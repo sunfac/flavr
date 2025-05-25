@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -96,112 +97,197 @@ export default function AuthModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md mx-4">
-        <DialogHeader className="text-center space-y-2">
-          <DialogTitle className="text-2xl font-bold text-display">
-            {title}
-          </DialogTitle>
-          <p className="text-muted-foreground text-sm">
-            {description}
-          </p>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-md mx-4 p-0 overflow-hidden rounded-3xl border-0 bg-transparent">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 20 }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="glass bg-card/95 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl"
+        >
+          {/* Header with cooking emoji */}
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-center space-y-4 mb-8"
+          >
+            <motion.div
+              animate={{ 
+                rotate: [0, 10, -10, 0],
+                scale: [1, 1.1, 1]
+              }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="text-4xl mx-auto"
+            >
+              👨‍🍳
+            </motion.div>
+            <DialogTitle className="text-2xl font-bold text-display">
+              {title}
+            </DialogTitle>
+            <p className="text-muted-foreground text-sm">
+              {description}
+            </p>
+          </motion.div>
 
-        <Tabs defaultValue="register" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="register">Sign Up</TabsTrigger>
-            <TabsTrigger value="login">Log In</TabsTrigger>
-          </TabsList>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Tabs defaultValue="register" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 bg-muted/50 backdrop-blur-sm rounded-2xl p-1 mb-6">
+                <TabsTrigger 
+                  value="register" 
+                  className="rounded-xl font-semibold data-[state=active]:bg-white data-[state=active]:shadow-lg transition-all duration-300"
+                >
+                  Sign Up ✨
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="login"
+                  className="rounded-xl font-semibold data-[state=active]:bg-white data-[state=active]:shadow-lg transition-all duration-300"
+                >
+                  Log In 🔐
+                </TabsTrigger>
+              </TabsList>
 
-          <TabsContent value="register" className="space-y-4 mt-6">
-            <form onSubmit={handleRegister} className="space-y-4">
-              <Input
-                type="text"
-                placeholder="Choose a username"
-                value={registerData.username}
-                onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
-                className="h-12"
-                required
-              />
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={registerData.email}
-                onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                className="h-12"
-                required
-              />
-              <Input
-                type="password"
-                placeholder="Create a password"
-                value={registerData.password}
-                onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                className="h-12"
-                required
-              />
-              <Button
-                type="submit"
-                className="w-full h-12 text-lg font-semibold"
-                disabled={registerMutation.isPending}
-                style={{ background: 'var(--gradient-primary)' }}
-              >
-                {registerMutation.isPending ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                    Creating account...
-                  </div>
-                ) : (
-                  <>
-                    <i className="fas fa-magic mr-2"></i>
-                    Create Account & See Recipes
-                  </>
-                )}
-              </Button>
-            </form>
-          </TabsContent>
+              <TabsContent value="register" className="space-y-4">
+                <motion.form 
+                  onSubmit={handleRegister} 
+                  className="space-y-4"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <motion.div whileFocus={{ scale: 1.02 }}>
+                    <Input
+                      type="text"
+                      placeholder="Choose a username"
+                      value={registerData.username}
+                      onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
+                      className="h-14 text-lg rounded-2xl border-2 border-border/50 focus:border-primary/50 transition-all duration-300 bg-background/50"
+                      required
+                    />
+                  </motion.div>
+                  <motion.div whileFocus={{ scale: 1.02 }}>
+                    <Input
+                      type="email"
+                      placeholder="Enter your email"
+                      value={registerData.email}
+                      onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+                      className="h-14 text-lg rounded-2xl border-2 border-border/50 focus:border-primary/50 transition-all duration-300 bg-background/50"
+                      required
+                    />
+                  </motion.div>
+                  <motion.div whileFocus={{ scale: 1.02 }}>
+                    <Input
+                      type="password"
+                      placeholder="Create a password"
+                      value={registerData.password}
+                      onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+                      className="h-14 text-lg rounded-2xl border-2 border-border/50 focus:border-primary/50 transition-all duration-300 bg-background/50"
+                      required
+                    />
+                  </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      type="submit"
+                      className="w-full h-14 text-lg font-bold rounded-2xl shadow-xl transition-all duration-300"
+                      disabled={registerMutation.isPending}
+                      style={{ background: 'var(--gradient-primary)' }}
+                    >
+                      {registerMutation.isPending ? (
+                        <div className="flex items-center gap-2">
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                          />
+                          Creating account...
+                        </div>
+                      ) : (
+                        <>
+                          <span className="mr-2">✨</span>
+                          Create Account & See Recipes
+                        </>
+                      )}
+                    </Button>
+                  </motion.div>
+                </motion.form>
+              </TabsContent>
 
-          <TabsContent value="login" className="space-y-4 mt-6">
-            <form onSubmit={handleLogin} className="space-y-4">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={loginData.email}
-                onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                className="h-12"
-                required
-              />
-              <Input
-                type="password"
-                placeholder="Enter your password"
-                value={loginData.password}
-                onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                className="h-12"
-                required
-              />
-              <Button
-                type="submit"
-                className="w-full h-12 text-lg font-semibold"
-                disabled={loginMutation.isPending}
-                style={{ background: 'var(--gradient-primary)' }}
-              >
-                {loginMutation.isPending ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                    Logging in...
-                  </div>
-                ) : (
-                  <>
-                    <i className="fas fa-sign-in-alt mr-2"></i>
-                    Log In & See Recipes
-                  </>
-                )}
-              </Button>
-            </form>
-          </TabsContent>
-        </Tabs>
+              <TabsContent value="login" className="space-y-4">
+                <motion.form 
+                  onSubmit={handleLogin} 
+                  className="space-y-4"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <motion.div whileFocus={{ scale: 1.02 }}>
+                    <Input
+                      type="email"
+                      placeholder="Enter your email"
+                      value={loginData.email}
+                      onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                      className="h-14 text-lg rounded-2xl border-2 border-border/50 focus:border-primary/50 transition-all duration-300 bg-background/50"
+                      required
+                    />
+                  </motion.div>
+                  <motion.div whileFocus={{ scale: 1.02 }}>
+                    <Input
+                      type="password"
+                      placeholder="Enter your password"
+                      value={loginData.password}
+                      onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                      className="h-14 text-lg rounded-2xl border-2 border-border/50 focus:border-primary/50 transition-all duration-300 bg-background/50"
+                      required
+                    />
+                  </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      type="submit"
+                      className="w-full h-14 text-lg font-bold rounded-2xl shadow-xl transition-all duration-300"
+                      disabled={loginMutation.isPending}
+                      style={{ background: 'var(--gradient-primary)' }}
+                    >
+                      {loginMutation.isPending ? (
+                        <div className="flex items-center gap-2">
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                          />
+                          Logging in...
+                        </div>
+                      ) : (
+                        <>
+                          <span className="mr-2">🔑</span>
+                          Log In & See Recipes
+                        </>
+                      )}
+                    </Button>
+                  </motion.div>
+                </motion.form>
+              </TabsContent>
+            </Tabs>
+          </motion.div>
 
-        <div className="text-center text-xs text-muted-foreground border-t pt-4">
-          By creating an account, you agree to our Terms of Service and Privacy Policy
-        </div>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-center text-xs text-muted-foreground border-t border-border/30 pt-4 mt-6"
+          >
+            By creating an account, you agree to our Terms of Service and Privacy Policy
+          </motion.div>
+        </motion.div>
       </DialogContent>
     </Dialog>
   );

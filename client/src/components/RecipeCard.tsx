@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import ShoppingList from "./ShoppingList";
 import { generateShoppingPrompt2 } from "@/prompts/shoppingPrompt2";
 import { generateFridgePrompt2 } from "@/prompts/fridgePrompt2";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface RecipeCardProps {
   recipe: any;
@@ -87,29 +88,111 @@ export default function RecipeCard({
   };
 
   if (!isFullView) {
-    // Preview card
+    // Modern Preview Card with Apple-inspired design
     return (
-      <div 
-        className="recipe-card relative bg-card rounded-2xl shadow-lg overflow-hidden cursor-pointer transition-transform hover:scale-105"
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ 
+          scale: 1.03,
+          y: -4,
+          transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] }
+        }}
+        whileTap={{ scale: 0.98 }}
+        className="recipe-card relative bg-card/90 backdrop-blur-lg rounded-3xl shadow-xl overflow-hidden cursor-pointer border border-white/20"
         onClick={handleCardClick}
+        style={{ minWidth: "300px", minHeight: "400px" }}
       >
-        <div className="w-full h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-          <i className="fas fa-utensils text-4xl text-muted-foreground"></i>
-        </div>
-        <div className="gradient-overlay absolute inset-0"></div>
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <div className="flex items-center space-x-2 mb-2">
-            <span className="bg-secondary px-2 py-1 rounded-full text-xs font-medium">
-              {recipe.cuisine || recipe.mood}
-            </span>
-            <span className="bg-primary px-2 py-1 rounded-full text-xs font-medium">
-              {recipe.cookTime || "25 min"}
-            </span>
+        {/* Hero Image Area */}
+        <motion.div 
+          className="w-full h-56 bg-gradient-to-br from-primary/30 via-secondary/20 to-accent/30 flex items-center justify-center relative overflow-hidden"
+          whileHover={{ scale: 1.05 }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.div
+            animate={{ 
+              rotate: [0, 5, -5, 0],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{ duration: 3, repeat: Infinity }}
+            className="text-6xl"
+          >
+            🍽️
+          </motion.div>
+          
+          {/* Floating elements */}
+          <motion.div
+            animate={{ y: [-10, 10, -10] }}
+            transition={{ duration: 4, repeat: Infinity }}
+            className="absolute top-4 right-4 text-2xl opacity-60"
+          >
+            ✨
+          </motion.div>
+          <motion.div
+            animate={{ y: [10, -10, 10] }}
+            transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+            className="absolute bottom-4 left-4 text-xl opacity-40"
+          >
+            👨‍🍳
+          </motion.div>
+        </motion.div>
+
+        {/* Content Area */}
+        <div className="p-6 space-y-4">
+          {/* Tags */}
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="flex items-center gap-2 flex-wrap"
+          >
+            <motion.span 
+              whileHover={{ scale: 1.05 }}
+              className="bg-gradient-secondary text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg"
+            >
+              {recipe.cuisine || recipe.mood || "Delicious"} 🌟
+            </motion.span>
+            <motion.span 
+              whileHover={{ scale: 1.05 }}
+              className="bg-gradient-primary text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg"
+            >
+              ⏱️ {recipe.cookTime || "25 min"}
+            </motion.span>
+          </motion.div>
+
+          {/* Title and Description */}
+          <div className="space-y-2">
+            <motion.h3 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="font-playfair font-bold text-xl text-foreground leading-tight"
+            >
+              {recipe.title}
+            </motion.h3>
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-muted-foreground text-sm leading-relaxed line-clamp-2"
+            >
+              {recipe.description}
+            </motion.p>
           </div>
-          <h3 className="font-playfair font-bold text-lg mb-1">{recipe.title}</h3>
-          <p className="text-sm opacity-90">{recipe.description}</p>
+
+          {/* Action hint */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="flex items-center justify-center pt-2"
+          >
+            <span className="text-xs text-muted-foreground font-medium">
+              Tap to view full recipe →
+            </span>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
