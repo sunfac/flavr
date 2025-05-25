@@ -128,12 +128,13 @@ export default function ShoppingMode() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header currentMode="shopping" />
+      {/* Only show header/footer when not in quiz mode */}
+      {currentStep !== "quiz" && <Header currentMode="shopping" />}
       
-      <main className="pb-20">
+      <main className={currentStep !== "quiz" ? "pb-20" : ""}>
         {currentStep === "quiz" && (
           <SlideQuizShell
-            title="Shopping Mode Quiz"
+            title="Shopping Mode"
             questions={shoppingQuestions}
             onSubmit={handleQuizComplete}
             theme="shopping"
@@ -141,38 +142,46 @@ export default function ShoppingMode() {
         )}
 
         {currentStep === "suggestions" && (
-          <div className="p-4 space-y-4">
-            <div className="text-center">
-              <h2 className="text-xl font-playfair font-bold text-foreground mb-1">
-                Perfect matches for you
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                Swipe to explore • Tap to see full recipe
-              </p>
-            </div>
+          <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white p-6">
+            <div className="max-w-md mx-auto">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent mb-4">
+                  Perfect matches for you
+                </h2>
+                <p className="text-slate-300 text-lg">
+                  Swipe to explore • Tap to see full recipe
+                </p>
+              </div>
 
-            <div className="swipe-container flex space-x-4 overflow-x-auto pb-4">
-              {recipeIdeas.map((recipe, index) => (
-                <RecipeCard
-                  key={index}
-                  recipe={recipe}
-                  onClick={() => handleRecipeSelect(recipe)}
-                />
-              ))}
-            </div>
+              <div className="space-y-4 mb-8">
+                {recipeIdeas.map((recipe, index) => (
+                  <div
+                    key={index}
+                    onClick={() => handleRecipeSelect(recipe)}
+                    className="bg-slate-800/50 border border-slate-600 rounded-xl p-6 cursor-pointer hover:border-orange-400/50 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/25"
+                  >
+                    <h3 className="text-xl font-semibold text-white mb-2">{recipe.title}</h3>
+                    <p className="text-slate-300 mb-3">{recipe.description}</p>
+                    <div className="flex items-center text-sm text-slate-400">
+                      <span className="mr-4">🕒 {recipe.cookTime || '30'} min</span>
+                      <span>👥 {recipe.servings || '2-4'} servings</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
-            <button
-              onClick={handleNewSearch}
-              className="w-full bg-muted text-foreground py-3 rounded-xl font-medium hover:bg-muted/80 transition-colors"
-            >
-              <i className="fas fa-redo mr-2"></i>Try Different Preferences
-            </button>
+              <button
+                onClick={handleNewSearch}
+                className="w-full bg-slate-700 hover:bg-slate-600 text-white py-4 rounded-xl font-semibold transition-all duration-300 border border-slate-600 hover:border-orange-400/50"
+              >
+                Try Different Preferences
+              </button>
+            </div>
           </div>
         )}
 
         {currentStep === "recipe" && selectedRecipe && (
           <div className="bg-background min-h-screen">
-            {/* Recipe content will be handled by RecipeCard component in full view mode */}
             <RecipeCard
               recipe={selectedRecipe}
               mode="shopping"
@@ -192,8 +201,12 @@ export default function ShoppingMode() {
         )}
       </main>
 
-      <ChatBot />
-      <Footer currentMode="shopping" />
+      {currentStep !== "quiz" && (
+        <>
+          <ChatBot />
+          <Footer currentMode="shopping" />
+        </>
+      )}
 
       <AuthModal
         isOpen={showAuthModal}

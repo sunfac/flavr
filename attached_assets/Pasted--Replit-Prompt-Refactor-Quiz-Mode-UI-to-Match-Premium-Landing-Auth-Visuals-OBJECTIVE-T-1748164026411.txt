@@ -1,0 +1,69 @@
+// Replit Prompt — Refactor Quiz & Mode UI to Match Premium Landing/Auth Visuals
+
+// OBJECTIVE:
+// The attached screenshots show the current UI for the Flavr quiz flow and mode selection views. 
+// These styles are visually outdated and inconsistent with the polished design of the landing page and auth modal.
+// Refactor the visual design of the quiz steps, sliders, cards, and navigation to align with the high-end Flavr brand experience already present in the landing and login modals.
+
+////////////////////////////////////////////////////////////////////////////////
+// 1. DESIGN ALIGNMENT
+////////////////////////////////////////////////////////////////////////////////
+
+// CURRENT STATE:
+// - Buttons, containers, and sliders in quiz flow feel clunky and unrefined.
+// - There's duplication of mode navigation at top and bottom (both visible).
+// - Sliders lack modern design styling or user feedback.
+// - Recipe cards from Prompt 1 are not displaying correctly — missing or broken.
+// - Emoji usage and typography spacing feels unbalanced across steps.
+
+// GOAL:
+// Match the **styling, spacing, typography, icon use, button styling, and transitions** from the Flavr **landing page** and **auth modal**, which already reflect the correct visual standard.
+
+////////////////////////////////////////////////////////////////////////////////
+// 2. ACTIONS TO TAKE
+////////////////////////////////////////////////////////////////////////////////
+
+// NAVIGATION CLEANUP:
+// - Remove duplicate top/bottom navs once a mode is selected
+- Keep only one fixed, minimal nav (bottom preferred)
+// - Use consistent icon sizing and padding
+// - Add smooth fade/slide transition between mode entry and quiz start
+
+// SLIDER RESTYLING:
+// - Use @radix-ui/react-slider or a visually polished alternative
+// - Brand-colored track (coral or mint), animated thumb, value label above slider
+// - Match ambition slider to modal styling:
+//   - "Just Get Fed" (1) → "Michelin Madness" (5)
+//   - Time slider uses: "10 min" → "90+ min" → "No time limit"
+
+– Spacing and UI elements should scale cleanly on mobile with no overflow or squished inputs
+
+// BUTTON + FORM ELEMENT STYLING:
+// - Replace all current buttons with `shadcn/button` or matching modal-style components
+// - Roundness, shadows, hover/tap feedback should feel native and premium
+// - Use full-width layout for mobile step forms with emoji-friendly font pairings
+
+// PROMPT 1 RECIPE CARD FIX:
+// - Fix JSON input ingestion so cards appear at the end of the quiz
+// - Display recipe title + 1-line description in swipeable cards
+// - Use `shadcn/card` or custom card with proper visual spacing and hover animation
+// - On select, feed back into Prompt 2 as intended
+
+// BRAND ALIGNMENT:
+// - Match modal/landing colors (dark gradient, orange accents, soft shadows)
+// - Use Inter or General Sans font
+// - Icons from Lucide — clean and consistent
+// - Use emojis only where they enhance UX (not where they clash with font size/layout)
+
+////////////////////////////////////////////////////////////////////////////////
+// 3. FINAL OUTCOME
+////////////////////////////////////////////////////////////////////////////////
+
+// The quiz and mode-specific screens should now:
+- Feel cohesive with the landing/auth styling
+- Use premium spacing, type, and touch-friendly design
+- Contain no jarring or duplicated layout elements
+- Show recipe cards that users can select and proceed with
+- Match the mobile polish of a top-tier cooking or wellness app
+
+// Do not change any logic or GPT flows — this is visual styling only.

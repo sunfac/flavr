@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, ArrowRight, CheckCircle, Clock, ChefHat, Utensils } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Clock, ChefHat, Utensils, Sparkles } from "lucide-react";
 
 export interface QuestionConfig {
   id: string;
@@ -42,130 +42,93 @@ export default function SlideQuizShell({
   questions, 
   onSubmit, 
   onLoading,
-  theme = 'shopping' 
+  theme = 'shopping'
 }: SlideQuizShellProps) {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [isCompleting, setIsCompleting] = useState(false);
 
-  const totalSteps = questions.length;
-  const progress = ((currentStep + 1) / totalSteps) * 100;
-  const currentQuestion = questions[currentStep];
+  const progress = ((currentQuestion + 1) / questions.length) * 100;
+  const currentQ = questions[currentQuestion];
 
-  // Theme configurations
-  const themeConfig = {
-    shopping: {
-      gradient: 'from-slate-50 via-rose-50 to-pink-50',
-      textGradient: 'var(--gradient-primary)',
-      buttonGradient: 'var(--gradient-primary)',
-      accentColor: 'primary'
-    },
-    fridge: {
-      gradient: 'from-slate-50 via-emerald-50 to-teal-50',
-      textGradient: 'var(--gradient-secondary)',
-      buttonGradient: 'var(--gradient-secondary)',
-      accentColor: 'secondary'
-    },
-    chef: {
-      gradient: 'from-slate-50 via-amber-50 to-orange-50',
-      textGradient: 'var(--gradient-accent)',
-      buttonGradient: 'var(--gradient-accent)',
-      accentColor: 'accent'
+  const handleNext = () => {
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(prev => prev + 1);
+    } else {
+      setIsCompleting(true);
+      if (onLoading) onLoading(true);
+      
+      setTimeout(() => {
+        onSubmit(answers);
+      }, 500);
     }
   };
 
-  const config = themeConfig[theme];
-
-  const validateQuestionSet = (questions: QuestionConfig[]) => {
-    return questions.every(q => q.id && q.label && q.type);
+  const handlePrevious = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(prev => prev - 1);
+    }
   };
-
-  if (!validateQuestionSet(questions)) {
-    console.error('Invalid question configuration detected');
-    return <div>Quiz configuration error</div>;
-  }
 
   const updateAnswer = (questionId: string, value: any) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
   };
 
-  const toggleArrayItem = (questionId: string, value: string) => {
-    const currentArray = answers[questionId] || [];
-    const updatedArray = currentArray.includes(value)
-      ? currentArray.filter((item: string) => item !== value)
-      : [...currentArray, value];
-    updateAnswer(questionId, updatedArray);
-  };
-
-  const isStepValid = () => {
-    const question = currentQuestion;
-    const answer = answers[question.id];
-
-    if (!question.required) return true;
-
-    if (question.validation) {
-      const result = question.validation(answer);
-      return result === true;
+  const isCurrentAnswered = () => {
+    const answer = answers[currentQ.id];
+    if (currentQ.required === false) return true;
+    if (currentQ.type === 'multi-select' || currentQ.type === 'tags') {
+      return Array.isArray(answer) && answer.length > 0;
     }
+    return answer !== undefined && answer !== '' && answer !== null;
+  };
 
-    switch (question.type) {
-      case 'text':
-      case 'textarea':
-        return answer && answer.toString().trim().length >= (question.min || 1);
-      case 'multi-select':
-      case 'tags':
-        return answer && Array.isArray(answer) && answer.length >= (question.min || 1);
-      case 'dropdown':
-        return !!answer;
-      default:
-        return true;
+  const themeColors = {
+    shopping: 'from-orange-500 to-amber-500',
+    fridge: 'from-emerald-500 to-teal-500', 
+    chef: 'from-amber-500 to-yellow-500'
+  };
+
+  const currentAnswer = answers[currentQ.id];
+
+  const renderSliderWithLabel = (value: number) => {
+    if (currentQ.dynamicLabel) {
+      return currentQ.dynamicLabel(value);
     }
-  };
-
-  const handleNext = () => {
-    if (currentStep < totalSteps - 1) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      handleSubmit();
+    if (currentQ.id === 'ambition') {
+      const labels = ['Just Get Fed', 'Casual Cook', 'Weekend Chef', 'Passionate Cook', 'Michelin Madness'];
+      return labels[Math.max(0, Math.min(4, value - 1))];
     }
-  };
-
-  const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+    if (currentQ.id === 'time') {
+      if (value <= 15) return `${value} min`;
+      if (value <= 90) return `${value} min`;
+      return 'No time limit';
     }
+    return `${value}`;
   };
 
-  const handleSubmit = () => {
-    onSubmit(answers);
-  };
-
-  const renderInput = () => {
-    const question = currentQuestion;
-    const answer = answers[question.id];
-
-    switch (question.type) {
+  const renderQuestion = () => {
+    switch (currentQ.type) {
       case 'text':
         return (
           <div className="space-y-4">
             <Input
-              value={answer || ''}
-              onChange={(e) => updateAnswer(question.id, e.target.value)}
-              placeholder={question.placeholder}
-              className="h-14 text-lg input-modern"
+              placeholder={currentQ.placeholder}
+              value={currentAnswer || ''}
+              onChange={(e) => updateAnswer(currentQ.id, e.target.value)}
+              className="h-14 text-lg bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-orange-400 rounded-xl"
             />
-            {question.examples && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-slate-600">Examples:</p>
-                {question.examples.map((example, index) => (
-                  <Card
-                    key={index}
-                    className="cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-md"
-                    onClick={() => updateAnswer(question.id, example)}
+            {currentQ.examples && (
+              <div className="flex flex-wrap gap-2">
+                {currentQ.examples.map((example, idx) => (
+                  <Badge 
+                    key={idx}
+                    variant="outline" 
+                    className="cursor-pointer hover:bg-orange-500/20 border-orange-400/30 text-slate-300"
+                    onClick={() => updateAnswer(currentQ.id, example)}
                   >
-                    <CardContent className="p-3">
-                      <p className="text-sm text-slate-700">"{example}"</p>
-                    </CardContent>
-                  </Card>
+                    {example}
+                  </Badge>
                 ))}
               </div>
             )}
@@ -174,43 +137,28 @@ export default function SlideQuizShell({
 
       case 'textarea':
         return (
-          <div className="space-y-4">
-            <Textarea
-              value={answer || ''}
-              onChange={(e) => updateAnswer(question.id, e.target.value)}
-              placeholder={question.placeholder}
-              className="min-h-32 text-lg input-modern resize-none"
-              rows={4}
-            />
-            {question.examples && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-slate-600">Need inspiration? Try these:</p>
-                {question.examples.map((example, index) => (
-                  <Card
-                    key={index}
-                    className="cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-md"
-                    onClick={() => updateAnswer(question.id, example)}
-                  >
-                    <CardContent className="p-3">
-                      <p className="text-sm text-slate-700 italic">"{example}"</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
+          <Textarea
+            placeholder={currentQ.placeholder}
+            value={currentAnswer || ''}
+            onChange={(e) => updateAnswer(currentQ.id, e.target.value)}
+            className="min-h-24 text-lg bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-orange-400 rounded-xl"
+          />
         );
 
       case 'dropdown':
         return (
-          <Select value={answer} onValueChange={(value) => updateAnswer(question.id, value)}>
-            <SelectTrigger className="h-14 text-lg">
-              <SelectValue placeholder={question.placeholder || "Select an option"} />
+          <Select value={currentAnswer || ''} onValueChange={(value) => updateAnswer(currentQ.id, value)}>
+            <SelectTrigger className="h-14 text-lg bg-slate-800/50 border-slate-600 text-white focus:border-orange-400 rounded-xl">
+              <SelectValue placeholder={currentQ.placeholder} />
             </SelectTrigger>
-            <SelectContent>
-              {question.options?.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+            <SelectContent className="bg-slate-800 border-slate-600">
+              {currentQ.options?.map((option) => (
+                <SelectItem 
+                  key={option.value} 
+                  value={option.value}
+                  className="text-white hover:bg-slate-700 focus:bg-orange-500/20"
+                >
+                  {option.icon} {option.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -219,292 +167,251 @@ export default function SlideQuizShell({
 
       case 'cards':
         return (
-          <div className="space-y-4">
-            {question.options?.map((option) => (
-              <Card
+          <div className="grid grid-cols-2 gap-4">
+            {currentQ.options?.map((option) => (
+              <motion.div
                 key={option.value}
-                className={`cursor-pointer transition-all duration-300 hover:scale-105 ${
-                  answer === option.value
-                    ? `ring-2 ring-${config.accentColor} shadow-lg scale-105`
-                    : 'hover:shadow-md'
-                }`}
-                onClick={() => updateAnswer(question.id, option.value)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <CardContent className="p-4 flex items-center space-x-4">
-                  {option.icon && <div className="text-3xl">{option.icon}</div>}
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg">{option.label}</h3>
-                    {option.desc && <p className="text-sm text-slate-600">{option.desc}</p>}
-                  </div>
-                  {answer === option.value && (
-                    <div className={`w-6 h-6 gradient-${theme} rounded-full flex items-center justify-center`}>
-                      <i className="fas fa-check text-white text-sm"></i>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        );
-
-      case 'multi-select':
-      case 'tags':
-        return (
-          <div className="space-y-4">
-            <div className="flex flex-wrap gap-3">
-              {question.options?.map((option) => (
-                <Badge
-                  key={option.value}
-                  variant={answer?.includes(option.value) ? "default" : "secondary"}
-                  className={`cursor-pointer transition-all duration-300 px-4 py-2 text-sm hover:scale-105 ${
-                    answer?.includes(option.value)
-                      ? `gradient-${theme} text-white shadow-lg`
-                      : 'hover:shadow-md'
+                <Card 
+                  className={`cursor-pointer transition-all duration-300 border-2 ${
+                    currentAnswer === option.value 
+                      ? 'border-orange-400 bg-orange-500/10 shadow-lg shadow-orange-500/25' 
+                      : 'border-slate-600 bg-slate-800/50 hover:border-orange-400/50'
                   }`}
-                  onClick={() => toggleArrayItem(question.id, option.value)}
+                  onClick={() => updateAnswer(currentQ.id, option.value)}
                 >
-                  {option.label}
-                </Badge>
-              ))}
-            </div>
-            {question.subtitle && (
-              <p className="text-sm text-slate-600 text-center">{question.subtitle}</p>
-            )}
+                  <CardContent className="p-6 text-center">
+                    <div className="text-3xl mb-3">{option.icon}</div>
+                    <div className="text-white font-semibold text-lg">{option.label}</div>
+                    {option.desc && (
+                      <div className="text-slate-400 text-sm mt-2">{option.desc}</div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </div>
         );
 
       case 'equipment-grid':
         return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              {question.options?.map((option) => (
-                <Card
+          <div className="grid grid-cols-2 gap-3">
+            {currentQ.options?.map((option) => {
+              const isSelected = Array.isArray(currentAnswer) && currentAnswer.includes(option.value);
+              return (
+                <motion.div
                   key={option.value}
-                  className={`cursor-pointer transition-all duration-300 hover:scale-105 ${
-                    answer?.includes(option.value)
-                      ? `ring-2 ring-${config.accentColor} shadow-lg scale-105`
-                      : 'hover:shadow-md'
-                  }`}
-                  onClick={() => toggleArrayItem(question.id, option.value)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <CardContent className="p-4 text-center">
-                    {option.icon && <div className="text-2xl mb-2">{option.icon}</div>}
-                    <div className="font-medium text-sm">{option.label}</div>
-                    {answer?.includes(option.value) && (
-                      <div className={`w-4 h-4 gradient-${theme} rounded-full flex items-center justify-center mx-auto mt-2`}>
-                        <i className="fas fa-check text-white text-xs"></i>
+                  <Card 
+                    className={`cursor-pointer transition-all duration-300 border-2 ${
+                      isSelected 
+                        ? 'border-orange-400 bg-orange-500/10 shadow-lg shadow-orange-500/25' 
+                        : 'border-slate-600 bg-slate-800/50 hover:border-orange-400/50'
+                    }`}
+                    onClick={() => {
+                      const current = Array.isArray(currentAnswer) ? currentAnswer : [];
+                      const updated = isSelected 
+                        ? current.filter(v => v !== option.value)
+                        : [...current, option.value];
+                      updateAnswer(currentQ.id, updated);
+                    }}
+                  >
+                    <CardContent className="p-4 text-center">
+                      <div className="text-2xl mb-2">{option.icon}</div>
+                      <div className="text-white font-medium text-sm">{option.label}</div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+        );
+
+      case 'multi-select':
+        return (
+          <div className="space-y-3">
+            {currentQ.options?.map((option) => {
+              const isSelected = Array.isArray(currentAnswer) && currentAnswer.includes(option.value);
+              return (
+                <motion.div 
+                  key={option.value}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                >
+                  <Card 
+                    className={`cursor-pointer transition-all duration-300 border-2 ${
+                      isSelected 
+                        ? 'border-orange-400 bg-orange-500/10 shadow-lg shadow-orange-500/25' 
+                        : 'border-slate-600 bg-slate-800/50 hover:border-orange-400/50'
+                    }`}
+                    onClick={() => {
+                      const current = Array.isArray(currentAnswer) ? currentAnswer : [];
+                      const updated = isSelected 
+                        ? current.filter(v => v !== option.value)
+                        : [...current, option.value];
+                      updateAnswer(currentQ.id, updated);
+                    }}
+                  >
+                    <CardContent className="p-4 flex items-center space-x-3">
+                      <div className="text-xl">{option.icon}</div>
+                      <div className="flex-1">
+                        <div className="text-white font-medium">{option.label}</div>
+                        {option.desc && (
+                          <div className="text-slate-400 text-sm mt-1">{option.desc}</div>
+                        )}
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      {isSelected && <CheckCircle className="w-5 h-5 text-orange-400" />}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </div>
         );
 
       case 'slider':
-        const sliderValue = answer || question.min || 0;
+        const sliderValue = currentAnswer || currentQ.min || 1;
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <div className={`text-4xl font-bold text-${config.accentColor} mb-2`}>
-                {question.dynamicLabel ? question.dynamicLabel(sliderValue) : `${sliderValue}${question.step === 1 ? '' : ' min'}`}
+              <div className="text-3xl font-bold text-orange-400 mb-2">
+                {renderSliderWithLabel(sliderValue)}
               </div>
-              {question.subtitle && (
-                <div className="text-lg text-slate-600">{question.subtitle}</div>
-              )}
             </div>
             <div className="px-4">
               <Slider
                 value={[sliderValue]}
-                onValueChange={(value) => updateAnswer(question.id, value[0])}
-                max={question.max || 100}
-                min={question.min || 0}
-                step={question.step || 1}
+                onValueChange={([value]) => updateAnswer(currentQ.id, value)}
+                min={currentQ.min || 1}
+                max={currentQ.max || 5}
+                step={currentQ.step || 1}
                 className="w-full"
               />
-              <div className="flex justify-between text-sm text-slate-500 mt-2">
-                <span>{question.min || 0}</span>
-                <span>{question.max || 100}</span>
-              </div>
+            </div>
+            <div className="flex justify-between text-sm text-slate-400 px-4">
+              <span>{currentQ.min || 1}</span>
+              <span>{currentQ.max || 5}</span>
             </div>
           </div>
         );
 
       default:
-        return <div>Unsupported question type: {question.type}</div>;
+        return null;
     }
   };
 
-  const slideVariants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? 300 : -300,
-      opacity: 0,
-    }),
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1,
-    },
-    exit: (direction: number) => ({
-      zIndex: 0,
-      x: direction < 0 ? 300 : -300,
-      opacity: 0,
-    }),
-  };
-
-  const [direction, setDirection] = useState(0);
-
-  const handleNextWithAnimation = () => {
-    setDirection(1);
-    handleNext();
-  };
-
-  const handleBackWithAnimation = () => {
-    setDirection(-1);
-    handleBack();
-  };
+  if (isCompleting) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black flex items-center justify-center">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="text-center"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="w-16 h-16 border-4 border-orange-400 border-t-transparent rounded-full mx-auto mb-4"
+          />
+          <h2 className="text-2xl font-bold text-white mb-2">
+            Whisking up something delicious...
+          </h2>
+          <p className="text-slate-400">
+            Creating your perfect recipe match
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${config.gradient} relative overflow-hidden`}>
-      {/* Modern Progress Header */}
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-10 glass backdrop-blur-xl border-b border-white/20 p-4"
-      >
-        <div className="flex items-center justify-between mb-4">
-          <motion.div 
-            key={currentStep}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-sm font-semibold text-slate-700"
-          >
-            Step {currentStep + 1} of {totalSteps}
-          </motion.div>
-          <motion.div 
-            key={progress}
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-sm font-semibold text-slate-700"
-          >
-            {Math.round(progress)}%
-          </motion.div>
-        </div>
-        <div className="relative h-2 bg-white/30 rounded-full overflow-hidden">
-          <motion.div
-            className="absolute top-0 left-0 h-full rounded-full"
-            style={{ background: config.buttonGradient }}
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white">
+      {/* Progress Header */}
+      <div className="sticky top-0 z-10 bg-slate-900/80 backdrop-blur-xl border-b border-slate-700">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
+              {title}
+            </h1>
+            <div className="text-sm text-slate-400">
+              {currentQuestion + 1} of {questions.length}
+            </div>
+          </div>
+          <Progress 
+            value={progress} 
+            className="h-2 bg-slate-700"
           />
         </div>
-      </motion.div>
+      </div>
 
-      {/* Animated Question Content */}
-      <div className="p-6 relative">
-        <div className="max-w-2xl mx-auto">
-          <AnimatePresence mode="wait" custom={direction}>
-            <motion.div
-              key={currentStep}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{
-                x: { type: "spring", stiffness: 300, damping: 30 },
-                opacity: { duration: 0.2 },
-              }}
-              className="space-y-8"
-            >
-              {/* Question Header */}
-              <div className="text-center space-y-4">
-                <motion.h1 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-3xl md:text-4xl font-bold text-display mb-3" 
-                  style={{
-                    background: config.textGradient,
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text'
-                  }}
-                >
-                  {currentQuestion.label}
-                </motion.h1>
-                {currentQuestion.subtitle && (
-                  <motion.p 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="text-lg text-slate-600"
-                  >
-                    {currentQuestion.subtitle}
-                  </motion.p>
-                )}
-              </div>
-
-              {/* Question Input */}
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                {renderInput()}
-              </motion.div>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Modern Navigation Buttons */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="flex gap-4 pt-8"
+      {/* Question Content */}
+      <div className="flex-1 p-6">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentQuestion}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+            className="max-w-md mx-auto"
           >
-            {currentStep > 0 && (
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex-1"
-              >
-                <Button
-                  variant="outline"
-                  onClick={handleBackWithAnimation}
-                  className="w-full h-14 text-lg glass border-white/30 bg-white/10 hover:bg-white/20 transition-all duration-300"
-                >
-                  ← Back
-                </Button>
-              </motion.div>
-            )}
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex-1"
-            >
-              <Button
-                onClick={handleNextWithAnimation}
-                disabled={!isStepValid()}
-                className="w-full h-14 text-lg font-bold text-white shadow-xl transition-all duration-300 disabled:opacity-50 disabled:scale-100"
-                style={{ background: config.buttonGradient }}
-              >
-                {currentStep === totalSteps - 1 ? (
-                  <>
-                    <span className="mr-2">{theme === 'chef' ? '👨‍🍳' : '✨'}</span>
-                    {theme === 'chef' ? 'Create Recipe' : 'Generate Ideas'}
-                  </>
-                ) : (
-                  <>
-                    Next
-                    <span className="ml-2">→</span>
-                  </>
-                )}
-              </Button>
-            </motion.div>
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-white mb-4 leading-tight">
+                {currentQ.label}
+              </h2>
+              {currentQ.subtitle && (
+                <p className="text-slate-300 text-lg">
+                  {currentQ.subtitle}
+                </p>
+              )}
+            </div>
+
+            <div className="mb-8">
+              {renderQuestion()}
+            </div>
           </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Navigation */}
+      <div className="sticky bottom-0 bg-slate-900/90 backdrop-blur-xl border-t border-slate-700 p-6">
+        <div className="max-w-md mx-auto flex gap-4">
+          {currentQuestion > 0 && (
+            <Button
+              onClick={handlePrevious}
+              variant="outline"
+              className="flex-1 h-14 border-slate-600 text-slate-300 hover:text-white hover:border-orange-400 rounded-xl"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Back
+            </Button>
+          )}
+          
+          <Button
+            onClick={handleNext}
+            disabled={!isCurrentAnswered()}
+            className={`flex-1 h-14 font-semibold rounded-xl transition-all duration-300 ${
+              isCurrentAnswered() 
+                ? `bg-gradient-to-r ${themeColors[theme]} hover:scale-105 shadow-lg hover:shadow-orange-500/25 text-white`
+                : 'bg-slate-700 text-slate-400 cursor-not-allowed'
+            }`}
+          >
+            {currentQuestion === questions.length - 1 ? (
+              <>
+                <Sparkles className="w-5 h-5 mr-2" />
+                Create Recipe
+              </>
+            ) : (
+              <>
+                Next
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </>
+            )}
+          </Button>
         </div>
       </div>
     </div>
