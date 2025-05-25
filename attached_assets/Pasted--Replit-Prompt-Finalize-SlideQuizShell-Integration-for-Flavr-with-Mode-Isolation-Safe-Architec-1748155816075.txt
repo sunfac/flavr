@@ -1,0 +1,100 @@
+// Replit Prompt — Finalize SlideQuizShell Integration for Flavr with Mode Isolation & Safe Architecture
+
+// OBJECTIVE:
+// Complete the integration of the shared <SlideQuizShell /> component for Flavr's three core modes: Shopping, Fridge, and Chef Assist.
+// This setup must ensure each mode remains fully isolated, safe from regressions, and maintainable — while reusing a consistent, premium quiz UX built in previous prompts.
+
+// 1. IMPLEMENT <SlideQuizShell /> AS A REUSABLE COMPONENT:
+
+// Accepts the following props:
+interface SlideQuizProps {
+  title: string;
+  questions: QuestionConfig[];
+  onSubmit: (answers: Record<string, any>) => void;
+}
+
+// Each question is defined using:
+interface QuestionConfig {
+  id: string;
+  label: string;
+  type: 'text' | 'dropdown' | 'multi-select' | 'slider' | 'tags' | 'checkbox';
+  options?: string[];
+  min?: number;
+  max?: number;
+  step?: number;
+  required?: boolean;
+  placeholder?: string;
+  dynamicLabel?: (value: number) => string;
+}
+
+// This component should:
+// - Handle all navigation (next, back, submit)
+// - Store all user answers in local state
+// - Render dynamic inputs based on question type
+// - Support animated transitions (Framer Motion preferred)
+// - Be fully mobile-friendly and match existing visual design
+
+// 2. MODE-SPECIFIC ISOLATION:
+
+// Each mode should have its own config file and submit handler:
+
+// ShoppingMode.tsx
+import { shoppingQuestions } from '../config/shoppingQuestions';
+<SlideQuizShell
+  title="Shopping Mode Quiz"
+  questions={shoppingQuestions}
+  onSubmit={handleShoppingSubmit}
+/>
+
+// FridgeMode.tsx
+import { fridgeQuestions } from '../config/fridgeQuestions';
+<SlideQuizShell
+  title="Fridge to Fork Quiz"
+  questions={fridgeQuestions}
+  onSubmit={handleFridgeSubmit}
+/>
+
+// ChefAssistMode.tsx
+import { chefQuestions } from '../config/chefQuestions';
+<SlideQuizShell
+  title="Chef Assist Quiz"
+  questions={chefQuestions}
+  onSubmit={handleChefSubmit}
+/>
+
+// This ensures that edits to one mode’s quiz cannot impact another mode.
+// If a team member updates `chefQuestions`, Fridge and Shopping remain untouched.
+
+// 3. STYLING REQUIREMENTS:
+
+// All quizzes must visually match what was built before:
+// - Full-screen, mobile-optimized slide layout
+// - Tailwind CSS + Framer Motion for transitions
+// - Use Headless UI or ShadCN for inputs
+// - Floating progress indicator (dots or progress bar)
+// - Buttons styled with hover/tap states, coral CTA, teal accents
+// - Font: Inter or Space Grotesk
+// - Tap targets min 48px height
+// - Consistent input padding and spacing across question types
+
+// 4. SAFETY ENHANCEMENTS (OPTIONAL):
+
+// Add a validator function to check each mode's config before rendering:
+function validateQuestionSet(questions: QuestionConfig[]) {
+  return questions.every(q => q.id && q.label && q.type);
+}
+
+// Prevent submit until all required questions are answered
+// Optionally log errors if question configs are misstructured
+
+// 5. FINAL RESULT:
+
+// - One reusable quiz shell powering all modes
+// - Zero duplicated logic across Shopping, Fridge, and Chef Assist
+// - Consistent design, animations, and structure
+// - Guaranteed mode isolation and stability
+// - All GPT prompt pipelines remain untouched and compatible
+
+// DELIVERABLE:
+// Fully functional <SlideQuizShell /> integrated into all three modes,
+// with custom question content, independent handlers, and consistent design — ready for testing and final polish.

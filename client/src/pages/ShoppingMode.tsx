@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import ShoppingQuiz from "@/components/ShoppingQuiz";
+import SlideQuizShell from "@/components/SlideQuizShell";
+import { shoppingQuestions } from "@/config/shoppingQuestions";
 import RecipeCard from "@/components/RecipeCard";
 import ChatBot from "@/components/ChatBot";
 import Loading from "@/components/Loading";
@@ -71,9 +72,12 @@ export default function ShoppingMode() {
       
       <main className="pb-20">
         {currentStep === "quiz" && (
-          <ShoppingQuiz
-            onComplete={handleQuizComplete}
+          <SlideQuizShell
+            title="Shopping Mode Quiz"
+            questions={shoppingQuestions}
+            onSubmit={handleQuizComplete}
             onLoading={setIsLoading}
+            theme="shopping"
           />
         )}
 
