@@ -205,29 +205,12 @@ export default function LandingPage() {
 
       {/* Hero Section - Full Viewport */}
       <section id="hero" className="min-h-screen flex flex-col items-center justify-center text-center px-6 relative z-10 pt-16">
-        {/* Large Premium Logo */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative group mb-4 mt-8"
-        >
-          <div className="w-80 h-80 md:w-[28rem] md:h-[28rem] mx-auto mb-2">
-            <img 
-              src={FlavrFullLogo} 
-              alt="Flavr - Your Private Chef"
-              className="w-full h-full object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500"
-            />
-          </div>
-          <div className="absolute inset-0 rounded-full blur-[100px] opacity-15 bg-gradient-to-b from-orange-300 via-orange-400 to-transparent group-hover:opacity-25 transition-opacity duration-500"></div>
-        </motion.div>
-
         {/* Hero Headlines */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-6"
+          className="mb-4"
         >
           <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight mb-4">
             Your Private Chef.
@@ -239,6 +222,23 @@ export default function LandingPage() {
           <p className="text-xl md:text-2xl text-slate-300 font-light max-w-3xl mx-auto leading-relaxed">
             Recipes personalized to your cravings, mood, time, and skill level.
           </p>
+        </motion.div>
+
+        {/* Large Premium Logo */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="relative group mb-6 mt-4"
+        >
+          <div className="w-80 h-80 md:w-[28rem] md:h-[28rem] mx-auto mb-2">
+            <img 
+              src={FlavrFullLogo} 
+              alt="Flavr - Your Private Chef"
+              className="w-full h-full object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500"
+            />
+          </div>
+          <div className="absolute inset-0 rounded-full blur-[100px] opacity-15 bg-gradient-to-b from-orange-300 via-orange-400 to-transparent group-hover:opacity-25 transition-opacity duration-500"></div>
         </motion.div>
 
         {/* CTA Button - Prominent on Mobile */}
