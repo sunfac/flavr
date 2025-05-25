@@ -120,66 +120,86 @@ export default function ChatBot() {
   return (
     <>
       {/* Floating Button */}
-      <div className="fixed bottom-20 right-4 z-40">
-        <Button
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-14 h-14 bg-gradient-to-br from-primary to-secondary text-white rounded-full shadow-lg hover:shadow-xl transition-all animate-pulse-slow"
-          size="sm"
-        >
-          <i className="fas fa-comment-alt text-xl"></i>
-        </Button>
+      <div className="fixed bottom-24 right-6 z-40">
+        <div className="relative group">
+          <Button
+            onClick={() => setIsOpen(!isOpen)}
+            className="w-16 h-16 gradient-primary text-white rounded-2xl shadow-2xl hover:shadow-orange-300/50 transition-all duration-500 group-hover:scale-110 btn-modern animate-bounce-gentle"
+            size="sm"
+          >
+            <i className={`fas ${isOpen ? 'fa-times' : 'fa-comment-alt'} text-2xl transition-all duration-300`}></i>
+          </Button>
+          <div className="absolute inset-0 gradient-primary rounded-2xl blur-xl opacity-40 group-hover:opacity-60 transition-opacity duration-500"></div>
+          {!isOpen && (
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Chat Panel */}
       <div 
-        className={`fixed bottom-0 left-0 right-0 bg-card border-t border-border max-h-96 transition-transform duration-300 z-50 ${
-          isOpen ? "translate-y-0" : "translate-y-full"
+        className={`fixed bottom-0 left-0 right-0 glass border-t border-white/20 max-h-[32rem] transition-all duration-500 z-50 backdrop-blur-xl ${
+          isOpen ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
         }`}
       >
-        <CardHeader className="p-4 border-b border-border flex flex-row items-center justify-between space-y-0">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center">
-              <i className="fas fa-chef-hat text-white text-sm"></i>
+        <CardHeader className="p-6 border-b border-white/10 flex flex-row items-center justify-between space-y-0">
+          <div className="flex items-center space-x-4">
+            <div className="relative group">
+              <div className="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300">
+                <i className="fas fa-chef-hat text-white text-lg"></i>
+              </div>
+              <div className="absolute inset-0 gradient-primary rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
             </div>
             <div>
-              <h3 className="font-medium text-foreground">Chef Assistant</h3>
-              <p className="text-xs text-muted-foreground">Ask me anything about cooking!</p>
+              <h3 className="font-bold text-slate-800 text-lg">Chef Assistant</h3>
+              <p className="text-sm text-slate-600">Ask me anything about cooking!</p>
             </div>
           </div>
           <Button
             variant="ghost"
             size="sm"
-            className="w-8 h-8 p-0 rounded-full"
+            className="w-10 h-10 p-0 rounded-xl glass hover:scale-110 transition-all duration-300 group"
             onClick={() => setIsOpen(false)}
           >
-            <i className="fas fa-times text-muted-foreground text-sm"></i>
+            <i className="fas fa-times text-slate-600 group-hover:text-slate-800"></i>
           </Button>
         </CardHeader>
         
-        <ScrollArea className="h-64 p-4" ref={scrollAreaRef}>
-          <div className="space-y-3">
+        <ScrollArea className="h-72 p-6" ref={scrollAreaRef}>
+          <div className="space-y-4">
             {localMessages.map((msg) => (
-              <div key={msg.id} className="flex space-x-3">
-                <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                  <i className={`fas ${msg.isUser ? "fa-user" : "fa-robot"} text-white text-xs`}></i>
-                </div>
-                <div className={`rounded-xl p-3 max-w-xs ${
-                  msg.isUser ? "bg-primary text-primary-foreground ml-auto" : "bg-muted text-foreground"
+              <div key={msg.id} className={`flex space-x-3 ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
+                {!msg.isUser && (
+                  <div className="w-8 h-8 gradient-primary rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                    <i className="fas fa-robot text-white text-sm"></i>
+                  </div>
+                )}
+                <div className={`rounded-2xl p-4 max-w-xs shadow-lg transition-all duration-300 hover:scale-105 ${
+                  msg.isUser 
+                    ? "gradient-primary text-white ml-4" 
+                    : "glass text-slate-800 border border-white/20"
                 }`}>
-                  <p className="text-sm">{msg.text}</p>
+                  <p className="text-sm leading-relaxed">{msg.text}</p>
                 </div>
+                {msg.isUser && (
+                  <div className="w-8 h-8 bg-slate-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                    <i className="fas fa-user text-white text-sm"></i>
+                  </div>
+                )}
               </div>
             ))}
             {sendMessageMutation.isPending && (
-              <div className="flex space-x-3">
-                <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                  <i className="fas fa-robot text-white text-xs"></i>
+              <div className="flex space-x-3 justify-start">
+                <div className="w-8 h-8 gradient-primary rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                  <i className="fas fa-robot text-white text-sm"></i>
                 </div>
-                <div className="bg-muted rounded-xl p-3 max-w-xs">
+                <div className="glass rounded-2xl p-4 max-w-xs border border-white/20">
                   <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
                   </div>
                 </div>
               </div>
@@ -187,22 +207,22 @@ export default function ChatBot() {
           </div>
         </ScrollArea>
 
-        <div className="p-4 border-t border-border">
-          <div className="flex space-x-2">
+        <div className="p-6 border-t border-white/10">
+          <div className="flex space-x-3">
             <Input
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask about substitutions, cooking tips..."
-              className="flex-1"
+              className="flex-1 h-12 input-modern glass border-white/20 placeholder:text-slate-500"
               disabled={sendMessageMutation.isPending}
             />
             <Button 
               onClick={handleSend}
-              className="w-12 h-12 p-0"
+              className="w-12 h-12 p-0 gradient-primary btn-modern shadow-lg hover:shadow-xl"
               disabled={!message.trim() || sendMessageMutation.isPending}
             >
-              <i className="fas fa-paper-plane"></i>
+              <i className="fas fa-paper-plane text-white"></i>
             </Button>
           </div>
         </div>

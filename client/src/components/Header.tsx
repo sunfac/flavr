@@ -59,29 +59,41 @@ export default function Header({ currentMode }: HeaderProps) {
 
         {/* Mode Selector */}
         {currentMode && (
-          <div className="bg-card border-b border-border">
-            <div className="px-4 py-3">
-              <div className="flex space-x-2">
+          <div className="border-t border-white/10 bg-white/30 backdrop-blur-sm">
+            <div className="px-6 py-4">
+              <div className="flex space-x-3">
                 <Button
-                  variant={currentMode === "shopping" ? "default" : "secondary"}
+                  variant="ghost"
                   size="sm"
-                  className="flex-1"
+                  className={`flex-1 h-11 rounded-xl font-medium transition-all duration-300 ${
+                    currentMode === "shopping" 
+                      ? "gradient-primary text-white shadow-lg" 
+                      : "glass text-slate-700 hover:text-slate-900 hover:scale-105"
+                  }`}
                   onClick={() => handleModeSelect("shopping")}
                 >
                   <i className="fas fa-shopping-cart mr-2"></i>Shopping
                 </Button>
                 <Button
-                  variant={currentMode === "fridge" ? "default" : "secondary"}
+                  variant="ghost"
                   size="sm"
-                  className="flex-1"
+                  className={`flex-1 h-11 rounded-xl font-medium transition-all duration-300 ${
+                    currentMode === "fridge" 
+                      ? "gradient-secondary text-white shadow-lg" 
+                      : "glass text-slate-700 hover:text-slate-900 hover:scale-105"
+                  }`}
                   onClick={() => handleModeSelect("fridge")}
                 >
                   <i className="fas fa-refrigerator mr-2"></i>Fridge
                 </Button>
                 <Button
-                  variant={currentMode === "chef" ? "default" : "secondary"}
+                  variant="ghost"
                   size="sm"
-                  className="flex-1"
+                  className={`flex-1 h-11 rounded-xl font-medium transition-all duration-300 ${
+                    currentMode === "chef" 
+                      ? "gradient-accent text-white shadow-lg" 
+                      : "glass text-slate-700 hover:text-slate-900 hover:scale-105"
+                  }`}
                   onClick={() => handleModeSelect("chef")}
                 >
                   <i className="fas fa-chef-hat mr-2"></i>Chef
