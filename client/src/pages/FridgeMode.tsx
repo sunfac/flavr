@@ -67,9 +67,12 @@ export default function FridgeMode() {
       
       <main className="pb-20">
         {currentStep === "quiz" && (
-          <FridgeQuiz
-            onComplete={handleQuizComplete}
+          <SlideQuizShell
+            title="Fridge to Fork Quiz"
+            questions={fridgeQuestions}
+            onSubmit={handleQuizComplete}
             onLoading={setIsLoading}
+            theme="fridge"
           />
         )}
 

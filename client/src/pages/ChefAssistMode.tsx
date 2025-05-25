@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import ChefAssistQuiz from "@/components/ChefAssistQuiz";
+import SlideQuizShell from "@/components/SlideQuizShell";
+import { chefQuestions } from "@/config/chefQuestions";
 import RecipeCard from "@/components/RecipeCard";
 import ChatBot from "@/components/ChatBot";
 import Loading from "@/components/Loading";
@@ -60,9 +61,12 @@ export default function ChefAssistMode() {
       
       <main className="pb-20">
         {currentStep === "quiz" && (
-          <ChefAssistQuiz
-            onComplete={handleQuizComplete}
+          <SlideQuizShell
+            title="Chef Assist Quiz"
+            questions={chefQuestions}
+            onSubmit={handleQuizComplete}
             onLoading={setIsLoading}
+            theme="chef"
           />
         )}
 
