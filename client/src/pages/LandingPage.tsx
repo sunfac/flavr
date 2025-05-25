@@ -102,11 +102,12 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-amber-900 relative overflow-hidden">
-      {/* Premium dark background with ambient lighting */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-800 via-amber-900/20 to-slate-900 relative overflow-hidden">
+      {/* Premium dark background matching logo style */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full opacity-20 blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-gradient-to-r from-orange-300 to-orange-400 rounded-full opacity-10 blur-2xl"></div>
+        <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-radial from-orange-400/30 via-amber-500/20 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/3 right-1/3 w-96 h-96 bg-gradient-radial from-orange-300/20 to-transparent rounded-full blur-2xl"></div>
+        <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-gradient-radial from-amber-400/15 to-transparent rounded-full blur-xl"></div>
       </div>
 
       {/* Header with dark theme */}
@@ -116,10 +117,20 @@ export default function LandingPage() {
             <img src={FlavrLogo} alt="Flavr" className="w-10 h-10" />
             <span className="text-xl font-bold text-white">Flavr</span>
           </div>
+          <nav className="hidden md:flex items-center space-x-8">
+            <a href="#features" className="text-white/80 hover:text-white transition-colors duration-300">Features</a>
+            <a href="#demo" className="text-white/80 hover:text-white transition-colors duration-300">Demo</a>
+            <a href="#pricing" className="text-white/80 hover:text-white transition-colors duration-300">Flavr+</a>
+            <Button 
+              onClick={handleLogin}
+              className="bg-white/10 border border-white/20 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
+            >
+              Sign In
+            </Button>
+          </nav>
           <Button 
-            variant="outline"
             onClick={handleLogin}
-            className="border-white/20 text-white hover:bg-white/10"
+            className="md:hidden bg-white/10 border border-white/20 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
           >
             Sign In
           </Button>
@@ -181,7 +192,7 @@ export default function LandingPage() {
       </section>
 
       {/* Feature Section */}
-      <section className="py-24 px-6 relative z-10">
+      <section id="features" className="py-24 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -232,7 +243,7 @@ export default function LandingPage() {
       </section>
 
       {/* Live Recipe Demo Section */}
-      <section className="py-24 px-6 relative z-10">
+      <section id="demo" className="py-24 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -248,11 +259,12 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          <div className="relative max-w-5xl mx-auto">
-            {/* Food Image with Chat Overlay */}
+          {/* Side-by-side layout */}
+          <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+            {/* Food Image */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               className="relative"
             >
@@ -261,69 +273,69 @@ export default function LandingPage() {
                 alt="Gourmet short rib with pea purée"
                 className="w-full rounded-2xl shadow-2xl"
               />
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/30 to-transparent"></div>
-              
-              {/* Chat Box Overlay */}
-              <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.3 }}
-                className="absolute right-4 md:right-8 top-4 md:top-8 w-72 md:w-80"
-              >
-                {/* Chat Container */}
-                <div className="bg-white/95 backdrop-blur-lg border border-white/20 rounded-2xl p-4 shadow-2xl">
-                  {/* Chat Header */}
-                  <div className="flex items-center space-x-3 mb-4 pb-3 border-b border-slate-200">
-                    <img src={FlavrLogo} alt="Flavr AI" className="w-8 h-8" />
-                    <div>
-                      <p className="font-semibold text-slate-800">Flavr AI</p>
-                      <p className="text-xs text-slate-500">Your cooking assistant</p>
-                    </div>
-                    <div className="ml-auto w-2 h-2 bg-green-400 rounded-full"></div>
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/20 to-transparent"></div>
+            </motion.div>
+
+            {/* Chat Interface */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="w-full max-w-md mx-auto lg:mx-0"
+            >
+              {/* Chat Container */}
+              <div className="bg-white/95 backdrop-blur-lg border border-white/20 rounded-2xl p-6 shadow-2xl">
+                {/* Chat Header */}
+                <div className="flex items-center space-x-3 mb-6 pb-4 border-b border-slate-200">
+                  <img src={FlavrLogo} alt="Flavr AI" className="w-10 h-10" />
+                  <div>
+                    <p className="font-semibold text-slate-800 text-lg">Flavr AI</p>
+                    <p className="text-sm text-slate-500">Your cooking assistant</p>
+                  </div>
+                  <div className="ml-auto w-3 h-3 bg-green-400 rounded-full"></div>
+                </div>
+                
+                {/* Chat Messages */}
+                <div className="space-y-4 mb-6">
+                  {/* Recipe Title */}
+                  <div className="bg-slate-100 rounded-xl p-4">
+                    <p className="font-semibold text-slate-800">Red Wine Braised Short Rib</p>
+                    <p className="text-slate-600 text-sm">with Pea Purée & Miso Glaze</p>
                   </div>
                   
-                  {/* Chat Messages */}
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {/* Recipe Title */}
-                    <div className="bg-slate-100 rounded-xl p-3">
-                      <p className="font-medium text-slate-800 text-sm">Red Wine Braised Short Rib</p>
-                      <p className="text-slate-600 text-xs">with Pea Purée & Miso Glaze</p>
-                    </div>
-                    
-                    {/* AI Messages */}
-                    <div className="bg-orange-500 text-white rounded-xl p-3 rounded-tl-sm">
-                      <p className="text-sm">Here's how to elevate it with a miso glaze ✨</p>
-                    </div>
-                    
-                    <div className="bg-orange-500 text-white rounded-xl p-3 rounded-tl-sm">
-                      <p className="text-sm">Would you like a wine pairing? 🍷</p>
-                    </div>
-                    
-                    <div className="bg-orange-500 text-white rounded-xl p-3 rounded-tl-sm">
-                      <p className="text-sm">Add a complementary side dish? 🥗</p>
-                    </div>
+                  {/* AI Messages */}
+                  <div className="bg-orange-500 text-white rounded-xl p-4 rounded-tl-sm">
+                    <p className="text-sm">Here's how to elevate it with a miso glaze ✨</p>
                   </div>
                   
-                  {/* Chat Input */}
-                  <div className="mt-4 pt-3 border-t border-slate-200">
-                    <div className="flex items-center space-x-2">
-                      <div className="flex-1 bg-slate-100 rounded-full px-4 py-2">
-                        <p className="text-sm text-slate-500">Ask about wine pairings...</p>
-                      </div>
-                      <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-                        <ArrowRight className="w-4 h-4 text-white" />
-                      </div>
+                  <div className="bg-orange-500 text-white rounded-xl p-4 rounded-tl-sm">
+                    <p className="text-sm">Would you like a wine pairing? 🍷</p>
+                  </div>
+                  
+                  <div className="bg-orange-500 text-white rounded-xl p-4 rounded-tl-sm">
+                    <p className="text-sm">Add a complementary side dish? 🥗</p>
+                  </div>
+                </div>
+                
+                {/* Chat Input */}
+                <div className="pt-4 border-t border-slate-200">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-1 bg-slate-100 rounded-full px-4 py-3">
+                      <p className="text-sm text-slate-500">Ask about wine pairings...</p>
+                    </div>
+                    <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center hover:bg-orange-600 transition-colors cursor-pointer">
+                      <ArrowRight className="w-5 h-5 text-white" />
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             </motion.div>
           </div>
         </div>
       </section>
 
       {/* Flavr+ CTA Section */}
-      <section className="py-24 px-6 relative z-10">
+      <section id="pricing" className="py-24 px-6 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
