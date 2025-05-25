@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import UserMenu from "./UserMenu";
 import SettingsPanel from "./SettingsPanel";
 import GlobalNavigation from "./GlobalNavigation";
+import { motion } from "framer-motion";
+import { ChefHat, Settings, User } from "lucide-react";
 
 interface HeaderProps {
   currentMode?: "shopping" | "fridge" | "chef";
@@ -20,32 +22,73 @@ export default function Header({ currentMode }: HeaderProps) {
 
   return (
     <>
-      <header className="glass sticky top-0 z-50 backdrop-blur-xl border-b border-white/20">
+      <motion.header 
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="glass sticky top-0 z-50 backdrop-blur-xl border-b border-white/20 bg-background/80"
+      >
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="relative group">
-                <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300">
-                  <i className="fas fa-utensils text-white text-lg"></i>
+            {/* Logo and Brand */}
+            <motion.div 
+              className="flex items-center space-x-4"
+              whileHover={{ scale: 1.02 }}
+              onClick={() => navigate("/")}
+            >
+              <motion.div 
+                className="relative group cursor-pointer"
+                whileHover={{ rotate: 5 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <div className="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center shadow-xl">
+                  <ChefHat className="text-white w-6 h-6" />
                 </div>
-                <div className="absolute inset-0 gradient-primary rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
-              </div>
-              <h1 
-                className="text-2xl font-playfair font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent cursor-pointer hover:scale-105 transition-transform duration-300"
-                onClick={() => navigate("/")}
+                <motion.div 
+                  className="absolute inset-0 gradient-primary rounded-2xl blur-lg opacity-30"
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+              </motion.div>
+              <motion.h1 
+                className="text-2xl font-playfair font-bold bg-gradient-to-r from-slate-800 via-slate-600 to-slate-800 bg-clip-text text-transparent cursor-pointer select-none"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
               >
-                Flavr
-              </h1>
-            </div>
+                Flavr ✨
+              </motion.h1>
+            </motion.div>
+
+            {/* Navigation Actions */}
             <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-10 h-10 p-0 rounded-xl glass hover:scale-110 transition-all duration-300 group"
-                onClick={() => setShowUserMenu(!showUserMenu)}
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <i className="fas fa-user text-slate-600 group-hover:text-slate-800 transition-colors"></i>
-              </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-12 h-12 p-0 rounded-2xl glass hover:bg-white/20 transition-all duration-300 group border border-white/10"
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                >
+                  <User className="w-5 h-5 text-slate-600 group-hover:text-primary transition-colors" />
+                </Button>
+              </motion.div>
+              
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-12 h-12 p-0 rounded-2xl glass hover:bg-white/20 transition-all duration-300 group border border-white/10"
+                  onClick={() => setShowSettings(!showSettings)}
+                >
+                  <Settings className="w-5 h-5 text-slate-600 group-hover:text-primary transition-colors" />
+                </Button>
+              </motion.div>
+
               <GlobalNavigation />
             </div>
           </div>
@@ -53,50 +96,60 @@ export default function Header({ currentMode }: HeaderProps) {
 
         {/* Mode Selector */}
         {currentMode && (
-          <div className="border-t border-white/10 bg-white/30 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="border-t border-white/10 bg-white/30 backdrop-blur-sm"
+          >
             <div className="px-6 py-4">
               <div className="flex space-x-3">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`flex-1 h-11 rounded-xl font-medium transition-all duration-300 ${
-                    currentMode === "shopping" 
-                      ? "gradient-primary text-white shadow-lg" 
-                      : "glass text-slate-700 hover:text-slate-900 hover:scale-105"
-                  }`}
-                  onClick={() => handleModeSelect("shopping")}
-                >
-                  <i className="fas fa-shopping-cart mr-2"></i>Shopping
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`flex-1 h-11 rounded-xl font-medium transition-all duration-300 ${
-                    currentMode === "fridge" 
-                      ? "gradient-secondary text-white shadow-lg" 
-                      : "glass text-slate-700 hover:text-slate-900 hover:scale-105"
-                  }`}
-                  onClick={() => handleModeSelect("fridge")}
-                >
-                  <i className="fas fa-refrigerator mr-2"></i>Fridge
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`flex-1 h-11 rounded-xl font-medium transition-all duration-300 ${
-                    currentMode === "chef" 
-                      ? "gradient-accent text-white shadow-lg" 
-                      : "glass text-slate-700 hover:text-slate-900 hover:scale-105"
-                  }`}
-                  onClick={() => handleModeSelect("chef")}
-                >
-                  <i className="fas fa-chef-hat mr-2"></i>Chef
-                </Button>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`flex-1 h-11 rounded-xl font-medium transition-all duration-300 ${
+                      currentMode === "shopping" 
+                        ? "gradient-primary text-white shadow-lg" 
+                        : "glass text-slate-700 hover:text-slate-900 hover:scale-105"
+                    }`}
+                    onClick={() => handleModeSelect("shopping")}
+                  >
+                    🛒 Shopping
+                  </Button>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`flex-1 h-11 rounded-xl font-medium transition-all duration-300 ${
+                      currentMode === "fridge" 
+                        ? "gradient-secondary text-white shadow-lg" 
+                        : "glass text-slate-700 hover:text-slate-900 hover:scale-105"
+                    }`}
+                    onClick={() => handleModeSelect("fridge")}
+                  >
+                    🥗 Fridge
+                  </Button>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`flex-1 h-11 rounded-xl font-medium transition-all duration-300 ${
+                      currentMode === "chef" 
+                        ? "gradient-accent text-white shadow-lg" 
+                        : "glass text-slate-700 hover:text-slate-900 hover:scale-105"
+                    }`}
+                    onClick={() => handleModeSelect("chef")}
+                  >
+                    👨‍🍳 Chef
+                  </Button>
+                </motion.div>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
-      </header>
+      </motion.header>
 
       {/* User Menu */}
       {showUserMenu && (

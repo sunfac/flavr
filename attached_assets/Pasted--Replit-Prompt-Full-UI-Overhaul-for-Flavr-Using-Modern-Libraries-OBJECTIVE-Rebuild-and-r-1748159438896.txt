@@ -1,0 +1,120 @@
+// Replit Prompt — Full UI Overhaul for Flavr Using Modern Libraries
+
+// OBJECTIVE:
+// Rebuild and restyle all visual elements in the Flavr app using modern UI libraries to create an elite, mobile-friendly, Apple-like design. 
+// Replace outdated layouts with responsive, animated, emotionally resonant components.
+
+//////////////////////////////////////////////////////////////////
+// 1. INSTALL MODERN LIBRARIES
+//////////////////////////////////////////////////////////////////
+
+// These are required to modernize all UI layers:
+npx shadcn-ui@latest init
+npm install lucide-react lottie-react framer-motion @radix-ui/react-slider
+
+// Tailwind CSS should already be configured.
+
+//////////////////////////////////////////////////////////////////
+// 2. UI REBUILD REQUIREMENTS BY COMPONENT
+//////////////////////////////////////////////////////////////////
+
+// HEADER / NAV BAR
+// - Use shadcn `navigation-menu` or `dropdown-menu`
+// - Sticky with blurred background, compact mobile nav
+// - Include Lucide icons: ChefHat, Settings, LogOut
+// - Optional dropdown to switch app mode (Shopping, Fridge, Chef Assist)
+
+
+// LOGIN / SIGN-UP MODAL
+// - Replace redirect with a `Dialog` from shadcn
+// - Show modal immediately at quiz completion if user is not authenticated
+// - Use `shadcn/form` inputs for email and password
+// - Must block recipe output until auth completes
+// - Style with rounded corners, full-width on mobile, Lucide icon in title bar
+// - No email verification needed yet
+
+// LOADING SCREEN
+// - Use `lottie-react` animation (e.g., chef cooking or magic stirring pot)
+// - Fullscreen overlay with dim background
+// - Label: "Whisking up something delicious…"
+
+// SLIDEQUIZ COMPONENT (USED IN ALL MODES)
+// - One full-screen slide per question
+// - Animate between slides with `framer-motion`
+// - Use dropdowns, multi-select chips, and sliders from `shadcn` and `radix-slider`
+// - No unnecessary scrolling; content must fit screen
+// - Mood/vibe selectors should include emojis
+
+// SLIDERS (TIME + AMBITION)
+// - Use @radix-ui/react-slider
+// - Label ambition as "1 — Easy Peasy" to "5 — Michelin Madness"
+// - Time slider should say “No Time Limit” when maxed
+
+// MOBILE OPTIMIZATION
+// - All buttons and form inputs must be tap-friendly (min-height: 48px)
+// - Use Tailwind breakpoints to ensure quiz and modals are fully responsive
+// - Avoid any horizontal scroll or layout shift
+// - Use safe mobile padding + dynamic rem-based text sizes
+
+// RECIPE CARD OUTPUT
+// - Replace with shadcn `card` component
+// - Title + description in top section
+// - Icons (clock, wallet, user) for time, budget, servings
+// - Steps list should support animation reveal or collapsible items
+// - Use emojis and Lucide icons where relevant
+
+// MENU + MODE SELECTION
+// - Use `navigation-menu` or `command-dialog` for switching between modes
+// - Keep UI consistent across all modes
+
+//////////////////////////////////////////////////////////////////
+// 3. STYLE GUIDE + EMOTIONAL DESIGN
+//////////////////////////////////////////////////////////////////
+
+// THEME (via shadcn `ThemeProvider`)
+- Primary color: coral (warm, energetic)
+- Accent color: mint or teal
+- Font: Inter or General Sans
+- Emojis: mood-based in questions, buttons, and output ("✨", "🔥", "🥗")
+
+// SHADOW + BORDER STYLE
+- Use soft elevation for cards and buttons
+- Rounded corners everywhere (except full-screen panels)
+
+// ANIMATION
+- All transitions use `framer-motion` (300ms easing)
+// Quiz slide-ins, button press-in feedback, modal fade in/out
+
+//////////////////////////////////////////////////////////////////
+// 4. OPTIONAL STRETCH ENHANCEMENTS
+//////////////////////////////////////////////////////////////////
+
+// - Swipe gesture support for quizzes (use react-swipeable)
+// - Add a background color/gradient that adapts per mode
+// - Add animated progress bar or dots during quiz steps
+// - Include sound effects for submit / complete (toggle in settings)
+
+//////////////////////////////////////////////////////////////////
+// 5. GOAL
+//////////////////////////////////////////////////////////////////
+
+// Final result should rival the UX of:
+- Calm
+- Headspace
+- Apple Fitness
+- Pinterest
+// It should feel joyful, premium, responsive, and emotionally engaging
+// Deliver a consistent, touch-friendly, mobile-first app experience
+
+//////////////////////////////////////////////////////////////////
+// FINAL DELIVERABLE
+//////////////////////////////////////////////////////////////////
+
+// Rebuild all UI elements listed above using:
+// - Tailwind + shadcn UI for layout and form components
+// - Lucide for icons
+// - Lottie for loading
+// - Framer Motion for transitions
+// - Radix Slider for inputs
+
+// Eliminate any outdated styles, default HTML elements, and inconsistent visual behavior.
