@@ -11,6 +11,7 @@ import Loading from "@/components/Loading";
 import FlavrPlusGate from "@/components/FlavrPlusGate";
 import { useFlavrGate } from "@/hooks/useFlavrGate";
 import { api } from "@/lib/api";
+import AuthModal from "@/components/AuthModal";
 
 export default function ShoppingMode() {
   const [, navigate] = useLocation();
@@ -20,6 +21,7 @@ export default function ShoppingMode() {
   const [selectedRecipe, setSelectedRecipe] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showGate, setShowGate] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const { canGenerateRecipe } = useFlavrGate();
 
@@ -52,8 +54,8 @@ export default function ShoppingMode() {
     setQuizData(transformedData);
 
     if (!isAuthenticated) {
-      // Show suggestions step with login prompt for unauthenticated users
-      setCurrentStep("suggestions");
+      // Show auth modal for unauthenticated users
+      setShowAuthModal(true);
       return;
     }
 
@@ -98,6 +100,27 @@ export default function ShoppingMode() {
     setSelectedRecipe(null);
   };
 
+  const handleAuthSuccess = async () => {
+    // After successful login/signup, generate recipes with stored quiz data
+    if (quizData) {
+      try {
+        setIsLoading(true);
+        const response = await api.generateRecipeIdeas({
+          mode: "shopping",
+          quizData: quizData,
+          prompt: `Generate recipe ideas for shopping mode with mood: ${quizData.mood}, budget: ${quizData.budget}`
+        });
+        setRecipeIdeas(response.ideas || []);
+        setCurrentStep("suggestions");
+      } catch (error) {
+        console.error("Failed to generate recipe ideas:", error);
+        setCurrentStep("suggestions");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   const handleBackToSuggestions = () => {
     setCurrentStep("suggestions");
     setSelectedRecipe(null);
@@ -119,57 +142,24 @@ export default function ShoppingMode() {
 
         {currentStep === "suggestions" && (
           <div className="p-4 space-y-4">
-            {!isAuthenticated ? (
-              <div className="max-w-md mx-auto text-center space-y-6 pt-8">
-                <div className="space-y-3">
-                  <h2 className="text-2xl font-bold text-foreground">
-                    Your personalized recipes are ready!
-                  </h2>
-                  <p className="text-muted-foreground">
-                    Based on your preferences, we've created amazing recipes just for you. Sign up to see them and start cooking!
-                  </p>
-                </div>
-                
-                <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg p-6 space-y-4">
-                  <div className="text-sm text-muted-foreground">
-                    <div className="font-medium">Your quiz results:</div>
-                    <div className="mt-2 space-y-1">
-                      <div>• Mood: {quizData?.mood}</div>
-                      <div>• Budget: {quizData?.budget}</div>
-                      <div>• Time: {quizData?.time} minutes</div>
-                    </div>
-                  </div>
-                </div>
+            <div className="text-center">
+              <h2 className="text-xl font-playfair font-bold text-foreground mb-1">
+                Perfect matches for you
+              </h2>
+              <p className="text-muted-foreground text-sm">
+                Swipe to explore • Tap to see full recipe
+              </p>
+            </div>
 
-                <button
-                  onClick={() => navigate("/")}
-                  className="w-full h-12 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors"
-                >
-                  Sign Up to See Your Recipes
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="text-center">
-                  <h2 className="text-xl font-playfair font-bold text-foreground mb-1">
-                    Perfect matches for you
-                  </h2>
-                  <p className="text-muted-foreground text-sm">
-                    Swipe to explore • Tap to see full recipe
-                  </p>
-                </div>
-
-                <div className="swipe-container flex space-x-4 overflow-x-auto pb-4">
-                  {recipeIdeas.map((recipe, index) => (
-                    <RecipeCard
-                      key={index}
-                      recipe={recipe}
-                      onClick={() => handleRecipeSelect(recipe)}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
+            <div className="swipe-container flex space-x-4 overflow-x-auto pb-4">
+              {recipeIdeas.map((recipe, index) => (
+                <RecipeCard
+                  key={index}
+                  recipe={recipe}
+                  onClick={() => handleRecipeSelect(recipe)}
+                />
+              ))}
+            </div>
 
             <button
               onClick={handleNewSearch}
@@ -204,6 +194,14 @@ export default function ShoppingMode() {
 
       <ChatBot />
       <Footer currentMode="shopping" />
+
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={handleAuthSuccess}
+        title="Your personalized recipes are ready!"
+        description="Sign up to unlock your custom AI-generated recipes based on your preferences"
+      />
     </div>
   );
 }
