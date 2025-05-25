@@ -41,11 +41,15 @@ export default function Header({ currentMode }: HeaderProps) {
                 whileHover={{ rotate: 5 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <div className="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center shadow-xl">
-                  <ChefHat className="text-white w-6 h-6" />
+                <div className="w-12 h-12 flex items-center justify-center">
+                  <img 
+                    src="/attached_assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png" 
+                    alt="Flavr Logo"
+                    className="w-10 h-10 object-contain drop-shadow-lg"
+                  />
                 </div>
                 <motion.div 
-                  className="absolute inset-0 gradient-primary rounded-2xl blur-lg opacity-30"
+                  className="absolute inset-0 rounded-2xl blur-lg opacity-20 bg-orange-400"
                   animate={{ scale: [1, 1.1, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 />

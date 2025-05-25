@@ -98,10 +98,14 @@ export default function LandingPage() {
         <div className="text-center mb-16 animate-fade-in">
           <div className="mb-8">
             <div className="relative group mx-auto mb-8 w-fit">
-              <div className="w-24 h-24 gradient-primary rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl group-hover:scale-110 transition-all duration-500 animate-bounce-gentle">
-                <i className="fas fa-utensils text-white text-4xl"></i>
+              <div className="w-32 h-32 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-500 animate-bounce-gentle">
+                <img 
+                  src="/attached_assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png" 
+                  alt="Flavr Logo"
+                  className="w-full h-full object-contain drop-shadow-2xl"
+                />
               </div>
-              <div className="absolute inset-0 gradient-primary rounded-3xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
+              <div className="absolute inset-0 rounded-full blur-xl opacity-20 bg-orange-400 group-hover:opacity-40 transition-opacity duration-500"></div>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold text-display leading-tight mb-6" style={{
               background: 'var(--gradient-dopamine)',

@@ -100,8 +100,12 @@ export default function GlobalNavigation({ onClose }: GlobalNavigationProps) {
               {/* Header */}
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
-                    <ChefHat className="text-white w-5 h-5" />
+                  <div className="w-10 h-10 flex items-center justify-center">
+                    <img 
+                      src="/attached_assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png" 
+                      alt="Flavr Logo"
+                      className="w-8 h-8 object-contain drop-shadow-lg"
+                    />
                   </div>
                   <h2 className="text-xl font-playfair font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
                     Flavr ✨
