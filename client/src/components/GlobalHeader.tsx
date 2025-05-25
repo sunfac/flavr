@@ -1,0 +1,56 @@
+import { Button } from "@/components/ui/button";
+import { Menu, Settings, User } from "lucide-react";
+import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
+
+interface GlobalHeaderProps {
+  onMenuClick?: () => void;
+  onSettingsClick?: () => void;
+  onUserClick?: () => void;
+}
+
+export default function GlobalHeader({ 
+  onMenuClick, 
+  onSettingsClick, 
+  onUserClick 
+}: GlobalHeaderProps) {
+  return (
+    <header className="absolute top-0 left-0 right-0 z-50 px-6 py-4">
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        {/* Left: Hamburger Menu */}
+        <Button 
+          variant="ghost"
+          size="icon"
+          onClick={onMenuClick}
+          className="text-white hover:bg-white/10"
+        >
+          <Menu className="w-6 h-6" />
+        </Button>
+
+        {/* Center: Chef Hat Logo */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
+          <img src={FlavrLogo} alt="Flavr" className="w-10 h-10" />
+        </div>
+
+        {/* Right: Settings and Login */}
+        <div className="flex items-center space-x-2">
+          <Button 
+            variant="ghost"
+            size="icon"
+            onClick={onSettingsClick}
+            className="text-white hover:bg-white/10"
+          >
+            <Settings className="w-6 h-6" />
+          </Button>
+          <Button 
+            variant="ghost"
+            size="icon"
+            onClick={onUserClick}
+            className="text-white hover:bg-white/10"
+          >
+            <User className="w-6 h-6" />
+          </Button>
+        </div>
+      </div>
+    </header>
+  );
+}

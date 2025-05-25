@@ -8,13 +8,13 @@ export const shoppingQuestions: QuestionConfig[] = [
     type: "cards",
     required: true,
     options: [
-      { value: "comfort", label: "Comfort food", icon: "🛋️", desc: "Warm and cozy vibes" },
-      { value: "healthy", label: "Fresh & healthy", icon: "🌱", desc: "Light and nutritious" },
-      { value: "indulgent", label: "Pure indulgence", icon: "💎", desc: "Treat yourself" },
-      { value: "adventurous", label: "Something new", icon: "🎯", desc: "Bold and exciting" },
-      { value: "quick", label: "Quick & easy", icon: "⚡", desc: "Minimal effort" },
-      { value: "impressive", label: "Impress someone", icon: "✨", desc: "Show off your skills" },
-      { value: "surprise", label: "Surprise me", icon: "🎲", desc: "Let's discover together" }
+      { value: "comfort", label: "Comfort food", icon: "Home", desc: "Warm and cozy vibes" },
+      { value: "healthy", label: "Fresh & healthy", icon: "Leaf", desc: "Light and nutritious" },
+      { value: "indulgent", label: "Pure indulgence", icon: "Crown", desc: "Treat yourself" },
+      { value: "adventurous", label: "Something new", icon: "Target", desc: "Bold and exciting" },
+      { value: "quick", label: "Quick & easy", icon: "Zap", desc: "Minimal effort" },
+      { value: "impressive", label: "Impress someone", icon: "Star", desc: "Show off your skills" },
+      { value: "surprise", label: "Surprise me", icon: "Shuffle", desc: "Let's discover together" }
     ]
   },
   {
@@ -62,10 +62,10 @@ export const shoppingQuestions: QuestionConfig[] = [
     type: "cards",
     required: true,
     options: [
-      { value: "budget", label: "Budget-friendly", icon: "💰", desc: "Under $15 total" },
-      { value: "moderate", label: "Moderate", icon: "💳", desc: "$15-30 range" },
-      { value: "premium", label: "Premium ingredients", icon: "💎", desc: "$30+ is fine" },
-      { value: "no-limit", label: "Sky's the limit", icon: "🌟", desc: "Best ingredients only" }
+      { value: "budget", label: "Budget-friendly", icon: "DollarSign", desc: "Under $15 total" },
+      { value: "moderate", label: "Moderate", icon: "CreditCard", desc: "$15-30 range" },
+      { value: "premium", label: "Premium ingredients", icon: "Crown", desc: "$30+ is fine" },
+      { value: "no-limit", label: "Sky's the limit", icon: "Star", desc: "Best ingredients only" }
     ]
   },
   {

@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, ArrowRight, CheckCircle, Clock, ChefHat, Utensils, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Clock, ChefHat, Utensils, Sparkles, Home, Leaf, Crown, Target, Zap, Star, Shuffle, DollarSign, CreditCard, Flame, Building, Microwave, Wind, Timer, ChefHat as Cooker } from "lucide-react";
 
 export interface QuestionConfig {
   id: string;
@@ -90,6 +90,17 @@ export default function SlideQuizShell({
   };
 
   const currentAnswer = answers[currentQ.id];
+
+  const renderIcon = (iconName: string) => {
+    const iconMap: Record<string, any> = {
+      Home, Leaf, Crown, Target, Zap, Star, Shuffle, DollarSign, CreditCard, 
+      Flame, Building, Microwave, Wind, Timer, Cooker,
+      Clock, ChefHat, Utensils, Sparkles
+    };
+    
+    const IconComponent = iconMap[iconName];
+    return IconComponent ? <IconComponent className="w-4 h-4" /> : <div className="w-4 h-4" />;
+  };
 
   const renderSliderWithLabel = (value: number) => {
     if (currentQ.dynamicLabel) {
