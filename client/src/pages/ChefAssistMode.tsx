@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import GlobalHeader from "@/components/GlobalHeader";
+import GlobalFooter from "@/components/GlobalFooter";
+import GlobalNavigation from "@/components/GlobalNavigation";
+import SettingsPanel from "@/components/SettingsPanel";
+import UserMenu from "@/components/UserMenu";
 import SlideQuizShell from "@/components/SlideQuizShell";
 import { chefQuestions } from "@/config/chefQuestions";
 import RecipeCard from "@/components/RecipeCard";
@@ -19,6 +22,9 @@ export default function ChefAssistMode() {
   const [generatedRecipe, setGeneratedRecipe] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showGate, setShowGate] = useState(false);
+  const [showNavigation, setShowNavigation] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const { canGenerateRecipe } = useFlavrGate();
 
@@ -79,10 +85,15 @@ export default function ChefAssistMode() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header currentMode="chef" />
+    <div className="min-h-screen">
+      {/* Consistent header across all modes */}
+      <GlobalHeader 
+        onMenuClick={() => setShowNavigation(true)}
+        onSettingsClick={() => setShowSettings(true)}
+        onUserClick={() => setShowUserMenu(true)}
+      />
       
-      <main className="pb-20">
+      <main>
         {currentStep === "quiz" && (
           <SlideQuizShell
             title="Chef Assist Quiz"
@@ -117,7 +128,22 @@ export default function ChefAssistMode() {
       </main>
 
       <ChatBot />
-      <Footer currentMode="chef" />
+      
+      {/* Consistent footer across all modes */}
+      <GlobalFooter currentMode="chef" />
+
+      {/* Navigation overlays */}
+      {showNavigation && (
+        <GlobalNavigation onClose={() => setShowNavigation(false)} />
+      )}
+      
+      {showSettings && (
+        <SettingsPanel onClose={() => setShowSettings(false)} />
+      )}
+      
+      {showUserMenu && (
+        <UserMenu onClose={() => setShowUserMenu(false)} />
+      )}
     </div>
   );
 }
