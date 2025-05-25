@@ -1,0 +1,89 @@
+// Replit Prompt — Redesign the Flavr Quiz UI with Premium Visual Experience
+
+// OBJECTIVE:
+// Redesign the visual layout and interaction model for the Flavr quiz flow across all modes (Shopping, Fridge, Chef Assist) 
+// to be beautiful, mobile-first, and emotionally engaging. Use `shadcn/ui`, `@radix-ui/react-slider`, `lucide-react`, and `framer-motion`. 
+// Maintain all quiz logic and data handling — this is purely a visual and UX upgrade.
+
+// DESIGN GOALS:
+// - One question per slide — full-screen step layout
+// - Smooth animated transitions between steps (using framer-motion)
+// - Use large buttons, sliders, dropdowns with touch-friendly design
+// - Clear visual hierarchy, emojis and icons to add emotional tone
+// - Form elements must look native to the new visual design system
+
+////////////////////////////////////////////////////////////////
+// 1. GENERAL QUIZ CONTAINER
+////////////////////////////////////////////////////////////////
+
+- Use a fullscreen container with centered question content
+- Animate slides in and out using `framer-motion` transitions
+- Keep consistent spacing, padding, and font styling across all steps
+- Show animated step progress indicator at top (e.g., dots or bar)
+
+////////////////////////////////////////////////////////////////
+// 2. QUESTION FORMATS (Component Styles)
+////////////////////////////////////////////////////////////////
+
+// Dropdowns:
+- Use `shadcn/select` with rounded styling, custom icon indicators
+- Mood + vibe dropdowns should include emoji in options
+
+// Multi-select Chips:
+- Use `shadcn/toggle` or `shadcn/button` in `toggleGroup` layout
+- For dietary preferences and equipment — allow toggling with feedback
+
+// Sliders:
+- Use `@radix-ui/react-slider` for:
+  - Time (in minutes)
+  - Ambition level
+- Add labels for min/max values:
+  - Time: "10 min" to "90 min+" (max = “No time limit”)
+  - Ambition: "1 — Easy Peasy" to "5 — Michelin Madness"
+- Optional emoji or Lucide icon next to ambition levels
+
+// Text/Ingredient Entry (Fridge mode):
+- Use a large text input with an "Add" button
+- Render added ingredients as tags with remove option
+
+////////////////////////////////////////////////////////////////
+// 3. NAVIGATION BUTTONS
+////////////////////////////////////////////////////////////////
+
+- Use `shadcn/button` components for:
+  - “Next”, “Back”, and “Submit”
+- Fixed to the bottom of the screen (mobile-first) with responsive sizing
+- Add icons: e.g., ArrowRight, CheckCircle
+
+////////////////////////////////////////////////////////////////
+// 4. MOBILE OPTIMIZATION
+////////////////////////////////////////////////////////////////
+
+- All components must be:
+  - Tap-friendly (min-height 48px)
+  - Fully responsive across mobile breakpoints
+  - Fit cleanly within one screen without vertical scroll when possible
+- Avoid modal popups during quiz — keep everything inline
+- Use `framer-motion` to create horizontal swipe/slide animation between questions
+
+////////////////////////////////////////////////////////////////
+// 5. VISUAL THEME + TONE
+////////////////////////////////////////////////////////////////
+
+- Use ThemeProvider from `shadcn` to apply:
+  - Rounded buttons and inputs
+  - Brand color highlights (coral/mint)
+  - Font: Inter
+- Use Lucide icons and emojis in questions:
+  - "What’s your vibe today? 🌈"
+  - "How much time do you have? ⏱️"
+  - "What kitchen gear do you have? 🍳"
+
+////////////////////////////////////////////////////////////////
+// 6. FINAL RESULT
+////////////////////////////////////////////////////////////////
+
+- A quiz UI that feels like a polished, modern mobile app
+- Comparable to onboarding flows in Headspace, Pinterest, or Apple Health
+- Visually engaging, emotionally intelligent, and fully usable on mobile
+- All output data remains fully compatible with Prompt 1 and Prompt 2 for recipe generation
