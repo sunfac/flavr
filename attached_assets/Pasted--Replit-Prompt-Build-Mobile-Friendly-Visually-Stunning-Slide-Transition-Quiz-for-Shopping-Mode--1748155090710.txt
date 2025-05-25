@@ -1,0 +1,87 @@
+// Replit Prompt — Build Mobile-Friendly, Visually Stunning Slide-Transition Quiz for Shopping Mode in Flavr
+
+// OBJECTIVE:
+// Build a multi-step, mobile-first quiz for the Shopping Mode in the Flavr app.
+// This quiz must be intuitive, animated, and beautiful — with responsive transitions, premium UX, and emotionally engaging inputs.
+
+// 1. COMPONENT STRUCTURE:
+// Create a <ShoppingQuiz /> component with internal state to manage question flow.
+// Each question should appear one at a time using slide transitions.
+// Use either conditional rendering + animation libraries, or a step-index approach.
+
+
+// 2. QUESTION STRUCTURE (Final List):
+
+// Step 1 — Mood
+// Dropdown with emotional context and icons
+// Options: Comfort food, Fresh & healthy, Decadent treat, Something exciting, Minimal effort, Foodie moment, Surprise me
+
+// Step 2 — Cuisine
+// Dropdown (searchable or with tag input)
+// Wide range: Italian, Japanese, Mexican, Thai, Greek, Korean, Turkish, Fusion, etc.
+
+// Step 3 — Time
+// Slider (5–90 min, step = 5)
+// Show live label: "Quick fix", "Midweek dinner", "Weekend cook-up", "No time limit" (if maxed)
+
+// Step 4 — Budget
+// Slider or tiered radio buttons: £, ££, £££
+
+// Step 5 — Dietary Preferences
+// Multi-select chips
+// Options: Vegetarian, Vegan, Gluten-free, Dairy-free, Low-carb, Low-calorie, Paleo, Halal, Kosher, None
+
+// Step 6 — Equipment
+// Multi-select icon grid or chips
+// Options: Stovetop, Oven, Microwave, Air Fryer, Grill, Slow Cooker, Pressure Cooker, Blender, Rice Cooker, BBQ, Kamado, Pizza Oven, None
+
+// Step 7 — Ambition / Skill Level
+// Slider (1–5) with labels:
+// 1 = Just get fed, 3 = Confident home cook, 5 = Michelin star effort
+
+// Step 8 — Preferred Supermarket
+// Dropdown
+// Options: Tesco, Sainsbury’s, Waitrose, Morrisons, ASDA, Aldi, Lidl, Iceland, Ocado, Local/Other, No preference
+
+
+// 3. FUNCTIONALITY:
+// - Animate between steps using Framer Motion or Headless UI transitions
+// - Use “Next” / “Back” buttons with swipe gesture support on mobile
+// - Only show “Submit” on final step
+// - Store answers in local state or shared context
+// - Final payload:
+{
+  mood: "Comfort food",
+  cuisine: "Japanese",
+  time: 45,
+  budget: "££",
+  dietary: ["Low-carb", "Dairy-free"],
+  equipment: ["Air Fryer", "Oven"],
+  ambition: 4,
+  supermarket: "Tesco"
+}
+// - On submit, send to shoppingPrompt1.ts GPT handler
+
+
+// 4. UI/UX STYLING:
+
+// USE:
+// - Tailwind CSS for layout and spacing
+// - Radix UI, ShadCN, or Headless UI for component styling
+// - Framer Motion for transitions
+
+// VISUALS:
+// - Mobile-first, full-width layout
+// - Soft gradients, subtle shadows, large touch targets (48px min height)
+// - Use "Inter", "Space Grotesk", or "General Sans" fonts
+// - Bright CTA colors: tangerine/coral; calm accents: teal/blue
+// - Clear spacing, friendly micro-interactions, and floating progress indicator (dots or steps)
+
+
+// 5. ACCESSIBILITY:
+// - Add aria-labels to all inputs
+// - Ensure keyboard navigation works
+// - Validate required inputs before progression
+
+// END RESULT:
+// A swipeable, tap-friendly, delightful quiz flow that guides the user step-by-step through their culinary mood and intent, feeding clean data into the recipe generation flow.
