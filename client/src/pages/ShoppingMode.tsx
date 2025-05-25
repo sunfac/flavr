@@ -37,24 +37,30 @@ export default function ShoppingMode() {
   const isAuthenticated = user?.user;
 
   const handleQuizComplete = async (data: any) => {
+    // Transform SlideQuizShell data to match expected API format
+    const transformedData = {
+      mood: data.mood,
+      cuisine: data.cuisine || [],
+      time: data.time || 30,
+      budget: data.budget,
+      dietary: data.dietary || [],
+      equipment: data.equipment || [],
+      ambition: data.ambition || 3,
+      supermarket: data.supermarket
+    };
+
+    setQuizData(transformedData);
+
+    if (!isAuthenticated) {
+      // Show suggestions step with login prompt for unauthenticated users
+      setCurrentStep("suggestions");
+      return;
+    }
+
     try {
       setIsLoading(true);
-      
-      // Transform SlideQuizShell data to match expected API format
-      const transformedData = {
-        mood: data.mood,
-        cuisine: data.cuisine || [],
-        time: data.time || 30,
-        budget: data.budget,
-        dietary: data.dietary || [],
-        equipment: data.equipment || [],
-        ambition: data.ambition || 3,
-        supermarket: data.supermarket
-      };
 
-      setQuizData(transformedData);
-
-      // Generate recipe ideas immediately
+      // Generate recipe ideas for authenticated users
       const response = await api.generateRecipeIdeas({
         mode: "shopping",
         quizData: transformedData,
@@ -65,6 +71,7 @@ export default function ShoppingMode() {
       setCurrentStep("suggestions");
     } catch (error) {
       console.error("Failed to generate recipe ideas:", error);
+      setCurrentStep("suggestions");
     } finally {
       setIsLoading(false);
     }
@@ -113,24 +120,57 @@ export default function ShoppingMode() {
 
         {currentStep === "suggestions" && (
           <div className="p-4 space-y-4">
-            <div className="text-center">
-              <h2 className="text-xl font-playfair font-bold text-foreground mb-1">
-                Perfect matches for you
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                Swipe to explore • Tap to see full recipe
-              </p>
-            </div>
+            {!isAuthenticated ? (
+              <div className="max-w-md mx-auto text-center space-y-6 pt-8">
+                <div className="space-y-3">
+                  <h2 className="text-2xl font-bold text-foreground">
+                    Your personalized recipes are ready!
+                  </h2>
+                  <p className="text-muted-foreground">
+                    Based on your preferences, we've created amazing recipes just for you. Sign up to see them and start cooking!
+                  </p>
+                </div>
+                
+                <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg p-6 space-y-4">
+                  <div className="text-sm text-muted-foreground">
+                    <div className="font-medium">Your quiz results:</div>
+                    <div className="mt-2 space-y-1">
+                      <div>• Mood: {quizData?.mood}</div>
+                      <div>• Budget: {quizData?.budget}</div>
+                      <div>• Time: {quizData?.time} minutes</div>
+                    </div>
+                  </div>
+                </div>
 
-            <div className="swipe-container flex space-x-4 overflow-x-auto pb-4">
-              {recipeIdeas.map((recipe, index) => (
-                <RecipeCard
-                  key={index}
-                  recipe={recipe}
-                  onClick={() => handleRecipeSelect(recipe)}
-                />
-              ))}
-            </div>
+                <button
+                  onClick={() => navigate("/")}
+                  className="w-full h-12 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+                >
+                  Sign Up to See Your Recipes
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="text-center">
+                  <h2 className="text-xl font-playfair font-bold text-foreground mb-1">
+                    Perfect matches for you
+                  </h2>
+                  <p className="text-muted-foreground text-sm">
+                    Swipe to explore • Tap to see full recipe
+                  </p>
+                </div>
+
+                <div className="swipe-container flex space-x-4 overflow-x-auto pb-4">
+                  {recipeIdeas.map((recipe, index) => (
+                    <RecipeCard
+                      key={index}
+                      recipe={recipe}
+                      onClick={() => handleRecipeSelect(recipe)}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
 
             <button
               onClick={handleNewSearch}
