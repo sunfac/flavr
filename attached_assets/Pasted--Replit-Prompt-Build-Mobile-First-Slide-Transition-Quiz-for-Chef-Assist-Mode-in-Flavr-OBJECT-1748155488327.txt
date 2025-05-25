@@ -1,0 +1,84 @@
+// Replit Prompt — Build Mobile-First Slide-Transition Quiz for Chef Assist Mode in Flavr
+
+// OBJECTIVE:
+// Create a structured, high-intent, mobile-friendly slide-style quiz for Chef Assist Mode.
+// This quiz helps the user define what they want to cook and what limitations or ambitions they have.
+// It must match the visual style of Shopping and Fridge quizzes — with animated transitions, intuitive inputs, and polished UX.
+
+// 1. COMPONENT STRUCTURE:
+// - Create <ChefAssistQuiz /> as a multi-step quiz component
+// - Use conditional rendering or step index to display one question at a time
+// - Add animated slide transitions between steps using Framer Motion or Headless UI
+// - Include "Next", "Back", and final "Submit" button
+// - Store responses in local state or shared context
+
+
+// 2. QUESTIONS + INPUT TYPES:
+
+// Step 1 — Cooking Intent
+// - Free-text input (required)
+// - Prompt the user to describe what they want to cook
+// - Placeholder examples:
+//   - “A rich chocolate fudge cake for a birthday”
+//   - “An elite BBQ dish for six”
+//   - “A romantic vegan dinner with wow factor”
+
+// Step 2 — Dietary Restrictions
+// - Multi-select chips
+// - Options: Vegetarian, Vegan, Gluten-free, Dairy-free, Low-carb, Low-calorie, Paleo, Halal, Kosher, No restrictions
+
+// Step 3 — Time Available
+// - Slider: 5–120 minutes
+// - Live label changes:
+//   - 15 min = “Quick win”
+//   - 45 min = “Weeknight dinner”
+//   - 90 min = “Take your time”
+//   - 120 min = “No time limit — chef’s adventure”
+
+// Step 4 — Ambition Level
+// - Slider: 1–5
+// - Labels:
+//   - 1 = Just need something edible
+//   - 3 = Confident cook
+//   - 5 = Michelin star effort
+
+// Step 5 — Kitchen Equipment
+// - Multi-select chips or icon buttons
+// - Options: Stovetop, Oven, Microwave, Air Fryer, Grill, Slow Cooker, Pressure Cooker, Blender, Stand Mixer, Cast Iron, Pizza Oven, BBQ, Kamado, Just the basics
+
+// Step 6 — Optional Enhancements
+// - Multi-select checkboxes or chips
+// - Options: Wine pairing, Side dish suggestion, Dessert to match, Presentation tips, Batch/prep suggestions, Make it restaurant-worthy
+
+
+// 3. FINAL PAYLOAD STRUCTURE:
+{
+  intent: "A romantic vegan dinner with wow factor",
+  dietary: ["Vegan", "Dairy-free"],
+  time: 90,
+  ambition: 5,
+  equipment: ["Oven", "Blender"],
+  extras: ["Wine pairing", "Side dish suggestion", "Make it restaurant-worthy"]
+}
+// On submission, send this payload to chefPrompt2.ts
+
+
+// 4. UI/UX STYLING:
+
+// - Use Tailwind CSS with @headlessui/react or Radix UI
+// - Full-width mobile-first layout with large tap targets (min 48px height)
+// - Floating progress indicator (e.g. step dots or numeric tracker)
+// - Add padding, margin, and animation for smooth transitions
+// - Use visually polished fonts (Inter, Space Grotesk, etc.)
+// - Color scheme: soft neutrals, dopamine coral/teal accents
+// - CTA buttons should have hover/tap feedback and accessibility tags
+
+
+// 5. ACCESSIBILITY & UX POLISH:
+// - aria-labels for all form inputs
+// - Block submission until required fields are complete
+// - Support keyboard navigation and swipe gestures (optional)
+// - Validate time slider and free-text intent before continuing
+
+// DELIVERABLE:
+// A beautifully responsive, emotionally engaging quiz experience that gives the AI Chef a clear creative brief to output a bespoke recipe using Prompt 2.
