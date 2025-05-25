@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 210 24% 16%; /* #2C3E50 */
+  --muted: 210 11% 98%; /* #F8F9FA */
+  --muted-foreground: 210 6% 50%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 210 24% 16%;
+  --card: 0 0% 100%;
+  --card-foreground: 210 24% 16%;
+  --border: 210 12% 90%;
+  --input: 210 12% 90%;
+  --primary: 14 100% 60%; /* #FF6B35 */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 147 50% 36%; /* #2E8B57 */
+  --secondary-foreground: 0 0% 100%;
+  --accent: 51 100% 50%; /* #FFD700 */
+  --accent-foreground: 210 24% 16%;
+  --destructive: 0 72% 51%; /* #E74C3C */
+  --destructive-foreground: 0 0% 100%;
+  --success: 134 61% 41%; /* #27AE60 */
+  --warning: 36 84% 50%; /* #F39C12 */
+  --ring: 210 24% 16%;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: 210 24% 16%;
+  --foreground: 0 0% 98%;
+  --muted: 210 20% 20%;
+  --muted-foreground: 210 10% 70%;
+  --popover: 210 24% 16%;
+  --popover-foreground: 0 0% 98%;
+  --card: 210 24% 16%;
+  --card-foreground: 0 0% 98%;
+  --border: 210 20% 25%;
+  --input: 210 20% 25%;
+  --primary: 14 100% 60%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 147 50% 36%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 51 100% 50%;
+  --accent-foreground: 210 24% 16%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --ring: 210 10% 70%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-inter antialiased bg-background text-foreground;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-playfair;
+  }
+}
+
+@layer components {
+  .font-inter {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .font-playfair {
+    font-family: 'Playfair Display', serif;
+  }
+
+  .swipe-container {
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .swipe-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .recipe-card {
+    scroll-snap-align: center;
+    flex: 0 0 280px;
+  }
+
+  .gradient-overlay {
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%);
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 2s infinite;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
