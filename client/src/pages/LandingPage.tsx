@@ -95,9 +95,12 @@ export default function LandingPage() {
   });
 
   const handleStartCooking = () => {
+    console.log("Button clicked! User:", user);
     if (user?.user) {
+      console.log("User logged in, navigating to /app");
       navigate("/app");
     } else {
+      console.log("User not logged in, showing auth modal");
       setAuthMode("signup");
       setShowAuthModal(true);
     }
