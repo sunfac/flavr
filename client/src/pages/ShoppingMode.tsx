@@ -2,8 +2,11 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Clock, Utensils } from "lucide-react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import GlobalHeader from "@/components/GlobalHeader";
+import GlobalFooter from "@/components/GlobalFooter";
+import GlobalNavigation from "@/components/GlobalNavigation";
+import SettingsPanel from "@/components/SettingsPanel";
+import UserMenu from "@/components/UserMenu";
 import SlideQuizShell from "@/components/SlideQuizShell";
 import TinderRecipeCards from "@/components/TinderRecipeCards";
 import { shoppingQuestions } from "@/config/shoppingQuestions";
@@ -24,6 +27,9 @@ export default function ShoppingMode() {
   const [isLoading, setIsLoading] = useState(false);
   const [showGate, setShowGate] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showNavigation, setShowNavigation] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const { canGenerateRecipe } = useFlavrGate();
 
@@ -231,8 +237,12 @@ export default function ShoppingMode() {
 
   return (
     <div className="min-h-screen">
-      {/* Clean layout - no duplicate navigation when in quiz or suggestions mode */}
-      {currentStep === "recipe" && <Header currentMode="shopping" />}
+      {/* Consistent header across all modes */}
+      <GlobalHeader 
+        onMenuClick={() => setShowNavigation(true)}
+        onSettingsClick={() => setShowSettings(true)}
+        onUserClick={() => setShowUserMenu(true)}
+      />
       
       <main>
         {currentStep === "quiz" && (
@@ -281,8 +291,21 @@ export default function ShoppingMode() {
         </div>
       )}
 
-      {/* Only show footer on recipe view to match landing page structure */}
-      {currentStep === "recipe" && <Footer currentMode="shopping" />}
+      {/* Consistent footer across all modes */}
+      <GlobalFooter currentMode="shopping" />
+
+      {/* Navigation overlays */}
+      {showNavigation && (
+        <GlobalNavigation onClose={() => setShowNavigation(false)} />
+      )}
+      
+      {showSettings && (
+        <SettingsPanel onClose={() => setShowSettings(false)} />
+      )}
+      
+      {showUserMenu && (
+        <UserMenu onClose={() => setShowUserMenu(false)} />
+      )}
 
       <AuthModal
         isOpen={showAuthModal}
