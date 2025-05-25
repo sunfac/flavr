@@ -118,7 +118,21 @@ export default function ModeSelection() {
         </div>
       </main>
 
-      <Footer />
+      {/* Consistent footer across all modes */}
+      <GlobalFooter />
+
+      {/* Navigation overlays */}
+      {showNavigation && (
+        <GlobalNavigation onClose={() => setShowNavigation(false)} />
+      )}
+      
+      {showSettings && (
+        <SettingsPanel onClose={() => setShowSettings(false)} />
+      )}
+      
+      {showUserMenu && (
+        <UserMenu onClose={() => setShowUserMenu(false)} />
+      )}
     </div>
   );
 }
