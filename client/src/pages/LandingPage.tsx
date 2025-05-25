@@ -12,13 +12,34 @@ import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 import FlavrFullLogo from "@assets/935FA3C5-A4E6-4FA8-A5E7-772FD650688C.png";
 import HeroFoodImage from "@assets/3D8C8E94-9BC0-4F6A-95F2-8951941A709B.png";
 import { motion } from "framer-motion";
-import { ChefHat, Sparkles, Timer, Star, ArrowRight, Menu, Settings, User } from "lucide-react";
+import { ChefHat, Sparkles, Timer, Star, ArrowRight, Menu, Settings, User, ChevronUp } from "lucide-react";
 
 export default function LandingPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("signup");
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  // Handle scroll to show/hide scroll-to-top button
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 500);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   // User query
   const { data: user, isLoading: userLoading } = useQuery({
@@ -150,8 +171,40 @@ export default function LandingPage() {
         </div>
       </header>
 
+      {/* Navigation Bar */}
+      <nav className="absolute top-20 left-0 right-0 z-40 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-full px-6 py-3 flex justify-center space-x-8">
+            <button 
+              onClick={() => scrollToSection('hero')}
+              className="text-white/80 hover:text-white transition-colors duration-300 text-sm font-medium"
+            >
+              Home
+            </button>
+            <button 
+              onClick={() => scrollToSection('features')}
+              className="text-white/80 hover:text-white transition-colors duration-300 text-sm font-medium"
+            >
+              Features
+            </button>
+            <button 
+              onClick={() => scrollToSection('demo')}
+              className="text-white/80 hover:text-white transition-colors duration-300 text-sm font-medium"
+            >
+              Demo
+            </button>
+            <button 
+              onClick={() => scrollToSection('pricing')}
+              className="text-white/80 hover:text-white transition-colors duration-300 text-sm font-medium"
+            >
+              Flavr+
+            </button>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section - Full Viewport */}
-      <section className="min-h-screen flex flex-col items-center justify-center text-center px-6 relative z-10 pt-20">
+      <section id="hero" className="min-h-screen flex flex-col items-center justify-center text-center px-6 relative z-10 pt-20">
         {/* Large Premium Logo */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -205,7 +258,7 @@ export default function LandingPage() {
       </section>
 
       {/* Feature Section */}
-      <section id="features" className="py-24 px-6 relative z-10">
+      <section id="features" className="py-16 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -256,7 +309,7 @@ export default function LandingPage() {
       </section>
 
       {/* Live Recipe Demo Section */}
-      <section id="demo" className="py-24 px-6 relative z-10">
+      <section id="demo" className="py-16 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -405,6 +458,19 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0 }}
+          onClick={scrollToTop}
+          className="fixed bottom-8 right-8 z-50 bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full shadow-2xl hover:shadow-orange-500/25 transition-all duration-300 hover:scale-110"
+        >
+          <ChevronUp className="w-6 h-6" />
+        </motion.button>
+      )}
     </div>
   );
 }
