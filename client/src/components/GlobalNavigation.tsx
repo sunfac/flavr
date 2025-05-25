@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Home, ChefHat, BookOpen, Star } from "lucide-react";
+import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 
 interface GlobalNavigationProps {
   onClose?: () => void;
@@ -102,7 +103,7 @@ export default function GlobalNavigation({ onClose }: GlobalNavigationProps) {
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 flex items-center justify-center">
                     <img 
-                      src="/attached_assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png" 
+                      src={FlavrLogo} 
                       alt="Flavr Logo"
                       className="w-8 h-8 object-contain drop-shadow-lg"
                     />

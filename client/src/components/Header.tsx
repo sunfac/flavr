@@ -6,6 +6,7 @@ import SettingsPanel from "./SettingsPanel";
 import GlobalNavigation from "./GlobalNavigation";
 import { motion } from "framer-motion";
 import { ChefHat, Settings, User } from "lucide-react";
+import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 
 interface HeaderProps {
   currentMode?: "shopping" | "fridge" | "chef";
@@ -43,7 +44,7 @@ export default function Header({ currentMode }: HeaderProps) {
               >
                 <div className="w-12 h-12 flex items-center justify-center">
                   <img 
-                    src="/attached_assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png" 
+                    src={FlavrLogo} 
                     alt="Flavr Logo"
                     className="w-10 h-10 object-contain drop-shadow-lg"
                   />

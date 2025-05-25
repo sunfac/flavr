@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
+import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 
 export default function LandingPage() {
   const [, navigate] = useLocation();
@@ -100,7 +101,7 @@ export default function LandingPage() {
             <div className="relative group mx-auto mb-8 w-fit">
               <div className="w-32 h-32 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-500 animate-bounce-gentle">
                 <img 
-                  src="/attached_assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png" 
+                  src={FlavrLogo} 
                   alt="Flavr Logo"
                   className="w-full h-full object-contain drop-shadow-2xl"
                 />
