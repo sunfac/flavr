@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import InputQuizFridge from "@/components/InputQuizFridge";
+import FridgeQuiz from "@/components/FridgeQuiz";
 import RecipeCard from "@/components/RecipeCard";
 import ChatBot from "@/components/ChatBot";
 import Loading from "@/components/Loading";
@@ -66,9 +66,8 @@ export default function FridgeMode() {
       
       <main className="pb-20">
         {currentStep === "quiz" && (
-          <InputQuizFridge
+          <FridgeQuiz
             onComplete={handleQuizComplete}
-            onRecipeIdeas={setRecipeIdeas}
             onLoading={setIsLoading}
           />
         )}

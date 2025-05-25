@@ -1,0 +1,91 @@
+// Replit Prompt — Build Mobile-First Slide-Transition Quiz for Fridge to Fork Mode in Flavr
+
+// OBJECTIVE:
+// Create a visually polished, mobile-first, slide-based quiz for Flavr’s Fridge to Fork Mode.
+// This quiz should focus on ingredient-first cooking and match the UX consistency of Shopping Mode, using animations, intuitive inputs, and clean transitions.
+
+// 1. COMPONENT STRUCTURE:
+// - Create <FridgeQuiz /> as a multi-step quiz component.
+// - Use internal step index or conditional rendering to show one question at a time.
+// - Use Framer Motion or Headless UI for slide transitions between steps.
+// - Track answers in local state or context.
+// - Add “Back” / “Next” buttons and only display “Submit” on the final step.
+
+
+// 2. QUESTIONS + INPUT TYPES:
+
+// Step 1 — Ingredients You Have
+// - Text input that allows comma-separated entry.
+// - Include an “Add” button to push each ingredient into a chip list.
+// - Render added items as chips with remove option.
+// - Require at least 3 items to continue.
+
+// Step 2 — Food Vibe
+// Dropdown with options (same as Shopping Mode):
+// - Comfort food
+// - Fresh & healthy
+// - Decadent treat
+// - Something exciting
+// - Minimal effort
+// - Foodie moment
+// - Surprise me
+
+// Step 3 — Preferred Cuisines (optional)
+// - Multi-select tag input
+// - Examples: Italian, Indian, Thai, Greek, French, Korean, Fusion, Other
+
+// Step 4 — Time Available
+// - Slider: 5–90 minutes
+// - Live label changes:
+//   - 15 = “Fast fix”
+//   - 45 = “Dinner mode”
+//   - 90 = “I’ll use it all”
+//   - Maxed = “No time limit”
+
+// Step 5 — Dietary Preferences
+// - Multi-select chip input
+// - Options: Vegetarian, Vegan, Gluten-free, Dairy-free, Low-carb, Low-calorie, Paleo, Halal, Kosher, No restrictions
+
+// Step 6 — Available Equipment
+// - Multi-select chips or icons
+// - Options: Stovetop, Oven, Microwave, Air Fryer, Grill, Slow Cooker, Pressure Cooker, Blender, Rice Cooker, BBQ, Kamado, Pizza Oven, Just the basics
+
+// Step 7 — Ambition Level
+// - Slider 1–5
+// - Labels:
+//   - 1 = Just get fed
+//   - 3 = Confident home cook
+//   - 5 = Michelin star effort
+
+
+// 3. FINAL OUTPUT PAYLOAD:
+{
+  ingredients: ["eggs", "spinach", "feta"],
+  vibe: "Fresh & healthy",
+  cuisines: ["Greek", "Italian"],
+  time: 45,
+  dietary: ["Low-carb", "Vegetarian"],
+  equipment: ["Oven", "Stovetop"],
+  ambition: 4
+}
+// On submit, pass this payload to fridgePrompt1.ts
+
+
+// 4. STYLING & INTERACTION:
+
+// - Use Tailwind CSS + Radix UI or Headless UI
+// - Add slide transitions between steps (Framer Motion preferred)
+// - Full mobile width, tap-friendly targets (48px min height)
+// - Animated buttons with hover/tap states
+// - Floating progress indicator (dots or steps)
+// - Font: Inter or Space Grotesk
+// - Use modern color palette: off-white background, soft gradients, coral/teal highlights
+
+
+// 5. ACCESSIBILITY & POLISH:
+// - aria-labels for all inputs
+// - Validate ingredients list length before proceeding
+// - Ensure keyboard and mobile gesture support
+
+// DELIVERABLE:
+// A fully responsive, swipeable, and delightful quiz that builds an ingredient-driven cooking profile to power Fridge Mode’s recipe idea generation (Prompt 1).
