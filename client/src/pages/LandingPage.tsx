@@ -96,7 +96,7 @@ export default function LandingPage() {
 
   const handleStartCooking = () => {
     if (user?.user) {
-      navigate("/shopping");
+      navigate("/app");
     } else {
       setAuthMode("signup");
       setShowAuthModal(true);
