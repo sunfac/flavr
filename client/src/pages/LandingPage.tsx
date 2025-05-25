@@ -103,12 +103,22 @@ export default function LandingPage() {
               </div>
               <div className="absolute inset-0 gradient-primary rounded-3xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
             </div>
-            <h1 className="text-5xl md:text-7xl font-playfair font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-6 leading-tight">
+            <h1 className="text-5xl md:text-7xl font-bold text-display leading-tight mb-6" style={{
+              background: 'var(--gradient-dopamine)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}>
               Welcome to Flavr
             </h1>
             <p className="text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto leading-relaxed font-medium">
               AI-powered recipe discovery that adapts to your mood, ingredients, and cooking style. 
-              <span className="block mt-2 bg-gradient-to-r from-orange-500 to-emerald-500 bg-clip-text text-transparent font-semibold">
+              <span className="block mt-2 font-bold text-2xl" style={{
+                background: 'var(--gradient-primary)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>
                 Turn any craving into a perfect meal.
               </span>
             </p>
@@ -166,10 +176,12 @@ export default function LandingPage() {
           <div className="mb-16">
             <Button
               onClick={() => navigate("/app")}
-              className="h-16 px-12 text-xl font-bold gradient-primary text-white btn-modern shadow-2xl hover:shadow-orange-300/50 transition-all duration-500 hover:scale-105 animate-pulse-gentle"
+              className="h-20 px-16 text-2xl font-bold text-white shadow-2xl transition-all duration-500 hover:scale-110 animate-pulse-gentle relative overflow-hidden group"
+              style={{ background: 'var(--gradient-dopamine)' }}
             >
-              <i className="fas fa-magic mr-3 text-2xl"></i>
-              Ask the AI Chef
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+              <i className="fas fa-sparkles mr-4 text-3xl group-hover:rotate-12 transition-transform duration-300"></i>
+              <span className="relative z-10 tracking-wide">Ask the AI Chef</span>
             </Button>
           </div>
         </div>

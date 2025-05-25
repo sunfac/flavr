@@ -52,10 +52,15 @@ export default function ModeSelection() {
       <main className="container mx-auto px-6 py-8 relative z-10 pb-24">
         {/* Hero Section */}
         <div className="text-center mb-12 animate-fade-in">
-          <h1 className="text-4xl md:text-6xl font-playfair font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4 leading-tight">
+          <h1 className="text-4xl md:text-6xl font-bold text-display leading-tight mb-4" style={{
+            background: 'var(--gradient-dopamine)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
             Choose Your Mode
           </h1>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed font-medium">
             Select how you'd like to create your next amazing meal with AI
           </p>
         </div>
@@ -86,13 +91,15 @@ export default function ModeSelection() {
                   {mode.description}
                 </p>
                 <Button 
-                  className={`w-full h-12 ${mode.gradient} text-white font-semibold btn-modern shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105`}
+                  className="w-full h-14 text-white font-bold shadow-xl transition-all duration-500 hover:scale-105 relative overflow-hidden group"
+                  style={{ background: `var(--gradient-${mode.id === 'shopping' ? 'primary' : mode.id === 'fridge' ? 'secondary' : 'accent'})` }}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleModeSelect(mode.id);
                   }}
                 >
-                  Start {mode.title}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                  <span className="relative z-10 tracking-wide text-lg">Start {mode.title}</span>
                 </Button>
               </CardContent>
             </Card>
