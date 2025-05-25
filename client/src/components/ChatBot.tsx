@@ -167,7 +167,7 @@ export default function ChatBot({
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    handleSend(suggestion);
+    return () => handleSend(suggestion);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -278,7 +278,7 @@ export default function ChatBot({
                     key={index}
                     variant="secondary"
                     className="cursor-pointer glass border border-white/20 hover:scale-105 transition-all duration-300 px-3 py-2 text-sm"
-                    onClick={() => handleSuggestionClick(chip.text)}
+                    onClick={handleSuggestionClick(chip.text)}
                   >
                     <span className="mr-2">{chip.icon}</span>
                     {chip.text}

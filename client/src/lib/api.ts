@@ -9,6 +9,19 @@ export interface RecipeGenerationRequest {
 
 export interface ChatRequest {
   message: string;
+  currentRecipe?: {
+    title: string;
+    description: string;
+    ingredients: string[];
+    instructions: string[];
+    cookTime?: number;
+    servings?: number;
+    difficulty?: string;
+    cuisine?: string;
+    imageUrl?: string;
+    shoppingList?: string[];
+  };
+  mode?: string;
 }
 
 export interface User {

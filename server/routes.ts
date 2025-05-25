@@ -181,11 +181,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Chat routes
+  // Enhanced Chat routes with recipe context
   app.post("/api/chat", requireAuth, async (req, res) => {
     try {
-      const { message } = req.body;
+      const { message, currentRecipe, mode } = req.body;
       const userId = req.session!.userId;
+
+      // Build context-aware system prompt
+      let systemPrompt = "You are a friendly, creative private chef who helps users adjust, enhance, and understand their AI-generated recipes. Provide cooking advice, substitutions, and modifications. Keep responses concise and practical.";
+      
+      if (mode) {
+        const modeContext = {
+          shopping: "The user is in shopping mode, planning meals and creating shopping lists.",
+          fridge: "The user is in fridge-to-fork mode, working with ingredients they already have.",
+          chef: "The user is in chef assist mode, looking for expert culinary guidance."
+        };
+        systemPrompt += ` ${modeContext[mode as keyof typeof modeContext] || ''}`;
+      }
+
+      if (currentRecipe) {
+        systemPrompt += ` The user is currently working with this recipe: "${currentRecipe.title}". Ingredients: ${currentRecipe.ingredients?.join(', ')}. Instructions: ${currentRecipe.instructions?.join(' ')}`;
+      }
 
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const response = await openai.chat.completions.create({
@@ -193,13 +209,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         messages: [
           {
             role: "system",
-            content: "You are a helpful chef assistant. Provide cooking advice, substitutions, and modifications. Keep responses concise and practical."
+            content: systemPrompt
           },
           { role: "user", content: message }
         ],
+        response_format: { type: "json_object" },
       });
 
-      const botResponse = response.choices[0].message.content!;
+      const aiResponse = JSON.parse(response.choices[0].message.content!);
+      const botResponse = aiResponse.response || response.choices[0].message.content!;
+      
+      // Check if AI provided an updated recipe
+      let updatedRecipe = null;
+      if (aiResponse.updatedRecipe && currentRecipe) {
+        updatedRecipe = {
+          ...currentRecipe,
+          ...aiResponse.updatedRecipe
+        };
+      }
       
       // Save chat message
       await storage.createChatMessage({
@@ -208,7 +235,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         response: botResponse,
       });
 
-      res.json({ response: botResponse });
+      res.json({ 
+        response: botResponse,
+        updatedRecipe
+      });
     } catch (error: any) {
       res.status(500).json({ message: "Failed to process chat: " + error.message });
     }
