@@ -210,16 +210,16 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="relative group mb-16 mt-8"
+          className="relative group mb-8 mt-16"
         >
-          <div className="w-72 h-72 md:w-96 md:h-96 mx-auto mb-12">
+          <div className="w-80 h-80 md:w-[28rem] md:h-[28rem] mx-auto mb-6">
             <img 
               src={FlavrFullLogo} 
               alt="Flavr - Your Private Chef"
               className="w-full h-full object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500"
             />
           </div>
-          <div className="absolute inset-0 rounded-full blur-3xl opacity-30 bg-orange-500 group-hover:opacity-50 transition-opacity duration-500"></div>
+          <div className="absolute inset-0 rounded-full blur-3xl opacity-10 bg-orange-400 group-hover:opacity-20 transition-opacity duration-500"></div>
         </motion.div>
 
         {/* Hero Headlines */}
@@ -227,7 +227,7 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-12"
+          className="mb-10"
         >
           <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight mb-6">
             Your Private Chef.
