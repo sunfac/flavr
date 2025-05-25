@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -334,77 +335,175 @@ export default function SlideQuizShell({
     }
   };
 
+  const slideVariants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 300 : -300,
+      opacity: 0,
+    }),
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction: number) => ({
+      zIndex: 0,
+      x: direction < 0 ? 300 : -300,
+      opacity: 0,
+    }),
+  };
+
+  const [direction, setDirection] = useState(0);
+
+  const handleNextWithAnimation = () => {
+    setDirection(1);
+    handleNext();
+  };
+
+  const handleBackWithAnimation = () => {
+    setDirection(-1);
+    handleBack();
+  };
+
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${config.gradient} relative`}>
-      {/* Progress Header */}
-      <div className="sticky top-0 z-10 glass backdrop-blur-xl border-b border-white/20 p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-sm font-medium text-slate-600">
+    <div className={`min-h-screen bg-gradient-to-br ${config.gradient} relative overflow-hidden`}>
+      {/* Modern Progress Header */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="sticky top-0 z-10 glass backdrop-blur-xl border-b border-white/20 p-4"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <motion.div 
+            key={currentStep}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-sm font-semibold text-slate-700"
+          >
             Step {currentStep + 1} of {totalSteps}
-          </div>
-          <div className="text-sm font-medium text-slate-600">
+          </motion.div>
+          <motion.div 
+            key={progress}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-sm font-semibold text-slate-700"
+          >
             {Math.round(progress)}%
-          </div>
+          </motion.div>
         </div>
-        <Progress value={progress} className="h-2" />
-      </div>
+        <div className="relative h-2 bg-white/30 rounded-full overflow-hidden">
+          <motion.div
+            className="absolute top-0 left-0 h-full rounded-full"
+            style={{ background: config.buttonGradient }}
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          />
+        </div>
+      </motion.div>
 
-      {/* Question Content */}
-      <div className="p-6">
+      {/* Animated Question Content */}
+      <div className="p-6 relative">
         <div className="max-w-2xl mx-auto">
-          {/* Question Header */}
-          <div className="text-center mb-8 animate-fade-in">
-            <h1 className="text-3xl md:text-4xl font-bold text-display mb-3" style={{
-              background: config.textGradient,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
-            }}>
-              {currentQuestion.label}
-            </h1>
-            {currentQuestion.subtitle && (
-              <p className="text-lg text-slate-600">
-                {currentQuestion.subtitle}
-              </p>
-            )}
-          </div>
-
-          {/* Question Input */}
-          <div className="mb-8 animate-scale-in">
-            {renderInput()}
-          </div>
-
-          {/* Navigation Buttons */}
-          <div className="flex gap-4 pt-6">
-            {currentStep > 0 && (
-              <Button
-                variant="outline"
-                onClick={handleBack}
-                className="flex-1 h-14 text-lg glass border-white/20"
-              >
-                <i className="fas fa-arrow-left mr-2"></i>
-                Back
-              </Button>
-            )}
-            <Button
-              onClick={handleNext}
-              disabled={!isStepValid()}
-              className="flex-1 h-14 text-lg font-bold text-white shadow-xl transition-all duration-300 hover:scale-105"
-              style={{ background: config.buttonGradient }}
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div
+              key={currentStep}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.2 },
+              }}
+              className="space-y-8"
             >
-              {currentStep === totalSteps - 1 ? (
-                <>
-                  <i className={`fas fa-${theme === 'chef' ? 'chef-hat' : 'magic'} mr-2`}></i>
-                  {theme === 'chef' ? 'Create Recipe' : 'Generate Ideas'}
-                </>
-              ) : (
-                <>
-                  Next
-                  <i className="fas fa-arrow-right ml-2"></i>
-                </>
-              )}
-            </Button>
-          </div>
+              {/* Question Header */}
+              <div className="text-center space-y-4">
+                <motion.h1 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-3xl md:text-4xl font-bold text-display mb-3" 
+                  style={{
+                    background: config.textGradient,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}
+                >
+                  {currentQuestion.label}
+                </motion.h1>
+                {currentQuestion.subtitle && (
+                  <motion.p 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="text-lg text-slate-600"
+                  >
+                    {currentQuestion.subtitle}
+                  </motion.p>
+                )}
+              </div>
+
+              {/* Question Input */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                {renderInput()}
+              </motion.div>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Modern Navigation Buttons */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="flex gap-4 pt-8"
+          >
+            {currentStep > 0 && (
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex-1"
+              >
+                <Button
+                  variant="outline"
+                  onClick={handleBackWithAnimation}
+                  className="w-full h-14 text-lg glass border-white/30 bg-white/10 hover:bg-white/20 transition-all duration-300"
+                >
+                  ← Back
+                </Button>
+              </motion.div>
+            )}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex-1"
+            >
+              <Button
+                onClick={handleNextWithAnimation}
+                disabled={!isStepValid()}
+                className="w-full h-14 text-lg font-bold text-white shadow-xl transition-all duration-300 disabled:opacity-50 disabled:scale-100"
+                style={{ background: config.buttonGradient }}
+              >
+                {currentStep === totalSteps - 1 ? (
+                  <>
+                    <span className="mr-2">{theme === 'chef' ? '👨‍🍳' : '✨'}</span>
+                    {theme === 'chef' ? 'Create Recipe' : 'Generate Ideas'}
+                  </>
+                ) : (
+                  <>
+                    Next
+                    <span className="ml-2">→</span>
+                  </>
+                )}
+              </Button>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </div>
