@@ -125,7 +125,7 @@ export default function LandingPage() {
           </Button>
 
           {/* Center: Chef Hat Logo */}
-          <div className="flex items-center">
+          <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
             <img src={FlavrLogo} alt="Flavr" className="w-10 h-10" />
           </div>
 
@@ -348,33 +348,71 @@ export default function LandingPage() {
       </section>
 
       {/* Flavr+ CTA Section */}
-      <section id="pricing" className="py-24 px-6 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
+      <section id="pricing" className="py-32 px-6 relative z-10">
+        <div className="max-w-5xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="bg-gradient-to-r from-orange-600 to-red-600 rounded-3xl p-12 md:p-16 relative overflow-hidden"
+            className="relative"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-3xl"></div>
-            <div className="relative z-10">
-              <div className="flex items-center justify-center mb-6">
-                <img src={FlavrLogo} alt="Flavr+" className="w-16 h-16 mr-4" />
-                <h2 className="text-4xl md:text-5xl font-bold text-white">
-                  Flavr+
-                </h2>
+            {/* Premium gradient card with enhanced styling */}
+            <div className="bg-gradient-to-br from-orange-500 via-red-500 to-orange-600 rounded-3xl p-1 shadow-2xl">
+              <div className="bg-gradient-to-br from-orange-600/95 to-red-600/95 backdrop-blur-sm rounded-3xl p-12 md:p-16 text-center relative overflow-hidden">
+                {/* Decorative elements */}
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent rounded-3xl"></div>
+                <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/5 rounded-full blur-2xl"></div>
+                <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-orange-300/10 rounded-full blur-2xl"></div>
+                
+                <div className="relative z-10">
+                  {/* Logo and title */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                    className="flex items-center justify-center mb-8"
+                  >
+                    <img src={FlavrLogo} alt="Flavr+" className="w-20 h-20 mr-4 drop-shadow-lg" />
+                    <h2 className="text-5xl md:text-6xl font-bold text-white drop-shadow-lg">
+                      Flavr+
+                    </h2>
+                  </motion.div>
+                  
+                  {/* Headline */}
+                  <motion.h3
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.3 }}
+                    className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight"
+                  >
+                    Take Your Kitchen to the Next Level
+                  </motion.h3>
+                  
+                  {/* Description */}
+                  <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.4 }}
+                    className="text-xl text-orange-50 mb-10 max-w-3xl mx-auto leading-relaxed"
+                  >
+                    Unlock unlimited recipes, advanced dietary filtering, wine pairings, personalized meal plans, and exclusive chef techniques.
+                  </motion.p>
+                  
+                  {/* CTA Button */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.5 }}
+                  >
+                    <Button 
+                      className="px-12 py-6 text-xl font-bold bg-white text-orange-600 hover:bg-orange-50 shadow-2xl hover:shadow-white/25 hover:scale-105 transition-all duration-300 rounded-full border-2 border-white/20"
+                    >
+                      Upgrade to Flavr+ 
+                      <Star className="ml-3 w-6 h-6 fill-current" />
+                    </Button>
+                  </motion.div>
+                </div>
               </div>
-              <h3 className="text-2xl md:text-3xl font-bold text-white mb-6">
-                Take Your Kitchen to the Next Level
-              </h3>
-              <p className="text-xl text-orange-100 mb-8 max-w-2xl mx-auto">
-                Unlock premium features: unlimited recipes, advanced dietary filtering, wine pairings, and more.
-              </p>
-              <Button 
-                className="px-8 py-4 text-lg font-semibold bg-white text-orange-600 hover:bg-orange-50 shadow-2xl hover:scale-105 transition-all duration-300 rounded-full"
-              >
-                Upgrade to Flavr+ <Star className="ml-2 w-5 h-5" />
-              </Button>
             </div>
           </motion.div>
         </div>
