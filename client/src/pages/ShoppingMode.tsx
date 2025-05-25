@@ -112,18 +112,56 @@ export default function ShoppingMode() {
     }
   };
 
-  const handleRecipeSelect = (recipe: any) => {
+  const handleRecipeSelect = async (recipe: any) => {
     if (!isAuthenticated) {
-      // Show login prompt for unauthenticated users
       navigate("/");
       return;
     }
-    if (!canGenerateRecipe(user.user)) {
+    if (!canGenerateRecipe(user?.user)) {
       setShowGate(true);
       return;
     }
-    setSelectedRecipe(recipe);
-    setCurrentStep("recipe");
+
+    // Generate full recipe immediately when selected
+    try {
+      setIsLoading(true);
+      
+      const fullRecipeResponse = await api.generateFullRecipe({
+        selectedRecipe: recipe,
+        mode: "shopping",
+        quizData: quizData,
+        prompt: `Generate a complete recipe for "${recipe.title}" based on shopping mode preferences: ${JSON.stringify(quizData)}. Include title, description, ingredients list, step-by-step instructions, cook time, servings, and difficulty level.`
+      });
+
+      setSelectedRecipe(fullRecipeResponse.recipe);
+      setCurrentStep("recipe");
+    } catch (error) {
+      console.error("Failed to generate full recipe:", error);
+      // Fallback to basic recipe structure
+      setSelectedRecipe({
+        ...recipe,
+        ingredients: [
+          "Main protein or base ingredient",
+          "Fresh vegetables or sides", 
+          "Seasonings and spices",
+          "Cooking oil or butter",
+          "Optional garnish"
+        ],
+        instructions: [
+          "Prepare all ingredients and equipment",
+          "Cook the main component using your preferred method",
+          "Add seasonings and complementary ingredients", 
+          "Combine everything and cook until done",
+          "Serve hot and enjoy your creation"
+        ],
+        cookTime: 30,
+        servings: 4,
+        difficulty: "Medium"
+      });
+      setCurrentStep("recipe");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleNewSearch = () => {

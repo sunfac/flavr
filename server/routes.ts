@@ -148,10 +148,32 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
 
       const { selectedRecipe, mode, quizData, prompt } = req.body;
 
+      // Build enhanced prompt for complete recipe generation
+      const enhancedPrompt = `Generate a complete, detailed recipe for "${selectedRecipe.title}" based on these preferences:
+
+Mode: ${mode}
+Quiz Data: ${JSON.stringify(quizData)}
+Recipe Description: ${selectedRecipe.description}
+
+Return a JSON object with this exact structure:
+{
+  "title": "${selectedRecipe.title}",
+  "description": "${selectedRecipe.description}",
+  "ingredients": ["ingredient 1", "ingredient 2", "etc"],
+  "instructions": ["step 1", "step 2", "etc"],
+  "cookTime": 30,
+  "servings": 4,
+  "difficulty": "Medium",
+  "cuisine": "cuisine type",
+  "tips": "helpful cooking tips"
+}
+
+Make the ingredients specific with quantities and the instructions detailed and clear.`;
+
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
+        messages: [{ role: "user", content: enhancedPrompt }],
         response_format: { type: "json_object" },
       });
 
