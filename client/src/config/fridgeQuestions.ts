@@ -22,13 +22,13 @@ export const fridgeQuestions: QuestionConfig[] = [
     type: "cards",
     required: true,
     options: [
-      { value: "comfort", label: "Comfort food", icon: "🍲", desc: "Warm and cozy" },
-      { value: "fresh", label: "Fresh & healthy", icon: "🥗", desc: "Light and nutritious" },
-      { value: "decadent", label: "Decadent treat", icon: "🍰", desc: "Indulgent pleasure" },
-      { value: "exciting", label: "Something exciting", icon: "🌶️", desc: "Bold and adventurous" },
-      { value: "minimal", label: "Minimal effort", icon: "⚡", desc: "Quick and easy" },
-      { value: "foodie", label: "Foodie moment", icon: "👨‍🍳", desc: "Restaurant quality" },
-      { value: "surprise", label: "Surprise me", icon: "🎲", desc: "Let's discover together" }
+      { value: "comfort", label: "Comfort food", icon: "Home", desc: "Warm and cozy" },
+      { value: "fresh", label: "Fresh & healthy", icon: "Leaf", desc: "Light and nutritious" },
+      { value: "decadent", label: "Decadent treat", icon: "Crown", desc: "Indulgent pleasure" },
+      { value: "exciting", label: "Something exciting", icon: "Flame", desc: "Bold and adventurous" },
+      { value: "minimal", label: "Minimal effort", icon: "Zap", desc: "Quick and easy" },
+      { value: "foodie", label: "Foodie moment", icon: "ChefHat", desc: "Restaurant quality" },
+      { value: "surprise", label: "Surprise me", icon: "Shuffle", desc: "Let's discover together" }
     ]
   },
   {
