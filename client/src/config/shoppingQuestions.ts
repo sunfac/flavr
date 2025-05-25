@@ -8,10 +8,10 @@ export const shoppingQuestions: QuestionConfig[] = [
     type: "cards",
     required: true,
     options: [
-      { value: "comfort", label: "Comfort food", icon: "🍲", desc: "Warm and cozy vibes" },
-      { value: "healthy", label: "Fresh & healthy", icon: "🥗", desc: "Light and nutritious" },
-      { value: "indulgent", label: "Pure indulgence", icon: "🍰", desc: "Treat yourself" },
-      { value: "adventurous", label: "Something new", icon: "🌶️", desc: "Bold and exciting" },
+      { value: "comfort", label: "Comfort food", icon: "🛋️", desc: "Warm and cozy vibes" },
+      { value: "healthy", label: "Fresh & healthy", icon: "🌱", desc: "Light and nutritious" },
+      { value: "indulgent", label: "Pure indulgence", icon: "💎", desc: "Treat yourself" },
+      { value: "adventurous", label: "Something new", icon: "🎯", desc: "Bold and exciting" },
       { value: "quick", label: "Quick & easy", icon: "⚡", desc: "Minimal effort" },
       { value: "impressive", label: "Impress someone", icon: "✨", desc: "Show off your skills" },
       { value: "surprise", label: "Surprise me", icon: "🎲", desc: "Let's discover together" }

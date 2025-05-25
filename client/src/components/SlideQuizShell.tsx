@@ -167,73 +167,74 @@ export default function SlideQuizShell({
 
       case 'cards':
         return (
-          <div className="grid grid-cols-2 gap-4">
-            {currentQ.options?.map((option) => (
-              <motion.div
-                key={option.value}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Card 
-                  className={`cursor-pointer transition-all duration-300 border-2 ${
-                    currentAnswer === option.value 
-                      ? 'border-orange-400 bg-orange-500/10 shadow-lg shadow-orange-500/25' 
-                      : 'border-slate-600 bg-slate-800/50 hover:border-orange-400/50'
-                  }`}
-                  onClick={() => updateAnswer(currentQ.id, option.value)}
-                >
-                  <CardContent className="p-6 text-center">
-                    <div className="text-3xl mb-3">{option.icon}</div>
-                    <div className="text-white font-semibold text-lg">{option.label}</div>
-                    {option.desc && (
-                      <div className="text-slate-400 text-sm mt-2">{option.desc}</div>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        );
-
-      case 'equipment-grid':
-        return (
-          <div className="grid grid-cols-2 gap-3">
-            {currentQ.options?.map((option) => {
-              const isSelected = Array.isArray(currentAnswer) && currentAnswer.includes(option.value);
-              return (
+          <div className="w-full max-w-sm mx-auto">
+            <div className="grid grid-cols-2 gap-3">
+              {currentQ.options?.map((option) => (
                 <motion.div
                   key={option.value}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
                   <Card 
-                    className={`cursor-pointer transition-all duration-300 border-2 ${
-                      isSelected 
+                    className={`cursor-pointer transition-all duration-300 border-2 h-24 ${
+                      currentAnswer === option.value 
                         ? 'border-orange-400 bg-orange-500/10 shadow-lg shadow-orange-500/25' 
                         : 'border-slate-600 bg-slate-800/50 hover:border-orange-400/50'
                     }`}
-                    onClick={() => {
-                      const current = Array.isArray(currentAnswer) ? currentAnswer : [];
-                      const updated = isSelected 
-                        ? current.filter(v => v !== option.value)
-                        : [...current, option.value];
-                      updateAnswer(currentQ.id, updated);
-                    }}
+                    onClick={() => updateAnswer(currentQ.id, option.value)}
                   >
-                    <CardContent className="p-4 text-center">
-                      <div className="text-2xl mb-2">{option.icon}</div>
+                    <CardContent className="p-3 text-center h-full flex flex-col justify-center">
+                      <div className="text-xl mb-1">{option.icon}</div>
                       <div className="text-white font-medium text-sm">{option.label}</div>
                     </CardContent>
                   </Card>
                 </motion.div>
-              );
-            })}
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'equipment-grid':
+        return (
+          <div className="w-full max-w-sm mx-auto">
+            <div className="grid grid-cols-2 gap-3">
+              {currentQ.options?.map((option) => {
+                const isSelected = Array.isArray(currentAnswer) && currentAnswer.includes(option.value);
+                return (
+                  <motion.div
+                    key={option.value}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Card 
+                      className={`cursor-pointer transition-all duration-300 border-2 h-20 ${
+                        isSelected 
+                          ? 'border-orange-400 bg-orange-500/10 shadow-lg shadow-orange-500/25' 
+                          : 'border-slate-600 bg-slate-800/50 hover:border-orange-400/50'
+                      }`}
+                      onClick={() => {
+                        const current = Array.isArray(currentAnswer) ? currentAnswer : [];
+                        const updated = isSelected 
+                          ? current.filter(v => v !== option.value)
+                          : [...current, option.value];
+                        updateAnswer(currentQ.id, updated);
+                      }}
+                    >
+                      <CardContent className="p-2 text-center h-full flex flex-col justify-center">
+                        <div className="text-lg mb-1">{option.icon}</div>
+                        <div className="text-white font-medium text-xs leading-tight">{option.label}</div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
         );
 
       case 'multi-select':
         return (
-          <div className="space-y-3">
+          <div className="w-full max-w-sm mx-auto space-y-2 max-h-64 overflow-y-auto">
             {currentQ.options?.map((option) => {
               const isSelected = Array.isArray(currentAnswer) && currentAnswer.includes(option.value);
               return (
@@ -256,15 +257,15 @@ export default function SlideQuizShell({
                       updateAnswer(currentQ.id, updated);
                     }}
                   >
-                    <CardContent className="p-4 flex items-center space-x-3">
-                      <div className="text-xl">{option.icon}</div>
+                    <CardContent className="p-3 flex items-center space-x-3">
+                      <div className="text-lg">{option.icon}</div>
                       <div className="flex-1">
-                        <div className="text-white font-medium">{option.label}</div>
+                        <div className="text-white font-medium text-sm">{option.label}</div>
                         {option.desc && (
-                          <div className="text-slate-400 text-sm mt-1">{option.desc}</div>
+                          <div className="text-slate-400 text-xs mt-1">{option.desc}</div>
                         )}
                       </div>
-                      {isSelected && <CheckCircle className="w-5 h-5 text-orange-400" />}
+                      {isSelected && <CheckCircle className="w-4 h-4 text-orange-400" />}
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -308,34 +309,34 @@ export default function SlideQuizShell({
 
             {/* Show options above slider */}
             {sliderOptions.length > 0 && (
-              <div className="space-y-3">
+              <div className="w-full max-w-sm mx-auto space-y-2">
                 {sliderOptions.map((option, index) => (
                   <div
                     key={option.value}
-                    className={`flex items-center justify-between p-3 rounded-lg transition-all duration-300 ${
+                    className={`flex items-center justify-between p-2 rounded-lg transition-all duration-300 ${
                       sliderValue === option.value
                         ? 'bg-orange-500/20 border-2 border-orange-400'
                         : 'bg-slate-800/30 border-2 border-slate-600 hover:border-orange-400/50'
                     }`}
                   >
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2">
                       <div className={`${sliderValue === option.value ? 'text-orange-400' : 'text-slate-400'}`}>
                         {option.icon}
                       </div>
-                      <span className={`font-medium ${sliderValue === option.value ? 'text-white' : 'text-slate-300'}`}>
+                      <span className={`font-medium text-sm ${sliderValue === option.value ? 'text-white' : 'text-slate-300'}`}>
                         {option.label}
                       </span>
                     </div>
                     <button
                       onClick={() => updateAnswer(currentQ.id, option.value)}
-                      className={`w-6 h-6 rounded-full border-2 transition-all duration-300 ${
+                      className={`w-5 h-5 rounded-full border-2 transition-all duration-300 ${
                         sliderValue === option.value
                           ? 'bg-orange-400 border-orange-400'
                           : 'border-slate-400 hover:border-orange-400'
                       }`}
                     >
                       {sliderValue === option.value && (
-                        <CheckCircle className="w-4 h-4 text-white mx-auto" />
+                        <CheckCircle className="w-3 h-3 text-white mx-auto" />
                       )}
                     </button>
                   </div>
@@ -386,27 +387,25 @@ export default function SlideQuizShell({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white">
+    <div className="h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white flex flex-col overflow-hidden">
       {/* Progress Header */}
-      <div className="sticky top-0 z-10 bg-slate-900/80 backdrop-blur-xl border-b border-slate-700">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
-              {title}
-            </h1>
-            <div className="text-sm text-slate-400">
-              {currentQuestion + 1} of {questions.length}
-            </div>
+      <div className="bg-slate-900/80 backdrop-blur-xl border-b border-slate-700 p-4 flex-shrink-0">
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-lg font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
+            {title}
+          </h1>
+          <div className="text-sm text-slate-400">
+            {currentQuestion + 1} of {questions.length}
           </div>
-          <Progress 
-            value={progress} 
-            className="h-2 bg-slate-700"
-          />
         </div>
+        <Progress 
+          value={progress} 
+          className="h-2 bg-slate-700"
+        />
       </div>
 
-      {/* Question Content */}
-      <div className="flex-1 p-6">
+      {/* Question Content - No scrolling */}
+      <div className="flex-1 p-4 flex flex-col justify-center overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentQuestion}
@@ -414,36 +413,36 @@ export default function SlideQuizShell({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
-            className="max-w-md mx-auto"
+            className="max-w-md mx-auto w-full flex flex-col justify-center h-full"
           >
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-white mb-4 leading-tight">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-white mb-3 leading-tight">
                 {currentQ.label}
               </h2>
               {currentQ.subtitle && (
-                <p className="text-slate-300 text-lg">
+                <p className="text-slate-300 text-base">
                   {currentQ.subtitle}
                 </p>
               )}
             </div>
 
-            <div className="mb-8">
+            <div className="flex-1 flex items-center justify-center">
               {renderQuestion()}
             </div>
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* Navigation */}
-      <div className="sticky bottom-0 bg-slate-900/90 backdrop-blur-xl border-t border-slate-700 p-6">
-        <div className="max-w-md mx-auto flex gap-4">
+      {/* Fixed Navigation */}
+      <div className="bg-slate-900/90 backdrop-blur-xl border-t border-slate-700 p-4 flex-shrink-0">
+        <div className="max-w-md mx-auto flex gap-3">
           {currentQuestion > 0 && (
             <Button
               onClick={handlePrevious}
               variant="outline"
-              className="flex-1 h-14 border-slate-600 text-slate-300 hover:text-white hover:border-orange-400 rounded-xl"
+              className="h-12 px-6 border-slate-600 text-slate-300 hover:text-white hover:border-orange-400 rounded-xl"
             >
-              <ArrowLeft className="w-5 h-5 mr-2" />
+              <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
           )}
@@ -451,7 +450,7 @@ export default function SlideQuizShell({
           <Button
             onClick={handleNext}
             disabled={!isCurrentAnswered()}
-            className={`flex-1 h-14 font-semibold rounded-xl transition-all duration-300 ${
+            className={`flex-1 h-12 font-semibold rounded-xl transition-all duration-300 ${
               isCurrentAnswered() 
                 ? `bg-gradient-to-r ${themeColors[theme]} hover:scale-105 shadow-lg hover:shadow-orange-500/25 text-white`
                 : 'bg-slate-700 text-slate-400 cursor-not-allowed'
@@ -459,13 +458,13 @@ export default function SlideQuizShell({
           >
             {currentQuestion === questions.length - 1 ? (
               <>
-                <Sparkles className="w-5 h-5 mr-2" />
+                <Sparkles className="w-4 h-4 mr-2" />
                 Create Recipe
               </>
             ) : (
               <>
                 Next
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ArrowRight className="w-4 h-4 ml-2" />
               </>
             )}
           </Button>
