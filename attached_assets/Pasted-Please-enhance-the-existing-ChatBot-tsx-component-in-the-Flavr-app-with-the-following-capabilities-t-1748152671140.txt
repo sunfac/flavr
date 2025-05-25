@@ -1,0 +1,44 @@
+Please enhance the existing ChatBot.tsx component in the Flavr app with the following capabilities to make it an intelligent, chef-like assistant that supports real-time conversation and dynamic recipe updates.
+
+⸻
+
+✅ FUNCTIONAL UPGRADES
+	1.	Conversational Flow
+	•	Maintain persistent chat history (within session)
+	•	Use GPT chat completions with a consistent system prompt:
+“You are a friendly, creative private chef who helps users adjust, enhance, and understand their AI-generated recipes.”
+	2.	Actionable Conversation Chips
+	•	After a recipe is generated, display interactive suggestions below the chat input (as chips/buttons):
+	•	“Add wine pairing”
+	•	“Make it spicier”
+	•	“Increase servings”
+	•	“Add a side dish”
+	•	“Substitute an ingredient”
+	•	“Change the protein”
+	•	Clicking one sends a predefined prompt to the ChatBot to enhance the current recipe accordingly
+	3.	Dynamic Recipe Editing
+	•	Detect when the user message implies a change to the recipe (e.g., “Can you make this vegetarian?”, “Add a dessert”, “Use tofu instead of chicken”)
+	•	When such input is detected:
+	•	Automatically send an update request to GPT using the current recipe context
+	•	Parse the response and update the RecipeCard component in real time
+	•	Visually animate or highlight updated fields (e.g., ingredients, method)
+	4.	Recipe Context Awareness
+	•	ChatBot should reference the current recipe as part of its conversation and modify it accordingly when needed
+	•	Maintain the current recipe state either in React context or as a prop passed to the ChatBot
+	5.	Screen Icon Activation
+	•	Add a floating chat icon or fixed chat toggle button (bottom-right or as per app design)
+	•	When clicked:
+	•	Opens ChatBot in a side panel, bottom drawer, or modal (mobile-friendly)
+	•	Can be toggled open/closed during any stage in the app
+	6.	Screen Tracking (Contextual Awareness)
+	•	Allow ChatBot to track the user’s current mode/page (Shopping, Fridge, ChefAssist)
+	•	Include page context in the GPT system prompt to allow different tones or suggestions per mode
+
+⸻
+
+🧠 TECH INTEGRATION NOTES
+	•	ChatBot must work independently of Prompt 1 / Prompt 2 flow
+	•	Must not disrupt quiz or recipe generation pipelines
+	•	Use GPT chat API (not text completions)
+	•	Use state to track and re-render modified recipe content in real time
+	•	Only one ChatBot instance should be active at a time

@@ -1,0 +1,69 @@
+Flavr is a mobile-first, AI-powered recipe generation app designed to create emotionally intelligent meals across three distinct use modes. It uses structured inputs, modular GPT prompt pipelines, and a shared conversational ChatBot to deliver personalized cooking experiences.
+
+⸻
+
+🔧 CORE TECHNOLOGY
+	•	Frontend: React + TypeScript
+	•	State/Storage: Replit DB
+	•	AI: OpenAI GPT-4/3.5 + Stable Diffusion (optional)
+	•	Monetization: Stripe → Flavr+ upgrade
+	•	Routing: Vite + React Router
+	•	Branding: Custom landing, header/footer, user menu, and settings panel
+
+⸻
+
+🔁 GLOBAL FEATURES
+
+🧾 Flavr+ Usage Gating
+	•	5 free GPT-generated recipes/month (Prompt 2)
+	•	5 Stable Diffusion images/month
+	•	Usage tracked via Replit DB (user:<id>:recipesThisMonth)
+	•	Stripe upgrades enable unlimited usage
+
+💬 ChatBot (Available in All Modes)
+	•	Persistent, chef-like conversational assistant
+	•	Users can:
+	•	Ask for substitutions
+	•	Clarify instructions
+	•	Request modifications
+	•	Does not interfere with Prompt 1/Prompt 2 pipeline
+	•	Powered by separate GPT chat API call (chatPrompt.ts)
+
+⸻
+
+🧭 MODE OVERVIEW
+
+🛒 Shopping Mode
+	•	Input Quiz:
+	•	Custom flow collecting mood, cuisine, time, budget, diet, equipment, ambition
+	•	Prompt 1 (shoppingPrompt1.ts):
+	•	Generates 3–6 swipeable recipe card ideas
+	•	Prompt 2 (shoppingPrompt2.ts):
+	•	Triggered on selection
+	•	Returns structured full recipe (title, servings, time, ingredients, steps)
+	•	Also shows: Shopping list, image (if allowed)
+
+⸻
+
+🥦 Fridge to Fork Mode
+	•	Input Quiz:
+	•	Tailored form for available ingredients, mood, equipment, time, ambition
+	•	Prompt 1 (fridgePrompt1.ts):
+	•	GPT generates dish ideas using only the available ingredients
+	•	Swipeable card preview output
+	•	Prompt 2 (fridgePrompt2.ts):
+	•	Full recipe for selected card
+	•	No shopping list (user already has ingredients)
+
+⸻
+
+👨‍🍳 Chef Assist Mode
+	•	Input Quiz:
+	•	Collects detailed intent (e.g., “I want to cook a romantic Italian dinner in 30 minutes using my air fryer”)
+	•	Prompt 2 Only (chefPrompt2.ts):
+	•	Uses structured intent input to generate a full recipe
+	•	No Prompt 1 preview step
+	•	Optionally includes:
+	•	Serving tips
+	•	Mood or storytelling enhancements
+	•	GPT response treated like a full bespoke chef consultation

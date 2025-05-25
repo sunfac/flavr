@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 interface ChatMessage {
   id: number;
@@ -15,11 +18,54 @@ interface ChatMessage {
   timestamp: Date;
 }
 
-export default function ChatBot() {
+interface Recipe {
+  id?: number;
+  title: string;
+  description: string;
+  ingredients: string[];
+  instructions: string[];
+  cookTime?: number;
+  servings?: number;
+  difficulty?: string;
+  cuisine?: string;
+  imageUrl?: string;
+  shoppingList?: string[];
+}
+
+interface ChatBotProps {
+  currentRecipe?: Recipe;
+  onRecipeUpdate?: (updatedRecipe: Recipe) => void;
+  currentMode?: "shopping" | "fridge" | "chef";
+}
+
+export default function ChatBot({ 
+  currentRecipe, 
+  onRecipeUpdate, 
+  currentMode 
+}: ChatBotProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+  const [location] = useLocation();
+
+  // Get current mode from URL if not provided
+  const detectedMode = currentMode || 
+    (location.includes('/shopping') ? 'shopping' : 
+     location.includes('/fridge') ? 'fridge' : 
+     location.includes('/chef') ? 'chef' : undefined);
+
+  // Conversation suggestion chips
+  const suggestionChips = [
+    { text: "Add wine pairing", icon: "🍷" },
+    { text: "Make it spicier", icon: "🌶️" },
+    { text: "Increase servings", icon: "👥" },
+    { text: "Add a side dish", icon: "🥗" },
+    { text: "Substitute an ingredient", icon: "🔄" },
+    { text: "Change the protein", icon: "🥩" }
+  ];
 
   // Get chat history
   const { data: historyData } = useQuery({
@@ -92,22 +138,36 @@ export default function ChatBot() {
     }
   }, [isOpen, historyData]);
 
-  const handleSend = () => {
-    if (!message.trim()) return;
+  const handleSend = (messageText?: string) => {
+    const textToSend = messageText || message;
+    if (!textToSend.trim()) return;
 
     // Add user message immediately
     const userMessage: ChatMessage = {
       id: Date.now(),
-      message,
+      message: textToSend,
       response: "",
       isUser: true,
-      text: message,
+      text: textToSend,
       timestamp: new Date(),
     };
     setLocalMessages(prev => [...prev, userMessage]);
+    setShowSuggestions(false);
 
-    // Send to API
-    sendMessageMutation.mutate({ message });
+    // Send to API with enhanced context
+    sendMessageMutation.mutate({ 
+      message: textToSend,
+      currentRecipe,
+      mode: detectedMode
+    });
+    
+    if (!messageText) {
+      setMessage("");
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    handleSend(suggestion);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -207,7 +267,28 @@ export default function ChatBot() {
           </div>
         </ScrollArea>
 
-        <div className="p-6 border-t border-white/10">
+        <div className="p-6 border-t border-white/10 space-y-4">
+          {/* Suggestion Chips */}
+          {showSuggestions && currentRecipe && (
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-slate-600">Quick suggestions:</p>
+              <div className="flex flex-wrap gap-2">
+                {suggestionChips.map((chip, index) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="cursor-pointer glass border border-white/20 hover:scale-105 transition-all duration-300 px-3 py-2 text-sm"
+                    onClick={() => handleSuggestionClick(chip.text)}
+                  >
+                    <span className="mr-2">{chip.icon}</span>
+                    {chip.text}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Input Area */}
           <div className="flex space-x-3">
             <Input
               value={message}
@@ -218,7 +299,7 @@ export default function ChatBot() {
               disabled={sendMessageMutation.isPending}
             />
             <Button 
-              onClick={handleSend}
+              onClick={() => handleSend()}
               className="w-12 h-12 p-0 gradient-primary btn-modern shadow-lg hover:shadow-xl"
               disabled={!message.trim() || sendMessageMutation.isPending}
             >
