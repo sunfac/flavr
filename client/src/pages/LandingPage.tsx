@@ -9,17 +9,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
+import FlavrFullLogo from "@assets/935FA3C5-A4E6-4FA8-A5E7-772FD650688C.png";
+import HeroFoodImage from "@assets/3D8C8E94-9BC0-4F6A-95F2-8951941A709B.png";
+import { motion } from "framer-motion";
+import { ChefHat, Sparkles, Timer, Star, ArrowRight } from "lucide-react";
 
 export default function LandingPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const [registerData, setRegisterData] = useState({ username: "", email: "", password: "" });
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "signup">("signup");
 
-  // Check if user is already logged in
-  const { data: user } = useQuery({
-    queryKey: ["/api/me"],
-    retry: false,
+  // User query
+  const { data: user, isLoading: userLoading } = useQuery({
+    queryKey: ['/api/me'],
+    enabled: true,
   });
 
   // Redirect if already logged in
@@ -30,253 +34,293 @@ export default function LandingPage() {
   }, [user, navigate]);
 
   const loginMutation = useMutation({
-    mutationFn: (data: { email: string; password: string }) =>
-      apiRequest("POST", "/api/login", data),
+    mutationFn: (credentials: { username: string; password: string }) =>
+      apiRequest("POST", "/api/auth/login", credentials),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
-      navigate("/shopping");
+      setShowAuthModal(false);
       toast({
-        title: "Welcome back!",
-        description: "You've been successfully logged in.",
+        title: "Welcome back! 👋",
+        description: "Ready to start cooking?",
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Login Failed",
-        description: error.message || "Please check your credentials.",
+        title: "Login failed",
+        description: error.message || "Please check your credentials",
         variant: "destructive",
       });
     },
   });
 
-  const registerMutation = useMutation({
-    mutationFn: (data: { username: string; email: string; password: string }) =>
-      apiRequest("POST", "/api/register", data),
+  const signupMutation = useMutation({
+    mutationFn: (userData: { username: string; email: string; password: string }) =>
+      apiRequest("POST", "/api/auth/signup", userData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
-      navigate("/shopping");
+      setShowAuthModal(false);
       toast({
-        title: "Welcome to Flavr!",
-        description: "Your account has been created successfully.",
+        title: "Welcome to Flavr! 🎉",
+        description: "Your culinary journey begins now",
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Registration Failed",
-        description: error.message || "Please try again.",
+        title: "Signup failed",
+        description: error.message || "Please try again",
         variant: "destructive",
       });
     },
   });
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    loginMutation.mutate(loginData);
+  const handleStartCooking = () => {
+    if (user?.user) {
+      navigate("/shopping");
+    } else {
+      setAuthMode("signup");
+      setShowAuthModal(true);
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    registerMutation.mutate(registerData);
+  const handleLogin = () => {
+    setAuthMode("login");
+    setShowAuthModal(true);
   };
 
+  // Show loading while checking auth
+  if (userLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-amber-900 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-orange-400 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  // Don't render if user is logged in (will redirect)
   if (user?.user) {
-    return null; // Will redirect
+    return null;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-emerald-50 relative overflow-hidden">
-      {/* Animated background elements */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-amber-900 relative overflow-hidden">
+      {/* Premium dark background with ambient lighting */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-orange-200 to-orange-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 floating"></div>
-        <div className="absolute top-40 right-10 w-72 h-72 bg-gradient-to-r from-emerald-200 to-emerald-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 floating-delayed"></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-gradient-to-r from-amber-200 to-amber-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 floating"></div>
+        <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full opacity-20 blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-gradient-to-r from-orange-300 to-orange-400 rounded-full opacity-10 blur-2xl"></div>
       </div>
 
-      <Header />
-      
-      <main className="container mx-auto px-4 py-8 relative z-10">
-        {/* Hero Section */}
-        <div className="text-center mb-16 animate-fade-in">
-          <div className="mb-8">
-            <div className="relative group mx-auto mb-8 w-fit">
-              <div className="w-32 h-32 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-500 animate-bounce-gentle">
-                <img 
-                  src={FlavrLogo} 
-                  alt="Flavr Logo"
-                  className="w-full h-full object-contain drop-shadow-2xl"
-                />
-              </div>
-              <div className="absolute inset-0 rounded-full blur-xl opacity-20 bg-orange-400 group-hover:opacity-40 transition-opacity duration-500"></div>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-bold text-display leading-tight mb-6" style={{
-              background: 'var(--gradient-dopamine)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
-            }}>
-              Welcome to Flavr
-            </h1>
-            <p className="text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto leading-relaxed font-medium">
-              AI-powered recipe discovery that adapts to your mood, ingredients, and cooking style. 
-              <span className="block mt-2 font-bold text-2xl" style={{
-                background: 'var(--gradient-primary)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>
-                Turn any craving into a perfect meal.
-              </span>
+      {/* Hero Section - Full Viewport */}
+      <section className="min-h-screen flex flex-col items-center justify-center text-center px-6 relative z-10">
+        {/* Large Premium Logo */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="relative group mb-12"
+        >
+          <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-8">
+            <img 
+              src={FlavrFullLogo} 
+              alt="Flavr - Your Private Chef"
+              className="w-full h-full object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500"
+            />
+          </div>
+          <div className="absolute inset-0 rounded-full blur-3xl opacity-30 bg-orange-500 group-hover:opacity-50 transition-opacity duration-500"></div>
+        </motion.div>
+
+        {/* Hero Headlines */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="mb-12"
+        >
+          <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight mb-6">
+            Your Private Chef.
+            <br />
+            <span className="bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
+              Anywhere.
+            </span>
+          </h1>
+          <p className="text-xl md:text-2xl text-slate-300 font-light max-w-3xl mx-auto leading-relaxed">
+            Recipes personalized to your cravings, mood, time, and skill level.
+          </p>
+        </motion.div>
+
+        {/* CTA Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+        >
+          <Button 
+            onClick={handleStartCooking}
+            className="px-12 py-6 text-lg font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 border-0 shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 text-white rounded-full"
+          >
+            Get Cooking Now
+            <ArrowRight className="ml-2 w-5 h-5" />
+          </Button>
+        </motion.div>
+      </section>
+
+      {/* Feature Section */}
+      <section className="py-24 px-6 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              Crafted for Your Kitchen
+            </h2>
+            <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+              Experience cooking like never before with AI that understands your taste, time, and skill.
             </p>
-          </div>
+          </motion.div>
 
-          {/* Feature highlights */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            <Card className="glass card-modern group border-0 shadow-2xl hover:shadow-orange-200/50 transition-all duration-500">
-              <CardContent className="pt-8 pb-8">
-                <div className="relative w-16 h-16 mx-auto mb-6">
-                  <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-500 shadow-lg">
-                    <i className="fas fa-shopping-cart text-white text-2xl"></i>
-                  </div>
-                  <div className="absolute inset-0 gradient-primary rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
-                </div>
-                <h3 className="font-playfair font-bold text-xl mb-3 text-slate-800">Smart Shopping</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Get personalized recipes with complete shopping lists tailored to your preferences
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className="glass card-modern group border-0 shadow-2xl hover:shadow-emerald-200/50 transition-all duration-500">
-              <CardContent className="pt-8 pb-8">
-                <div className="relative w-16 h-16 mx-auto mb-6">
-                  <div className="w-16 h-16 gradient-secondary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-500 shadow-lg">
-                    <i className="fas fa-refrigerator text-white text-2xl"></i>
-                  </div>
-                  <div className="absolute inset-0 gradient-secondary rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
-                </div>
-                <h3 className="font-playfair font-bold text-xl mb-3 text-slate-800">Fridge to Fork</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Transform available ingredients into delicious meals with zero waste
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className="glass card-modern group border-0 shadow-2xl hover:shadow-amber-200/50 transition-all duration-500">
-              <CardContent className="pt-8 pb-8">
-                <div className="relative w-16 h-16 mx-auto mb-6">
-                  <div className="w-16 h-16 gradient-accent rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-500 shadow-lg">
-                    <i className="fas fa-chef-hat text-white text-2xl"></i>
-                  </div>
-                  <div className="absolute inset-0 gradient-accent rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
-                </div>
-                <h3 className="font-playfair font-bold text-xl mb-3 text-slate-800">Chef Assist</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Get expert-level guidance for your culinary ambitions and special occasions
-                </p>
-              </CardContent>
-            </Card>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: ChefHat,
+                title: "Chef-Crafted Recipes",
+                description: "Recipes tailored to your preferences, dietary needs, and cooking expertise."
+              },
+              {
+                icon: Sparkles,
+                title: "Smart AI Adaptation",
+                description: "Our AI learns and adapts as you cook, making each recipe better than the last."
+              },
+              {
+                icon: Timer,
+                title: "Time-Based Cooking",
+                description: "Perfect recipes whether you have 15 minutes or 3 hours to create something amazing."
+              }
+            ].map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: index * 0.1 }}
+                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 group"
+              >
+                <feature.icon className="w-12 h-12 text-orange-400 mb-6 group-hover:scale-110 transition-transform duration-300" />
+                <h3 className="text-xl font-bold text-white mb-4">{feature.title}</h3>
+                <p className="text-slate-300 leading-relaxed">{feature.description}</p>
+              </motion.div>
+            ))}
           </div>
+        </div>
+      </section>
 
-          {/* Main CTA Button */}
-          <div className="mb-16">
-            <Button
-              onClick={() => navigate("/app")}
-              className="h-20 px-16 text-2xl font-bold text-white shadow-2xl transition-all duration-500 hover:scale-110 animate-pulse-gentle relative overflow-hidden group"
-              style={{ background: 'var(--gradient-dopamine)' }}
+      {/* Live Recipe Demo Section */}
+      <section className="py-24 px-6 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Food Image */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="relative"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-              <i className="fas fa-sparkles mr-4 text-3xl group-hover:rotate-12 transition-transform duration-300"></i>
-              <span className="relative z-10 tracking-wide">Ask the AI Chef</span>
-            </Button>
+              <img
+                src={HeroFoodImage}
+                alt="Gourmet short rib with pea purée"
+                className="w-full rounded-2xl shadow-2xl"
+              />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/20 to-transparent"></div>
+            </motion.div>
+
+            {/* Chat UI Demo */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="space-y-6"
+            >
+              <h3 className="text-3xl md:text-4xl font-bold text-white mb-8">
+                See Flavr in Action
+              </h3>
+              
+              {/* Chat Messages */}
+              <div className="space-y-4">
+                <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 max-w-sm">
+                  <p className="text-white font-medium mb-2">Red Wine Braised Short Rib</p>
+                  <p className="text-slate-300 text-sm">with Pea Purée & Miso Glaze</p>
+                </div>
+                
+                <div className="bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-2xl p-4 max-w-xs ml-auto">
+                  <p className="text-orange-100 text-sm">Here's how to elevate it with a miso glaze. ✨</p>
+                </div>
+                
+                <div className="bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-2xl p-4 max-w-xs ml-auto">
+                  <p className="text-orange-100 text-sm">Would you like a wine pairing? 🍷</p>
+                </div>
+                
+                <div className="bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-2xl p-4 max-w-xs ml-auto">
+                  <p className="text-orange-100 text-sm">Add a side dish? 🥗</p>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
+      </section>
 
-        {/* Auth Section */}
-        <div className="max-w-lg mx-auto animate-scale-in">
-          <Card className="glass card-modern border-0 shadow-2xl backdrop-blur-xl">
-            <CardHeader className="text-center pb-2">
-              <CardTitle className="text-2xl font-playfair font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">Get Started</CardTitle>
-              <p className="text-slate-600 mt-2">Join thousands creating amazing meals with AI</p>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <Tabs defaultValue="login" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 glass p-1 h-12">
-                  <TabsTrigger value="login" className="btn-modern font-medium">Sign In</TabsTrigger>
-                  <TabsTrigger value="register" className="btn-modern font-medium">Sign Up</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="login" className="mt-6">
-                  <form onSubmit={handleLogin} className="space-y-6">
-                    <div className="space-y-4">
-                      <Input
-                        type="email"
-                        placeholder="Enter your email"
-                        value={loginData.email}
-                        onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
-                        required
-                        className="input-modern h-12 bg-white/50 border-white/20 placeholder:text-slate-500"
-                      />
-                      <Input
-                        type="password"
-                        placeholder="Enter your password"
-                        value={loginData.password}
-                        onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
-                        required
-                        className="input-modern h-12 bg-white/50 border-white/20 placeholder:text-slate-500"
-                      />
-                    </div>
-                    <Button 
-                      type="submit" 
-                      className="w-full h-12 btn-modern gradient-primary text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-                      disabled={loginMutation.isPending}
-                    >
-                      {loginMutation.isPending ? "Signing In..." : "Sign In to Flavr"}
-                    </Button>
-                  </form>
-                </TabsContent>
-                
-                <TabsContent value="register" className="mt-6">
-                  <form onSubmit={handleRegister} className="space-y-6">
-                    <div className="space-y-4">
-                      <Input
-                        type="text"
-                        placeholder="Choose a username"
-                        value={registerData.username}
-                        onChange={(e) => setRegisterData(prev => ({ ...prev, username: e.target.value }))}
-                        required
-                        className="input-modern h-12 bg-white/50 border-white/20 placeholder:text-slate-500"
-                      />
-                      <Input
-                        type="email"
-                        placeholder="Enter your email"
-                        value={registerData.email}
-                        onChange={(e) => setRegisterData(prev => ({ ...prev, email: e.target.value }))}
-                        required
-                        className="input-modern h-12 bg-white/50 border-white/20 placeholder:text-slate-500"
-                      />
-                      <Input
-                        type="password"
-                        placeholder="Create a password"
-                        value={registerData.password}
-                        onChange={(e) => setRegisterData(prev => ({ ...prev, password: e.target.value }))}
-                        required
-                        className="input-modern h-12 bg-white/50 border-white/20 placeholder:text-slate-500"
-                      />
-                    </div>
-                    <Button 
-                      type="submit" 
-                      className="w-full h-12 btn-modern gradient-primary text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-                      disabled={registerMutation.isPending}
-                    >
-                      {registerMutation.isPending ? "Creating Account..." : "Create Your Account"}
-                    </Button>
-                  </form>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+      {/* Flavr+ CTA Section */}
+      <section className="py-24 px-6 relative z-10">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="bg-gradient-to-r from-orange-600 to-red-600 rounded-3xl p-12 md:p-16 relative overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-3xl"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-center mb-6">
+                <img src={FlavrLogo} alt="Flavr+" className="w-16 h-16 mr-4" />
+                <h2 className="text-4xl md:text-5xl font-bold text-white">
+                  Flavr+
+                </h2>
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold text-white mb-6">
+                Take Your Kitchen to the Next Level
+              </h3>
+              <p className="text-xl text-orange-100 mb-8 max-w-2xl mx-auto">
+                Unlock premium features: unlimited recipes, advanced dietary filtering, wine pairings, and more.
+              </p>
+              <Button 
+                className="px-8 py-4 text-lg font-semibold bg-white text-orange-600 hover:bg-orange-50 shadow-2xl hover:scale-105 transition-all duration-300 rounded-full"
+              >
+                Upgrade to Flavr+ <Star className="ml-2 w-5 h-5" />
+              </Button>
+            </div>
+          </motion.div>
         </div>
-      </main>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 px-6 border-t border-white/10 relative z-10">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
+          <div className="flex items-center mb-4 md:mb-0">
+            <img src={FlavrLogo} alt="Flavr" className="w-8 h-8 mr-3" />
+            <p className="text-slate-400">© 2025 Flavr. All rights reserved.</p>
+          </div>
+          <div className="flex space-x-6">
+            {["Privacy", "Terms", "Instagram", "Contact"].map((link) => (
+              <a
+                key={link}
+                href="#"
+                className="text-slate-400 hover:text-orange-400 transition-colors duration-300"
+              >
+                {link}
+              </a>
+            ))}
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

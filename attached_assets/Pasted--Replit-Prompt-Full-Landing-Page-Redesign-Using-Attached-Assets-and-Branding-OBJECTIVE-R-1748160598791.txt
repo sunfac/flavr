@@ -1,0 +1,102 @@
+// Replit Prompt — Full Landing Page Redesign Using Attached Assets and Branding
+
+// OBJECTIVE:
+// Redesign the Flavr landing page with premium visual polish using the attached logo, icon, and hero food image. 
+// The new design should reflect the app’s elite branding, showcase core features, and include a CTA for Flavr+ upsell. 
+// Use modern UI libraries (shadcn/ui, Tailwind, framer-motion, lucide-react) and asset libraries (Unsplash, Heroicons, or Lottie) where appropriate.
+
+////////////////////////////////////////////////////////////////////////////////
+// 1. BRANDING + STYLE SYSTEM
+////////////////////////////////////////////////////////////////////////////////
+
+// Color Scheme:
+// - Primary background: dark charcoal or gradient black → deep amber glow (to match logo atmosphere)
+// - Accent color: vibrant orange (#FF7A00) to match icon
+// - Fonts: Inter, with bold and thin weights
+// - Apply light vignette behind the logo
+
+// Logo:
+// - Use the attached logo image prominently in hero section
+// - Use the smaller chef-hat icon in footer, CTA sections, and next to text headlines
+
+////////////////////////////////////////////////////////////////////////////////
+// 2. LANDING PAGE STRUCTURE
+////////////////////////////////////////////////////////////////////////////////
+
+<Hero Section>
+// Full viewport height
+// Background: dark gradient with soft light burst behind logo
+// Center-aligned content:
+  - Large logo (attached)
+  - Headline: “Your Private Chef. Anywhere.”
+  - Subtitle: “Recipes personalized to your cravings, mood, time, and skill level.”
+  - CTA Button: “Get Cooking Now” (uses shadcn/button, full width on mobile)
+
+<Feature Section>
+// Use 3 horizontal feature cards with stylish icons (lucide or Heroicons):
+  - ChefHat icon: "Chef-crafted recipes tailored to you"
+  - Sparkles icon: "Smart AI adapts as you cook"
+  - Timer icon: "Time-based cooking at your level"
+// Optional subtle animations on hover or scroll-in
+
+<Live Recipe Demo Section>
+// Two-column layout
+// Left side: full-width food photo (attached)
+// Right side: floating chat bubble UI (styled like GPT/Apple Messages):
+  - Recipe title: “Red Wine Braised Short Rib with Pea Purée”
+  - Chat UI shows:
+    - “Here’s how to elevate it with a miso glaze.”
+    - “Would you like a wine pairing?”
+    - “Add a side dish?”
+// Show AI in action live adapting the recipe
+
+<Flavr+ CTA Section>
+// Background color: deep warm tone or gradient (e.g., orange to red)
+// Title: “Flavr+ — Take Your Kitchen to the Next Level”
+// Subtitle: “Unlock premium features: unlimited recipes, advanced dietary filtering, wine pairings, and more.”
+// CTA Button: “Upgrade to Flavr+”
+
+<Footer>
+// Left: "© 2025 Flavr. All rights reserved."
+// Right: Links: “Privacy”, “Terms”, “Instagram”, “Contact”
+// Use chef icon beside copyright
+
+////////////////////////////////////////////////////////////////////////////////
+// 3. MOBILE OPTIMIZATION
+////////////////////////////////////////////////////////////////////////////////
+
+// - Stack hero and CTA vertically
+// - Image should scale to full width on small devices
+// - Button sizes: min-height 48px
+// - Hide chat UI on very small viewports or make collapsible
+
+////////////////////////////////////////////////////////////////////////////////
+// 4. LIBRARIES TO USE
+////////////////////////////////////////////////////////////////////////////////
+
+- Tailwind CSS for layout + colors
+- shadcn/ui for buttons, cards, dialog
+- lucide-react for icons
+- framer-motion for entrance animations
+- Lottie or Unsplash assets for additional visuals if needed
+
+////////////////////////////////////////////////////////////////////////////////
+// 5. FILES TO INCLUDE
+////////////////////////////////////////////////////////////////////////////////
+
+// LOGO: Use "Flavr." logo image (attached)
+// ICON: Use chef-hat icon in various placements
+// RECIPE IMAGE: Use provided hero food image in demo section
+// Design consistency must match the brand mood and minimalism of the attached materials
+
+////////////////////////////////////////////////////////////////////////////////
+// 6. FINAL RESULT
+////////////////////////////////////////////////////////////////////////////////
+
+// Landing page should feel:
+- Elite, modern, emotional
+- Like a product from Apple, Notion, or Calm
+- Fast and clear in messaging
+- Visually consistent with Flavr’s app UI upgrade plan
+
+// Call all assets from /public or assets folder as needed. Use Tailwind’s theming to control spacing, shadows, and animations.
