@@ -12,7 +12,7 @@ import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 import FlavrFullLogo from "@assets/935FA3C5-A4E6-4FA8-A5E7-772FD650688C.png";
 import HeroFoodImage from "@assets/3D8C8E94-9BC0-4F6A-95F2-8951941A709B.png";
 import { motion } from "framer-motion";
-import { ChefHat, Sparkles, Timer, Star, ArrowRight } from "lucide-react";
+import { ChefHat, Sparkles, Timer, Star, ArrowRight, Menu, Settings, User } from "lucide-react";
 
 export default function LandingPage() {
   const [, navigate] = useLocation();
@@ -113,27 +113,38 @@ export default function LandingPage() {
       {/* Header with dark theme */}
       <header className="absolute top-0 left-0 right-0 z-50 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <img src={FlavrLogo} alt="Flavr" className="w-10 h-10" />
-            <span className="text-xl font-bold text-white">Flavr</span>
-          </div>
-          <nav className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-white/80 hover:text-white transition-colors duration-300">Features</a>
-            <a href="#demo" className="text-white/80 hover:text-white transition-colors duration-300">Demo</a>
-            <a href="#pricing" className="text-white/80 hover:text-white transition-colors duration-300">Flavr+</a>
-            <Button 
-              onClick={handleLogin}
-              className="bg-white/10 border border-white/20 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
-            >
-              Sign In
-            </Button>
-          </nav>
+          {/* Left: Hamburger Menu */}
           <Button 
-            onClick={handleLogin}
-            className="md:hidden bg-white/10 border border-white/20 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
+            variant="ghost"
+            size="icon"
+            className="text-white hover:bg-white/10"
           >
-            Sign In
+            <Menu className="w-6 h-6" />
           </Button>
+
+          {/* Center: Chef Hat Logo */}
+          <div className="flex items-center">
+            <img src={FlavrLogo} alt="Flavr" className="w-10 h-10" />
+          </div>
+
+          {/* Right: Settings and Login */}
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/10"
+            >
+              <Settings className="w-6 h-6" />
+            </Button>
+            <Button 
+              variant="ghost"
+              size="icon"
+              onClick={handleLogin}
+              className="text-white hover:bg-white/10"
+            >
+              <User className="w-6 h-6" />
+            </Button>
+          </div>
         </div>
       </header>
 
