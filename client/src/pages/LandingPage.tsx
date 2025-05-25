@@ -102,12 +102,14 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-800 via-amber-900/20 to-slate-900 relative overflow-hidden">
-      {/* Premium dark background matching logo style */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black relative overflow-hidden">
+      {/* Premium dark background matching logo's black elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-radial from-orange-400/30 via-amber-500/20 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/3 right-1/3 w-96 h-96 bg-gradient-radial from-orange-300/20 to-transparent rounded-full blur-2xl"></div>
-        <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-gradient-radial from-amber-400/15 to-transparent rounded-full blur-xl"></div>
+        {/* Subtle orange glow that matches the chef hat's orange speech bubble */}
+        <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-orange-500/15 via-orange-400/8 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-radial from-orange-300/10 to-transparent rounded-full blur-2xl"></div>
+        {/* Dark ambient lighting that blends with logo's black outline */}
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/30 via-transparent to-black/50"></div>
       </div>
 
       {/* Header with dark theme */}
