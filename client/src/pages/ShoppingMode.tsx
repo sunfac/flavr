@@ -31,10 +31,8 @@ export default function ShoppingMode() {
     return <Loading message="Loading your profile..." />;
   }
 
-  if (!user?.user) {
-    navigate("/");
-    return null;
-  }
+  // Allow users to try the quiz without authentication
+  const isAuthenticated = user?.user;
 
   const handleQuizComplete = (data: any) => {
     setQuizData(data);
@@ -42,6 +40,11 @@ export default function ShoppingMode() {
   };
 
   const handleRecipeSelect = (recipe: any) => {
+    if (!isAuthenticated) {
+      // Show login prompt for unauthenticated users
+      navigate("/");
+      return;
+    }
     if (!canGenerateRecipe(user.user)) {
       setShowGate(true);
       return;

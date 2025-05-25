@@ -31,10 +31,8 @@ export default function FridgeMode() {
     return <Loading message="Loading your profile..." />;
   }
 
-  if (!user?.user) {
-    navigate("/");
-    return null;
-  }
+  // Allow users to try the quiz without authentication
+  const isAuthenticated = user?.user;
 
   const handleQuizComplete = (data: any) => {
     setQuizData(data);
