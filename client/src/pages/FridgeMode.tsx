@@ -98,6 +98,12 @@ export default function FridgeMode() {
     setSelectedRecipe(null);
   };
 
+  const handleAuthSuccess = () => {
+    setShowAuthModal(false);
+    // Refresh user data after successful auth
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-screen">
       {/* Consistent header across all modes */}
