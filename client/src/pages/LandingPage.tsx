@@ -219,7 +219,7 @@ export default function LandingPage() {
               className="w-full h-full object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500"
             />
           </div>
-          <div className="absolute inset-0 rounded-full blur-[100px] opacity-5 bg-gradient-to-b from-orange-300 via-orange-400 to-transparent group-hover:opacity-10 transition-opacity duration-500"></div>
+          <div className="absolute inset-0 rounded-full blur-[100px] opacity-15 bg-gradient-to-b from-orange-300 via-orange-400 to-transparent group-hover:opacity-25 transition-opacity duration-500"></div>
         </motion.div>
 
         {/* Hero Headlines */}
@@ -227,9 +227,9 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-8"
+          className="mb-6"
         >
-          <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight mb-6">
+          <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight mb-4">
             Your Private Chef.
             <br />
             <span className="bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
@@ -241,15 +241,16 @@ export default function LandingPage() {
           </p>
         </motion.div>
 
-        {/* CTA Button */}
+        {/* CTA Button - Prominent on Mobile */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
+          className="mb-8"
         >
           <Button 
             onClick={handleStartCooking}
-            className="px-12 py-6 text-lg font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 border-0 shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 text-white rounded-full"
+            className="px-8 py-6 md:px-12 md:py-6 text-lg md:text-xl font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 border-0 shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 text-white rounded-full w-full max-w-xs md:w-auto"
           >
             Get Cooking Now
             <ArrowRight className="ml-2 w-5 h-5" />
