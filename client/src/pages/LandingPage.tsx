@@ -161,6 +161,17 @@ export default function LandingPage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Main CTA Button */}
+          <div className="mb-16">
+            <Button
+              onClick={() => navigate("/app")}
+              className="h-16 px-12 text-xl font-bold gradient-primary text-white btn-modern shadow-2xl hover:shadow-orange-300/50 transition-all duration-500 hover:scale-105 animate-pulse-gentle"
+            >
+              <i className="fas fa-magic mr-3 text-2xl"></i>
+              Ask the AI Chef
+            </Button>
+          </div>
         </div>
 
         {/* Auth Section */}

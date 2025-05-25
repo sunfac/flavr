@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import UserMenu from "./UserMenu";
 import SettingsPanel from "./SettingsPanel";
+import GlobalNavigation from "./GlobalNavigation";
 
 interface HeaderProps {
   currentMode?: "shopping" | "fridge" | "chef";
@@ -45,14 +46,7 @@ export default function Header({ currentMode }: HeaderProps) {
               >
                 <i className="fas fa-user text-slate-600 group-hover:text-slate-800 transition-colors"></i>
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-10 h-10 p-0 rounded-xl glass hover:scale-110 transition-all duration-300 group"
-                onClick={() => setShowSettings(!showSettings)}
-              >
-                <i className="fas fa-cog text-slate-600 group-hover:text-slate-800 transition-colors"></i>
-              </Button>
+              <GlobalNavigation />
             </div>
           </div>
         </div>

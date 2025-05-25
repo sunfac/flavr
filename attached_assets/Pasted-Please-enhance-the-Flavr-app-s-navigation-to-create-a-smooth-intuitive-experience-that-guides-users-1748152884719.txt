@@ -1,0 +1,52 @@
+Please enhance the Flavr app’s navigation to create a smooth, intuitive experience that guides users from landing through to mode selection and recipe generation, with a consistent, polished design inspired by Apple-level usability.
+
+⸻
+
+✅ NAVIGATION IMPROVEMENTS TO IMPLEMENT
+	1.	From Landing Page to Mode Selection
+	•	On the landing page (/), prominently feature a large CTA button:
+	•	Label: “Ask the AI Chef” or “Start Cooking with Flavr”
+	•	When clicked, navigate the user to the mode selector page at /app
+	•	Use smooth scrolling or route transitions for visual polish
+	2.	Mode Selection Page (/app)
+	•	Clearly display all three modes with friendly, tappable cards:
+	•	🛒 Shopping Mode
+	•	🥦 Fridge to Fork Mode
+	•	👨‍🍳 Chef Assist Mode
+	•	Each mode card should include:
+	•	A short description
+	•	Visual/icon
+	•	“Start” button that takes user into the quiz for that mode
+	3.	Global Site-Wide Navigation
+	•	Add a clean, consistent navigation menu accessible from all pages:
+	•	Apple-style top-right hamburger or icon menu
+	•	Menu options:
+	•	Home
+	•	Choose a Mode
+	•	My Recipes / History
+	•	Settings
+	•	Flavr+
+	•	Make sure it’s responsive (mobile/tablet/desktop) and polished
+	•	Use smooth slide-in animation or modal dropdown
+	•	Optional: fixed bottom tab bar on mobile for instant access to “Home”, “Chat”, “Modes”, and “Profile”
+	4.	Persistent Mode Awareness
+	•	Highlight the current active mode in the nav bar or header
+	•	Optionally show breadcrumb trail: e.g., Home > Shopping > Recipe
+	5.	Styling Goals
+	•	Prioritize simplicity, hierarchy, and white space
+	•	Transitions should feel fluid
+	•	Keep color scheme and branding consistent with the Flavr identity
+	•	Apply Apple-like design principles: intuitive, minimal, delightful
+
+⸻
+
+🧠 TECH CONSIDERATIONS
+	•	Use React Router for navigation
+	•	Use useLocation or similar hook to track active route
+	•	Header should conditionally hide/show “Back” or “Menu” based on screen
+	•	Make sure navigation does not interrupt in-progress quizzes or chat
+	•	Apply lazy loading if needed to preserve performance across transitions
+
+⸻
+
+Once implemented, navigation should feel seamless, obvious, and enjoyable — guiding users through the experience from curiosity to creation, just like exploring a beautifully designed Apple app. Let me know when it’s complete for UX review.

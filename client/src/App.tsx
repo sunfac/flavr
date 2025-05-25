@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import LandingPage from "@/pages/LandingPage";
+import ModeSelection from "@/pages/ModeSelection";
 import ShoppingMode from "@/pages/ShoppingMode";
 import FridgeMode from "@/pages/FridgeMode";
 import ChefAssistMode from "@/pages/ChefAssistMode";
@@ -15,6 +16,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={LandingPage} />
+      <Route path="/app" component={ModeSelection} />
       <Route path="/shopping" component={ShoppingMode} />
       <Route path="/fridge" component={FridgeMode} />
       <Route path="/chef" component={ChefAssistMode} />
