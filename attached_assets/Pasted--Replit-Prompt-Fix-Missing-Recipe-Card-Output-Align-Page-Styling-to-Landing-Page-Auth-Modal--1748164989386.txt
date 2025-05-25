@@ -1,0 +1,56 @@
+// Replit Prompt — Fix Missing Recipe Card Output + Align Page Styling to Landing Page + Auth Modal
+
+// OBJECTIVE:
+// The attached screenshot shows the current /shopping page after quiz completion.
+// The Tinder-style recipe cards from Prompt 1 are NOT rendering.
+// Visually, the page is inconsistent with the polished design used on the landing page and auth modal.
+// The chat icon is misaligned, mode selectors are still visible unnecessarily, and the layout feels disconnected from the rest of the brand experience.
+
+////////////////////////////////////////////////////////////////////////////////
+// 1. FUNCTIONAL FIX — PROMPT 1 RECIPE CARD OUTPUT
+////////////////////////////////////////////////////////////////////////////////
+
+// ISSUE:
+// After quiz completion in Shopping mode, Prompt 1 successfully returns recipe suggestions BUT the cards are not rendering.
+// This is breaking the experience flow — the user cannot see or select a recipe to trigger Prompt 2.
+
+// FIX:
+- Ensure Prompt 1 is triggered on quiz completion
+- It must return an array of 6 recipe objects with title and description
+- These must be rendered as Tinder-style swipeable cards (see previously defined layout)
+// Each card should contain:
+// - Title (bold, brand font)
+// - Subtitle/descriptor
+// - Chips (mood, diet, time, ambition, equipment)
+// - "Use this recipe" button (for non-swipe users)
+// - On click: trigger Prompt 2 using recipe name + quiz inputs
+
+////////////////////////////////////////////////////////////////////////////////
+// 2. PAGE STYLING FIX — ALIGN TO LANDING PAGE + AUTH MODAL
+////////////////////////////////////////////////////////////////////////////////
+
+// VISUAL INCONSISTENCIES:
+- The top nav with mode selection (Shopping, Fridge, Chef) is still visible — remove it
+- Footer nav is present — should be unified with the landing/auth footer style
+- Chat icon is present but floats awkwardly — reposition or restyle to be aligned bottom-right in a clean pop-up button
+- Header and footer structure do not match the rest of the app
+
+// FIX:
+- Reuse the same header/footer used on landing and login pages
+- Apply the same background, shadows, padding, and typography
+- Remove other mode buttons once a mode is selected
+- Ensure consistent font sizes, button styles, iconography (Lucide), and badge styles (ShadCN)
+// Chat icon should use same size/style as user/settings icons on landing
+
+////////////////////////////////////////////////////////////////////////////////
+// 3. FINAL DELIVERABLE
+////////////////////////////////////////////////////////////////////////////////
+
+- After completing the quiz in Shopping or Fridge mode:
+  - Prompt 1 should run and render 6 Tinder-style recipe cards
+  - Each card allows swipe or click-to-select
+  - Selection triggers Prompt 2 and shows full recipe
+- Header and footer use same styling as landing and auth modal
+- No duplicate nav UI present
+- Chat icon is fixed in bottom-right with elegant appearance
+- All visuals follow Flavr’s premium brand look and feel
