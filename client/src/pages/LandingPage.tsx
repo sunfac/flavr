@@ -13,6 +13,7 @@ import FlavrFullLogo from "@assets/DB23351A-869B-42C9-A1B2-E6C2685B7586.png";
 import HeroFoodImage from "@assets/3D8C8E94-9BC0-4F6A-95F2-8951941A709B.png";
 import { motion } from "framer-motion";
 import { ChefHat, Sparkles, Timer, Star, ArrowRight, Menu, Settings, User, ChevronUp } from "lucide-react";
+import AuthModal from "@/components/AuthModal";
 
 export default function LandingPage() {
   const [, navigate] = useLocation();
@@ -475,6 +476,18 @@ export default function LandingPage() {
           <ChevronUp className="w-6 h-6" />
         </motion.button>
       )}
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => {
+          setShowAuthModal(false);
+          navigate("/app");
+        }}
+        title={authMode === "login" ? "Welcome back!" : "Join Flavr today!"}
+        description={authMode === "login" ? "Sign in to continue your culinary journey" : "Create your account to unlock personalized AI-generated recipes"}
+      />
     </div>
   );
 }
