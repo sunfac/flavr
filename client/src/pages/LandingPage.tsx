@@ -109,8 +109,25 @@ export default function LandingPage() {
         <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-gradient-to-r from-orange-300 to-orange-400 rounded-full opacity-10 blur-2xl"></div>
       </div>
 
+      {/* Header with dark theme */}
+      <header className="absolute top-0 left-0 right-0 z-50 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <img src={FlavrLogo} alt="Flavr" className="w-10 h-10" />
+            <span className="text-xl font-bold text-white">Flavr</span>
+          </div>
+          <Button 
+            variant="outline"
+            onClick={handleLogin}
+            className="border-white/20 text-white hover:bg-white/10"
+          >
+            Sign In
+          </Button>
+        </div>
+      </header>
+
       {/* Hero Section - Full Viewport */}
-      <section className="min-h-screen flex flex-col items-center justify-center text-center px-6 relative z-10">
+      <section className="min-h-screen flex flex-col items-center justify-center text-center px-6 relative z-10 pt-20">
         {/* Large Premium Logo */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -217,11 +234,25 @@ export default function LandingPage() {
       {/* Live Recipe Demo Section */}
       <section className="py-24 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Food Image */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              See Flavr in Action
+            </h2>
+            <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+              Watch how our AI transforms your cooking experience with real-time guidance and suggestions.
+            </p>
+          </motion.div>
+
+          <div className="relative max-w-5xl mx-auto">
+            {/* Food Image with Chat Overlay */}
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8 }}
               className="relative"
             >
@@ -230,39 +261,62 @@ export default function LandingPage() {
                 alt="Gourmet short rib with pea purée"
                 className="w-full rounded-2xl shadow-2xl"
               />
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/20 to-transparent"></div>
-            </motion.div>
-
-            {/* Chat UI Demo */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="space-y-6"
-            >
-              <h3 className="text-3xl md:text-4xl font-bold text-white mb-8">
-                See Flavr in Action
-              </h3>
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/30 to-transparent"></div>
               
-              {/* Chat Messages */}
-              <div className="space-y-4">
-                <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 max-w-sm">
-                  <p className="text-white font-medium mb-2">Red Wine Braised Short Rib</p>
-                  <p className="text-slate-300 text-sm">with Pea Purée & Miso Glaze</p>
+              {/* Chat Box Overlay */}
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                className="absolute right-4 md:right-8 top-4 md:top-8 w-72 md:w-80"
+              >
+                {/* Chat Container */}
+                <div className="bg-white/95 backdrop-blur-lg border border-white/20 rounded-2xl p-4 shadow-2xl">
+                  {/* Chat Header */}
+                  <div className="flex items-center space-x-3 mb-4 pb-3 border-b border-slate-200">
+                    <img src={FlavrLogo} alt="Flavr AI" className="w-8 h-8" />
+                    <div>
+                      <p className="font-semibold text-slate-800">Flavr AI</p>
+                      <p className="text-xs text-slate-500">Your cooking assistant</p>
+                    </div>
+                    <div className="ml-auto w-2 h-2 bg-green-400 rounded-full"></div>
+                  </div>
+                  
+                  {/* Chat Messages */}
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {/* Recipe Title */}
+                    <div className="bg-slate-100 rounded-xl p-3">
+                      <p className="font-medium text-slate-800 text-sm">Red Wine Braised Short Rib</p>
+                      <p className="text-slate-600 text-xs">with Pea Purée & Miso Glaze</p>
+                    </div>
+                    
+                    {/* AI Messages */}
+                    <div className="bg-orange-500 text-white rounded-xl p-3 rounded-tl-sm">
+                      <p className="text-sm">Here's how to elevate it with a miso glaze ✨</p>
+                    </div>
+                    
+                    <div className="bg-orange-500 text-white rounded-xl p-3 rounded-tl-sm">
+                      <p className="text-sm">Would you like a wine pairing? 🍷</p>
+                    </div>
+                    
+                    <div className="bg-orange-500 text-white rounded-xl p-3 rounded-tl-sm">
+                      <p className="text-sm">Add a complementary side dish? 🥗</p>
+                    </div>
+                  </div>
+                  
+                  {/* Chat Input */}
+                  <div className="mt-4 pt-3 border-t border-slate-200">
+                    <div className="flex items-center space-x-2">
+                      <div className="flex-1 bg-slate-100 rounded-full px-4 py-2">
+                        <p className="text-sm text-slate-500">Ask about wine pairings...</p>
+                      </div>
+                      <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                        <ArrowRight className="w-4 h-4 text-white" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                
-                <div className="bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-2xl p-4 max-w-xs ml-auto">
-                  <p className="text-orange-100 text-sm">Here's how to elevate it with a miso glaze. ✨</p>
-                </div>
-                
-                <div className="bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-2xl p-4 max-w-xs ml-auto">
-                  <p className="text-orange-100 text-sm">Would you like a wine pairing? 🍷</p>
-                </div>
-                
-                <div className="bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-2xl p-4 max-w-xs ml-auto">
-                  <p className="text-orange-100 text-sm">Add a side dish? 🥗</p>
-                </div>
-              </div>
+              </motion.div>
             </motion.div>
           </div>
         </div>
