@@ -19,36 +19,39 @@ export default function Header({ currentMode }: HeaderProps) {
 
   return (
     <>
-      <header className="bg-card shadow-sm border-b border-border sticky top-0 z-50">
-        <div className="px-4 py-3">
+      <header className="glass sticky top-0 z-50 backdrop-blur-xl border-b border-white/20">
+        <div className="px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-                <i className="fas fa-utensils text-white text-sm"></i>
+            <div className="flex items-center space-x-4">
+              <div className="relative group">
+                <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300">
+                  <i className="fas fa-utensils text-white text-lg"></i>
+                </div>
+                <div className="absolute inset-0 gradient-primary rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
               </div>
               <h1 
-                className="text-xl font-playfair font-bold text-foreground cursor-pointer"
+                className="text-2xl font-playfair font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent cursor-pointer hover:scale-105 transition-transform duration-300"
                 onClick={() => navigate("/")}
               >
                 Flavr
               </h1>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-8 h-8 p-0 rounded-full"
+                className="w-10 h-10 p-0 rounded-xl glass hover:scale-110 transition-all duration-300 group"
                 onClick={() => setShowUserMenu(!showUserMenu)}
               >
-                <i className="fas fa-user text-muted-foreground text-sm"></i>
+                <i className="fas fa-user text-slate-600 group-hover:text-slate-800 transition-colors"></i>
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-8 h-8 p-0 rounded-full"
+                className="w-10 h-10 p-0 rounded-xl glass hover:scale-110 transition-all duration-300 group"
                 onClick={() => setShowSettings(!showSettings)}
               >
-                <i className="fas fa-cog text-muted-foreground text-sm"></i>
+                <i className="fas fa-cog text-slate-600 group-hover:text-slate-800 transition-colors"></i>
               </Button>
             </div>
           </div>
