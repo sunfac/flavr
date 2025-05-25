@@ -5,6 +5,7 @@ import { Clock, Utensils } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SlideQuizShell from "@/components/SlideQuizShell";
+import TinderRecipeCards from "@/components/TinderRecipeCards";
 import { shoppingQuestions } from "@/config/shoppingQuestions";
 import RecipeCard from "@/components/RecipeCard";
 import ChatBot from "@/components/ChatBot";
@@ -143,44 +144,12 @@ export default function ShoppingMode() {
         )}
 
         {currentStep === "suggestions" && (
-          <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white p-6">
-            <div className="max-w-md mx-auto">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent mb-4">
-                  Perfect matches for you
-                </h2>
-                <p className="text-slate-300 text-lg">
-                  Swipe to explore • Tap to see full recipe
-                </p>
-              </div>
-
-              <div className="space-y-4 mb-8">
-                {recipeIdeas.map((recipe, index) => (
-                  <div
-                    key={index}
-                    onClick={() => handleRecipeSelect(recipe)}
-                    className="bg-slate-800/50 border border-slate-600 rounded-xl p-6 cursor-pointer hover:border-orange-400/50 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/25"
-                  >
-                    <h3 className="text-xl font-semibold text-white mb-2">{recipe.title}</h3>
-                    <p className="text-slate-300 mb-3">{recipe.description}</p>
-                    <div className="flex items-center text-sm text-slate-400">
-                      <Clock className="w-4 h-4 mr-1" />
-                      <span className="mr-4">{recipe.cookTime || '30'} min</span>
-                      <Utensils className="w-4 h-4 mr-1" />
-                      <span>{recipe.servings || '2-4'} servings</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                onClick={handleNewSearch}
-                className="w-full bg-slate-700 hover:bg-slate-600 text-white py-4 rounded-xl font-semibold transition-all duration-300 border border-slate-600 hover:border-orange-400/50"
-              >
-                Try Different Preferences
-              </button>
-            </div>
-          </div>
+          <TinderRecipeCards 
+            recipes={recipeIdeas}
+            onSelectRecipe={handleRecipeSelect}
+            quizData={quizData}
+            theme="shopping"
+          />
         )}
 
         {currentStep === "recipe" && selectedRecipe && (

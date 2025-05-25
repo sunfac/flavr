@@ -101,16 +101,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { mode, quizData, prompt } = req.body;
 
+      // Build enhanced prompt for 6 recipe suggestions
+      const enhancedPrompt = `Generate exactly 6 diverse recipe suggestions based on these preferences:
+
+Mode: ${mode}
+Quiz Data: ${JSON.stringify(quizData)}
+
+Return a JSON object with this exact structure:
+{
+  "recipes": [
+    {
+      "title": "Recipe Name",
+      "description": "Brief appealing description in one sentence"
+    }
+  ]
+}
+
+Make each recipe unique and appealing. Focus on variety in cooking styles, flavors, and techniques.`;
+
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
+        messages: [{ role: "user", content: enhancedPrompt }],
         response_format: { type: "json_object" },
       });
 
-      const recipeIdeas = JSON.parse(response.choices[0].message.content!);
-      res.json({ recipeIdeas });
+      const result = JSON.parse(response.choices[0].message.content!);
+      res.json({ ideas: result.recipes || [] });
     } catch (error: any) {
+      console.error("Recipe ideas generation error:", error);
       res.status(500).json({ message: "Failed to generate recipe ideas: " + error.message });
     }
   });
