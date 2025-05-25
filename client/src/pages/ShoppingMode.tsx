@@ -10,6 +10,7 @@ import ChatBot from "@/components/ChatBot";
 import Loading from "@/components/Loading";
 import FlavrPlusGate from "@/components/FlavrPlusGate";
 import { useFlavrGate } from "@/hooks/useFlavrGate";
+import { api } from "@/lib/api";
 
 export default function ShoppingMode() {
   const [, navigate] = useLocation();
@@ -35,9 +36,38 @@ export default function ShoppingMode() {
   // Allow users to try the quiz without authentication
   const isAuthenticated = user?.user;
 
-  const handleQuizComplete = (data: any) => {
-    setQuizData(data);
-    setCurrentStep("suggestions");
+  const handleQuizComplete = async (data: any) => {
+    try {
+      setIsLoading(true);
+      
+      // Transform SlideQuizShell data to match expected API format
+      const transformedData = {
+        mood: data.mood,
+        cuisine: data.cuisine || [],
+        time: data.time || 30,
+        budget: data.budget,
+        dietary: data.dietary || [],
+        equipment: data.equipment || [],
+        ambition: data.ambition || 3,
+        supermarket: data.supermarket
+      };
+
+      setQuizData(transformedData);
+
+      // Generate recipe ideas immediately
+      const response = await api.generateRecipeIdeas({
+        mode: "shopping",
+        quizData: transformedData,
+        prompt: `Generate recipe ideas for shopping mode with mood: ${transformedData.mood}, budget: ${transformedData.budget}`
+      });
+
+      setRecipeIdeas(response.ideas || []);
+      setCurrentStep("suggestions");
+    } catch (error) {
+      console.error("Failed to generate recipe ideas:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleRecipeSelect = (recipe: any) => {

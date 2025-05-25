@@ -10,6 +10,7 @@ import ChatBot from "@/components/ChatBot";
 import Loading from "@/components/Loading";
 import FlavrPlusGate from "@/components/FlavrPlusGate";
 import { useFlavrGate } from "@/hooks/useFlavrGate";
+import { api } from "@/lib/api";
 
 export default function ChefAssistMode() {
   const [, navigate] = useLocation();
@@ -34,14 +35,36 @@ export default function ChefAssistMode() {
   // Allow users to try the quiz without authentication
   const isAuthenticated = user?.user;
 
-  const handleQuizComplete = (data: any, recipe: any) => {
-    if (!canGenerateRecipe(user.user)) {
-      setShowGate(true);
-      return;
+  const handleQuizComplete = async (data: any) => {
+    try {
+      setIsLoading(true);
+      
+      // Transform SlideQuizShell data to match expected API format
+      const transformedData = {
+        intent: data.intent,
+        dietary: data.dietary || [],
+        time: data.time || 60,
+        ambition: data.ambition || 3,
+        equipment: data.equipment || [],
+        extras: data.extras || []
+      };
+
+      setQuizData(transformedData);
+
+      // Generate recipe directly for Chef mode
+      const response = await api.generateFullRecipe({
+        mode: "chef",
+        quizData: transformedData,
+        prompt: `Create a recipe for: ${transformedData.intent}`
+      });
+
+      setGeneratedRecipe(response.recipe);
+      setCurrentStep("recipe");
+    } catch (error) {
+      console.error("Failed to generate recipe:", error);
+    } finally {
+      setIsLoading(false);
     }
-    setQuizData(data);
-    setGeneratedRecipe(recipe);
-    setCurrentStep("recipe");
   };
 
   const handleNewSearch = () => {

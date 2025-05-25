@@ -10,6 +10,7 @@ import ChatBot from "@/components/ChatBot";
 import Loading from "@/components/Loading";
 import FlavrPlusGate from "@/components/FlavrPlusGate";
 import { useFlavrGate } from "@/hooks/useFlavrGate";
+import { api } from "@/lib/api";
 
 export default function FridgeMode() {
   const [, navigate] = useLocation();
@@ -35,9 +36,37 @@ export default function FridgeMode() {
   // Allow users to try the quiz without authentication
   const isAuthenticated = user?.user;
 
-  const handleQuizComplete = (data: any) => {
-    setQuizData(data);
-    setCurrentStep("suggestions");
+  const handleQuizComplete = async (data: any) => {
+    try {
+      setIsLoading(true);
+      
+      // Transform SlideQuizShell data to match expected API format
+      const transformedData = {
+        ingredients: data.ingredients?.split(',').map((i: string) => i.trim()) || [],
+        vibe: data.vibe,
+        cuisines: data.cuisines || [],
+        time: data.time || 30,
+        dietary: data.dietary || [],
+        equipment: data.equipment || [],
+        ambition: data.ambition || 3
+      };
+
+      setQuizData(transformedData);
+
+      // Generate recipe ideas immediately
+      const response = await api.generateRecipeIdeas({
+        mode: "fridge",
+        quizData: transformedData,
+        prompt: `Generate recipe ideas for fridge mode with ingredients: ${transformedData.ingredients.join(', ')}, vibe: ${transformedData.vibe}`
+      });
+
+      setRecipeIdeas(response.ideas || []);
+      setCurrentStep("suggestions");
+    } catch (error) {
+      console.error("Failed to generate recipe ideas:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleRecipeSelect = (recipe: any) => {
