@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { Clock, Utensils } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SlideQuizShell from "@/components/SlideQuizShell";
@@ -163,8 +164,10 @@ export default function ShoppingMode() {
                     <h3 className="text-xl font-semibold text-white mb-2">{recipe.title}</h3>
                     <p className="text-slate-300 mb-3">{recipe.description}</p>
                     <div className="flex items-center text-sm text-slate-400">
-                      <span className="mr-4">🕒 {recipe.cookTime || '30'} min</span>
-                      <span>👥 {recipe.servings || '2-4'} servings</span>
+                      <Clock className="w-4 h-4 mr-1" />
+                      <span className="mr-4">{recipe.cookTime || '30'} min</span>
+                      <Utensils className="w-4 h-4 mr-1" />
+                      <span>{recipe.servings || '2-4'} servings</span>
                     </div>
                   </div>
                 ))}

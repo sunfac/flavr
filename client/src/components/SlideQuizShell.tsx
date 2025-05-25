@@ -275,13 +275,74 @@ export default function SlideQuizShell({
 
       case 'slider':
         const sliderValue = currentAnswer || currentQ.min || 1;
+        const getSliderOptions = () => {
+          if (currentQ.id === 'ambition') {
+            return [
+              { value: 1, label: 'Just Get Fed', icon: <Clock className="w-4 h-4" /> },
+              { value: 2, label: 'Casual Cook', icon: <Utensils className="w-4 h-4" /> },
+              { value: 3, label: 'Weekend Chef', icon: <ChefHat className="w-4 h-4" /> },
+              { value: 4, label: 'Passionate Cook', icon: <Sparkles className="w-4 h-4" /> },
+              { value: 5, label: 'Michelin Madness', icon: <CheckCircle className="w-4 h-4" /> }
+            ];
+          }
+          if (currentQ.id === 'time') {
+            return [
+              { value: 15, label: '15 min', icon: <Clock className="w-4 h-4" /> },
+              { value: 30, label: '30 min', icon: <Clock className="w-4 h-4" /> },
+              { value: 60, label: '60 min', icon: <Clock className="w-4 h-4" /> },
+              { value: 90, label: '90 min', icon: <Clock className="w-4 h-4" /> },
+              { value: 120, label: 'No limit', icon: <Sparkles className="w-4 h-4" /> }
+            ];
+          }
+          return [];
+        };
+
+        const sliderOptions = getSliderOptions();
         return (
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div className="text-center">
               <div className="text-3xl font-bold text-orange-400 mb-2">
                 {renderSliderWithLabel(sliderValue)}
               </div>
             </div>
+
+            {/* Show options above slider */}
+            {sliderOptions.length > 0 && (
+              <div className="space-y-3">
+                {sliderOptions.map((option, index) => (
+                  <div
+                    key={option.value}
+                    className={`flex items-center justify-between p-3 rounded-lg transition-all duration-300 ${
+                      sliderValue === option.value
+                        ? 'bg-orange-500/20 border-2 border-orange-400'
+                        : 'bg-slate-800/30 border-2 border-slate-600 hover:border-orange-400/50'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`${sliderValue === option.value ? 'text-orange-400' : 'text-slate-400'}`}>
+                        {option.icon}
+                      </div>
+                      <span className={`font-medium ${sliderValue === option.value ? 'text-white' : 'text-slate-300'}`}>
+                        {option.label}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => updateAnswer(currentQ.id, option.value)}
+                      className={`w-6 h-6 rounded-full border-2 transition-all duration-300 ${
+                        sliderValue === option.value
+                          ? 'bg-orange-400 border-orange-400'
+                          : 'border-slate-400 hover:border-orange-400'
+                      }`}
+                    >
+                      {sliderValue === option.value && (
+                        <CheckCircle className="w-4 h-4 text-white mx-auto" />
+                      )}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="px-4">
               <Slider
                 value={[sliderValue]}
@@ -291,10 +352,6 @@ export default function SlideQuizShell({
                 step={currentQ.step || 1}
                 className="w-full"
               />
-            </div>
-            <div className="flex justify-between text-sm text-slate-400 px-4">
-              <span>{currentQ.min || 1}</span>
-              <span>{currentQ.max || 5}</span>
             </div>
           </div>
         );
