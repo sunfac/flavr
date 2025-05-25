@@ -11,6 +11,7 @@ import Loading from "@/components/Loading";
 import FlavrPlusGate from "@/components/FlavrPlusGate";
 import { useFlavrGate } from "@/hooks/useFlavrGate";
 import { api } from "@/lib/api";
+import AuthModal from "@/components/AuthModal";
 
 export default function FridgeMode() {
   const [, navigate] = useLocation();
@@ -20,6 +21,7 @@ export default function FridgeMode() {
   const [selectedRecipe, setSelectedRecipe] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showGate, setShowGate] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const { canGenerateRecipe } = useFlavrGate();
 
