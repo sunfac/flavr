@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, User, Sparkles, ChefHat } from "lucide-react";
+import FlavrIcon from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -90,7 +91,11 @@ export default function AuthModal({
             className="flex justify-center mb-4"
           >
             <div className="relative">
-              <ChefHat className="w-12 h-12 text-orange-400" />
+              <img 
+                src={FlavrIcon} 
+                alt="Flavr Chef Hat" 
+                className="w-12 h-12 drop-shadow-lg" 
+              />
               <Sparkles className="w-4 h-4 text-yellow-400 absolute -top-1 -right-1" />
             </div>
           </motion.div>

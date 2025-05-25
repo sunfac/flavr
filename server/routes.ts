@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import session from "express-session";
 import OpenAI from "openai";
 import Stripe from "stripe";
 import { storage } from "./storage";
@@ -21,6 +22,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // Setup session middleware
+  app.use(session({
+    secret: process.env.SESSION_SECRET || 'flavr-dev-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+  }));
+
   // Authentication middleware
   const requireAuth = (req: any, res: any, next: any) => {
     if (!req.session?.userId) {
