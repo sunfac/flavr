@@ -17,6 +17,9 @@ function Router() {
     <Switch>
       <Route path="/" component={LandingPage} />
       <Route path="/app" component={ModeSelection} />
+      <Route path="/app/shopping" component={ShoppingMode} />
+      <Route path="/app/fridge" component={FridgeMode} />
+      <Route path="/app/chef" component={ChefAssistMode} />
       <Route path="/shopping" component={ShoppingMode} />
       <Route path="/fridge" component={FridgeMode} />
       <Route path="/chef" component={ChefAssistMode} />

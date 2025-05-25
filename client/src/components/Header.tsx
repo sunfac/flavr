@@ -15,7 +15,7 @@ export default function Header({ currentMode }: HeaderProps) {
   const [showSettings, setShowSettings] = useState(false);
 
   const handleModeSelect = (mode: string) => {
-    navigate(`/${mode}`);
+    navigate(`/app/${mode}`);
   };
 
   return (

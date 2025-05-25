@@ -18,7 +18,7 @@ export default function Footer({ currentMode }: FooterProps) {
               ? "gradient-primary text-white shadow-lg scale-105" 
               : "text-slate-600 hover:text-slate-800 hover:scale-105 hover:bg-white/20"
           }`}
-          onClick={() => navigate("/shopping")}
+          onClick={() => navigate("/app/shopping")}
         >
           <i className="fas fa-shopping-cart text-xl group-hover:scale-110 transition-transform"></i>
           <span className="text-xs font-medium">Shopping</span>
@@ -31,7 +31,7 @@ export default function Footer({ currentMode }: FooterProps) {
               ? "gradient-secondary text-white shadow-lg scale-105" 
               : "text-slate-600 hover:text-slate-800 hover:scale-105 hover:bg-white/20"
           }`}
-          onClick={() => navigate("/fridge")}
+          onClick={() => navigate("/app/fridge")}
         >
           <i className="fas fa-refrigerator text-xl group-hover:scale-110 transition-transform"></i>
           <span className="text-xs font-medium">Fridge</span>
@@ -44,7 +44,7 @@ export default function Footer({ currentMode }: FooterProps) {
               ? "gradient-accent text-white shadow-lg scale-105" 
               : "text-slate-600 hover:text-slate-800 hover:scale-105 hover:bg-white/20"
           }`}
-          onClick={() => navigate("/chef")}
+          onClick={() => navigate("/app/chef")}
         >
           <i className="fas fa-chef-hat text-xl group-hover:scale-110 transition-transform"></i>
           <span className="text-xs font-medium">Chef</span>

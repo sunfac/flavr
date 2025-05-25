@@ -35,7 +35,7 @@ export default function ModeSelection() {
   ];
 
   const handleModeSelect = (modeId: string) => {
-    navigate(`/${modeId}`);
+    navigate(`/app/${modeId}`);
   };
 
   return (

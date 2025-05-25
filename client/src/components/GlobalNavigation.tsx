@@ -107,7 +107,7 @@ export default function GlobalNavigation({ onClose }: GlobalNavigationProps) {
           <div className="flex-1 space-y-3">
             {navigationItems.map((item, index) => (
               <Card
-                key={item.path}
+                key={`nav-${item.title}-${index}`}
                 className={`cursor-pointer transition-all duration-300 hover:scale-105 border-0 ${
                   location === item.path 
                     ? 'glass shadow-lg ring-2 ring-orange-200' 
