@@ -77,7 +77,7 @@ export default function LandingPage() {
 
   const signupMutation = useMutation({
     mutationFn: (userData: { username: string; email: string; password: string }) =>
-      apiRequest("POST", "/api/auth/signup", userData),
+      apiRequest("POST", "/api/register", userData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
       setShowAuthModal(false);
