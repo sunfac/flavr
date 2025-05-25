@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -15,12 +15,12 @@
   --card-foreground: 210 24% 16%;
   --border: 220 13% 91%; /* #E2E8F0 */
   --input: 220 13% 91%;
-  --primary: 14 100% 60%; /* #FF6B35 */
+  --primary: 14 100% 67%; /* #FF5722 - Dopamine coral */
   --primary-foreground: 0 0% 100%;
-  --secondary: 147 50% 36%; /* #2E8B57 */
+  --secondary: 174 72% 56%; /* #0DB5A5 - Electric teal */
   --secondary-foreground: 0 0% 100%;
-  --accent: 51 100% 50%; /* #FFD700 */
-  --accent-foreground: 210 24% 16%;
+  --accent: 45 97% 54%; /* #F59E0B - Golden amber */
+  --accent-foreground: 0 0% 100%;
   --destructive: 0 72% 51%; /* #E74C3C */
   --destructive-foreground: 0 0% 100%;
   --success: 134 61% 41%; /* #27AE60 */
@@ -28,12 +28,13 @@
   --ring: 14 100% 60%;
   --radius: 1rem;
   
-  /* Modern gradients */
-  --gradient-primary: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
-  --gradient-secondary: linear-gradient(135deg, #2E8B57 0%, #20B2AA 100%);
-  --gradient-accent: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-  --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --gradient-card: linear-gradient(145deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
+  /* Dopamine-inducing gradients */
+  --gradient-primary: linear-gradient(135deg, #FF5722 0%, #FF7043 50%, #FF8A65 100%);
+  --gradient-secondary: linear-gradient(135deg, #0DB5A5 0%, #26C6DA 50%, #4DD0E1 100%);
+  --gradient-accent: linear-gradient(135deg, #F59E0B 0%, #FBBF24 50%, #FCD34D 100%);
+  --gradient-hero: linear-gradient(135deg, #FF5722 0%, #0DB5A5 50%, #F59E0B 100%);
+  --gradient-card: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 100%);
+  --gradient-dopamine: linear-gradient(135deg, #FF5722 0%, #FF7043 25%, #0DB5A5 75%, #F59E0B 100%);
   
   /* Glass morphism */
   --glass-bg: rgba(255, 255, 255, 0.25);
