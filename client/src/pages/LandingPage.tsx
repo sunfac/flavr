@@ -210,9 +210,9 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="relative group mb-12"
+          className="relative group mb-16 mt-8"
         >
-          <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-8">
+          <div className="w-72 h-72 md:w-96 md:h-96 mx-auto mb-12">
             <img 
               src={FlavrFullLogo} 
               alt="Flavr - Your Private Chef"
