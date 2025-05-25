@@ -134,7 +134,6 @@ export default function SlideQuizShell({
   };
 
   const handleSubmit = () => {
-    if (onLoading) onLoading(true);
     onSubmit(answers);
   };
 

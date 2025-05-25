@@ -113,7 +113,6 @@ export default function ShoppingMode() {
             title="Shopping Mode Quiz"
             questions={shoppingQuestions}
             onSubmit={handleQuizComplete}
-            onLoading={setIsLoading}
             theme="shopping"
           />
         )}
