@@ -45,14 +45,12 @@ export const shoppingQuestions: QuestionConfig[] = [
     label: "How much time?",
     subtitle: "From quick fixes to weekend projects",
     type: "slider",
-    min: 5,
-    max: 120,
-    step: 5,
+    min: 10,
+    max: 90,
+    step: 10,
     dynamicLabel: (value: number) => {
-      if (value <= 15) return "Fast fix";
-      if (value <= 45) return "Dinner mode";
       if (value >= 90) return "No time limit";
-      return "I'll use it all";
+      return `${value} minutes`;
     }
   },
   {
@@ -110,20 +108,15 @@ export const shoppingQuestions: QuestionConfig[] = [
     id: "ambition",
     label: "Ambition level",
     subtitle: "How adventurous are we feeling?",
-    type: "slider",
-    min: 1,
-    max: 5,
-    step: 1,
-    dynamicLabel: (value: number) => {
-      const labels = {
-        1: "Just get fed",
-        2: "Simple & tasty", 
-        3: "Confident cook",
-        4: "Ambitious chef",
-        5: "Michelin effort"
-      };
-      return labels[value as keyof typeof labels] || `Level ${value}`;
-    }
+    type: "cards",
+    required: true,
+    options: [
+      { value: "1", label: "Just get fed", icon: "Coffee", desc: "Simple & quick" },
+      { value: "2", label: "Simple & tasty", icon: "Heart", desc: "Easy but delicious" },
+      { value: "3", label: "Confident cook", icon: "Sparkles", desc: "Bit of adventure" },
+      { value: "4", label: "Ambitious chef", icon: "Target", desc: "Push my skills" },
+      { value: "5", label: "Michelin effort", icon: "Crown", desc: "Go all out" }
+    ]
   },
   {
     id: "supermarket",

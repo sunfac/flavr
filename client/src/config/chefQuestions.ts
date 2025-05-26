@@ -47,14 +47,12 @@ export const chefQuestions: QuestionConfig[] = [
     label: "Time to create",
     subtitle: "How long can you dedicate to this?",
     type: "slider",
-    min: 5,
-    max: 120,
-    step: 5,
+    min: 10,
+    max: 90,
+    step: 10,
     dynamicLabel: (value: number) => {
-      if (value <= 15) return "Quick win";
-      if (value <= 45) return "Weeknight dinner";
-      if (value <= 90) return "Take your time";
-      return "No time limit — chef's adventure";
+      if (value >= 90) return "No time limit";
+      return `${value} minutes`;
     }
   },
   {
@@ -74,20 +72,15 @@ export const chefQuestions: QuestionConfig[] = [
     id: "ambition",
     label: "Your ambition level",
     subtitle: "How challenging should this be?",
-    type: "slider",
-    min: 1,
-    max: 5,
-    step: 1,
-    dynamicLabel: (value: number) => {
-      const labels = {
-        1: "Just need something edible",
-        2: "Simple but delicious",
-        3: "Confident cook",
-        4: "Ambitious home chef",
-        5: "Michelin star effort"
-      };
-      return labels[value as keyof typeof labels] || `Level ${value}`;
-    }
+    type: "cards",
+    required: true,
+    options: [
+      { value: "1", label: "Just need something edible", icon: "Coffee", desc: "Simple & quick" },
+      { value: "2", label: "Simple but delicious", icon: "Heart", desc: "Easy but tasty" },
+      { value: "3", label: "Confident cook", icon: "Sparkles", desc: "Try new techniques" },
+      { value: "4", label: "Ambitious home chef", icon: "Target", desc: "Challenge myself" },
+      { value: "5", label: "Michelin star effort", icon: "Crown", desc: "Go all out" }
+    ]
   },
   {
     id: "equipment",
