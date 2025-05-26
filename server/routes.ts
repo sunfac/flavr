@@ -5,6 +5,7 @@ import OpenAI from "openai";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import { insertRecipeSchema, insertChatMessageSchema } from "@shared/schema";
+import { getCreativeGuidanceBlock } from "./shoppingPromptBlocks";
 
 // Budget mapping functions for GPT prompts
 const budgetMappings = {
@@ -400,6 +401,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
         
         // Build Shopping Mode mapped prompt (Prompt 1)
+        const creativeGuidance = getCreativeGuidanceBlock();
+        
         enhancedPrompt = `You are an elite private chef.
 
 Based on the following preferences, suggest 5 unique, flavour-packed recipe ideas that could be made. Each idea should have a title and a one-sentence description:
@@ -419,6 +422,8 @@ Cuisine preference: ${quizData.cuisine || 'Any cuisine'}
 ${timeText}
 
 ${equipmentText}
+
+${creativeGuidance}
 
 Only return a list of 5 recipe titles and short, enticing one-liners for each.
 Do not include ingredient lists or steps yet.
@@ -513,6 +518,8 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
         
         // Build Shopping Mode mapped prompt (Prompt 2)
+        const creativeGuidance = getCreativeGuidanceBlock();
+        
         enhancedPrompt = `You are an elite private chef.
 
 Based on the user's preferences and selected idea, generate the full recipe for:
@@ -536,6 +543,8 @@ ${equipmentText}
 Ingredients: ${quizData.ingredients || 'Use suitable ingredients'}
 
 Servings: ${quizData.servings || '4 servings'}
+
+${creativeGuidance}
 
 Please return:
 - Title
