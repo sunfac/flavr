@@ -828,7 +828,7 @@ Assume users have access to standard kitchen tools. Do not force niche appliance
 Ensure the recipe fully respects the constraints and uses realistic supermarket pricing (GBP).
 Use clear quantities, supermarket-friendly items, and include any helpful substitutions or prep notes.
 
-Return a JSON object with this exact structure:
+Return a JSON object with this exact structure. THE SERVINGS VALUE IS LOCKED AND CANNOT BE CHANGED:
 {
   "title": "${selectedRecipe.title}",
   "description": "${selectedRecipe.description}",
@@ -839,7 +839,9 @@ Return a JSON object with this exact structure:
   "difficulty": "${quizData.ambition === 'easy' ? 'Easy' : quizData.ambition === 'challenging' || quizData.ambition === 'michelin' ? 'Hard' : 'Medium'}",
   "cuisine": "${quizData.cuisine || 'International'}",
   "tips": "helpful cooking tips"
-}`;
+}
+
+FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown above. This value cannot be modified.`;
       } else if (mode === 'fridge') {
         // Get mapped guidance text for Fridge Mode (omit budget and cuisine)
         const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
@@ -897,7 +899,7 @@ Use a friendly, helpful tone. Ensure the recipe is flavour-rich, realistic, uses
 Assume users have access to standard kitchen tools. Do not force niche appliances into the recipe method unless clearly necessary. If equipment is unavailable, suggest fallback steps (e.g., oven instead of air fryer).
 Avoid unnecessary complexity or ingredients requiring unavailable equipment.
 
-Return a JSON object with this exact structure:
+Return a JSON object with this exact structure. THE SERVINGS VALUE IS LOCKED AND CANNOT BE CHANGED:
 {
   "title": "${selectedRecipe.title}",
   "description": "${selectedRecipe.description}",
@@ -908,7 +910,9 @@ Return a JSON object with this exact structure:
   "difficulty": "${quizData.ambition === 'easy' ? 'Easy' : quizData.ambition === 'challenging' || quizData.ambition === 'michelin' ? 'Hard' : 'Medium'}",
   "cuisine": "Fridge-to-Fork",
   "tips": "helpful cooking tips"
-}`;
+}
+
+FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown above. This value cannot be modified.`;
       } else if (mode === 'chef') {
         // Get mapped guidance text for Chef Assist Mode (include budget, omit cuisine)
         const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
@@ -962,7 +966,7 @@ Always prioritise maximising flavour to the highest possible level while respect
 
 Avoid unnecessary complexity or inaccessible ingredients unless clearly aligned with ambition level and user skill.
 
-Return a JSON object with this exact structure:
+Return a JSON object with this exact structure. THE SERVINGS VALUE IS LOCKED AND CANNOT BE CHANGED:
 {
   "title": "${selectedRecipe.title}",
   "description": "${selectedRecipe.description}",
@@ -973,7 +977,9 @@ Return a JSON object with this exact structure:
   "difficulty": "${quizData.ambition === 'easy' ? 'Easy' : quizData.ambition === 'challenging' || quizData.ambition === 'michelin' ? 'Hard' : 'Medium'}",
   "cuisine": "Chef-Guided",
   "tips": "helpful cooking tips"
-}`;
+}
+
+FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown above. This value cannot be modified.`;
       } else {
         // Fallback to existing enhanced prompt for other modes
         const budgetGuidance = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
