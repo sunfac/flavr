@@ -81,6 +81,21 @@ export default function Subscribe() {
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
+  // Close all menus
+  const closeAllMenus = () => {
+    setShowNavigation(false);
+    setShowSettings(false);
+    setShowUserMenu(false);
+  };
+
+  // Open specific menu and close others
+  const openMenu = (menuType: 'navigation' | 'settings' | 'userMenu') => {
+    closeAllMenus();
+    if (menuType === 'navigation') setShowNavigation(true);
+    if (menuType === 'settings') setShowSettings(true);
+    if (menuType === 'userMenu') setShowUserMenu(true);
+  };
+
   // Get user data to check premium status
   const { data: user, isLoading } = useQuery({
     queryKey: ["/api/me"],
@@ -98,8 +113,8 @@ export default function Subscribe() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black">
         <GlobalHeader 
-          onMenuClick={() => setShowNavigation(true)}
-          onSettingsClick={() => setShowSettings(true)}
+          onMenuClick={() => openMenu('navigation')}
+          onSettingsClick={() => openMenu('settings')}
           onAuthRequired={() => navigate("/")}
         />
         

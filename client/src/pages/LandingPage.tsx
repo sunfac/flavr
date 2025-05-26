@@ -28,6 +28,21 @@ export default function LandingPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
+  // Close all menus
+  const closeAllMenus = () => {
+    setShowNavigation(false);
+    setShowSettings(false);
+    setShowUserMenu(false);
+  };
+
+  // Open specific menu and close others
+  const openMenu = (menuType: 'navigation' | 'settings' | 'userMenu') => {
+    closeAllMenus();
+    if (menuType === 'navigation') setShowNavigation(true);
+    if (menuType === 'settings') setShowSettings(true);
+    if (menuType === 'userMenu') setShowUserMenu(true);
+  };
+
 
 
   const scrollToSection = (sectionId: string) => {
@@ -127,9 +142,10 @@ export default function LandingPage() {
       </div>
 
       <GlobalHeader 
-        onMenuClick={() => setShowNavigation(true)}
-        onSettingsClick={() => setShowSettings(true)}
+        onMenuClick={() => openMenu('navigation')}
+        onSettingsClick={() => openMenu('settings')}
         onAuthRequired={() => {
+          closeAllMenus();
           setAuthMode("login");
           setShowAuthModal(true);
         }}
@@ -766,17 +782,17 @@ export default function LandingPage() {
 
       {/* Navigation Panel */}
       {showNavigation && (
-        <GlobalNavigation onClose={() => setShowNavigation(false)} />
+        <GlobalNavigation onClose={closeAllMenus} />
       )}
 
       {/* Settings Panel */}
       {showSettings && (
-        <SettingsPanel onClose={() => setShowSettings(false)} />
+        <SettingsPanel onClose={closeAllMenus} />
       )}
 
       {/* User Menu */}
       {showUserMenu && (
-        <UserMenu onClose={() => setShowUserMenu(false)} />
+        <UserMenu onClose={closeAllMenus} />
       )}
     </div>
   );
