@@ -59,14 +59,27 @@ export default function InputQuizChef({ onComplete, onLoading }: InputQuizChefPr
       return;
     }
 
-    // Generate recipe directly (no Prompt 1 step for chef mode)
+    // Generate recipe directly using server-side mapped prompts (no Prompt 1 step for chef mode)
     onLoading(true);
-    const prompt = generateChefPrompt2(quizData);
+    
+    // Map client quiz data to server format
+    const serverQuizData = {
+      intent: quizData.intent,
+      occasion: quizData.occasion,
+      skill: quizData.skill,
+      equipment: quizData.equipment,
+      time: parseInt(quizData.cookingTime),
+      servings: parseInt(quizData.servings),
+      // Map skill to ambition level
+      ambition: quizData.skill === "beginner" ? "quick" : 
+                quizData.skill === "intermediate" ? "ambitious" : "challenging"
+    };
+    
     generateRecipeMutation.mutate({
       selectedRecipe: { title: "Custom Chef Recipe", description: quizData.intent },
       mode: "chef",
-      quizData,
-      prompt,
+      quizData: serverQuizData,
+      prompt: "", // Server will generate the mapped prompt
     });
   };
 
