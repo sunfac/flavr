@@ -777,7 +777,10 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
         const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
         const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
-        const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
+        // Fix equipment mapping - ensure array is passed correctly
+        const equipmentText = (quizData.equipment && Array.isArray(quizData.equipment) && quizData.equipment.length > 0) 
+          ? getEquipmentPromptText(quizData.equipment) 
+          : 'Available Equipment: Standard kitchen setup - use basic cooking methods suitable for most home kitchens.';
         
         // Build Shopping Mode mapped prompt (Prompt 2)
         const creativeGuidance = getCreativeGuidanceBlock();
@@ -1070,7 +1073,7 @@ Make the ingredients specific with quantities and the instructions detailed and 
         fullRecipe.cuisine = quizData.cuisine;
       }
       if (quizData.ambition) {
-        const difficultyMap = {
+        const difficultyMap: { [key: string]: string } = {
           'easy': 'Easy',
           'challenging': 'Hard', 
           'michelin': 'Hard'
