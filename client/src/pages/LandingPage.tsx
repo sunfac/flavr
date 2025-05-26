@@ -52,10 +52,11 @@ export default function LandingPage() {
     }
   };
 
-  // User query
+  // User query - completely disable to prevent loading issues
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ['/api/me'],
     enabled: false, // Disable auto-fetching to prevent excessive calls
+    retry: false,
   });
 
   // Redirect if already logged in
