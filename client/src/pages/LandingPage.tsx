@@ -31,9 +31,14 @@ export default function LandingPage() {
   // Handle scroll to show/hide scroll-to-top button
   useEffect(() => {
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 200);
+      const scrolled = window.pageYOffset || document.documentElement.scrollTop;
+      setShowScrollTop(scrolled > 300);
     };
-    window.addEventListener('scroll', handleScroll);
+    
+    // Initial check
+    handleScroll();
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
