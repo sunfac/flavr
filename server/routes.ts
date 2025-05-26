@@ -387,16 +387,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { mode, quizData, prompt } = req.body;
 
-      // Include budget, mood, ambition, time, dietary, and equipment guidance in the recipe ideas prompt
-      const budgetGuidance = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
-      const moodGuidance = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
-      const ambitionGuidance = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
-      const timeGuidance = quizData.time ? getTimePromptText(quizData.time) : '';
-      const dietaryGuidance = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
-      const equipmentGuidance = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
+      // Build mapped prompt for Shopping Mode (Prompt 1 - Recipe Idea Generator)
+      let enhancedPrompt;
       
-      // Build enhanced prompt for 6 recipe suggestions
-      const enhancedPrompt = `Generate exactly 6 diverse recipe suggestions based on these preferences:
+      if (mode === 'shopping') {
+        // Get mapped guidance text
+        const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
+        const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
+        const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
+        const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
+        const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
+        const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
+        
+        // Build Shopping Mode mapped prompt (Prompt 1)
+        enhancedPrompt = `You are an elite private chef.
+
+Based on the following preferences, suggest 5 unique, flavour-packed recipe ideas that could be made. Each idea should have a title and a one-sentence description:
+
+Ingredients they want to use: ${quizData.ingredients || 'Any ingredients'}
+
+${moodText}
+
+${ambitionText}
+
+${dietaryText}
+
+${budgetText}
+
+Cuisine preference: ${quizData.cuisine || 'Any cuisine'}
+
+${timeText}
+
+${equipmentText}
+
+Only return a list of 5 recipe titles and short, enticing one-liners for each.
+Do not include ingredient lists or steps yet.
+
+Return a JSON object with this exact structure:
+{
+  "recipes": [
+    {
+      "title": "Recipe Name", 
+      "description": "Brief appealing description in one sentence"
+    }
+  ]
+}`;
+      } else {
+        // Fallback to existing enhanced prompt for other modes
+        const budgetGuidance = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
+        const moodGuidance = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
+        const ambitionGuidance = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
+        const timeGuidance = quizData.time ? getTimePromptText(quizData.time) : '';
+        const dietaryGuidance = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
+        const equipmentGuidance = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
+        
+        enhancedPrompt = `Generate exactly 6 diverse recipe suggestions based on these preferences:
 
 Mode: ${mode}
 Quiz Data: ${JSON.stringify(quizData)}
@@ -424,6 +469,7 @@ Return a JSON object with this exact structure:
 }
 
 Make each recipe unique and appealing. Focus on variety in cooking styles, flavors, and techniques. Ensure all suggestions align with the specified mood, ambition level, time constraints, and budget constraints.`;
+      }
 
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const response = await openai.chat.completions.create({
@@ -454,16 +500,73 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
 
       const { selectedRecipe, mode, quizData, prompt } = req.body;
 
-      // Include budget, mood, ambition, time, dietary, and equipment guidance in the prompt
-      const budgetGuidance = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
-      const moodGuidance = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
-      const ambitionGuidance = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
-      const timeGuidance = quizData.time ? getTimePromptText(quizData.time) : '';
-      const dietaryGuidance = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
-      const equipmentGuidance = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
+      // Build mapped prompt for Shopping Mode (Prompt 2 - Final Recipe Builder)
+      let enhancedPrompt;
       
-      // Build enhanced prompt for complete recipe generation
-      const enhancedPrompt = `Generate a complete, detailed recipe for "${selectedRecipe.title}" based on these preferences:
+      if (mode === 'shopping') {
+        // Get mapped guidance text for Shopping Mode
+        const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
+        const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
+        const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
+        const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
+        const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
+        const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
+        
+        // Build Shopping Mode mapped prompt (Prompt 2)
+        enhancedPrompt = `You are an elite private chef.
+
+Based on the user's preferences and selected idea, generate the full recipe for:
+
+**${selectedRecipe.title}**
+
+${moodText}
+
+${ambitionText}
+
+${dietaryText}
+
+${budgetText}
+
+Cuisine preference: ${quizData.cuisine || 'Any cuisine'}
+
+${timeText}
+
+${equipmentText}
+
+Ingredients: ${quizData.ingredients || 'Use suitable ingredients'}
+
+Servings: ${quizData.servings || '4 servings'}
+
+Please return:
+- Title
+- Ingredient list with quantities
+- Step-by-step instructions
+
+Write instructions in a friendly tone, with helpful technique notes.
+Ensure the recipe fully respects the constraints and uses realistic supermarket pricing (GBP).
+
+Return a JSON object with this exact structure:
+{
+  "title": "${selectedRecipe.title}",
+  "description": "${selectedRecipe.description}",
+  "ingredients": ["ingredient 1", "ingredient 2", "etc"],
+  "instructions": ["step 1", "step 2", "etc"],
+  "cookTime": 30,
+  "servings": 4,
+  "difficulty": "Medium",
+  "cuisine": "cuisine type",
+  "tips": "helpful cooking tips"
+}`;
+      } else {
+        // Fallback to existing enhanced prompt for other modes
+        const budgetGuidance = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
+        const moodGuidance = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
+        const ambitionGuidance = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
+        const timeGuidance = quizData.time ? getTimePromptText(quizData.time) : '';
+        const dietaryGuidance = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
+        const equipmentGuidance = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
+        
+        enhancedPrompt = `Generate a complete, detailed recipe for "${selectedRecipe.title}" based on these preferences:
 
 Mode: ${mode}
 Quiz Data: ${JSON.stringify(quizData)}
@@ -495,6 +598,7 @@ Return a JSON object with this exact structure:
 }
 
 Make the ingredients specific with quantities and the instructions detailed and clear. Ensure all ingredient selections and quantities align with the specified mood, ambition level, time constraints, and budget constraints.`;
+      }
 
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const response = await openai.chat.completions.create({
