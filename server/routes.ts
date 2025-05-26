@@ -809,14 +809,14 @@ Ingredients: ${quizData.ingredients || 'Use suitable ingredients'}
 
 ${creativeGuidance}
 
-Important: The following values must be strictly used when creating the recipe:
-- Servings: ${quizData.servings || 4} people
+CRITICAL INSTRUCTION: You MUST use these exact values in your JSON response:
+- Servings: EXACTLY ${quizData.servings || 4} people (DO NOT change this number)
 - Cuisine: ${quizData.cuisine || 'International'}
 - Cooking Time: ${quizData.time || 30} minutes
 - Dietary Restrictions: ${quizData.dietary ? quizData.dietary.join(', ') : 'None'}
 - Budget: ${quizData.budget || 'Any'}
 
-Do not override these values. They were chosen by the user and must appear accurately in the recipe output metadata and instructions.
+MANDATORY: The JSON response MUST contain "servings": ${quizData.servings || 4} - this is non-negotiable and was specifically chosen by the user. Do not modify this number under any circumstances.
 
 Please return:
 - Title
@@ -876,14 +876,14 @@ ${getStrictDietaryInstruction(quizData.dietary)}
 
 ${creativeGuidance}
 
-Important: The following values must be strictly used when creating the recipe:
-- Servings: ${quizData.servings || 4} people
+CRITICAL INSTRUCTION: You MUST use these exact values in your JSON response:
+- Servings: EXACTLY ${quizData.servings || 4} people (DO NOT change this number)
 - Cuisine: Fridge-to-Fork
 - Cooking Time: ${quizData.time || 30} minutes
 - Dietary Restrictions: ${quizData.dietary ? quizData.dietary.join(', ') : 'None'}
 - Ambition Level: ${quizData.ambition || 'Medium'}
 
-Do not override these values. They were chosen by the user and must appear accurately in the recipe output metadata and instructions.
+MANDATORY: The JSON response MUST contain "servings": ${quizData.servings || 4} - this is non-negotiable and was specifically chosen by the user. Do not modify this number under any circumstances.
 
 Prioritise using all or most of the user's provided ingredients.
 Do not use any ingredients not listed unless they are common pantry items. You may assume common pantry items are available, including oils, seasonings, dried herbs and spices, flour, stock cubes, tinned tomatoes, beans, tuna, sweetcorn, pasta, rice, and similar cupboard staples.
