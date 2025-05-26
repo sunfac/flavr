@@ -297,6 +297,23 @@ function getEquipmentPromptText(equipmentKeys: string[]): string {
   return `Available Equipment: ${equipmentDescriptions.join(' | ')}`;
 }
 
+function getStrictDietaryInstruction(dietKeys: string[]): string {
+  if (!dietKeys || dietKeys.length === 0 || dietKeys.includes('noRestrictions')) {
+    return '';
+  }
+
+  return `
+Important: The user has specific dietary preferences that must be respected without exception.
+
+If the user selected "Vegetarian", do not include any meat, poultry, or seafood in the recipe. You may include plant-based proteins, dairy, or eggs.
+
+If the user selected "Vegan", do not include any meat, poultry, seafood, dairy, eggs, or animal-derived products.
+
+Do not suggest substitutions that violate these preferences. If a recipe traditionally contains meat or dairy, provide a suitable plant-based alternative.
+
+These constraints are non-negotiable and should influence ingredient selection, recipe structure, and cooking techniques.`;
+}
+
 // Initialize OpenAI
 if (!process.env.OPENAI_API_KEY) {
   throw new Error('Missing required OpenAI API key: OPENAI_API_KEY');
@@ -456,6 +473,7 @@ ${moodText}
 ${ambitionText}
 
 ${dietaryText}
+${getStrictDietaryInstruction(quizData.dietary)}
 
 ${budgetText}
 
@@ -498,6 +516,7 @@ ${getMoodPromptText(quizData.mood || quizData.vibe || '')}
 ${getAmbitionPromptText(quizData.ambition || '')}
 
 ${getDietPromptText(quizData.dietary || [])}
+${getStrictDietaryInstruction(quizData.dietary)}
 
 ${getTimePromptText(quizData.time || 30)}
 

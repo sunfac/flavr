@@ -1,0 +1,43 @@
+// Replit Prompt Update — Dietary Preference Enforcement Across All Modes
+
+// OBJECTIVE:
+// Ensure GPT consistently respects user-selected dietary preferences (e.g. vegetarian, vegan) in all recipe generation modes.
+// This update applies globally to Shopping Mode, Fridge Mode, and Chef Assist Mode Prompt 2 — wherever recipes are generated.
+
+// DO NOT alter or remove any existing prompt structure, variables, formatting, or injected text.
+// This update is strictly additive. Inject the following enforcement logic into the final constructed prompt string after ${dietaryText} has been mapped.
+
+// STEP 1 — Add explicit directive to the GPT prompt to reinforce dietary compliance:
+
+const strictDietaryInstruction = `
+Important: The user has specific dietary preferences that must be respected without exception.
+
+If the user selected "Vegetarian", do not include any meat, poultry, or seafood in the recipe. You may include plant-based proteins, dairy, or eggs.
+
+If the user selected "Vegan", do not include any meat, poultry, seafood, dairy, eggs, or animal-derived products.
+
+Do not suggest substitutions that violate these preferences. If a recipe traditionally contains meat or dairy, provide a suitable plant-based alternative.
+
+These constraints are non-negotiable and should influence ingredient selection, recipe structure, and cooking techniques.
+`;
+
+// STEP 2 — Inject this string VERBATIM into all final prompt strings after ${dietaryText}, like so:
+
+prompt += `\n${dietaryText}`;
+prompt += `\n${strictDietaryInstruction}`;
+
+// STEP 3 — Ensure this injection occurs in:
+// - Shopping Mode Prompt 1
+// - Shopping Mode Prompt 2
+// - Fridge Mode Prompt 1
+// - Fridge Mode Prompt 2
+// - Chef Assist Prompt 2
+
+// DO NOT add this to prompts that do not include dietary input.
+// DO NOT override or alter the existing ${dietaryText} construction logic or remove any part of the existing prompt string.
+
+// OUTCOME:
+// ✅ GPT will explicitly be told to avoid meat/dairy/fish in vegetarian/vegan modes
+// ✅ Recipes will respect the user's intent
+// ✅ Prompt integrity, formatting, and creativity are preserved
+// ✅ This logic is consistent across all modes using dietary input
