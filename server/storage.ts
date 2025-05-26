@@ -123,14 +123,42 @@ export class MemStorage implements IStorage {
     return recipe;
   }
 
-  async getRecipesByUser(userId: number): Promise<Recipe[]> {
-    return Array.from(this.recipes.values()).filter(
-      (recipe) => recipe.userId === userId,
-    );
+  async getRecipesByUser(userId: number, limit: number = 50): Promise<Recipe[]> {
+    return Array.from(this.recipes.values())
+      .filter((recipe) => recipe.userId === userId)
+      .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())
+      .slice(0, limit);
   }
 
   async getRecipe(id: number): Promise<Recipe | undefined> {
     return this.recipes.get(id);
+  }
+
+  async getRecipeByShareId(shareId: string): Promise<Recipe | undefined> {
+    return Array.from(this.recipes.values()).find(recipe => recipe.shareId === shareId);
+  }
+
+  async updateRecipeSharing(id: number, isShared: boolean, shareId?: string): Promise<Recipe> {
+    const recipe = this.recipes.get(id);
+    if (!recipe) {
+      throw new Error("Recipe not found");
+    }
+    
+    const updatedRecipe = {
+      ...recipe,
+      isShared,
+      shareId: shareId || null
+    };
+    
+    this.recipes.set(id, updatedRecipe);
+    return updatedRecipe;
+  }
+
+  async getUserRecipeHistory(userId: number, limit: number = 20): Promise<Recipe[]> {
+    return Array.from(this.recipes.values())
+      .filter((recipe) => recipe.userId === userId)
+      .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())
+      .slice(0, limit);
   }
 
   async createChatMessage(insertMessage: InsertChatMessage): Promise<ChatMessage> {

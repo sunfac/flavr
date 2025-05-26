@@ -979,10 +979,52 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
         }
       }
 
-      // Return the generated recipe with image
+      // Save recipe to database with complete context
+      let savedRecipe = null;
+      try {
+        // Generate unique share ID for potential sharing
+        const shareId = `flavr-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        const recipeToSave = {
+          userId: req.session?.userId || null,
+          title: fullRecipe.title,
+          description: fullRecipe.description,
+          ingredients: fullRecipe.ingredients || [],
+          instructions: fullRecipe.instructions || [],
+          cookTime: fullRecipe.cookTime,
+          servings: fullRecipe.servings,
+          difficulty: fullRecipe.difficulty,
+          cuisine: fullRecipe.cuisine,
+          mode,
+          mood: quizData.mood || quizData.vibe,
+          ambition: quizData.ambition,
+          dietary: quizData.dietary || [],
+          equipment: quizData.equipment || [],
+          budget: quizData.budget,
+          cookingTime: quizData.time || quizData.cookingTime,
+          quizData: quizData,
+          recipeText: JSON.stringify(fullRecipe),
+          originalPrompt: enhancedPrompt,
+          tips: fullRecipe.tips,
+          imageUrl: imageUrl,
+          shoppingList: fullRecipe.shoppingList || [],
+          shareId: shareId,
+          isShared: false
+        };
+
+        savedRecipe = await storage.createRecipe(recipeToSave);
+        console.log(`Recipe saved to database with ID: ${savedRecipe.id}`);
+      } catch (saveError) {
+        console.error("Failed to save recipe to database:", saveError);
+        // Continue without failing - recipe generation was successful
+      }
+
+      // Return the generated recipe with image and database ID
       res.json({ 
         ...fullRecipe,
-        imageUrl 
+        imageUrl,
+        id: savedRecipe?.id,
+        shareId: savedRecipe?.shareId
       });
     } catch (error: any) {
       console.error("=== FULL RECIPE GENERATION ERROR ===");
@@ -1073,6 +1115,77 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
       res.json({ history });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Recipe History and Management API Routes
+  app.get("/api/recipes/history", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session!.userId;
+      const limit = parseInt(req.query.limit as string) || 20;
+      
+      const recipes = await storage.getUserRecipeHistory(userId, limit);
+      res.json({ recipes });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to get recipe history: " + error.message });
+    }
+  });
+
+  // Get single recipe by ID
+  app.get("/api/recipe/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const recipe = await storage.getRecipe(id);
+      
+      if (!recipe) {
+        return res.status(404).json({ message: "Recipe not found" });
+      }
+      
+      // If recipe is private, only owner can access
+      if (!recipe.isShared && recipe.userId !== req.session?.userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      res.json({ recipe });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to get recipe: " + error.message });
+    }
+  });
+
+  // Get shared recipe by share ID (public access)
+  app.get("/api/share/:shareId", async (req, res) => {
+    try {
+      const shareId = req.params.shareId;
+      const recipe = await storage.getRecipeByShareId(shareId);
+      
+      if (!recipe || !recipe.isShared) {
+        return res.status(404).json({ message: "Shared recipe not found" });
+      }
+      
+      res.json({ recipe });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to get shared recipe: " + error.message });
+    }
+  });
+
+  // Toggle recipe sharing
+  app.post("/api/recipe/:id/share", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { isShared } = req.body;
+      const userId = req.session!.userId;
+      
+      const recipe = await storage.getRecipe(id);
+      if (!recipe || recipe.userId !== userId) {
+        return res.status(404).json({ message: "Recipe not found or access denied" });
+      }
+      
+      const shareId = isShared ? `flavr-${Date.now()}-${Math.random().toString(36).substr(2, 9)}` : undefined;
+      const updatedRecipe = await storage.updateRecipeSharing(id, isShared, shareId);
+      
+      res.json({ recipe: updatedRecipe });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update recipe sharing: " + error.message });
     }
   });
 
