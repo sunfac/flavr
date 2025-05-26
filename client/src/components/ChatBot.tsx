@@ -185,7 +185,7 @@ export default function ChatBot({
         <div className="relative">
           <Button
             onClick={() => setIsOpen(!isOpen)}
-            className="w-12 h-12 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-2 border-white"
+            className="w-12 h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-2 border-white"
             size="sm"
           >
             {isOpen ? (

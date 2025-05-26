@@ -30,6 +30,7 @@ export default function TinderRecipeCards({
 }: TinderRecipeCardsProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const [availableRecipes, setAvailableRecipes] = useState(recipes);
 
   const themeColors = {
     shopping: 'from-orange-500 to-amber-500',
@@ -43,14 +44,34 @@ export default function TinderRecipeCards({
     chef: 'amber-400'
   };
 
-  const currentRecipe = recipes[currentIndex];
+  // Update available recipes when props change
+  useEffect(() => {
+    setAvailableRecipes(recipes);
+    setCurrentIndex(0);
+  }, [recipes]);
+
+  const currentRecipe = availableRecipes[currentIndex];
 
   const handleSwipe = (direction: number) => {
     setDirection(direction);
-    if (direction > 0 && currentIndex < recipes.length - 1) {
+    if (direction > 0 && currentIndex < availableRecipes.length - 1) {
       setCurrentIndex(prev => prev + 1);
     } else if (direction < 0 && currentIndex > 0) {
       setCurrentIndex(prev => prev - 1);
+    }
+  };
+
+  const handleReject = () => {
+    // Remove current recipe from available recipes
+    const newAvailableRecipes = availableRecipes.filter((_, index) => index !== currentIndex);
+    setAvailableRecipes(newAvailableRecipes);
+    
+    // Adjust current index if needed
+    if (currentIndex >= newAvailableRecipes.length && newAvailableRecipes.length > 0) {
+      setCurrentIndex(newAvailableRecipes.length - 1);
+    } else if (newAvailableRecipes.length === 0) {
+      // No more recipes left - could show a message or generate more
+      setCurrentIndex(0);
     }
   };
 
@@ -59,7 +80,8 @@ export default function TinderRecipeCards({
     if (info.offset.x > swipeThreshold) {
       handleSwipe(-1); // Previous
     } else if (info.offset.x < -swipeThreshold) {
-      handleSwipe(1); // Next
+      // Swipe left to reject
+      handleReject();
     }
   };
 
@@ -105,7 +127,7 @@ export default function TinderRecipeCards({
           <div className="flex justify-center items-center space-x-2 text-sm text-slate-400">
             <span>{currentIndex + 1}</span>
             <div className="flex space-x-1">
-              {recipes.map((_, index) => (
+              {availableRecipes.map((_, index) => (
                 <div
                   key={index}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
@@ -114,12 +136,12 @@ export default function TinderRecipeCards({
                 />
               ))}
             </div>
-            <span>{recipes.length}</span>
+            <span>{availableRecipes.length}</span>
           </div>
         </div>
 
-        {/* Card Stack */}
-        <div className="relative h-96 mb-8">
+        {/* Card Stack - Made taller to fit titles better */}
+        <div className="relative h-[28rem] mb-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
