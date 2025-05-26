@@ -519,12 +519,8 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
     }
   });
 
-  app.post("/api/generate-recipe-ideas", requireAuth, async (req, res) => {
+  app.post("/api/generate-recipe-ideas", async (req, res) => {
     try {
-      const user = await storage.getUser(req.session!.userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
 
       const { mode, quizData, prompt } = req.body;
 
@@ -689,18 +685,8 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
     }
   });
 
-  app.post("/api/generate-full-recipe", requireAuth, async (req, res) => {
+  app.post("/api/generate-full-recipe", async (req, res) => {
     try {
-      const user = await storage.getUser(req.session!.userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Check usage limits for non-Plus users (bypass in development)
-      const isDevelopment = process.env.NODE_ENV === 'development';
-      if (!isDevelopment && !user.isPlus && user.recipesThisMonth >= 5) {
-        return res.status(403).json({ message: "Recipe limit reached. Upgrade to Flavr+ for unlimited access." });
-      }
 
       const { selectedRecipe, mode, quizData, prompt } = req.body;
 
