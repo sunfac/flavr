@@ -40,7 +40,7 @@ export default function LandingPage() {
   // User query
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ['/api/me'],
-    enabled: true,
+    enabled: false, // Disable auto-fetching to prevent excessive calls
   });
 
   // Redirect if already logged in

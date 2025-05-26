@@ -25,7 +25,7 @@ export default function GlobalNavigation({ onClose }: GlobalNavigationProps) {
   // User query
   const { data: user } = useQuery({
     queryKey: ['/api/me'],
-    enabled: true,
+    enabled: false, // Disable auto-fetching to prevent excessive calls
   });
 
   const toggleTheme = () => {
