@@ -447,7 +447,7 @@ export default function SlideQuizShell({
       </div>
 
       {/* Fixed Navigation */}
-      <div className="bg-slate-900/90 backdrop-blur-xl border-t border-slate-700 p-4 pb-6 md:pb-4 flex-shrink-0">
+      <div className="bg-slate-900/90 backdrop-blur-xl border-t border-slate-700 p-4 pb-8 md:pb-4 flex-shrink-0">
         <div className="max-w-md mx-auto flex gap-3">
           {currentQuestion > 0 && (
             <Button
