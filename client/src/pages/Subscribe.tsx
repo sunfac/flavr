@@ -6,7 +6,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Header from "@/components/Header";
+import GlobalHeader from "@/components/GlobalHeader";
+import GlobalNavigation from "@/components/GlobalNavigation";
+import SettingsPanel from "@/components/SettingsPanel";
+import UserMenu from "@/components/UserMenu";
 import Loading from "@/components/Loading";
 
 // Make sure to call `loadStripe` outside of a component's render to avoid
@@ -73,6 +76,9 @@ const SubscribeForm = () => {
 export default function Subscribe() {
   const [clientSecret, setClientSecret] = useState("");
   const [, navigate] = useLocation();
+  const [showNavigation, setShowNavigation] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
     // Create subscription as soon as the page loads
@@ -93,7 +99,11 @@ export default function Subscribe() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <GlobalHeader 
+        onMenuClick={() => setShowNavigation(true)}
+        onSettingsClick={() => setShowSettings(true)}
+        onUserClick={() => setShowUserMenu(true)}
+      />
       
       <main className="container mx-auto px-4 py-6">
         <div className="max-w-md mx-auto">
@@ -152,6 +162,21 @@ export default function Subscribe() {
           </Card>
         </div>
       </main>
+
+      {/* Navigation Panel */}
+      {showNavigation && (
+        <GlobalNavigation onClose={() => setShowNavigation(false)} />
+      )}
+
+      {/* Settings Panel */}
+      {showSettings && (
+        <SettingsPanel onClose={() => setShowSettings(false)} />
+      )}
+
+      {/* User Menu */}
+      {showUserMenu && (
+        <UserMenu onClose={() => setShowUserMenu(false)} />
+      )}
     </div>
   );
 }

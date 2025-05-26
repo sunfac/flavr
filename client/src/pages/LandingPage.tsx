@@ -140,7 +140,10 @@ export default function LandingPage() {
       <GlobalHeader 
         onMenuClick={() => setShowNavigation(true)}
         onSettingsClick={() => setShowSettings(true)}
-        onUserClick={() => setShowUserMenu(true)}
+        onUserClick={() => {
+          setAuthMode("signup");
+          setShowAuthModal(true);
+        }}
       />
 
       {/* Navigation Bar */}
