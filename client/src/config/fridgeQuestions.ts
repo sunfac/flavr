@@ -94,7 +94,7 @@ export const fridgeQuestions: QuestionConfig[] = [
     subtitle: "What can you cook with?",
     type: "equipment-grid",
     options: [
-      { value: "stovetop", label: "Stovetop", icon: "Flame" },
+      { value: "hob", label: "Hob", icon: "Flame" },
       { value: "oven", label: "Oven", icon: "Oven" },
       { value: "microwave", label: "Microwave", icon: "Zap" },
       { value: "airfryer", label: "Air Fryer", icon: "Wind" },

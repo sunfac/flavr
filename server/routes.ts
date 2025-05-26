@@ -233,9 +233,13 @@ function getDietPromptText(dietKeys: string[]): string {
 
 function getEquipmentPromptText(equipmentKeys: string[]): string {
   const equipmentMap: Record<string, { label: string; description: string }> = {
+    hob: {
+      label: "Hob / Stovetop",
+      description: "Use hob cooking methods like sautéing, boiling, simmering, and pan-frying. Focus on recipes that require direct heat control.",
+    },
     stovetop: {
-      label: "Stovetop / Hob",
-      description: "Use stovetop cooking methods like sautéing, boiling, simmering, and pan-frying. Focus on recipes that require direct heat control.",
+      label: "Hob / Stovetop", 
+      description: "Use hob cooking methods like sautéing, boiling, simmering, and pan-frying. Focus on recipes that require direct heat control.",
     },
     oven: {
       label: "Oven",
@@ -245,7 +249,7 @@ function getEquipmentPromptText(equipmentKeys: string[]): string {
       label: "Microwave",
       description: "Quick reheating and simple cooking methods. Focus on steam-cooking vegetables, melting, and rapid preparation techniques.",
     },
-    airFryer: {
+    airfryer: {
       label: "Air Fryer",
       description: "Crispy textures with minimal oil using circulated hot air. Excellent for achieving fried-like results with healthier cooking.",
     },

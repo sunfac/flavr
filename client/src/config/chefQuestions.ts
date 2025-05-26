@@ -103,7 +103,7 @@ export const chefQuestions: QuestionConfig[] = [
     subtitle: "What tools do you have access to?",
     type: "equipment-grid",
     options: [
-      { value: "stovetop", label: "Stovetop", icon: "Flame" },
+      { value: "hob", label: "Hob", icon: "Flame" },
       { value: "oven", label: "Oven", icon: "Oven" },
       { value: "microwave", label: "Microwave", icon: "Zap" },
       { value: "airfryer", label: "Air Fryer", icon: "Wind" },
