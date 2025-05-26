@@ -46,8 +46,8 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
   const navigationItems = [
     {
       icon: Home,
-      label: "Home",
-      href: "/",
+      label: "Home", 
+      href: user?.user ? "/app" : "/",
       requiresAuth: false
     },
     {

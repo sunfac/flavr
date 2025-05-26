@@ -1,6 +1,9 @@
 import { useLocation } from "wouter";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface SettingsPanelProps {
   onClose: () => void;
@@ -8,10 +11,44 @@ interface SettingsPanelProps {
 
 export default function SettingsPanel({ onClose }: SettingsPanelProps) {
   const [, navigate] = useLocation();
+  const { toast } = useToast();
+
+  // Check if user is logged in
+  const { data: user } = useQuery({
+    queryKey: ["/api/me"],
+    retry: false,
+  });
+
+  const isAuthenticated = user?.user;
+
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/logout"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+      toast({
+        title: "Logged out successfully",
+        description: "See you next time!",
+      });
+      navigate("/");
+      onClose();
+    },
+    onError: () => {
+      toast({
+        title: "Logout failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleNavigation = (path: string) => {
     navigate(path);
     onClose();
+  };
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
   };
 
   return (
@@ -57,6 +94,18 @@ export default function SettingsPanel({ onClose }: SettingsPanelProps) {
             </Button>
             
             <div className="border-t border-border pt-3">
+              {isAuthenticated && (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                  onClick={handleLogout}
+                  disabled={logoutMutation.isPending}
+                >
+                  <i className="fas fa-sign-out-alt mr-3"></i>
+                  {logoutMutation.isPending ? "Logging out..." : "Logout"}
+                </Button>
+              )}
+              
               <Button
                 variant="ghost"
                 className="w-full justify-start text-muted-foreground"
