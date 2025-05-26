@@ -179,7 +179,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section - Mobile Optimized */}
-      <section id="hero" className="min-h-screen flex flex-col items-center justify-center text-center px-4 relative z-10 pt-24">
+      <section id="hero" className="min-h-screen flex flex-col items-center justify-center text-center px-4 relative z-10 pt-32">
         {/* Optimized Logo with White Radial Glow */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
