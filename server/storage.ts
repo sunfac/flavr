@@ -46,8 +46,8 @@ export class MemStorage implements IStorage {
   private async createDeveloperAccount() {
     const developerUser: User = {
       id: 999,
-      username: "williambly@blycontracting.co.uk",
-      email: "williambly@blycontracting.co.uk",
+      username: "william@blycontracting.co.uk",
+      email: "william@blycontracting.co.uk",
       password: "flavr1", // In production, this would be hashed
       subscriptionTier: "premium",
       recipesGenerated: 0,
@@ -60,7 +60,7 @@ export class MemStorage implements IStorage {
     };
     
     this.users.set(999, developerUser);
-    console.log("Developer account created: williambly@blycontracting.co.uk");
+    console.log("Developer account created: william@blycontracting.co.uk");
   }
 
   async getUser(id: number): Promise<User | undefined> {
