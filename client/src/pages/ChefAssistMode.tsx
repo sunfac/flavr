@@ -27,6 +27,21 @@ export default function ChefAssistMode() {
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
+  // Close all menus
+  const closeAllMenus = () => {
+    setShowNavigation(false);
+    setShowSettings(false);
+    setShowUserMenu(false);
+  };
+
+  // Open specific menu and close others
+  const openMenu = (menuType: 'navigation' | 'settings' | 'userMenu') => {
+    closeAllMenus();
+    if (menuType === 'navigation') setShowNavigation(true);
+    if (menuType === 'settings') setShowSettings(true);
+    if (menuType === 'userMenu') setShowUserMenu(true);
+  };
+
   // Check if user is logged in
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["/api/me"],
@@ -116,9 +131,9 @@ export default function ChefAssistMode() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <GlobalHeader 
-        onMenuClick={() => setShowNavigation(true)}
-        onSettingsClick={() => setShowSettings(true)}
-        onUserClick={() => setShowUserMenu(true)}
+        onMenuClick={() => openMenu('navigation')}
+        onSettingsClick={() => openMenu('settings')}
+        onAuthRequired={() => navigate("/")}
       />
 
       {/* Recipe Remaining Banner - positioned below header with proper spacing */}
@@ -161,15 +176,22 @@ export default function ChefAssistMode() {
       <GlobalFooter currentMode="chef" />
 
       {showNavigation && (
-        <GlobalNavigation onClose={() => setShowNavigation(false)} />
+        <GlobalNavigation 
+          onClose={closeAllMenus}
+          onAuthRequired={() => navigate("/")}
+        />
       )}
 
       {showSettings && (
-        <SettingsPanel onClose={() => setShowSettings(false)} />
+        <SettingsPanel 
+          onClose={closeAllMenus}
+        />
       )}
 
       {showUserMenu && (
-        <UserMenu onClose={() => setShowUserMenu(false)} />
+        <UserMenu 
+          onClose={closeAllMenus}
+        />
       )}
 
       {showAuthModal && (

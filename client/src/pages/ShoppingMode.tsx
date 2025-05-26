@@ -20,6 +20,21 @@ export default function ShoppingMode() {
   const [showNavigation, setShowNavigation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Close all menus
+  const closeAllMenus = () => {
+    setShowNavigation(false);
+    setShowSettings(false);
+    setShowUserMenu(false);
+  };
+
+  // Open specific menu and close others
+  const openMenu = (menuType: 'navigation' | 'settings' | 'userMenu') => {
+    closeAllMenus();
+    if (menuType === 'navigation') setShowNavigation(true);
+    if (menuType === 'settings') setShowSettings(true);
+    if (menuType === 'userMenu') setShowUserMenu(true);
+  };
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [hasSentPrompt1Twice, setHasSentPrompt1Twice] = useState(false);
 
