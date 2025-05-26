@@ -93,14 +93,16 @@ export default function FridgeMode() {
       
       // Use the already transformed data with random cuisine selection
       const apiData = {
-        ingredients: data.ingredients?.split(',').map((i: string) => i.trim()) || [],
-        vibe: data.vibe,
-        cuisines: selectedCuisines, // Use the randomly selected cuisine
-        time: data.time || 30,
-        dietary: data.dietary || [],
-        equipment: data.equipment || [],
-        ambition: data.ambition || 3
+        ingredients: transformedData.ingredients || [],
+        vibe: transformedData.vibe,
+        cuisines: transformedData.cuisines, // Use the randomly selected cuisine
+        time: transformedData.time || 30,
+        dietary: transformedData.dietary || [],
+        equipment: transformedData.equipment || [],
+        ambition: transformedData.ambition || 3
       };
+      
+      console.log("Final API data prepared:", apiData);
 
       // Generate recipe ideas using the same pattern as Shopping mode
       console.log("Making API call to /api/generate-recipe-ideas with data:", {
