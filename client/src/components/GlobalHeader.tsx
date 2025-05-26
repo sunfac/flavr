@@ -5,7 +5,6 @@ import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 interface GlobalHeaderProps {
   onMenuClick?: () => void;
   onSettingsClick?: () => void;
-  onUserClick?: () => void;
   onAuthRequired?: () => void;
 }
 
@@ -35,8 +34,8 @@ export default function GlobalHeader({
           <img src={FlavrLogo} alt="Flavr" className="w-10 h-10" />
         </div>
 
-        {/* Right: Settings and Login */}
-        <div className="flex items-center space-x-2">
+        {/* Right: Settings */}
+        <div className="flex items-center">
           <Button 
             variant="ghost"
             size="icon"
@@ -47,17 +46,6 @@ export default function GlobalHeader({
             className="text-white hover:bg-white/10 relative z-10"
           >
             <Settings className="w-6 h-6" />
-          </Button>
-          <Button 
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              console.log("User clicked");
-              onUserClick?.();
-            }}
-            className="text-white hover:bg-white/10 relative z-10"
-          >
-            <User className="w-6 h-6" />
           </Button>
         </div>
       </div>
