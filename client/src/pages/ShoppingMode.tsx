@@ -131,36 +131,7 @@ export default function ShoppingMode() {
       setCurrentStep("recipe");
     } catch (error) {
       console.error("Recipe generation failed:", error);
-      // Create a well-formatted fallback recipe
-      const fallbackRecipe = {
-        ...recipe,
-        ingredients: [
-          "2 lbs beef short ribs, cut into strips",
-          "3 tbsp gochujang (Korean chili paste)",
-          "2 tbsp soy sauce",
-          "1 tbsp sesame oil",
-          "2 cloves garlic, minced",
-          "1 inch fresh ginger, grated",
-          "2 green onions, chopped",
-          "1 tbsp rice vinegar",
-          "1 tsp brown sugar",
-          "Sesame seeds for garnish"
-        ],
-        instructions: [
-          "In a bowl, mix gochujang, soy sauce, sesame oil, garlic, ginger, and brown sugar to create the marinade.",
-          "Add beef strips to the marinade and let sit for 30 minutes.",
-          "Preheat grill or grill pan to medium-high heat.",
-          "Grill marinated beef for 3-4 minutes per side until nicely charred.",
-          "Remove from heat and let rest for 2 minutes.",
-          "Garnish with chopped green onions and sesame seeds.",
-          "Serve immediately with steamed rice and kimchi."
-        ],
-        cookTime: 25,
-        servings: 4,
-        difficulty: "Medium",
-        cuisine: "Korean"
-      };
-      setSelectedRecipe(fallbackRecipe);
+      setSelectedRecipe(recipe);
       setCurrentStep("recipe");
     } finally {
       setIsLoading(false);

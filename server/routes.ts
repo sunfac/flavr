@@ -901,6 +901,9 @@ Return a JSON object with this exact structure:
 Make the ingredients specific with quantities and the instructions detailed and clear. Ensure all ingredient selections and quantities align with the specified mood, ambition level, time constraints, and budget constraints.`;
       }
 
+      // Add error handling and logging for OpenAI API call
+      console.log("Making OpenAI API call for full recipe generation");
+      
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -908,6 +911,7 @@ Make the ingredients specific with quantities and the instructions detailed and 
         response_format: { type: "json_object" },
       });
 
+      console.log("OpenAI API response received for full recipe");
       const fullRecipe = JSON.parse(response.choices[0].message.content!);
 
       // Generate sophisticated recipe image
@@ -957,6 +961,9 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
         imageUrl 
       });
     } catch (error: any) {
+      console.error("Full recipe generation error details:", error);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
       res.status(500).json({ message: "Failed to generate full recipe: " + error.message });
     }
   });
