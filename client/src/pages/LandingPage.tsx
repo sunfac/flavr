@@ -768,7 +768,7 @@ export default function LandingPage() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0 }}
           onClick={scrollToTop}
-          className="fixed bottom-24 left-1/2 transform -translate-x-1/2 md:bottom-8 md:right-8 md:left-auto md:transform-none z-50 relative group"
+          className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-50 relative group"
         >
           {/* Enhanced glow effects */}
           <div className="absolute -inset-2 bg-gradient-to-r from-orange-500/50 via-amber-500/40 to-orange-500/50 rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity duration-300 animate-pulse"></div>
