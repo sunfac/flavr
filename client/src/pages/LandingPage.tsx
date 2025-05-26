@@ -185,7 +185,7 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative group -mb-3"
+          className="relative group -mb-2.5"
         >
           <div className="w-48 md:w-56 mx-auto relative">
             {/* Multi-layer glow effect */}
