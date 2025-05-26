@@ -1,6 +1,13 @@
 // Global quota management utility for Flavr app
 // This function manages the 3-recipe free limit across ALL modes (Shopping, Fridge, Chef)
 export async function checkQuotaBeforeGPT(): Promise<boolean> {
+  // Developer mode bypass - unlimited recipes in development
+  const isDevelopment = import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
+  if (isDevelopment) {
+    console.log("[Flavr] Developer mode active - bypassing recipe limits");
+    return true;
+  }
+
   // Step 1: Create or retrieve pseudo-user ID
   let userId = localStorage.getItem("flavrUserId");
   if (!userId) {
