@@ -394,6 +394,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ message: "Backend routing works!", timestamp: new Date().toISOString() });
   });
 
+  // Creative instructions for Shopping Mode variety
+  const creativeInstructions = [
+    "Add international influence — pull from Asian, Mediterranean or Latin American inspiration.",
+    "Emphasize seasonal ingredients and vibrant colors.",
+    "Focus on textural contrast — include crunch, creaminess, or char.",
+    "Use unexpected pairings — like fruit with spice or sweet with umami.",
+    "Think like a street food chef — punchy, bold, and fun.",
+    "Simplify technique — one pot or traybake encouraged.",
+    "Create meals that feel comforting and nostalgic.",
+    "Modernize a classic recipe with a surprising twist.",
+    "Use fresh herbs, acid, and fat to create depth.",
+    "Make it visually Instagrammable with color contrast and plating."
+  ];
+
   // Recipe generation routes (no auth required for ideas)
   app.post("/api/recipe-ideas", async (req, res) => {
     console.log("Recipe ideas endpoint hit with:", { mode: req.body.mode, quizData: req.body.quizData });
@@ -415,6 +429,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Build Shopping Mode mapped prompt (Prompt 1)
         const creativeGuidance = getCreativeGuidanceBlock();
         
+        // Generate random creativity injection for Shopping Mode
+        const randomInstruction = creativeInstructions[Math.floor(Math.random() * creativeInstructions.length)];
+        const variationSeed = `seed-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+
         enhancedPrompt = `You are an elite private chef.
 
 Based on the following preferences, suggest 5 unique, flavour-packed recipe ideas. Each idea should have a title and a one-sentence description:
@@ -437,6 +455,9 @@ ${creativeGuidance}
 
 Ensure the 5 ideas are meaningfully distinct from each other in ingredients, style, or technique.
 Avoid repeating the same ingredient combinations across recipes.
+
+Creative Direction: ${randomInstruction}
+Seed for creative variation (not visible to user): ${variationSeed}
 
 Return a JSON object with this exact structure:
 {
