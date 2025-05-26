@@ -673,7 +673,7 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
 
       console.log("OpenAI API response received successfully");
       const result = JSON.parse(response.choices[0].message.content!);
-      res.json({ ideas: result.recipes || [] });
+      res.json({ recipes: result.recipes || [] });
     } catch (error: any) {
       console.error("Recipe ideas generation error details:", {
         message: error.message,
