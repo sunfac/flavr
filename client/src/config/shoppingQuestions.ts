@@ -100,7 +100,7 @@ export const shoppingQuestions: QuestionConfig[] = [
       { value: "grill", label: "Grill", icon: "Beef" },
       { value: "slowcooker", label: "Slow Cooker", icon: "Clock" },
       { value: "pressure", label: "Pressure Cooker", icon: "Timer" },
-      { value: "blender", label: "Blender", icon: "Coffee" },
+      { value: "blender", label: "Blender", icon: "Blend" },
       { value: "rice", label: "Rice Cooker", icon: "Star" },
       { value: "bbq", label: "BBQ", icon: "Flame" },
       { value: "basics", label: "Just the basics", icon: "ChefHat" }

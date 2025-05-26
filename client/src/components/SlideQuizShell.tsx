@@ -47,7 +47,8 @@ import {
   Heart,
   Waves,
   Beef,
-  Coffee
+  Blend,
+  Soup
 } from "lucide-react";
 
 export interface QuestionConfig {
@@ -150,7 +151,7 @@ export default function SlideQuizShell({
       Flame, Building, Microwave, Wind, Timer, Cooker,
       Clock, ChefHat, Utensils, Sparkles, ShoppingCart, Store,
       PoundSterling, ShoppingBag, Coins, Banknote, Users, Heart,
-      Waves, Beef, Coffee
+      Waves, Beef, Blend, Soup
     };
     
     const IconComponent = iconMap[iconName];
@@ -271,8 +272,8 @@ export default function SlideQuizShell({
 
       case 'equipment-grid':
         return (
-          <div className="w-full max-w-md mx-auto">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="w-full">
+            <div className="grid grid-cols-3 gap-2 max-h-[50vh] overflow-y-auto pr-1 scroll-smooth">
               {currentQ.options?.map((option) => {
                 const isSelected = Array.isArray(currentAnswer) && currentAnswer.includes(option.value);
                 return (
@@ -282,7 +283,7 @@ export default function SlideQuizShell({
                     whileTap={{ scale: 0.98 }}
                   >
                     <Card 
-                      className={`cursor-pointer transition-all duration-300 border-2 aspect-square ${
+                      className={`cursor-pointer transition-all duration-300 border-2 h-16 ${
                         isSelected 
                           ? 'border-orange-400 bg-orange-500/10 shadow-lg shadow-orange-500/25' 
                           : 'border-slate-600 bg-slate-800/50 hover:border-orange-400/50'
@@ -296,7 +297,9 @@ export default function SlideQuizShell({
                       }}
                     >
                       <CardContent className="p-2 text-center h-full flex flex-col justify-center">
-                        <div className="text-lg mb-1">{option.icon}</div>
+                        <div className="mb-1 flex justify-center text-orange-400">
+                          {option.icon ? renderIcon(option.icon) : <div className="w-4 h-4" />}
+                        </div>
                         <div className="text-white font-medium text-xs leading-tight">{option.label}</div>
                       </CardContent>
                     </Card>
