@@ -209,8 +209,8 @@ export default function SlideQuizShell({
 
       case 'equipment-grid':
         return (
-          <div className="w-full max-w-sm mx-auto">
-            <div className="grid grid-cols-2 gap-3">
+          <div className="w-full max-w-md mx-auto">
+            <div className="grid grid-cols-2 gap-4">
               {currentQ.options?.map((option) => {
                 const isSelected = Array.isArray(currentAnswer) && currentAnswer.includes(option.value);
                 return (
@@ -247,7 +247,7 @@ export default function SlideQuizShell({
 
       case 'multi-select':
         return (
-          <div className="w-full max-w-sm mx-auto space-y-2 max-h-64 overflow-y-auto">
+          <div className="w-full max-w-md mx-auto space-y-3 max-h-80 overflow-y-auto">
             {currentQ.options?.map((option) => {
               const isSelected = Array.isArray(currentAnswer) && currentAnswer.includes(option.value);
               return (

@@ -108,6 +108,20 @@ export const fridgeQuestions: QuestionConfig[] = [
     ]
   },
   {
+    id: "servings",
+    label: "How many servings?",
+    subtitle: "Planning for how many people?",
+    type: "cards",
+    required: true,
+    options: [
+      { value: "1", label: "Just me", icon: "User", desc: "1 serving" },
+      { value: "2", label: "For two", icon: "Users", desc: "2 servings" },
+      { value: "4", label: "Small family", icon: "Home", desc: "4 servings" },
+      { value: "6", label: "Large family", icon: "Users2", desc: "6 servings" },
+      { value: "8", label: "Party time", icon: "PartyPopper", desc: "8+ servings" }
+    ]
+  },
+  {
     id: "ambition",
     label: "Ambition level",
     subtitle: "How adventurous are we feeling?",

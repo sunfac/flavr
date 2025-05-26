@@ -73,6 +73,7 @@ export default function ShoppingMode() {
       const dietaryText = transformedData.dietary?.length ? `Dietary requirements: ${transformedData.dietary.join(', ')}.` : '';
       const equipmentText = transformedData.equipment?.length ? `Available equipment: ${transformedData.equipment.join(', ')}.` : '';
       const ambitionText = transformedData.ambition ? `Cooking ambition level: ${transformedData.ambition}/5 - adjust complexity accordingly.` : '';
+      const servingsText = transformedData.servings ? `Number of servings needed: ${transformedData.servings}.` : '';
       
       const enhancedPrompt = `You are an elite private chef creating personalized recipe suggestions.
 
@@ -84,6 +85,7 @@ ${timeText}
 ${dietaryText}
 ${equipmentText}
 ${ambitionText}
+${servingsText}
 
 Cuisine preference: ${transformedData.cuisine || 'Any cuisine'}
 
