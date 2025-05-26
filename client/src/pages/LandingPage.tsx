@@ -187,7 +187,7 @@ export default function LandingPage() {
           transition={{ duration: 0.8 }}
           className="relative group mb-4"
         >
-          <div className="w-56 h-44 md:w-72 md:h-56 mx-auto relative overflow-hidden">
+          <div className="w-56 md:w-72 mx-auto relative">
             {/* Subtle white radial glow behind logo */}
             <div className="absolute inset-0 bg-gradient-radial from-white/20 via-white/10 to-transparent rounded-full blur-2xl scale-110 group-hover:scale-125 transition-transform duration-500"></div>
             <div className="absolute inset-0 bg-gradient-radial from-white/15 via-white/5 to-transparent rounded-full blur-3xl scale-125 group-hover:scale-150 transition-transform duration-700"></div>
@@ -195,7 +195,7 @@ export default function LandingPage() {
             <img 
               src={FlavrFullLogo} 
               alt="Flavr - Your Private Chef"
-              className="w-full h-full object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-300 relative z-10"
+              className="w-full h-auto object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-300 relative z-10"
             />
           </div>
         </motion.div>
