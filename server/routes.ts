@@ -599,6 +599,10 @@ Each idea should include a recipe title and one short sentence describing what m
 
 Ingredients the user has in their fridge: ${Array.isArray(quizData.ingredients) ? quizData.ingredients.join(', ') : (quizData.ingredients || 'Various ingredients')}
 
+Servings needed: ${quizData.servings || 4} people
+
+Cuisine preference: ${Array.isArray(quizData.cuisines) ? quizData.cuisines.join(', ') : (quizData.cuisines || 'Any cuisine')}
+
 ${moodText}
 
 ${ambitionText}
@@ -780,6 +784,10 @@ Based on the user's selected idea and quiz preferences, generate the complete re
 
 **${selectedRecipe.title}**
 
+Servings needed: ${quizData.servings || 4} people
+
+Cuisine preference: ${Array.isArray(quizData.cuisines) ? quizData.cuisines.join(', ') : (quizData.cuisines || 'Any cuisine')}
+
 ${moodText}
 
 ${ambitionText}
@@ -791,8 +799,6 @@ ${timeText}
 ${equipmentText}
 
 Ingredients available: ${Array.isArray(quizData.ingredients) ? quizData.ingredients.join(', ') : (quizData.ingredients || 'Various ingredients')}
-
-Servings: ${quizData.servings || '4 servings'}
 
 ${creativeGuidance}
 

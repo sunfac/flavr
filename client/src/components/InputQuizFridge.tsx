@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { generateFridgePrompt1 } from "@/prompts/fridgePrompt1";
+
 
 interface QuizData {
   ingredients: string;
@@ -34,7 +34,7 @@ export default function InputQuizFridge({ onComplete, onRecipeIdeas, onLoading }
   const { toast } = useToast();
 
   const generateIdeasMutation = useMutation({
-    mutationFn: async (data: { mode: string; quizData: QuizData; prompt: string }) => {
+    mutationFn: async (data: { mode: string; quizData: QuizData; prompt?: string }) => {
       const fetchResponse = await fetch("/api/generate-recipe-ideas", {
         method: "POST",
         headers: {
@@ -82,13 +82,11 @@ export default function InputQuizFridge({ onComplete, onRecipeIdeas, onLoading }
         return;
       }
       
-      // Generate recipe ideas
+      // Generate recipe ideas using server-side mapped prompts
       onLoading(true);
-      const prompt = generateFridgePrompt1(quizData);
       generateIdeasMutation.mutate({
         mode: "fridge",
         quizData,
-        prompt,
       });
     }
   };
