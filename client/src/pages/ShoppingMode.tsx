@@ -44,8 +44,10 @@ export default function ShoppingMode() {
       });
       
       console.log("API Response:", response);
-      console.log("Recipe ideas received:", response.recipes || []);
-      setRecipeIdeas(response.recipes || []);
+      console.log("Full response:", JSON.stringify(response));
+      const recipes = response?.recipes || response || [];
+      console.log("Recipe ideas received:", recipes);
+      setRecipeIdeas(recipes);
       setCurrentStep("suggestions");
     } catch (error) {
       console.error("Recipe generation failed:", error);
