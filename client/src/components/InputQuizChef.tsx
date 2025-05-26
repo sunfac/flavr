@@ -14,6 +14,7 @@ interface QuizData {
   equipment: string;
   cookingTime: string;
   servings: string;
+  dietary?: string[];
 }
 
 interface InputQuizChefProps {
@@ -29,6 +30,7 @@ export default function InputQuizChef({ onComplete, onLoading }: InputQuizChefPr
     equipment: "",
     cookingTime: "",
     servings: "",
+    dietary: [],
   });
   const { toast } = useToast();
 
