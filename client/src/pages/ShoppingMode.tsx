@@ -13,9 +13,8 @@ import { shoppingQuestions } from "@/config/shoppingQuestions";
 import RecipeCard from "@/components/RecipeCard";
 import ChatBot from "@/components/ChatBot";
 import Loading from "@/components/Loading";
-import FlavrPlusGate from "@/components/FlavrPlusGate";
-import { useFlavrGate } from "@/hooks/useFlavrGate";
-import { api } from "@/lib/api";
+import { checkQuotaBeforeGPT, getRemainingRecipes } from "@/lib/quotaManager";
+import { apiRequest } from "@/lib/queryClient";
 import AuthModal from "@/components/AuthModal";
 
 export default function ShoppingMode() {
@@ -25,13 +24,10 @@ export default function ShoppingMode() {
   const [recipeIdeas, setRecipeIdeas] = useState<any[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showGate, setShowGate] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showNavigation, setShowNavigation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-
-  const { canGenerateRecipe } = useFlavrGate();
 
   // Check if user is logged in
   const { data: user, isLoading: userLoading } = useQuery({
@@ -61,105 +57,94 @@ export default function ShoppingMode() {
 
     setQuizData(transformedData);
 
+    // Check quota for non-authenticated users
     if (!isAuthenticated) {
-      // Show auth modal for unauthenticated users
-      setShowAuthModal(true);
-      return;
+      const canProceed = await checkQuotaBeforeGPT();
+      if (!canProceed) {
+        setShowAuthModal(true);
+        return;
+      }
     }
 
     try {
       setIsLoading(true);
 
-      // Generate recipe ideas for authenticated users
-      try {
-        const response = await api.generateRecipeIdeas({
-          mode: "shopping",
-          quizData: transformedData,
-          prompt: `Generate recipe ideas for shopping mode with mood: ${transformedData.mood}, budget: ${transformedData.budget}`
-        });
-        setRecipeIdeas(response.ideas || []);
-      } catch (error) {
-        console.error("API call failed, using fallback recipes:", error);
-        // Use curated fallback recipes based on quiz data
-        const fallbackRecipes = [
-          {
-            title: "Quick Asian Stir-Fry Bowl",
-            description: "Colorful vegetables and protein in savory sauce over steamed rice."
-          },
-          {
-            title: "Mediterranean Chicken Wrap",
-            description: "Herb-marinated chicken with fresh veggies in warm pita bread."
-          },
-          {
-            title: "Creamy Tuscan Pasta",
-            description: "Rich garlic cream sauce with sun-dried tomatoes and spinach."
-          },
-          {
-            title: "Spicy Black Bean Tacos",
-            description: "Seasoned beans with fresh salsa and creamy avocado slices."
-          },
-          {
-            title: "Honey Garlic Salmon",
-            description: "Glazed salmon fillet with roasted seasonal vegetables."
-          },
-          {
-            title: "Classic Caesar Salad",
-            description: "Crisp romaine with homemade dressing and parmesan croutons."
-          }
-        ];
-        setRecipeIdeas(fallbackRecipes);
+      // Generate recipe ideas
+      const response = await apiRequest("POST", "/api/recipe-ideas", {
+        mode: "shopping",
+        quizData: transformedData,
+        prompt: `Generate recipe ideas for shopping mode with mood: ${transformedData.mood}, budget: ${transformedData.budget}`
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        setRecipeIdeas(result.ideas || []);
+      } else {
+        throw new Error('Failed to generate recipe ideas');
       }
-      setCurrentStep("suggestions");
     } catch (error) {
-      console.error("Failed to generate recipe ideas:", error);
-      setCurrentStep("suggestions");
+      console.error("API call failed, using fallback recipes:", error);
+      // Use curated fallback recipes based on quiz data
+      const fallbackRecipes = [
+        {
+          title: "Quick Asian Stir-Fry Bowl",
+          description: "Colorful vegetables and protein in savory sauce over steamed rice."
+        },
+        {
+          title: "Mediterranean Chicken Wrap",
+          description: "Herb-marinated chicken with fresh veggies in warm pita bread."
+        },
+        {
+          title: "Creamy Tuscan Pasta",
+          description: "Rich garlic cream sauce with sun-dried tomatoes and spinach."
+        },
+        {
+          title: "Classic Caesar Salad",
+          description: "Crisp romaine with homemade dressing and parmesan croutons."
+        }
+      ];
+      setRecipeIdeas(fallbackRecipes);
     } finally {
+      setCurrentStep("suggestions");
       setIsLoading(false);
     }
   };
 
   const handleRecipeSelect = async (recipe: any) => {
+    // Check quota for non-authenticated users
     if (!isAuthenticated) {
-      navigate("/");
-      return;
-    }
-    if (!canGenerateRecipe(user?.user)) {
-      setShowGate(true);
-      return;
+      const canProceed = await checkQuotaBeforeGPT();
+      if (!canProceed) {
+        setShowAuthModal(true);
+        return;
+      }
     }
 
     // Generate full recipe immediately when selected
     try {
       setIsLoading(true);
       
-      const fullRecipeResponse = await api.generateFullRecipe({
+      const fullRecipeResponse = await apiRequest("POST", "/api/generate-recipe", {
         selectedRecipe: recipe,
         mode: "shopping",
         quizData: quizData,
         prompt: `Generate a complete recipe for "${recipe.title}" based on shopping mode preferences: ${JSON.stringify(quizData)}. Include title, description, ingredients list, step-by-step instructions, cook time, servings, and difficulty level.`
       });
 
-      setSelectedRecipe(fullRecipeResponse.recipe);
-      setCurrentStep("recipe");
+      if (fullRecipeResponse.ok) {
+        const result = await fullRecipeResponse.json();
+        setSelectedRecipe(result.recipe);
+        setCurrentStep("recipe");
+      } else {
+        throw new Error('Failed to generate recipe');
+      }
     } catch (error) {
       console.error("Failed to generate full recipe:", error);
       // Fallback to basic recipe structure
       setSelectedRecipe({
         ...recipe,
-        ingredients: [
-          "Main protein or base ingredient",
-          "Fresh vegetables or sides", 
-          "Seasonings and spices",
-          "Cooking oil or butter",
-          "Optional garnish"
-        ],
-        instructions: [
-          "Prepare all ingredients and equipment",
-          "Cook the main component using your preferred method",
-          "Add seasonings and complementary ingredients", 
-          "Combine everything and cook until done",
-          "Serve hot and enjoy your creation"
-        ],
+        ingredients: ["Ingredients will be generated based on your preferences"],
+        instructions: ["Instructions will be provided once generated"],
         cookTime: 30,
         servings: 4,
         difficulty: "Medium"
@@ -170,84 +155,47 @@ export default function ShoppingMode() {
     }
   };
 
-  const handleNewSearch = () => {
+  const handleBackToQuiz = () => {
     setCurrentStep("quiz");
     setQuizData(null);
     setRecipeIdeas([]);
     setSelectedRecipe(null);
   };
 
-  const handleAuthSuccess = async () => {
-    // After successful login/signup, generate recipes with stored quiz data
-    if (quizData) {
-      try {
-        setIsLoading(true);
-        try {
-          const response = await api.generateRecipeIdeas({
-            mode: "shopping",
-            quizData: quizData,
-            prompt: `Generate recipe ideas for shopping mode with mood: ${quizData.mood}, budget: ${quizData.budget}`
-          });
-          setRecipeIdeas(response.ideas || []);
-        } catch (error) {
-          console.error("API call failed, using fallback recipes:", error);
-          // Use curated fallback recipes based on quiz data
-          const fallbackRecipes = [
-            {
-              title: "Quick Asian Stir-Fry Bowl",
-              description: "Colorful vegetables and protein in savory sauce over steamed rice."
-            },
-            {
-              title: "Mediterranean Chicken Wrap", 
-              description: "Herb-marinated chicken with fresh veggies in warm pita bread."
-            },
-            {
-              title: "Creamy Tuscan Pasta",
-              description: "Rich garlic cream sauce with sun-dried tomatoes and spinach."
-            },
-            {
-              title: "Spicy Black Bean Tacos",
-              description: "Seasoned beans with fresh salsa and creamy avocado slices."
-            },
-            {
-              title: "Honey Garlic Salmon", 
-              description: "Glazed salmon fillet with roasted seasonal vegetables."
-            },
-            {
-              title: "Classic Caesar Salad",
-              description: "Crisp romaine with homemade dressing and parmesan croutons."
-            }
-          ];
-          setRecipeIdeas(fallbackRecipes);
-        }
-        setCurrentStep("suggestions");
-      } catch (error) {
-        console.error("Failed to generate recipe ideas:", error);
-        setCurrentStep("suggestions");
-      } finally {
-        setIsLoading(false);
-      }
+  const handleAuthSuccess = () => {
+    setShowAuthModal(false);
+    // Continue with recipe generation after successful auth
+    if (quizData && currentStep === "quiz") {
+      handleQuizComplete(quizData);
     }
   };
 
-  const handleBackToSuggestions = () => {
-    setCurrentStep("suggestions");
-    setSelectedRecipe(null);
-  };
+  if (isLoading) {
+    return <Loading message="Creating your perfect shopping recipe..." />;
+  }
 
   return (
-    <div className="min-h-screen">
-      {/* Consistent header across all modes */}
+    <div className="min-h-screen bg-background flex flex-col">
       <GlobalHeader 
         onMenuClick={() => setShowNavigation(true)}
         onSettingsClick={() => setShowSettings(true)}
         onUserClick={() => setShowUserMenu(true)}
       />
-      
-      <main>
+
+      <main className="flex-1 p-4 pb-20">
+        {!isAuthenticated && currentStep === "quiz" && (
+          <div className="mb-4 p-4 bg-card border border-border rounded-xl">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Clock className="w-4 h-4" />
+              <span>{getRemainingRecipes()} free recipes remaining</span>
+            </div>
+          </div>
+        )}
+
         {currentStep === "quiz" && (
           <SlideQuizShell
             title="Shopping Mode"
+            subtitle="Let's create your perfect shopping list and recipe"
             questions={shoppingQuestions}
             onSubmit={handleQuizComplete}
             theme="shopping"
@@ -255,65 +203,73 @@ export default function ShoppingMode() {
         )}
 
         {currentStep === "suggestions" && (
-          <TinderRecipeCards 
-            recipes={recipeIdeas}
-            onSelectRecipe={handleRecipeSelect}
-            quizData={quizData}
-            theme="shopping"
-          />
-        )}
-
-        {currentStep === "recipe" && selectedRecipe && (
-          <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black">
-            <RecipeCard
-              recipe={selectedRecipe}
-              mode="shopping"
+          <div className="space-y-6">
+            <div className="text-center">
+              <h2 className="text-heading mb-2">Recipe Suggestions</h2>
+              <p className="text-muted-foreground">Swipe right to select a recipe</p>
+            </div>
+            
+            <TinderRecipeCards
+              recipes={recipeIdeas}
+              onSelectRecipe={handleRecipeSelect}
               quizData={quizData}
-              isFullView={true}
-              onBack={handleBackToSuggestions}
+              theme="shopping"
             />
+
+            <div className="text-center">
+              <button
+                onClick={handleBackToQuiz}
+                className="btn-ghost"
+              >
+                Back to Quiz
+              </button>
+            </div>
           </div>
         )}
 
-        {isLoading && (
-          <Loading message="Creating your perfect recipe..." />
-        )}
-
-        {showGate && (
-          <FlavrPlusGate onClose={() => setShowGate(false)} />
+        {currentStep === "recipe" && selectedRecipe && (
+          <RecipeCard
+            recipe={selectedRecipe}
+            mode="shopping"
+            quizData={quizData}
+            isFullView={true}
+            onBack={() => setCurrentStep("suggestions")}
+            showNewSearchButton={true}
+            onNewSearch={handleBackToQuiz}
+          />
         )}
       </main>
 
-      {/* Chat bot positioned elegantly in bottom-right like landing page icons */}
-      {currentStep !== "quiz" && (
-        <div className="fixed bottom-6 right-6 z-50">
-          <ChatBot />
-        </div>
-      )}
-
-      {/* Consistent footer across all modes */}
       <GlobalFooter currentMode="shopping" />
 
-      {/* Navigation overlays */}
       {showNavigation && (
         <GlobalNavigation onClose={() => setShowNavigation(false)} />
       )}
-      
+
       {showSettings && (
         <SettingsPanel onClose={() => setShowSettings(false)} />
       )}
-      
+
       {showUserMenu && (
         <UserMenu onClose={() => setShowUserMenu(false)} />
       )}
 
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={handleAuthSuccess}
-        title="Your personalized recipes are ready!"
-        description="Sign up to unlock your custom AI-generated recipes based on your preferences"
-      />
+      {showAuthModal && (
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={handleAuthSuccess}
+          title="Join Flavr to Continue"
+          description="Sign up for free to unlock unlimited recipe generation and save your favorites!"
+        />
+      )}
+
+      {selectedRecipe && (
+        <ChatBot
+          currentRecipe={selectedRecipe}
+          currentMode="shopping"
+        />
+      )}
     </div>
   );
 }
