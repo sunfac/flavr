@@ -230,6 +230,68 @@ function getDietPromptText(dietKeys: string[]): string {
   return `Dietary Requirements: ${dietDescriptions.join(' | ')}`;
 }
 
+function getEquipmentPromptText(equipmentKeys: string[]): string {
+  const equipmentMap: Record<string, { label: string; description: string }> = {
+    stovetop: {
+      label: "Stovetop / Hob",
+      description: "Use stovetop cooking methods like sautéing, boiling, simmering, and pan-frying. Focus on recipes that require direct heat control.",
+    },
+    oven: {
+      label: "Oven",
+      description: "Utilize baking, roasting, and broiling techniques. Perfect for dishes that need even heat distribution and longer cooking times.",
+    },
+    microwave: {
+      label: "Microwave",
+      description: "Quick reheating and simple cooking methods. Focus on steam-cooking vegetables, melting, and rapid preparation techniques.",
+    },
+    airFryer: {
+      label: "Air Fryer",
+      description: "Crispy textures with minimal oil using circulated hot air. Excellent for achieving fried-like results with healthier cooking.",
+    },
+    grill: {
+      label: "Grill / Broiler",
+      description: "High-heat cooking for char marks and smoky flavors. Perfect for meats, vegetables, and dishes requiring direct intense heat.",
+    },
+    slowCooker: {
+      label: "Slow Cooker",
+      description: "Long, gentle cooking for tender results. Ideal for stews, braised dishes, and hands-off cooking methods.",
+    },
+    pressureCooker: {
+      label: "Pressure Cooker",
+      description: "Fast cooking under pressure for quick, tender results. Perfect for beans, tough cuts of meat, and rapid meal preparation.",
+    },
+    blender: {
+      label: "Blender / Food Processor",
+      description: "Smoothies, soups, sauces, and ingredient processing. Essential for recipes requiring smooth textures or chopped ingredients.",
+    },
+    riceCooker: {
+      label: "Rice Cooker",
+      description: "Perfect rice and grain cooking with hands-off convenience. Can also steam vegetables and cook one-pot grain dishes.",
+    },
+    bbq: {
+      label: "BBQ / Outdoor Grill",
+      description: "Outdoor cooking with wood, charcoal, or gas for authentic BBQ flavors. Focus on grilled and smoked preparations.",
+    }
+  };
+
+  if (!equipmentKeys || equipmentKeys.length === 0) {
+    return "Available Equipment: Standard kitchen setup - use basic cooking methods suitable for most home kitchens.";
+  }
+
+  const equipmentDescriptions = equipmentKeys
+    .map(key => {
+      const equipment = equipmentMap[key];
+      return equipment ? `${equipment.label}: ${equipment.description}` : null;
+    })
+    .filter(Boolean);
+
+  if (equipmentDescriptions.length === 0) {
+    return "Available Equipment: Standard kitchen setup - use basic cooking methods.";
+  }
+
+  return `Available Equipment: ${equipmentDescriptions.join(' | ')}`;
+}
+
 // Initialize OpenAI
 if (!process.env.OPENAI_API_KEY) {
   throw new Error('Missing required OpenAI API key: OPENAI_API_KEY');
@@ -325,12 +387,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { mode, quizData, prompt } = req.body;
 
-      // Include budget, mood, ambition, time, and dietary guidance in the recipe ideas prompt
+      // Include budget, mood, ambition, time, dietary, and equipment guidance in the recipe ideas prompt
       const budgetGuidance = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
       const moodGuidance = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
       const ambitionGuidance = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
       const timeGuidance = quizData.time ? getTimePromptText(quizData.time) : '';
       const dietaryGuidance = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
+      const equipmentGuidance = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
       
       // Build enhanced prompt for 6 recipe suggestions
       const enhancedPrompt = `Generate exactly 6 diverse recipe suggestions based on these preferences:
@@ -347,6 +410,8 @@ ${timeGuidance}
 ${budgetGuidance}
 
 ${dietaryGuidance}
+
+${equipmentGuidance}
 
 Return a JSON object with this exact structure:
 {
@@ -389,12 +454,13 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
 
       const { selectedRecipe, mode, quizData, prompt } = req.body;
 
-      // Include budget, mood, ambition, time, and dietary guidance in the prompt
+      // Include budget, mood, ambition, time, dietary, and equipment guidance in the prompt
       const budgetGuidance = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
       const moodGuidance = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
       const ambitionGuidance = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
       const timeGuidance = quizData.time ? getTimePromptText(quizData.time) : '';
       const dietaryGuidance = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
+      const equipmentGuidance = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
       
       // Build enhanced prompt for complete recipe generation
       const enhancedPrompt = `Generate a complete, detailed recipe for "${selectedRecipe.title}" based on these preferences:
@@ -412,6 +478,8 @@ ${timeGuidance}
 ${budgetGuidance}
 
 ${dietaryGuidance}
+
+${equipmentGuidance}
 
 Return a JSON object with this exact structure:
 {
