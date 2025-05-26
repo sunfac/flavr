@@ -199,7 +199,7 @@ ${publicUrl}`;
         
         <div className="text-center mt-8">
           <div id="pdf-qr">
-            <QRCodeSVG value={publicUrl} size={100} />
+            <QRCode value={publicUrl} size={100} />
           </div>
           <p className="text-xs text-gray-500 mt-2">Scan to view online</p>
         </div>
@@ -307,7 +307,7 @@ ${publicUrl}`;
           {/* QR Code Display */}
           <div className="text-center">
             <div id="recipe-qr" className="inline-block p-4 bg-white rounded-lg">
-              <QRCodeSVG value={publicUrl} size={120} />
+              <QRCode value={publicUrl} size={120} />
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               Scan to share this recipe instantly

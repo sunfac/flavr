@@ -18,7 +18,7 @@ import { apiRequest } from "@/lib/queryClient";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
 import ChatBot from "@/components/ChatBot";
-import RecipeShareTools from "@/components/RecipeShareTools";
+import SocialShareTools from "@/components/SocialShareTools";
 
 interface Recipe {
   id: number;
@@ -42,6 +42,7 @@ interface Recipe {
 export default function RecipeView() {
   const [location, navigate] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   // Extract recipe ID from URL
   const recipeId = location.split('/')[2];
@@ -50,6 +51,15 @@ export default function RecipeView() {
   const { data: recipeData, isLoading, error } = useQuery({
     queryKey: [`/api/recipe/${recipeId}`],
     enabled: !!recipeId,
+  });
+
+  // Share toggle mutation
+  const shareToggleMutation = useMutation({
+    mutationFn: (data: { id: number; isShared: boolean }) =>
+      apiRequest("POST", "/api/toggle-recipe-share", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/recipe/${recipeId}`] });
+    },
   });
 
   // Copy share link to clipboard
@@ -286,6 +296,24 @@ export default function RecipeView() {
               </CardContent>
             </Card>
           )}
+
+          {/* Social Share Tools */}
+          <div className="mt-8">
+            <SocialShareTools
+              id={recipe.id.toString()}
+              shareId={recipe.shareId || undefined}
+              title={recipe.title}
+              description={recipe.description || ""}
+              imageUrl={recipe.imageUrl || undefined}
+              isShared={recipe.isShared || false}
+              onShareToggle={() => 
+                shareToggleMutation.mutate({
+                  id: recipe.id,
+                  isShared: !recipe.isShared
+                })
+              }
+            />
+          </div>
 
           {/* AI Chef Chat */}
           <div className="mt-8">
