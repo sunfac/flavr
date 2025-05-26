@@ -36,18 +36,23 @@ export default function ShoppingMode() {
     try {
       setIsLoading(true);
       
-      const response = await apiRequest("POST", "/api/generate-recipe-ideas", {
-        mode: "shopping",
-        quizData: data,
-        isSecondAttempt,
-        prompt: "Generate 5 diverse recipe ideas for shopping mode"
+      const fetchResponse = await fetch("/api/generate-recipe-ideas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mode: "shopping",
+          quizData: data,
+          isSecondAttempt,
+          prompt: "Generate 5 diverse recipe ideas for shopping mode"
+        })
       });
       
+      const response = await fetchResponse.json();
       console.log("API Response:", response);
-      console.log("Full response:", JSON.stringify(response));
-      const recipes = response?.recipes || response || [];
-      console.log("Recipe ideas received:", recipes);
-      setRecipeIdeas(recipes);
+      console.log("Recipe ideas received:", response.recipes || []);
+      setRecipeIdeas(response.recipes || []);
       setCurrentStep("suggestions");
     } catch (error) {
       console.error("Recipe generation failed:", error);
