@@ -152,6 +152,14 @@ export default function FridgeMode() {
     setCurrentStep("recipe");
   };
 
+  const handleAllRecipesRejected = () => {
+    // When user rejects all recipes, go back to quiz for new search
+    setCurrentStep("quiz");
+    setQuizData(null);
+    setRecipeIdeas([]);
+    setSelectedRecipe(null);
+  };
+
   const handleNewSearch = () => {
     setCurrentStep("quiz");
     setQuizData(null);
