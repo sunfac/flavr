@@ -94,17 +94,17 @@ export const fridgeQuestions: QuestionConfig[] = [
     subtitle: "What can you cook with?",
     type: "equipment-grid",
     options: [
-      { value: "stovetop", label: "Stovetop", icon: "🔥" },
-      { value: "oven", label: "Oven", icon: "🏠" },
-      { value: "microwave", label: "Microwave", icon: "📻" },
-      { value: "airfryer", label: "Air Fryer", icon: "💨" },
-      { value: "grill", label: "Grill", icon: "🔥" },
-      { value: "slowcooker", label: "Slow Cooker", icon: "⏰" },
-      { value: "pressure", label: "Pressure Cooker", icon: "⚡" },
-      { value: "blender", label: "Blender", icon: "🌪️" },
-      { value: "rice", label: "Rice Cooker", icon: "🍚" },
-      { value: "bbq", label: "BBQ", icon: "🔥" },
-      { value: "basics", label: "Just the basics", icon: "🔪" }
+      { value: "stovetop", label: "Stovetop", icon: "Flame" },
+      { value: "oven", label: "Oven", icon: "Oven" },
+      { value: "microwave", label: "Microwave", icon: "Zap" },
+      { value: "airfryer", label: "Air Fryer", icon: "Wind" },
+      { value: "grill", label: "Grill", icon: "Barbecue" },
+      { value: "slowcooker", label: "Slow Cooker", icon: "Clock" },
+      { value: "pressure", label: "Pressure Cooker", icon: "Timer" },
+      { value: "blender", label: "Blender", icon: "Blend" },
+      { value: "rice", label: "Rice Cooker", icon: "Bowl" },
+      { value: "bbq", label: "BBQ", icon: "Grill" },
+      { value: "basics", label: "Just the basics", icon: "ChefHat" }
     ]
   },
   {

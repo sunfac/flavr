@@ -93,17 +93,17 @@ export const shoppingQuestions: QuestionConfig[] = [
     subtitle: "What can you cook with?",
     type: "equipment-grid",
     options: [
-      { value: "stovetop", label: "Stovetop", icon: "🔥" },
-      { value: "oven", label: "Oven", icon: "🏠" },
-      { value: "microwave", label: "Microwave", icon: "📻" },
-      { value: "airfryer", label: "Air Fryer", icon: "💨" },
-      { value: "grill", label: "Grill", icon: "🔥" },
-      { value: "slowcooker", label: "Slow Cooker", icon: "⏰" },
-      { value: "pressure", label: "Pressure Cooker", icon: "⚡" },
-      { value: "blender", label: "Blender", icon: "🌪️" },
-      { value: "rice", label: "Rice Cooker", icon: "🍚" },
-      { value: "bbq", label: "BBQ", icon: "🔥" },
-      { value: "basics", label: "Just the basics", icon: "🔪" }
+      { value: "stovetop", label: "Stovetop", icon: "Flame" },
+      { value: "oven", label: "Oven", icon: "Oven" },
+      { value: "microwave", label: "Microwave", icon: "Zap" },
+      { value: "airfryer", label: "Air Fryer", icon: "Wind" },
+      { value: "grill", label: "Grill", icon: "Barbecue" },
+      { value: "slowcooker", label: "Slow Cooker", icon: "Clock" },
+      { value: "pressure", label: "Pressure Cooker", icon: "Timer" },
+      { value: "blender", label: "Blender", icon: "Blend" },
+      { value: "rice", label: "Rice Cooker", icon: "Bowl" },
+      { value: "bbq", label: "BBQ", icon: "Grill" },
+      { value: "basics", label: "Just the basics", icon: "ChefHat" }
     ]
   },
   {
@@ -131,16 +131,18 @@ export const shoppingQuestions: QuestionConfig[] = [
     subtitle: "Where do you usually shop?",
     type: "cards",
     options: [
-      { value: "whole-foods", label: "Whole Foods", icon: "🌿", desc: "Premium organic focus" },
-      { value: "trader-joes", label: "Trader Joe's", icon: "🛒", desc: "Unique specialty items" },
-      { value: "kroger", label: "Kroger", icon: "🏪", desc: "Wide selection" },
-      { value: "safeway", label: "Safeway", icon: "🛍️", desc: "Fresh & convenient" },
-      { value: "walmart", label: "Walmart", icon: "💰", desc: "Budget-friendly" },
-      { value: "target", label: "Target", icon: "🎯", desc: "Trendy selections" },
-      { value: "costco", label: "Costco", icon: "📦", desc: "Bulk buying" },
-      { value: "local", label: "Local market", icon: "🏘️", desc: "Community stores" },
-      { value: "online", label: "Online delivery", icon: "📱", desc: "Convenient ordering" },
-      { value: "any", label: "Any store works", icon: "🤷", desc: "Flexible shopper" }
+      { value: "tesco", label: "Tesco", icon: "ShoppingCart", desc: "Every little helps" },
+      { value: "sainsburys", label: "Sainsbury's", icon: "Store", desc: "Quality & value" },
+      { value: "asda", label: "ASDA", icon: "PoundSterling", desc: "Save money, live better" },
+      { value: "morrisons", label: "Morrisons", icon: "ShoppingBag", desc: "Makes it fresh" },
+      { value: "aldi", label: "Aldi", icon: "Coins", desc: "Amazing quality, unbeatable prices" },
+      { value: "lidl", label: "Lidl", icon: "Banknote", desc: "Big on quality, Lidl on price" },
+      { value: "waitrose", label: "Waitrose", icon: "Crown", desc: "Premium quality" },
+      { value: "coop", label: "Co-op", icon: "Users", desc: "Community focused" },
+      { value: "iceland", label: "Iceland", icon: "Snowflake", desc: "Frozen food specialist" },
+      { value: "marks", label: "M&S Food", icon: "Star", desc: "Simply better food" },
+      { value: "local", label: "Local shops", icon: "Home", desc: "Independent stores" },
+      { value: "online", label: "Online delivery", icon: "Smartphone", desc: "Convenient ordering" }
     ]
   }
 ];
