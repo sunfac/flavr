@@ -1,0 +1,133 @@
+import React, { useRef } from 'react';
+import {
+  FaShareAlt,
+  FaTwitter,
+  FaFacebook,
+  FaInstagram,
+  FaWhatsapp,
+  FaPrint,
+  FaRegStickyNote,
+  FaQrcode,
+  FaFilePdf
+} from 'react-icons/fa';
+import { toast, ToastContainer } from 'react-toastify';
+import QRCode from 'qrcode.react';
+import 'react-toastify/dist/ReactToastify.css';
+import html2pdf from 'html2pdf.js';
+
+interface RecipeShareToolsProps {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  isShared: boolean;
+  onShareToggle?: () => void;
+}
+
+const RecipeShareTools: React.FC<RecipeShareToolsProps> = ({
+  id,
+  title,
+  description,
+  imageUrl,
+  isShared,
+  onShareToggle
+}) => {
+  const publicUrl = `https://flavr.app/share/${id}`;
+  const caption = `Just made this with Flavr:
+🔥 "${title}"
+${description}
+
+#FlavrRecipe #PrivateChefAI #FlavorBombs #MoodFood
+${publicUrl}`;
+
+  const qrRef = useRef(null);
+  const pdfRef = useRef<HTMLDivElement>(null);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(caption);
+    toast.success('Copied to clipboard!');
+  };
+
+  const handleCopyFullRecipe = () => {
+    const fullText = `Recipe: ${title}\n\n${description}\n\nLink: ${publicUrl}`;
+    navigator.clipboard.writeText(fullText);
+    toast.success('Recipe copied – paste into Apple Notes or anywhere you like!');
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const ensureShared = async () => {
+    if (!isShared && onShareToggle) {
+      await onShareToggle();
+      toast.info('Recipe is now public!');
+    }
+  };
+
+  const handleSocialClick = async (platform: string) => {
+    await ensureShared();
+    const encoded = encodeURIComponent(caption);
+    const urlMap: { [key: string]: string } = {
+      twitter: `https://twitter.com/intent/tweet?text=${encoded}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${publicUrl}`,
+      whatsapp: `https://api.whatsapp.com/send?text=${encoded}`
+    };
+
+    if (platform === 'instagram') {
+      handleCopy();
+      toast.info('Instagram doesn’t support direct sharing – caption copied!');
+    } else {
+      window.open(urlMap[platform], '_blank');
+    }
+  };
+
+  const downloadQRCode = () => {
+    const canvas = document.querySelector('canvas') as HTMLCanvasElement;
+    const link = document.createElement('a');
+    link.download = `${title}-flavr-qr.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+    toast.success('QR code downloaded!');
+  };
+
+  const downloadPDF = () => {
+    if (pdfRef.current) {
+      html2pdf()
+        .set({ margin: 0.5, filename: `${title}-flavr-recipe.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: {}, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } })
+        .from(pdfRef.current)
+        .save();
+    }
+  };
+
+  return (
+    <>
+      <div ref={pdfRef} style={{ padding: '20px', backgroundColor: '#fff', color: '#000', fontFamily: 'Arial' }}>
+        <h2>{title}</h2>
+        <img src={imageUrl} alt={title} style={{ maxWidth: '100%', borderRadius: '8px' }} />
+        <p>{description}</p>
+        <p><strong>Link:</strong> {publicUrl}</p>
+      </div>
+
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', flexWrap: 'wrap', marginTop: '20px' }}>
+        <button title="Twitter" onClick={() => handleSocialClick('twitter')}><FaTwitter size={20} /></button>
+        <button title="Instagram" onClick={() => handleSocialClick('instagram')}><FaInstagram size={20} /></button>
+        <button title="Facebook" onClick={() => handleSocialClick('facebook')}><FaFacebook size={20} /></button>
+        <button title="WhatsApp" onClick={() => handleSocialClick('whatsapp')}><FaWhatsapp size={20} /></button>
+        <button title="Print" onClick={handlePrint}><FaPrint size={20} /></button>
+        <button title="Copy to Notes" onClick={handleCopyFullRecipe}><FaRegStickyNote size={20} /></button>
+        <button title="Download PDF" onClick={downloadPDF}><FaFilePdf size={20} /></button>
+        <button title="Download QR Code" onClick={downloadQRCode}><FaQrcode size={20} /></button>
+      </div>
+
+      <div ref={qrRef} style={{ marginTop: '20px', textAlign: 'center' }}>
+        <QRCode value={publicUrl} size={128} />
+        <p style={{ fontSize: '12px' }}>Scan or download QR to share this recipe</p>
+      </div>
+
+      <ToastContainer position="bottom-right" autoClose={2000} hideProgressBar />
+    </>
+  );
+};
+
+export default RecipeShareTools;
