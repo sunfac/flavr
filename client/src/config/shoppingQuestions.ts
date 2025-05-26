@@ -93,16 +93,16 @@ export const shoppingQuestions: QuestionConfig[] = [
     subtitle: "What can you cook with?",
     type: "equipment-grid",
     options: [
-      { value: "stovetop", label: "Stovetop", icon: "Flame" },
-      { value: "oven", label: "Oven", icon: "Oven" },
-      { value: "microwave", label: "Microwave", icon: "Zap" },
+      { value: "hob", label: "Hob", icon: "Flame" },
+      { value: "oven", label: "Oven", icon: "Building" },
+      { value: "microwave", label: "Microwave", icon: "Waves" },
       { value: "airfryer", label: "Air Fryer", icon: "Wind" },
-      { value: "grill", label: "Grill", icon: "Barbecue" },
+      { value: "grill", label: "Grill", icon: "Beef" },
       { value: "slowcooker", label: "Slow Cooker", icon: "Clock" },
       { value: "pressure", label: "Pressure Cooker", icon: "Timer" },
-      { value: "blender", label: "Blender", icon: "Blend" },
-      { value: "rice", label: "Rice Cooker", icon: "Bowl" },
-      { value: "bbq", label: "BBQ", icon: "Grill" },
+      { value: "blender", label: "Blender", icon: "Coffee" },
+      { value: "rice", label: "Rice Cooker", icon: "Star" },
+      { value: "bbq", label: "BBQ", icon: "Flame" },
       { value: "basics", label: "Just the basics", icon: "ChefHat" }
     ]
   },

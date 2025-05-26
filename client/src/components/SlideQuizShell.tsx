@@ -44,7 +44,10 @@ import {
   Coins,
   Banknote,
   Users,
-  Heart
+  Heart,
+  Waves,
+  Beef,
+  Coffee
 } from "lucide-react";
 
 export interface QuestionConfig {
@@ -146,7 +149,8 @@ export default function SlideQuizShell({
       Home, Leaf, Crown, Target, Zap, Star, Shuffle, DollarSign, CreditCard, 
       Flame, Building, Microwave, Wind, Timer, Cooker,
       Clock, ChefHat, Utensils, Sparkles, ShoppingCart, Store,
-      PoundSterling, ShoppingBag, Coins, Banknote, Users, Heart
+      PoundSterling, ShoppingBag, Coins, Banknote, Users, Heart,
+      Waves, Beef, Coffee
     };
     
     const IconComponent = iconMap[iconName];
