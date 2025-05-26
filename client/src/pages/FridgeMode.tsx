@@ -11,10 +11,10 @@ import { fridgeQuestions } from "@/config/fridgeQuestions";
 import RecipeCard from "@/components/RecipeCard";
 import ChatBot from "@/components/ChatBot";
 import Loading from "@/components/Loading";
-import FlavrPlusGate from "@/components/FlavrPlusGate";
-import { useFlavrGate } from "@/hooks/useFlavrGate";
-import { api } from "@/lib/api";
+import { checkQuotaBeforeGPT, getRemainingRecipes } from "@/lib/quotaManager";
+import { apiRequest } from "@/lib/queryClient";
 import AuthModal from "@/components/AuthModal";
+import { Clock } from "lucide-react";
 
 export default function FridgeMode() {
   const [, navigate] = useLocation();
@@ -28,8 +28,6 @@ export default function FridgeMode() {
   const [showNavigation, setShowNavigation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-
-  const { canGenerateRecipe } = useFlavrGate();
 
   // Check if user is logged in
   const { data: user, isLoading: userLoading } = useQuery({
@@ -45,6 +43,26 @@ export default function FridgeMode() {
   const isAuthenticated = user?.user;
 
   const handleQuizComplete = async (data: any) => {
+    // Transform quiz data
+    const transformedData = {
+      ingredients: data.ingredients || [],
+      vibe: data.vibe || "",
+      cuisines: data.cuisines || [],
+      time: data.time || 30,
+      dietary: data.dietary || [],
+      equipment: data.equipment || [],
+      ambition: data.ambition || 3
+    };
+
+    setQuizData(transformedData);
+
+    // Check global quota before proceeding with GPT
+    const allowed = await checkQuotaBeforeGPT();
+    if (!allowed) {
+      setShowAuthModal(true);
+      return;
+    }
+
     try {
       setIsLoading(true);
       
@@ -61,14 +79,29 @@ export default function FridgeMode() {
 
       setQuizData(transformedData);
 
-      // Generate recipe ideas immediately
-      const response = await api.generateRecipeIdeas({
+      // Generate recipe ideas using the global quota system
+      const response = await apiRequest("POST", "/api/recipe-ideas", {
         mode: "fridge",
         quizData: transformedData,
         prompt: `Generate recipe ideas for fridge mode with ingredients: ${transformedData.ingredients.join(', ')}, vibe: ${transformedData.vibe}`
       });
 
-      setRecipeIdeas(response.ideas || []);
+      if (response.ok) {
+        const result = await response.json();
+        setRecipeIdeas(result.ideas || []);
+      } else {
+        // Fallback recipes for fridge mode
+        setRecipeIdeas([
+          {
+            title: "Quick Vegetable Stir-Fry",
+            description: "Use whatever vegetables you have on hand with garlic and soy sauce."
+          },
+          {
+            title: "Simple Pasta Dish",
+            description: "Combine available ingredients with pasta for a satisfying meal."
+          }
+        ]);
+      }
       setCurrentStep("suggestions");
     } catch (error) {
       console.error("Failed to generate recipe ideas:", error);

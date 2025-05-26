@@ -11,9 +11,10 @@ import { chefQuestions } from "@/config/chefQuestions";
 import RecipeCard from "@/components/RecipeCard";
 import ChatBot from "@/components/ChatBot";
 import Loading from "@/components/Loading";
-import FlavrPlusGate from "@/components/FlavrPlusGate";
-import { useFlavrGate } from "@/hooks/useFlavrGate";
-import { api } from "@/lib/api";
+import { checkQuotaBeforeGPT, getRemainingRecipes } from "@/lib/quotaManager";
+import { apiRequest } from "@/lib/queryClient";
+import AuthModal from "@/components/AuthModal";
+import { Clock } from "lucide-react";
 
 export default function ChefAssistMode() {
   const [, navigate] = useLocation();
@@ -21,12 +22,10 @@ export default function ChefAssistMode() {
   const [quizData, setQuizData] = useState<any>(null);
   const [generatedRecipe, setGeneratedRecipe] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showGate, setShowGate] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [showNavigation, setShowNavigation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-
-  const { canGenerateRecipe } = useFlavrGate();
 
   // Check if user is logged in
   const { data: user, isLoading: userLoading } = useQuery({
@@ -42,107 +41,148 @@ export default function ChefAssistMode() {
   const isAuthenticated = user?.user;
 
   const handleQuizComplete = async (data: any) => {
+    // Transform quiz data
+    const transformedData = {
+      intent: data.intent,
+      dietary: data.dietary || [],
+      time: data.time || 30,
+      ambition: data.ambition || 3,
+      equipment: data.equipment || [],
+      extras: data.extras || []
+    };
+
+    setQuizData(transformedData);
+
+    // Check global quota before proceeding with GPT
+    const allowed = await checkQuotaBeforeGPT();
+    if (!allowed) {
+      setShowAuthModal(true);
+      return;
+    }
+
     try {
       setIsLoading(true);
-      
-      // Transform SlideQuizShell data to match expected API format
-      const transformedData = {
-        intent: data.intent,
-        dietary: data.dietary || [],
-        time: data.time || 60,
-        ambition: data.ambition || 3,
-        equipment: data.equipment || [],
-        extras: data.extras || []
-      };
 
-      setQuizData(transformedData);
-
-      // Generate recipe directly for Chef mode
-      const response = await api.generateFullRecipe({
+      // Generate recipe directly for Chef mode using global quota system
+      const response = await apiRequest("POST", "/api/generate-recipe", {
         mode: "chef",
         quizData: transformedData,
         prompt: `Create a recipe for: ${transformedData.intent}`
       });
 
-      setGeneratedRecipe(response.recipe);
+      if (response.ok) {
+        const result = await response.json();
+        setGeneratedRecipe(result.recipe);
+      } else {
+        // Fallback recipe for chef mode
+        setGeneratedRecipe({
+          title: `Custom ${transformedData.intent} Recipe`,
+          description: "A personalized recipe created based on your preferences.",
+          ingredients: ["Ingredients will be generated based on your preferences"],
+          instructions: ["Instructions will be provided once generated"],
+          cookTime: transformedData.time || 30,
+          servings: 4,
+          difficulty: "Medium"
+        });
+      }
+
       setCurrentStep("recipe");
     } catch (error) {
       console.error("Failed to generate recipe:", error);
+      setCurrentStep("recipe");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleNewSearch = () => {
+  const handleBackToQuiz = () => {
     setCurrentStep("quiz");
     setQuizData(null);
     setGeneratedRecipe(null);
   };
 
-  const handleBackToQuiz = () => {
-    setCurrentStep("quiz");
-    setGeneratedRecipe(null);
+  const handleAuthSuccess = () => {
+    setShowAuthModal(false);
+    // Continue with recipe generation after successful auth
+    if (quizData) {
+      handleQuizComplete(quizData);
+    }
   };
 
+  if (isLoading) {
+    return <Loading message="Creating your culinary masterpiece..." />;
+  }
+
   return (
-    <div className="min-h-screen">
-      {/* Consistent header across all modes */}
+    <div className="min-h-screen bg-background flex flex-col">
       <GlobalHeader 
         onMenuClick={() => setShowNavigation(true)}
         onSettingsClick={() => setShowSettings(true)}
         onUserClick={() => setShowUserMenu(true)}
       />
-      
-      <main>
+
+      <main className="flex-1 p-4 pb-20">
+        {!isAuthenticated && currentStep === "quiz" && (
+          <div className="mb-4 p-4 bg-card border border-border rounded-xl">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Clock className="w-4 h-4" />
+              <span>{getRemainingRecipes()} free recipes remaining</span>
+            </div>
+          </div>
+        )}
+
         {currentStep === "quiz" && (
           <SlideQuizShell
-            title="Chef Assist Quiz"
+            title="Chef Assist Mode"
+            subtitle="Let's create the perfect recipe for your culinary goals"
             questions={chefQuestions}
             onSubmit={handleQuizComplete}
-            onLoading={setIsLoading}
             theme="chef"
           />
         )}
 
         {currentStep === "recipe" && generatedRecipe && (
-          <div className="bg-background min-h-screen">
-            <RecipeCard
-              recipe={generatedRecipe}
-              mode="chef"
-              quizData={quizData}
-              isFullView={true}
-              onBack={handleBackToQuiz}
-              showNewSearchButton={true}
-              onNewSearch={handleNewSearch}
-            />
-          </div>
-        )}
-
-        {isLoading && (
-          <Loading message="Creating your bespoke culinary experience..." />
-        )}
-
-        {showGate && (
-          <FlavrPlusGate onClose={() => setShowGate(false)} />
+          <RecipeCard
+            recipe={generatedRecipe}
+            mode="chef"
+            quizData={quizData}
+            isFullView={true}
+            onBack={handleBackToQuiz}
+            showNewSearchButton={true}
+            onNewSearch={handleBackToQuiz}
+          />
         )}
       </main>
 
-      <ChatBot />
-      
-      {/* Consistent footer across all modes */}
       <GlobalFooter currentMode="chef" />
 
-      {/* Navigation overlays */}
       {showNavigation && (
         <GlobalNavigation onClose={() => setShowNavigation(false)} />
       )}
-      
+
       {showSettings && (
         <SettingsPanel onClose={() => setShowSettings(false)} />
       )}
-      
+
       {showUserMenu && (
         <UserMenu onClose={() => setShowUserMenu(false)} />
+      )}
+
+      {showAuthModal && (
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={handleAuthSuccess}
+          title="Join Flavr to Continue"
+          description="Sign up for free to unlock unlimited recipe generation and save your favorites!"
+        />
+      )}
+
+      {generatedRecipe && (
+        <ChatBot
+          currentRecipe={generatedRecipe}
+          currentMode="chef"
+        />
       )}
     </div>
   );

@@ -1,4 +1,5 @@
-// Pseudo-user quota management for freemium model
+// Global quota management utility for Flavr app
+// This function manages the 3-recipe free limit across ALL modes (Shopping, Fridge, Chef)
 export async function checkQuotaBeforeGPT(): Promise<boolean> {
   // Step 1: Create or retrieve pseudo-user ID
   let userId = localStorage.getItem("flavrUserId");
@@ -8,19 +9,19 @@ export async function checkQuotaBeforeGPT(): Promise<boolean> {
     console.log("[Flavr] New pseudo-user ID created:", userId);
   }
 
-  // Step 2: Check recipe usage for this user
+  // Step 2: Check recipe usage for this user across ALL modes
   const usageKey = `flavrUsage_${userId}`;
   const usage = parseInt(localStorage.getItem(usageKey) || "0", 10);
 
   if (usage >= 3) {
-    // Step 3: Simulate quota limit - trigger sign-up modal
-    console.warn(`[Flavr] User ${userId} has hit the 3-recipe limit. Showing upgrade prompt.`);
+    // Step 3: User has hit the 3-recipe limit across all modes
+    console.warn(`[Flavr] User ${userId} has hit the 3-recipe global limit. Total recipes generated: ${usage}`);
     return false; // Will trigger signup modal in component
   }
 
-  // Step 4: Allow recipe generation and increment usage
+  // Step 4: Allow recipe generation and increment global usage counter
   localStorage.setItem(usageKey, (usage + 1).toString());
-  console.log(`[Flavr] Recipe #${usage + 1} generated for pseudo-user: ${userId}`);
+  console.log(`[Flavr] Global recipe #${usage + 1} generated for pseudo-user: ${userId}`);
 
   return true; // User is under quota, proceed to GPT
 }
