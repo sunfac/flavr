@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import SlideQuizShell from "@/components/SlideQuizShell";
 import TinderRecipeCards from "@/components/TinderRecipeCards";
@@ -8,10 +9,12 @@ import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
 import GlobalNavigation from "@/components/GlobalNavigation";
 import SettingsPanel from "@/components/SettingsPanel";
+import UserMenu from "@/components/UserMenu";
 import AuthModal from "@/components/AuthModal";
 import { shoppingQuestions } from "@/config/shoppingQuestions";
 
 export default function ShoppingMode() {
+  const [, navigate] = useLocation();
   const [currentStep, setCurrentStep] = useState("quiz");
   const [quizData, setQuizData] = useState<any>(null);
   const [recipeIdeas, setRecipeIdeas] = useState<any[]>([]);
