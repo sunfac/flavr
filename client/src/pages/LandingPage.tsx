@@ -12,7 +12,7 @@ import GlobalNavigation from "@/components/GlobalNavigation";
 import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
 import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
-import FlavrFullLogo from "@assets/935FA3C5-A4E6-4FA8-A5E7-772FD650688C.jpeg";
+import FlavrFullLogo from "@assets/IMG_3044.png";
 import HeroFoodImage from "@assets/3D8C8E94-9BC0-4F6A-95F2-8951941A709B.png";
 import { motion } from "framer-motion";
 import { ChefHat, Sparkles, Timer, Star, ArrowRight, Menu, Settings, User, ChevronUp } from "lucide-react";
@@ -180,21 +180,24 @@ export default function LandingPage() {
 
       {/* Hero Section - Mobile Optimized */}
       <section id="hero" className="min-h-screen flex flex-col items-center justify-center text-center px-4 relative z-10 pt-12">
-        {/* Compact Logo - Mobile First */}
+        {/* Compact Logo with White Radial Glow */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="relative group mb-6"
         >
-          <div className="w-48 h-48 md:w-64 md:h-64 mx-auto">
+          <div className="w-48 h-48 md:w-64 md:h-64 mx-auto relative">
+            {/* Subtle white radial glow behind logo */}
+            <div className="absolute inset-0 bg-gradient-radial from-white/20 via-white/10 to-transparent rounded-full blur-2xl scale-110 group-hover:scale-125 transition-transform duration-500"></div>
+            <div className="absolute inset-0 bg-gradient-radial from-white/15 via-white/5 to-transparent rounded-full blur-3xl scale-125 group-hover:scale-150 transition-transform duration-700"></div>
+            
             <img 
               src={FlavrFullLogo} 
               alt="Flavr - Your Private Chef"
-              className="w-full h-full object-contain drop-shadow-xl group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-300 relative z-10"
             />
           </div>
-          <div className="absolute inset-0 rounded-full blur-[60px] opacity-10 bg-gradient-to-b from-orange-300 via-orange-400 to-transparent group-hover:opacity-20 transition-opacity duration-300"></div>
         </motion.div>
 
         {/* Compact Headlines */}
