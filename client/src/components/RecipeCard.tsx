@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import ShoppingList from "./ShoppingList";
+import ChatBot from "./ChatBot";
 import { generateShoppingPrompt2 } from "@/prompts/shoppingPrompt2";
 import { generateFridgePrompt2 } from "@/prompts/fridgePrompt2";
 import { motion, AnimatePresence } from "framer-motion";
@@ -316,6 +317,14 @@ export default function RecipeCard({
             <i className="fas fa-redo mr-2"></i>Create Another Recipe
           </Button>
         )}
+        
+        {/* AI Chef Chat */}
+        <div className="mt-6">
+          <ChatBot 
+            currentRecipe={fullRecipe}
+            currentMode={mode}
+          />
+        </div>
       </div>
 
       {/* Shopping List Modal */}
