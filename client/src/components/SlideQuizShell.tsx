@@ -505,7 +505,7 @@ export default function SlideQuizShell({
               )}
             </div>
 
-            <div className="mb-8 max-h-[60vh] overflow-y-auto overflow-x-hidden">
+            <div className="mb-8 max-h-[75vh] overflow-y-auto overflow-x-hidden">
               <div className="space-y-4">
                 {renderQuestion()}
               </div>
