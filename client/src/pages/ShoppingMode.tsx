@@ -52,6 +52,7 @@ export default function ShoppingMode() {
       dietary: data.dietary || [],
       equipment: data.equipment || [],
       ambition: data.ambition || 3,
+      servings: data.servings || 4,
       supermarket: data.supermarket
     };
 
