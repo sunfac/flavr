@@ -17,6 +17,8 @@ export function getCreativeGuidanceBlock(): string {
   const random = creativeVariations[Math.floor(Math.random() * creativeVariations.length)];
   return `
 Creative Guidance:
+Do not include kitchen equipment in the recipe title. Focus on flavor, cuisine, or emotional theme. Assume the user has access to standard kitchen tools. Equipment should not define the identity of the dish.
+
 Add a subtle variation or elevated element that enhances the recipe without violating any of the user's dietary, time, ingredient, or equipment constraints. Do not introduce new tools or ingredients the user hasn't approved. Stay within the defined limits while maximizing flavour variety and originality.
 
 ${random}

@@ -751,6 +751,7 @@ Please return:
 - Step-by-step instructions
 
 Write instructions in a friendly tone, with helpful technique notes.
+Assume users have access to standard kitchen tools. Do not force niche appliances into the recipe method unless clearly necessary. If equipment is unavailable, suggest fallback steps (e.g., oven instead of air fryer).
 Ensure the recipe fully respects the constraints and uses realistic supermarket pricing (GBP).
 Use clear quantities, supermarket-friendly items, and include any helpful substitutions or prep notes.
 
@@ -808,6 +809,7 @@ Please return:
 - Step-by-step instructions
 
 Use a friendly, helpful tone. Ensure the recipe is flavour-rich, realistic, uses pantry basics, and only what the user has available.
+Assume users have access to standard kitchen tools. Do not force niche appliances into the recipe method unless clearly necessary. If equipment is unavailable, suggest fallback steps (e.g., oven instead of air fryer).
 Avoid unnecessary complexity or ingredients requiring unavailable equipment.
 
 Return a JSON object with this exact structure:
@@ -853,6 +855,7 @@ Please return:
 - Step-by-step instructions
 
 Use a confident and friendly tone. The recipe should feel tailored, aspirational, and achievable.
+Assume users have access to standard kitchen tools. Do not force niche appliances into the recipe method unless clearly necessary. If equipment is unavailable, suggest fallback steps (e.g., oven instead of air fryer).
 Always prioritise maximising flavour to the highest possible level while respecting the user's time, skill level, and equipment.
 
 Avoid unnecessary complexity or inaccessible ingredients unless clearly aligned with ambition level and user skill.

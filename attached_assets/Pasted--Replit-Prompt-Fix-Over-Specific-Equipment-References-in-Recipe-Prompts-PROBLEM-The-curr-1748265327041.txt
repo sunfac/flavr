@@ -1,0 +1,56 @@
+// Replit Prompt — Fix Over-Specific Equipment References in Recipe Prompts
+
+// PROBLEM:
+// The current Prompt 1 and Prompt 2 structures across Shopping Mode, Fridge Mode, and Chef Assist are producing recipe titles that overly reference specific kitchen appliances — e.g., "Microwave Duck" or "Air Fryer Salmon".
+// This results in unnatural naming, limits user appeal, and creates overly constrained outputs. Users should not be forced into niche equipment-based recipes unless explicitly selected.
+
+// OBJECTIVE:
+// Adjust all recipe generation prompts (Prompt 1 & 2 in all modes) to treat available kitchen equipment as a soft constraint, not a naming or recipe-defining mechanism.
+// Avoid placing equipment in recipe titles unless it's a universally recognized culinary style (e.g., BBQ ribs).
+
+// ACTIONS TO APPLY ACROSS ALL PROMPTS:
+
+////////////////////////////////////////////////////////////////////////////////
+// 1. PROMPT 1 UPDATE (Shopping Mode, Fridge Mode)
+////////////////////////////////////////////////////////////////////////////////
+
+// Within the creative instruction section of Prompt 1, add:
+"Do not include kitchen equipment in the recipe title. Focus on flavor, cuisine, or emotional theme. Assume the user has access to standard kitchen tools. Equipment should not define the identity of the dish."
+
+// Example BAD output: "Microwave Duck with Herbs"
+// Example GOOD output: "Honey Glazed Duck with Thyme and Citrus"
+
+// Equipment like Air Fryer, Microwave, Pressure Cooker should NOT appear in titles.
+
+////////////////////////////////////////////////////////////////////////////////
+// 2. PROMPT 2 UPDATE (Full Recipe Output)
+////////////////////////////////////////////////////////////////////////////////
+
+// Within cooking instructions section of Prompt 2, add:
+"Assume users have access to standard kitchen tools. Do not force niche appliances into the recipe method unless clearly necessary. If equipment is unavailable, suggest fallback steps (e.g., oven instead of air fryer)."
+
+// Recipe method should not be centered around a specific device unless that device is the user's only available tool (e.g., camping, minimalism setting).
+
+////////////////////////////////////////////////////////////////////////////////
+// 3. APPLY TO ALL MODES:
+////////////////////////////////////////////////////////////////////////////////
+
+// Apply this instruction set to:
+// - Shopping Mode Prompt 1 and Prompt 2
+// - Fridge Mode Prompt 1 and Prompt 2
+// - Chef Assist Mode Prompt 2
+
+// Ensure Stable Diffusion image prompts are not visually styled to over-emphasize equipment.
+
+////////////////////////////////////////////////////////////////////////////////
+// 4. FINAL RESULT:
+////////////////////////////////////////////////////////////////////////////////
+
+// - Recipe titles will be clean, emotionally appealing, and focused on flavor and ingredients
+// - Instructions will offer flexible cooking paths
+// - Equipment is treated as a subtle enhancer, not a constraint
+// - Prompts remain highly adaptive to user needs without alienating low-equipment users
+
+// ✅ Improves UX
+// ✅ Boosts prompt flexibility
+// ✅ Increases shareability and perceived professionalism
