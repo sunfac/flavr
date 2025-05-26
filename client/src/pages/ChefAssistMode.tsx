@@ -78,28 +78,22 @@ export default function ChefAssistMode() {
     try {
       setIsLoading(true);
 
-      // Generate recipe directly for Chef mode using global quota system
-      const response = await apiRequest("POST", "/api/generate-recipe", {
-        mode: "chef",
-        quizData: transformedData,
-        prompt: `Create a recipe for: ${transformedData.intent}`
+      // Generate recipe directly for Chef mode using the same pattern as Shopping mode
+      const fetchResponse = await fetch("/api/generate-recipe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mode: "chef",
+          quizData: transformedData,
+          prompt: `Create a recipe for: ${transformedData.intent}`
+        })
       });
-
-      if (response.ok) {
-        const result = await response.json();
-        setGeneratedRecipe(result.recipe);
-      } else {
-        // Fallback recipe for chef mode
-        setGeneratedRecipe({
-          title: `Custom ${transformedData.intent} Recipe`,
-          description: "A personalized recipe created based on your preferences.",
-          ingredients: ["Ingredients will be generated based on your preferences"],
-          instructions: ["Instructions will be provided once generated"],
-          cookTime: transformedData.time || 30,
-          servings: 4,
-          difficulty: "Medium"
-        });
-      }
+      
+      const response = await fetchResponse.json();
+      console.log("Chef API Response:", response);
+      setGeneratedRecipe(response.recipe);
 
       setCurrentStep("recipe");
     } catch (error) {
