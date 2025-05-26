@@ -191,6 +191,20 @@ export default function SettingsPage() {
       </main>
 
       <GlobalFooter />
+
+      {/* Navigation Menu */}
+      {showNavigation && (
+        <GlobalNavigation 
+          onClose={() => setShowNavigation(false)}
+        />
+      )}
+
+      {/* Settings Panel */}
+      {showSettings && (
+        <SettingsPanel 
+          onClose={() => setShowSettings(false)}
+        />
+      )}
     </div>
   );
 }
