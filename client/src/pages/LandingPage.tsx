@@ -229,20 +229,23 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
-          className="relative"
+          className="flex justify-center"
         >
-          {/* Button glow effect */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
-          
-          <Button 
-            onClick={handleStartCooking}
-            className="relative px-8 py-5 md:px-10 md:py-6 text-lg md:text-xl font-semibold bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-400 hover:via-orange-500 hover:to-amber-400 border-0 shadow-2xl hover:shadow-orange-500/40 hover:scale-105 transition-all duration-500 text-white rounded-full backdrop-blur-sm group"
-          >
-            <span className="relative z-10 flex items-center">
-              Get Cooking Now
-              <ArrowRight className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-            </span>
-          </Button>
+          <div className="relative">
+            {/* Enhanced multi-layer glow effect */}
+            <div className="absolute -inset-2 bg-gradient-to-r from-orange-500/40 via-amber-500/30 to-orange-500/40 rounded-full blur-xl opacity-60 animate-pulse"></div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-orange-400/50 to-amber-400/50 rounded-full blur-lg opacity-80 group-hover:opacity-100 transition-opacity duration-300"></div>
+            
+            <Button 
+              onClick={handleStartCooking}
+              className="relative px-10 py-6 md:px-12 md:py-7 text-lg md:text-xl font-bold bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-400 hover:via-orange-500 hover:to-amber-400 border-0 shadow-2xl hover:shadow-orange-500/50 hover:scale-110 transition-all duration-500 text-white rounded-full backdrop-blur-sm group min-w-[280px] justify-center"
+            >
+              <span className="relative z-10 flex items-center justify-center">
+                Get Cooking Now
+                <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
+              </span>
+            </Button>
+          </div>
         </motion.div>
 
         {/* Ambient Background Elements */}
@@ -383,7 +386,7 @@ export default function LandingPage() {
           </motion.div>
 
           {/* Side-by-side layout with enhanced styling */}
-          <div className="grid lg:grid-cols-2 gap-8 items-start max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start max-w-7xl mx-auto">
             {/* Food Image with clean styling */}
             <motion.div
               initial={{ opacity: 0, x: -50, scale: 0.95 }}
@@ -513,7 +516,7 @@ export default function LandingPage() {
       </section>
 
       {/* Flavr+ Premium Section - Completely Redesigned */}
-      <section id="pricing" className="py-32 px-4 relative z-10 overflow-hidden">
+      <section id="pricing" className="py-16 px-4 relative z-10 overflow-hidden">
         {/* Dynamic Background Elements */}
         <div className="absolute top-0 left-0 w-full h-full">
           <div className="absolute top-1/4 left-1/3 w-80 h-80 bg-gradient-to-r from-orange-500/15 to-amber-500/15 rounded-full blur-3xl animate-pulse"></div>
@@ -653,35 +656,94 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer - Clean Design */}
-      <footer className="py-16 px-4 border-t border-white/10 relative z-10 overflow-hidden">
+      {/* Enhanced Footer */}
+      <footer className="py-20 px-4 border-t border-white/10 relative z-10 overflow-hidden bg-gradient-to-b from-transparent to-slate-950/30">
         {/* Background ambient elements */}
-        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl"></div>
-        <div className="absolute top-0 right-1/4 w-48 h-48 bg-amber-400/5 rounded-full blur-2xl"></div>
+        <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-orange-500/8 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-0 right-1/4 w-64 h-64 bg-amber-400/8 rounded-full blur-2xl animate-pulse"></div>
         
-        <div className="max-w-6xl mx-auto relative flex flex-col md:flex-row justify-between items-center">
-          <div className="flex items-center mb-6 md:mb-0">
-            <div className="relative">
-              <div className="absolute -inset-1 bg-orange-400/20 rounded-full blur-sm"></div>
-              <img src={FlavrLogo} alt="Flavr" className="relative w-10 h-10 mr-4" />
+        <div className="max-w-7xl mx-auto relative">
+          <div className="grid md:grid-cols-3 gap-12 items-start mb-12">
+            {/* Brand Section */}
+            <div className="md:col-span-1">
+              <div className="flex items-center mb-6">
+                <div className="relative">
+                  <div className="absolute -inset-2 bg-orange-400/30 rounded-full blur-lg animate-pulse"></div>
+                  <img src={FlavrLogo} alt="Flavr" className="relative w-12 h-12 mr-4" />
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-2xl tracking-tight">Flavr</h3>
+                  <p className="text-slate-400 text-sm">Your AI Chef Companion</p>
+                </div>
+              </div>
+              <p className="text-slate-400 leading-relaxed mb-6">
+                Transform your kitchen into a culinary playground with AI-powered recipes that understand your taste, time, and skill level.
+              </p>
+              <div className="flex space-x-4">
+                {["Instagram", "Twitter", "TikTok"].map((social) => (
+                  <a
+                    key={social}
+                    href="#"
+                    className="w-10 h-10 bg-white/5 hover:bg-orange-500/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 group"
+                  >
+                    <div className="w-5 h-5 bg-slate-400 group-hover:bg-orange-400 transition-colors duration-300 rounded"></div>
+                  </a>
+                ))}
+              </div>
             </div>
-            <div>
-              <p className="text-white font-semibold text-lg">Flavr</p>
-              <p className="text-slate-400 text-sm">© 2025 All rights reserved.</p>
+            
+            {/* Quick Links */}
+            <div className="md:col-span-1">
+              <h4 className="text-white font-semibold text-lg mb-6">Quick Links</h4>
+              <ul className="space-y-4">
+                {["About Us", "How It Works", "Pricing", "Support", "Blog"].map((link) => (
+                  <li key={link}>
+                    <a
+                      href="#"
+                      className="text-slate-400 hover:text-orange-400 transition-all duration-300 relative group"
+                    >
+                      <span className="relative z-10">{link}</span>
+                      <div className="absolute -inset-1 bg-orange-400/20 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            {/* Legal & Contact */}
+            <div className="md:col-span-1">
+              <h4 className="text-white font-semibold text-lg mb-6">Legal & Contact</h4>
+              <ul className="space-y-4">
+                {["Privacy Policy", "Terms of Service", "Cookie Policy", "Contact Us", "Help Center"].map((link) => (
+                  <li key={link}>
+                    <a
+                      href="#"
+                      className="text-slate-400 hover:text-orange-400 transition-all duration-300 relative group"
+                    >
+                      <span className="relative z-10">{link}</span>
+                      <div className="absolute -inset-1 bg-orange-400/20 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
           
-          <div className="flex flex-wrap justify-center md:justify-end gap-6 md:gap-8">
-            {["Privacy", "Terms", "Instagram", "Contact"].map((link) => (
-              <a
-                key={link}
-                href="#"
-                className="text-slate-300 hover:text-white transition-all duration-300 relative group text-lg"
-              >
-                <span className="relative z-10">{link}</span>
-                <div className="absolute -inset-2 bg-orange-400/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
-              </a>
-            ))}
+          {/* Bottom Bar */}
+          <div className="pt-8 border-t border-white/10">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <p className="text-slate-500 text-sm mb-4 md:mb-0">
+                © 2025 Flavr. All rights reserved. Made with ❤️ for food lovers everywhere.
+              </p>
+              <div className="flex items-center space-x-6">
+                <span className="text-slate-500 text-sm">Available on</span>
+                <div className="flex space-x-3">
+                  <div className="px-3 py-1 bg-white/5 rounded-lg text-slate-400 text-xs">Web</div>
+                  <div className="px-3 py-1 bg-white/5 rounded-lg text-slate-400 text-xs">iOS</div>
+                  <div className="px-3 py-1 bg-white/5 rounded-lg text-slate-400 text-xs">Android</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
@@ -693,13 +755,14 @@ export default function LandingPage() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0 }}
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 relative group"
+          className="fixed bottom-6 right-6 z-50 relative group"
         >
-          {/* Button glow */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full blur-lg opacity-70 group-hover:opacity-100 transition-opacity duration-300"></div>
+          {/* Enhanced glow effects */}
+          <div className="absolute -inset-2 bg-gradient-to-r from-orange-500/50 via-amber-500/40 to-orange-500/50 rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity duration-300 animate-pulse"></div>
+          <div className="absolute -inset-1 bg-gradient-to-r from-orange-400/70 to-amber-400/70 rounded-full blur-lg opacity-80 group-hover:opacity-100 transition-opacity duration-300"></div>
           
-          <div className="relative bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-full shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-110 backdrop-blur-sm">
-            <ChevronUp className="w-6 h-6" />
+          <div className="relative bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white p-3 rounded-full shadow-2xl hover:shadow-orange-500/50 transition-all duration-300 hover:scale-110 backdrop-blur-sm border border-orange-300/20">
+            <ChevronUp className="w-5 h-5" />
           </div>
         </motion.button>
       )}
