@@ -16,9 +16,10 @@ import { useQuery } from "@tanstack/react-query";
 
 interface GlobalNavigationProps {
   onClose?: () => void;
+  onAuthRequired?: () => void;
 }
 
-export default function GlobalNavigation({ onClose }: GlobalNavigationProps) {
+export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavigationProps) {
   const [location] = useLocation();
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -27,6 +28,15 @@ export default function GlobalNavigation({ onClose }: GlobalNavigationProps) {
     queryKey: ['/api/me'],
     enabled: false, // Disable auto-fetching to prevent excessive calls
   });
+
+  const handleNavigation = (href: string, requiresAuth: boolean = false) => {
+    if (requiresAuth && !user?.user) {
+      onClose?.();
+      alert("Please sign in to access this feature");
+      return;
+    }
+    onClose?.();
+  };
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -37,27 +47,32 @@ export default function GlobalNavigation({ onClose }: GlobalNavigationProps) {
     {
       icon: Home,
       label: "Home",
-      href: "/"
+      href: "/",
+      requiresAuth: false
     },
     {
       icon: ChefHat,
       label: "Cooking Modes",
-      href: "/app"
+      href: "/app",
+      requiresAuth: false
     },
     {
       icon: Bookmark,
       label: "Saved Recipes",
-      href: "/my-recipes"
+      href: "/my-recipes",
+      requiresAuth: true
     },
-    ...(user?.user?.subscriptionTier !== 'premium' ? [{
+    {
       icon: Star,
       label: "Flavr+",
-      href: "/plus"
-    }] : []),
+      href: "/subscribe",
+      requiresAuth: true
+    },
     {
       icon: Settings,
       label: "Settings",
-      href: "/settings"
+      href: "/settings",
+      requiresAuth: true
     }
   ];
 
