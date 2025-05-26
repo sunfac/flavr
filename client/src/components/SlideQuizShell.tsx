@@ -178,8 +178,8 @@ export default function SlideQuizShell({
 
       case 'cards':
         return (
-          <div className="w-full max-w-sm mx-auto">
-            <div className="grid grid-cols-2 gap-2">
+          <div className="w-full max-w-md mx-auto">
+            <div className="grid grid-cols-2 gap-3">
               {currentQ.options?.map((option) => (
                 <motion.div
                   key={option.value}
@@ -187,18 +187,21 @@ export default function SlideQuizShell({
                   whileTap={{ scale: 0.98 }}
                 >
                   <Card 
-                    className={`cursor-pointer transition-all duration-300 border-2 h-20 ${
+                    className={`cursor-pointer transition-all duration-300 border-2 min-h-24 ${
                       currentAnswer === option.value 
                         ? 'border-orange-400 bg-orange-500/10 shadow-lg shadow-orange-500/25' 
                         : 'border-slate-600 bg-slate-800/50 hover:border-orange-400/50'
                     }`}
                     onClick={() => updateAnswer(currentQ.id, option.value)}
                   >
-                    <CardContent className="p-2 text-center h-full flex flex-col justify-center">
-                      <div className="mb-1 flex justify-center text-orange-400">
+                    <CardContent className="p-3 text-center h-full flex flex-col justify-center">
+                      <div className="mb-2 flex justify-center text-orange-400">
                         {option.icon ? renderIcon(option.icon) : <div className="w-4 h-4" />}
                       </div>
-                      <div className="text-white font-medium text-xs leading-tight">{option.label}</div>
+                      <div className="text-white font-medium text-sm leading-tight">{option.label}</div>
+                      {option.desc && (
+                        <div className="text-slate-400 text-xs mt-1">{option.desc}</div>
+                      )}
                     </CardContent>
                   </Card>
                 </motion.div>
