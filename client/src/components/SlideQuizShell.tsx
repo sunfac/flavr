@@ -235,9 +235,10 @@ export default function SlideQuizShell({
         );
 
       case 'cards':
+        const hasMany = (currentQ.options?.length || 0) > 8;
         return (
           <div className="w-full">
-            <div className="grid grid-cols-2 gap-3 max-h-[45vh] overflow-y-auto pr-2">
+            <div className={`grid grid-cols-2 gap-3 ${hasMany ? 'max-h-[45vh] overflow-y-auto pr-2' : ''}`}>
               {currentQ.options?.map((option) => (
                 <motion.div
                   key={option.value}
