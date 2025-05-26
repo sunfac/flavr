@@ -456,7 +456,7 @@ Return a JSON object with this exact structure:
 Based on the user's available ingredients and preferences, suggest 5 exciting recipe ideas.
 Each idea should include a recipe title and one short sentence describing what makes it delicious or unique.
 
-Ingredients the user has in their fridge: ${quizData.ingredients || 'Various ingredients'}
+Ingredients the user has in their fridge: ${Array.isArray(quizData.ingredients) ? quizData.ingredients.join(', ') : (quizData.ingredients || 'Various ingredients')}
 
 ${getMoodPromptText(quizData.mood || quizData.vibe || '')}
 
@@ -597,7 +597,7 @@ Return a JSON object with this exact structure:
 Based on the user's available ingredients and preferences, suggest 5 exciting recipe ideas.
 Each idea should include a recipe title and one short sentence describing what makes it delicious or unique.
 
-Ingredients the user has in their fridge: ${quizData.ingredients || 'Various ingredients'}
+Ingredients the user has in their fridge: ${Array.isArray(quizData.ingredients) ? quizData.ingredients.join(', ') : (quizData.ingredients || 'Various ingredients')}
 
 ${moodText}
 
@@ -790,7 +790,7 @@ ${timeText}
 
 ${equipmentText}
 
-Ingredients available: ${quizData.ingredients || 'Various ingredients'}
+Ingredients available: ${Array.isArray(quizData.ingredients) ? quizData.ingredients.join(', ') : (quizData.ingredients || 'Various ingredients')}
 
 Servings: ${quizData.servings || '4 servings'}
 
