@@ -31,7 +31,7 @@ export default function LandingPage() {
   // Handle scroll to show/hide scroll-to-top button
   useEffect(() => {
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 500);
+      setShowScrollTop(window.scrollY > 200);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -774,8 +774,8 @@ export default function LandingPage() {
           <div className="absolute -inset-2 bg-gradient-to-r from-orange-500/50 via-amber-500/40 to-orange-500/50 rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity duration-300 animate-pulse"></div>
           <div className="absolute -inset-1 bg-gradient-to-r from-orange-400/70 to-amber-400/70 rounded-full blur-lg opacity-80 group-hover:opacity-100 transition-opacity duration-300"></div>
           
-          <div className="relative bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white p-3 rounded-full shadow-2xl hover:shadow-orange-500/50 transition-all duration-300 hover:scale-110 backdrop-blur-sm border border-orange-300/20">
-            <ChevronUp className="w-5 h-5" />
+          <div className="relative bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white p-3 rounded-full shadow-2xl hover:shadow-orange-500/50 transition-all duration-300 hover:scale-110 backdrop-blur-sm border border-orange-300/20 cursor-pointer active:scale-95">
+            <ChevronUp className="w-5 h-5 group-hover:animate-bounce" />
           </div>
         </motion.button>
       )}
