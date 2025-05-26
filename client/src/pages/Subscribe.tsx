@@ -74,27 +74,114 @@ const SubscribeForm = () => {
 };
 
 export default function Subscribe() {
-  const [clientSecret, setClientSecret] = useState("");
   const [, navigate] = useLocation();
   const [showNavigation, setShowNavigation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  useEffect(() => {
-    // Create subscription as soon as the page loads
-    apiRequest("POST", "/api/create-subscription")
-      .then((res) => res.json())
-      .then((data) => {
-        setClientSecret(data.clientSecret);
-      })
-      .catch((error) => {
-        console.error("Failed to create subscription:", error);
-        navigate("/");
-      });
-  }, [navigate]);
+  // Get user data to check premium status
+  const { data: user, isLoading } = useQuery({
+    queryKey: ["/api/me"],
+    retry: false,
+  });
 
-  if (!clientSecret) {
-    return <Loading message="Setting up your subscription..." />;
+  if (isLoading) {
+    return <Loading message="Loading your account..." />;
+  }
+
+  // Check if user is already premium (developer account)
+  const isPremium = user?.user?.subscriptionTier === "premium";
+
+  if (isPremium) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black">
+        <GlobalHeader 
+          onMenuClick={() => setShowNavigation(true)}
+          onSettingsClick={() => setShowSettings(true)}
+          onUserClick={() => setShowUserMenu(true)}
+        />
+        
+        <main className="container mx-auto px-4 py-6 pt-24">
+          <div className="max-w-md mx-auto">
+            <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20">
+              <CardHeader className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i className="fas fa-crown text-white text-2xl"></i>
+                </div>
+                <CardTitle className="font-playfair text-2xl text-orange-400">You're Already Premium!</CardTitle>
+                <p className="text-gray-300">
+                  Your developer account has unlimited access to all Flavr features
+                </p>
+              </CardHeader>
+              
+              <CardContent className="space-y-6">
+                {/* Premium Features */}
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 text-sm text-gray-300">
+                    <i className="fas fa-check text-green-400"></i>
+                    <span>✓ Unlimited AI recipe generation</span>
+                  </div>
+                  <div className="flex items-center space-x-3 text-sm text-gray-300">
+                    <i className="fas fa-check text-green-400"></i>
+                    <span>✓ HD recipe images</span>
+                  </div>
+                  <div className="flex items-center space-x-3 text-sm text-gray-300">
+                    <i className="fas fa-check text-green-400"></i>
+                    <span>✓ All cooking modes</span>
+                  </div>
+                  <div className="flex items-center space-x-3 text-sm text-gray-300">
+                    <i className="fas fa-check text-green-400"></i>
+                    <span>✓ Recipe history & sharing</span>
+                  </div>
+                  <div className="flex items-center space-x-3 text-sm text-gray-300">
+                    <i className="fas fa-check text-green-400"></i>
+                    <span>✓ Developer access</span>
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={() => navigate("/app")}
+                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700"
+                >
+                  Start Cooking with Flavr
+                </Button>
+                
+                <Button 
+                  variant="outline"
+                  onClick={() => navigate("/my-recipes")}
+                  className="w-full border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
+                >
+                  View My Recipes
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+
+        <GlobalFooter />
+
+        {/* Navigation Menu */}
+        {showNavigation && (
+          <GlobalNavigation 
+            onClose={() => setShowNavigation(false)}
+          />
+        )}
+
+        {/* Settings Panel */}
+        {showSettings && (
+          <SettingsPanel 
+            onClose={() => setShowSettings(false)}
+          />
+        )}
+
+        {/* User Menu */}
+        {showUserMenu && (
+          <UserMenu 
+            onClose={() => setShowUserMenu(false)}
+          />
+        )}
+      </div>
+    );
   }
 
   return (
