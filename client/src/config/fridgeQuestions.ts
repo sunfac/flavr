@@ -74,16 +74,17 @@ export const fridgeQuestions: QuestionConfig[] = [
     subtitle: "Any restrictions or goals?",
     type: "multi-select",
     options: [
-      { value: "vegetarian", label: "Vegetarian" },
       { value: "vegan", label: "Vegan" },
+      { value: "vegetarian", label: "Vegetarian" },
       { value: "gluten-free", label: "Gluten-free" },
       { value: "dairy-free", label: "Dairy-free" },
-      { value: "low-carb", label: "Low-carb" },
-      { value: "low-calorie", label: "Low-calorie" },
-      { value: "paleo", label: "Paleo" },
+      { value: "nut-free", label: "Nut-free" },
+      { value: "pescatarian", label: "Pescatarian" },
       { value: "keto", label: "Keto" },
-      { value: "halal", label: "Halal" },
-      { value: "kosher", label: "Kosher" },
+      { value: "paleo", label: "Paleo" },
+      { value: "low-carb", label: "Low-carb" },
+      { value: "high-protein", label: "High-protein" },
+      { value: "low-calorie", label: "Low-calorie" },
       { value: "none", label: "No restrictions" }
     ]
   },
