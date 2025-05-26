@@ -673,6 +673,53 @@ Return a JSON object with this exact structure:
   "cuisine": "cuisine type",
   "tips": "helpful cooking tips"
 }`;
+      } else if (mode === 'chef') {
+        // Get mapped guidance text for Chef Assist Mode (omit budget and cuisine)
+        const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
+        const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
+        const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
+        const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
+        const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
+        
+        // Build Chef Assist Mode mapped prompt (Prompt 2 only)
+        enhancedPrompt = `You are an elite private chef.
+
+Based on the user's intent and quiz preferences, generate a detailed, flavour-rich recipe for:
+
+**${selectedRecipe.title}**
+
+${moodText}
+
+${ambitionText}
+
+${dietaryText}
+
+${timeText}
+
+${equipmentText}
+
+Please return:
+- Title
+- Ingredient list (with specific quantities)
+- Step-by-step instructions
+
+Use a confident and friendly tone. The recipe should feel tailored, aspirational, and achievable.
+Always prioritise maximising flavour to the highest possible level while respecting the user's time, skill level, and equipment.
+
+Avoid unnecessary complexity or inaccessible ingredients unless clearly aligned with ambition level and user skill.
+
+Return a JSON object with this exact structure:
+{
+  "title": "${selectedRecipe.title}",
+  "description": "${selectedRecipe.description}",
+  "ingredients": ["ingredient 1", "ingredient 2", "etc"],
+  "instructions": ["step 1", "step 2", "etc"],
+  "cookTime": 30,
+  "servings": 4,
+  "difficulty": "Medium",
+  "cuisine": "cuisine type",
+  "tips": "helpful cooking tips"
+}`;
       } else {
         // Fallback to existing enhanced prompt for other modes
         const budgetGuidance = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
