@@ -147,160 +147,158 @@ export default function TinderRecipeCards({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white p-6">
-      <div className="max-w-md mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent mb-4">
-            Perfect matches for you
-          </h2>
-          <p className="text-slate-300 text-lg mb-2">
-            Swipe to explore • Tap to select
-          </p>
-          <div className="flex justify-center items-center space-x-2 text-sm text-slate-400">
-            <span>{currentIndex + 1}</span>
-            <div className="flex space-x-1">
-              {availableRecipes.map((_, index) => (
-                <div
-                  key={index}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    index === currentIndex ? `bg-${themeAccents[theme]}` : 'bg-slate-600'
-                  }`}
-                />
-              ))}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white">
+      {/* Safe area padding for mobile */}
+      <div className="px-4 pt-4 pb-28 min-h-screen">
+        <div className="max-w-md mx-auto">
+          {/* Header - More compact */}
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent mb-3">
+              Perfect matches for you
+            </h2>
+            <p className="text-slate-300 text-base mb-2">
+              Swipe to explore • Tap to select
+            </p>
+            <div className="flex justify-center items-center space-x-2 text-sm text-slate-400">
+              <span>{currentIndex + 1}</span>
+              <div className="flex space-x-1">
+                {availableRecipes.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      index === currentIndex ? `bg-orange-400` : 'bg-slate-600'
+                    }`}
+                  />
+                ))}
+              </div>
+              <span>{availableRecipes.length}</span>
             </div>
-            <span>{availableRecipes.length}</span>
           </div>
-        </div>
 
-        {/* Card Stack - Made taller to fit titles better */}
-        <div className="relative h-[28rem] mb-8">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentIndex}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.3}
-              onDragEnd={handleDragEnd}
-              initial={{ 
-                opacity: 0, 
-                scale: 0.8,
-                x: direction > 0 ? 300 : -300 
-              }}
-              animate={{ 
-                opacity: 1, 
-                scale: 1,
-                x: 0 
-              }}
-              exit={{ 
-                opacity: 0, 
-                scale: 0.8,
-                x: direction > 0 ? -300 : 300 
-              }}
-              transition={{ 
-                type: "spring", 
-                stiffness: 300, 
-                damping: 30 
-              }}
-              className="absolute inset-0"
-            >
-              <Card className="h-full bg-slate-800/80 backdrop-blur-xl border border-slate-600 hover:border-orange-400/50 transition-all duration-300 shadow-2xl hover:shadow-orange-500/25">
-                <CardContent className="p-8 h-full flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-2xl font-bold text-white mb-4 leading-tight">
-                      {currentRecipe.title}
-                    </h3>
-                    <p className="text-slate-300 text-lg mb-6 leading-relaxed">
-                      {currentRecipe.description}
-                    </p>
-                    
-                    {/* Badges */}
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {getBadgeData(currentRecipe).map((badge, index) => (
-                        <Badge
-                          key={index}
-                          variant="outline"
-                          className="flex items-center space-x-1 px-3 py-1 border-orange-400/30 text-slate-300 bg-orange-500/10"
-                        >
-                          {badge.icon}
-                          <span>{badge.label}</span>
-                        </Badge>
-                      ))}
+          {/* Card Stack - Responsive height */}
+          <div className="relative mb-6" style={{ height: 'calc(100vh - 320px)', minHeight: '400px', maxHeight: '500px' }}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentIndex}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.3}
+                onDragEnd={handleDragEnd}
+                initial={{ 
+                  opacity: 0, 
+                  scale: 0.8,
+                  x: direction > 0 ? 300 : -300 
+                }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: 1,
+                  x: 0 
+                }}
+                exit={{ 
+                  opacity: 0, 
+                  scale: 0.8,
+                  x: direction > 0 ? -300 : 300 
+                }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 300, 
+                  damping: 30 
+                }}
+                className="absolute inset-0"
+              >
+                <Card className="h-full bg-slate-800/80 backdrop-blur-xl border border-slate-600 hover:border-orange-400/50 transition-all duration-300 shadow-2xl hover:shadow-orange-500/25">
+                  <CardContent className="p-6 h-full flex flex-col justify-between">
+                    <div className="flex-1 overflow-y-auto">
+                      <h3 className="text-xl font-bold text-white mb-3 leading-tight">
+                        {currentRecipe.title}
+                      </h3>
+                      <p className="text-slate-300 text-base mb-4 leading-relaxed">
+                        {currentRecipe.description}
+                      </p>
+                      
+                      {/* Badges */}
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {getBadgeData(currentRecipe).map((badge, index) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="flex items-center space-x-1 px-2 py-1 border-orange-400/30 text-slate-300 bg-orange-500/10 text-xs"
+                          >
+                            {badge.icon}
+                            <span>{badge.label}</span>
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Action Button */}
-                  <Button
-                    onClick={() => onSelectRecipe(currentRecipe)}
-                    className={`w-full h-14 font-semibold rounded-xl transition-all duration-300 bg-gradient-to-r ${themeColors[theme]} hover:scale-105 shadow-lg hover:shadow-orange-500/25 text-white`}
-                  >
-                    <Heart className="w-5 h-5 mr-2" />
-                    Use This Recipe
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </AnimatePresence>
-        </div>
+                    {/* Action Button */}
+                    <Button
+                      onClick={() => onSelectRecipe(currentRecipe)}
+                      className={`w-full h-12 font-semibold rounded-xl transition-all duration-300 bg-gradient-to-r ${themeColors[theme]} hover:scale-105 shadow-lg hover:shadow-orange-500/25 text-white`}
+                    >
+                      <Heart className="w-4 h-4 mr-2" />
+                      Use This Recipe
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
-        {/* Tinder-Style Controls */}
-        <div className="flex justify-center items-center space-x-6">
-          {/* Navigate Previous */}
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={() => navigateRecipe('prev')}
-            disabled={currentIndex === 0}
-            className="w-14 h-14 rounded-full border-slate-600 text-slate-300 hover:text-white hover:border-orange-400 disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
+          {/* Tinder-Style Controls - Fixed position from bottom */}
+          <div className="fixed bottom-20 left-0 right-0 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent pt-4 pb-4">
+            <div className="flex justify-center items-center space-x-4 max-w-md mx-auto px-4">
+              {/* Navigate Previous */}
+              <Button
+                variant="outline"
+                onClick={() => navigateRecipe('prev')}
+                disabled={currentIndex === 0}
+                className="w-12 h-12 rounded-full border-slate-600 text-slate-300 hover:text-white hover:border-orange-400 disabled:opacity-30 disabled:cursor-not-allowed bg-slate-800/80 backdrop-blur-sm"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
 
-          {/* Reject Recipe (Swipe Left Action) */}
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={handleRejectRecipe}
-            className="w-16 h-16 rounded-full border-red-500/50 text-red-400 hover:text-red-300 hover:border-red-400 hover:bg-red-500/10 transition-all duration-300"
-          >
-            <X className="w-6 h-6" />
-          </Button>
-          
-          {/* Confirm Recipe (Swipe Right Action) */}
-          <Button
-            size="lg"
-            onClick={handleConfirmRecipe}
-            className={`w-20 h-20 rounded-full bg-gradient-to-r ${themeColors[theme]} hover:scale-110 shadow-lg hover:shadow-orange-500/25 text-white transition-all duration-300`}
-          >
-            <Heart className="w-8 h-8" />
-          </Button>
+              {/* Reject Recipe (Swipe Left Action) */}
+              <Button
+                variant="outline"
+                onClick={handleRejectRecipe}
+                className="w-14 h-14 rounded-full border-red-500/50 text-red-400 hover:text-red-300 hover:border-red-400 hover:bg-red-500/10 transition-all duration-300 bg-slate-800/80 backdrop-blur-sm"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+              
+              {/* Confirm Recipe (Swipe Right Action) */}
+              <Button
+                onClick={handleConfirmRecipe}
+                className={`w-16 h-16 rounded-full bg-gradient-to-r ${themeColors[theme]} hover:scale-110 shadow-lg hover:shadow-orange-500/25 text-white transition-all duration-300`}
+              >
+                <Heart className="w-6 h-6" />
+              </Button>
 
-          {/* Navigate Next */}
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={() => navigateRecipe('next')}
-            disabled={currentIndex === availableRecipes.length - 1}
-            className="w-14 h-14 rounded-full border-slate-600 text-slate-300 hover:text-white hover:border-orange-400 disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </Button>
-        </div>
+              {/* Navigate Next */}
+              <Button
+                variant="outline"
+                onClick={() => navigateRecipe('next')}
+                disabled={currentIndex === availableRecipes.length - 1}
+                className="w-12 h-12 rounded-full border-slate-600 text-slate-300 hover:text-white hover:border-orange-400 disabled:opacity-30 disabled:cursor-not-allowed bg-slate-800/80 backdrop-blur-sm"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
 
-        {/* Improved Swipe Hint */}
-        <div className="text-center mt-6">
-          <p className="text-slate-400 text-sm mb-2">
-            👈 Swipe left to reject • Swipe right to cook 👉
-          </p>
-          <div className="flex justify-center items-center space-x-4 text-xs text-slate-500">
-            <span className="flex items-center space-x-1">
-              <X className="w-3 h-3 text-red-400" />
-              <span>Pass</span>
-            </span>
-            <span className="flex items-center space-x-1">
-              <Heart className="w-3 h-3 text-orange-400" />
-              <span>Cook This!</span>
-            </span>
+            {/* Swipe Hints - More compact */}
+            <div className="text-center mt-2 px-4">
+              <div className="flex justify-center items-center space-x-6 text-xs text-slate-400">
+                <span className="flex items-center space-x-1">
+                  <X className="w-3 h-3 text-red-400" />
+                  <span>Pass</span>
+                </span>
+                <span className="flex items-center space-x-1">
+                  <Heart className="w-3 h-3 text-orange-400" />
+                  <span>Cook This!</span>
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
