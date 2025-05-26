@@ -76,16 +76,16 @@ export const fridgeQuestions: QuestionConfig[] = [
     options: [
       { value: "vegan", label: "Vegan" },
       { value: "vegetarian", label: "Vegetarian" },
-      { value: "gluten-free", label: "Gluten-free" },
-      { value: "dairy-free", label: "Dairy-free" },
-      { value: "nut-free", label: "Nut-free" },
+      { value: "glutenFree", label: "Gluten-free" },
+      { value: "dairyFree", label: "Dairy-free" },
+      { value: "nutFree", label: "Nut-free" },
       { value: "pescatarian", label: "Pescatarian" },
       { value: "keto", label: "Keto" },
       { value: "paleo", label: "Paleo" },
-      { value: "low-carb", label: "Low-carb" },
-      { value: "high-protein", label: "High-protein" },
-      { value: "low-calorie", label: "Low-calorie" },
-      { value: "none", label: "No restrictions" }
+      { value: "lowCarb", label: "Low-carb" },
+      { value: "highProtein", label: "High-protein" },
+      { value: "lowCalorie", label: "Low-calorie" },
+      { value: "noRestrictions", label: "No restrictions" }
     ]
   },
   {
