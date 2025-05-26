@@ -351,15 +351,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/login", async (req, res) => {
     try {
       const { email, password } = req.body;
+      console.log("Login attempt:", email, password);
+      
       const user = await storage.getUserByEmail(email);
+      console.log("Found user:", user ? "Yes" : "No");
       
       if (!user || user.password !== password) {
+        console.log("Login failed - invalid credentials");
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
       req.session!.userId = user.id;
-      res.json({ user: { id: user.id, username: user.username, email: user.email, isPlus: user.isPlus } });
+      console.log("Login successful for user:", user.email);
+      res.json({ user: { id: user.id, username: user.username, email: user.email, subscriptionTier: user.subscriptionTier } });
     } catch (error: any) {
+      console.log("Login error:", error.message);
       res.status(500).json({ message: error.message });
     }
   });
