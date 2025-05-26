@@ -59,3 +59,13 @@ export function getCurrentUsage(): number {
   const usageKey = `flavrUsage_${userId}`;
   return parseInt(localStorage.getItem(usageKey) || "0", 10);
 }
+
+export function canGenerateRecipe(user: any): boolean {
+  // If user is authenticated and has a subscription, allow unlimited recipes
+  if (user && user.subscriptionTier === 'plus') {
+    return true;
+  }
+  
+  // For non-authenticated users or free tier, check quota
+  return getRemainingRecipes() > 0;
+}

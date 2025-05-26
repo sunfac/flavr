@@ -11,9 +11,10 @@ import { fridgeQuestions } from "@/config/fridgeQuestions";
 import RecipeCard from "@/components/RecipeCard";
 import ChatBot from "@/components/ChatBot";
 import Loading from "@/components/Loading";
-import { checkQuotaBeforeGPT, getRemainingRecipes } from "@/lib/quotaManager";
+import { checkQuotaBeforeGPT, getRemainingRecipes, canGenerateRecipe } from "@/lib/quotaManager";
 import { apiRequest } from "@/lib/queryClient";
 import AuthModal from "@/components/AuthModal";
+import FlavrPlusGate from "@/components/FlavrPlusGate";
 import { Clock } from "lucide-react";
 
 export default function FridgeMode() {
@@ -42,15 +43,12 @@ export default function FridgeMode() {
     setShowUserMenu(false);
   };
 
-  // Check if user is logged in
+  // Check if user is logged in - allow graceful fallback for non-authenticated users
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["/api/me"],
     retry: false,
+    enabled: false, // Don't auto-fetch on load to prevent 401 errors
   });
-
-  if (userLoading) {
-    return <Loading message="Loading your profile..." />;
-  }
 
   // Allow users to try the quiz without authentication
   const isAuthenticated = user?.user;
@@ -100,8 +98,7 @@ export default function FridgeMode() {
       // Generate recipe ideas using the global quota system
       const response = await apiRequest("POST", "/api/recipe-ideas", {
         mode: "fridge",
-        quizData: apiData,
-        prompt: `Generate recipe ideas for fridge mode with ingredients: ${apiData.ingredients.join(', ')}, vibe: ${apiData.vibe}`
+        quizData: apiData
       });
 
       if (response.ok) {
