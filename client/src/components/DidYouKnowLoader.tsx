@@ -38,25 +38,34 @@ interface DidYouKnowLoaderProps {
 }
 
 const DidYouKnowLoader: React.FC<DidYouKnowLoaderProps> = ({ className = "" }) => {
+  const [shuffledFacts, setShuffledFacts] = useState<string[]>([]);
   const [index, setIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
 
+  // Shuffle facts array on component mount
   useEffect(() => {
+    const shuffled = [...facts].sort(() => Math.random() - 0.5);
+    setShuffledFacts(shuffled);
+  }, []);
+
+  useEffect(() => {
+    if (shuffledFacts.length === 0) return;
+    
     const rotate = setInterval(() => {
       setIsVisible(false);
       setTimeout(() => {
-        setIndex((prev) => (prev + 1) % facts.length);
+        setIndex((prev) => (prev + 1) % shuffledFacts.length);
         setIsVisible(true);
       }, 300);
     }, 4000);
     return () => clearInterval(rotate);
-  }, []);
+  }, [shuffledFacts]);
 
   return (
     <div className={`w-full min-h-[7rem] flex items-center justify-center bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 dark:from-orange-950/20 dark:via-amber-950/20 dark:to-orange-950/20 rounded-xl mt-6 px-6 py-4 border border-orange-200/50 dark:border-orange-800/30 ${className}`}>
       <div className="text-center max-w-md">
         <p className={`text-sm font-medium text-orange-700 dark:text-orange-300 leading-relaxed transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-          {facts[index]}
+          {shuffledFacts[index]}
         </p>
         <div className="mt-3 flex justify-center space-x-1">
           {[...Array(3)].map((_, i) => (
