@@ -113,11 +113,11 @@ export const fridgeQuestions: QuestionConfig[] = [
     type: "cards",
     required: true,
     options: [
-      { value: "1", label: "Just get fed", icon: "Coffee", desc: "Simple & quick" },
-      { value: "2", label: "Simple & tasty", icon: "Heart", desc: "Easy but delicious" },
-      { value: "3", label: "Confident cook", icon: "Sparkles", desc: "Try something new" },
-      { value: "4", label: "Ambitious home chef", icon: "Target", desc: "Challenge myself" },
-      { value: "5", label: "Michelin star effort", icon: "Crown", desc: "Go all out" }
+      { value: "justFed", label: "Just get fed", icon: "Coffee", desc: "Minimal effort" },
+      { value: "simpleTasty", label: "Simple & tasty", icon: "Heart", desc: "Easy but delicious" },
+      { value: "confidentCook", label: "Confident cook", icon: "Sparkles", desc: "Touch of flair" },
+      { value: "ambitiousChef", label: "Ambitious chef", icon: "Target", desc: "Multi-step prep" },
+      { value: "michelinEffort", label: "Michelin effort", icon: "Crown", desc: "Restaurant quality" }
     ]
   }
 ];
