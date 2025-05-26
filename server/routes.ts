@@ -437,6 +437,50 @@ Return a JSON object with this exact structure:
     }
   ]
 }`;
+      } else if (mode === 'fridge') {
+        // Get mapped guidance text for Fridge Mode (omit budget and cuisine)
+        const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
+        const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
+        const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
+        const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
+        const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
+        
+        // Build Fridge Mode mapped prompt (Prompt 1)
+        const creativeGuidance = getCreativeGuidanceBlock();
+        
+        enhancedPrompt = `You are an elite private chef.
+
+Based on the user's available ingredients and preferences, suggest 5 exciting recipe ideas.
+Each idea should include a recipe title and one short sentence describing what makes it delicious or unique.
+
+Ingredients the user has in their fridge: ${quizData.ingredients || 'Various ingredients'}
+
+${moodText}
+
+${ambitionText}
+
+${dietaryText}
+
+${timeText}
+
+${equipmentText}
+
+${creativeGuidance}
+
+Only return 5 distinct recipe ideas in the format:
+- [Recipe Title]: [One-line description]
+
+Do not include ingredients or instructions yet.
+
+Return a JSON object with this exact structure:
+{
+  "recipes": [
+    {
+      "title": "Recipe Name", 
+      "description": "Brief appealing description in one sentence"
+    }
+  ]
+}`;
       } else {
         // Fallback to existing enhanced prompt for other modes
         const budgetGuidance = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
@@ -553,6 +597,59 @@ Please return:
 
 Write instructions in a friendly tone, with helpful technique notes.
 Ensure the recipe fully respects the constraints and uses realistic supermarket pricing (GBP).
+
+Return a JSON object with this exact structure:
+{
+  "title": "${selectedRecipe.title}",
+  "description": "${selectedRecipe.description}",
+  "ingredients": ["ingredient 1", "ingredient 2", "etc"],
+  "instructions": ["step 1", "step 2", "etc"],
+  "cookTime": 30,
+  "servings": 4,
+  "difficulty": "Medium",
+  "cuisine": "cuisine type",
+  "tips": "helpful cooking tips"
+}`;
+      } else if (mode === 'fridge') {
+        // Get mapped guidance text for Fridge Mode (omit budget and cuisine)
+        const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
+        const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
+        const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
+        const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
+        const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
+        
+        // Build Fridge Mode mapped prompt (Prompt 2)
+        const creativeGuidance = getCreativeGuidanceBlock();
+        
+        enhancedPrompt = `You are an elite private chef.
+
+Based on the user's selected idea and quiz preferences, generate the complete recipe for:
+
+**${selectedRecipe.title}**
+
+${moodText}
+
+${ambitionText}
+
+${dietaryText}
+
+${timeText}
+
+${equipmentText}
+
+Ingredients available: ${quizData.ingredients || 'Various ingredients'}
+
+Servings: ${quizData.servings || '4 servings'}
+
+${creativeGuidance}
+
+Please return:
+- Title
+- Ingredient list (with estimated quantities based on what's in the fridge)
+- Step-by-step instructions
+
+Use a friendly, helpful tone. Ensure the recipe is flavour-rich, realistic, uses pantry basics, and only what the user has available.
+Avoid unnecessary complexity or ingredients requiring unavailable equipment.
 
 Return a JSON object with this exact structure:
 {
