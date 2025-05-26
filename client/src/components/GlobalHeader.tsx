@@ -14,14 +14,17 @@ export default function GlobalHeader({
   onUserClick 
 }: GlobalHeaderProps) {
   return (
-    <header className="absolute top-0 left-0 right-0 z-50 px-6 py-4">
+    <header className="absolute top-0 left-0 right-0 z-50 px-6 py-4 pointer-events-auto">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Left: Hamburger Menu */}
         <Button 
           variant="ghost"
           size="icon"
-          onClick={onMenuClick}
-          className="text-white hover:bg-white/10"
+          onClick={() => {
+            console.log("Menu clicked");
+            onMenuClick?.();
+          }}
+          className="text-white hover:bg-white/10 relative z-10"
         >
           <Menu className="w-6 h-6" />
         </Button>
@@ -36,16 +39,22 @@ export default function GlobalHeader({
           <Button 
             variant="ghost"
             size="icon"
-            onClick={onSettingsClick}
-            className="text-white hover:bg-white/10"
+            onClick={() => {
+              console.log("Settings clicked");
+              onSettingsClick?.();
+            }}
+            className="text-white hover:bg-white/10 relative z-10"
           >
             <Settings className="w-6 h-6" />
           </Button>
           <Button 
             variant="ghost"
             size="icon"
-            onClick={onUserClick}
-            className="text-white hover:bg-white/10"
+            onClick={() => {
+              console.log("User clicked");
+              onUserClick?.();
+            }}
+            className="text-white hover:bg-white/10 relative z-10"
           >
             <User className="w-6 h-6" />
           </Button>
