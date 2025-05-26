@@ -809,6 +809,15 @@ Ingredients: ${quizData.ingredients || 'Use suitable ingredients'}
 
 ${creativeGuidance}
 
+Important: The following values must be strictly used when creating the recipe:
+- Servings: ${quizData.servings || 4} people
+- Cuisine: ${quizData.cuisine || 'International'}
+- Cooking Time: ${quizData.time || 30} minutes
+- Dietary Restrictions: ${quizData.dietary ? quizData.dietary.join(', ') : 'None'}
+- Budget: ${quizData.budget || 'Any'}
+
+Do not override these values. They were chosen by the user and must appear accurately in the recipe output metadata and instructions.
+
 Please return:
 - Title
 - Ingredient list with quantities
@@ -867,6 +876,15 @@ ${getStrictDietaryInstruction(quizData.dietary)}
 
 ${creativeGuidance}
 
+Important: The following values must be strictly used when creating the recipe:
+- Servings: ${quizData.servings || 4} people
+- Cuisine: Fridge-to-Fork
+- Cooking Time: ${quizData.time || 30} minutes
+- Dietary Restrictions: ${quizData.dietary ? quizData.dietary.join(', ') : 'None'}
+- Ambition Level: ${quizData.ambition || 'Medium'}
+
+Do not override these values. They were chosen by the user and must appear accurately in the recipe output metadata and instructions.
+
 Prioritise using all or most of the user's provided ingredients.
 Do not use any ingredients not listed unless they are common pantry items. You may assume common pantry items are available, including oils, seasonings, dried herbs and spices, flour, stock cubes, tinned tomatoes, beans, tuna, sweetcorn, pasta, rice, and similar cupboard staples.
 
@@ -923,6 +941,15 @@ ${budgetText}
 ${timeText}
 
 ${equipmentText}
+
+Important: The following values must be strictly used when creating the recipe:
+- Servings: ${quizData.servings || 4} people
+- Cuisine: Chef-Guided
+- Cooking Time: ${quizData.time || 30} minutes
+- Dietary Restrictions: ${quizData.dietary ? quizData.dietary.join(', ') : 'None'}
+- Ambition Level: ${quizData.ambition || 'Medium'}
+
+Do not override these values. They were chosen by the user and must appear accurately in the recipe output metadata and instructions.
 
 Please return:
 - Title
