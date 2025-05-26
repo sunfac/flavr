@@ -829,10 +829,11 @@ Return a JSON object with this exact structure:
   "tips": "helpful cooking tips"
 }`;
       } else if (mode === 'chef') {
-        // Get mapped guidance text for Chef Assist Mode (omit budget and cuisine)
+        // Get mapped guidance text for Chef Assist Mode (include budget, omit cuisine)
         const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
         const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
         const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
+        const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
         
@@ -847,13 +848,13 @@ User's Culinary Vision: ${quizData.intent || selectedRecipe.description || 'Cust
 
 Servings needed: ${quizData.servings || 4} people
 
-Cuisine preference: ${quizData.cuisine || 'Any cuisine'}
-
 ${moodText}
 
 ${ambitionText}
 
 ${dietaryText}
+
+${budgetText}
 
 ${timeText}
 
