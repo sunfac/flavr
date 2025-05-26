@@ -924,13 +924,37 @@ Make the ingredients specific with quantities and the instructions detailed and 
 
       const fullRecipe = JSON.parse(response.choices[0].message.content!);
 
-      // Generate image if user has remaining credits
+      // Generate sophisticated recipe image if user has remaining credits
       let imageUrl = null;
       if (user.isPlus || user.imagesThisMonth < 5) {
         try {
+          // Create enhanced image prompt based on recipe details
+          const generateImagePrompt = (recipeTitle: string, ingredients: string[], mood: string, platingNotes?: string) => {
+            // Extract main ingredients (first 3-4 key ingredients)
+            const mainIngredients = ingredients.slice(0, 4).map(ing => 
+              ing.replace(/^\d+.*?\s/, '').replace(/,.*$/, '').trim()
+            );
+            
+            return `High-resolution photo of a plated dish titled "${recipeTitle}". 
+Prepared with ingredients like: ${mainIngredients.join(", ")}.
+Styled to match the mood: ${mood || "elevated home comfort"}.
+Plated on a neutral background, natural lighting, with light shadows.
+No labels, no text, no hands, no brand packaging.
+Styled like an editorial cookbook photo or a Waitrose magazine.
+${platingNotes ? `Plating style: ${platingNotes}.` : ""}
+Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows or artificial textures.`;
+          };
+
+          const sophisticatedPrompt = generateImagePrompt(
+            fullRecipe.title,
+            fullRecipe.ingredients || [],
+            quizData.mood || quizData.vibe || "elevated home comfort",
+            fullRecipe.tips
+          );
+
           const imageResponse = await openai.images.generate({
             model: "dall-e-3",
-            prompt: `A beautiful, appetizing photo of ${fullRecipe.title}, professional food photography, high quality`,
+            prompt: sophisticatedPrompt,
             n: 1,
             size: "1024x1024",
             quality: "standard",
