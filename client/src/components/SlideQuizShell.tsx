@@ -95,6 +95,7 @@ export default function SlideQuizShell({
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [direction, setDirection] = useState(0);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [tempInput, setTempInput] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
 
   const currentQ = questions[currentQuestionIndex];
@@ -104,6 +105,8 @@ export default function SlideQuizShell({
     if (containerRef.current) {
       containerRef.current.scrollTop = 0;
     }
+    // Clear temp input when changing questions
+    setTempInput('');
   }, [currentQuestionIndex]);
 
   const updateAnswer = (questionId: string, value: any) => {
