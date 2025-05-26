@@ -1,12 +1,15 @@
 export function generateFridgePrompt1(quizData: any): string {
   return `You are a creative chef specializing in "fridge to fork" cooking. Generate 3-6 diverse recipe ideas using ONLY the ingredients the user has available.
 
-Available Ingredients: ${quizData.ingredients}
+Available Ingredients: ${Array.isArray(quizData.ingredients) ? quizData.ingredients.join(', ') : quizData.ingredients}
 
 User Preferences:
-- Style: ${quizData.mood}
-- Equipment: ${quizData.equipment}
-- Cooking Time: ${quizData.cookingTime} minutes
+- Style: ${quizData.vibe || quizData.mood}
+- Cuisine: ${Array.isArray(quizData.cuisines) ? quizData.cuisines.join(', ') : quizData.cuisines || 'Any'}
+- Equipment: ${Array.isArray(quizData.equipment) ? quizData.equipment.join(', ') : quizData.equipment}
+- Cooking Time: ${quizData.time || quizData.cookingTime} minutes
+- Servings: ${quizData.servings} people
+- Dietary Requirements: ${Array.isArray(quizData.dietary) ? quizData.dietary.join(', ') : quizData.dietary || 'None'}
 - Ambition Level: ${quizData.ambition || "Moderate"}
 
 Generate recipe ideas that:

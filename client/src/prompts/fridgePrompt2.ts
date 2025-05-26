@@ -3,12 +3,16 @@ export function generateFridgePrompt2(selectedRecipe: any, quizData: any): strin
 
 Selected Recipe: ${selectedRecipe.title}
 Description: ${selectedRecipe.description}
-Available Ingredients: ${quizData.ingredients}
+Available Ingredients: ${Array.isArray(quizData.ingredients) ? quizData.ingredients.join(', ') : quizData.ingredients}
 
 User's Preferences:
-- Style: ${quizData.mood}
-- Equipment: ${quizData.equipment}
-- Cooking Time: ${quizData.cookingTime} minutes
+- Style: ${quizData.vibe || quizData.mood}
+- Cuisine: ${Array.isArray(quizData.cuisines) ? quizData.cuisines.join(', ') : quizData.cuisines || 'Any'}
+- Equipment: ${Array.isArray(quizData.equipment) ? quizData.equipment.join(', ') : quizData.equipment}
+- Cooking Time: ${quizData.time || quizData.cookingTime} minutes
+- Servings: ${quizData.servings} people
+- Dietary Requirements: ${Array.isArray(quizData.dietary) ? quizData.dietary.join(', ') : quizData.dietary || 'None'}
+- Ambition Level: ${quizData.ambition || "Moderate"}
 
 Create a complete recipe that:
 1. Uses ONLY the available ingredients (plus basic pantry staples)
