@@ -10,6 +10,8 @@ import FridgeMode from "@/pages/FridgeMode";
 import ChefAssistMode from "@/pages/ChefAssistMode";
 import SettingsPage from "@/pages/SettingsPage";
 import Subscribe from "@/pages/Subscribe";
+import MyRecipes from "@/pages/MyRecipes";
+import RecipeView from "@/pages/RecipeView";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -23,6 +25,8 @@ function Router() {
       <Route path="/shopping" component={ShoppingMode} />
       <Route path="/fridge" component={FridgeMode} />
       <Route path="/chef" component={ChefAssistMode} />
+      <Route path="/my-recipes" component={MyRecipes} />
+      <Route path="/recipe/:id" component={RecipeView} />
       <Route path="/settings" component={SettingsPage} />
       <Route path="/subscribe" component={Subscribe} />
       <Route component={NotFound} />

@@ -30,9 +30,9 @@ export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
     },
     {
       id: "history",
-      label: "History", 
+      label: "My Recipes", 
       icon: History,
-      path: "/history",
+      path: "/my-recipes",
     },
   ];
 
