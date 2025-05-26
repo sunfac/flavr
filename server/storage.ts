@@ -38,6 +38,29 @@ export class MemStorage implements IStorage {
     this.currentUserId = 1;
     this.currentRecipeId = 1;
     this.currentChatId = 1;
+    
+    // Create developer account with unlimited access
+    this.createDeveloperAccount();
+  }
+
+  private async createDeveloperAccount() {
+    const developerUser: User = {
+      id: 999,
+      username: "williambly@blycontracting.co.uk",
+      email: "williambly@blycontracting.co.uk",
+      password: "flavr1", // In production, this would be hashed
+      subscriptionTier: "premium",
+      recipesGenerated: 0,
+      imagesGenerated: 0,
+      monthlyRecipeLimit: 999999,
+      monthlyImageLimit: 999999,
+      createdAt: new Date(),
+      stripeCustomerId: null,
+      stripeSubscriptionId: null
+    };
+    
+    this.users.set(999, developerUser);
+    console.log("Developer account created: williambly@blycontracting.co.uk");
   }
 
   async getUser(id: number): Promise<User | undefined> {
