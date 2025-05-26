@@ -845,6 +845,10 @@ User's Culinary Vision: ${quizData.intent || selectedRecipe.description || 'Cust
 
 **${selectedRecipe.title}**
 
+Servings needed: ${quizData.servings || 4} people
+
+Cuisine preference: ${quizData.cuisine || 'Any cuisine'}
+
 ${moodText}
 
 ${ambitionText}
