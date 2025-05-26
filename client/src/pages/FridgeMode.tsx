@@ -96,6 +96,12 @@ export default function FridgeMode() {
       };
 
       // Generate recipe ideas using the same pattern as Shopping mode
+      console.log("Making API call to /api/generate-recipe-ideas with data:", {
+        mode: "fridge",
+        quizData: apiData,
+        prompt: "Generate 5 diverse recipe ideas for fridge mode"
+      });
+      
       const fetchResponse = await fetch("/api/generate-recipe-ideas", {
         method: "POST",
         headers: {
@@ -107,6 +113,13 @@ export default function FridgeMode() {
           prompt: "Generate 5 diverse recipe ideas for fridge mode"
         })
       });
+      
+      console.log("Fetch response status:", fetchResponse.status);
+      console.log("Fetch response ok:", fetchResponse.ok);
+      
+      if (!fetchResponse.ok) {
+        throw new Error(`API call failed with status: ${fetchResponse.status}`);
+      }
       
       const response = await fetchResponse.json();
       console.log("API Response:", response);
