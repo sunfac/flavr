@@ -980,10 +980,10 @@ Return a JSON object with this exact structure:
   "description": "${selectedRecipe.description}",
   "ingredients": ["ingredient 1", "ingredient 2", "etc"],
   "instructions": ["step 1", "step 2", "etc"],
-  "cookTime": 30,
-  "servings": 4,
-  "difficulty": "Medium",
-  "cuisine": "cuisine type",
+  "cookTime": ${quizData.time || 30},
+  "servings": ${quizData.servings || 4},
+  "difficulty": "${quizData.ambition === 'easy' ? 'Easy' : quizData.ambition === 'challenging' || quizData.ambition === 'michelin' ? 'Hard' : 'Medium'}",
+  "cuisine": "${quizData.cuisine || 'International'}",
   "tips": "helpful cooking tips"
 }
 
