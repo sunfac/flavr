@@ -477,16 +477,20 @@ export default function SlideQuizShell({
         />
       </div>
 
-      {/* Question Content - With scrolling */}
+      {/* Question Content - With swipe gestures and scrolling */}
       <div className="flex-1 p-4 overflow-y-auto">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentQuestion}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleSwipeEnd}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
-            className="max-w-lg mx-auto w-full min-h-full py-4"
+            className="max-w-lg mx-auto w-full min-h-full py-4 cursor-grab active:cursor-grabbing"
           >
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-white mb-4 leading-tight">
@@ -501,6 +505,14 @@ export default function SlideQuizShell({
 
             <div className="mb-8">
               {renderQuestion()}
+            </div>
+
+            {/* Swipe hint for mobile */}
+            <div className="text-center mt-6">
+              <div className="flex justify-center items-center space-x-2 text-xs text-slate-500">
+                <Hand className="w-3 h-3" />
+                <span>Swipe left/right to navigate</span>
+              </div>
             </div>
           </motion.div>
         </AnimatePresence>
