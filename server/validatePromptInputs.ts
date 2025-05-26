@@ -1,0 +1,57 @@
+// validatePromptInputs.ts
+
+type Mode = "shopping" | "fridge" | "chef";
+
+interface PromptInputCheck {
+  field: string;
+  value: any;
+  required: boolean;
+  mapped?: boolean;
+}
+
+export function validatePromptInputs(mode: Mode, input: Record<string, any>) {
+  const requiredInputs: Record<Mode, PromptInputCheck[]> = {
+    shopping: [
+      { field: "mood", value: input.mood, required: true, mapped: true },
+      { field: "ambition", value: input.ambition, required: true, mapped: true },
+      { field: "diet", value: input.diet, required: true, mapped: true },
+      { field: "budget", value: input.budget, required: true, mapped: true },
+      { field: "cuisine", value: input.cuisine, required: true },
+      { field: "time", value: input.time, required: true, mapped: true },
+      { field: "equipment", value: input.equipment, required: true, mapped: true },
+      { field: "servings", value: input.servings, required: true }
+    ],
+    fridge: [
+      { field: "fridgeIngredients", value: input.fridgeIngredients, required: true },
+      { field: "mood", value: input.mood, required: true, mapped: true },
+      { field: "ambition", value: input.ambition, required: true, mapped: true },
+      { field: "diet", value: input.diet, required: true, mapped: true },
+      { field: "time", value: input.time, required: true, mapped: true },
+      { field: "equipment", value: input.equipment, required: true, mapped: true },
+      { field: "servings", value: input.servings, required: true }
+    ],
+    chef: [
+      { field: "dishIntent", value: input.dishIntent, required: true },
+      { field: "mood", value: input.mood, required: true, mapped: true },
+      { field: "ambition", value: input.ambition, required: true, mapped: true },
+      { field: "diet", value: input.diet, required: true, mapped: true },
+      { field: "time", value: input.time, required: true, mapped: true },
+      { field: "equipment", value: input.equipment, required: true, mapped: true },
+      { field: "servings", value: input.servings, required: true }
+    ]
+  };
+
+  const results = requiredInputs[mode].map(check => {
+    const { field, value, required, mapped } = check;
+    const isMissing = required && (value === undefined || value === null || value === "");
+    return {
+      field,
+      status: isMissing ? "❌ MISSING" : "✅ PRESENT",
+      mapped,
+      valuePreview: isMissing ? "N/A" : JSON.stringify(value)
+    };
+  });
+
+  console.table(results);
+  return results;
+}
