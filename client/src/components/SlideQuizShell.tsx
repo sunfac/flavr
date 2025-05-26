@@ -478,14 +478,8 @@ export default function SlideQuizShell({
         />
       </div>
 
-      {/* Question Content - With swipe gestures and proper scrolling */}
-      <div 
-        className="flex-1 overflow-y-auto scroll-smooth"
-        style={{
-          scrollPaddingTop: '4rem',
-          scrollPaddingBottom: '8rem',
-        }}
-      >
+      {/* Question Content - With proper scrolling for all content */}
+      <div className="flex-1 overflow-y-auto scroll-smooth pb-4">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentQuestion}
@@ -497,7 +491,7 @@ export default function SlideQuizShell({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
-            className="max-w-lg mx-auto w-full px-4 py-6 cursor-grab active:cursor-grabbing min-h-full"
+            className="max-w-lg mx-auto w-full px-4 py-6 cursor-grab active:cursor-grabbing"
           >
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-white mb-4 leading-tight">
@@ -510,7 +504,7 @@ export default function SlideQuizShell({
               )}
             </div>
 
-            <div className="mb-8">
+            <div className="mb-8 max-h-[60vh] overflow-y-auto">
               {renderQuestion()}
             </div>
 
