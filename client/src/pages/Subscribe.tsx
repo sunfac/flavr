@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react';
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalNavigation from "@/components/GlobalNavigation";
+import GlobalFooter from "@/components/GlobalFooter";
 import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
 import Loading from "@/components/Loading";
@@ -98,7 +100,7 @@ export default function Subscribe() {
         <GlobalHeader 
           onMenuClick={() => setShowNavigation(true)}
           onSettingsClick={() => setShowSettings(true)}
-          onUserClick={() => setShowUserMenu(true)}
+          onAuthRequired={() => navigate("/")}
         />
         
         <main className="container mx-auto px-4 py-6 pt-24">
@@ -189,7 +191,7 @@ export default function Subscribe() {
       <GlobalHeader 
         onMenuClick={() => setShowNavigation(true)}
         onSettingsClick={() => setShowSettings(true)}
-        onUserClick={() => setShowUserMenu(true)}
+        onAuthRequired={() => navigate("/")}
       />
       
       <main className="container mx-auto px-4 py-6">
