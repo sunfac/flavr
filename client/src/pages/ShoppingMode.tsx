@@ -126,6 +126,7 @@ export default function ShoppingMode() {
       });
       
       const response = await fetchResponse.json();
+      console.log("Full recipe response:", response);
       
       setSelectedRecipe(response);
       setCurrentStep("recipe");
