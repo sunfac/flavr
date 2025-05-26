@@ -178,57 +178,57 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero Section - Full Viewport */}
-      <section id="hero" className="min-h-screen flex flex-col items-center justify-center text-center px-6 relative z-10 pt-16">
-        {/* Large Premium Logo */}
+      {/* Hero Section - Mobile Optimized */}
+      <section id="hero" className="min-h-screen flex flex-col items-center justify-center text-center px-4 relative z-10 pt-12">
+        {/* Compact Logo - Mobile First */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="relative group mb-2 mt-8"
+          className="relative group mb-6"
         >
-          <div className="w-80 h-80 md:w-[28rem] md:h-[28rem] mx-auto mb-2">
+          <div className="w-48 h-48 md:w-64 md:h-64 mx-auto">
             <img 
               src={FlavrFullLogo} 
               alt="Flavr - Your Private Chef"
-              className="w-full h-full object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500"
+              className="w-full h-full object-contain drop-shadow-xl group-hover:scale-105 transition-transform duration-300"
             />
           </div>
-          <div className="absolute inset-0 rounded-full blur-[100px] opacity-15 bg-gradient-to-b from-orange-300 via-orange-400 to-transparent group-hover:opacity-25 transition-opacity duration-500"></div>
+          <div className="absolute inset-0 rounded-full blur-[60px] opacity-10 bg-gradient-to-b from-orange-300 via-orange-400 to-transparent group-hover:opacity-20 transition-opacity duration-300"></div>
         </motion.div>
 
-        {/* Hero Headlines */}
+        {/* Compact Headlines */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-4"
+          className="mb-8"
         >
-          <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight mb-4">
+          <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight mb-3">
             Your Private Chef.
             <br />
             <span className="bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
               Anywhere.
             </span>
           </h1>
-          <p className="text-xl md:text-2xl text-slate-300 font-light max-w-3xl mx-auto leading-relaxed">
-            Recipes personalized to your cravings, mood, time, and skill level.
+          <p className="text-lg md:text-xl text-slate-300 font-light max-w-2xl mx-auto leading-relaxed">
+            AI recipes personalized to your mood, time, and skill level.
           </p>
         </motion.div>
 
-        {/* CTA Button - Prominent on Mobile */}
+        {/* Compact CTA Button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="mb-8"
+          className="mb-6"
         >
           <Button 
             onClick={handleStartCooking}
-            className="px-8 py-6 md:px-12 md:py-6 text-lg md:text-xl font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 border-0 shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 text-white rounded-full w-full max-w-xs md:w-auto"
+            className="px-6 py-4 md:px-8 md:py-4 text-base md:text-lg font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 border-0 shadow-xl hover:shadow-orange-500/30 hover:scale-105 transition-all duration-300 text-white rounded-full w-full max-w-xs"
           >
             Get Cooking Now
-            <ArrowRight className="ml-2 w-5 h-5" />
+            <ArrowRight className="ml-2 w-4 h-4" />
           </Button>
         </motion.div>
       </section>
