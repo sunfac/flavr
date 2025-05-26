@@ -47,7 +47,8 @@ export default function ChatBot({
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [hasInitialized, setHasInitialized] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [location] = useLocation();
@@ -76,7 +77,7 @@ export default function ChatBot({
 
   // Send chat message
   const sendMessageMutation = useMutation({
-    mutationFn: (data: { message: string }) =>
+    mutationFn: (data: { message: string; currentRecipe?: Recipe; mode?: string }) =>
       apiRequest("POST", "/api/chat", data),
     onSuccess: async (response) => {
       const result = await response.json();
@@ -92,6 +93,22 @@ export default function ChatBot({
       setMessage("");
     },
   });
+
+  // Initialize with welcome message
+  useEffect(() => {
+    if (!hasInitialized && isOpen) {
+      const welcomeMessage: ChatMessage = {
+        id: Date.now(),
+        message: "",
+        response: "Let's cook something unforgettable. What do you feel like today?",
+        isUser: false,
+        text: "Let's cook something unforgettable. What do you feel like today?",
+        timestamp: new Date(),
+      };
+      setLocalMessages([welcomeMessage]);
+      setHasInitialized(true);
+    }
+  }, [isOpen, hasInitialized]);
 
   // Scroll to bottom when messages change
   useEffect(() => {

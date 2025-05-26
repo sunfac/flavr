@@ -1,0 +1,45 @@
+// OBJECTIVE:
+// Update the Flavr chatbot ("Zest") so it appears visually consistent, loads with a welcoming opening bubble, and functions as:
+// 1. A dynamic recipe editor (updates recipe steps or ingredients in real-time)
+// 2. A conversational cooking assistant
+// 3. A mobile-optimized, visually premium floating chat UI
+
+// DESIGN INSTRUCTIONS:
+// • Match styling to the Auth Modal and general Flavr theme (use same rounded corners, shadow, font, blur layer, glowing buttons)
+// • Ensure Zest opens with:
+//   → Initial greeting bubble: "Let’s cook something unforgettable. What do you feel like today?"
+// • Position Zest in the lower right on desktop and float-in from the bottom on mobile
+// • Auto-expand when a user starts interacting with a recipe (or clicks the chat icon)
+// • Ensure the chat container does not block recipe content (use semi-transparent or collapsible styles)
+
+// FUNCTIONAL INSTRUCTIONS:
+// • Enable Zest to handle:
+  - Recipe improvements (e.g., “make it spicier,” “double it for 4 people,” “swap chicken for tofu”)
+  - Ingredient substitutions
+  - Cooking time or method changes
+  - Side suggestions or wine pairings
+• Allow GPT to dynamically update the visible recipe card using current output (Prompt 2) + change logic
+• Use chips above the input bar for:
+  - [ Make it spicier ]
+  - [ Bigger portions ]
+  - [ Add a side ]
+  - [ Substitute ingredient ]
+  - [ Change cooking method ]
+  - [ Wine pairing ]
+• Clicking a chip should automatically send that intent to GPT with recipe context
+
+// TECH INTEGRATION:
+// • Ensure all recipe context (Prompt 2) is passed to Zest so it can adjust dynamically
+• Append any edits Zest makes directly into the recipe card displayed
+• Store a running history of chat interactions in session storage for context continuity
+
+// BUG FIX:
+// • Currently the chatbot is cut off and not styled — fix the container width, height, and background
+• Make input bar sticky, ensure buttons are not cut off on smaller screens
+
+// OUTCOME:
+// ✅ A premium, consistent chatbot with full conversational ability
+✅ Real-time recipe editing powered by GPT
+✅ Mobile-optimized and visually cohesive
+✅ Opening line to guide users into interaction
+✅ Quick edit chips to encourage repeat engagement
