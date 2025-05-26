@@ -420,8 +420,8 @@ export default function SlideQuizShell({
         />
       </div>
 
-      {/* Question Content - No scrolling */}
-      <div className="flex-1 p-4 flex flex-col justify-center overflow-hidden">
+      {/* Question Content - With scrolling */}
+      <div className="flex-1 p-4 overflow-y-auto">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentQuestion}
@@ -429,20 +429,20 @@ export default function SlideQuizShell({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
-            className="max-w-md mx-auto w-full flex flex-col justify-center h-full"
+            className="max-w-lg mx-auto w-full min-h-full py-4"
           >
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-white mb-3 leading-tight">
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4 leading-tight">
                 {currentQ.label}
               </h2>
               {currentQ.subtitle && (
-                <p className="text-slate-300 text-base">
+                <p className="text-slate-300 text-lg leading-relaxed">
                   {currentQ.subtitle}
                 </p>
               )}
             </div>
 
-            <div className="flex-1 flex items-center justify-center">
+            <div className="mb-8">
               {renderQuestion()}
             </div>
           </motion.div>
