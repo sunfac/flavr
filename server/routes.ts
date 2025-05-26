@@ -380,6 +380,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Recipe generation routes (no auth required for ideas)
   app.post("/api/recipe-ideas", async (req, res) => {
+    console.log("Recipe ideas endpoint hit with:", { mode: req.body.mode, quizData: req.body.quizData });
     try {
       const { mode, quizData, prompt } = req.body;
 
