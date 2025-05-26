@@ -32,6 +32,16 @@ export const recipes = pgTable("recipes", {
   imageUrl: text("image_url"),
   shoppingList: jsonb("shopping_list").$type<string[]>(),
   originalPrompt: text("original_prompt"),
+  // Enhanced fields for full context storage
+  ambition: text("ambition"),
+  dietary: jsonb("dietary").$type<string[]>(),
+  equipment: jsonb("equipment").$type<string[]>(),
+  budget: text("budget"),
+  cookingTime: integer("cooking_time_preference"), // user's time preference from quiz
+  quizData: jsonb("quiz_data").$type<Record<string, any>>(), // complete quiz context
+  recipeText: text("recipe_text"), // full formatted recipe output
+  isShared: boolean("is_shared").default(false),
+  shareId: text("share_id").unique(), // for public sharing links
   createdAt: timestamp("created_at").defaultNow(),
 });
 

@@ -12,8 +12,11 @@ export interface IStorage {
   
   // Recipe operations
   createRecipe(recipe: InsertRecipe): Promise<Recipe>;
-  getRecipesByUser(userId: number): Promise<Recipe[]>;
+  getRecipesByUser(userId: number, limit?: number): Promise<Recipe[]>;
   getRecipe(id: number): Promise<Recipe | undefined>;
+  getRecipeByShareId(shareId: string): Promise<Recipe | undefined>;
+  updateRecipeSharing(id: number, isShared: boolean, shareId?: string): Promise<Recipe>;
+  getUserRecipeHistory(userId: number, limit?: number): Promise<Recipe[]>;
   
   // Chat operations
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;

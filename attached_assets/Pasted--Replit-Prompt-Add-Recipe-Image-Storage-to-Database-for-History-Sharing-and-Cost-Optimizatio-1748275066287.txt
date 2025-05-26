@@ -1,0 +1,69 @@
+// Replit Prompt — Add Recipe + Image Storage to Database for History, Sharing, and Cost Optimization
+
+// OBJECTIVE:
+// Create a persistent database to store generated recipes and associated Stable Diffusion image URLs.
+// This enables user history, sharing links, cost-saving by caching images, and the foundation for Flavr+ premium features.
+
+// TECH SETUP:
+// Use Replit DB or Supabase (depending on current backend integration).
+// This example assumes use of Replit DB with REST-style logic or lightweight file-based abstraction.
+// If Supabase is already active, use `supabase.from('recipes').insert(...)` pattern.
+
+// DATABASE SCHEMA:
+interface StoredRecipe {
+  id: string;                // UUID or timestamp-based unique ID
+  userId?: string;           // null if guest, string if authenticated
+  promptMode: 'shopping' | 'fridge' | 'chef';
+  recipeTitle: string;
+  recipeText: string;        // Full recipe output from Prompt 2
+  ingredients: string[];     // Core inputs used
+  mood: string;
+  ambition: string;
+  dietary: string[];
+  equipment: string[];
+  imageUrl?: string;         // Optional SD image URL if generated
+  createdAt: string;         // ISO timestamp
+}
+
+// 1. ON RECIPE GENERATION SUCCESS (Prompt 2 complete + recipe displayed):
+// Save recipe into DB with context and image if applicable
+
+const recipeToSave: StoredRecipe = {
+  id: generateUUID(),
+  userId: user?.id || null,
+  promptMode: 'shopping',
+  recipeTitle: output.title,
+  recipeText: output.fullText,
+  ingredients: inputs.ingredients,
+  mood: inputs.mood,
+  ambition: inputs.ambition,
+  dietary: inputs.dietary,
+  equipment: inputs.equipment,
+  imageUrl: stableDiffusionImageUrl || undefined,
+  createdAt: new Date().toISOString(),
+};
+
+await db.set(`recipe:${recipeToSave.id}`, recipeToSave);
+
+// 2. OPTIONAL: INDEX BY USER FOR HISTORY DISPLAY
+if (user?.id) {
+  const userHistoryKey = `user:${user.id}:recipes`;
+  const existing = (await db.get(userHistoryKey)) || [];
+  await db.set(userHistoryKey, [...existing, recipeToSave.id]);
+}
+
+// 3. TO DISPLAY USER HISTORY:
+// Fetch IDs from `user:{id}:recipes`, then retrieve each recipe by `recipe:{id}`
+// Display recipe cards with “View Again”, “Regenerate with changes”, or “Share” options
+
+// 4. ADDITIONAL ROUTES (optional)
+// - GET /api/recipe/:id → fetch single recipe by ID for sharing
+// - GET /api/user/recipes → fetch all for user
+// - POST /api/recipe → add new
+// - DELETE /api/recipe/:id → remove (premium only)
+
+// OUTCOME:
+// ✅ Recipes persist between sessions
+// ✅ Images are cached, saving SD cost
+// ✅ History tab now works
+// ✅ Sets foundation for Flavr+, social sharing, favouriting and analytics
