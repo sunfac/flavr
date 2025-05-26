@@ -378,6 +378,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test endpoint to verify routing
+  app.get("/api/test", (req, res) => {
+    console.log("Test endpoint hit successfully!");
+    res.json({ message: "Backend routing works!", timestamp: new Date().toISOString() });
+  });
+
   // Recipe generation routes (no auth required for ideas)
   app.post("/api/recipe-ideas", async (req, res) => {
     console.log("Recipe ideas endpoint hit with:", { mode: req.body.mode, quizData: req.body.quizData });
