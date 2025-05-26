@@ -180,24 +180,23 @@ export default function ChatBot({
 
   return (
     <>
-      {/* Floating Button */}
-      <div className="fixed bottom-24 right-6 z-40">
-        <div className="relative group">
+      {/* WhatsApp-style Floating Chat Button */}
+      <div className="fixed bottom-20 right-4 z-40">
+        <div className="relative">
           <Button
             onClick={() => setIsOpen(!isOpen)}
-            className="w-16 h-16 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl shadow-2xl hover:shadow-orange-300/50 transition-all duration-500 group-hover:scale-110 animate-bounce-gentle"
+            className="w-12 h-12 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-2 border-white"
             size="sm"
           >
             {isOpen ? (
-              <X className="w-6 h-6 transition-all duration-300" />
+              <X className="w-5 h-5" />
             ) : (
-              <MessageCircle className="w-6 h-6 transition-all duration-300" />
+              <MessageCircle className="w-5 h-5" />
             )}
           </Button>
-          <div className="absolute inset-0 gradient-primary rounded-2xl blur-xl opacity-40 group-hover:opacity-60 transition-opacity duration-500"></div>
           {!isOpen && (
-            <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+              <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
             </div>
           )}
         </div>
