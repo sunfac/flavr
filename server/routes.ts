@@ -831,7 +831,9 @@ Return a JSON object with this exact structure:
         // Build Chef Assist Mode mapped prompt (Prompt 2 only)
         enhancedPrompt = `You are an elite private chef.
 
-Based on the user's intent and quiz preferences, generate a detailed, flavour-rich recipe for:
+Based on the user's culinary vision and quiz preferences, generate a detailed, flavour-rich recipe.
+
+User's Culinary Vision: ${quizData.intent || selectedRecipe.description || 'Custom chef-guided recipe'}
 
 **${selectedRecipe.title}**
 
