@@ -901,13 +901,26 @@ Return a JSON object with this exact structure:
 Make the ingredients specific with quantities and the instructions detailed and clear. Ensure all ingredient selections and quantities align with the specified mood, ambition level, time constraints, and budget constraints.`;
       }
 
-      // Add error handling and logging for OpenAI API call
+      // Simplified test for OpenAI API call
       console.log("Making OpenAI API call for full recipe generation");
+      console.log("Prompt length:", enhancedPrompt.length);
       
+      // Test with a simpler prompt first
+      const testPrompt = `Generate a complete Korean recipe for "${selectedRecipe.title}". Return only JSON with this structure:
+{
+  "title": "${selectedRecipe.title}",
+  "description": "${selectedRecipe.description}",
+  "ingredients": ["ingredient 1", "ingredient 2"],
+  "instructions": ["step 1", "step 2"],
+  "cookTime": 30,
+  "servings": 4,
+  "difficulty": "Medium"
+}`;
+
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
-        messages: [{ role: "user", content: enhancedPrompt }],
+        messages: [{ role: "user", content: testPrompt }],
         response_format: { type: "json_object" },
       });
 
