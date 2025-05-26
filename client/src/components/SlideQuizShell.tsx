@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,35 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, ArrowRight, CheckCircle, Clock, ChefHat, Utensils, Sparkles, Home, Leaf, Crown, Target, Zap, Star, Shuffle, DollarSign, CreditCard, Flame, Building, Microwave, Wind, Timer, ChefHat as Cooker } from "lucide-react";
+import { 
+  ArrowLeft, 
+  ArrowRight, 
+  CheckCircle, 
+  Clock, 
+  ChefHat, 
+  Utensils, 
+  Sparkles, 
+  Home, 
+  Leaf, 
+  Crown, 
+  Target, 
+  Zap, 
+  Star, 
+  Shuffle, 
+  DollarSign, 
+  CreditCard, 
+  Flame, 
+  Building, 
+  Microwave, 
+  Wind, 
+  Timer, 
+  ChefHat as Cooker,
+  Circle,
+  CircleDot,
+  Hand,
+  CheckCircle2,
+  XCircle
+} from "lucide-react";
 
 export interface QuestionConfig {
   id: string;
@@ -47,9 +75,25 @@ export default function SlideQuizShell({
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [isCompleting, setIsCompleting] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const progress = ((currentQuestion + 1) / questions.length) * 100;
   const currentQ = questions[currentQuestion];
+
+  // Lock body scroll during quiz for mobile optimization
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    document.body.style.height = '100vh';
+    return () => { 
+      document.body.style.overflow = 'auto';
+      document.body.style.height = 'auto';
+    };
+  }, []);
+
+  // Scroll to input on focus for mobile
+  const scrollToInput = (ref: React.RefObject<HTMLElement>) => {
+    ref?.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
 
   const handleNext = () => {
     if (currentQuestion < questions.length - 1) {
@@ -67,6 +111,19 @@ export default function SlideQuizShell({
   const handlePrevious = () => {
     if (currentQuestion > 0) {
       setCurrentQuestion(prev => prev - 1);
+    }
+  };
+
+  // Swipe gesture handler for mobile optimization
+  const handleSwipeEnd = (event: any, info: any) => {
+    const threshold = 100;
+    if (info.offset.x > threshold) {
+      handlePrevious();
+    } else if (info.offset.x < -threshold) {
+      const currentAnswer = answers[currentQ?.id];
+      if (currentAnswer !== undefined && currentAnswer !== '') {
+        handleNext();
+      }
     }
   };
 

@@ -1,0 +1,136 @@
+// Replit Prompt — Fully Implement Mobile-Optimized Quiz Flow with Swipe UX, Scroll Fixes, and Icon Support
+
+// OBJECTIVE:
+// This prompt upgrades the Flavr quiz UI for all modes (Shopping, Fridge, Chef Assist) to include:
+// - Smooth swipe gestures
+- Scroll-lock for mobile
+- Scroll-to-input behavior
+- Progress navigation and slide control buttons
+- Full icon usage for navigation + actions using Lucide
+
+//////////////////////////////////////////////////////////////////
+// 1. INSTALL + IMPORT ICONS (Lucide)
+//////////////////////////////////////////////////////////////////
+
+// Install Lucide:
+npm install lucide-react
+
+// In your quiz component file:
+import {
+  ArrowLeft,
+  ArrowRight,
+  Circle,
+  CircleDot,
+  Hand,
+  CheckCircle2,
+  XCircle,
+  Timer,
+  ChefHat
+} from 'lucide-react';
+
+//////////////////////////////////////////////////////////////////
+// 2. QUIZ SLIDE STRUCTURE + SCROLL SNAP
+//////////////////////////////////////////////////////////////////
+
+.quiz-slide-container {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  height: 100dvh;
+}
+
+.quiz-slide {
+  flex: 0 0 100vw;
+  height: 100%;
+  scroll-snap-align: center;
+  padding: 1.25rem;
+  box-sizing: border-box;
+  position: relative;
+}
+
+useEffect(() => {
+  document.body.style.overflow = 'hidden';
+  return () => { document.body.style.overflow = 'auto'; };
+}, []);
+
+//////////////////////////////////////////////////////////////////
+// 3. SWIPE GESTURES (FRAMER MOTION)
+//////////////////////////////////////////////////////////////////
+
+<motion.div
+  drag="x"
+  dragConstraints={{ left: 0, right: 0 }}
+  dragElastic={0.2}
+  onDragEnd={(e, info) => {
+    if (info.offset.x > 100) handlePrevious();
+    else if (info.offset.x < -100) handleNext();
+  }}
+  className="quiz-slide"
+>
+  {slideContent}
+</motion.div>
+
+//////////////////////////////////////////////////////////////////
+// 4. SCROLL-TO-VIEW ON INPUT FOCUS
+//////////////////////////////////////////////////////////////////
+
+const scrollToInput = (ref) => {
+  ref?.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+};
+
+<input
+  ref={inputRef}
+  onFocus={() => scrollToInput(inputRef)}
+  className="w-full px-4 py-3 border rounded-xl"
+/>
+
+//////////////////////////////////////////////////////////////////
+// 5. NAVIGATION & ICON BUTTONS
+//////////////////////////////////////////////////////////////////
+
+<div className="flex justify-between items-center px-4 pb-6">
+  <button onClick={handlePrevious} className="flex items-center gap-2 text-sm font-medium text-gray-600">
+    <ArrowLeft size={18} /> Back
+  </button>
+  <button onClick={handleNext} className="flex items-center gap-2 text-sm font-medium bg-orange-500 text-white px-4 py-2 rounded-xl">
+    Next <ArrowRight size={18} />
+  </button>
+</div>
+
+<div className="flex justify-center gap-3 pt-4">
+  {slides.map((_, index) => (
+    <div key={index}>
+      {index === currentIndex ? (
+        <CircleDot className="text-orange-500" size={16} />
+      ) : (
+        <Circle className="text-gray-300" size={16} />
+      )}
+    </div>
+  ))}
+</div>
+
+//////////////////////////////////////////////////////////////////
+// 6. VISUAL POLISH & LAYOUT ALIGNMENT
+//////////////////////////////////////////////////////////////////
+
+- Font: General Sans (700 for headings), Inter (500 for body/buttons)
+- Colors: White or bg-gray-50 base, #FF6B4A for accents/CTAs
+- Button: Rounded-xl, min-height: 48px, hover/focus states
+- Icons: Use Lucide icons consistently for nav, badges, progress
+- All layouts responsive across 320px+ screens with no horizontal scroll bleed
+
+//////////////////////////////////////////////////////////////////
+// FINAL RESULT
+//////////////////////////////////////////////////////////////////
+
+✅ Smooth swipe between questions (horizontal)
+✅ Scroll locked vertically during quiz
+✅ Inputs always scroll into view on focus
+✅ Icons appear consistently and render correctly
+✅ Navigation and CTA buttons are clear, tappable, and modern
+✅ Entire quiz UI is polished, mobile-first, and on-brand
+
+// Apply this across all quiz flows. Do not affect recipe cards or chatbot flows.
