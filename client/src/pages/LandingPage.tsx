@@ -7,7 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import Header from "@/components/Header";
+import GlobalHeader from "@/components/GlobalHeader";
+import GlobalNavigation from "@/components/GlobalNavigation";
+import SettingsPanel from "@/components/SettingsPanel";
+import UserMenu from "@/components/UserMenu";
 import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 import FlavrFullLogo from "@assets/DB23351A-869B-42C9-A1B2-E6C2685B7586.png";
 import HeroFoodImage from "@assets/3D8C8E94-9BC0-4F6A-95F2-8951941A709B.png";
@@ -21,6 +24,9 @@ export default function LandingPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("signup");
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showNavigation, setShowNavigation] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   // Handle scroll to show/hide scroll-to-top button
   useEffect(() => {
@@ -131,43 +137,11 @@ export default function LandingPage() {
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/30 via-transparent to-black/50"></div>
       </div>
 
-      {/* Header with dark theme */}
-      <header className="absolute top-0 left-0 right-0 z-50 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Left: Hamburger Menu */}
-          <Button 
-            variant="ghost"
-            size="icon"
-            className="text-white hover:bg-white/10"
-          >
-            <Menu className="w-6 h-6" />
-          </Button>
-
-          {/* Center: Chef Hat Logo */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
-            <img src={FlavrLogo} alt="Flavr" className="w-10 h-10" />
-          </div>
-
-          {/* Right: Settings and Login */}
-          <div className="flex items-center space-x-2">
-            <Button 
-              variant="ghost"
-              size="icon"
-              className="text-white hover:bg-white/10"
-            >
-              <Settings className="w-6 h-6" />
-            </Button>
-            <Button 
-              variant="ghost"
-              size="icon"
-              onClick={handleLogin}
-              className="text-white hover:bg-white/10"
-            >
-              <User className="w-6 h-6" />
-            </Button>
-          </div>
-        </div>
-      </header>
+      <GlobalHeader 
+        onMenuClick={() => setShowNavigation(true)}
+        onSettingsClick={() => setShowSettings(true)}
+        onUserClick={() => setShowUserMenu(true)}
+      />
 
       {/* Navigation Bar */}
       <nav className="absolute top-20 left-0 right-0 z-40 px-6">
@@ -482,6 +456,21 @@ export default function LandingPage() {
         title={authMode === "login" ? "Welcome back!" : "Join Flavr today!"}
         description={authMode === "login" ? "Sign in to continue your culinary journey" : "Create your account to unlock personalized AI-generated recipes"}
       />
+
+      {/* Navigation Panel */}
+      {showNavigation && (
+        <GlobalNavigation onClose={() => setShowNavigation(false)} />
+      )}
+
+      {/* Settings Panel */}
+      {showSettings && (
+        <SettingsPanel onClose={() => setShowSettings(false)} />
+      )}
+
+      {/* User Menu */}
+      {showUserMenu && (
+        <UserMenu onClose={() => setShowUserMenu(false)} />
+      )}
     </div>
   );
 }
