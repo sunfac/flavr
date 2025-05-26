@@ -527,7 +527,7 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
 
   app.post("/api/generate-recipe-ideas", async (req, res) => {
     try {
-
+      console.log("Recipe ideas API called with:", { mode, body: req.body });
       const { mode, quizData, prompt } = req.body;
 
       // Build mapped prompt for Shopping Mode (Prompt 1 - Recipe Idea Generator)
