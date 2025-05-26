@@ -378,7 +378,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Recipe generation routes
+  // Recipe generation routes (no auth required for ideas)
+  app.post("/api/recipe-ideas", async (req, res) => {
+    try {
+      const { mode, quizData, prompt } = req.body;
+
+      // Build mapped prompt for Shopping Mode (Prompt 1 - Recipe Idea Generator)
+      let enhancedPrompt;
+      
+      if (mode === 'shopping') {
+        // Get mapped guidance text
+        const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
+        const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
+        const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
+        const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
+        const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
+        const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
+        
+        // Build Shopping Mode mapped prompt (Prompt 1)
+        const creativeGuidance = getCreativeGuidanceBlock();
+        
+        enhancedPrompt = `You are an elite private chef.
+
+Based on the following preferences, suggest 5 unique, flavour-packed recipe ideas. Each idea should have a title and a one-sentence description:
+
+${moodText}
+
+${ambitionText}
+
+${dietaryText}
+
+${budgetText}
+
+${timeText}
+
+${equipmentText}
+
+Cuisine preference: ${quizData.cuisine || 'Any cuisine'}
+
+${creativeGuidance}
+
+Ensure the 5 ideas are meaningfully distinct from each other in ingredients, style, or technique.
+Avoid repeating the same ingredient combinations across recipes.
+
+Return a JSON object with this exact structure:
+{
+  "recipes": [
+    {
+      "title": "Recipe Name", 
+      "description": "Brief appealing description in one sentence"
+    }
+  ]
+}`;
+      } else if (mode === 'fridge') {
+        // Build Fridge Mode mapped prompt (Prompt 1)
+        const creativeGuidance = getCreativeGuidanceBlock();
+        
+        enhancedPrompt = `You are an elite private chef.
+
+Based on the user's available ingredients and preferences, suggest 5 exciting recipe ideas.
+Each idea should include a recipe title and one short sentence describing what makes it delicious or unique.
+
+Ingredients the user has in their fridge: ${quizData.ingredients || 'Various ingredients'}
+
+${getMoodPromptText(quizData.mood || quizData.vibe || '')}
+
+${getAmbitionPromptText(quizData.ambition || '')}
+
+${getDietPromptText(quizData.dietary || [])}
+
+${getTimePromptText(quizData.time || 30)}
+
+${getEquipmentPromptText(quizData.equipment || [])}
+
+${creativeGuidance}
+
+Ensure the 5 ideas are meaningfully distinct from each other in ingredients, style, or technique.
+You may assume common pantry items are available, including oils, seasonings, dried herbs and spices, flour, stock cubes, tinned tomatoes, beans, tuna, sweetcorn, pasta, rice, and similar cupboard staples.
+
+Return a JSON object with this exact structure:
+{
+  "recipes": [
+    {
+      "title": "Recipe Name", 
+      "description": "Brief appealing description in one sentence"
+    }
+  ]
+}`;
+      } else {
+        // Fallback for other modes
+        enhancedPrompt = `Generate exactly 5 diverse recipe suggestions based on these preferences:
+
+Mode: ${mode}
+Quiz Data: ${JSON.stringify(quizData)}
+
+Return a JSON object with this exact structure:
+{
+  "recipes": [
+    {
+      "title": "Recipe Name",
+      "description": "Brief appealing description in one sentence"
+    }
+  ]
+}
+
+Make each recipe unique and appealing. Focus on variety in cooking styles, flavors, and techniques.`;
+      }
+
+      console.log("Making OpenAI API call with prompt length:", enhancedPrompt.length);
+      
+      // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: enhancedPrompt }],
+        response_format: { type: "json_object" },
+      });
+
+      console.log("OpenAI API response received successfully");
+      const result = JSON.parse(response.choices[0].message.content!);
+      res.json({ ideas: result.recipes || [] });
+    } catch (error: any) {
+      console.error("Recipe ideas generation error details:", {
+        message: error.message,
+        status: error.status,
+        type: error.type,
+        code: error.code
+      });
+      res.status(500).json({ message: "Failed to generate recipe ideas: " + error.message });
+    }
+  });
+
   app.post("/api/generate-recipe-ideas", requireAuth, async (req, res) => {
     try {
       const user = await storage.getUser(req.session!.userId);
