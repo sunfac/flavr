@@ -18,6 +18,7 @@ interface RecipeIdea {
 interface TinderRecipeCardsProps {
   recipes: RecipeIdea[];
   onSelectRecipe: (recipe: RecipeIdea) => void;
+  onAllRecipesExhausted?: () => void;
   quizData?: any;
   theme?: 'shopping' | 'fridge' | 'chef';
 }
@@ -25,6 +26,7 @@ interface TinderRecipeCardsProps {
 export default function TinderRecipeCards({ 
   recipes, 
   onSelectRecipe, 
+  onAllRecipesExhausted,
   quizData,
   theme = 'shopping' 
 }: TinderRecipeCardsProps) {
@@ -70,6 +72,10 @@ export default function TinderRecipeCards({
       setCurrentIndex(newAvailableRecipes.length - 1);
     } else if (newAvailableRecipes.length === 0) {
       setCurrentIndex(0);
+      // Trigger second batch of recipes
+      if (onAllRecipesExhausted) {
+        onAllRecipesExhausted();
+      }
     }
   };
 

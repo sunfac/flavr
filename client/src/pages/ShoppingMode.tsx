@@ -199,6 +199,7 @@ export default function ShoppingMode() {
           <TinderRecipeCards
             recipes={recipeIdeas}
             onSelectRecipe={handleRecipeSelect}
+            onAllRecipesExhausted={handleAllRecipesRejected}
             quizData={quizData}
             theme="shopping"
           />
