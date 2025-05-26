@@ -47,7 +47,7 @@ export default function GlobalNavigation({ onClose }: GlobalNavigationProps) {
     {
       icon: Bookmark,
       label: "Saved Recipes",
-      href: "/recipes"
+      href: "/my-recipes"
     },
     ...(user?.user?.subscriptionTier !== 'premium' ? [{
       icon: Star,
