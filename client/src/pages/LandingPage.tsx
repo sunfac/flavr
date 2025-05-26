@@ -516,7 +516,7 @@ export default function LandingPage() {
       </section>
 
       {/* Flavr+ Premium Section - Completely Redesigned */}
-      <section id="pricing" className="py-16 px-4 relative z-10 overflow-hidden">
+<section id="pricing" className="py-8 px-4 relative z-10 overflow-hidden">
         {/* Dynamic Background Elements */}
         <div className="absolute top-0 left-0 w-full h-full">
           <div className="absolute top-1/4 left-1/3 w-80 h-80 bg-gradient-to-r from-orange-500/15 to-amber-500/15 rounded-full blur-3xl animate-pulse"></div>
@@ -768,7 +768,7 @@ export default function LandingPage() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0 }}
           onClick={scrollToTop}
-          className="fixed bottom-20 right-4 md:bottom-8 md:right-8 z-50 relative group"
+          className="fixed bottom-24 left-1/2 transform -translate-x-1/2 md:bottom-8 md:right-8 md:left-auto md:transform-none z-50 relative group"
         >
           {/* Enhanced glow effects */}
           <div className="absolute -inset-2 bg-gradient-to-r from-orange-500/50 via-amber-500/40 to-orange-500/50 rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity duration-300 animate-pulse"></div>
