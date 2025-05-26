@@ -69,9 +69,12 @@ export default function ShoppingMode() {
       
       if (response.ok) {
         const result = await response.json();
+        console.log("API response received:", result);
         setRecipeIdeas(result.ideas || []);
       } else {
-        throw new Error('Failed to generate recipe ideas');
+        const errorText = await response.text();
+        console.error("API error response:", errorText);
+        throw new Error(`Failed to generate recipe ideas: ${response.status}`);
       }
     } catch (error) {
       console.error("API call failed, using fallback recipes:", error);
