@@ -425,6 +425,8 @@ ${equipmentText}
 
 ${creativeGuidance}
 
+Ensure the 5 recipe ideas are meaningfully distinct from one another in style, technique, or core ingredients.
+
 Only return a list of 5 recipe titles and short, enticing one-liners for each.
 Do not include ingredient lists or steps yet.
 
@@ -466,6 +468,10 @@ ${timeText}
 ${equipmentText}
 
 ${creativeGuidance}
+
+Ensure the 5 ideas are meaningfully distinct from each other in ingredients, style, or technique.
+Avoid repeating the same ingredient combinations across recipes.
+You may assume common pantry items are available, including oils, seasonings, dried herbs and spices, flour, stock cubes, tinned tomatoes, beans, tuna, sweetcorn, pasta, rice, and similar cupboard staples.
 
 Only return 5 distinct recipe ideas in the format:
 - [Recipe Title]: [One-line description]
@@ -597,6 +603,7 @@ Please return:
 
 Write instructions in a friendly tone, with helpful technique notes.
 Ensure the recipe fully respects the constraints and uses realistic supermarket pricing (GBP).
+Use clear quantities, supermarket-friendly items, and include any helpful substitutions or prep notes.
 
 Return a JSON object with this exact structure:
 {
@@ -642,6 +649,9 @@ Ingredients available: ${quizData.ingredients || 'Various ingredients'}
 Servings: ${quizData.servings || '4 servings'}
 
 ${creativeGuidance}
+
+Prioritise using all or most of the user's provided ingredients.
+Do not use any ingredients not listed unless they are common pantry items. You may assume common pantry items are available, including oils, seasonings, dried herbs and spices, flour, stock cubes, tinned tomatoes, beans, tuna, sweetcorn, pasta, rice, and similar cupboard staples.
 
 Please return:
 - Title
