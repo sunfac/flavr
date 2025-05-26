@@ -633,12 +633,12 @@ export default function LandingPage() {
               <div className="absolute -inset-4 bg-gradient-to-r from-orange-400/30 via-amber-300/20 to-yellow-400/30 rounded-full blur-2xl opacity-60 animate-pulse"></div>
               
               <Button 
-                className="relative px-12 py-6 md:px-16 md:py-8 text-xl md:text-2xl font-bold bg-gradient-to-r from-white via-orange-50 to-white text-orange-600 hover:from-orange-50 hover:via-white hover:to-orange-50 shadow-2xl hover:shadow-orange-500/30 hover:scale-110 transition-all duration-700 rounded-full backdrop-blur-sm group border-2 border-orange-200/50 flex items-center justify-center"
+                className="relative px-6 py-3 md:px-12 md:py-6 text-base md:text-xl font-bold bg-gradient-to-r from-white via-orange-50 to-white text-orange-600 hover:from-orange-50 hover:via-white hover:to-orange-50 shadow-2xl hover:shadow-orange-500/30 hover:scale-105 transition-all duration-500 rounded-full backdrop-blur-sm group border-2 border-orange-200/50 flex items-center justify-center max-w-xs md:max-w-none mx-auto"
               >
                 <span className="bg-gradient-to-r from-orange-600 via-red-600 to-amber-600 bg-clip-text text-transparent">
                   Start Your Culinary Journey
                 </span>
-                <Star className="ml-4 w-6 h-6 text-orange-500 fill-current group-hover:rotate-12 group-hover:scale-125 transition-all duration-500" />
+                <Star className="ml-2 md:ml-4 w-4 h-4 md:w-6 md:h-6 text-orange-500 fill-current group-hover:rotate-12 group-hover:scale-125 transition-all duration-500" />
               </Button>
             </motion.div>
 
@@ -768,7 +768,7 @@ export default function LandingPage() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0 }}
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 z-50 relative group"
+          className="fixed bottom-20 right-4 md:bottom-8 md:right-8 z-50 relative group"
         >
           {/* Enhanced glow effects */}
           <div className="absolute -inset-2 bg-gradient-to-r from-orange-500/50 via-amber-500/40 to-orange-500/50 rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity duration-300 animate-pulse"></div>
