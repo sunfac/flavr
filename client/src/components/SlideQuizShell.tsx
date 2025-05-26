@@ -460,7 +460,7 @@ export default function SlideQuizShell({
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white flex flex-col overflow-hidden">
+    <div className="h-[100dvh] bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white flex flex-col overflow-hidden">
       {/* Progress Header */}
       <div className="bg-slate-900/80 backdrop-blur-xl border-b border-slate-700 p-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
@@ -477,8 +477,14 @@ export default function SlideQuizShell({
         />
       </div>
 
-      {/* Question Content - With swipe gestures and scrolling */}
-      <div className="flex-1 p-4 overflow-y-auto">
+      {/* Question Content - With swipe gestures and proper scrolling */}
+      <div 
+        className="flex-1 overflow-y-auto scroll-smooth"
+        style={{
+          scrollPaddingTop: '4rem',
+          scrollPaddingBottom: '8rem',
+        }}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={currentQuestion}
@@ -490,7 +496,7 @@ export default function SlideQuizShell({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
-            className="max-w-lg mx-auto w-full min-h-full py-4 cursor-grab active:cursor-grabbing"
+            className="max-w-lg mx-auto w-full px-4 py-6 cursor-grab active:cursor-grabbing min-h-full"
           >
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-white mb-4 leading-tight">
