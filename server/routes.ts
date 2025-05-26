@@ -389,11 +389,12 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
 
       const { selectedRecipe, mode, quizData, prompt } = req.body;
 
-      // Include budget, mood, ambition, and time guidance in the prompt
+      // Include budget, mood, ambition, time, and dietary guidance in the prompt
       const budgetGuidance = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
       const moodGuidance = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
       const ambitionGuidance = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
       const timeGuidance = quizData.time ? getTimePromptText(quizData.time) : '';
+      const dietaryGuidance = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
       
       // Build enhanced prompt for complete recipe generation
       const enhancedPrompt = `Generate a complete, detailed recipe for "${selectedRecipe.title}" based on these preferences:
@@ -409,6 +410,8 @@ ${ambitionGuidance}
 ${timeGuidance}
 
 ${budgetGuidance}
+
+${dietaryGuidance}
 
 Return a JSON object with this exact structure:
 {
