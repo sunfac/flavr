@@ -80,10 +80,11 @@ export default function SlideQuizShell({
   const progress = ((currentQuestion + 1) / questions.length) * 100;
   const currentQ = questions[currentQuestion];
 
-  // Lock body scroll during quiz for mobile optimization
+  // Allow proper scrolling for quiz navigation
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    document.body.style.height = '100vh';
+    // Don't lock scroll - allow natural scrolling to reach buttons
+    document.body.style.overflow = 'auto';
+    document.body.style.height = 'auto';
     return () => { 
       document.body.style.overflow = 'auto';
       document.body.style.height = 'auto';
@@ -460,7 +461,7 @@ export default function SlideQuizShell({
   }
 
   return (
-    <div className="h-[100dvh] bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white flex flex-col overflow-hidden">
+    <div className="min-h-[100dvh] bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white flex flex-col">
       {/* Progress Header */}
       <div className="bg-slate-900/80 backdrop-blur-xl border-b border-slate-700 p-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
