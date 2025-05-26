@@ -30,25 +30,22 @@ export default function ModeSelection() {
       id: "shopping",
       title: "Shopping Mode",
       icon: ShoppingCart,
-      description: "Get personalized recipes with complete shopping lists tailored to your preferences and budget",
-      gradient: "gradient-primary",
-      color: "orange"
+      description: "Personalized recipes with shopping lists",
+      subtitle: "Perfect for meal planning & grocery runs"
     },
     {
       id: "fridge",
       title: "Fridge to Fork",
       icon: Refrigerator,
-      description: "Transform available ingredients into delicious meals with zero waste and maximum creativity",
-      gradient: "gradient-secondary",
-      color: "emerald"
+      description: "Transform what you have into meals",
+      subtitle: "Zero waste, maximum creativity"
     },
     {
       id: "chef",
       title: "Chef Assist",
       icon: ChefHat,
-      description: "Get expert-level guidance for special occasions and culinary ambitions",
-      gradient: "gradient-accent",
-      color: "amber"
+      description: "Expert guidance for special occasions",
+      subtitle: "Elevate your culinary skills"
     }
   ];
 
@@ -77,66 +74,54 @@ export default function ModeSelection() {
         </div>
       )}
 
-      <main className="container mx-auto px-6 py-8 relative z-10 pb-24">
-        {/* Hero Section */}
-        <div className="text-center mb-12 pt-20">
-          <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-4 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
+      <main className="container mx-auto px-6 py-6 relative z-10 pb-24">
+        {/* Minimal Hero Section */}
+        <div className="text-center mb-8 pt-12">
+          <h1 className="text-3xl md:text-4xl font-bold leading-tight mb-3 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
             Choose Your Mode
           </h1>
-          <p className="text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed font-medium">
-            Select how you'd like to create your next amazing meal with AI
+          <p className="text-lg text-slate-400 max-w-lg mx-auto leading-relaxed">
+            How would you like to cook today?
           </p>
         </div>
 
-        {/* Mode Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        {/* Minimal Mode Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {modes.map((mode, index) => (
             <Card 
               key={mode.id}
-              className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 group shadow-2xl hover:shadow-orange-500/25 transition-all duration-500 cursor-pointer hover:scale-105"
+              className="bg-card/90 backdrop-blur-xl border border-border/50 group shadow-lg hover:shadow-orange-500/20 transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:border-orange-500/40"
               onClick={() => handleModeSelect(mode.id)}
             >
-              <CardHeader className="text-center pb-4">
-                <div className="relative w-20 h-20 mx-auto mb-4">
-                  <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl flex items-center justify-center group-hover:scale-110 transition-all duration-500 shadow-xl">
-                    <mode.icon className="w-8 h-8 text-white" />
+              <CardContent className="text-center p-8">
+                <div className="relative w-16 h-16 mx-auto mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-orange-600/20 border border-orange-500/30 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-lg">
+                    <mode.icon className="w-7 h-7 text-orange-400 group-hover:text-orange-300 transition-colors duration-300" strokeWidth={1.5} />
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500/30 to-orange-600/30 rounded-2xl blur-xl opacity-0 group-hover:opacity-40 transition-opacity duration-300"></div>
                 </div>
-                <CardTitle className="text-2xl font-bold text-white mb-2">
+                
+                <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-orange-300 transition-colors duration-300">
                   {mode.title}
-                </CardTitle>
-              </CardHeader>
-              
-              <CardContent className="text-center pb-8">
-                <p className="text-slate-600 leading-relaxed mb-6">
+                </h3>
+                
+                <p className="text-muted-foreground text-sm leading-relaxed mb-1">
                   {mode.description}
                 </p>
-                <Button 
-                  className="w-full h-14 text-white font-bold shadow-xl transition-all duration-500 hover:scale-105 relative overflow-hidden group"
-                  style={{ background: `var(--gradient-${mode.id === 'shopping' ? 'primary' : mode.id === 'fridge' ? 'secondary' : 'accent'})` }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleModeSelect(mode.id);
-                  }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                  <span className="relative z-10 tracking-wide text-lg">Start {mode.title}</span>
-                </Button>
+                
+                <p className="text-muted-foreground/70 text-xs">
+                  {mode.subtitle}
+                </p>
               </CardContent>
             </Card>
           ))}
         </div>
-
-        {/* Back to Landing */}
-        <div className="text-center mt-12">
-          <Button
-            variant="ghost"
-            className="text-slate-600 hover:text-slate-800 transition-colors"
-            onClick={() => navigate("/")}
-          >
-            ← Back to Home
-          </Button>
+        
+        {/* Subtle Call to Action */}
+        <div className="text-center mt-8">
+          <p className="text-sm text-muted-foreground/60">
+            Tap any mode to get started with personalized recipes
+          </p>
         </div>
       </main>
 
