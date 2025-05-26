@@ -185,7 +185,7 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="relative group mb-4"
+          className="relative group mb-2"
         >
           <div className="w-56 md:w-72 mx-auto relative">
             {/* Subtle white radial glow behind logo */}
