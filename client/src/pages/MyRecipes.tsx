@@ -46,6 +46,22 @@ export default function MyRecipes() {
   const queryClient = useQueryClient();
   const [showNavigation, setShowNavigation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Close all menus
+  const closeAllMenus = () => {
+    setShowNavigation(false);
+    setShowSettings(false);
+    setShowUserMenu(false);
+  };
+
+  // Open specific menu and close others
+  const openMenu = (menuType: 'navigation' | 'settings' | 'userMenu') => {
+    closeAllMenus();
+    if (menuType === 'navigation') setShowNavigation(true);
+    if (menuType === 'settings') setShowSettings(true);
+    if (menuType === 'userMenu') setShowUserMenu(true);
+  };
 
   // Check authentication
   const { data: user, isLoading: userLoading } = useQuery({
@@ -161,8 +177,9 @@ export default function MyRecipes() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black relative overflow-hidden">
       <GlobalHeader 
-        onMenuClick={() => setShowNavigation(true)}
-        onSettingsClick={() => setShowSettings(true)}
+        onMenuClick={() => openMenu('navigation')}
+        onSettingsClick={() => openMenu('settings')}
+        onAuthRequired={() => navigate("/")}
       />
       
       <main className="container mx-auto px-6 py-8 relative z-10 pb-24 pt-24">
@@ -327,14 +344,22 @@ export default function MyRecipes() {
       {/* Navigation Menu */}
       {showNavigation && (
         <GlobalNavigation 
-          onClose={() => setShowNavigation(false)}
+          onClose={closeAllMenus}
+          onAuthRequired={() => navigate("/")}
         />
       )}
 
       {/* Settings Panel */}
       {showSettings && (
         <SettingsPanel 
-          onClose={() => setShowSettings(false)}
+          onClose={closeAllMenus}
+        />
+      )}
+
+      {/* User Menu */}
+      {showUserMenu && (
+        <UserMenu 
+          onClose={closeAllMenus}
         />
       )}
     </div>

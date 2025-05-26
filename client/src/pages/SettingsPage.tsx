@@ -17,6 +17,22 @@ export default function SettingsPage() {
   const { toast } = useToast();
   const [showNavigation, setShowNavigation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Close all menus
+  const closeAllMenus = () => {
+    setShowNavigation(false);
+    setShowSettings(false);
+    setShowUserMenu(false);
+  };
+
+  // Open specific menu and close others
+  const openMenu = (menuType: 'navigation' | 'settings' | 'userMenu') => {
+    closeAllMenus();
+    if (menuType === 'navigation') setShowNavigation(true);
+    if (menuType === 'settings') setShowSettings(true);
+    if (menuType === 'userMenu') setShowUserMenu(true);
+  };
 
   // Get user data
   const { data: user, isLoading: userLoading } = useQuery({
@@ -62,8 +78,9 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-background">
       <GlobalHeader 
-        onMenuClick={() => setShowNavigation(true)}
-        onSettingsClick={() => setShowSettings(true)}
+        onMenuClick={() => openMenu('navigation')}
+        onSettingsClick={() => openMenu('settings')}
+        onAuthRequired={() => navigate("/")}
       />
       
       <main className="container mx-auto px-4 pt-20 py-6 pb-20">
@@ -195,14 +212,21 @@ export default function SettingsPage() {
       {/* Navigation Menu */}
       {showNavigation && (
         <GlobalNavigation 
-          onClose={() => setShowNavigation(false)}
+          onClose={closeAllMenus}
         />
       )}
 
       {/* Settings Panel */}
       {showSettings && (
         <SettingsPanel 
-          onClose={() => setShowSettings(false)}
+          onClose={closeAllMenus}
+        />
+      )}
+
+      {/* User Menu */}
+      {showUserMenu && (
+        <UserMenu 
+          onClose={closeAllMenus}
         />
       )}
     </div>
