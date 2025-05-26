@@ -90,6 +90,34 @@ const ambitionMappings = {
   }
 } as const;
 
+// Time mapping functions for GPT prompts
+const timeRanges = [
+  {
+    label: "Under 15 minutes",
+    description: "The entire recipe must take no more than 15 minutes from start to finish, including all prep and cooking. Use rapid-cook ingredients and shortcuts.",
+    min: 10,
+    max: 15,
+  },
+  {
+    label: "15–30 minutes",
+    description: "The recipe must be completed in under 30 minutes. Use efficient prep and quick-cooking methods with minimal downtime.",
+    min: 20,
+    max: 30,
+  },
+  {
+    label: "30–60 minutes",
+    description: "The recipe should take no more than 60 minutes. You may include oven-based cooking, simmering, and basic prep techniques.",
+    min: 40,
+    max: 60,
+  },
+  {
+    label: "No time limit",
+    description: "There are no time restrictions. You may include longer methods like slow roasting, fermentation, marination, or multiple components if they elevate flavour and texture.",
+    min: 70,
+    max: 90,
+  }
+];
+
 function getBudgetPromptText(budgetLevel: string): string {
   const mapping = budgetMappings[budgetLevel as keyof typeof budgetMappings];
   if (!mapping) {
@@ -119,6 +147,16 @@ function getAmbitionPromptText(ambitionKey: string): string {
 
   return `Cooking Ambition: ${ambition.label}
 ${ambition.description}`;
+}
+
+function getTimePromptText(timeValue: number): string {
+  const timeRange = timeRanges.find(range => timeValue >= range.min && timeValue <= range.max);
+  if (!timeRange) {
+    return "Cooking time should be reasonable and efficient for the home cook.";
+  }
+
+  return `Cooking Time: ${timeRange.label}
+${timeRange.description}`;
 }
 
 // Initialize OpenAI
@@ -216,10 +254,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { mode, quizData, prompt } = req.body;
 
-      // Include budget, mood, and ambition guidance in the recipe ideas prompt
+      // Include budget, mood, ambition, and time guidance in the recipe ideas prompt
       const budgetGuidance = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
       const moodGuidance = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
       const ambitionGuidance = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
+      const timeGuidance = quizData.time ? getTimePromptText(quizData.time) : '';
       
       // Build enhanced prompt for 6 recipe suggestions
       const enhancedPrompt = `Generate exactly 6 diverse recipe suggestions based on these preferences:
@@ -230,6 +269,8 @@ Quiz Data: ${JSON.stringify(quizData)}
 ${moodGuidance}
 
 ${ambitionGuidance}
+
+${timeGuidance}
 
 ${budgetGuidance}
 
@@ -243,7 +284,7 @@ Return a JSON object with this exact structure:
   ]
 }
 
-Make each recipe unique and appealing. Focus on variety in cooking styles, flavors, and techniques. Ensure all suggestions align with the specified mood, ambition level, and budget constraints.`;
+Make each recipe unique and appealing. Focus on variety in cooking styles, flavors, and techniques. Ensure all suggestions align with the specified mood, ambition level, time constraints, and budget constraints.`;
 
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const response = await openai.chat.completions.create({
@@ -274,10 +315,11 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
 
       const { selectedRecipe, mode, quizData, prompt } = req.body;
 
-      // Include budget, mood, and ambition guidance in the prompt
+      // Include budget, mood, ambition, and time guidance in the prompt
       const budgetGuidance = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
       const moodGuidance = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
       const ambitionGuidance = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
+      const timeGuidance = quizData.time ? getTimePromptText(quizData.time) : '';
       
       // Build enhanced prompt for complete recipe generation
       const enhancedPrompt = `Generate a complete, detailed recipe for "${selectedRecipe.title}" based on these preferences:
@@ -289,6 +331,8 @@ Recipe Description: ${selectedRecipe.description}
 ${moodGuidance}
 
 ${ambitionGuidance}
+
+${timeGuidance}
 
 ${budgetGuidance}
 
@@ -305,7 +349,7 @@ Return a JSON object with this exact structure:
   "tips": "helpful cooking tips"
 }
 
-Make the ingredients specific with quantities and the instructions detailed and clear. Ensure all ingredient selections and quantities align with the specified mood, ambition level, and budget constraints.`;
+Make the ingredients specific with quantities and the instructions detailed and clear. Ensure all ingredient selections and quantities align with the specified mood, ambition level, time constraints, and budget constraints.`;
 
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const response = await openai.chat.completions.create({
