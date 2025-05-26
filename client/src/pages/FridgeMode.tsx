@@ -95,28 +95,23 @@ export default function FridgeMode() {
         ambition: data.ambition || 3
       };
 
-      // Generate recipe ideas using the global quota system
-      const response = await apiRequest("POST", "/api/generate-recipe-ideas", {
-        mode: "fridge",
-        quizData: apiData
+      // Generate recipe ideas using the same pattern as Shopping mode
+      const fetchResponse = await fetch("/api/generate-recipe-ideas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mode: "fridge",
+          quizData: apiData,
+          prompt: "Generate 5 diverse recipe ideas for fridge mode"
+        })
       });
-
-      if (response.ok) {
-        const result = await response.json();
-        setRecipeIdeas(result.ideas || []);
-      } else {
-        // Fallback recipes for fridge mode
-        setRecipeIdeas([
-          {
-            title: "Quick Vegetable Stir-Fry",
-            description: "Use whatever vegetables you have on hand with garlic and soy sauce."
-          },
-          {
-            title: "Simple Pasta Dish",
-            description: "Combine available ingredients with pasta for a satisfying meal."
-          }
-        ]);
-      }
+      
+      const response = await fetchResponse.json();
+      console.log("API Response:", response);
+      console.log("Recipe ideas received:", response.recipes || []);
+      setRecipeIdeas(response.recipes || []);
       setCurrentStep("suggestions");
     } catch (error) {
       console.error("Failed to generate recipe ideas:", error);
