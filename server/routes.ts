@@ -910,9 +910,9 @@ Make the ingredients specific with quantities and the instructions detailed and 
 
       const fullRecipe = JSON.parse(response.choices[0].message.content!);
 
-      // Generate sophisticated recipe image if user has remaining credits
+      // Generate sophisticated recipe image
       let imageUrl = null;
-      if (user.isPlus || user.imagesThisMonth < 5) {
+      if (true) {
         try {
           // Create enhanced image prompt based on recipe details
           const generateImagePrompt = (recipeTitle: string, ingredients: string[], mood: string, platingNotes?: string) => {
@@ -945,42 +945,17 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
             size: "1024x1024",
             quality: "standard",
           });
-          imageUrl = imageResponse.data[0].url;
-          
-          // Update image usage
-          if (!user.isPlus) {
-            await storage.updateUserUsage(user.id, 0, 1);
-          }
+          imageUrl = imageResponse.data?.[0]?.url;
         } catch (imageError) {
           console.error("Failed to generate image:", imageError);
         }
       }
 
-      // Save recipe to database
-      const recipe = await storage.createRecipe({
-        userId: user.id,
-        title: fullRecipe.title,
-        description: fullRecipe.description,
-        cookTime: fullRecipe.cookTime,
-        servings: fullRecipe.servings,
-        difficulty: fullRecipe.difficulty,
-        cuisine: quizData.cuisine,
-        mood: quizData.mood,
-        mode,
-        ingredients: fullRecipe.ingredients,
-        instructions: fullRecipe.instructions,
-        tips: fullRecipe.tips,
-        imageUrl,
-        shoppingList: fullRecipe.shoppingList,
-        originalPrompt: prompt,
+      // Return the generated recipe with image
+      res.json({ 
+        ...fullRecipe,
+        imageUrl 
       });
-
-      // Update recipe usage for non-Plus users
-      if (!user.isPlus) {
-        await storage.updateUserUsage(user.id, 1, 0);
-      }
-
-      res.json({ recipe });
     } catch (error: any) {
       res.status(500).json({ message: "Failed to generate full recipe: " + error.message });
     }
