@@ -25,6 +25,7 @@ export default function FridgeMode() {
   const [recipeIdeas, setRecipeIdeas] = useState<any[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasGeneratedSecondBatch, setHasGeneratedSecondBatch] = useState(false);
   const [showGate, setShowGate] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showNavigation, setShowNavigation] = useState(false);
@@ -154,12 +155,53 @@ export default function FridgeMode() {
     setCurrentStep("recipe");
   };
 
-  const handleAllRecipesRejected = () => {
-    // When user rejects all recipes, go back to quiz for new search
-    setCurrentStep("quiz");
-    setQuizData(null);
-    setRecipeIdeas([]);
-    setSelectedRecipe(null);
+  const handleAllRecipesRejected = async () => {
+    if (!hasGeneratedSecondBatch) {
+      // First rejection - generate second batch of recipes
+      setHasGeneratedSecondBatch(true);
+      setIsLoading(true);
+      
+      try {
+        // Generate second batch with slightly modified prompt for variety
+        const apiData = {
+          ingredients: quizData.ingredients || [],
+          vibe: quizData.vibe,
+          cuisines: quizData.cuisines,
+          time: quizData.time || 30,
+          dietary: quizData.dietary || [],
+          equipment: quizData.equipment || [],
+          ambition: quizData.ambition || 3
+        };
+
+        const fetchResponse = await fetch("/api/generate-recipe-ideas", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            mode: "fridge",
+            quizData: apiData,
+            prompt: "Generate 5 NEW diverse recipe ideas for fridge mode - try different cooking techniques and flavor combinations"
+          })
+        });
+        
+        if (fetchResponse.ok) {
+          const response = await fetchResponse.json();
+          setRecipeIdeas(response.recipes || []);
+        }
+      } catch (error) {
+        console.error("Failed to generate second batch:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Second rejection - suggest trying different ingredients
+      setCurrentStep("quiz");
+      setQuizData(null);
+      setRecipeIdeas([]);
+      setSelectedRecipe(null);
+      setHasGeneratedSecondBatch(false);
+    }
   };
 
   const handleNewSearch = () => {
