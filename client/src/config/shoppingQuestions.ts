@@ -61,7 +61,7 @@ export const shoppingQuestions: QuestionConfig[] = [
     type: "cards",
     required: true,
     options: [
-      { value: "budget", label: "Budget Friendly", icon: "PoundSterling", desc: "£1–£2 per portion" },
+      { value: "budget", label: "Budget Friendly", icon: "DollarSign", desc: "£1–£2 per portion" },
       { value: "moderate", label: "Moderate Spend", icon: "CreditCard", desc: "£2–£4 per portion" },
       { value: "premium", label: "Premium Choice", icon: "Crown", desc: "£4–£7 per portion" },
       { value: "luxury", label: "Sky's the Limit", icon: "Star", desc: "£7+ per portion" }

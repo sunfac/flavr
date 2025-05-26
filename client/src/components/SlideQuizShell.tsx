@@ -36,7 +36,9 @@ import {
   CircleDot,
   Hand,
   CheckCircle2,
-  XCircle
+  XCircle,
+  ShoppingCart,
+  Store
 } from "lucide-react";
 
 export interface QuestionConfig {
@@ -70,81 +72,65 @@ export default function SlideQuizShell({
   questions, 
   onSubmit, 
   onLoading,
-  theme = 'shopping'
+  theme = 'shopping' 
 }: SlideQuizShellProps) {
-  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [direction, setDirection] = useState(0);
   const [isCompleting, setIsCompleting] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const progress = ((currentQuestion + 1) / questions.length) * 100;
-  const currentQ = questions[currentQuestion];
+  const currentQ = questions[currentQuestionIndex];
+  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
-  // Allow proper scrolling for quiz navigation
   useEffect(() => {
-    // Don't lock scroll - allow natural scrolling to reach buttons
-    document.body.style.overflow = 'auto';
-    document.body.style.height = 'auto';
-    return () => { 
-      document.body.style.overflow = 'auto';
-      document.body.style.height = 'auto';
-    };
-  }, []);
-
-  // Scroll to input on focus for mobile
-  const scrollToInput = (ref: React.RefObject<HTMLElement>) => {
-    ref?.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-  };
-
-  const handleNext = () => {
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(prev => prev + 1);
-    } else {
-      setIsCompleting(true);
-      if (onLoading) onLoading(true);
-      
-      setTimeout(() => {
-        onSubmit(answers);
-      }, 500);
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
     }
-  };
-
-  const handlePrevious = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(prev => prev - 1);
-    }
-  };
-
-  // Swipe gesture handler for mobile optimization
-  const handleSwipeEnd = (event: any, info: any) => {
-    const threshold = 100;
-    if (info.offset.x > threshold) {
-      handlePrevious();
-    } else if (info.offset.x < -threshold) {
-      const currentAnswer = answers[currentQ?.id];
-      if (currentAnswer !== undefined && currentAnswer !== '') {
-        handleNext();
-      }
-    }
-  };
+  }, [currentQuestionIndex]);
 
   const updateAnswer = (questionId: string, value: any) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
+    setAnswers(prev => ({
+      ...prev,
+      [questionId]: value
+    }));
   };
 
-  const isCurrentAnswered = () => {
-    const answer = answers[currentQ.id];
-    if (currentQ.required === false) return true;
-    if (currentQ.type === 'multi-select' || currentQ.type === 'tags') {
-      return Array.isArray(answer) && answer.length > 0;
+  const nextQuestion = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setDirection(1);
+      setCurrentQuestionIndex(prev => prev + 1);
+    } else {
+      handleSubmit();
     }
-    return answer !== undefined && answer !== '' && answer !== null;
   };
 
-  const themeColors = {
-    shopping: 'from-orange-500 to-amber-500',
-    fridge: 'from-emerald-500 to-teal-500', 
-    chef: 'from-amber-500 to-yellow-500'
+  const prevQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setDirection(-1);
+      setCurrentQuestionIndex(prev => prev - 1);
+    }
+  };
+
+  const handleSubmit = async () => {
+    setIsCompleting(true);
+    onLoading?.(true);
+    
+    setTimeout(() => {
+      onSubmit(answers);
+      onLoading?.(false);
+    }, 1000);
+  };
+
+  const canProceed = () => {
+    const currentAnswer = answers[currentQ.id];
+    if (currentQ.required) {
+      if (currentQ.type === 'multi-select') {
+        return Array.isArray(currentAnswer) && currentAnswer.length > 0;
+      }
+      return currentAnswer !== undefined && currentAnswer !== '' && currentAnswer !== null;
+    }
+    return true;
   };
 
   const currentAnswer = answers[currentQ.id];
@@ -153,7 +139,7 @@ export default function SlideQuizShell({
     const iconMap: Record<string, any> = {
       Home, Leaf, Crown, Target, Zap, Star, Shuffle, DollarSign, CreditCard, 
       Flame, Building, Microwave, Wind, Timer, Cooker,
-      Clock, ChefHat, Utensils, Sparkles
+      Clock, ChefHat, Utensils, Sparkles, ShoppingCart, Store
     };
     
     const IconComponent = iconMap[iconName];
@@ -188,17 +174,20 @@ export default function SlideQuizShell({
               className="h-14 text-lg bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-orange-400 rounded-xl"
             />
             {currentQ.examples && (
-              <div className="flex flex-wrap gap-2">
-                {currentQ.examples.map((example, idx) => (
-                  <Badge 
-                    key={idx}
-                    variant="outline" 
-                    className="cursor-pointer hover:bg-orange-500/20 border-orange-400/30 text-slate-300"
-                    onClick={() => updateAnswer(currentQ.id, example)}
-                  >
-                    {example}
-                  </Badge>
-                ))}
+              <div className="space-y-2">
+                <p className="text-sm text-slate-400">Examples:</p>
+                <div className="flex flex-wrap gap-2">
+                  {currentQ.examples.map((example, index) => (
+                    <Badge 
+                      key={index} 
+                      variant="outline" 
+                      className="cursor-pointer hover:bg-orange-500/20 border-slate-600 text-slate-300"
+                      onClick={() => updateAnswer(currentQ.id, example)}
+                    >
+                      {example}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -210,7 +199,7 @@ export default function SlideQuizShell({
             placeholder={currentQ.placeholder}
             value={currentAnswer || ''}
             onChange={(e) => updateAnswer(currentQ.id, e.target.value)}
-            className="min-h-24 text-lg bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-orange-400 rounded-xl"
+            className="min-h-32 text-lg bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-orange-400 rounded-xl"
           />
         );
 
@@ -282,7 +271,7 @@ export default function SlideQuizShell({
                     whileTap={{ scale: 0.98 }}
                   >
                     <Card 
-                      className={`cursor-pointer transition-all duration-300 border-2 h-20 ${
+                      className={`cursor-pointer transition-all duration-300 border-2 aspect-square ${
                         isSelected 
                           ? 'border-orange-400 bg-orange-500/10 shadow-lg shadow-orange-500/25' 
                           : 'border-slate-600 bg-slate-800/50 hover:border-orange-400/50'
@@ -309,7 +298,7 @@ export default function SlideQuizShell({
 
       case 'multi-select':
         return (
-          <div className="w-full max-w-md mx-auto space-y-3 max-h-80 overflow-y-auto">
+          <div className="w-full space-y-3 max-h-[50vh] overflow-y-auto pr-2 scroll-smooth">
             {currentQ.options?.map((option) => {
               const isSelected = Array.isArray(currentAnswer) && currentAnswer.includes(option.value);
               return (
@@ -340,7 +329,13 @@ export default function SlideQuizShell({
                           <div className="text-slate-400 text-xs mt-1">{option.desc}</div>
                         )}
                       </div>
-                      {isSelected && <CheckCircle className="w-4 h-4 text-orange-400" />}
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-300 ${
+                        isSelected 
+                          ? 'bg-orange-400 border-orange-400' 
+                          : 'border-slate-400'
+                      }`}>
+                        {isSelected && <CheckCircle className="w-3 h-3 text-white" />}
+                      </div>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -375,24 +370,43 @@ export default function SlideQuizShell({
 
         const sliderOptions = getSliderOptions();
         return (
-          <div className="space-y-8">
+          <div className="space-y-6">
+            {/* Scale at the top for time slider */}
+            {currentQ.id === 'time' && (
+              <div className="w-full">
+                <div className="flex justify-between text-xs text-slate-400 mb-2">
+                  <span>10 min</span>
+                  <span>30 min</span>
+                  <span>60 min</span>
+                  <span>90 min+</span>
+                </div>
+                <div className="flex justify-between text-xs text-orange-400 font-medium">
+                  <span>Quick</span>
+                  <span>Standard</span>
+                  <span>Relaxed</span>
+                  <span>No Rush</span>
+                </div>
+              </div>
+            )}
+
             <div className="text-center">
               <div className="text-3xl font-bold text-orange-400 mb-2">
                 {renderSliderWithLabel(sliderValue)}
               </div>
             </div>
 
-            {/* Show options above slider */}
-            {sliderOptions.length > 0 && (
+            {/* Show options above slider for ambition only */}
+            {sliderOptions.length > 0 && currentQ.id === 'ambition' && (
               <div className="w-full max-w-sm mx-auto space-y-2">
                 {sliderOptions.map((option, index) => (
                   <div
                     key={option.value}
-                    className={`flex items-center justify-between p-2 rounded-lg transition-all duration-300 ${
+                    className={`flex items-center justify-between p-2 rounded-lg transition-all duration-300 cursor-pointer ${
                       sliderValue === option.value
                         ? 'bg-orange-500/20 border-2 border-orange-400'
                         : 'bg-slate-800/30 border-2 border-slate-600 hover:border-orange-400/50'
                     }`}
+                    onClick={() => updateAnswer(currentQ.id, option.value)}
                   >
                     <div className="flex items-center space-x-2">
                       <div className={`${sliderValue === option.value ? 'text-orange-400' : 'text-slate-400'}`}>
@@ -402,18 +416,17 @@ export default function SlideQuizShell({
                         {option.label}
                       </span>
                     </div>
-                    <button
-                      onClick={() => updateAnswer(currentQ.id, option.value)}
-                      className={`w-5 h-5 rounded-full border-2 transition-all duration-300 ${
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 transition-all duration-300 flex items-center justify-center ${
                         sliderValue === option.value
                           ? 'bg-orange-400 border-orange-400'
-                          : 'border-slate-400 hover:border-orange-400'
+                          : 'border-slate-400'
                       }`}
                     >
                       {sliderValue === option.value && (
-                        <CheckCircle className="w-3 h-3 text-white mx-auto" />
+                        <div className="w-2 h-2 bg-white rounded-full" />
                       )}
-                    </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -450,113 +463,91 @@ export default function SlideQuizShell({
             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
             className="w-16 h-16 border-4 border-orange-400 border-t-transparent rounded-full mx-auto mb-4"
           />
-          <h2 className="text-2xl font-bold text-white mb-2">
-            Whisking up something delicious...
-          </h2>
-          <p className="text-slate-400">
-            Creating your perfect recipe match
-          </p>
+          <h2 className="text-2xl font-bold text-white mb-2">Creating your perfect recipe...</h2>
+          <p className="text-slate-400">Analyzing your preferences</p>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white flex flex-col">
-      {/* Progress Header */}
-      <div className="bg-slate-900/80 backdrop-blur-xl border-b border-slate-700 p-4 flex-shrink-0">
-        <div className="flex items-center justify-between mb-3">
-          <h1 className="text-lg font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
-            {title}
-          </h1>
-          <div className="text-sm text-slate-400">
-            {currentQuestion + 1} of {questions.length}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black">
+      {/* Header */}
+      <div className="sticky top-0 bg-slate-900/80 backdrop-blur-lg border-b border-slate-700 z-10">
+        <div className="max-w-md mx-auto px-4 py-4">
+          <div className="text-center mb-4">
+            <h1 className="text-2xl font-bold text-white">{title}</h1>
+            {subtitle && <p className="text-slate-400 mt-1">{subtitle}</p>}
+          </div>
+          <Progress value={progress} className="h-2 bg-slate-800" />
+          <div className="flex justify-between items-center mt-2">
+            <span className="text-xs text-slate-400">
+              Question {currentQuestionIndex + 1} of {questions.length}
+            </span>
+            <span className="text-xs text-orange-400 font-medium">
+              {Math.round(progress)}% complete
+            </span>
           </div>
         </div>
-        <Progress 
-          value={progress} 
-          className="h-2 bg-slate-700"
-        />
       </div>
 
-      {/* Question Content - With proper scrolling for all content */}
-      <div className="flex-1 overflow-y-auto scroll-smooth pb-4">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentQuestion}
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.2}
-            onDragEnd={handleSwipeEnd}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="max-w-lg mx-auto w-full px-4 py-6 cursor-grab active:cursor-grabbing"
-          >
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-white mb-4 leading-tight">
-                {currentQ.label}
-              </h2>
-              {currentQ.subtitle && (
-                <p className="text-slate-300 text-lg leading-relaxed">
-                  {currentQ.subtitle}
-                </p>
+      {/* Question Content */}
+      <div ref={containerRef} className="flex-1 overflow-y-auto">
+        <div className="max-w-md mx-auto px-4 py-6">
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div
+              key={currentQuestionIndex}
+              custom={direction}
+              initial={{ x: direction > 0 ? 300 : -300, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: direction > 0 ? -300 : 300, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="space-y-6"
+            >
+              <div className="text-center space-y-2">
+                <h2 className="text-xl font-semibold text-white">
+                  {currentQ.label}
+                </h2>
+                {currentQ.subtitle && (
+                  <p className="text-slate-400 text-sm">{currentQ.subtitle}</p>
+                )}
+              </div>
+
+              {renderQuestion()}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <div className="sticky bottom-0 bg-slate-900/90 backdrop-blur-lg border-t border-slate-700">
+        <div className="max-w-md mx-auto px-4 py-4">
+          <div className="flex justify-between items-center gap-4">
+            <Button
+              variant="outline"
+              onClick={prevQuestion}
+              disabled={currentQuestionIndex === 0}
+              className="flex items-center gap-2 border-slate-600 bg-slate-800/50 text-white hover:bg-slate-700"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </Button>
+
+            <div className="text-center flex-1">
+              {currentQ.required && !canProceed() && (
+                <p className="text-orange-400 text-xs">This question is required</p>
               )}
             </div>
 
-            <div className="mb-8 max-h-[75vh] overflow-y-auto overflow-x-hidden">
-              <div className="space-y-4">
-                {renderQuestion()}
-              </div>
-            </div>
-
-            {/* Swipe hint for mobile */}
-            <div className="text-center mt-6">
-              <div className="flex justify-center items-center space-x-2 text-xs text-slate-500">
-                <Hand className="w-3 h-3" />
-                <span>Swipe left/right to navigate</span>
-              </div>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      {/* Fixed Navigation */}
-      <div className="bg-slate-900/90 backdrop-blur-xl border-t border-slate-700 p-4 pb-8 md:pb-4 flex-shrink-0">
-        <div className="max-w-md mx-auto flex gap-3">
-          {currentQuestion > 0 && (
             <Button
-              onClick={handlePrevious}
-              variant="outline"
-              className="h-12 px-6 border-slate-600 text-slate-300 hover:text-white hover:border-orange-400 rounded-xl"
+              onClick={nextQuestion}
+              disabled={!canProceed()}
+              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
+              {currentQuestionIndex === questions.length - 1 ? 'Generate Recipe' : 'Next'}
+              <ArrowRight className="w-4 h-4" />
             </Button>
-          )}
-          
-          <Button
-            onClick={handleNext}
-            disabled={!isCurrentAnswered()}
-            className={`flex-1 h-12 font-semibold rounded-xl transition-all duration-300 ${
-              isCurrentAnswered() 
-                ? `bg-gradient-to-r ${themeColors[theme]} hover:scale-105 shadow-lg hover:shadow-orange-500/25 text-white`
-                : 'bg-slate-700 text-slate-400 cursor-not-allowed'
-            }`}
-          >
-            {currentQuestion === questions.length - 1 ? (
-              <>
-                <Sparkles className="w-4 h-4 mr-2" />
-                Create Recipe
-              </>
-            ) : (
-              <>
-                Next
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </>
-            )}
-          </Button>
+          </div>
         </div>
       </div>
     </div>
