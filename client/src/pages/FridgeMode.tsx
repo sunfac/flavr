@@ -78,12 +78,16 @@ export default function FridgeMode() {
     setQuizData(transformedData);
 
     // Check global quota before proceeding with GPT
+    console.log("Checking quota...");
     const allowed = await checkQuotaBeforeGPT();
+    console.log("Quota check result:", allowed);
     if (!allowed) {
+      console.log("Quota exceeded, showing auth modal");
       setShowAuthModal(true);
       return;
     }
 
+    console.log("Quota approved, starting API call...");
     try {
       setIsLoading(true);
       
