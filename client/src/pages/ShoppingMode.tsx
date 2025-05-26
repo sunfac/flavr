@@ -170,7 +170,13 @@ export default function ShoppingMode() {
       <GlobalHeader 
         onMenuClick={() => setShowNavigation(true)}
         onSettingsClick={() => setShowSettings(true)}
-        onUserClick={() => setShowUserMenu(true)}
+        onUserClick={() => {
+          if (isAuthenticated) {
+            setShowUserMenu(true);
+          } else {
+            setShowAuthModal(true);
+          }
+        }}
       />
 
       {/* Recipe Remaining Banner - positioned below header with proper spacing */}
