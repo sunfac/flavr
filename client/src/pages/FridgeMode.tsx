@@ -9,6 +9,7 @@ import UserMenu from "@/components/UserMenu";
 import SlideQuizShell from "@/components/SlideQuizShell";
 import { fridgeQuestions } from "@/config/fridgeQuestions";
 import RecipeCard from "@/components/RecipeCard";
+import TinderRecipeCards from "@/components/TinderRecipeCards";
 import ChatBot from "@/components/ChatBot";
 import Loading from "@/components/Loading";
 import { checkQuotaBeforeGPT, getRemainingRecipes, canGenerateRecipe } from "@/lib/quotaManager";
@@ -202,33 +203,13 @@ export default function FridgeMode() {
         )}
 
         {currentStep === "suggestions" && (
-          <div className="p-4 space-y-4">
-            <div className="text-center">
-              <h2 className="text-xl font-playfair font-bold text-foreground mb-1">
-                Made with your ingredients
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                Swipe to explore • Tap to see full recipe
-              </p>
-            </div>
-
-            <div className="swipe-container flex space-x-4 overflow-x-auto pb-4">
-              {recipeIdeas.map((recipe, index) => (
-                <RecipeCard
-                  key={index}
-                  recipe={recipe}
-                  onClick={() => handleRecipeSelect(recipe)}
-                />
-              ))}
-            </div>
-
-            <button
-              onClick={handleNewSearch}
-              className="w-full bg-muted text-foreground py-3 rounded-xl font-medium hover:bg-muted/80 transition-colors"
-            >
-              <i className="fas fa-redo mr-2"></i>Try Different Ingredients
-            </button>
-          </div>
+          <TinderRecipeCards
+            recipes={recipeIdeas}
+            onSelectRecipe={handleRecipeSelect}
+            onAllRecipesExhausted={handleAllRecipesRejected}
+            quizData={quizData}
+            theme="fridge"
+          />
         )}
 
         {currentStep === "recipe" && selectedRecipe && (
