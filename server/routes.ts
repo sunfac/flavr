@@ -929,7 +929,7 @@ Make the ingredients specific with quantities and the instructions detailed and 
 
       // Generate sophisticated recipe image
       let imageUrl = null;
-      if (true) {
+      if (false) {
         try {
           // Create enhanced image prompt based on recipe details
           const generateImagePrompt = (recipeTitle: string, ingredients: string[], mood: string, platingNotes?: string) => {
