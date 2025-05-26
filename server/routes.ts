@@ -1055,6 +1055,30 @@ Make the ingredients specific with quantities and the instructions detailed and 
       console.log("OpenAI API response received for full recipe");
       console.log("Response content:", response.choices[0].message.content);
       const fullRecipe = JSON.parse(response.choices[0].message.content!);
+      
+      // POST-PROCESSING: Force correct quiz values (AI keeps ignoring our instructions)
+      console.log(`ENFORCING QUIZ VALUES - Original servings: ${fullRecipe.servings}, Required: ${quizData.servings || 4}`);
+      
+      // Override AI's incorrect values with user's actual quiz selections
+      if (quizData.servings) {
+        fullRecipe.servings = quizData.servings;
+      }
+      if (quizData.time) {
+        fullRecipe.cookTime = quizData.time;
+      }
+      if (quizData.cuisine && mode === 'shopping') {
+        fullRecipe.cuisine = quizData.cuisine;
+      }
+      if (quizData.ambition) {
+        const difficultyMap = {
+          'easy': 'Easy',
+          'challenging': 'Hard', 
+          'michelin': 'Hard'
+        };
+        fullRecipe.difficulty = difficultyMap[quizData.ambition] || 'Medium';
+      }
+      
+      console.log(`CORRECTED VALUES - Final servings: ${fullRecipe.servings}, cookTime: ${fullRecipe.cookTime}`);
 
       // Generate sophisticated recipe image
       let imageUrl = null;
