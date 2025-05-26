@@ -43,11 +43,18 @@ export default function FridgeMode() {
   const isAuthenticated = user?.user;
 
   const handleQuizComplete = async (data: any) => {
+    // Handle random cuisine selection if multiple are chosen
+    let selectedCuisines = data.cuisines || [];
+    if (Array.isArray(selectedCuisines) && selectedCuisines.length > 1) {
+      // Randomly select one cuisine from the array - this changes each time
+      selectedCuisines = [selectedCuisines[Math.floor(Math.random() * selectedCuisines.length)]];
+    }
+
     // Transform quiz data
     const transformedData = {
       ingredients: data.ingredients || [],
       vibe: data.vibe || "",
-      cuisines: data.cuisines || [],
+      cuisines: selectedCuisines,
       time: data.time || 30,
       dietary: data.dietary || [],
       equipment: data.equipment || [],
@@ -66,24 +73,22 @@ export default function FridgeMode() {
     try {
       setIsLoading(true);
       
-      // Transform SlideQuizShell data to match expected API format
-      const transformedData = {
+      // Use the already transformed data with random cuisine selection
+      const apiData = {
         ingredients: data.ingredients?.split(',').map((i: string) => i.trim()) || [],
         vibe: data.vibe,
-        cuisines: data.cuisines || [],
+        cuisines: selectedCuisines, // Use the randomly selected cuisine
         time: data.time || 30,
         dietary: data.dietary || [],
         equipment: data.equipment || [],
         ambition: data.ambition || 3
       };
 
-      setQuizData(transformedData);
-
       // Generate recipe ideas using the global quota system
       const response = await apiRequest("POST", "/api/recipe-ideas", {
         mode: "fridge",
-        quizData: transformedData,
-        prompt: `Generate recipe ideas for fridge mode with ingredients: ${transformedData.ingredients.join(', ')}, vibe: ${transformedData.vibe}`
+        quizData: apiData,
+        prompt: `Generate recipe ideas for fridge mode with ingredients: ${apiData.ingredients.join(', ')}, vibe: ${apiData.vibe}`
       });
 
       if (response.ok) {

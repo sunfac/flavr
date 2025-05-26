@@ -43,10 +43,17 @@ export default function ShoppingMode() {
   const isAuthenticated = user?.user;
 
   const handleQuizComplete = async (data: any) => {
+    // Handle random cuisine selection if multiple are chosen
+    let selectedCuisine = data.cuisine || [];
+    if (Array.isArray(selectedCuisine) && selectedCuisine.length > 1) {
+      // Randomly select one cuisine from the array - this changes each time
+      selectedCuisine = [selectedCuisine[Math.floor(Math.random() * selectedCuisine.length)]];
+    }
+
     // Transform SlideQuizShell data to match expected API format
     const transformedData = {
       mood: data.mood,
-      cuisine: data.cuisine || [],
+      cuisine: selectedCuisine,
       time: data.time || 30,
       budget: data.budget,
       dietary: data.dietary || [],

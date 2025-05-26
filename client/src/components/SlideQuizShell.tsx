@@ -304,50 +304,65 @@ export default function SlideQuizShell({
         );
 
       case 'multi-select':
+        const hasScrollableOptions = (currentQ.options?.length || 0) > 6;
         return (
-          <div className="w-full space-y-3 max-h-[50vh] overflow-y-auto pr-2 scroll-smooth">
-            {currentQ.options?.map((option) => {
-              const isSelected = Array.isArray(currentAnswer) && currentAnswer.includes(option.value);
-              return (
-                <motion.div 
-                  key={option.value}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                >
-                  <Card 
-                    className={`cursor-pointer transition-all duration-300 border-2 ${
-                      isSelected 
-                        ? 'border-orange-400 bg-orange-500/10 shadow-lg shadow-orange-500/25' 
-                        : 'border-slate-600 bg-slate-800/50 hover:border-orange-400/50'
-                    }`}
-                    onClick={() => {
-                      const current = Array.isArray(currentAnswer) ? currentAnswer : [];
-                      const updated = isSelected 
-                        ? current.filter(v => v !== option.value)
-                        : [...current, option.value];
-                      updateAnswer(currentQ.id, updated);
-                    }}
+          <div className="w-full relative">
+            {/* Scroll indicator for mobile */}
+            {hasScrollableOptions && (
+              <div className="text-center mb-2">
+                <p className="text-xs text-orange-400 animate-pulse">Scroll to see more options ↓</p>
+              </div>
+            )}
+            <div className={`w-full space-y-3 ${hasScrollableOptions ? 'max-h-[50vh] overflow-y-auto pr-2 scroll-smooth' : ''}`}>
+              {currentQ.options?.map((option) => {
+                const isSelected = Array.isArray(currentAnswer) && currentAnswer.includes(option.value);
+                return (
+                  <motion.div 
+                    key={option.value}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
                   >
-                    <CardContent className="p-3 flex items-center space-x-3">
-                      <div className="text-lg">{option.icon}</div>
-                      <div className="flex-1">
-                        <div className="text-white font-medium text-sm">{option.label}</div>
-                        {option.desc && (
-                          <div className="text-slate-400 text-xs mt-1">{option.desc}</div>
-                        )}
-                      </div>
-                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-300 ${
+                    <Card 
+                      className={`cursor-pointer transition-all duration-300 border-2 ${
                         isSelected 
-                          ? 'bg-orange-400 border-orange-400' 
-                          : 'border-slate-400'
-                      }`}>
-                        {isSelected && <CheckCircle className="w-3 h-3 text-white" />}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
+                          ? 'border-orange-400 bg-orange-500/10 shadow-lg shadow-orange-500/25' 
+                          : 'border-slate-600 bg-slate-800/50 hover:border-orange-400/50'
+                      }`}
+                      onClick={() => {
+                        const current = Array.isArray(currentAnswer) ? currentAnswer : [];
+                        const updated = isSelected 
+                          ? current.filter(v => v !== option.value)
+                          : [...current, option.value];
+                        updateAnswer(currentQ.id, updated);
+                      }}
+                    >
+                      <CardContent className="p-3 flex items-center space-x-3">
+                        <div className="text-lg">{option.icon}</div>
+                        <div className="flex-1">
+                          <div className="text-white font-medium text-sm">{option.label}</div>
+                          {option.desc && (
+                            <div className="text-slate-400 text-xs mt-1">{option.desc}</div>
+                          )}
+                        </div>
+                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-300 ${
+                          isSelected 
+                            ? 'bg-orange-400 border-orange-400' 
+                            : 'border-slate-400'
+                        }`}>
+                          {isSelected && <CheckCircle className="w-3 h-3 text-white" />}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+            {/* Bottom scroll indicator */}
+            {hasScrollableOptions && (
+              <div className="text-center mt-2">
+                <div className="w-8 h-1 bg-orange-400/30 rounded-full mx-auto"></div>
+              </div>
+            )}
           </div>
         );
 
