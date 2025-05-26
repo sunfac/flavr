@@ -112,12 +112,20 @@ export default function ShoppingMode() {
     try {
       setIsLoading(true);
       
-      const response = await apiRequest("POST", "/api/generate-full-recipe", {
-        selectedRecipe: recipe,
-        mode: "shopping",
-        quizData: quizData,
-        prompt: `Generate a complete recipe for ${recipe.title}`
+      const fetchResponse = await fetch("/api/generate-full-recipe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          selectedRecipe: recipe,
+          mode: "shopping",
+          quizData: quizData,
+          prompt: `Generate a complete recipe for ${recipe.title}`
+        })
       });
+      
+      const response = await fetchResponse.json();
       
       setSelectedRecipe(response);
       setCurrentStep("recipe");
