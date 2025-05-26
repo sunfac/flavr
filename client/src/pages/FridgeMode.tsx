@@ -146,6 +146,18 @@ export default function FridgeMode() {
         onUserClick={() => setShowUserMenu(true)}
       />
       
+      {/* Recipe Remaining Banner - positioned below header */}
+      {!isAuthenticated && (
+        <div className="w-full bg-card/90 backdrop-blur-sm border-b border-border">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Clock className="w-4 h-4" />
+              <span>{getRemainingRecipes()} free recipes remaining</span>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <main>
         {currentStep === "quiz" && (
           <SlideQuizShell

@@ -1,19 +1,29 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Refrigerator, ChefHat } from "lucide-react";
+import { ShoppingCart, Refrigerator, ChefHat, Clock } from "lucide-react";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
 import GlobalNavigation from "@/components/GlobalNavigation";
 import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
+import { getRemainingRecipes } from "@/lib/quotaManager";
 
 export default function ModeSelection() {
   const [, navigate] = useLocation();
   const [showNavigation, setShowNavigation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Check if user is logged in for quota display
+  const { data: user } = useQuery({
+    queryKey: ["/api/me"],
+    retry: false,
+  });
+
+  const isAuthenticated = user?.user;
 
   const modes = [
     {
@@ -55,6 +65,18 @@ export default function ModeSelection() {
         onUserClick={() => setShowUserMenu(true)}
       />
       
+      {/* Recipe Remaining Banner - positioned below header */}
+      {!isAuthenticated && (
+        <div className="w-full bg-card/90 backdrop-blur-sm border-b border-border">
+          <div className="container mx-auto px-6 py-3">
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Clock className="w-4 h-4" />
+              <span>{getRemainingRecipes()} free recipes remaining</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <main className="container mx-auto px-6 py-8 relative z-10 pb-24">
         {/* Hero Section */}
         <div className="text-center mb-12 pt-20">

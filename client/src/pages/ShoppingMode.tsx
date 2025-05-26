@@ -182,15 +182,19 @@ export default function ShoppingMode() {
         onUserClick={() => setShowUserMenu(true)}
       />
 
-      <main className="flex-1 p-4 pb-20">
-        {!isAuthenticated && currentStep === "quiz" && (
-          <div className="mb-4 p-4 bg-card border border-border rounded-xl">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      {/* Recipe Remaining Banner - positioned below header */}
+      {!isAuthenticated && (
+        <div className="w-full bg-card/90 backdrop-blur-sm border-b border-border">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
               <Clock className="w-4 h-4" />
               <span>{getRemainingRecipes()} free recipes remaining</span>
             </div>
           </div>
-        )}
+        </div>
+      )}
+
+      <main className="flex-1 p-4 pb-20">
 
         {currentStep === "quiz" && (
           <SlideQuizShell
