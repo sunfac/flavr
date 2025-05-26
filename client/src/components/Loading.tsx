@@ -1,11 +1,13 @@
 import { motion } from "framer-motion";
+import DidYouKnowLoader from "./DidYouKnowLoader";
 
 interface LoadingProps {
   message?: string;
   isFullScreen?: boolean;
+  showDidYouKnow?: boolean;
 }
 
-export default function Loading({ message = "Whisking up something delicious...", isFullScreen = true }: LoadingProps) {
+export default function Loading({ message = "Whisking up something delicious...", isFullScreen = true, showDidYouKnow = true }: LoadingProps) {
   const getDetailMessage = (msg: string) => {
     if (msg.includes("profile")) return "Getting your account information...";
     if (msg.includes("ingredients")) return "Our AI chef is analyzing your ingredients and finding the best combinations.";
@@ -114,6 +116,18 @@ export default function Loading({ message = "Whisking up something delicious..."
             />
           </div>
         </div>
+        
+        {/* Add Did You Know facts for recipe generation */}
+        {showDidYouKnow && (message.includes("recipe") || message.includes("Creating") || message.includes("Generating")) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-6"
+          >
+            <DidYouKnowLoader className="max-w-sm" />
+          </motion.div>
+        )}
       </motion.div>
     </motion.div>
   );
