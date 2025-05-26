@@ -127,14 +127,15 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black relative overflow-hidden">
-      {/* Premium dark background matching logo's black elements */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-zinc-950 relative overflow-hidden font-['Inter'] text-slate-50">
+      {/* Premium dark background with warm fade */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Subtle orange glow that matches the chef hat's orange speech bubble */}
-        <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-orange-500/15 via-orange-400/8 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-radial from-orange-300/10 to-transparent rounded-full blur-2xl"></div>
-        {/* Dark ambient lighting that blends with logo's black outline */}
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/30 via-transparent to-black/50"></div>
+        {/* Elite ambient lighting */}
+        <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-gradient-radial from-orange-500/12 via-amber-400/6 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/3 right-1/3 w-[500px] h-[500px] bg-gradient-radial from-orange-300/8 to-transparent rounded-full blur-2xl"></div>
+        {/* Sophisticated dark to warm fade */}
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-slate-950/60 via-transparent to-amber-950/20"></div>
+        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-zinc-950/40 to-transparent"></div>
       </div>
 
       <GlobalHeader 
@@ -197,38 +198,41 @@ export default function LandingPage() {
           <div className="absolute inset-0 rounded-full blur-[100px] opacity-15 bg-gradient-to-b from-orange-300 via-orange-400 to-transparent group-hover:opacity-25 transition-opacity duration-500"></div>
         </motion.div>
 
-        {/* Hero Headlines */}
+        {/* Hero Headlines - Premium Typography */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-4"
+          className="mb-6"
         >
-          <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight mb-4">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-tight text-white leading-[1.1] mb-6 font-['Plus_Jakarta_Sans']">
             Your Private Chef.
             <br />
-            <span className="bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-orange-400 via-amber-400 to-orange-500 bg-clip-text text-transparent font-medium">
               Anywhere.
             </span>
           </h1>
-          <p className="text-xl md:text-2xl text-slate-300 font-light max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-slate-300 font-light max-w-2xl mx-auto leading-relaxed tracking-wide">
             Recipes personalized to your cravings, mood, time, and skill level.
           </p>
         </motion.div>
 
-        {/* CTA Button - Prominent on Mobile */}
+        {/* Premium CTA Button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="mb-8"
+          className="mb-12"
         >
           <Button 
             onClick={handleStartCooking}
-            className="px-8 py-6 md:px-12 md:py-6 text-lg md:text-xl font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 border-0 shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 text-white rounded-full w-full max-w-xs md:w-auto"
+            className="group relative px-8 py-4 md:px-10 md:py-5 text-base md:text-lg font-medium bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 hover:border-orange-400/50 shadow-2xl hover:scale-[1.02] transition-all duration-300 text-white rounded-2xl"
           >
-            Get Cooking Now
-            <ArrowRight className="ml-2 w-5 h-5" />
+            <span className="relative z-10 flex items-center">
+              Start Cooking with AI
+              <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-amber-500/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </Button>
         </motion.div>
       </section>
@@ -242,10 +246,10 @@ export default function LandingPage() {
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-3xl md:text-4xl font-light text-white mb-6 font-['Plus_Jakarta_Sans'] tracking-wide">
               Crafted for Your Kitchen
             </h2>
-            <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+            <p className="text-lg text-slate-300 max-w-2xl mx-auto font-light leading-relaxed">
               Experience cooking like never before with AI that understands your taste, time, and skill.
             </p>
           </motion.div>
@@ -282,6 +286,42 @@ export default function LandingPage() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* Central Animated CTA Block */}
+      <section className="py-20 px-6 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="max-w-4xl mx-auto text-center"
+        >
+          <div className="bg-gradient-to-br from-orange-500/10 via-amber-400/5 to-orange-600/10 backdrop-blur-xl border border-orange-400/20 rounded-3xl p-12 md:p-16 relative overflow-hidden">
+            {/* Animated background glow */}
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 via-transparent to-amber-500/20 animate-pulse"></div>
+            
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-4xl font-light text-white mb-4 font-['Plus_Jakarta_Sans']">
+                Ready to cook with AI?
+              </h2>
+              
+              <Button 
+                onClick={handleStartCooking}
+                className="group relative px-12 py-6 text-lg font-medium bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 border-0 shadow-2xl hover:shadow-orange-500/50 hover:scale-[1.05] transition-all duration-300 text-white rounded-full mb-4"
+              >
+                <span className="relative z-10 flex items-center">
+                  Start Now with Flavr
+                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                </span>
+                <div className="absolute inset-0 bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </Button>
+              
+              <p className="text-slate-300 font-light text-sm tracking-wide">
+                Your next meal starts with your mood, ingredients, and Zest.
+              </p>
+            </div>
+          </div>
+        </motion.div>
       </section>
 
       {/* Live Recipe Demo Section */}
@@ -435,6 +475,81 @@ export default function LandingPage() {
         </div>
       </footer>
 
+      {/* Emotional Hook Sections */}
+      <section className="py-16 px-6 relative z-10">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* First Emotional Hook */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-center md:text-left"
+            >
+              <h3 className="text-2xl md:text-3xl font-light text-white mb-4 font-['Plus_Jakarta_Sans']">
+                No more food waste.
+                <br />
+                <span className="text-orange-400">No more guesswork.</span>
+              </h3>
+              <p className="text-slate-300 font-light leading-relaxed">
+                Transform your kitchen into a place of creativity and confidence with AI that knows exactly what to make.
+              </p>
+            </motion.div>
+
+            {/* Second Emotional Hook */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-center md:text-right"
+            >
+              <h3 className="text-2xl md:text-3xl font-light text-white mb-4 font-['Plus_Jakarta_Sans']">
+                Chef-crafted meals.
+                <br />
+                <span className="text-orange-400">Pantry-level effort.</span>
+              </h3>
+              <p className="text-slate-300 font-light leading-relaxed">
+                Every recipe feels like it came from a personal chef who knows your taste, time, and cooking style.
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Premium Footer */}
+      <footer className="py-12 px-6 border-t border-white/10 backdrop-blur-sm relative z-10">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            {/* Logo */}
+            <div className="flex items-center">
+              <img src={FlavrLogo} alt="Flavr" className="w-8 h-8 mr-3" />
+              <span className="text-white font-medium font-['Plus_Jakarta_Sans']">Flavr</span>
+            </div>
+            
+            {/* Links */}
+            <div className="flex items-center gap-8 text-sm">
+              <button className="text-slate-400 hover:text-white transition-colors font-light">
+                Terms
+              </button>
+              <button className="text-slate-400 hover:text-white transition-colors font-light">
+                Privacy
+              </button>
+              <button className="text-slate-400 hover:text-orange-400 transition-colors">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.097.118.112.222.083.343-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.746-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001.012.001z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <div className="text-center mt-8 pt-8 border-t border-white/5">
+            <p className="text-slate-500 text-xs font-light">
+              © 2024 Flavr. Crafted with care for culinary creativity.
+            </p>
+          </div>
+        </div>
+      </footer>
+
       {/* Scroll to Top Button */}
       {showScrollTop && (
         <motion.button
@@ -442,9 +557,9 @@ export default function LandingPage() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0 }}
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full shadow-2xl hover:shadow-orange-500/25 transition-all duration-300 hover:scale-110"
+          className="fixed bottom-8 right-8 z-50 bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-orange-500/20 hover:border-orange-400/40 text-white p-3 rounded-full shadow-2xl hover:scale-110 transition-all duration-300"
         >
-          <ChevronUp className="w-6 h-6" />
+          <ChevronUp className="w-5 h-5" />
         </motion.button>
       )}
 
