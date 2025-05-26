@@ -57,19 +57,10 @@ export default function ShoppingMode() {
 
     setQuizData(transformedData);
 
-    // Check quota for non-authenticated users
-    if (!isAuthenticated) {
-      const canProceed = await checkQuotaBeforeGPT();
-      if (!canProceed) {
-        setShowAuthModal(true);
-        return;
-      }
-    }
-
     try {
       setIsLoading(true);
 
-      // Generate recipe ideas
+      // Generate recipe ideas (no quota check - this is just ideas)
       const response = await apiRequest("POST", "/api/recipe-ideas", {
         mode: "shopping",
         quizData: transformedData,
@@ -111,7 +102,7 @@ export default function ShoppingMode() {
   };
 
   const handleRecipeSelect = async (recipe: any) => {
-    // Check quota for non-authenticated users
+    // Check quota for final recipe generation (this is what counts against limit)
     if (!isAuthenticated) {
       const canProceed = await checkQuotaBeforeGPT();
       if (!canProceed) {

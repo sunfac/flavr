@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { MessageCircle, X, Send, ChefHat, User, Bot } from "lucide-react";
 
 interface ChatMessage {
   id: number;
@@ -184,10 +185,14 @@ export default function ChatBot({
         <div className="relative group">
           <Button
             onClick={() => setIsOpen(!isOpen)}
-            className="w-16 h-16 gradient-primary text-white rounded-2xl shadow-2xl hover:shadow-orange-300/50 transition-all duration-500 group-hover:scale-110 btn-modern animate-bounce-gentle"
+            className="w-16 h-16 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl shadow-2xl hover:shadow-orange-300/50 transition-all duration-500 group-hover:scale-110 animate-bounce-gentle"
             size="sm"
           >
-            <i className={`fas ${isOpen ? 'fa-times' : 'fa-comment-alt'} text-2xl transition-all duration-300`}></i>
+            {isOpen ? (
+              <X className="w-6 h-6 transition-all duration-300" />
+            ) : (
+              <MessageCircle className="w-6 h-6 transition-all duration-300" />
+            )}
           </Button>
           <div className="absolute inset-0 gradient-primary rounded-2xl blur-xl opacity-40 group-hover:opacity-60 transition-opacity duration-500"></div>
           {!isOpen && (
@@ -207,10 +212,10 @@ export default function ChatBot({
         <CardHeader className="p-6 border-b border-white/10 flex flex-row items-center justify-between space-y-0">
           <div className="flex items-center space-x-4">
             <div className="relative group">
-              <div className="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300">
-                <i className="fas fa-chef-hat text-white text-lg"></i>
+              <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300">
+                <ChefHat className="text-white w-5 h-5" />
               </div>
-              <div className="absolute inset-0 gradient-primary rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
             </div>
             <div>
               <h3 className="font-bold text-slate-800 text-lg">Chef Assistant</h3>
@@ -223,7 +228,7 @@ export default function ChatBot({
             className="w-10 h-10 p-0 rounded-xl glass hover:scale-110 transition-all duration-300 group"
             onClick={() => setIsOpen(false)}
           >
-            <i className="fas fa-times text-slate-600 group-hover:text-slate-800"></i>
+            <X className="w-4 h-4 text-slate-600 group-hover:text-slate-800" />
           </Button>
         </CardHeader>
         
@@ -232,20 +237,20 @@ export default function ChatBot({
             {localMessages.map((msg) => (
               <div key={msg.id} className={`flex space-x-3 ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
                 {!msg.isUser && (
-                  <div className="w-8 h-8 gradient-primary rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                    <i className="fas fa-robot text-white text-sm"></i>
+                  <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                    <Bot className="text-white w-4 h-4" />
                   </div>
                 )}
                 <div className={`rounded-2xl p-4 max-w-xs shadow-lg transition-all duration-300 hover:scale-105 ${
                   msg.isUser 
-                    ? "gradient-primary text-white ml-4" 
-                    : "glass text-slate-800 border border-white/20"
+                    ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white ml-4" 
+                    : "bg-card/90 backdrop-blur-sm text-foreground border border-border"
                 }`}>
                   <p className="text-sm leading-relaxed">{msg.text}</p>
                 </div>
                 {msg.isUser && (
                   <div className="w-8 h-8 bg-slate-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                    <i className="fas fa-user text-white text-sm"></i>
+                    <User className="text-white w-4 h-4" />
                   </div>
                 )}
               </div>
