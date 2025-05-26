@@ -797,6 +797,7 @@ ${moodText}
 ${ambitionText}
 
 ${dietaryText}
+${getStrictDietaryInstruction(quizData.dietary)}
 
 ${budgetText}
 
