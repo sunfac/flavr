@@ -48,7 +48,10 @@ import {
   Waves,
   Beef,
   Blend,
-  Soup
+  Soup,
+  User,
+  Users2,
+  PartyPopper
 } from "lucide-react";
 
 export interface QuestionConfig {
@@ -151,7 +154,7 @@ export default function SlideQuizShell({
       Flame, Building, Microwave, Wind, Timer, Cooker,
       Clock, ChefHat, Utensils, Sparkles, ShoppingCart, Store,
       PoundSterling, ShoppingBag, Coins, Banknote, Users, Heart,
-      Waves, Beef, Blend, Soup
+      Waves, Beef, Blend, Soup, User, Users2, PartyPopper
     };
     
     const IconComponent = iconMap[iconName];
