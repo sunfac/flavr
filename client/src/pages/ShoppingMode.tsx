@@ -174,9 +174,9 @@ export default function ShoppingMode() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black">
         <GlobalHeader 
-          onMenuClick={() => setShowNavigation(true)}
-          onSettingsClick={() => setShowSettings(true)}
-          onUserClick={() => setShowUserMenu(true)}
+          onMenuClick={() => openMenu('navigation')}
+          onSettingsClick={() => openMenu('settings')}
+          onAuthRequired={() => navigate("/")}
         />
         
         <main className="pt-20 pb-24">
@@ -191,8 +191,9 @@ export default function ShoppingMode() {
 
         <GlobalFooter currentMode="shopping" />
         
-        {showNavigation && <GlobalNavigation onClose={() => setShowNavigation(false)} />}
-        {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
+        {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
+        {showSettings && <SettingsPanel onClose={closeAllMenus} />}
+        {showUserMenu && <UserMenu onClose={closeAllMenus} />}
         {showAuthModal && (
           <AuthModal
             isOpen={showAuthModal}
@@ -214,9 +215,9 @@ export default function ShoppingMode() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black">
         <GlobalHeader 
-          onMenuClick={() => setShowNavigation(true)}
-          onSettingsClick={() => setShowSettings(true)}
-          onUserClick={() => setShowUserMenu(true)}
+          onMenuClick={() => openMenu('navigation')}
+          onSettingsClick={() => openMenu('settings')}
+          onAuthRequired={() => navigate("/")}
         />
         
         <main className="pt-20 pb-24">
@@ -231,8 +232,9 @@ export default function ShoppingMode() {
 
         <GlobalFooter currentMode="shopping" />
         
-        {showNavigation && <GlobalNavigation onClose={() => setShowNavigation(false)} />}
-        {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
+        {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
+        {showSettings && <SettingsPanel onClose={closeAllMenus} />}
+        {showUserMenu && <UserMenu onClose={closeAllMenus} />}
         {showAuthModal && (
           <AuthModal
             isOpen={showAuthModal}
@@ -250,9 +252,9 @@ export default function ShoppingMode() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black">
         <GlobalHeader 
-          onMenuClick={() => setShowNavigation(true)}
-          onSettingsClick={() => setShowSettings(true)}
-          onUserClick={() => setShowUserMenu(true)}
+          onMenuClick={() => openMenu('navigation')}
+          onSettingsClick={() => openMenu('settings')}
+          onAuthRequired={() => navigate("/")}
         />
         
         <main className="pt-20 pb-24">
@@ -269,8 +271,9 @@ export default function ShoppingMode() {
 
         <GlobalFooter currentMode="shopping" />
         
-        {showNavigation && <GlobalNavigation onClose={() => setShowNavigation(false)} />}
-        {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
+        {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
+        {showSettings && <SettingsPanel onClose={closeAllMenus} />}
+        {showUserMenu && <UserMenu onClose={closeAllMenus} />}
       </div>
     );
   }
