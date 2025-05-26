@@ -155,12 +155,15 @@ export default function FridgeMode() {
     setIsLoading(true);
     
     try {
-      // Generate the full recipe with ingredients and instructions
+      // Generate the full recipe with ingredients and instructions using Prompt 2
+      const { generateFridgePrompt2 } = await import("@/prompts/fridgePrompt2");
+      const fullPrompt = generateFridgePrompt2(recipe, quizData);
+      
       const apiData = {
         selectedRecipe: recipe,
         mode: "fridge",
         quizData: quizData,
-        prompt: `Generate a complete recipe for "${recipe.title}" with detailed ingredients and step-by-step instructions`
+        prompt: fullPrompt
       };
 
       const response = await fetch("/api/generate-full-recipe", {
