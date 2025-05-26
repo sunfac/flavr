@@ -237,8 +237,8 @@ export default function SlideQuizShell({
       case 'cards':
         const hasMany = (currentQ.options?.length || 0) > 8;
         return (
-          <div className="w-full">
-            <div className={`grid grid-cols-2 gap-3 w-full ${hasMany ? 'max-h-[55vh] overflow-y-auto pr-2 scroll-smooth' : ''}`}>
+          <div className="w-full max-w-none">
+            <div className={`grid grid-cols-2 gap-2 w-full ${hasMany ? 'max-h-[55vh] overflow-y-auto pr-1 scroll-smooth' : ''}`}>
               {currentQ.options?.map((option) => (
                 <motion.div
                   key={option.value}
