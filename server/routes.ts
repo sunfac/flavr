@@ -922,14 +922,17 @@ Make the ingredients specific with quantities and the instructions detailed and 
         model: "gpt-4o",
         messages: [{ role: "user", content: testPrompt }],
         response_format: { type: "json_object" },
+        max_tokens: 1000,
+        temperature: 0.7
       });
 
       console.log("OpenAI API response received for full recipe");
+      console.log("Response content:", response.choices[0].message.content);
       const fullRecipe = JSON.parse(response.choices[0].message.content!);
 
       // Generate sophisticated recipe image
       let imageUrl = null;
-      if (false) {
+      if (true) {
         try {
           // Create enhanced image prompt based on recipe details
           const generateImagePrompt = (recipeTitle: string, ingredients: string[], mood: string, platingNotes?: string) => {
@@ -974,9 +977,12 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
         imageUrl 
       });
     } catch (error: any) {
-      console.error("Full recipe generation error details:", error);
+      console.error("=== FULL RECIPE GENERATION ERROR ===");
+      console.error("Error type:", typeof error);
       console.error("Error message:", error.message);
-      console.error("Error stack:", error.stack);
+      console.error("Error name:", error.name);
+      console.error("Full error:", error);
+      console.error("=====================================");
       res.status(500).json({ message: "Failed to generate full recipe: " + error.message });
     }
   });
