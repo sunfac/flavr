@@ -38,7 +38,12 @@ import {
   CheckCircle2,
   XCircle,
   ShoppingCart,
-  Store
+  Store,
+  PoundSterling,
+  ShoppingBag,
+  Coins,
+  Banknote,
+  Users
 } from "lucide-react";
 
 export interface QuestionConfig {
@@ -139,7 +144,8 @@ export default function SlideQuizShell({
     const iconMap: Record<string, any> = {
       Home, Leaf, Crown, Target, Zap, Star, Shuffle, DollarSign, CreditCard, 
       Flame, Building, Microwave, Wind, Timer, Cooker,
-      Clock, ChefHat, Utensils, Sparkles, ShoppingCart, Store
+      Clock, ChefHat, Utensils, Sparkles, ShoppingCart, Store,
+      PoundSterling, ShoppingBag, Coins, Banknote, Users
     };
     
     const IconComponent = iconMap[iconName];
