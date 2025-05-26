@@ -13,7 +13,7 @@ interface GlobalNavigationProps {
 
 export default function GlobalNavigation({ onClose }: GlobalNavigationProps) {
   const [location, navigate] = useLocation();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true); // Start open since this component is conditionally rendered
 
   const navigationItems = [
     {
@@ -49,8 +49,9 @@ export default function GlobalNavigation({ onClose }: GlobalNavigationProps) {
     onClose?.();
   };
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
+  const handleClose = () => {
+    setIsOpen(false);
+    onClose?.();
   };
 
   return (
@@ -64,7 +65,7 @@ export default function GlobalNavigation({ onClose }: GlobalNavigationProps) {
           variant="ghost"
           size="sm"
           className="w-12 h-12 p-0 rounded-2xl glass hover:bg-white/20 transition-all duration-300 group border border-white/10"
-          onClick={toggleMenu}
+          onClick={handleClose}
         >
           {isOpen ? (
             <X className="w-5 h-5 text-slate-600 group-hover:text-primary transition-colors" />
@@ -82,7 +83,7 @@ export default function GlobalNavigation({ onClose }: GlobalNavigationProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-            onClick={() => setIsOpen(false)}
+            onClick={handleClose}
           />
         )}
       </AnimatePresence>
@@ -120,7 +121,7 @@ export default function GlobalNavigation({ onClose }: GlobalNavigationProps) {
                     variant="ghost"
                     size="sm"
                     className="w-8 h-8 p-0 rounded-lg hover:bg-slate-100"
-                    onClick={() => setIsOpen(false)}
+                    onClick={handleClose}
                   >
                     <X className="w-4 h-4 text-slate-600" />
                   </Button>
