@@ -43,6 +43,8 @@ export default function ShoppingMode() {
         prompt: "Generate 5 diverse recipe ideas for shopping mode"
       });
       
+      console.log("API Response:", response);
+      console.log("Recipe ideas received:", response.recipes || []);
       setRecipeIdeas(response.recipes || []);
       setCurrentStep("suggestions");
     } catch (error) {
