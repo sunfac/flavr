@@ -150,31 +150,74 @@ Return a JSON object with this exact structure:
       }
     }
 
-    // Generate full recipe immediately when selected
+    // Generate full recipe using direct OpenAI API call
     try {
       setIsLoading(true);
       
-      const fullRecipeResponse = await apiRequest("POST", "/api/generate-recipe", {
-        selectedRecipe: recipe,
-        mode: "shopping",
-        quizData: quizData,
-        prompt: `Generate a complete recipe for "${recipe.title}" based on shopping mode preferences: ${JSON.stringify(quizData)}. Include title, description, ingredients list, step-by-step instructions, cook time, servings, and difficulty level.`
+      // Build mapped prompt for full recipe generation (Prompt 2)
+      const moodText = quizData.mood ? `The user wants ${quizData.mood} food that brings comfort and satisfaction.` : '';
+      const budgetText = quizData.budget ? `Budget level: ${quizData.budget} - suggest ingredients that fit this price range.` : '';
+      const timeText = quizData.time ? `Cooking time preference: ${quizData.time} minutes maximum.` : '';
+      const dietaryText = quizData.dietary?.length ? `Dietary requirements: ${quizData.dietary.join(', ')}.` : '';
+      const equipmentText = quizData.equipment?.length ? `Available equipment: ${quizData.equipment.join(', ')}.` : '';
+      const ambitionText = quizData.ambition ? `Cooking ambition level: ${quizData.ambition}/5 - adjust complexity accordingly.` : '';
+      
+      const fullRecipePrompt = `You are an elite private chef creating a complete recipe.
+
+Generate a detailed recipe for "${recipe.title}": ${recipe.description}
+
+Personalization requirements:
+${moodText}
+${budgetText}
+${timeText}
+${dietaryText}
+${equipmentText}
+${ambitionText}
+
+Create a shopping list optimized for ${quizData.supermarket || 'any supermarket'}.
+
+Creative guidance: Include one technique or ingredient substitution that elevates this dish beyond the ordinary while respecting all constraints.
+
+Return a JSON object with this exact structure:
+{
+  "title": "Recipe Name",
+  "description": "Appealing description",
+  "ingredients": ["ingredient 1", "ingredient 2"],
+  "instructions": ["step 1", "step 2"],
+  "cookTime": 30,
+  "servings": 4,
+  "difficulty": "Easy/Medium/Hard",
+  "shoppingList": ["shopping item 1", "shopping item 2"]
+}`;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [{ role: 'user', content: fullRecipePrompt }],
+          response_format: { type: "json_object" }
+        })
       });
 
-      if (fullRecipeResponse.ok) {
-        const result = await fullRecipeResponse.json();
-        setSelectedRecipe(result.recipe);
+      if (response.ok) {
+        const result = await response.json();
+        const parsedRecipe = JSON.parse(result.choices[0].message.content);
+        setSelectedRecipe(parsedRecipe);
         setCurrentStep("recipe");
+        console.log("Successfully generated complete recipe with mapped prompts!");
       } else {
-        throw new Error('Failed to generate recipe');
+        throw new Error('OpenAI API call failed for full recipe');
       }
     } catch (error) {
       console.error("Failed to generate full recipe:", error);
-      // Fallback to basic recipe structure
       setSelectedRecipe({
         ...recipe,
-        ingredients: ["Ingredients will be generated based on your preferences"],
-        instructions: ["Instructions will be provided once generated"],
+        ingredients: ["Recipe generation temporarily unavailable"],
+        instructions: ["Please try again or refresh the page"],
         cookTime: 30,
         servings: 4,
         difficulty: "Medium"
