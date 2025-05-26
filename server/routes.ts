@@ -548,8 +548,9 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Check usage limits for non-Plus users
-      if (!user.isPlus && user.recipesThisMonth >= 5) {
+      // Check usage limits for non-Plus users (bypass in development)
+      const isDevelopment = process.env.NODE_ENV === 'development';
+      if (!isDevelopment && !user.isPlus && user.recipesThisMonth >= 5) {
         return res.status(403).json({ message: "Recipe limit reached. Upgrade to Flavr+ for unlimited access." });
       }
 
