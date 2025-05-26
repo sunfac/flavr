@@ -34,11 +34,18 @@ export default function InputQuizFridge({ onComplete, onRecipeIdeas, onLoading }
   const { toast } = useToast();
 
   const generateIdeasMutation = useMutation({
-    mutationFn: (data: { mode: string; quizData: QuizData; prompt: string }) =>
-      apiRequest("POST", "/api/generate-recipe-ideas", data),
-    onSuccess: async (response) => {
-      const result = await response.json();
-      onRecipeIdeas(result.recipeIdeas.recipes || []);
+    mutationFn: async (data: { mode: string; quizData: QuizData; prompt: string }) => {
+      const fetchResponse = await fetch("/api/generate-recipe-ideas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data)
+      });
+      return fetchResponse.json();
+    },
+    onSuccess: async (result) => {
+      onRecipeIdeas(result.recipes || []);
       onComplete(quizData);
       onLoading(false);
     },
