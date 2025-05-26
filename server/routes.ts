@@ -526,6 +526,8 @@ Return a JSON object with this exact structure:
 Make each recipe unique and appealing. Focus on variety in cooking styles, flavors, and techniques. Ensure all suggestions align with the specified mood, ambition level, time constraints, and budget constraints.`;
       }
 
+      console.log("Making OpenAI API call with prompt length:", enhancedPrompt.length);
+      
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -533,10 +535,16 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
         response_format: { type: "json_object" },
       });
 
+      console.log("OpenAI API response received successfully");
       const result = JSON.parse(response.choices[0].message.content!);
       res.json({ ideas: result.recipes || [] });
     } catch (error: any) {
-      console.error("Recipe ideas generation error:", error);
+      console.error("Recipe ideas generation error details:", {
+        message: error.message,
+        status: error.status,
+        type: error.type,
+        code: error.code
+      });
       res.status(500).json({ message: "Failed to generate recipe ideas: " + error.message });
     }
   });
