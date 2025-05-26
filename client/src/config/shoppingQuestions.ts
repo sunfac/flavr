@@ -127,7 +127,7 @@ export const shoppingQuestions: QuestionConfig[] = [
     type: "cards",
     required: true,
     options: [
-      { value: "justFed", label: "Just get fed", icon: "Coffee", desc: "Minimal effort" },
+      { value: "justFed", label: "Just get fed", icon: "User", desc: "Minimal effort" },
       { value: "simpleTasty", label: "Simple & tasty", icon: "Heart", desc: "Easy but delicious" },
       { value: "confidentCook", label: "Confident cook", icon: "Sparkles", desc: "Touch of flair" },
       { value: "ambitiousChef", label: "Ambitious chef", icon: "Target", desc: "Multi-step prep" },
