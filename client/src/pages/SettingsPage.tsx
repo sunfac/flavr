@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -14,6 +15,8 @@ import Loading from "@/components/Loading";
 export default function SettingsPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const [showNavigation, setShowNavigation] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   // Get user data
   const { data: user, isLoading: userLoading } = useQuery({
@@ -58,7 +61,10 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <GlobalHeader />
+      <GlobalHeader 
+        onMenuClick={() => setShowNavigation(true)}
+        onSettingsClick={() => setShowSettings(true)}
+      />
       
       <main className="container mx-auto px-4 pt-20 py-6 pb-20">
         <h1 className="text-2xl font-playfair font-bold text-foreground mb-6">Settings</h1>

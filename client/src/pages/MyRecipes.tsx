@@ -21,6 +21,8 @@ import {
   Coffee
 } from "lucide-react";
 import GlobalHeader from "@/components/GlobalHeader";
+import GlobalNavigation from "@/components/GlobalNavigation";
+import SettingsPanel from "@/components/SettingsPanel";
 import GlobalFooter from "@/components/GlobalFooter";
 
 interface Recipe {
@@ -42,6 +44,8 @@ export default function MyRecipes() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [showNavigation, setShowNavigation] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   // Check authentication
   const { data: user, isLoading: userLoading } = useQuery({
@@ -156,7 +160,10 @@ export default function MyRecipes() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black relative overflow-hidden">
-      <GlobalHeader />
+      <GlobalHeader 
+        onMenuClick={() => setShowNavigation(true)}
+        onSettingsClick={() => setShowSettings(true)}
+      />
       
       <main className="container mx-auto px-6 py-8 relative z-10 pb-24 pt-24">
         {/* Header */}
@@ -316,6 +323,20 @@ export default function MyRecipes() {
       </main>
 
       <GlobalFooter currentMode="history" />
+
+      {/* Navigation Menu */}
+      {showNavigation && (
+        <GlobalNavigation 
+          onClose={() => setShowNavigation(false)}
+        />
+      )}
+
+      {/* Settings Panel */}
+      {showSettings && (
+        <SettingsPanel 
+          onClose={() => setShowSettings(false)}
+        />
+      )}
     </div>
   );
 }
