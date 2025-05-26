@@ -30,6 +30,42 @@ const budgetMappings = {
   }
 } as const;
 
+// Mood mapping functions for GPT prompts
+const moodMappings = {
+  "comfort": {
+    label: "Comfort food",
+    description: "The meal should feel warm, nostalgic, and hearty — like a hug in a bowl. Lean into familiar, satisfying flavours and soft textures."
+  },
+  "impressive": {
+    label: "Impressive for guests",
+    description: "Design the dish with visual impact and elevated flavour layers. Prioritise presentation and restaurant-level quality."
+  },
+  "light": {
+    label: "Light & refreshing",
+    description: "The dish should be bright, vibrant, and easy to digest. Use fresh herbs, citrus, or cooling elements to keep it lively."
+  },
+  "family": {
+    label: "Family-friendly",
+    description: "Appeal to a variety of tastes including children. Keep it approachable, with minimal spice and simple presentation."
+  },
+  "romantic": {
+    label: "Romantic",
+    description: "The meal should feel intimate, indulgent, and sensorial. Use elegant plating, rich ingredients, and warm, candlelit-friendly colours."
+  },
+  "indulgent": {
+    label: "Indulgent",
+    description: "This is an unapologetically rich, flavour-packed dish. Prioritise taste over health — think bold sauces, melted textures, and crave-worthy ingredients."
+  },
+  "quick": {
+    label: "Quick & energetic",
+    description: "The dish should be bold, punchy, and fast to prepare. Use high-impact flavours with low fuss and minimal prep."
+  },
+  "clean": {
+    label: "Clean & nourishing",
+    description: "Prioritise health, digestion, and natural ingredients. Use lean proteins, grains, and greens with minimal processing or added fat."
+  }
+} as const;
+
 function getBudgetPromptText(budgetLevel: string): string {
   const mapping = budgetMappings[budgetLevel as keyof typeof budgetMappings];
   if (!mapping) {
@@ -39,6 +75,16 @@ function getBudgetPromptText(budgetLevel: string): string {
   return `Budget: ${mapping.label}
 Please ensure the cost per portion reflects this: ${mapping.costRange} ${mapping.guidance}
 Currency: GBP (British Pounds). Assume supermarket prices.`;
+}
+
+function getMoodPromptText(moodKey: string): string {
+  const mood = moodMappings[moodKey as keyof typeof moodMappings];
+  if (!mood) {
+    return "Create a balanced, appealing dish that satisfies the user's preferences.";
+  }
+
+  return `Mood: ${mood.label}
+${mood.description}`;
 }
 
 // Initialize OpenAI
@@ -136,14 +182,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { mode, quizData, prompt } = req.body;
 
-      // Include budget guidance in the recipe ideas prompt
+      // Include budget and mood guidance in the recipe ideas prompt
       const budgetGuidance = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
+      const moodGuidance = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
       
       // Build enhanced prompt for 6 recipe suggestions
       const enhancedPrompt = `Generate exactly 6 diverse recipe suggestions based on these preferences:
 
 Mode: ${mode}
 Quiz Data: ${JSON.stringify(quizData)}
+
+${moodGuidance}
 
 ${budgetGuidance}
 
@@ -157,7 +206,7 @@ Return a JSON object with this exact structure:
   ]
 }
 
-Make each recipe unique and appealing. Focus on variety in cooking styles, flavors, and techniques. Ensure all suggestions align with the specified budget constraints.`;
+Make each recipe unique and appealing. Focus on variety in cooking styles, flavors, and techniques. Ensure all suggestions align with the specified mood and budget constraints.`;
 
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const response = await openai.chat.completions.create({
@@ -188,8 +237,9 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
 
       const { selectedRecipe, mode, quizData, prompt } = req.body;
 
-      // Include budget guidance in the prompt
+      // Include budget and mood guidance in the prompt
       const budgetGuidance = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
+      const moodGuidance = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
       
       // Build enhanced prompt for complete recipe generation
       const enhancedPrompt = `Generate a complete, detailed recipe for "${selectedRecipe.title}" based on these preferences:
@@ -197,6 +247,8 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
 Mode: ${mode}
 Quiz Data: ${JSON.stringify(quizData)}
 Recipe Description: ${selectedRecipe.description}
+
+${moodGuidance}
 
 ${budgetGuidance}
 
@@ -213,7 +265,7 @@ Return a JSON object with this exact structure:
   "tips": "helpful cooking tips"
 }
 
-Make the ingredients specific with quantities and the instructions detailed and clear. Ensure all ingredient selections and quantities align with the specified budget constraints.`;
+Make the ingredients specific with quantities and the instructions detailed and clear. Ensure all ingredient selections and quantities align with the specified mood and budget constraints.`;
 
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const response = await openai.chat.completions.create({

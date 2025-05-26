@@ -8,13 +8,14 @@ export const shoppingQuestions: QuestionConfig[] = [
     type: "cards",
     required: true,
     options: [
-      { value: "comfort", label: "Comfort food", icon: "Home", desc: "Warm and cozy vibes" },
-      { value: "healthy", label: "Fresh & healthy", icon: "Leaf", desc: "Light and nutritious" },
-      { value: "indulgent", label: "Pure indulgence", icon: "Crown", desc: "Treat yourself" },
-      { value: "adventurous", label: "Something new", icon: "Target", desc: "Bold and exciting" },
-      { value: "quick", label: "Quick & easy", icon: "Zap", desc: "Minimal effort" },
-      { value: "impressive", label: "Impress someone", icon: "Star", desc: "Show off your skills" },
-      { value: "surprise", label: "Surprise me", icon: "Shuffle", desc: "Let's discover together" }
+      { value: "comfort", label: "Comfort food", icon: "Home", desc: "Warm & nostalgic" },
+      { value: "impressive", label: "Impressive for guests", icon: "Star", desc: "Restaurant-level" },
+      { value: "light", label: "Light & refreshing", icon: "Leaf", desc: "Bright & vibrant" },
+      { value: "family", label: "Family-friendly", icon: "Users", desc: "Appeals to all" },
+      { value: "romantic", label: "Romantic", icon: "Heart", desc: "Intimate & indulgent" },
+      { value: "indulgent", label: "Indulgent", icon: "Crown", desc: "Rich & bold" },
+      { value: "quick", label: "Quick & energetic", icon: "Zap", desc: "Fast & punchy" },
+      { value: "clean", label: "Clean & nourishing", icon: "Sparkles", desc: "Healthy & natural" }
     ]
   },
   {

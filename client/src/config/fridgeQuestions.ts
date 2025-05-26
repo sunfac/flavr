@@ -22,13 +22,14 @@ export const fridgeQuestions: QuestionConfig[] = [
     type: "cards",
     required: true,
     options: [
-      { value: "comfort", label: "Comfort food", icon: "Home", desc: "Warm and cozy" },
-      { value: "fresh", label: "Fresh & healthy", icon: "Leaf", desc: "Light and nutritious" },
-      { value: "decadent", label: "Decadent treat", icon: "Crown", desc: "Indulgent pleasure" },
-      { value: "exciting", label: "Something exciting", icon: "Flame", desc: "Bold and adventurous" },
-      { value: "minimal", label: "Minimal effort", icon: "Zap", desc: "Quick and easy" },
-      { value: "foodie", label: "Foodie moment", icon: "ChefHat", desc: "Restaurant quality" },
-      { value: "surprise", label: "Surprise me", icon: "Shuffle", desc: "Let's discover together" }
+      { value: "comfort", label: "Comfort food", icon: "Home", desc: "Warm & nostalgic" },
+      { value: "impressive", label: "Impressive for guests", icon: "Star", desc: "Restaurant-level" },
+      { value: "light", label: "Light & refreshing", icon: "Leaf", desc: "Bright & vibrant" },
+      { value: "family", label: "Family-friendly", icon: "Users", desc: "Appeals to all" },
+      { value: "romantic", label: "Romantic", icon: "Heart", desc: "Intimate & indulgent" },
+      { value: "indulgent", label: "Indulgent", icon: "Crown", desc: "Rich & bold" },
+      { value: "quick", label: "Quick & energetic", icon: "Zap", desc: "Fast & punchy" },
+      { value: "clean", label: "Clean & nourishing", icon: "Sparkles", desc: "Healthy & natural" }
     ]
   },
   {
