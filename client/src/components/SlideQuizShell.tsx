@@ -62,7 +62,7 @@ export interface QuestionConfig {
   id: string;
   label: string;
   subtitle?: string;
-  type: 'text' | 'textarea' | 'dropdown' | 'multi-select' | 'slider' | 'tags' | 'checkbox' | 'cards' | 'equipment-grid';
+  type: 'text' | 'textarea' | 'dropdown' | 'multi-select' | 'slider' | 'tags' | 'checkbox' | 'cards' | 'equipment-grid' | 'ingredient-list';
   options?: Array<{ value: string; label: string; icon?: string; desc?: string }>;
   min?: number;
   max?: number;
@@ -205,6 +205,71 @@ export default function SlideQuizShell({
                       onClick={() => updateAnswer(currentQ.id, example)}
                     >
                       {example}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
+      case 'ingredient-list':
+        const ingredients = Array.isArray(currentAnswer) ? currentAnswer : [];
+
+        const addIngredients = () => {
+          if (!tempInput.trim()) return;
+          
+          // Split by commas and clean up
+          const newIngredients = tempInput
+            .split(',')
+            .map(ingredient => ingredient.trim())
+            .filter(ingredient => ingredient.length > 0);
+          
+          const updatedIngredients = [...ingredients, ...newIngredients];
+          updateAnswer(currentQ.id, updatedIngredients);
+          setTempInput('');
+        };
+
+        const removeIngredient = (index: number) => {
+          const updatedIngredients = ingredients.filter((_, i) => i !== index);
+          updateAnswer(currentQ.id, updatedIngredients);
+        };
+
+        return (
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <Input
+                placeholder={currentQ.placeholder}
+                value={tempInput}
+                onChange={(e) => setTempInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && addIngredients()}
+                className="h-14 text-lg bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-orange-400 rounded-xl flex-1"
+              />
+              <Button
+                onClick={addIngredients}
+                disabled={!tempInput.trim()}
+                className="h-14 px-6 bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 rounded-xl"
+              >
+                Add
+              </Button>
+            </div>
+            
+            <p className="text-xs text-slate-400">
+              Add multiple ingredients separated by commas (e.g., "eggs, spinach, tomatoes")
+            </p>
+
+            {ingredients.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-slate-300">Added ingredients:</p>
+                <div className="flex flex-wrap gap-2">
+                  {ingredients.map((ingredient, index) => (
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="bg-orange-500/20 border border-orange-400/30 text-orange-200 hover:bg-orange-500/30 cursor-pointer"
+                      onClick={() => removeIngredient(index)}
+                    >
+                      {ingredient} ×
                     </Badge>
                   ))}
                 </div>

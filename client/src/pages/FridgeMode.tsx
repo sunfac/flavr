@@ -238,7 +238,8 @@ export default function FridgeMode() {
         )}
       </main>
 
-      <ChatBot />
+      {/* Only show ChatBot when not in quiz mode */}
+      {currentStep !== "quiz" && <ChatBot />}
       
       {/* Consistent footer across all modes */}
       <GlobalFooter currentMode="fridge" />

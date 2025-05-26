@@ -5,12 +5,12 @@ export const fridgeQuestions: QuestionConfig[] = [
     id: "ingredients",
     label: "What's in your fridge?",
     subtitle: "Add ingredients you want to use",
-    type: "text",
+    type: "ingredient-list",
     required: true,
     placeholder: "e.g., eggs, spinach, tomatoes, chicken...",
     validation: (value) => {
-      if (!value || value.trim().length < 10) {
-        return "Please add at least a few ingredients";
+      if (!value || (Array.isArray(value) ? value.length === 0 : value.trim().length === 0)) {
+        return "Please add at least one ingredient";
       }
       return true;
     }
