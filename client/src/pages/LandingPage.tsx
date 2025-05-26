@@ -382,9 +382,9 @@ export default function LandingPage() {
             </motion.p>
           </motion.div>
 
-          {/* Side-by-side layout with glass morphism */}
-          <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-            {/* Food Image with enhanced styling */}
+          {/* Side-by-side layout with enhanced styling */}
+          <div className="grid lg:grid-cols-2 gap-8 items-start max-w-7xl mx-auto">
+            {/* Food Image with clean styling */}
             <motion.div
               initial={{ opacity: 0, x: -50, scale: 0.95 }}
               whileInView={{ opacity: 1, x: 0, scale: 1 }}
@@ -412,66 +412,98 @@ export default function LandingPage() {
               </div>
             </motion.div>
 
-            {/* Chat Interface with glass morphism */}
+            {/* WhatsApp-Style Chat Interface */}
             <motion.div
               initial={{ opacity: 0, x: 50, scale: 0.95 }}
               whileInView={{ opacity: 1, x: 0, scale: 1 }}
               transition={{ duration: 1, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
               viewport={{ once: true }}
-              className="w-full max-w-md mx-auto lg:mx-0 relative group"
+              className="w-full max-w-lg mx-auto lg:mx-0"
             >
-              {/* Chat Container with enhanced glass morphism */}
-              <div className="relative bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl p-8 shadow-2xl">
-                {/* Glow effect */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-white/20 via-orange-500/20 to-white/20 rounded-3xl blur-xl opacity-60"></div>
-                <div className="absolute -inset-2 bg-gradient-to-r from-white/10 via-orange-400/10 to-white/10 rounded-3xl blur-2xl opacity-40"></div>
-                
-                <div className="relative z-10">
-                  {/* Chat Header */}
-                  <div className="flex items-center space-x-3 mb-8 pb-6 border-b border-white/20">
+              {/* WhatsApp-Style Chat Container */}
+              <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl">
+                {/* Chat Header - WhatsApp Style */}
+                <div className="bg-slate-800/80 backdrop-blur-sm px-6 py-4 border-b border-slate-700/50">
+                  <div className="flex items-center space-x-4">
                     <div className="relative">
                       <div className="absolute -inset-1 bg-orange-400/30 rounded-full blur-sm"></div>
-                      <img src={FlavrLogo} alt="Flavr AI" className="relative w-12 h-12" />
+                      <img src={FlavrLogo} alt="Flavr AI" className="relative w-10 h-10 rounded-full" />
                     </div>
-                    <div>
-                      <p className="font-semibold text-white text-lg">Flavr AI</p>
-                      <p className="text-sm text-slate-300">Your cooking assistant</p>
-                    </div>
-                    <div className="ml-auto w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
-                  </div>
-                  
-                  {/* Chat Messages */}
-                  <div className="space-y-4 mb-6">
-                    {/* Recipe Title */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-                      <p className="font-semibold text-white">Red Wine Braised Short Rib</p>
-                      <p className="text-slate-300 text-sm">with Pea Purée & Miso Glaze</p>
-                    </div>
-                    
-                    {/* AI Messages */}
-                    <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl p-4 rounded-tl-md shadow-lg">
-                      <p className="text-sm">Here's how to elevate it with a miso glaze ✨</p>
-                    </div>
-                    
-                    <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl p-4 rounded-tl-md shadow-lg">
-                      <p className="text-sm">Would you like a wine pairing? 🍷</p>
-                    </div>
-                    
-                    <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl p-4 rounded-tl-md shadow-lg">
-                      <p className="text-sm">Add a complementary side dish? 🥗</p>
-                    </div>
-                  </div>
-                  
-                  {/* Chat Input */}
-                  <div className="pt-6 border-t border-white/20">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-full px-4 py-3 border border-white/20">
-                        <p className="text-sm text-slate-300">Ask about wine pairings...</p>
-                      </div>
-                      <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center hover:from-orange-400 hover:to-orange-500 transition-all duration-300 cursor-pointer shadow-lg">
-                        <ArrowRight className="w-5 h-5 text-white" />
+                    <div className="flex-1">
+                      <p className="font-semibold text-white text-base">Flavr AI Chef</p>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <p className="text-xs text-green-400">online</p>
                       </div>
                     </div>
+                    <div className="text-slate-400">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                        <path d="M10 4a2 2 0 100-4 2 2 0 000 4z"/>
+                        <path d="M10 20a2 2 0 100-4 2 2 0 000 4z"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Chat Messages Area - WhatsApp Style */}
+                <div className="p-4 h-80 overflow-y-auto bg-slate-900/50 space-y-3">
+                  {/* Date Separator */}
+                  <div className="text-center">
+                    <span className="bg-slate-700/50 text-slate-300 text-xs px-3 py-1 rounded-full">Today</span>
+                  </div>
+                  
+                  {/* Recipe Card - System Message */}
+                  <div className="flex justify-center">
+                    <div className="bg-slate-700/70 backdrop-blur-sm rounded-lg p-3 max-w-xs">
+                      <p className="text-white font-medium text-sm">Red Wine Braised Short Rib</p>
+                      <p className="text-slate-300 text-xs">with Pea Purée & Miso Glaze</p>
+                    </div>
+                  </div>
+                  
+                  {/* AI Messages - WhatsApp Bubbles */}
+                  <div className="flex justify-start">
+                    <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl rounded-tl-md p-3 max-w-xs shadow-lg">
+                      <p className="text-white text-sm">Here's how to elevate it with a miso glaze ✨</p>
+                      <p className="text-orange-100 text-xs mt-1 opacity-75">2:14 PM</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-start">
+                    <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl rounded-tl-md p-3 max-w-xs shadow-lg">
+                      <p className="text-white text-sm">Would you like a wine pairing? 🍷</p>
+                      <p className="text-orange-100 text-xs mt-1 opacity-75">2:15 PM</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-start">
+                    <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl rounded-tl-md p-3 max-w-xs shadow-lg">
+                      <p className="text-white text-sm">Add a complementary side dish? 🥗</p>
+                      <p className="text-orange-100 text-xs mt-1 opacity-75">2:16 PM</p>
+                    </div>
+                  </div>
+                  
+                  {/* Typing Indicator */}
+                  <div className="flex justify-start">
+                    <div className="bg-slate-700/70 rounded-2xl rounded-tl-md p-3">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Input Area - WhatsApp Style */}
+                <div className="p-4 bg-slate-800/80 backdrop-blur-sm border-t border-slate-700/50">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-1 bg-slate-700/50 rounded-full px-4 py-3 border border-slate-600/50">
+                      <p className="text-slate-400 text-sm">Ask about wine pairings...</p>
+                    </div>
+                    <button className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center hover:from-orange-400 hover:to-orange-500 transition-all duration-300 shadow-lg hover:scale-105">
+                      <ArrowRight className="w-5 h-5 text-white" />
+                    </button>
                   </div>
                 </div>
               </div>
