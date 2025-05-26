@@ -1,0 +1,47 @@
+// Replit Prompt Update — Enhance Fridge Mode Prompt 1 with Randomness and Creativity Injection
+
+// OBJECTIVE:
+// Without altering any existing Fridge Mode logic or prompt structure,
+// this update appends two variation-enhancing elements to Fridge Mode’s Prompt 1:
+// 1. A dynamic `variationSeed` for structural uniqueness
+// 2. A randomly selected `creativeInstruction` tailored to “use-what-you-have” fridge cooking
+// These additions should be inserted **verbatim** at the end of the current Prompt 1 for Fridge Mode,
+// immediately before calling the GPT model.
+
+// DO NOT remove or modify any existing inputs, quiz mappings, or structure.
+// This update is additive and must retain current behavior and formatting.
+
+
+// STEP 1 — Add this curated set of `creativeInstructions` specific to Fridge Mode:
+
+const creativeInstructions = [
+  "Prioritize minimizing waste — make sure all ingredients are used thoughtfully.",
+  "Find clever ways to elevate simple, mismatched ingredients.",
+  "Use pantry staples to tie leftover ingredients together.",
+  "Suggest bold flavors or sauces that can unify disparate fridge items.",
+  "Think of global comfort foods that are flexible — stir fries, stews, or frittatas.",
+  "Create dishes that could be prepped in one pan or tray.",
+  "Highlight make-ahead versatility or batch-cooking value.",
+  "Turn odds and ends into something impressive with pro technique.",
+  "Keep it simple but surprising — use pickling, roasting, or toasting for impact.",
+  "Avoid recipes that rely on ingredients not likely to be on hand."
+];
+
+
+// STEP 2 — Randomize instruction + create variationSeed when Prompt 1 runs:
+
+const randomInstruction = creativeInstructions[Math.floor(Math.random() * creativeInstructions.length)];
+const variationSeed = `fridge-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+
+
+// STEP 3 — Inject the following lines VERBATIM at the bottom of the existing Fridge Mode Prompt 1 string:
+
+prompt += `\n\nCreative Direction: ${randomInstruction}`;
+prompt += `\nSeed for creative variation (not visible to user): ${variationSeed}`;
+
+
+// OUTCOME:
+// ✅ Retains all current quiz input logic and formatting
+// ✅ Adds GPT-prompted creativity within Fridge context (no waste, high flavor, practical ideas)
+// ✅ Structural randomness prevents recipe repetition for same input
+// ✅ Final prompt remains mode-isolated, coherent, and optimized

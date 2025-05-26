@@ -395,7 +395,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Creative instructions for Shopping Mode variety
-  const creativeInstructions = [
+  const shoppingCreativeInstructions = [
     "Add international influence — pull from Asian, Mediterranean or Latin American inspiration.",
     "Emphasize seasonal ingredients and vibrant colors.",
     "Focus on textural contrast — include crunch, creaminess, or char.",
@@ -406,6 +406,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     "Modernize a classic recipe with a surprising twist.",
     "Use fresh herbs, acid, and fat to create depth.",
     "Make it visually Instagrammable with color contrast and plating."
+  ];
+
+  // Creative instructions for Fridge Mode variety
+  const fridgeCreativeInstructions = [
+    "Prioritize minimizing waste — make sure all ingredients are used thoughtfully.",
+    "Find clever ways to elevate simple, mismatched ingredients.",
+    "Use pantry staples to tie leftover ingredients together.",
+    "Suggest bold flavors or sauces that can unify disparate fridge items.",
+    "Think of global comfort foods that are flexible — stir fries, stews, or frittatas.",
+    "Create dishes that could be prepped in one pan or tray.",
+    "Highlight make-ahead versatility or batch-cooking value.",
+    "Turn odds and ends into something impressive with pro technique.",
+    "Keep it simple but surprising — use pickling, roasting, or toasting for impact.",
+    "Avoid recipes that rely on ingredients not likely to be on hand."
   ];
 
   // Recipe generation routes (no auth required for ideas)
@@ -430,7 +444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const creativeGuidance = getCreativeGuidanceBlock();
         
         // Generate random creativity injection for Shopping Mode
-        const randomInstruction = creativeInstructions[Math.floor(Math.random() * creativeInstructions.length)];
+        const randomInstruction = shoppingCreativeInstructions[Math.floor(Math.random() * shoppingCreativeInstructions.length)];
         const variationSeed = `seed-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 
         enhancedPrompt = `You are an elite private chef.
@@ -615,6 +629,10 @@ Return a JSON object with this exact structure:
         // Build Fridge Mode mapped prompt (Prompt 1)
         const creativeGuidance = getCreativeGuidanceBlock();
         
+        // Generate random creativity injection for Fridge Mode
+        const randomInstruction = fridgeCreativeInstructions[Math.floor(Math.random() * fridgeCreativeInstructions.length)];
+        const variationSeed = `fridge-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+
         enhancedPrompt = `You are an elite private chef.
 
 Based on the user's available ingredients and preferences, suggest 5 exciting recipe ideas.
@@ -641,6 +659,9 @@ ${creativeGuidance}
 Ensure the 5 ideas are meaningfully distinct from each other in ingredients, style, or technique.
 Avoid repeating the same ingredient combinations across recipes.
 You may assume common pantry items are available, including oils, seasonings, dried herbs and spices, flour, stock cubes, tinned tomatoes, beans, tuna, sweetcorn, pasta, rice, and similar cupboard staples.
+
+Creative Direction: ${randomInstruction}
+Seed for creative variation (not visible to user): ${variationSeed}
 
 Only return 5 distinct recipe ideas in the format:
 - [Recipe Title]: [One-line description]
