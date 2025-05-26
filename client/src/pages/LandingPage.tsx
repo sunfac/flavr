@@ -12,7 +12,7 @@ import GlobalNavigation from "@/components/GlobalNavigation";
 import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
 import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
-import FlavrFullLogo from "@assets/IMG_3044.png";
+import FlavrFullLogo from "@assets/DB23351A-869B-42C9-A1B2-E6C2685B7586.png";
 import HeroFoodImage from "@assets/3D8C8E94-9BC0-4F6A-95F2-8951941A709B.png";
 import { motion } from "framer-motion";
 import { ChefHat, Sparkles, Timer, Star, ArrowRight, Menu, Settings, User, ChevronUp } from "lucide-react";
