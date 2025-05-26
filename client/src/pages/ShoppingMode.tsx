@@ -28,6 +28,8 @@ export default function ShoppingMode() {
   const [showNavigation, setShowNavigation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [hasSentPrompt1Twice, setHasSentPrompt1Twice] = useState(false);
+  const [rejectedRecipes, setRejectedRecipes] = useState<Set<string>>(new Set());
 
   // Check if user is logged in
   const { data: user, isLoading: userLoading } = useQuery({
@@ -41,6 +43,97 @@ export default function ShoppingMode() {
 
   // Allow users to try the quiz without authentication
   const isAuthenticated = user?.user;
+
+  // Extract recipe generation function to allow retry
+  const generateRecipeIdeas = async (data: any, isRetry = false) => {
+    try {
+      setIsLoading(true);
+      
+      if (isRetry) {
+        console.log("Generating fresh batch of recipe ideas...");
+      } else {
+        console.log("Generating recipe ideas with mapped prompts...");
+      }
+      
+      // Build mapped prompt for Shopping Mode using your sophisticated 6D framework
+      const moodText = data.mood ? `The user wants ${data.mood} food that brings comfort and satisfaction.` : '';
+      const budgetText = data.budget ? `Budget level: ${data.budget} - suggest recipes that fit this price range.` : '';
+      const timeText = data.time ? `Cooking time preference: ${data.time} minutes maximum.` : '';
+      const dietaryText = data.dietary?.length ? `Dietary requirements: ${data.dietary.join(', ')}.` : '';
+      const equipmentText = data.equipment?.length ? `Available equipment: ${data.equipment.join(', ')}.` : '';
+      const ambitionText = data.ambition ? `Cooking ambition level: ${data.ambition}/5 - adjust complexity accordingly.` : '';
+      
+      const shoppingPrompt = `You are an elite private chef.
+
+Based on the following preferences, suggest 6 unique, flavour-packed recipe ideas. Each idea should have a title and a one-sentence description:
+
+${moodText}
+
+${ambitionText}
+
+${dietaryText}
+
+${budgetText}
+
+${timeText}
+
+${equipmentText}
+
+Cuisine preference: ${data.cuisine || 'Any cuisine'}
+
+Creative Guidance:
+Do not include kitchen equipment in the recipe title. Focus on flavor, cuisine, or emotional theme. Assume the user has access to standard kitchen tools. Equipment should not define the identity of the dish.
+
+Ensure the 6 ideas are meaningfully distinct from each other in ingredients, style, or technique.
+Avoid repeating the same ingredient combinations across recipes.
+
+Return a JSON object with this exact structure:
+{
+  "recipes": [
+    {
+      "title": "Recipe Name", 
+      "description": "Brief appealing description in one sentence"
+    }
+  ]
+}`;
+
+      const response = await fetch('/api/openai-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [{ role: "user", content: shoppingPrompt }],
+          response_format: { type: "json_object" }
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const parsedResult = JSON.parse(result.choices[0].message.content);
+        setRecipeIdeas(parsedResult.recipes || []);
+        setRejectedRecipes(new Set()); // Reset rejected recipes for new batch
+        console.log("Successfully generated recipes with your mapped prompt system!");
+        return parsedResult.recipes || [];
+      } else {
+        throw new Error('Recipe generation failed');
+      }
+      
+    } catch (error) {
+      console.error("Recipe generation failed:", error);
+      // Basic fallback if everything fails
+      const basicFallback = [
+        {
+          title: "Simple Pasta Bowl",
+          description: "Quick and satisfying pasta with your favorite sauce and toppings."
+        }
+      ];
+      setRecipeIdeas(basicFallback);
+      return basicFallback;
+    } finally {
+      setCurrentStep("suggestions");
+      setIsLoading(false);
+    }
+  };
 
   const handleQuizComplete = async (data: any) => {
     // Handle random cuisine selection if multiple are chosen
@@ -64,38 +157,177 @@ export default function ShoppingMode() {
     };
 
     setQuizData(transformedData);
+    setHasSentPrompt1Twice(false); // Reset retry state for new quiz
+    
+    // Generate initial batch of recipe ideas
+    await generateRecipeIdeas(transformedData);
+  };
 
+  // Handle when all recipes are rejected - trigger second batch
+  const handleAllRecipesRejected = async () => {
+    if (!hasSentPrompt1Twice && quizData) {
+      setHasSentPrompt1Twice(true);
+      await generateRecipeIdeas(quizData, true);
+    }
+  };
+
+  const handleRecipeSelect = async (recipe: any) => {
+    // Check quota for final recipe generation (this is what counts against limit)
+    if (!isAuthenticated) {
+      const canProceed = await checkQuotaBeforeGPT();
+      if (!canProceed) {
+        setShowAuthModal(true);
+        return;
+      }
+    }
+
+    // Generate full recipe using backend API
     try {
       setIsLoading(true);
-
-      // Since the backend routing is currently blocked by the frontend,
-      // we'll need to use the OpenAI API directly from the frontend
-      // This is a temporary solution until the routing issue is resolved
       
-      console.log("Generating recipe ideas with mapped prompts...");
+      const response = await apiRequest("POST", "/api/generate-full-recipe", {
+        selectedRecipe: recipe,
+        mode: "shopping",
+        quizData: quizData,
+        prompt: `Generate a complete recipe for ${recipe.title}`
+      });
       
-      // Build mapped prompt for Shopping Mode using your sophisticated 6D framework
-      const moodText = transformedData.mood ? `The user wants ${transformedData.mood} food that brings comfort and satisfaction.` : '';
-      const budgetText = transformedData.budget ? `Budget level: ${transformedData.budget} - suggest recipes that fit this price range.` : '';
-      const timeText = transformedData.time ? `Cooking time preference: ${transformedData.time} minutes maximum.` : '';
-      const dietaryText = transformedData.dietary?.length ? `Dietary requirements: ${transformedData.dietary.join(', ')}.` : '';
-      const equipmentText = transformedData.equipment?.length ? `Available equipment: ${transformedData.equipment.join(', ')}.` : '';
-      const ambitionText = transformedData.ambition ? `Cooking ambition level: ${transformedData.ambition}/5 - adjust complexity accordingly.` : '';
-      const servingsText = transformedData.servings ? `Number of servings needed: ${transformedData.servings}.` : '';
-      
-      const enhancedPrompt = `You are an elite private chef creating personalized recipe suggestions.
+      setSelectedRecipe(response);
+      setCurrentStep("recipe");
+    } catch (error) {
+      console.error("Recipe generation failed:", error);
+      setSelectedRecipe(recipe);
+      setCurrentStep("recipe");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-Based on these preferences, suggest 5 unique, flavour-packed recipe ideas for shopping mode:
+  const handleBackToSuggestions = () => {
+    setSelectedRecipe(null);
+    setCurrentStep("suggestions");
+  };
 
-${moodText}
-${budgetText}
-${timeText}
-${dietaryText}
-${equipmentText}
-${ambitionText}
-${servingsText}
+  const handleNewSearch = () => {
+    setCurrentStep("quiz");
+    setQuizData(null);
+    setRecipeIdeas([]);
+    setSelectedRecipe(null);
+  };
 
-Cuisine preference: ${transformedData.cuisine || 'Any cuisine'}
+  const handleAuthSuccess = () => {
+    setShowAuthModal(false);
+  };
+
+  if (!quizData && currentStep === "quiz") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black">
+        <GlobalHeader 
+          onMenuClick={() => setShowNavigation(true)}
+          onSettingsClick={() => setShowSettings(true)}
+          onUserClick={() => setShowUserMenu(true)}
+        />
+        
+        <main className="pt-20 pb-24">
+          <SlideQuizShell
+            title="Shopping Mode"
+            subtitle="Plan your perfect shopping trip"
+            questions={shoppingQuestions}
+            onSubmit={handleQuizComplete}
+            theme="shopping"
+          />
+        </main>
+
+        <GlobalFooter currentMode="shopping" />
+        
+        {showNavigation && <GlobalNavigation onClose={() => setShowNavigation(false)} />}
+        {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
+        {showUserMenu && <UserMenu onClose={() => setShowUserMenu(false)} />}
+        {showAuthModal && (
+          <AuthModal
+            isOpen={showAuthModal}
+            onClose={() => setShowAuthModal(false)}
+            onSuccess={handleAuthSuccess}
+            title="Continue Your Culinary Journey"
+            description="Sign up to unlock unlimited recipes and save your favorites!"
+          />
+        )}
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return <Loading message="Creating your perfect recipe..." showDidYouKnow />;
+  }
+
+  if (currentStep === "suggestions") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black">
+        <GlobalHeader 
+          onMenuClick={() => setShowNavigation(true)}
+          onSettingsClick={() => setShowSettings(true)}
+          onUserClick={() => setShowUserMenu(true)}
+        />
+        
+        <main className="pt-20 pb-24">
+          <TinderRecipeCards
+            recipes={recipeIdeas}
+            onSelectRecipe={handleRecipeSelect}
+            quizData={quizData}
+            theme="shopping"
+          />
+        </main>
+
+        <GlobalFooter currentMode="shopping" />
+        
+        {showNavigation && <GlobalNavigation onClose={() => setShowNavigation(false)} />}
+        {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
+        {showUserMenu && <UserMenu onClose={() => setShowUserMenu(false)} />}
+        {showAuthModal && (
+          <AuthModal
+            isOpen={showAuthModal}
+            onClose={() => setShowAuthModal(false)}
+            onSuccess={handleAuthSuccess}
+            title="Continue Your Culinary Journey"
+            description="Sign up to unlock unlimited recipes and save your favorites!"
+          />
+        )}
+      </div>
+    );
+  }
+
+  if (currentStep === "recipe" && selectedRecipe) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black">
+        <GlobalHeader 
+          onMenuClick={() => setShowNavigation(true)}
+          onSettingsClick={() => setShowSettings(true)}
+          onUserClick={() => setShowUserMenu(true)}
+        />
+        
+        <main className="pt-20 pb-24">
+          <RecipeCard
+            recipe={selectedRecipe}
+            mode="shopping"
+            quizData={quizData}
+            isFullView={true}
+            onBack={handleBackToSuggestions}
+            showNewSearchButton={true}
+            onNewSearch={handleNewSearch}
+          />
+        </main>
+
+        <GlobalFooter currentMode="shopping" />
+        
+        {showNavigation && <GlobalNavigation onClose={() => setShowNavigation(false)} />}
+        {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
+        {showUserMenu && <UserMenu onClose={() => setShowUserMenu(false)} />}
+      </div>
+    );
+  }
+
+  return null;
+}
 
 Creative guidance: Add one unexpected ingredient or technique that elevates each dish beyond the ordinary while respecting the constraints.
 

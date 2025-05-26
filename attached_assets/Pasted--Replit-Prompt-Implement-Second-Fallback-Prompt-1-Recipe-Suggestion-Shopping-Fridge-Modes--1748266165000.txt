@@ -1,0 +1,53 @@
+// Replit Prompt — Implement Second Fallback Prompt 1 Recipe Suggestion (Shopping + Fridge Modes)
+
+// OBJECTIVE:
+// If a user swipes or rejects all 6 recipe suggestion cards from Prompt 1 in either Shopping Mode or Fridge Mode,
+// automatically resend Prompt 1 **one final time** with the same quiz inputs to generate 6 more suggestions.
+// If those second suggestions are exhausted again, fall back to the “No matches found — try another search” message.
+
+// BEHAVIOR FLOW:
+// - First Prompt 1: 6 recipe suggestion cards shown
+// - User swipes away or rejects all 6
+// - Trigger second Prompt 1 call using same quiz input (DO NOT ask user to refill quiz)
+// - Present 6 new recipe ideas (second batch)
+// - If second batch is also rejected, then:
+//   → Show fallback message (same as current behavior)
+
+// USAGE NOTES:
+// - Do not show the fallback message until BOTH Prompt 1 attempts are exhausted
+// - Keep track of fallback round using a session state variable:
+//   `hasSentPrompt1Twice: boolean = false`
+// - Ensure user doesn't get locked in infinite loop by limiting Prompt 1 retries to just two per session
+
+// STATE EXAMPLE:
+const [recipeCardSet, setRecipeCardSet] = useState<RecipeCard[]>([]);
+const [cardsRejected, setCardsRejected] = useState<number>(0);
+const [hasSentPrompt1Twice, setHasSentPrompt1Twice] = useState(false);
+
+useEffect(() => {
+  if (cardsRejected >= 6 && !hasSentPrompt1Twice) {
+    // Retry Prompt 1 one final time
+    sendPrompt1Again();
+    setHasSentPrompt1Twice(true);
+    setCardsRejected(0);
+  } else if (cardsRejected >= 6 && hasSentPrompt1Twice) {
+    // All recipes exhausted
+    showFallbackMessage(); // “Try a different search” etc.
+  }
+}, [cardsRejected]);
+
+// FUNCTION TO RE-TRIGGER PROMPT 1:
+const sendPrompt1Again = async () => {
+  const newRecipes = await generatePrompt1Again(existingQuizInput);
+  setRecipeCardSet(newRecipes);
+};
+
+// VISUAL UPDATE:
+// You may optionally show a subtle UI cue like:
+// “Here’s a fresh batch of ideas…” above the new card stack
+
+// FINAL OUTCOME:
+// ✅ Prevents dead-end experiences after 6 rejections
+// ✅ Keeps user engaged with a fresh second batch
+// ✅ Guarantees clean fallback message if both attempts are exhausted
+// ✅ Matches Tinder-style UX expectations
