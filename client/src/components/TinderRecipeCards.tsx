@@ -52,17 +52,16 @@ export default function TinderRecipeCards({
 
   const currentRecipe = availableRecipes[currentIndex];
 
-  const handleSwipe = (direction: number) => {
-    setDirection(direction);
-    if (direction > 0 && currentIndex < availableRecipes.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-    } else if (direction < 0 && currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
+  const handleConfirmRecipe = () => {
+    if (currentRecipe) {
+      setDirection(1);
+      onSelectRecipe(currentRecipe);
     }
   };
 
-  const handleReject = () => {
-    // Remove current recipe from available recipes
+  const handleRejectRecipe = () => {
+    setDirection(-1);
+    // Remove current recipe from stack
     const newAvailableRecipes = availableRecipes.filter((_, index) => index !== currentIndex);
     setAvailableRecipes(newAvailableRecipes);
     
@@ -70,18 +69,27 @@ export default function TinderRecipeCards({
     if (currentIndex >= newAvailableRecipes.length && newAvailableRecipes.length > 0) {
       setCurrentIndex(newAvailableRecipes.length - 1);
     } else if (newAvailableRecipes.length === 0) {
-      // No more recipes left - could show a message or generate more
       setCurrentIndex(0);
+    }
+  };
+
+  const navigateRecipe = (direction: 'prev' | 'next') => {
+    if (direction === 'prev' && currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    } else if (direction === 'next' && currentIndex < availableRecipes.length - 1) {
+      setCurrentIndex(currentIndex + 1);
     }
   };
 
   const handleDragEnd = (event: any, info: PanInfo) => {
     const swipeThreshold = 100;
+    
     if (info.offset.x > swipeThreshold) {
-      handleSwipe(-1); // Previous
+      // Swipe right = confirm recipe (triggers Prompt 2)
+      handleConfirmRecipe();
     } else if (info.offset.x < -swipeThreshold) {
-      // Swipe left to reject
-      handleReject();
+      // Swipe left = reject recipe (remove from stack)
+      handleRejectRecipe();
     }
   };
 
@@ -111,7 +119,32 @@ export default function TinderRecipeCards({
     return badges.slice(0, 4); // Limit to 4 badges for clean layout
   };
 
-  if (!currentRecipe) return null;
+  // Show fallback UI when no recipes remain
+  if (!currentRecipe || availableRecipes.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white p-6 flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center">
+          <div className="mb-8">
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center">
+              <Heart className="w-12 h-12 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-4">
+              No more matches!
+            </h2>
+            <p className="text-slate-300 text-lg mb-6">
+              You've seen all the recipe suggestions. Want to try different preferences?
+            </p>
+          </div>
+          <Button
+            onClick={() => window.location.reload()}
+            className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-8 py-3 rounded-xl font-semibold"
+          >
+            Try New Search
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white p-6">
@@ -210,53 +243,65 @@ export default function TinderRecipeCards({
           </AnimatePresence>
         </div>
 
-        {/* Navigation Controls */}
-        <div className="flex justify-between items-center">
+        {/* Tinder-Style Controls */}
+        <div className="flex justify-center items-center space-x-6">
+          {/* Navigate Previous */}
           <Button
             variant="outline"
             size="lg"
-            onClick={() => handleSwipe(-1)}
+            onClick={() => navigateRecipe('prev')}
             disabled={currentIndex === 0}
-            className="w-16 h-16 rounded-full border-slate-600 text-slate-300 hover:text-white hover:border-orange-400 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="w-14 h-14 rounded-full border-slate-600 text-slate-300 hover:text-white hover:border-orange-400 disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-5 h-5" />
           </Button>
 
-          <div className="flex space-x-4">
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => handleSwipe(1)}
-              className="w-16 h-16 rounded-full border-red-500/50 text-red-400 hover:text-red-300 hover:border-red-400 hover:bg-red-500/10"
-            >
-              <X className="w-6 h-6" />
-            </Button>
-            
-            <Button
-              size="lg"
-              onClick={() => onSelectRecipe(currentRecipe)}
-              className={`w-16 h-16 rounded-full bg-gradient-to-r ${themeColors[theme]} hover:scale-110 shadow-lg hover:shadow-orange-500/25 text-white transition-all duration-300`}
-            >
-              <Heart className="w-6 h-6" />
-            </Button>
-          </div>
-
+          {/* Reject Recipe (Swipe Left Action) */}
           <Button
             variant="outline"
             size="lg"
-            onClick={() => handleSwipe(1)}
-            disabled={currentIndex === recipes.length - 1}
-            className="w-16 h-16 rounded-full border-slate-600 text-slate-300 hover:text-white hover:border-orange-400 disabled:opacity-30 disabled:cursor-not-allowed"
+            onClick={handleRejectRecipe}
+            className="w-16 h-16 rounded-full border-red-500/50 text-red-400 hover:text-red-300 hover:border-red-400 hover:bg-red-500/10 transition-all duration-300"
           >
-            <ChevronRight className="w-6 h-6" />
+            <X className="w-6 h-6" />
+          </Button>
+          
+          {/* Confirm Recipe (Swipe Right Action) */}
+          <Button
+            size="lg"
+            onClick={handleConfirmRecipe}
+            className={`w-20 h-20 rounded-full bg-gradient-to-r ${themeColors[theme]} hover:scale-110 shadow-lg hover:shadow-orange-500/25 text-white transition-all duration-300`}
+          >
+            <Heart className="w-8 h-8" />
+          </Button>
+
+          {/* Navigate Next */}
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => navigateRecipe('next')}
+            disabled={currentIndex === availableRecipes.length - 1}
+            className="w-14 h-14 rounded-full border-slate-600 text-slate-300 hover:text-white hover:border-orange-400 disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <ChevronRight className="w-5 h-5" />
           </Button>
         </div>
 
-        {/* Swipe Hint */}
+        {/* Improved Swipe Hint */}
         <div className="text-center mt-6">
-          <p className="text-slate-400 text-sm">
-            Swipe left/right or use buttons to browse recipes
+          <p className="text-slate-400 text-sm mb-2">
+            👈 Swipe left to reject • Swipe right to cook 👉
           </p>
+          <div className="flex justify-center items-center space-x-4 text-xs text-slate-500">
+            <span className="flex items-center space-x-1">
+              <X className="w-3 h-3 text-red-400" />
+              <span>Pass</span>
+            </span>
+            <span className="flex items-center space-x-1">
+              <Heart className="w-3 h-3 text-orange-400" />
+              <span>Cook This!</span>
+            </span>
+          </div>
         </div>
       </div>
     </div>
