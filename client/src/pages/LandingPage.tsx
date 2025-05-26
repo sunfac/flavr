@@ -31,12 +31,13 @@ export default function LandingPage() {
   // Handle scroll to show/hide scroll-to-top button
   useEffect(() => {
     const handleScroll = () => {
-      const scrolled = window.pageYOffset || document.documentElement.scrollTop;
+      const scrolled = window.scrollY;
+      console.log('Scroll position:', scrolled, 'Show button:', scrolled > 300);
       setShowScrollTop(scrolled > 300);
     };
     
-    // Initial check
-    handleScroll();
+    // Initial check - start with false
+    setShowScrollTop(false);
     
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -767,16 +768,14 @@ export default function LandingPage() {
       </footer>
 
       {/* Enhanced Scroll to Top Button */}
-      <motion.button
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ 
-          opacity: showScrollTop ? 1 : 0, 
-          scale: showScrollTop ? 1 : 0 
-        }}
-        onClick={scrollToTop}
-        className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-50 relative group"
-        style={{ pointerEvents: showScrollTop ? 'auto' : 'none' }}
-      >
+      {showScrollTop && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0 }}
+          onClick={scrollToTop}
+          className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-50 relative group"
+        >
           {/* Enhanced glow effects */}
           <div className="absolute -inset-2 bg-gradient-to-r from-orange-500/50 via-amber-500/40 to-orange-500/50 rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity duration-300 animate-pulse"></div>
           <div className="absolute -inset-1 bg-gradient-to-r from-orange-400/70 to-amber-400/70 rounded-full blur-lg opacity-80 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -784,7 +783,8 @@ export default function LandingPage() {
           <div className="relative bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white p-3 rounded-full shadow-2xl hover:shadow-orange-500/50 transition-all duration-300 hover:scale-110 backdrop-blur-sm border border-orange-300/20 cursor-pointer active:scale-95">
             <ChevronUp className="w-5 h-5 group-hover:animate-bounce" />
           </div>
-      </motion.button>
+        </motion.button>
+      )}
 
       {/* Auth Modal */}
       <AuthModal
