@@ -109,13 +109,9 @@ export default function GlobalNavigation({ onClose }: GlobalNavigationProps) {
                       onClick={onClose}
                     >
                       <Icon className="w-5 h-5 flex-shrink-0" />
-                      <span className="font-medium text-sm sm:text-base hidden xs:block">
+                      <span className="font-medium text-sm sm:text-base">
                         {item.label}
                       </span>
-                      {/* Mobile tooltip - shows on screens < 480px */}
-                      <div className="xs:hidden absolute left-16 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                        {item.label}
-                      </div>
                     </motion.div>
                   </Link>
                 );
