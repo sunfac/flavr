@@ -144,15 +144,49 @@ export default function FridgeMode() {
     }
   };
 
-  const handleRecipeSelect = (recipe: any) => {
+  const handleRecipeSelect = async (recipe: any) => {
     // Use the same developer mode bypass logic as in quota check
     const currentUser = user?.user;
     if (currentUser && !canGenerateRecipe(currentUser)) {
       setShowGate(true);
       return;
     }
-    setSelectedRecipe(recipe);
-    setCurrentStep("recipe");
+    
+    setIsLoading(true);
+    
+    try {
+      // Generate the full recipe with ingredients and instructions
+      const apiData = {
+        selectedRecipe: recipe,
+        mode: "fridge",
+        quizData: quizData,
+        prompt: `Generate a complete recipe for "${recipe.title}" with detailed ingredients and step-by-step instructions`
+      };
+
+      const response = await fetch("/api/generate-full-recipe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(apiData)
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        setSelectedRecipe(result.recipe);
+        setCurrentStep("recipe");
+      } else {
+        console.error("Failed to generate full recipe");
+        setSelectedRecipe(recipe); // Fallback to basic recipe
+        setCurrentStep("recipe");
+      }
+    } catch (error) {
+      console.error("Error generating full recipe:", error);
+      setSelectedRecipe(recipe); // Fallback to basic recipe
+      setCurrentStep("recipe");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleAllRecipesRejected = async () => {
