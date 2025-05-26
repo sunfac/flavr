@@ -180,7 +180,7 @@ export default function FridgeMode() {
       
       if (response.ok) {
         const result = await response.json();
-        setSelectedRecipe(result.recipe);
+        setSelectedRecipe(result);
         setCurrentStep("recipe");
       } else {
         console.error("Failed to generate full recipe");
