@@ -111,6 +111,23 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
                 const Icon = item.icon;
                 const isActive = location === item.href;
                 
+                if (item.requiresAuth && !user?.user) {
+                  return (
+                    <motion.div
+                      key={item.href}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      className="flex items-center space-x-4 p-4 rounded-xl transition-all duration-200 min-h-[44px] group hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 cursor-pointer"
+                      onClick={() => handleNavigation(item.href, item.requiresAuth)}
+                    >
+                      <Icon className="w-5 h-5 flex-shrink-0" />
+                      <span className="font-medium text-sm sm:text-base">
+                        {item.label}
+                      </span>
+                    </motion.div>
+                  );
+                }
+                
                 return (
                   <Link key={item.href} href={item.href}>
                     <motion.div
