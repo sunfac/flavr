@@ -12,7 +12,7 @@ interface QuizData {
   cuisine: string;
   cookingTime: string;
   budget: string;
-  diet?: string;
+  dietary?: string[];
   equipment?: string;
   ambition?: string;
 }
@@ -30,7 +30,7 @@ export default function InputQuizShopping({ onComplete, onRecipeIdeas, onLoading
     cuisine: "",
     cookingTime: "",
     budget: "",
-    diet: "",
+    dietary: [],
     equipment: "",
     ambition: "",
   });

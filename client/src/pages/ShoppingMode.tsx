@@ -95,7 +95,7 @@ export default function ShoppingMode() {
       cuisine: data.cuisine,
       time: data.cookingTime,
       budget: data.budget,
-      dietary: data.diet ? [data.diet] : [],
+      dietary: data.dietary || [],
       equipment: data.equipment ? [data.equipment] : [],
       ambition: data.ambition,
       servings: data.servings || 4,
