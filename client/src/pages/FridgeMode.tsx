@@ -107,10 +107,14 @@ export default function FridgeMode() {
       console.log("Final API data prepared:", apiData);
 
       // Generate recipe ideas using the same pattern as Shopping mode
+      // Use the proper Prompt 1 system for Tinder cards
+      const { generateFridgePrompt1 } = await import("@/prompts/fridgePrompt1");
+      const properPrompt = generateFridgePrompt1(apiData);
+      
       console.log("Making API call to /api/generate-recipe-ideas with data:", {
         mode: "fridge",
         quizData: apiData,
-        prompt: "Generate 5 diverse recipe ideas for fridge mode"
+        prompt: properPrompt
       });
       
       const fetchResponse = await fetch("/api/generate-recipe-ideas", {
@@ -121,7 +125,7 @@ export default function FridgeMode() {
         body: JSON.stringify({
           mode: "fridge",
           quizData: apiData,
-          prompt: "Generate 5 diverse recipe ideas for fridge mode"
+          prompt: properPrompt
         })
       });
       
@@ -210,6 +214,10 @@ export default function FridgeMode() {
           ambition: quizData.ambition || 3
         };
 
+        // Use the proper Prompt 1 system for second batch too
+        const { generateFridgePrompt1 } = await import("@/prompts/fridgePrompt1");
+        const secondBatchPrompt = generateFridgePrompt1(apiData);
+        
         const fetchResponse = await fetch("/api/generate-recipe-ideas", {
           method: "POST",
           headers: {
@@ -218,7 +226,7 @@ export default function FridgeMode() {
           body: JSON.stringify({
             mode: "fridge",
             quizData: apiData,
-            prompt: "Generate 5 NEW diverse recipe ideas for fridge mode - try different cooking techniques and flavor combinations"
+            prompt: secondBatchPrompt
           })
         });
         
