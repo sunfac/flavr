@@ -54,6 +54,8 @@ export default function FridgeMode() {
   const isAuthenticated = user?.user;
 
   const handleQuizComplete = async (data: any) => {
+    console.log("Quiz completed with data:", data);
+    
     // Handle random cuisine selection if multiple are chosen
     let selectedCuisines = data.cuisines || [];
     if (Array.isArray(selectedCuisines) && selectedCuisines.length > 1) {
@@ -72,6 +74,7 @@ export default function FridgeMode() {
       ambition: data.ambition || 3
     };
 
+    console.log("Transformed data:", transformedData);
     setQuizData(transformedData);
 
     // Check global quota before proceeding with GPT
