@@ -96,7 +96,7 @@ export default function FridgeMode() {
       };
 
       // Generate recipe ideas using the global quota system
-      const response = await apiRequest("POST", "/api/recipe-ideas", {
+      const response = await apiRequest("POST", "/api/generate-recipe-ideas", {
         mode: "fridge",
         quizData: apiData
       });
