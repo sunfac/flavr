@@ -6,6 +6,41 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 import { insertRecipeSchema, insertChatMessageSchema } from "@shared/schema";
 
+// Budget mapping functions for GPT prompts
+const budgetMappings = {
+  "budget": {
+    label: "Budget Friendly",
+    costRange: "£1–£2 per portion",
+    guidance: "using basic, widely available supermarket ingredients only. Avoid excess packaging and ingredient waste."
+  },
+  "moderate": {
+    label: "Moderate", 
+    costRange: "£2–£4 per portion",
+    guidance: "Balanced cost-conscious meals with quality ingredients and some flexibility in preparation time or brand."
+  },
+  "premium": {
+    label: "Premium Ingredients",
+    costRange: "£4–£7 per portion", 
+    guidance: "Use higher quality ingredients like fresh herbs, good cuts of meat, artisanal products, but keep portions reasonable."
+  },
+  "luxury": {
+    label: "Sky's the Limit",
+    costRange: "£7+ per portion",
+    guidance: "Prioritise flavour and ingredient quality without concern for price. Use premium cuts, luxury items, or rare produce."
+  }
+} as const;
+
+function getBudgetPromptText(budgetLevel: string): string {
+  const mapping = budgetMappings[budgetLevel as keyof typeof budgetMappings];
+  if (!mapping) {
+    return "Budget: Moderate. Please ensure the cost per portion reflects this: £2–£4 per portion. Balanced cost-conscious meals with quality ingredients and some flexibility in preparation time or brand. Currency: GBP (British Pounds). Assume supermarket prices.";
+  }
+
+  return `Budget: ${mapping.label}
+Please ensure the cost per portion reflects this: ${mapping.costRange} ${mapping.guidance}
+Currency: GBP (British Pounds). Assume supermarket prices.`;
+}
+
 // Initialize OpenAI
 if (!process.env.OPENAI_API_KEY) {
   throw new Error('Missing required OpenAI API key: OPENAI_API_KEY');
@@ -101,11 +136,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { mode, quizData, prompt } = req.body;
 
+      // Include budget guidance in the recipe ideas prompt
+      const budgetGuidance = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
+      
       // Build enhanced prompt for 6 recipe suggestions
       const enhancedPrompt = `Generate exactly 6 diverse recipe suggestions based on these preferences:
 
 Mode: ${mode}
 Quiz Data: ${JSON.stringify(quizData)}
+
+${budgetGuidance}
 
 Return a JSON object with this exact structure:
 {
@@ -117,7 +157,7 @@ Return a JSON object with this exact structure:
   ]
 }
 
-Make each recipe unique and appealing. Focus on variety in cooking styles, flavors, and techniques.`;
+Make each recipe unique and appealing. Focus on variety in cooking styles, flavors, and techniques. Ensure all suggestions align with the specified budget constraints.`;
 
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const response = await openai.chat.completions.create({
@@ -148,12 +188,17 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
 
       const { selectedRecipe, mode, quizData, prompt } = req.body;
 
+      // Include budget guidance in the prompt
+      const budgetGuidance = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
+      
       // Build enhanced prompt for complete recipe generation
       const enhancedPrompt = `Generate a complete, detailed recipe for "${selectedRecipe.title}" based on these preferences:
 
 Mode: ${mode}
 Quiz Data: ${JSON.stringify(quizData)}
 Recipe Description: ${selectedRecipe.description}
+
+${budgetGuidance}
 
 Return a JSON object with this exact structure:
 {
@@ -168,7 +213,7 @@ Return a JSON object with this exact structure:
   "tips": "helpful cooking tips"
 }
 
-Make the ingredients specific with quantities and the instructions detailed and clear.`;
+Make the ingredients specific with quantities and the instructions detailed and clear. Ensure all ingredient selections and quantities align with the specified budget constraints.`;
 
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const response = await openai.chat.completions.create({

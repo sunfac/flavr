@@ -58,6 +58,19 @@ export const chefQuestions: QuestionConfig[] = [
     }
   },
   {
+    id: "budget",
+    label: "What's your budget?",
+    subtitle: "How much are you looking to spend?",
+    type: "cards",
+    required: true,
+    options: [
+      { value: "budget", label: "Budget Friendly", icon: "PoundSterling", desc: "£1–£2 per portion" },
+      { value: "moderate", label: "Moderate", icon: "CreditCard", desc: "£2–£4 per portion" },
+      { value: "premium", label: "Premium Ingredients", icon: "Crown", desc: "£4–£7 per portion" },
+      { value: "luxury", label: "Sky's the Limit", icon: "Star", desc: "£7+ per portion" }
+    ]
+  },
+  {
     id: "ambition",
     label: "Your ambition level",
     subtitle: "How challenging should this be?",
