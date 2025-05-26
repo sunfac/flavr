@@ -58,7 +58,7 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <GlobalHeader />
       
       <main className="container mx-auto px-4 py-6 pb-20">
         <h1 className="text-2xl font-playfair font-bold text-foreground mb-6">Settings</h1>
@@ -184,7 +184,7 @@ export default function SettingsPage() {
         </div>
       </main>
 
-      <Footer />
+      <GlobalFooter />
     </div>
   );
 }
