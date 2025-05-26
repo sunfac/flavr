@@ -863,6 +863,7 @@ ${timeText}
 ${equipmentText}
 
 Ingredients available: ${Array.isArray(quizData.ingredients) ? quizData.ingredients.join(', ') : (quizData.ingredients || 'Various ingredients')}
+${getStrictDietaryInstruction(quizData.dietary)}
 
 ${creativeGuidance}
 
@@ -915,6 +916,7 @@ ${moodText}
 ${ambitionText}
 
 ${dietaryText}
+${getStrictDietaryInstruction(quizData.dietary)}
 
 ${budgetText}
 
