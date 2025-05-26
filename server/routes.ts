@@ -551,6 +551,10 @@ Based on the following preferences, suggest 5 unique, flavour-packed recipe idea
 
 Ingredients they want to use: ${quizData.ingredients || 'Any ingredients'}
 
+Servings needed: ${quizData.servings || 4} people
+
+Cuisine preference: ${quizData.cuisine || 'Any cuisine'}
+
 ${moodText}
 
 ${ambitionText}
@@ -558,8 +562,6 @@ ${ambitionText}
 ${dietaryText}
 
 ${budgetText}
-
-Cuisine preference: ${quizData.cuisine || 'Any cuisine'}
 
 ${timeText}
 
@@ -725,6 +727,10 @@ Based on the user's preferences and selected idea, generate the full recipe for:
 
 **${selectedRecipe.title}**
 
+Servings needed: ${quizData.servings || 4} people
+
+Cuisine preference: ${quizData.cuisine || 'Any cuisine'}
+
 ${moodText}
 
 ${ambitionText}
@@ -733,15 +739,11 @@ ${dietaryText}
 
 ${budgetText}
 
-Cuisine preference: ${quizData.cuisine || 'Any cuisine'}
-
 ${timeText}
 
 ${equipmentText}
 
 Ingredients: ${quizData.ingredients || 'Use suitable ingredients'}
-
-Servings: ${quizData.servings || '4 servings'}
 
 ${creativeGuidance}
 
