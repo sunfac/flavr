@@ -663,6 +663,10 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
       }
 
       console.log("Making OpenAI API call with prompt length:", enhancedPrompt.length);
+      console.log("EXACT RECIPE IDEAS PROMPT:");
+      console.log("=".repeat(50));
+      console.log(enhancedPrompt);
+      console.log("=".repeat(50));
       
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const response = await openai.chat.completions.create({
@@ -904,6 +908,10 @@ Make the ingredients specific with quantities and the instructions detailed and 
       // Simplified test for OpenAI API call
       console.log("Making OpenAI API call for full recipe generation");
       console.log("Prompt length:", enhancedPrompt.length);
+      console.log("EXACT FULL RECIPE PROMPT:");
+      console.log("=".repeat(50));
+      console.log(enhancedPrompt);
+      console.log("=".repeat(50));
       
       // Test with a simpler prompt first
       const testPrompt = `Generate a complete Korean recipe for "${selectedRecipe.title}". Return only JSON with this structure:
