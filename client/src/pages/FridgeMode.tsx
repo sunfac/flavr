@@ -144,7 +144,9 @@ export default function FridgeMode() {
   };
 
   const handleRecipeSelect = (recipe: any) => {
-    if (!canGenerateRecipe(user.user)) {
+    // Use the same developer mode bypass logic as in quota check
+    const currentUser = user?.user;
+    if (currentUser && !canGenerateRecipe(currentUser)) {
       setShowGate(true);
       return;
     }

@@ -61,6 +61,12 @@ export function getCurrentUsage(): number {
 }
 
 export function canGenerateRecipe(user: any): boolean {
+  // Developer mode bypass - unlimited recipes in development
+  const isDevelopment = import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
+  if (isDevelopment) {
+    return true;
+  }
+  
   // If user is authenticated and has a subscription, allow unlimited recipes
   if (user && user.subscriptionTier === 'plus') {
     return true;
