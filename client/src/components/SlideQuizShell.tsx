@@ -236,8 +236,8 @@ export default function SlideQuizShell({
 
       case 'cards':
         return (
-          <div className="w-full max-w-sm mx-auto">
-            <div className="grid grid-cols-2 gap-2.5">
+          <div className="w-full">
+            <div className="grid grid-cols-2 gap-3 max-h-[45vh] overflow-y-auto pr-2">
               {currentQ.options?.map((option) => (
                 <motion.div
                   key={option.value}
@@ -252,13 +252,13 @@ export default function SlideQuizShell({
                     }`}
                     onClick={() => updateAnswer(currentQ.id, option.value)}
                   >
-                    <CardContent className="p-2.5 text-center flex flex-col justify-center">
-                      <div className="mb-1.5 flex justify-center text-orange-400">
+                    <CardContent className="p-3 text-center flex flex-col justify-center">
+                      <div className="mb-2 flex justify-center text-orange-400">
                         {option.icon ? renderIcon(option.icon) : <div className="w-4 h-4" />}
                       </div>
                       <div className="text-white font-medium text-sm leading-tight">{option.label}</div>
                       {option.desc && (
-                        <div className="text-slate-400 text-xs mt-0.5 leading-tight">{option.desc}</div>
+                        <div className="text-slate-400 text-xs mt-1 leading-tight">{option.desc}</div>
                       )}
                     </CardContent>
                   </Card>
