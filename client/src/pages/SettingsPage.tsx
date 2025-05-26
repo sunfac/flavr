@@ -60,7 +60,7 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-background">
       <GlobalHeader />
       
-      <main className="container mx-auto px-4 py-6 pb-20">
+      <main className="container mx-auto px-4 pt-20 py-6 pb-20">
         <h1 className="text-2xl font-playfair font-bold text-foreground mb-6">Settings</h1>
         
         <div className="space-y-6">
