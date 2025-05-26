@@ -148,7 +148,7 @@ export default function ChefAssistMode() {
         </div>
       )}
 
-      <main className="flex-1 p-4 pb-20">
+      <main className="flex-1 pt-20 pb-24 p-4">
 
         {currentStep === "quiz" && (
           <SlideQuizShell

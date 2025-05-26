@@ -29,6 +29,19 @@ export default function FridgeMode() {
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
+  // Smart menu management - only one menu open at a time
+  const openMenu = (menuType: 'navigation' | 'settings' | 'user') => {
+    setShowNavigation(menuType === 'navigation');
+    setShowSettings(menuType === 'settings');
+    setShowUserMenu(menuType === 'user');
+  };
+
+  const closeAllMenus = () => {
+    setShowNavigation(false);
+    setShowSettings(false);
+    setShowUserMenu(false);
+  };
+
   // Check if user is logged in
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["/api/me"],
@@ -146,9 +159,9 @@ export default function FridgeMode() {
     <div className="min-h-screen">
       {/* Consistent header across all modes */}
       <GlobalHeader 
-        onMenuClick={() => setShowNavigation(true)}
-        onSettingsClick={() => setShowSettings(true)}
-        onUserClick={() => setShowUserMenu(true)}
+        onMenuClick={() => openMenu('navigation')}
+        onSettingsClick={() => openMenu('settings')}
+        onAuthRequired={() => navigate("/")}
       />
       
       {/* Recipe Remaining Banner - positioned below header with proper spacing */}
@@ -163,7 +176,7 @@ export default function FridgeMode() {
         </div>
       )}
       
-      <main>
+      <main className="pt-20 pb-24">
         {currentStep === "quiz" && (
           <SlideQuizShell
             title="Fridge to Fork Quiz"
@@ -232,15 +245,15 @@ export default function FridgeMode() {
 
       {/* Navigation overlays */}
       {showNavigation && (
-        <GlobalNavigation onClose={() => setShowNavigation(false)} />
+        <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />
       )}
       
       {showSettings && (
-        <SettingsPanel onClose={() => setShowSettings(false)} />
+        <SettingsPanel onClose={closeAllMenus} />
       )}
       
       {showUserMenu && (
-        <UserMenu onClose={() => setShowUserMenu(false)} />
+        <UserMenu onClose={closeAllMenus} />
       )}
 
       <AuthModal
