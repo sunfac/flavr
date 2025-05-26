@@ -128,7 +128,10 @@ export default function LandingPage() {
 
       <GlobalHeader 
         onMenuClick={() => setShowNavigation(true)}
-        onSettingsClick={() => setShowSettings(true)}
+        onSettingsClick={() => {
+          console.log("Settings clicked");
+          alert("Please sign in to access settings");
+        }}
         onUserClick={() => {
           setAuthMode("signup");
           setShowAuthModal(true);

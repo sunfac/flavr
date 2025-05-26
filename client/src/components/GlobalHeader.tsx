@@ -6,6 +6,7 @@ interface GlobalHeaderProps {
   onMenuClick?: () => void;
   onSettingsClick?: () => void;
   onUserClick?: () => void;
+  onAuthRequired?: () => void;
 }
 
 export default function GlobalHeader({ 
