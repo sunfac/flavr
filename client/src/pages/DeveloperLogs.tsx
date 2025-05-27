@@ -21,6 +21,10 @@ interface DeveloperLog {
   estimatedCost: string;
   matchStatus: boolean;
   discrepancies: string[] | null;
+  imagePrompt?: string;
+  imageGenerated?: boolean;
+  imageUrl?: string;
+  imageCost?: string;
   createdAt: string;
 }
 
@@ -158,6 +162,7 @@ export default function DeveloperLogs() {
                     <TableHead>User</TableHead>
                     <TableHead>Tokens</TableHead>
                     <TableHead>Cost</TableHead>
+                    <TableHead>Image</TableHead>
                     <TableHead>Match</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
@@ -192,6 +197,16 @@ export default function DeveloperLogs() {
                         <TableCell className="text-sm font-mono">
                           {log.estimatedCost}
                         </TableCell>
+                        <TableCell className="text-sm">
+                          {log.imageGenerated ? (
+                            <div className="flex items-center space-x-1">
+                              <CheckCircle className="h-3 w-3 text-green-500" />
+                              <span className="text-xs text-green-600 font-mono">{log.imageCost}</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-gray-400">None</span>
+                          )}
+                        </TableCell>
                         <TableCell>
                           <Badge variant={log.matchStatus ? 'default' : 'destructive'}>
                             {log.matchStatus ? '✅' : '❌'}
@@ -208,7 +223,7 @@ export default function DeveloperLogs() {
                       
                       {expandedRows.has(log.id) && (
                         <TableRow>
-                          <TableCell colSpan={8} className="bg-gray-50">
+                          <TableCell colSpan={9} className="bg-gray-50">
                             <div className="p-4 space-y-4">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
@@ -244,6 +259,34 @@ export default function DeveloperLogs() {
                                       <li key={idx} className="text-red-600">• {disc}</li>
                                     ))}
                                   </ul>
+                                </div>
+                              )}
+
+                              {log.imageGenerated && (
+                                <div>
+                                  <h4 className="font-semibold text-sm mb-2 text-purple-700">Stable Diffusion Image Generation</h4>
+                                  <div className="space-y-3">
+                                    <div>
+                                      <span className="text-xs font-medium text-purple-600 block mb-1">Image Prompt:</span>
+                                      <pre className="text-xs bg-purple-50 p-3 rounded border overflow-auto max-h-20 text-gray-900 font-mono border-purple-200">
+                                        {log.imagePrompt}
+                                      </pre>
+                                    </div>
+                                    {log.imageUrl && (
+                                      <div>
+                                        <span className="text-xs font-medium text-purple-600 block mb-1">Generated Image:</span>
+                                        <img 
+                                          src={log.imageUrl} 
+                                          alt="Generated recipe" 
+                                          className="w-32 h-32 object-cover rounded border border-purple-200"
+                                        />
+                                      </div>
+                                    )}
+                                    <div className="flex items-center space-x-4 text-xs">
+                                      <span className="text-purple-600">Cost: <span className="font-mono font-medium">{log.imageCost}</span></span>
+                                      <span className="text-green-600">✅ Successfully Generated</span>
+                                    </div>
+                                  </div>
                                 </div>
                               )}
                               
