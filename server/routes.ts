@@ -321,6 +321,10 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
     try {
       const { mode, quizData, prompt } = req.body;
       console.log("Recipe ideas API called with:", { mode, body: req.body });
+      console.log("=============QUIZ DEBUG START=============");
+      console.log("TIME INPUT:", quizData.time, typeof quizData.time);
+      console.log("EQUIPMENT INPUT:", quizData.equipment, typeof quizData.equipment);
+      console.log("=============QUIZ DEBUG END===============");
       
       // === QUIZ INPUT DEBUGGING ===
       console.log("🔍 QUIZ INPUT DEBUG - Time:", quizData.time, "Type:", typeof quizData.time);
