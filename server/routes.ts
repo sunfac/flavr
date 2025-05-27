@@ -1412,8 +1412,13 @@ Keep it SHORT and encouraging. The recipe card will show the changes!`;
                 }
               }
               
-              // Remove JSON from response text
-              botResponse = fullResponse.replace(/\{[\s\S]*\}/, '').trim();
+              // Extract only the casual message before the JSON
+              const jsonStart = fullResponse.indexOf('{');
+              if (jsonStart > 0) {
+                botResponse = fullResponse.substring(0, jsonStart).trim();
+              } else {
+                botResponse = "Great! I've updated your recipe with those changes.";
+              }
             } else {
               botResponse = fullResponse;
             }

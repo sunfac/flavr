@@ -41,6 +41,16 @@ export default function RecipeCard({
   const [chatbotMessage, setChatbotMessage] = useState("");
   const { toast } = useToast();
 
+  // Handle recipe updates from chatbot
+  const handleRecipeUpdate = (updatedRecipe: any) => {
+    console.log('🔄 Recipe card received update:', updatedRecipe);
+    setFullRecipe(updatedRecipe);
+    toast({
+      title: "Recipe updated!",
+      description: "Your recipe has been modified based on your request.",
+    });
+  };
+
   const generateFullRecipeMutation = useMutation({
     mutationFn: (data: { selectedRecipe: any; mode: string; quizData: any; prompt: string }) =>
       apiRequest("POST", "/api/generate-full-recipe", data),
@@ -423,6 +433,7 @@ export default function RecipeCard({
               <ChatBot 
                 currentRecipe={fullRecipe}
                 currentMode={mode}
+                onRecipeUpdate={handleRecipeUpdate}
               />
             </div>
           </div>
