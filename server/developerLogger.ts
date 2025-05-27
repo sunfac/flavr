@@ -5,6 +5,9 @@ import type { InsertDeveloperLog } from "@shared/schema";
 const GPT4O_INPUT_COST_PER_1K = 0.005;  // $0.005 per 1K input tokens
 const GPT4O_OUTPUT_COST_PER_1K = 0.015; // $0.015 per 1K output tokens
 
+// Stable Diffusion pricing (typical API costs)
+const STABLE_DIFFUSION_COST_PER_IMAGE = 0.02; // $0.02 per image generation
+
 // Simple token estimation (rough approximation)
 function estimateTokens(text: string): number {
   // Rough estimation: 1 token ≈ 4 characters for English text
@@ -17,6 +20,12 @@ function calculateCost(inputTokens: number, outputTokens: number): string {
   const outputCost = (outputTokens / 1000) * GPT4O_OUTPUT_COST_PER_1K;
   const totalCost = inputCost + outputCost;
   return `$${totalCost.toFixed(6)}`;
+}
+
+// Calculate image generation cost using Stable Diffusion pricing
+function calculateImageCost(imageCount: number = 1): string {
+  const totalCost = imageCount * STABLE_DIFFUSION_COST_PER_IMAGE;
+  return `$${totalCost.toFixed(4)}`;
 }
 
 // Compare expected vs actual output values

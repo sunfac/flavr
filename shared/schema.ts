@@ -7,7 +7,7 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
-  isPlus: boolean("is_plus").default(false),
+  hasFlavrPlus: boolean("has_flavr_plus").default(false),
   subscriptionTier: text("subscription_tier").default("free"),
   recipesThisMonth: integer("recipes_this_month").default(0),
   imagesThisMonth: integer("images_this_month").default(0),
@@ -17,6 +17,18 @@ export const users = pgTable("users", {
   imagesGenerated: integer("images_generated").default(0),
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
+  lastMonthlyReset: timestamp("last_monthly_reset").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Pseudo-users table for tracking free usage without authentication
+export const pseudoUsers = pgTable("pseudo_users", {
+  id: serial("id").primaryKey(),
+  pseudoId: text("pseudo_id").notNull().unique(), // Client-generated persistent ID
+  recipesThisMonth: integer("recipes_this_month").default(0),
+  monthlyRecipeLimit: integer("monthly_recipe_limit").default(3),
+  lastMonthlyReset: timestamp("last_monthly_reset").defaultNow(),
+  browserFingerprint: text("browser_fingerprint"), // Optional anti-abuse measure
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -89,6 +101,11 @@ export const insertUserSchema = createInsertSchema(users).omit({
   stripeSubscriptionId: true,
 });
 
+export const insertPseudoUserSchema = createInsertSchema(pseudoUsers).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertRecipeSchema = createInsertSchema(recipes).omit({
   id: true,
   createdAt: true,
@@ -106,6 +123,8 @@ export const insertDeveloperLogSchema = createInsertSchema(developerLogs).omit({
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+export type InsertPseudoUser = z.infer<typeof insertPseudoUserSchema>;
+export type PseudoUser = typeof pseudoUsers.$inferSelect;
 export type InsertRecipe = z.infer<typeof insertRecipeSchema>;
 export type Recipe = typeof recipes.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;

@@ -973,7 +973,7 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
         if (imageUrl) {
           imagePrompt = `A stunning food photograph of ${fullRecipe.title}, featuring ${fullRecipe.cuisine} cuisine, professional food styling, natural lighting, appetizing presentation`;
           imageGenerated = true;
-          imageCost = "$0.040"; // Standard DALL-E 3 cost
+          imageCost = "$0.020"; // Standard Stable Diffusion cost
         }
 
         await logGPTInteraction(

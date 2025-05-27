@@ -1,0 +1,58 @@
+/*
+  === REPLIT INSTRUCTION: Flavr+ Gating System (Final Version) ===
+
+  Objective:
+  Implement the official Flavr+ gating logic using a clean, persistent system that supports both guest and authenticated users. Replace any previous gating logic to avoid duplication or conflicts.
+
+  🔐 TRACKING METHOD:
+  - Use a persistent **pseudo-user ID** for freemium users (e.g. via localStorage or fingerprint)
+  - This ID should be created on first visit and stored client-side (fallback to cookies if needed)
+  - Link this ID to backend-tracked monthly recipe generation count
+
+  ⚠️ SECURITY REMINDER:
+  Users may attempt to bypass limits by deleting cookies or localStorage.
+  To reduce abuse:
+    • Optionally fingerprint browser/device (e.g. user-agent hash + timezone + entropy)
+    • Consider backend token throttling or detection logic if abuse becomes an issue
+    • Optionally sync pseudo-user to IP logs (without storing PII)
+
+  === OVERWRITE ALL EXISTING GATING LOGIC ===
+  - Replace any existing recipe count, Flavr+ check, or feature visibility logic
+  - Ensure no legacy conditionals interfere with the new gating system
+
+  === ACCESS RULES ===
+
+  ✅ Free Users (pseudo ID or no login):
+  - Access to full Zest features
+  - 3 recipe generations per calendar month
+  - No access to Flavr Rituals
+
+  ✅ Flavr+ Users (authenticated with hasFlavrPlus flag):
+  - Unlimited generations
+  - Full access to Flavr Rituals and any upcoming premium features
+
+  === UI GATING BEHAVIOUR ===
+
+  1. Show recipe counter badge: “You have 1/3 free recipes left”
+  2. On 3rd recipe, display final alert: “This is your last recipe this month”
+  3. On attempt to generate a 4th:
+     - Block request
+     - Show full-screen Flavr+ upgrade modal
+     - Temporarily disable Zest chat, chips, and recipe buttons with tooltip overlay: “Unlock with Flavr+”
+
+  === FLAVR RITUALS TAB ===
+  - Always visible
+  - For free users:
+    • Blur content
+    • CTA: “Get chef-crafted weekly plans with Flavr+”
+    • Block any interaction
+
+  === BACKEND SETUP ===
+  - Track recipe generations per pseudo-user or authenticated user
+  - Reset monthly count on the 1st of each month (automatically or on login)
+  - Allow admin-level reset for testing/dev users
+
+  === FINAL GOAL ===
+  Give free users full exposure to the magic of Zest + recipe generation,
+  while cleanly gating volume (not features) to drive meaningful upgrades to Flavr+.
+*/
