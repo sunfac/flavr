@@ -1,18 +1,13 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence, PanInfo } from "framer-motion";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Heart, X, Clock, ChefHat, Utensils, Sparkles } from "lucide-react";
+import { Heart, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface RecipeIdea {
   title: string;
   description: string;
-  mood?: string;
-  time?: string;
-  diet?: string;
-  ambition?: string;
-  equipment?: string;
 }
 
 interface TinderRecipeCardsProps {
@@ -40,12 +35,6 @@ export default function TinderRecipeCards({
     chef: 'from-amber-500 to-yellow-500'
   };
 
-  const themeAccents = {
-    shopping: 'orange-400',
-    fridge: 'emerald-400',
-    chef: 'amber-400'
-  };
-
   // Update available recipes when props change
   useEffect(() => {
     setAvailableRecipes(recipes);
@@ -54,193 +43,122 @@ export default function TinderRecipeCards({
 
   const currentRecipe = availableRecipes[currentIndex];
 
+  const navigateRecipe = (direction: 'next' | 'prev') => {
+    if (direction === 'next' && currentIndex < availableRecipes.length - 1) {
+      setDirection(1);
+      setCurrentIndex(currentIndex + 1);
+    } else if (direction === 'prev' && currentIndex > 0) {
+      setDirection(-1);
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
   const handleConfirmRecipe = () => {
     if (currentRecipe) {
-      setDirection(1);
       onSelectRecipe(currentRecipe);
     }
   };
 
   const handleRejectRecipe = () => {
-    setDirection(-1);
-    // Remove current recipe from stack
-    const newAvailableRecipes = availableRecipes.filter((_, index) => index !== currentIndex);
-    setAvailableRecipes(newAvailableRecipes);
+    // Remove current recipe from available options
+    const updatedRecipes = availableRecipes.filter((_, index) => index !== currentIndex);
+    setAvailableRecipes(updatedRecipes);
     
-    // Adjust current index if needed
-    if (currentIndex >= newAvailableRecipes.length && newAvailableRecipes.length > 0) {
-      setCurrentIndex(newAvailableRecipes.length - 1);
-    } else if (newAvailableRecipes.length === 0) {
-      setCurrentIndex(0);
-      // Trigger second batch of recipes
-      if (onAllRecipesExhausted) {
-        onAllRecipesExhausted();
-      }
+    if (updatedRecipes.length === 0) {
+      onAllRecipesExhausted?.();
+      return;
     }
-  };
-
-  const navigateRecipe = (direction: 'prev' | 'next') => {
-    if (direction === 'prev' && currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    } else if (direction === 'next' && currentIndex < availableRecipes.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
-
-  const handleDragEnd = (event: any, info: PanInfo) => {
-    const swipeThreshold = 100;
     
-    if (info.offset.x > swipeThreshold) {
-      // Swipe right = confirm recipe (triggers Prompt 2)
-      handleConfirmRecipe();
-    } else if (info.offset.x < -swipeThreshold) {
-      // Swipe left = reject recipe (remove from stack)
-      handleRejectRecipe();
+    // Adjust current index if we're at the end
+    if (currentIndex >= updatedRecipes.length) {
+      setCurrentIndex(updatedRecipes.length - 1);
     }
   };
 
-  const getBadgeData = (recipe: RecipeIdea) => {
-    const badges = [];
-    
-    if (quizData?.mood) {
-      badges.push({ icon: <Heart className="w-3 h-3" />, label: quizData.mood });
-    }
-    if (quizData?.time || recipe.time) {
-      badges.push({ icon: <Clock className="w-3 h-3" />, label: `${quizData?.time || recipe.time} min` });
-    }
-    if (quizData?.dietary?.length > 0) {
-      badges.push({ icon: <Utensils className="w-3 h-3" />, label: quizData.dietary[0] });
-    }
-    if (quizData?.ambition) {
-      const ambitionLabels = ['Easy', 'Simple', 'Moderate', 'Advanced', 'Expert'];
-      badges.push({ 
-        icon: <ChefHat className="w-3 h-3" />, 
-        label: `Level ${quizData.ambition}` 
-      });
-    }
-    if (quizData?.equipment?.length > 0) {
-      badges.push({ icon: <Sparkles className="w-3 h-3" />, label: quizData.equipment[0] });
-    }
-
-    return badges.slice(0, 4); // Limit to 4 badges for clean layout
-  };
-
-  // Show fallback UI when no recipes remain
-  if (!currentRecipe || availableRecipes.length === 0) {
+  if (!currentRecipe) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white p-6 flex items-center justify-center">
-        <div className="max-w-md mx-auto text-center">
-          <div className="mb-8">
-            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center">
-              <Heart className="w-12 h-12 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold text-white mb-4">
-              No more matches!
-            </h2>
-            <p className="text-slate-300 text-lg mb-6">
-              You've seen all the recipe suggestions. Want to try different preferences?
-            </p>
-          </div>
-          <Button
-            onClick={() => window.location.reload()}
-            className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-8 py-3 rounded-xl font-semibold"
-          >
-            Try New Search
-          </Button>
+      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">No more recipes!</h2>
+          <p className="text-slate-400">All recipes have been reviewed.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white">
-      {/* Safe area padding for mobile */}
-      <div className="px-4 pt-4 pb-28 min-h-screen">
-        <div className="max-w-md mx-auto">
-          {/* Header - More compact */}
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent mb-3">
-              Perfect matches for you
-            </h2>
-            <p className="text-slate-300 text-base mb-2">
-              Swipe to explore • Tap to select
-            </p>
-            <div className="flex justify-center items-center space-x-2 text-sm text-slate-400">
-              <span>{currentIndex + 1}</span>
-              <div className="flex space-x-1">
-                {availableRecipes.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      index === currentIndex ? `bg-orange-400` : 'bg-slate-600'
-                    }`}
-                  />
-                ))}
-              </div>
-              <span>{availableRecipes.length}</span>
+    <div className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white overflow-hidden flex flex-col">
+      {/* Header - Compact */}
+      <div className="flex-shrink-0 px-4 pt-2 pb-2">
+        <div className="max-w-md mx-auto text-center">
+          <h2 className="text-lg font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent mb-1">
+            Perfect matches for you
+          </h2>
+          <p className="text-slate-300 text-xs mb-2">
+            Swipe to explore • Tap to select
+          </p>
+          <div className="flex justify-center items-center space-x-2 text-xs text-slate-400">
+            <span>{currentIndex + 1}</span>
+            <div className="flex space-x-1">
+              {availableRecipes.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                    index === currentIndex ? `bg-orange-400` : 'bg-slate-600'
+                  }`}
+                />
+              ))}
             </div>
+            <span>{availableRecipes.length}</span>
           </div>
+        </div>
+      </div>
 
-          {/* Card Stack - Responsive height */}
-          <div className="relative mb-6" style={{ height: 'calc(100vh - 320px)', minHeight: '400px', maxHeight: '500px' }}>
+      {/* Card Container - Flexible height */}
+      <div className="flex-1 px-4 min-h-0">
+        <div className="max-w-md mx-auto h-full flex flex-col">
+          {/* Recipe Card Area */}
+          <div className="flex-1 relative min-h-0">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.3}
-                onDragEnd={handleDragEnd}
-                initial={{ 
-                  opacity: 0, 
-                  scale: 0.8,
-                  x: direction > 0 ? 300 : -300 
-                }}
-                animate={{ 
-                  opacity: 1, 
-                  scale: 1,
-                  x: 0 
-                }}
-                exit={{ 
-                  opacity: 0, 
-                  scale: 0.8,
-                  x: direction > 0 ? -300 : 300 
-                }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 300, 
-                  damping: 30 
-                }}
+                custom={direction}
+                initial={{ x: direction > 0 ? 300 : -300, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: direction > 0 ? -300 : 300, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 className="absolute inset-0"
               >
-                <Card className="h-full bg-slate-800/80 backdrop-blur-xl border border-slate-600 hover:border-orange-400/50 transition-all duration-300 shadow-2xl hover:shadow-orange-500/25">
-                  <CardContent className="p-6 h-full flex flex-col justify-between">
-                    <div className="flex-1 overflow-y-auto">
-                      <h3 className="text-xl font-bold text-white mb-3 leading-tight">
+                <Card className="h-full w-full bg-slate-800/90 backdrop-blur-lg border-slate-700 rounded-2xl overflow-hidden flex flex-col">
+                  <CardContent className="p-4 flex-1 flex flex-col">
+                    {/* Recipe Title */}
+                    <div className="text-center mb-3">
+                      <h3 className="text-lg font-bold text-white mb-1 leading-tight">
                         {currentRecipe.title}
                       </h3>
-                      <p className="text-slate-300 text-base mb-4 leading-relaxed">
+                      <p className="text-slate-300 text-sm leading-snug">
                         {currentRecipe.description}
                       </p>
-                      
-                      {/* Badges */}
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {getBadgeData(currentRecipe).map((badge, index) => (
-                          <Badge
-                            key={index}
-                            variant="outline"
-                            className="flex items-center space-x-1 px-2 py-1 border-orange-400/30 text-slate-300 bg-orange-500/10 text-xs"
-                          >
-                            {badge.icon}
-                            <span>{badge.label}</span>
-                          </Badge>
-                        ))}
-                      </div>
+                    </div>
+
+                    {/* Recipe Visual */}
+                    <div className="flex-1 bg-gradient-to-br from-orange-500/20 via-amber-500/20 to-yellow-500/20 rounded-xl flex items-center justify-center mb-3">
+                      <motion.div
+                        animate={{ 
+                          rotate: [0, 5, -5, 0],
+                          scale: [1, 1.05, 1]
+                        }}
+                        transition={{ duration: 3, repeat: Infinity }}
+                        className="text-4xl"
+                      >
+                        🍽️
+                      </motion.div>
                     </div>
 
                     {/* Action Button */}
                     <Button
                       onClick={() => onSelectRecipe(currentRecipe)}
-                      className={`w-full h-12 font-semibold rounded-xl transition-all duration-300 bg-gradient-to-r ${themeColors[theme]} hover:scale-105 shadow-lg hover:shadow-orange-500/25 text-white`}
+                      className={`w-full h-10 font-semibold rounded-xl transition-all duration-300 bg-gradient-to-r ${themeColors[theme]} hover:scale-105 shadow-lg hover:shadow-orange-500/25 text-white`}
                     >
                       <Heart className="w-4 h-4 mr-2" />
                       Use This Recipe
@@ -251,9 +169,9 @@ export default function TinderRecipeCards({
             </AnimatePresence>
           </div>
 
-          {/* Tinder-Style Controls - Positioned below recipe cards */}
-          <div className="mt-6 mb-4 pt-4 pb-4">
-            <div className="flex justify-center items-center space-x-4 max-w-md mx-auto px-4">
+          {/* Navigation Controls - Always visible at bottom */}
+          <div className="flex-shrink-0 mt-4 mb-4">
+            <div className="flex justify-center items-center space-x-4">
               {/* Navigate Previous */}
               <Button
                 variant="outline"
@@ -263,7 +181,7 @@ export default function TinderRecipeCards({
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-
+              
               {/* Reject Recipe (Swipe Left Action) */}
               <Button
                 variant="outline"
@@ -290,20 +208,6 @@ export default function TinderRecipeCards({
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
-            </div>
-
-            {/* Swipe Hints - More compact */}
-            <div className="text-center mt-2 px-4">
-              <div className="flex justify-center items-center space-x-6 text-xs text-slate-400">
-                <span className="flex items-center space-x-1">
-                  <X className="w-3 h-3 text-red-400" />
-                  <span>Pass</span>
-                </span>
-                <span className="flex items-center space-x-1">
-                  <Heart className="w-3 h-3 text-orange-400" />
-                  <span>Cook This!</span>
-                </span>
-              </div>
             </div>
           </div>
         </div>
