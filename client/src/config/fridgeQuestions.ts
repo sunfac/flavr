@@ -22,8 +22,8 @@ export const fridgeQuestions: QuestionConfig[] = [
     type: "cards",
     required: true,
     options: [
-      { value: "strict", label: "Use what I have", icon: "ShieldCheck", desc: "Only my ingredients + pantry basics" },
-      { value: "flexible", label: "Add a few extras", icon: "PlusCircle", desc: "Include 2-4 complementary ingredients" }
+      { value: "strict", label: "Use What I Have", icon: "Shield", desc: "Only my ingredients + pantry basics" },
+      { value: "flexible", label: "Add A Few Extras", icon: "Plus", desc: "Include 2-4 complementary ingredients" }
     ]
   },
   {
