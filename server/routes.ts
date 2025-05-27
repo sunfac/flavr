@@ -6,6 +6,7 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 import { insertRecipeSchema, insertChatMessageSchema } from "@shared/schema";
 import { getCreativeGuidanceBlock } from "./shoppingPromptBlocks";
+import { difficultyMap, getCookTime, budgetMap, formatEquipmentText, getDifficulty, getBudgetText } from "./mappingUtils";
 
 // Budget mapping functions for GPT prompts
 const budgetMappings = {
@@ -612,13 +613,13 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
       let enhancedPrompt;
       
       if (mode === 'shopping') {
-        // Get mapped guidance text
+        // Get mapped guidance text using centralized mapping
         const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
         const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
         const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
-        const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
+        const budgetText = quizData.budget ? getBudgetText(quizData.budget) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
-        const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
+        const equipmentText = formatEquipmentText(quizData);
         
         // Build Shopping Mode mapped prompt (Prompt 1)
         const creativeGuidance = getCreativeGuidanceBlock();
@@ -662,12 +663,12 @@ Return a JSON object with this exact structure:
   ]
 }`;
       } else if (mode === 'fridge') {
-        // Get mapped guidance text for Fridge Mode (omit budget and cuisine)
+        // Get mapped guidance text for Fridge Mode (omit budget and cuisine) using centralized mapping
         const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
         const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
         const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
-        const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
+        const equipmentText = formatEquipmentText(quizData);
         
         // Build Fridge Mode mapped prompt (Prompt 1)
         const creativeGuidance = getCreativeGuidanceBlock();
