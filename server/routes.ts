@@ -1159,26 +1159,54 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
     }
   });
 
-  // Enhanced Chat routes with recipe context
+  // Enhanced Chat routes with recipe context and conversation memory
   app.post("/api/chat", async (req, res) => {
     try {
       const { message, currentRecipe, mode } = req.body;
       const userId = req.session?.userId;
 
-      // Build context-aware system prompt
-      let systemPrompt = "You are a friendly, creative private chef who helps users adjust, enhance, and understand their AI-generated recipes. Provide cooking advice, substitutions, and modifications. Keep responses concise and practical.";
+      // Get recent chat history for conversation memory
+      let chatHistory: any[] = [];
+      if (userId) {
+        try {
+          chatHistory = await storage.getChatHistory(userId, 4); // Last 4 messages for context
+        } catch (error) {
+          console.log("No chat history found, starting fresh conversation");
+        }
+      }
+
+      // Build context-aware system prompt with personality
+      let systemPrompt = `You are Zest, Flavr's bold and encouraging AI cooking assistant. You help users modify recipes with confidence and flair.
+
+PERSONALITY: Be casual, enthusiastic, and supportive. Use phrases like "Nice!", "Let's do it!", "That's a great idea!", "Perfect!". Keep responses short and conversational.
+
+RESPONSE RULES:
+1. NEVER include full recipes, ingredients lists, or detailed instructions in your responses
+2. When updating a recipe, just say what you changed casually (e.g., "Swapped in chicken and bumped the spice!")
+3. Keep responses under 50 words when possible
+4. Be encouraging and make cooking feel fun and accessible
+
+CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`;
+
+      // Add conversation history for context
+      if (chatHistory.length > 0) {
+        systemPrompt += "\nRecent conversation:\n";
+        chatHistory.slice(-4).forEach((msg, index) => {
+          systemPrompt += `User: ${msg.message}\nYou: ${msg.response}\n`;
+        });
+      }
       
       if (mode) {
         const modeContext = {
-          shopping: "The user is in shopping mode, planning meals and creating shopping lists.",
-          fridge: "The user is in fridge-to-fork mode, working with ingredients they already have.",
-          chef: "The user is in chef assist mode, looking for expert culinary guidance."
+          shopping: "User is planning meals and shopping lists.",
+          fridge: "User is working with ingredients they have on hand.",
+          chef: "User wants expert culinary guidance."
         };
-        systemPrompt += ` ${modeContext[mode as keyof typeof modeContext] || ''}`;
+        systemPrompt += ` Mode: ${modeContext[mode as keyof typeof modeContext] || ''}`;
       }
 
       if (currentRecipe) {
-        systemPrompt += ` The user is currently working with this recipe: "${currentRecipe.title}". Ingredients: ${currentRecipe.ingredients?.join(', ')}. Instructions: ${currentRecipe.instructions?.join(' ')}`;
+        systemPrompt += ` Current recipe: "${currentRecipe.title}"`;
       }
 
       console.log(`EXACT CHATBOT (ZEST) CONVERSATION PROMPT:`);
@@ -1260,53 +1288,46 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
       let botResponse = "";
 
       if (shouldUpdateRecipe) {
-        // Recipe modification prompt with intelligent detection
-        const modificationPrompt = `You are Zest, a bold and clever private chef assistant. The user wants to modify this recipe: "${currentRecipe.title}".
+        // Recipe modification prompt with casual updates
+        const modificationPrompt = `You are Zest, Flavr's bold and encouraging AI cooking assistant. The user wants to modify this recipe: "${currentRecipe.title}".
 
-Current recipe:
+CONVERSATION CONTEXT:
+${chatHistory.length > 0 ? `Recent chat:\n${chatHistory.slice(-2).map(msg => `User: ${msg.message}\nYou: ${msg.response}`).join('\n')}\n` : ''}
+
+Current recipe details:
 - Title: ${currentRecipe.title}
-- Description: ${currentRecipe.description}
 - Ingredients: ${currentRecipe.ingredients?.join(', ')}
-- Instructions: ${currentRecipe.instructions?.join(' ')}
-- Cook Time: ${currentRecipe.cookTime} minutes
 - Servings: ${currentRecipe.servings}
-- Difficulty: ${currentRecipe.difficulty}
+- Cook Time: ${currentRecipe.cookTime} minutes
 
 User request: "${message}"
 
-ANALYZE THE REQUEST:
-- If user mentions "for X people" or "X people" or serving numbers, scale ALL ingredients proportionally
-- If user wants spicier/milder, add/reduce spicy ingredients
-- If user wants substitutions, replace ingredients while keeping proportions
-- If user wants time changes, adjust cooking methods and times
+RESPONSE RULES:
+1. Give a SHORT, casual response about what you're changing (1-2 sentences max)
+2. NO LONG EXPLANATIONS, NO INGREDIENT LISTS, NO INSTRUCTIONS
+3. Just mention what you swapped/changed in a fun way
+4. Then provide ONLY the JSON with the updated recipe data
 
-RESPONSE FORMAT:
-1. Start with an encouraging response in Zest's voice (2-3 sentences max)
-2. Then provide the updated recipe in this EXACT JSON format:
+EXAMPLES:
+- "Nice! Swapped in chicken and doubled the portions for your crew!"
+- "Perfect! Made it way spicier and cut the cook time in half!"
+- "Let's do it! Going dairy-free with some clever swaps!"
 
+Then respond with this JSON format:
 {
   "shouldUpdateRecipe": true,
   "updatedRecipe": {
-    "title": "Updated Recipe Title (change if modification is significant like protein change, cuisine change, or major technique change)",
-    "description": "Updated description reflecting the changes",
-    "ingredients": ["updated ingredient 1", "updated ingredient 2"],
-    "instructions": ["updated step 1 with specific timing", "updated step 2 with specific timing"],
-    "cookTime": updated_minutes_as_number,
-    "servings": updated_servings_as_number,
-    "difficulty": "Easy/Medium/Hard",
-    "cuisine": "updated cuisine if significantly changed"
+    "title": "Updated title if significantly changed",
+    "description": "Brief updated description", 
+    "ingredients": ["proportionally scaled ingredients"],
+    "instructions": ["updated cooking steps with times"],
+    "cookTime": number,
+    "servings": number,
+    "difficulty": "Easy/Medium/Hard"
   }
 }
 
-CRITICAL RULES:
-- If changing protein (chicken to beef), cuisine style, or cooking method: UPDATE THE TITLE
-- If changing spice level significantly: mention in title (e.g., "Spicy Pork Belly Salad")
-- If changing servings: adjust ALL ingredient quantities proportionally
-- If making quicker: reduce cook times and suggest faster cooking methods
-- Always include specific timings in instructions ("cook for 15 minutes", "sauté for 5 minutes")
-- Keep Zest's voice: bold, clever, builds confidence
-
-Use Zest's voice: bold, clever, builds confidence. Make the user feel like a culinary rockstar.`;
+Keep it SHORT and encouraging. The recipe card will show the changes!`;
 
         const response = await openai.chat.completions.create({
           model: "gpt-3.5-turbo", // Using GPT-3.5 Turbo for cost efficiency
@@ -1395,10 +1416,18 @@ Use Zest's voice: bold, clever, builds confidence. Make the user feel like a cul
           botResponse = fullResponse;
         }
       } else {
-        // Regular chat response with Zest personality
-        const regularChatPrompt = `You are Zest, a bold and clever private chef assistant. Respond to the user's cooking question with confidence and enthusiasm. Keep responses helpful but concise. Build the user's confidence and make them feel like a culinary rockstar.
+        // Regular chat response with Zest personality and conversation memory
+        const regularChatPrompt = `${systemPrompt}
 
-Use Zest's voice: bold, clever, encouraging. Provide practical cooking advice without modifying any recipes.`;
+REGULAR CHAT RULES:
+- Keep responses casual and conversational (2-3 sentences max)
+- Reference previous conversation naturally if relevant
+- Give cooking tips, advice, and encouragement
+- NEVER include code, JSON, or technical formatting
+- Be supportive and make cooking feel fun and accessible
+- Use phrases like "That sounds amazing!", "Great question!", "You've got this!"
+
+Current conversation topic: User is asking about cooking/recipes in general.`;
 
         const response = await openai.chat.completions.create({
           model: "gpt-3.5-turbo", // Using GPT-3.5 Turbo for cost efficiency
