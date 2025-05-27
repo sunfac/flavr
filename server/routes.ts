@@ -563,7 +563,8 @@ ${budgetText}
 
 The total cooking time must NOT exceed ${cookTime} minutes. This is the user's hard time limit.
 
-${equipmentText}
+EQUIPMENT REQUIREMENT: ${equipmentText}
+MANDATORY: You MUST use the specified equipment as the primary cooking method. The user has specifically selected this equipment and expects the recipe to center around it.
 
 Ingredients: ${quizData.ingredients || 'Use suitable ingredients'}
 
