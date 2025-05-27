@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
 import OpenAI from "openai";
+import Replicate from "replicate";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import { insertRecipeSchema, insertChatMessageSchema } from "@shared/schema";
@@ -34,6 +35,14 @@ if (!process.env.OPENAI_API_KEY) {
   throw new Error('Missing required OpenAI API key: OPENAI_API_KEY');
 }
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Initialize Replicate for Stable Diffusion
+if (!process.env.REPLICATE_API_TOKEN) {
+  throw new Error('Missing required Replicate API token: REPLICATE_API_TOKEN');
+}
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN,
+});
 
 // Initialize Stripe
 if (!process.env.STRIPE_SECRET_KEY) {
