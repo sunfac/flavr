@@ -155,15 +155,26 @@ export default function ChefAssistMode() {
         )}
 
         {currentStep === "recipe" && generatedRecipe && (
-          <RecipeCard
-            recipe={generatedRecipe}
-            mode="chef"
-            quizData={quizData}
-            isFullView={true}
-            onBack={handleBackToQuiz}
-            showNewSearchButton={true}
-            onNewSearch={handleBackToQuiz}
-          />
+          <>
+            <RecipeCard
+              recipe={generatedRecipe}
+              mode="chef"
+              quizData={quizData}
+              isFullView={true}
+              onBack={handleBackToQuiz}
+              showNewSearchButton={true}
+              onNewSearch={handleBackToQuiz}
+            />
+            
+            {/* Floating Zest Chatbot - Always visible when recipe is shown */}
+            <ChatBot 
+              currentRecipe={generatedRecipe}
+              currentMode="chef"
+              onRecipeUpdate={(updatedRecipe: any) => {
+                setGeneratedRecipe(updatedRecipe);
+              }}
+            />
+          </>
         )}
       </main>
 

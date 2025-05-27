@@ -332,7 +332,15 @@ export default function FridgeMode() {
       </main>
 
       {/* Only show ChatBot when not in quiz mode */}
-      {currentStep !== "quiz" && <ChatBot />}
+      {currentStep !== "quiz" && (
+        <ChatBot 
+          currentRecipe={selectedRecipe}
+          currentMode="fridge"
+          onRecipeUpdate={(updatedRecipe: any) => {
+            setSelectedRecipe(updatedRecipe);
+          }}
+        />
+      )}
       
       {/* Consistent footer across all modes */}
       <GlobalFooter currentMode="fridge" />
