@@ -1,0 +1,64 @@
+/*
+  === REPLIT INSTRUCTION: Finalize Flavr+ Gating and Upgrade UX ===
+
+  Objective:
+  Finalize and polish the Flavr+ subscription logic, model handling, UI messaging, and upgrade flow. Ensure free users are capped fairly while seeing the full value of Flavr+, and direct them to upgrade paths with clear benefit messaging and minimal friction.
+
+  === USER ACCESS LOGIC ===
+
+  ✅ Free Users (unauthenticated or no Flavr+):
+  - Can generate up to 3 full recipes per calendar month
+  - Can access full functionality per recipe (Zest chatbot, recipe editing, Stable Diffusion image generation)
+  - Cannot access Flavr Rituals
+  - After hitting cap, must upgrade to Flavr+ to generate more recipes
+
+  ✅ Flavr+ Users (user.hasFlavrPlus === true):
+  - Unlimited recipe generations
+  - GPT-4 Turbo model used for all recipes + Zest chat
+  - DALL·E used for recipe images
+  - Full access to Flavr Rituals and any new premium features
+
+  === MODEL LOGIC ===
+
+  - Use GPT-3.5 Turbo for free users
+  - Use GPT-4 Turbo for Flavr+ users
+  - Use Stable Diffusion for all image generation (both free and premium)
+  - Upgrade to DALL·E for Flavr+ users where available
+
+  === UI + UX CHANGES ===
+
+  1. ✅ Header Navigation
+     - Add a “Flavr+” button to the main site header (top nav) linking to `/flavr-plus`
+     - Style consistently with CTA buttons (e.g. bold outline or orange accent)
+
+  2. ✅ Hamburger Menu
+     - Already contains a Flavr+ link — no changes needed
+
+  3. ✅ Landing Page CTA
+     - Already includes a Flavr+ upgrade button — confirm it links to `/flavr-plus`
+
+  4. 🔒 Gating Behavior After Cap Reached
+     - On 4th recipe attempt for free user:
+       • Block generation
+       • Show a modal-style signup popup
+       • Include Flavr+ pricing and benefits clearly:
+         - Headline: “You’ve reached your free recipe limit”
+         - Subtitle: “Unlock unlimited recipes, GPT-4 Turbo, weekly meal plans, and stunning recipe images”
+         - Pricing tier (e.g. “Only £4.99/month” or use Stripe tier)
+         - CTA Button: “Upgrade to Flavr+”
+       • Disable generation buttons and chatbot interactions unless upgraded
+       • Optional: Fade or blur UI behind modal for clarity
+
+  5. 🚪 Flavr Rituals
+     - Tab should be visible to all users
+     - For free users:
+       • Blur content
+       • Overlay: “Flavr Rituals are exclusive to Flavr+”
+       • CTA: “Upgrade for weekly meal plans”
+
+  === FINAL GOAL ===
+
+  Provide full recipe power to free users with a natural upgrade moment after 3 generations.  
+  Visually promote Flavr+ across header, menu, and landing.  
+  Ensure upgrade flow is clean, persuasive, and fully integrated across the experience.
+*/

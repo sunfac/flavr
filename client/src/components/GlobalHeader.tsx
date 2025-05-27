@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Menu, Settings } from "lucide-react";
+import { Menu, Settings, Crown } from "lucide-react";
 import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 
 interface GlobalHeaderProps {
   onMenuClick?: () => void;
@@ -14,6 +15,8 @@ export default function GlobalHeader({
   onSettingsClick,
   onAuthRequired 
 }: GlobalHeaderProps) {
+  const [, navigate] = useLocation();
+  
   // Check authentication status
   const { data: user } = useQuery({
     queryKey: ["/api/me"],
@@ -32,6 +35,10 @@ export default function GlobalHeader({
     
     // User is authenticated, open settings
     onSettingsClick?.();
+  };
+
+  const handleFlavrPlusClick = () => {
+    navigate('/flavr-plus');
   };
   return (
     <header className="absolute top-0 left-0 right-0 z-50 px-6 py-4 pointer-events-auto">
@@ -54,8 +61,19 @@ export default function GlobalHeader({
           <img src={FlavrLogo} alt="Flavr" className="w-10 h-10" />
         </div>
 
-        {/* Right: Settings */}
-        <div className="flex items-center">
+        {/* Right: Flavr+ and Settings */}
+        <div className="flex items-center gap-2">
+          {/* Show Flavr+ button only if user is not already a Flavr+ member */}
+          {(!user?.user?.hasFlavrPlus) && (
+            <Button 
+              onClick={handleFlavrPlusClick}
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold px-3 py-1 text-sm border border-orange-400 shadow-lg relative z-10"
+            >
+              <Crown className="w-4 h-4 mr-1" />
+              Flavr+
+            </Button>
+          )}
+          
           <Button 
             variant="ghost"
             size="icon"

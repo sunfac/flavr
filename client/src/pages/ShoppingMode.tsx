@@ -12,7 +12,9 @@ import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
 import AuthModal from "@/components/AuthModal";
 import ChatBot from "@/components/ChatBot";
+import UpgradeModal from "@/components/UpgradeModal";
 import { shoppingQuestions } from "@/config/shoppingQuestions";
+import { useQuery } from "@tanstack/react-query";
 
 export default function ShoppingMode() {
   const [, navigate] = useLocation();
@@ -40,15 +42,34 @@ export default function ShoppingMode() {
     if (menuType === 'userMenu') setShowUserMenu(true);
   };
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [hasSentPrompt1Twice, setHasSentPrompt1Twice] = useState(false);
+  const [usageData, setUsageData] = useState<any>(null);
 
-  // Mock user state for demo
-  const user = {};
-  const isAuthenticated = false;
+  // Get user authentication status
+  const { data: user } = useQuery({
+    queryKey: ["/api/me"],
+    retry: false,
+  });
+  const isAuthenticated = !!user?.user;
 
-  const checkQuotaBeforeGPT = async () => {
-    // Quota check logic here
-    return true;
+  const checkUsageLimit = async () => {
+    try {
+      const response = await apiRequest("GET", "/api/check-usage-limit");
+      const data = await response.json();
+      setUsageData(data);
+      
+      // If user can't generate more recipes, show upgrade modal
+      if (!data.canGenerate && !data.hasFlavrPlus) {
+        setShowUpgradeModal(true);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Usage check failed:", error);
+      return true; // Allow generation if check fails
+    }
   };
 
   const generateRecipeIdeas = async (data: any, isSecondAttempt = false) => {
