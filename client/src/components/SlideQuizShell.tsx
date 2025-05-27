@@ -659,25 +659,24 @@ export default function SlideQuizShell({
         </div>
       </div>
 
-      {/* Navigation - Force always visible */}
+      {/* Navigation - Above footer */}
       <div 
-        className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-700 shadow-2xl"
+        className="fixed left-0 right-0 bg-slate-900 border-t border-slate-700 shadow-2xl"
         style={{ 
           zIndex: 9999,
           position: 'fixed',
-          bottom: 0,
+          bottom: '80px', // Position above the global footer
           left: 0,
           right: 0
         }}
       >
-        <div className="w-full max-w-md mx-auto px-4 py-4">
+        <div className="w-full max-w-md mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
             <Button
               variant="outline"
               onClick={prevQuestion}
               disabled={currentQuestionIndex === 0}
-              className="flex items-center gap-2 border-slate-600 bg-slate-800 text-white hover:bg-slate-700 px-4 py-3 min-w-[80px] flex-shrink-0"
-              style={{ minWidth: '80px' }}
+              className="flex items-center gap-2 border-slate-600 bg-slate-800 text-white hover:bg-slate-700 px-4 py-2 min-w-[80px] flex-shrink-0"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back</span>
@@ -685,14 +684,14 @@ export default function SlideQuizShell({
 
             <div className="text-center flex-1 min-w-0">
               {currentQ.required && !canProceed() && (
-                <p className="text-orange-400 text-sm font-medium">Required field</p>
+                <p className="text-orange-400 text-sm font-medium">Required</p>
               )}
             </div>
 
             <Button
               onClick={nextQuestion}
               disabled={!canProceed()}
-              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 px-6 py-3 min-w-[100px] flex-shrink-0 font-medium"
+              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 px-6 py-2 min-w-[100px] flex-shrink-0 font-medium"
               style={{ minWidth: '100px', backgroundColor: '#f97316' }}
             >
               <span className="whitespace-nowrap">{currentQuestionIndex === questions.length - 1 ? 'Generate' : 'Next'}</span>
