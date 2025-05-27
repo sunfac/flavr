@@ -629,9 +629,9 @@ export default function SlideQuizShell({
         </div>
       </div>
 
-      {/* Question Content - Fixed height to ensure navigation is always visible */}
-      <div ref={containerRef} className="flex-1 min-h-0 overflow-hidden">
-        <div className="max-w-md mx-auto px-4 h-full">
+      {/* Question Content - Scrollable area */}
+      <div ref={containerRef} className="flex-1 overflow-y-auto webkit-overflow-scrolling-touch">
+        <div className="max-w-md mx-auto px-4 pb-24">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={currentQuestionIndex}
@@ -640,7 +640,7 @@ export default function SlideQuizShell({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: direction > 0 ? -300 : 300, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="h-full flex flex-col py-4"
+              className="flex flex-col py-4 min-h-0"
             >
               <div className="text-center space-y-2 flex-shrink-0">
                 <h2 className="text-lg font-semibold text-white">
@@ -651,10 +651,8 @@ export default function SlideQuizShell({
                 )}
               </div>
 
-              <div className="flex-1 min-h-0 overflow-hidden mt-4">
-                <div className="h-full overflow-y-auto scrollbar-hide">
-                  {renderQuestion()}
-                </div>
+              <div className="flex-1 overflow-y-auto mt-4 pb-4">
+                {renderQuestion()}
               </div>
             </motion.div>
           </AnimatePresence>
