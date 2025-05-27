@@ -512,11 +512,11 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
       if (req.session?.userId) {
         const expectedOutput = {
           mode,
-          servings: quizData.servings || 4,
-          cookTime: quizData.time || 30,
+          servings: parseInt(quizData.servings) || quizData.portions || 4,
+          cookTime: quizData.time || quizData.cookingTime || 30,
           difficulty: getDifficulty(quizData.ambition || 'moderate'),
           budget: quizData.budget || 'moderate',
-          cuisine: quizData.cuisine || 'any'
+          cuisine: quizData.cuisines?.[0] || quizData.cuisine || 'any'
         };
         
         const actualOutput = {
@@ -937,11 +937,11 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
       // Log GPT interaction for developer analysis (after image generation)
       if (req.session?.userId) {
         const expectedOutput = {
-          servings: quizData.servings || 4,
-          cookTime: quizData.time || 30,
+          servings: parseInt(quizData.servings) || quizData.portions || 4,
+          cookTime: quizData.time || quizData.cookingTime || 30,
           difficulty: getDifficulty(quizData.ambition || 'moderate'),
           budget: quizData.budget || 'moderate',
-          cuisine: quizData.cuisine || 'any'
+          cuisine: quizData.cuisines?.[0] || quizData.cuisine || 'any'
         };
         
         const actualOutput = {
@@ -1073,20 +1073,12 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
           },
           { role: "user", content: message }
         ],
-        response_format: { type: "json_object" },
       });
 
-      const aiResponse = JSON.parse(response.choices[0].message.content!);
-      const botResponse = aiResponse.response || response.choices[0].message.content!;
+      const botResponse = response.choices[0].message.content!;
       
-      // Check if AI provided an updated recipe
+      // For now, don't update recipes through chat - just provide advice
       let updatedRecipe = null;
-      if (aiResponse.updatedRecipe && currentRecipe) {
-        updatedRecipe = {
-          ...currentRecipe,
-          ...aiResponse.updatedRecipe
-        };
-      }
       
       // Save chat message
       await storage.createChatMessage({
