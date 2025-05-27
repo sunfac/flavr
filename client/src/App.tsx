@@ -16,6 +16,7 @@ import MyRecipes from "@/pages/MyRecipes";
 import RecipeView from "@/pages/RecipeView";
 import DeveloperLogs from "@/pages/DeveloperLogs";
 import NotFound from "@/pages/not-found";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 
 function Router() {
   return (
@@ -46,6 +47,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
+        <PWAInstallPrompt />
       </TooltipProvider>
     </QueryClientProvider>
   );
