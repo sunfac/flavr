@@ -24,6 +24,7 @@ export const shoppingQuestions: QuestionConfig[] = [
     subtitle: "Any particular flavors calling to you?",
     type: "multi-select",
     options: [
+      { value: "any", label: "Any" },
       { value: "italian", label: "Italian" },
       { value: "indian", label: "Indian" },
       { value: "thai", label: "Thai" },
