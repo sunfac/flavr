@@ -55,7 +55,9 @@ import {
   Snowflake,
   Globe,
   Coffee,
-  Smartphone
+  Smartphone,
+  Shield,
+  Plus
 } from "lucide-react";
 
 export interface QuestionConfig {
@@ -162,7 +164,7 @@ export default function SlideQuizShell({
       Clock, ChefHat, Utensils, Sparkles, ShoppingCart, Store,
       PoundSterling, ShoppingBag, Coins, Banknote, Users, Heart,
       Waves, Beef, Blend, Soup, User, Users2, PartyPopper,
-      Snowflake, Globe, Coffee, Smartphone
+      Snowflake, Globe, Coffee, Smartphone, Shield, Plus
     };
     
     const IconComponent = iconMap[iconName];
