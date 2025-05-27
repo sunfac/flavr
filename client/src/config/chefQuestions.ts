@@ -23,6 +23,7 @@ export const chefQuestions: QuestionConfig[] = [
     subtitle: "Any restrictions or goals?",
     type: "multi-select",
     options: [
+      { value: "noRestrictions", label: "No restrictions" },
       { value: "vegan", label: "Vegan" },
       { value: "vegetarian", label: "Vegetarian" },
       { value: "glutenFree", label: "Gluten-free" },
@@ -33,8 +34,7 @@ export const chefQuestions: QuestionConfig[] = [
       { value: "paleo", label: "Paleo" },
       { value: "lowCarb", label: "Low-carb" },
       { value: "highProtein", label: "High-protein" },
-      { value: "lowCalorie", label: "Low-calorie" },
-      { value: "noRestrictions", label: "No restrictions" }
+      { value: "lowCalorie", label: "Low-calorie" }
     ]
   },
   {
