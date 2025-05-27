@@ -609,9 +609,9 @@ export default function SlideQuizShell({
   }
 
   return (
-    <div className="h-screen w-full flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-black" style={{ height: '100vh' }}>
-      {/* Header */}
-      <div className="flex-shrink-0 bg-slate-900/80 backdrop-blur-lg border-b border-slate-700 z-10">
+    <div className="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-black">
+      {/* Header - Sticky */}
+      <div className="sticky top-0 bg-slate-900/80 backdrop-blur-lg border-b border-slate-700 z-10">
         <div className="max-w-md mx-auto px-4 py-3">
           <div className="text-center mb-3">
             <h1 className="text-lg font-bold text-white">{title}</h1>
@@ -629,9 +629,9 @@ export default function SlideQuizShell({
         </div>
       </div>
 
-      {/* Question Content - Scrollable area */}
-      <div ref={containerRef} className="flex-1 overflow-y-auto webkit-overflow-scrolling-touch">
-        <div className="max-w-md mx-auto px-4 pb-24">
+      {/* Question Content - Scrollable */}
+      <div ref={containerRef} className="min-h-screen">
+        <div className="max-w-md mx-auto px-4 pt-6 pb-32">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={currentQuestionIndex}
@@ -640,9 +640,9 @@ export default function SlideQuizShell({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: direction > 0 ? -300 : 300, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="flex flex-col py-4 min-h-0"
+              className="space-y-6"
             >
-              <div className="text-center space-y-2 flex-shrink-0">
+              <div className="text-center space-y-2">
                 <h2 className="text-lg font-semibold text-white">
                   {currentQ.label}
                 </h2>
@@ -651,7 +651,7 @@ export default function SlideQuizShell({
                 )}
               </div>
 
-              <div className="flex-1 overflow-y-auto mt-4 pb-4">
+              <div>
                 {renderQuestion()}
               </div>
             </motion.div>
@@ -659,8 +659,8 @@ export default function SlideQuizShell({
         </div>
       </div>
 
-      {/* Navigation - Always visible at bottom */}
-      <div className="flex-shrink-0 bg-slate-900/90 backdrop-blur-lg border-t border-slate-700 relative z-50">
+      {/* Navigation - Fixed at bottom */}
+      <div className="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-lg border-t border-slate-700 z-50">
         <div className="w-full max-w-sm mx-auto px-8 py-4">
           <div className="flex items-center justify-between gap-4">
             <Button
