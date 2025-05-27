@@ -73,6 +73,12 @@ export default function ShoppingMode() {
   };
 
   const generateRecipeIdeas = async (data: any, isSecondAttempt = false) => {
+    // Check usage limit before generating
+    const canGenerate = await checkUsageLimit();
+    if (!canGenerate) {
+      return; // Stop if user hit their limit
+    }
+
     try {
       setIsLoading(true);
       
@@ -269,6 +275,14 @@ export default function ShoppingMode() {
             description="Sign up to unlock unlimited recipes and save your favorites!"
           />
         )}
+        {showUpgradeModal && (
+          <UpgradeModal
+            isOpen={showUpgradeModal}
+            onClose={() => setShowUpgradeModal(false)}
+            recipesUsed={usageData?.recipesUsed || 3}
+            recipesLimit={usageData?.recipesLimit || 3}
+          />
+        )}
       </div>
     );
   }
@@ -308,6 +322,14 @@ export default function ShoppingMode() {
         {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
         {showSettings && <SettingsPanel onClose={closeAllMenus} />}
         {showUserMenu && <UserMenu onClose={closeAllMenus} />}
+        {showUpgradeModal && (
+          <UpgradeModal
+            isOpen={showUpgradeModal}
+            onClose={() => setShowUpgradeModal(false)}
+            recipesUsed={usageData?.recipesUsed || 3}
+            recipesLimit={usageData?.recipesLimit || 3}
+          />
+        )}
       </div>
     );
   }
