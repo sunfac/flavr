@@ -294,16 +294,16 @@ export default function DeveloperLogs() {
                                 <CollapsibleTrigger className="text-sm font-semibold text-blue-600 hover:text-blue-800">
                                   View Full Prompt & Response ↓
                                 </CollapsibleTrigger>
-                                <CollapsibleContent className="mt-2 space-y-2">
+                                <CollapsibleContent className="mt-4 space-y-4">
                                   <div>
-                                    <span className="text-xs text-gray-600">Prompt Sent:</span>
-                                    <pre className="text-xs bg-yellow-50 p-2 rounded border overflow-auto max-h-40">
+                                    <span className="text-sm font-medium text-gray-800 block mb-2">Prompt Sent:</span>
+                                    <pre className="text-xs bg-yellow-50 p-4 rounded-lg border border-yellow-200 overflow-auto max-h-64 text-gray-900 font-mono whitespace-pre-wrap leading-relaxed shadow-sm">
                                       {log.promptSent}
                                     </pre>
                                   </div>
                                   <div>
-                                    <span className="text-xs text-gray-600">GPT Response:</span>
-                                    <pre className="text-xs bg-purple-50 p-2 rounded border overflow-auto max-h-40">
+                                    <span className="text-sm font-medium text-gray-800 block mb-2">GPT Response:</span>
+                                    <pre className="text-xs bg-purple-50 p-4 rounded-lg border border-purple-200 overflow-auto max-h-64 text-gray-900 font-mono whitespace-pre-wrap leading-relaxed shadow-sm">
                                       {log.gptResponse}
                                     </pre>
                                   </div>
