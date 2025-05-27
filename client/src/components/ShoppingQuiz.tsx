@@ -96,7 +96,7 @@ export default function ShoppingQuiz({ onComplete, onLoading }: ShoppingQuizProp
   ];
 
   const cuisineOptions = [
-    "Italian", "Japanese", "Mexican", "Thai", "Greek", "Korean", "Turkish", "Indian",
+    "Any", "Italian", "Japanese", "Mexican", "Thai", "Greek", "Korean", "Turkish", "Indian",
     "Chinese", "French", "Spanish", "Lebanese", "Vietnamese", "Moroccan", "Fusion", "British"
   ];
 
@@ -121,7 +121,7 @@ export default function ShoppingQuiz({ onComplete, onLoading }: ShoppingQuizProp
     { value: "pressure", label: "Pressure Cooker", icon: "⚡" },
     { value: "blender", label: "Blender", icon: "🌪️" },
     { value: "rice", label: "Rice Cooker", icon: "🍚" },
-    { value: "bbq", label: "BBQ", icon: "🔥" }
+    { value: "bbq", label: "BBQ", icon: "🍖" }
   ];
 
   const supermarketOptions = [

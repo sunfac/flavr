@@ -703,7 +703,9 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
         
         // Build Chef Assist Mode mapped prompt (Prompt 2 only)
-        enhancedPrompt = `You are an elite private chef.
+        enhancedPrompt = `IMPORTANT: You must respond ONLY in English. Do not use any other language under any circumstances.
+
+You are an elite private chef.
 
 Based on the user's culinary vision and quiz preferences, generate a detailed, flavour-rich recipe.
 
@@ -773,7 +775,9 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
         const dietaryGuidance = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
         const equipmentGuidance = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
         
-        enhancedPrompt = `Generate a complete, detailed recipe for "${selectedRecipe.title}" based on these preferences:
+        enhancedPrompt = `IMPORTANT: You must respond ONLY in English. Do not use any other language under any circumstances.
+
+Generate a complete, detailed recipe for "${selectedRecipe.title}" based on these preferences:
 
 Mode: ${mode}
 Quiz Data: ${JSON.stringify(quizData)}

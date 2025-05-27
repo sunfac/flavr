@@ -87,7 +87,7 @@ export default function FridgeQuiz({ onComplete, onLoading }: FridgeQuizProps) {
   ];
 
   const cuisineOptions = [
-    "Italian", "Indian", "Thai", "Greek", "French", "Korean", "Mexican", "Chinese",
+    "Any", "Italian", "Indian", "Thai", "Greek", "French", "Korean", "Mexican", "Chinese",
     "Japanese", "Spanish", "Lebanese", "Vietnamese", "Moroccan", "Fusion", "Other"
   ];
 
@@ -106,7 +106,7 @@ export default function FridgeQuiz({ onComplete, onLoading }: FridgeQuizProps) {
     { value: "pressure", label: "Pressure Cooker", icon: "⚡" },
     { value: "blender", label: "Blender", icon: "🌪️" },
     { value: "rice", label: "Rice Cooker", icon: "🍚" },
-    { value: "bbq", label: "BBQ", icon: "🔥" },
+    { value: "bbq", label: "BBQ", icon: "🍖" },
     { value: "basics", label: "Just the basics", icon: "🔪" }
   ];
 
