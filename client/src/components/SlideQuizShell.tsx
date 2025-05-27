@@ -609,7 +609,7 @@ export default function SlideQuizShell({
   }
 
   return (
-    <div className="fixed inset-0 w-full h-full flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-black overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-black" style={{ minHeight: '100vh' }}>
       {/* Header */}
       <div className="flex-shrink-0 bg-slate-900/80 backdrop-blur-lg border-b border-slate-700 z-10">
         <div className="max-w-2xl mx-auto px-4 py-3">

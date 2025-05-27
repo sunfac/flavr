@@ -114,18 +114,9 @@
   /* Quiz-specific no-scroll styles */
   body.quiz-mode {
     overflow: hidden !important;
-    height: 100vh !important;
-    position: fixed !important;
-    width: 100% !important;
   }
 
   html.quiz-mode {
-    overflow: hidden !important;
-    height: 100vh !important;
-  }
-
-  .quiz-mode #root {
-    height: 100vh !important;
     overflow: hidden !important;
   }
 
