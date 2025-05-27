@@ -662,7 +662,7 @@ export default function SlideQuizShell({
       </div>
 
       {/* Navigation - Always visible at bottom */}
-      <div className="flex-shrink-0 bg-slate-900/90 backdrop-blur-lg border-t border-slate-700">
+      <div className="flex-shrink-0 bg-slate-900/90 backdrop-blur-lg border-t border-slate-700 relative z-50">
         <div className="max-w-lg mx-auto px-6 py-4">
           <div className="flex justify-between items-center gap-10">
             <div className="w-20 flex-shrink-0">
