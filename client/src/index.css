@@ -60,11 +60,6 @@
     opacity: 1;
     transform: translateY(0);
   }
-  
-  /* Interactive states */
-  --tap-scale: scale(0.97);
-  --hover-scale: scale(1.02);
-  --focus-ring: 0 0 0 3px rgba(255, 87, 34, 0.2);
 }
 
 .dark {
@@ -92,13 +87,40 @@
 @layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    height: 100%;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     @apply antialiased bg-background text-foreground;
     font-feature-settings: 'rlig' 1, 'calt' 1;
+    margin: 0;
+    padding: 0;
+    position: relative;
     font-optical-sizing: auto;
+  }
+
+  /* Mobile viewport optimization */
+  #root {
+    height: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Scrolling utilities for mobile */
+  .scrollable {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   /* Hide scrollbars completely */

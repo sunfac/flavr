@@ -609,15 +609,15 @@ export default function SlideQuizShell({
   }
 
   return (
-    <div className="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-black">
-      {/* Header - Sticky */}
-      <div className="sticky top-0 bg-slate-900/80 backdrop-blur-lg border-b border-slate-700 z-10">
-        <div className="max-w-md mx-auto px-4 py-3">
-          <div className="text-center mb-3">
-            <h1 className="text-lg font-bold text-white">{title}</h1>
+    <div className="w-full min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black scrollable">
+      {/* Header - Compact for mobile */}
+      <div className="sticky top-0 bg-slate-900/95 backdrop-blur-lg border-b border-slate-700 z-10">
+        <div className="max-w-md mx-auto px-3 py-2">
+          <div className="text-center mb-2">
+            <h1 className="text-base md:text-lg font-bold text-white">{title}</h1>
             {subtitle && <p className="text-slate-400 mt-1 text-xs">{subtitle}</p>}
           </div>
-          <Progress value={progress} className="h-1.5 bg-slate-800" />
+          <Progress value={progress} className="h-1 bg-slate-800" />
           <div className="flex justify-between items-center mt-1">
             <span className="text-xs text-slate-400">
               {currentQuestionIndex + 1}/{questions.length}
@@ -629,9 +629,9 @@ export default function SlideQuizShell({
         </div>
       </div>
 
-      {/* Question Content - Scrollable */}
-      <div ref={containerRef} className="min-h-screen">
-        <div className="max-w-md mx-auto px-4 pt-6 pb-32">
+      {/* Question Content - Mobile optimized */}
+      <div ref={containerRef} className="pb-20">
+        <div className="max-w-md mx-auto px-3 pt-4">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={currentQuestionIndex}
@@ -640,10 +640,10 @@ export default function SlideQuizShell({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: direction > 0 ? -300 : 300, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="space-y-6"
+              className="space-y-4 mb-6"
             >
-              <div className="text-center space-y-2">
-                <h2 className="text-lg font-semibold text-white">
+              <div className="text-center space-y-1">
+                <h2 className="text-base md:text-lg font-semibold text-white">
                   {currentQ.label}
                 </h2>
                 {currentQ.subtitle && (
@@ -651,7 +651,7 @@ export default function SlideQuizShell({
                 )}
               </div>
 
-              <div>
+              <div className="space-y-3">
                 {renderQuestion()}
               </div>
             </motion.div>
@@ -659,32 +659,32 @@ export default function SlideQuizShell({
         </div>
       </div>
 
-      {/* Navigation - Fixed at bottom */}
-      <div className="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-lg border-t border-slate-700 z-50">
-        <div className="w-full max-w-sm mx-auto px-8 py-4">
-          <div className="flex items-center justify-between gap-4">
+      {/* Navigation - Mobile optimized */}
+      <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-lg border-t border-slate-700 z-50 safe-area-inset-bottom">
+        <div className="w-full max-w-md mx-auto px-4 py-3">
+          <div className="flex items-center justify-between gap-3">
             <Button
               variant="outline"
               onClick={prevQuestion}
               disabled={currentQuestionIndex === 0}
-              className="flex items-center gap-2 border-slate-600 bg-slate-800/50 text-white hover:bg-slate-700 text-sm px-4 py-2 min-w-0 flex-shrink-0"
+              className="flex items-center gap-1 border-slate-600 bg-slate-800/50 text-white hover:bg-slate-700 text-sm px-3 py-2 min-w-0 flex-shrink-0"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back</span>
+              <span className="hidden sm:inline">Back</span>
             </Button>
 
             <div className="text-center flex-1 min-w-0">
               {currentQ.required && !canProceed() && (
-                <p className="text-orange-400 text-xs">This question is required</p>
+                <p className="text-orange-400 text-xs">Required</p>
               )}
             </div>
 
             <Button
               onClick={nextQuestion}
               disabled={!canProceed()}
-              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 text-sm px-4 py-2 min-w-0 flex-shrink-0"
+              className="flex items-center gap-1 bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 text-sm px-3 py-2 min-w-0 flex-shrink-0"
             >
-              <span className="whitespace-nowrap">{currentQuestionIndex === questions.length - 1 ? 'Generate' : 'Next'}</span>
+              <span className="whitespace-nowrap text-sm">{currentQuestionIndex === questions.length - 1 ? 'Generate' : 'Next'}</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
