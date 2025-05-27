@@ -99,6 +99,31 @@
     @apply antialiased bg-background text-foreground;
     font-feature-settings: 'rlig' 1, 'calt' 1;
     font-optical-sizing: auto;
+    overflow: hidden;
+    height: 100vh;
+    position: fixed;
+    width: 100%;
+  }
+
+  /* Hide scrollbars completely */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Ensure quiz content doesn't cause page scrolling */
+  html {
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  #root {
+    height: 100vh;
+    overflow: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
