@@ -14,7 +14,6 @@ interface QuizData {
   time: number;
   ambition: number;
   equipment: string[];
-  extras: string[];
 }
 
 interface ChefAssistQuizProps {
@@ -28,12 +27,11 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
     intent: "",
     dietary: [],
     equipment: [],
-    extras: [],
     time: 60,
     ambition: 3
   });
 
-  const totalSteps = 6;
+  const totalSteps = 5;
   const progress = ((currentStep + 1) / totalSteps) * 100;
 
   const questions = [
@@ -61,11 +59,6 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
       title: "Available equipment",
       subtitle: "What tools do you have access to?",
       type: "equipment"
-    },
-    {
-      title: "Extra touches",
-      subtitle: "Want to make it even more special?",
-      type: "extras"
     }
   ];
 
@@ -84,20 +77,14 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
   ];
 
   const equipmentOptions = [
-    { value: "stovetop", label: "Stovetop", icon: "🔥" },
-    { value: "oven", label: "Oven", icon: "🏠" },
+    { value: "stovetop", label: "Stovetop only", icon: "🔥" },
+    { value: "oven", label: "Oven only", icon: "🏠" },
+    { value: "airfryer", label: "Air fryer", icon: "💨" },
     { value: "microwave", label: "Microwave", icon: "📻" },
-    { value: "airfryer", label: "Air Fryer", icon: "💨" },
-    { value: "grill", label: "Grill", icon: "🔥" },
-    { value: "slowcooker", label: "Slow Cooker", icon: "⏰" },
-    { value: "pressure", label: "Pressure Cooker", icon: "⚡" },
+    { value: "grill", label: "BBQ/Grill", icon: "🔥" },
+    { value: "slowcooker", label: "Slow cooker", icon: "⏰" },
     { value: "blender", label: "Blender", icon: "🌪️" },
-    { value: "mixer", label: "Stand Mixer", icon: "🥄" },
-    { value: "castiron", label: "Cast Iron", icon: "🍳" },
-    { value: "pizza", label: "Pizza Oven", icon: "🍕" },
-    { value: "bbq", label: "BBQ", icon: "🔥" },
-    { value: "kamado", label: "Kamado", icon: "🥩" },
-    { value: "basics", label: "Just the basics", icon: "🔪" }
+    { value: "any", label: "Any equipment", icon: "🔪" }
   ];
 
   const extrasOptions = [
@@ -319,39 +306,7 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
           </div>
         );
 
-      case "extras":
-        return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-3">
-              {extrasOptions.map((option) => (
-                <Card
-                  key={option.value}
-                  className={`cursor-pointer transition-all duration-300 hover:scale-105 ${
-                    quizData.extras?.includes(option.value)
-                      ? 'ring-2 ring-accent shadow-lg scale-105'
-                      : 'hover:shadow-md'
-                  }`}
-                  onClick={() => toggleArrayItem('extras', option.value)}
-                >
-                  <CardContent className="p-4 flex items-center space-x-4">
-                    <div className="text-2xl">{option.icon}</div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold">{option.label}</h3>
-                    </div>
-                    {quizData.extras?.includes(option.value) && (
-                      <div className="w-6 h-6 gradient-accent rounded-full flex items-center justify-center">
-                        <i className="fas fa-check text-white text-sm"></i>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            <p className="text-sm text-slate-600 text-center">
-              Choose extras to make your dish truly exceptional (optional)
-            </p>
-          </div>
-        );
+
 
       default:
         return null;
