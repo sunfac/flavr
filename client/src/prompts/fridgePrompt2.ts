@@ -1,9 +1,21 @@
 export function generateFridgePrompt2(selectedRecipe: any, quizData: any): string {
-  return `You are a professional chef creating a complete recipe using only available ingredients. The user has selected "${selectedRecipe.title}" from your suggestions.
+  const getFlexibilityText = (flexibility: string) => {
+    if (flexibility === 'flexible') {
+      return `Ingredient Flexibility: You may add 2-4 additional complementary ingredients to enhance the dish. Choose ingredients that pair naturally with what's available and improve the overall flavor or texture. Be thoughtful about your additions - they should feel natural and accessible.`;
+    } else {
+      return `Ingredient Flexibility: Use ONLY the ingredients listed by the user plus standard pantry staples (salt, pepper, oil, vinegar, basic herbs/spices). Do not add any other ingredients beyond these basics.`;
+    }
+  };
+  
+  const flexibilityText = getFlexibilityText(quizData.ingredientFlexibility || 'strict');
+  
+  return `You are a professional chef creating a complete recipe using the user's available ingredients. The user has selected "${selectedRecipe.title}" from your suggestions.
 
 Selected Recipe: ${selectedRecipe.title}
 Description: ${selectedRecipe.description}
 Available Ingredients: ${Array.isArray(quizData.ingredients) ? quizData.ingredients.join(', ') : quizData.ingredients}
+
+${flexibilityText}
 
 User's Preferences:
 - Style: ${quizData.vibe || quizData.mood}
@@ -15,11 +27,10 @@ User's Preferences:
 - Ambition Level: ${quizData.ambition || "Moderate"}
 
 Create a complete recipe that:
-1. Uses ONLY the available ingredients (plus basic pantry staples)
-2. Matches the selected recipe concept
-3. Provides detailed, clear instructions
+1. Follows the ingredient flexibility guidelines above
+2. Matches the selected recipe concept exactly
+3. Provides detailed, clear instructions with specific timings
 4. Maximizes flavor from available ingredients
-5. Requires NO additional shopping
 
 Respond with a JSON object in this format:
 {

@@ -342,3 +342,11 @@ export function getStrictDietaryInstruction(dietKeys: string[]): string {
   return `
 DIETARY OVERRIDE: If any creative direction conflicts with the user's dietary requirements, the dietary rules take absolute priority.`;
 }
+
+export function getIngredientFlexibilityPromptText(flexibility: string): string {
+  if (flexibility === 'flexible') {
+    return `Ingredient Flexibility: You may add 2-4 additional complementary ingredients to enhance the dish. Choose ingredients that pair naturally with what's available and improve the overall flavor or texture. Be thoughtful about your additions - they should feel natural and accessible.`;
+  } else {
+    return `Ingredient Flexibility: Use ONLY the ingredients listed by the user plus standard pantry staples (salt, pepper, oil, vinegar, basic herbs/spices). Do not add any other ingredients beyond these basics.`;
+  }
+}

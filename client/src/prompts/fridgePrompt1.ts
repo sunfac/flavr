@@ -1,7 +1,19 @@
 export function generateFridgePrompt1(quizData: any): string {
-  return `You are a creative chef specializing in "fridge to fork" cooking. Generate 3-6 diverse recipe ideas using ONLY the ingredients the user has available.
+  const getFlexibilityText = (flexibility: string) => {
+    if (flexibility === 'flexible') {
+      return `Ingredient Flexibility: You may add 2-4 additional complementary ingredients to enhance the dish. Choose ingredients that pair naturally with what's available and improve the overall flavor or texture. Be thoughtful about your additions - they should feel natural and accessible.`;
+    } else {
+      return `Ingredient Flexibility: Use ONLY the ingredients listed by the user plus standard pantry staples (salt, pepper, oil, vinegar, basic herbs/spices). Do not add any other ingredients beyond these basics.`;
+    }
+  };
+  
+  const flexibilityText = getFlexibilityText(quizData.ingredientFlexibility || 'strict');
+  
+  return `You are a creative chef specializing in "fridge to fork" cooking. Generate 3-6 diverse recipe ideas using the ingredients the user has available.
 
 Available Ingredients: ${Array.isArray(quizData.ingredients) ? quizData.ingredients.join(', ') : quizData.ingredients}
+
+${flexibilityText}
 
 User Preferences:
 - Style: ${quizData.vibe || quizData.mood}
@@ -13,12 +25,11 @@ User Preferences:
 - Ambition Level: ${quizData.ambition || "Moderate"}
 
 Generate recipe ideas that:
-1. Use ONLY the ingredients listed (plus basic pantry staples like salt, pepper, oil)
+1. Follow the ingredient flexibility guidelines above
 2. Match the user's preferred cooking style
 3. Can be completed with their available equipment
 4. Fit within the time constraints
 5. Offer creative ways to combine the available ingredients
-6. Don't require any additional shopping
 
 Respond with a JSON object in this format:
 {
