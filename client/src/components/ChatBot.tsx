@@ -115,21 +115,21 @@ export default function ChatBot({
     },
   });
 
-  // Initialize with welcome message
+  // Initialize with Zest's welcome message when we have a recipe
   useEffect(() => {
-    if (!hasInitialized && isOpen) {
+    if (!hasInitialized && isOpen && currentRecipe) {
       const welcomeMessage: ChatMessage = {
         id: Date.now(),
         message: "",
-        response: "Let's cook something unforgettable. What do you feel like today?",
+        response: "Boom — you picked a flavour bomb. Want to swap something, spice it up, or make it your own? I've got ideas. Just ask.",
         isUser: false,
-        text: "Let's cook something unforgettable. What do you feel like today?",
+        text: "Boom — you picked a flavour bomb. Want to swap something, spice it up, or make it your own? I've got ideas. Just ask.",
         timestamp: new Date(),
       };
       setLocalMessages([welcomeMessage]);
       setHasInitialized(true);
     }
-  }, [isOpen, hasInitialized]);
+  }, [isOpen, hasInitialized, currentRecipe]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
