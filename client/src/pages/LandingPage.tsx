@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 import FlavrFullLogo from "@assets/AD24FB4E-3BFB-4891-8859-5DEA19E45222.png";
 import HeroFoodImage from "@assets/3D8C8E94-9BC0-4F6A-95F2-8951941A709B.png";
 import { motion } from "framer-motion";
-import { ChefHat, Sparkles, Timer, Star, ArrowRight, Menu, Settings, User, ChevronUp } from "lucide-react";
+import { ChefHat, Sparkles, Timer, Star, ArrowRight, Menu, Settings, User, ChevronUp, Crown } from "lucide-react";
 import AuthModal from "@/components/AuthModal";
 
 export default function LandingPage() {
@@ -660,6 +660,32 @@ export default function LandingPage() {
               Join thousands of home chefs who've discovered their passion
             </motion.p>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Flavr+ CTA Section */}
+      <section className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 border-y border-orange-500/20">
+        <div className="max-w-4xl mx-auto px-4 py-16 text-center">
+          <div className="mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Ready for unlimited recipes?
+            </h2>
+            <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+              Join Flavr+ and unlock unlimited AI-generated recipes, exclusive features, and premium cooking experiences.
+            </p>
+          </div>
+          <Link href="/flavr-plus">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <Crown className="w-5 h-5 mr-2" />
+              Sign up for Flavr+
+            </Button>
+          </Link>
+          <p className="text-sm text-slate-400 mt-4">
+            Just £3.49/month • Cancel anytime
+          </p>
         </div>
       </section>
 
