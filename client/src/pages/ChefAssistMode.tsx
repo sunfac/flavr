@@ -6,13 +6,14 @@ import GlobalFooter from "@/components/GlobalFooter";
 import GlobalNavigation from "@/components/GlobalNavigation";
 import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
-import ChefAssistQuiz from "@/components/ChefAssistQuiz";
+import SlideQuizShell from "@/components/SlideQuizShell";
 import RecipeCard from "@/components/RecipeCard";
 import ChatBot from "@/components/ChatBot";
 import Loading from "@/components/Loading";
 import { checkQuotaBeforeGPT, getRemainingRecipes } from "@/lib/quotaManager";
 import { apiRequest } from "@/lib/queryClient";
 import AuthModal from "@/components/AuthModal";
+import { chefQuestions } from "@/config/chefQuestions";
 import { Clock } from "lucide-react";
 
 export default function ChefAssistMode() {
@@ -144,9 +145,13 @@ export default function ChefAssistMode() {
       <main className="flex-1 pt-20 pb-24 p-4">
 
         {currentStep === "quiz" && (
-          <ChefAssistQuiz
-            onComplete={handleQuizComplete}
+          <SlideQuizShell
+            title="Chef Assist Mode"
+            subtitle="Tell me your culinary vision and I'll help you create something amazing"
+            questions={chefQuestions}
+            onSubmit={handleQuizComplete}
             onLoading={setIsLoading}
+            theme="chef"
           />
         )}
 

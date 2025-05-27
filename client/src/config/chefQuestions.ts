@@ -4,29 +4,21 @@ export const chefQuestions: QuestionConfig[] = [
   {
     id: "intent",
     label: "What's your culinary vision?",
-    subtitle: "Describe what you want to create",
+    subtitle: "Describe what you want to create today",
     type: "textarea",
     required: true,
-    placeholder: "Describe your culinary vision in detail...",
+    placeholder: "Tell me about the dish you have in mind...",
     examples: [
-      "A rich chocolate fudge cake for a birthday",
-      "An elite BBQ dish for six guests",
-      "A romantic vegan dinner with wow factor",
-      "Authentic Italian pasta from scratch",
-      "Show-stopping dessert for dinner party",
-      "Comfort food with a gourmet twist"
-    ],
-    validation: (value) => {
-      if (!value || value.trim().length < 10) {
-        return "Please describe your vision in more detail";
-      }
-      return true;
-    }
+      "I want to make a comforting pasta dish with fresh herbs",
+      "Something impressive for a dinner party with seafood",
+      "A hearty breakfast that will wow my family",
+      "An elegant dessert with chocolate and berries"
+    ]
   },
   {
     id: "dietary",
-    label: "Dietary considerations",
-    subtitle: "Any restrictions or preferences?",
+    label: "Dietary preferences",
+    subtitle: "Any restrictions or goals?",
     type: "multi-select",
     options: [
       { value: "vegan", label: "Vegan" },
@@ -45,8 +37,8 @@ export const chefQuestions: QuestionConfig[] = [
   },
   {
     id: "time",
-    label: "Time to create",
-    subtitle: "How long can you dedicate to this?",
+    label: "How much time?",
+    subtitle: "From quick fixes to weekend projects",
     type: "slider",
     min: 10,
     max: 90,
@@ -56,15 +48,14 @@ export const chefQuestions: QuestionConfig[] = [
       return `${value} minutes`;
     }
   },
-
   {
     id: "ambition",
-    label: "Your ambition level",
-    subtitle: "How challenging should this be?",
+    label: "Ambition level",
+    subtitle: "How adventurous are we feeling?",
     type: "cards",
     required: true,
     options: [
-      { value: "justFed", label: "Just get fed", icon: "Coffee", desc: "Minimal effort" },
+      { value: "justFed", label: "Just get fed", icon: "User", desc: "Minimal effort" },
       { value: "simpleTasty", label: "Simple & tasty", icon: "Heart", desc: "Easy but delicious" },
       { value: "confidentCook", label: "Confident cook", icon: "Sparkles", desc: "Touch of flair" },
       { value: "ambitiousChef", label: "Ambitious chef", icon: "Target", desc: "Multi-step prep" },
@@ -88,17 +79,21 @@ export const chefQuestions: QuestionConfig[] = [
   {
     id: "equipment",
     label: "Available equipment",
-    subtitle: "What tools do you have access to?",
+    subtitle: "What can you cook with?",
     type: "equipment-grid",
     options: [
-      { value: "stovetop", label: "Stovetop only", icon: "🔥" },
-      { value: "oven", label: "Oven only", icon: "🏠" },
-      { value: "airfryer", label: "Air fryer", icon: "💨" },
-      { value: "microwave", label: "Microwave", icon: "📻" },
-      { value: "grill", label: "BBQ/Grill", icon: "🔥" },
-      { value: "slowcooker", label: "Slow cooker", icon: "⏰" },
-      { value: "blender", label: "Blender", icon: "🌪️" },
-      { value: "any", label: "Any equipment", icon: "🔪" }
+      { value: "hob", label: "Hob", icon: "Flame" },
+      { value: "oven", label: "Oven", icon: "Building" },
+      { value: "microwave", label: "Microwave", icon: "Waves" },
+      { value: "airfryer", label: "Air Fryer", icon: "Wind" },
+      { value: "grill", label: "Grill", icon: "Beef" },
+      { value: "slowcooker", label: "Slow Cooker", icon: "Clock" },
+      { value: "pressure", label: "Pressure Cooker", icon: "Timer" },
+      { value: "blender", label: "Blender", icon: "Blend" },
+      { value: "rice", label: "Rice Cooker", icon: "Star" },
+      { value: "bbq", label: "BBQ", icon: "Flame" },
+      { value: "any", label: "Any equipment", icon: "ChefHat" },
+      { value: "basics", label: "Just the basics", icon: "ChefHat" }
     ]
   }
 ];
