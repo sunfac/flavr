@@ -118,19 +118,20 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
     "Paleo", "Keto", "Halal", "Kosher", "Nut-free", "No restrictions"
   ];
 
-  // Match exact equipment options from other modes with lucide icons
+  // Match exact equipment options from other modes  
   const equipmentOptions = [
-    { value: "stovetop", label: "Stovetop", icon: Flame },
-    { value: "oven", label: "Oven", icon: Home },
-    { value: "microwave", label: "Microwave", icon: Microwave },
-    { value: "airfryer", label: "Air Fryer", icon: Wind },
-    { value: "grill", label: "Grill", icon: Flame },
-    { value: "slowcooker", label: "Slow Cooker", icon: Timer },
-    { value: "pressure", label: "Pressure Cooker", icon: Zap },
-    { value: "blender", label: "Blender", icon: Zap },
-    { value: "rice", label: "Rice Cooker", icon: ChefHat },
-    { value: "bbq", label: "BBQ", icon: Flame },
-    { value: "basics", label: "Just the basics", icon: Utensils }
+    { value: "stovetop", label: "Stovetop", icon: "🔥" },
+    { value: "oven", label: "Oven", icon: "🏠" },
+    { value: "microwave", label: "Microwave", icon: "📻" },
+    { value: "airfryer", label: "Air Fryer", icon: "💨" },
+    { value: "grill", label: "Grill", icon: "🔥" },
+    { value: "slowcooker", label: "Slow Cooker", icon: "⏰" },
+    { value: "pressure", label: "Pressure Cooker", icon: "⚡" },
+    { value: "blender", label: "Blender", icon: "🌪️" },
+    { value: "rice", label: "Rice Cooker", icon: "🍚" },
+    { value: "bbq", label: "BBQ", icon: "🍖" },
+    { value: "any", label: "Any equipment", icon: "🔪" },
+    { value: "basics", label: "Just the basics", icon: "🔪" }
   ];
 
   // Match exact ambition labels from other modes
@@ -265,7 +266,7 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
               ))}
             </div>
             <p className="text-sm text-slate-600 text-center">
-              Select any dietary preferences or restrictions
+              Tap to select multiple options (or skip if none apply)
             </p>
           </div>
         );
@@ -275,11 +276,11 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
           <div className="space-y-6">
             <div className="text-center">
               <div className="text-4xl font-bold text-primary mb-2">{quizData.time} min</div>
-              <div className="text-lg text-slate-600">{timeLabels(quizData.time || 60)}</div>
+              <div className="text-lg text-slate-600">{timeLabels(quizData.time || 30)}</div>
             </div>
             <div className="px-4">
               <Slider
-                value={[quizData.time || 60]}
+                value={[quizData.time || 30]}
                 onValueChange={(value) => updateQuizData('time', value[0])}
                 max={90}
                 min={5}
@@ -359,9 +360,7 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
                   onClick={() => toggleArrayItem('equipment', option.value)}
                 >
                   <CardContent className="p-4 text-center">
-                    <div className="w-8 h-8 mx-auto mb-2 text-primary flex items-center justify-center">
-                      {React.createElement(option.icon, { className: "w-6 h-6" })}
-                    </div>
+                    <div className="text-2xl mb-2">{option.icon}</div>
                     <div className="font-medium text-sm">{option.label}</div>
                     {quizData.equipment?.includes(option.value) && (
                       <div className="w-4 h-4 gradient-primary rounded-full flex items-center justify-center mx-auto mt-2">
@@ -392,49 +391,56 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
             {Math.round(progress)}%
           </div>
         </div>
-        <Progress value={progress} className="h-2 bg-white/30" />
+        <Progress value={progress} className="h-2" />
       </div>
 
-      {/* Content */}
-      <div className="p-6 max-w-2xl mx-auto space-y-8">
-        {/* Question */}
-        <div className="text-center space-y-2">
-          <h2 className="text-3xl font-bold gradient-text">
-            {questions[currentStep].title}
-          </h2>
-          <p className="text-slate-600 text-lg">
-            {questions[currentStep].subtitle}
-          </p>
-        </div>
+      {/* Question Content */}
+      <div className="p-6">
+        <div className="max-w-2xl mx-auto">
+          {/* Question Header */}
+          <div className="text-center mb-8 animate-fade-in">
+            <h1 className="text-3xl md:text-4xl font-bold text-display mb-3" style={{
+              background: 'var(--gradient-primary)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}>
+              {questions[currentStep].title}
+            </h1>
+            <p className="text-lg text-slate-600">
+              {questions[currentStep].subtitle}
+            </p>
+          </div>
 
-        {/* Answer Options */}
-        <Card className="glass border-white/20 shadow-xl">
-          <CardContent className="p-8">
+          {/* Question Content */}
+          <div className="mb-8 animate-scale-in">
             {renderQuestion()}
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Navigation */}
-        <div className="flex justify-between">
-          <Button
-            variant="outline"
-            onClick={handleBack}
-            disabled={currentStep === 0}
-            className="flex items-center gap-2 glass border-white/20"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Button>
+          {/* Navigation Buttons */}
+          <div className="flex gap-4 pt-6">
+            {currentStep > 0 && (
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                className="flex items-center gap-2 px-6 py-3 h-12"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </Button>
+            )}
 
-          <Button
-            onClick={handleNext}
-            disabled={!isStepValid() || generateRecipeMutation.isPending}
-            className="flex items-center gap-2 gradient-primary text-white font-semibold px-8"
-          >
-            {generateRecipeMutation.isPending ? "Creating..." : 
-             currentStep === totalSteps - 1 ? "Create Recipe" : "Next"}
-            <ArrowRight className="w-4 h-4" />
-          </Button>
+            <Button
+              onClick={handleNext}
+              disabled={!isStepValid() || generateRecipeMutation.isPending}
+              className="flex-1 flex items-center justify-center gap-2 h-12 text-lg font-semibold"
+              style={{ background: 'var(--gradient-primary)' }}
+            >
+              {generateRecipeMutation.isPending ? "Creating..." : 
+               currentStep === totalSteps - 1 ? "Create Recipe" : "Next"}
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
