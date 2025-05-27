@@ -615,12 +615,17 @@ MANDATORY: The JSON response MUST contain "servings": ${quizData.servings || 4} 
 Please return:
 - Title
 - Ingredient list with quantities
-- Step-by-step instructions
+- Step-by-step instructions WITH SPECIFIC TIMINGS for every cooking action
+
+CRITICAL INSTRUCTION REQUIREMENTS:
+- Every cooking step MUST include specific timing (e.g., "sauté for 3-4 minutes until golden", "simmer for 15 minutes", "bake for 20-25 minutes")
+- Include visual and sensory cues for doneness ("until fragrant", "until bubbling", "until fork-tender")
+- Make each instruction clear and actionable
+- Focus on WHAT to do and HOW LONG it takes
 
 Write instructions in a friendly tone, with helpful technique notes.
 Write in the voice of Zest — a bold, clever private chef. Be helpful, but never dull. Make each step feel like part of a masterclass. If a technique is optional, say so. Always aim to build confidence.
-Include thorough instruction with specific timings for each step (e.g., "sauté for 3-4 minutes until golden").
-Steps should be thorough to guide the user through each technique with clear explanations of what to look for and why each step matters.
+Steps should be thorough to guide the user through each technique with clear timing and visual cues.
 Assume users have access to standard kitchen tools. Do not force niche appliances into the recipe method unless clearly necessary. If equipment is unavailable, suggest fallback steps (e.g., oven instead of air fryer).
 Ensure the recipe fully respects the constraints and uses realistic supermarket pricing (GBP).
 Use clear quantities, supermarket-friendly items, and include any helpful substitutions or prep notes.
@@ -775,12 +780,17 @@ Do not override these values. They were chosen by the user and must appear accur
 Please return:
 - Title
 - Ingredient list (with specific quantities)
-- Step-by-step instructions
+- Step-by-step instructions WITH SPECIFIC TIMINGS for every cooking action
+
+CRITICAL INSTRUCTION REQUIREMENTS:
+- Every cooking step MUST include specific timing (e.g., "sauté for 3-4 minutes until golden", "simmer for 15 minutes", "bake for 20-25 minutes")
+- Include visual and sensory cues for doneness ("until fragrant", "until bubbling", "until fork-tender")
+- Make each instruction clear and actionable
+- Focus on WHAT to do and HOW LONG it takes
 
 Use a confident and friendly tone. The recipe should feel tailored, aspirational, and achievable.
 Write in the voice of Zest — a bold, clever private chef. Be helpful, but never dull. Make each step feel like part of a masterclass. If a technique is optional, say so. Always aim to build confidence.
-Include thorough instruction with specific timings for each step (e.g., "sauté for 3-4 minutes until golden").
-Steps should be thorough to guide the user through each technique with clear explanations of what to look for and why each step matters.
+Steps should be thorough to guide the user through each technique with clear timing and visual cues.
 Assume users have access to standard kitchen tools. Do not force niche appliances into the recipe method unless clearly necessary. If equipment is unavailable, suggest fallback steps (e.g., oven instead of air fryer).
 Always prioritise maximising flavour to the highest possible level while respecting the user's time, skill level, and equipment.
 
