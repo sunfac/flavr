@@ -114,11 +114,11 @@ export default function TinderRecipeCards({
         </div>
       </div>
 
-      {/* Card Container - Flexible height */}
+      {/* Card Container - Fixed height to fit viewport */}
       <div className="flex-1 px-4 min-h-0">
         <div className="max-w-md mx-auto h-full flex flex-col">
           {/* Recipe Card Area */}
-          <div className="flex-1 relative" style={{ minHeight: '400px' }}>
+          <div className="relative" style={{ height: '460px' }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
@@ -132,17 +132,20 @@ export default function TinderRecipeCards({
                 <Card className="w-full h-full bg-slate-800/90 backdrop-blur-lg border border-slate-700 rounded-2xl overflow-hidden shadow-2xl">
                   <CardContent className="p-6 h-full flex flex-col">
                     {/* Recipe Title & Description */}
-                    <div className="text-center mb-4">
-                      <h3 className="text-xl font-bold text-white mb-3 leading-tight">
+                    <div className="text-center mb-6">
+                      <h3 className="text-xl font-bold text-white mb-4 leading-tight">
                         {currentRecipe.title}
                       </h3>
-                      <div className="text-slate-300 text-base leading-relaxed px-2">
-                        {currentRecipe.description || "Delicious recipe waiting for you to discover!"}
-                      </div>
+                      <p className="text-slate-300 text-base leading-relaxed px-3">
+                        {typeof currentRecipe.description === 'string' 
+                          ? currentRecipe.description 
+                          : "Delicious recipe waiting for you to discover!"
+                        }
+                      </p>
                     </div>
 
                     {/* Recipe Visual */}
-                    <div className="flex-1 bg-gradient-to-br from-orange-500/20 via-amber-500/20 to-yellow-500/20 rounded-xl flex items-center justify-center mb-4 min-h-0">
+                    <div className="flex-1 bg-gradient-to-br from-orange-500/20 via-amber-500/20 to-yellow-500/20 rounded-xl flex items-center justify-center mb-6 min-h-0">
                       <motion.div
                         animate={{ 
                           rotate: [0, 5, -5, 0],
