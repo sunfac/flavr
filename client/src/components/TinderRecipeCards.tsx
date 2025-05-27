@@ -118,7 +118,7 @@ export default function TinderRecipeCards({
       <div className="flex-1 px-4 min-h-0">
         <div className="max-w-md mx-auto h-full flex flex-col">
           {/* Recipe Card Area */}
-          <div className="relative" style={{ height: '460px' }}>
+          <div className="relative" style={{ height: '350px' }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
@@ -144,19 +144,7 @@ export default function TinderRecipeCards({
                       </p>
                     </div>
 
-                    {/* Recipe Visual */}
-                    <div className="flex-1 bg-gradient-to-br from-orange-500/20 via-amber-500/20 to-yellow-500/20 rounded-xl flex items-center justify-center mb-6 min-h-0">
-                      <motion.div
-                        animate={{ 
-                          rotate: [0, 5, -5, 0],
-                          scale: [1, 1.05, 1]
-                        }}
-                        transition={{ duration: 3, repeat: Infinity }}
-                        className="text-6xl"
-                      >
-                        🍽️
-                      </motion.div>
-                    </div>
+                    {/* Recipe Visual - Removed */}
 
                     {/* Action Button */}
                     <Button
