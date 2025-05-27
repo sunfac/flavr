@@ -613,11 +613,11 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
       let enhancedPrompt;
       
       if (mode === 'shopping') {
-        // Get mapped guidance text using centralized mapping
+        // Get mapped guidance text using existing functions (preserve Chef Assist compatibility)
         const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
         const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
         const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
-        const budgetText = quizData.budget ? getBudgetText(quizData.budget) : '';
+        const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
         const equipmentText = formatEquipmentText(quizData);
         
@@ -796,15 +796,15 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
       let enhancedPrompt;
       
       if (mode === 'shopping') {
-        // Get mapped guidance text for Shopping Mode using centralized mapping
+        // Get mapped guidance text for Shopping Mode using existing functions (preserve Chef Assist compatibility)
         const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
         const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
         const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
-        const budgetText = quizData.budget ? getBudgetText(quizData.budget) : '';
+        const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
         const equipmentText = formatEquipmentText(quizData);
         
-        // Use centralized mapping utilities
+        // Use centralized mapping utilities for specific elements only
         const difficulty = getDifficulty(quizData.ambition);
         const cookTime = getCookTime(quizData);
         
