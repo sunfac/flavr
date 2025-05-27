@@ -66,8 +66,8 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
     {
       icon: Star,
       label: "Flavr+",
-      href: "/subscribe",
-      requiresAuth: true
+      href: "/flavr-plus",
+      requiresAuth: false
     },
     {
       icon: Settings,
