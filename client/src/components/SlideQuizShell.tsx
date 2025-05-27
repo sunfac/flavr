@@ -665,29 +665,31 @@ export default function SlideQuizShell({
       <div className="flex-shrink-0 bg-slate-900/90 backdrop-blur-lg border-t border-slate-700">
         <div className="max-w-md mx-auto px-4 py-4">
           <div className="flex justify-between items-center gap-4">
-            <div className="w-20">
+            <div className="w-20 flex-shrink-0">
               <Button
                 variant="outline"
                 onClick={prevQuestion}
                 disabled={currentQuestionIndex === 0}
-                className="flex items-center gap-1 border-slate-600 bg-slate-800/50 text-white hover:bg-slate-700 text-sm px-3 py-2 w-full justify-center"
+                className="flex items-center gap-1 border-slate-600 bg-slate-800/50 text-white hover:bg-slate-700 text-sm px-2 py-2 w-full justify-center overflow-hidden"
+                style={{ transform: 'none' }}
               >
                 <ArrowLeft className="w-3 h-3" />
-                <span>Back</span>
+                <span className="text-xs">Back</span>
               </Button>
             </div>
 
-            <div className="text-center flex-1">
+            <div className="text-center flex-1 px-2">
               {currentQ.required && !canProceed() && (
                 <p className="text-orange-400 text-xs">This question is required</p>
               )}
             </div>
 
-            <div className="w-24">
+            <div className="w-24 flex-shrink-0">
               <Button
                 onClick={nextQuestion}
                 disabled={!canProceed()}
-                className="flex items-center gap-1 bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 text-sm px-3 py-2 w-full justify-center"
+                className="flex items-center gap-1 bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 text-sm px-2 py-2 w-full justify-center overflow-hidden"
+                style={{ transform: 'none' }}
               >
                 <span className="whitespace-nowrap text-xs">{currentQuestionIndex === questions.length - 1 ? 'Generate' : 'Next'}</span>
                 <ArrowRight className="w-3 h-3" />
