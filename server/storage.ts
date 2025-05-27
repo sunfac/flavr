@@ -1,4 +1,4 @@
-import { users, recipes, chatMessages, type User, type InsertUser, type Recipe, type InsertRecipe, type ChatMessage, type InsertChatMessage } from "@shared/schema";
+import { users, recipes, chatMessages, developerLogs, type User, type InsertUser, type Recipe, type InsertRecipe, type ChatMessage, type InsertChatMessage, type DeveloperLog, type InsertDeveloperLog } from "@shared/schema";
 
 export interface IStorage {
   // User operations
@@ -21,23 +21,31 @@ export interface IStorage {
   // Chat operations
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
   getChatHistory(userId: number, limit?: number): Promise<ChatMessage[]>;
+  
+  // Developer logging operations
+  createDeveloperLog(log: InsertDeveloperLog): Promise<DeveloperLog>;
+  getDeveloperLogs(limit?: number): Promise<DeveloperLog[]>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private recipes: Map<number, Recipe>;
   private chatMessages: Map<number, ChatMessage>;
+  private developerLogs: Map<number, DeveloperLog>;
   private currentUserId: number;
   private currentRecipeId: number;
   private currentChatId: number;
+  private currentLogId: number;
 
   constructor() {
     this.users = new Map();
     this.recipes = new Map();
     this.chatMessages = new Map();
+    this.developerLogs = new Map();
     this.currentUserId = 1;
     this.currentRecipeId = 1;
     this.currentChatId = 1;
+    this.currentLogId = 1;
     
     // Create developer account with unlimited access
     this.createDeveloperAccount();
@@ -198,7 +206,24 @@ export class MemStorage implements IStorage {
   async getChatHistory(userId: number, limit: number = 10): Promise<ChatMessage[]> {
     return Array.from(this.chatMessages.values())
       .filter((message) => message.userId === userId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime())
+      .slice(0, limit);
+  }
+
+  async createDeveloperLog(insertLog: InsertDeveloperLog): Promise<DeveloperLog> {
+    const id = this.currentLogId++;
+    const log: DeveloperLog = {
+      id,
+      ...insertLog,
+      createdAt: new Date(),
+    };
+    this.developerLogs.set(id, log);
+    return log;
+  }
+
+  async getDeveloperLogs(limit: number = 50): Promise<DeveloperLog[]> {
+    return Array.from(this.developerLogs.values())
+      .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime())
       .slice(0, limit);
   }
 }

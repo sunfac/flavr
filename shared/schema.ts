@@ -58,6 +58,23 @@ export const chatMessages = pgTable("chat_messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const developerLogs = pgTable("developer_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  mode: text("mode").notNull(), // shopping, fridge, chef
+  quizInputs: jsonb("quiz_inputs").$type<Record<string, any>>().notNull(),
+  promptSent: text("prompt_sent").notNull(),
+  gptResponse: text("gpt_response").notNull(),
+  expectedOutput: jsonb("expected_output").$type<Record<string, any>>().notNull(),
+  actualOutput: jsonb("actual_output").$type<Record<string, any>>().notNull(),
+  inputTokens: integer("input_tokens").notNull(),
+  outputTokens: integer("output_tokens").notNull(),
+  estimatedCost: text("estimated_cost").notNull(), // in USD
+  matchStatus: boolean("match_status").notNull(),
+  discrepancies: jsonb("discrepancies").$type<string[]>(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -77,9 +94,16 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   createdAt: true,
 });
 
+export const insertDeveloperLogSchema = createInsertSchema(developerLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertRecipe = z.infer<typeof insertRecipeSchema>;
 export type Recipe = typeof recipes.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
+export type InsertDeveloperLog = z.infer<typeof insertDeveloperLogSchema>;
+export type DeveloperLog = typeof developerLogs.$inferSelect;
