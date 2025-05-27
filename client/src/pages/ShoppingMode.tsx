@@ -11,6 +11,7 @@ import GlobalNavigation from "@/components/GlobalNavigation";
 import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
 import AuthModal from "@/components/AuthModal";
+import ChatBot from "@/components/ChatBot";
 import { shoppingQuestions } from "@/config/shoppingQuestions";
 
 export default function ShoppingMode() {
@@ -269,6 +270,15 @@ export default function ShoppingMode() {
             onBack={handleBackToSuggestions}
             showNewSearchButton={true}
             onNewSearch={handleNewSearch}
+          />
+          
+          {/* Floating Zest Chatbot - Always visible when recipe is shown */}
+          <ChatBot 
+            currentRecipe={selectedRecipe}
+            currentMode="shopping"
+            onRecipeUpdate={(updatedRecipe: any) => {
+              setSelectedRecipe(updatedRecipe);
+            }}
           />
         </main>
 

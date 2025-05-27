@@ -1,0 +1,68 @@
+/*
+  === REPLIT INSTRUCTION: Fix & Upgrade Flavr's Zest Chatbot ===
+
+  Objective:
+  Repair and enhance the Zest chatbot system to make it fully functional, visually cohesive, and seamlessly integrated with the recipe card experience. Ensure it dynamically edits recipes, responds conversationally, and is visually consistent with the rest of the app.
+
+  CRITICAL: The floating Zest chat icon is currently NOT visible. This must appear when a recipe is shown so users can access the assistant.
+
+  --- REQUIRED FIXES & UPGRADES ---
+
+  1. ❌ FIX: Floating Chat Icon Not Visible
+     - Ensure the Zest chat button (floating icon) is:
+       • Always rendered once a recipe is generated (`recipeCard !== null`)
+       • Visible in the lower right or consistent mobile-safe position
+       • Styled with brand colors (e.g., Flavr orange background, white icon)
+     - Use a `ZestFloatingButton.tsx` component if needed
+     - On click, it should open the full `ZestChatPopup` window
+
+  2. ❌ Chat Not Responding
+     - Confirm `onSend()` fires correctly and submits messages to `/api/zest`
+     - Log or display errors if GPT fails to return a response
+     - Show typing indicator while waiting (e.g., “Zest is thinking…”)
+
+  3. ❌ Recipe Chips Not Updating Recipe
+     - Clicking chips (e.g., “Make it spicier”) must:
+       • Send a structured prompt to Zest
+       • GPT responds with modified recipe JSON
+       • Update `recipeCard` state and re-render with changes
+
+  4. ❌ Missing Context in GPT Prompt
+     - Inject full context into the GPT prompt:
+       ```
+       You are Zest — a clever, confident private chef.
+       You help tweak the user’s current recipe based on their input.
+       Always use JSON if updating the recipe.
+       Recipe Title: {recipe.title}
+       Ingredients: {recipe.ingredients}
+       Servings: {recipe.servings}
+       Constraints: {mood}, {diet}, {time}, {equipment}
+       ```
+
+  5. 🎨 Fix Visual Style for Chat
+     - Match chat font and style to the rest of the app
+     - Zest (bot): orange bubbles (#F77D0E), white text
+     - User: light grey (#E5E5EA), black text
+     - Add hover/tap states, animations, and smooth transitions
+
+  6. 🔁 Sync Chat With Recipe Updates
+     - When GPT returns a new recipe, parse and update:
+       • `recipeCard` state
+       • Any dependent displays (ingredients list, image, etc.)
+     - Show user confirmation in chat: “Done! I’ve updated it for 6 servings.”
+
+  7. 💬 Improve UX Flow
+     - Animate popup opening
+     - Limit chat window to 1 instance
+     - Use global context or store to manage chat/recipe interaction cleanly
+
+  Optional:
+     - Add unread message indicator on chat icon when Zest replies
+     - Add toast for updates (e.g., “Recipe Updated”, “Zest Replied”)
+
+  --- FINAL GOAL ---
+  When complete:
+  - Chat icon appears as soon as a recipe is output
+  - Zest assistant works conversationally and edits recipes
+  - Everything is visually styled and mobile-friendly
+*/
