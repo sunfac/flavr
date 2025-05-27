@@ -281,25 +281,25 @@ export default function ChatBot({
           </Button>
         </CardHeader>
         
-        <ScrollArea className="flex-1 p-4 min-h-0 max-h-64 overflow-y-auto" ref={scrollAreaRef}>
-          <div className="space-y-4">
+        <ScrollArea className="flex-1 p-2 sm:p-4 min-h-0 max-h-48 sm:max-h-64 overflow-y-auto" ref={scrollAreaRef}>
+          <div className="space-y-3 sm:space-y-4">
             {localMessages.map((msg) => (
-              <div key={msg.id} className={`flex space-x-3 ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
+              <div key={msg.id} className={`flex space-x-2 sm:space-x-3 ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
                 {!msg.isUser && (
-                  <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                    <Bot className="text-white w-4 h-4" />
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                    <Bot className="text-white w-3 h-3 sm:w-4 sm:h-4" />
                   </div>
                 )}
-                <div className={`rounded-2xl p-4 max-w-xs shadow-lg transition-all duration-300 hover:scale-105 ${
+                <div className={`rounded-2xl p-2 sm:p-4 max-w-[240px] sm:max-w-xs shadow-lg ${
                   msg.isUser 
-                    ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white ml-4" 
+                    ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white ml-2 sm:ml-4" 
                     : "bg-card/90 backdrop-blur-sm text-foreground border border-border"
                 }`}>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.text}</p>
+                  <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.text}</p>
                 </div>
                 {msg.isUser && (
-                  <div className="w-8 h-8 bg-slate-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                    <User className="text-white w-4 h-4" />
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-slate-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                    <User className="text-white w-3 h-3 sm:w-4 sm:h-4" />
                   </div>
                 )}
               </div>
@@ -321,16 +321,16 @@ export default function ChatBot({
           </div>
         </ScrollArea>
 
-        {/* Suggestion Chips - Above input */}
+        {/* Suggestion Chips - Above input - Mobile optimized */}
         {showSuggestions && currentRecipe && (
-          <div className="px-4 py-2 border-t border-white/10 flex-shrink-0">
+          <div className="px-3 sm:px-4 py-2 border-t border-white/10 flex-shrink-0">
             <p className="text-xs font-medium text-slate-600 mb-2">Quick suggestions:</p>
             <div className="flex flex-wrap gap-1">
               {suggestionChips.map((chip, index) => (
                 <Badge
                   key={index}
                   variant="outline"
-                  className="cursor-pointer transition-all duration-300 px-2 py-1 text-xs hover:scale-105 bg-orange-500/10 border-orange-400/30 text-orange-400 hover:bg-orange-500/20 hover:border-orange-400/50"
+                  className="cursor-pointer transition-all duration-300 px-2 py-1 text-xs bg-orange-500/10 border-orange-400/30 text-orange-400 hover:bg-orange-500/20 hover:border-orange-400/50"
                   onClick={handleSuggestionClick(chip.text)}
                 >
                   <span className="mr-1">{chip.icon}</span>
@@ -342,26 +342,26 @@ export default function ChatBot({
           </div>
         )}
 
-        {/* Input Area */}
-        <div className="p-4 border-t border-white/10 flex-shrink-0">
+        {/* Input Area - Mobile optimized */}
+        <div className="p-3 sm:p-4 border-t border-white/10 flex-shrink-0">
           <div className="flex space-x-2">
             <Input
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ask about substitutions, cooking tips..."
-              className="flex-1 h-10 input-modern glass border-white/20 placeholder:text-slate-500 text-sm"
+              placeholder="Ask about cooking..."
+              className="flex-1 h-9 sm:h-10 input-modern glass border-white/20 placeholder:text-slate-500 text-sm"
               disabled={sendMessageMutation.isPending}
             />
             <Button 
               onClick={() => handleSend()}
-              className="h-10 px-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+              className="h-9 sm:h-10 px-2 sm:px-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={!message.trim() || sendMessageMutation.isPending}
             >
               {sendMessageMutation.isPending ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <Send className="w-4 h-4" />
+                <Send className="w-3 h-3 sm:w-4 sm:h-4" />
               )}
             </Button>
           </div>
