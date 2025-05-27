@@ -563,8 +563,8 @@ ${budgetText}
 
 The total cooking time must NOT exceed ${cookTime} minutes. This is the user's hard time limit.
 
-EQUIPMENT REQUIREMENT: ${equipmentText}
-MANDATORY: You MUST use the specified equipment as the primary cooking method. The user has specifically selected this equipment and expects the recipe to center around it.
+AVAILABLE EQUIPMENT: ${equipmentText}
+COOKING CONSTRAINT: You may ONLY use the equipment listed above. Do not suggest any cooking methods that require equipment the user doesn't have.
 
 Ingredients: ${quizData.ingredients || 'Use suitable ingredients'}
 
@@ -640,7 +640,8 @@ ${dietaryText}
 
 The total cooking time must NOT exceed ${cookTime} minutes. This is the user's hard time limit.
 
-${equipmentText}
+AVAILABLE EQUIPMENT: ${equipmentText}
+COOKING CONSTRAINT: You may ONLY use the equipment listed above. Do not suggest any cooking methods that require equipment the user doesn't have.
 
 Ingredients available: ${Array.isArray(quizData.ingredients) ? quizData.ingredients.join(', ') : (quizData.ingredients || 'Various ingredients')}
 ${getStrictDietaryInstruction(quizData.dietary)}
@@ -717,7 +718,8 @@ ${budgetText}
 
 ${timeText}
 
-${equipmentText}
+AVAILABLE EQUIPMENT: ${equipmentText}
+COOKING CONSTRAINT: You may ONLY use the equipment listed above. Do not suggest any cooking methods that require equipment the user doesn't have.
 
 Important: The following values must be strictly used when creating the recipe:
 - Servings: ${quizData.servings || 4} people
