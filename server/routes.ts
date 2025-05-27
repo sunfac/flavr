@@ -326,6 +326,21 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
       let enhancedPrompt;
       
       if (mode === 'shopping') {
+        // === QUIZ INPUT LOGGING FOR DEBUGGING ===
+        console.log("=== SHOPPING MODE QUIZ INPUTS ===");
+        console.log("Raw quizData:", JSON.stringify(quizData, null, 2));
+        console.log("Individual fields:");
+        console.log("- mood/vibe:", quizData.mood || quizData.vibe);
+        console.log("- ambition:", quizData.ambition);
+        console.log("- dietary:", quizData.dietary);
+        console.log("- budget:", quizData.budget);
+        console.log("- time:", quizData.time, "(type:", typeof quizData.time, ")");
+        console.log("- equipment:", quizData.equipment, "(type:", typeof quizData.equipment, ")");
+        console.log("- servings:", quizData.servings);
+        console.log("- cuisine:", quizData.cuisine);
+        console.log("- ingredients:", quizData.ingredients);
+        console.log("=====================================");
+        
         // Get mapped guidance text using existing functions (preserve Chef Assist compatibility)
         const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
         const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
@@ -333,6 +348,16 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
         const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : "";
+        
+        // === MAPPED OUTPUT LOGGING FOR DEBUGGING ===
+        console.log("=== MAPPED PROMPT OUTPUTS ===");
+        console.log("- moodText:", moodText);
+        console.log("- ambitionText:", ambitionText);
+        console.log("- dietaryText:", dietaryText);
+        console.log("- budgetText:", budgetText);
+        console.log("- timeText:", timeText);
+        console.log("- equipmentText:", equipmentText);
+        console.log("==============================");
         
         // Build Shopping Mode mapped prompt (Prompt 1)
         const creativeGuidance = getCreativeGuidanceBlock();
