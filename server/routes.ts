@@ -321,6 +321,11 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
     try {
       const { mode, quizData, prompt } = req.body;
       console.log("Recipe ideas API called with:", { mode, body: req.body });
+      
+      // === QUIZ INPUT DEBUGGING ===
+      console.log("🔍 QUIZ INPUT DEBUG - Time:", quizData.time, "Type:", typeof quizData.time);
+      console.log("🔍 QUIZ INPUT DEBUG - Equipment:", quizData.equipment, "Type:", typeof quizData.equipment);
+      console.log("🔍 QUIZ INPUT DEBUG - All inputs:", JSON.stringify(quizData));
 
       // Build mapped prompt for Shopping Mode (Prompt 1 - Recipe Idea Generator)
       let enhancedPrompt;
@@ -350,14 +355,10 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : "";
         
         // === MAPPED OUTPUT LOGGING FOR DEBUGGING ===
-        console.log("=== MAPPED PROMPT OUTPUTS ===");
-        console.log("- moodText:", moodText);
-        console.log("- ambitionText:", ambitionText);
-        console.log("- dietaryText:", dietaryText);
-        console.log("- budgetText:", budgetText);
-        console.log("- timeText:", timeText);
-        console.log("- equipmentText:", equipmentText);
-        console.log("==============================");
+        console.log("🔧 MAPPED OUTPUT - timeText:", timeText);
+        console.log("🔧 MAPPED OUTPUT - equipmentText:", equipmentText);
+        console.log("🔧 MAPPED OUTPUT - moodText:", moodText);
+        console.log("🔧 MAPPED OUTPUT - budgetText:", budgetText);
         
         // Build Shopping Mode mapped prompt (Prompt 1)
         const creativeGuidance = getCreativeGuidanceBlock();
