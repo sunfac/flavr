@@ -84,6 +84,14 @@ export default function ChatBot({
       apiRequest("POST", "/api/chat", data),
     onSuccess: async (response) => {
       const result = await response.json();
+      
+      // Debug logging to see what we receive
+      console.log('🔍 CHAT RESPONSE RECEIVED:', {
+        hasUpdatedRecipe: !!result.updatedRecipe,
+        updatedRecipeTitle: result.updatedRecipe?.title || 'none',
+        onRecipeUpdateExists: !!onRecipeUpdate
+      });
+      
       const newMessage: ChatMessage = {
         id: Date.now(),
         message,
@@ -97,6 +105,7 @@ export default function ChatBot({
 
       // Check if the response includes recipe updates
       if (result.updatedRecipe && onRecipeUpdate) {
+        console.log('📝 UPDATING RECIPE:', result.updatedRecipe);
         onRecipeUpdate(result.updatedRecipe);
         
         // Add a recipe update notification message

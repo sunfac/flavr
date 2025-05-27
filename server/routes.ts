@@ -1366,13 +1366,21 @@ Keep it SHORT and encouraging. The recipe card will show the changes!`;
           if (jsonMatch) {
             const parsed = JSON.parse(jsonMatch[0]);
             if (parsed.shouldUpdateRecipe && parsed.updatedRecipe) {
-              updatedRecipe = { ...currentRecipe, ...parsed.updatedRecipe };
+              // Ensure we preserve the original recipe ID and merge updates properly
+              updatedRecipe = { 
+                ...currentRecipe, 
+                ...parsed.updatedRecipe,
+                id: currentRecipe.id // Preserve the original ID
+              };
+              
+              console.log(`🔄 RECIPE UPDATE DETECTED: ${currentRecipe.title} → ${updatedRecipe.title}`);
+              console.log(`📊 Updated servings: ${currentRecipe.servings} → ${updatedRecipe.servings}`);
               
               // Check if the title changed significantly (indicates major modification)
               const titleChanged = updatedRecipe.title !== currentRecipe.title;
               
               // Generate new image for Flavr+ users if title changed significantly
-              if (titleChanged && user?.hasFlavrPlus) {
+              if (titleChanged && userId) {
                 try {
                   console.log(`\n🖼️ GENERATING NEW IMAGE for modified recipe: ${updatedRecipe.title}`);
                   
@@ -1467,6 +1475,13 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
         userId,
         message,
         response: botResponse,
+      });
+
+      // Debug logging to see what we're sending back
+      console.log(`🚀 CHAT RESPONSE SENDING:`, {
+        hasUpdatedRecipe: !!updatedRecipe,
+        responseLength: botResponse.length,
+        updatedRecipeTitle: updatedRecipe?.title || 'none'
       });
 
       res.json({ 
