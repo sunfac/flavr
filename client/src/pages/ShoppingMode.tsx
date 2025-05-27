@@ -96,10 +96,10 @@ export default function ShoppingMode() {
     const transformedData = {
       mood: data.mood,
       cuisine: data.cuisine,
-      time: data.cookingTime,
+      time: data.time,  // Fixed: use data.time instead of data.cookingTime
       budget: data.budget,
       dietary: data.dietary || [],
-      equipment: data.equipment ? [data.equipment] : [],
+      equipment: data.equipment || [],  // Fixed: use array directly, don't wrap in another array
       ambition: data.ambition,
       servings: data.servings || 4,
       supermarket: data.supermarket
