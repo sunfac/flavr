@@ -322,15 +322,15 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.8, delay: index * 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
                 viewport={{ once: true }}
-                className="relative group"
+                className="relative group h-full"
               >
-                {/* Glass morphism container with glow */}
-                <div className="relative bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 md:p-10 shadow-2xl hover:shadow-3xl transition-all duration-700 group-hover:bg-white/8">
+                {/* Glass morphism container with glow - ensure equal height */}
+                <div className="relative bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 md:p-10 shadow-2xl hover:shadow-3xl transition-all duration-700 group-hover:bg-white/8 h-full flex flex-col">
                   {/* Multi-layer glow effect */}
                   <div className={`absolute -inset-1 bg-gradient-to-r ${feature.gradient} rounded-3xl blur-xl opacity-0 group-hover:opacity-60 transition-opacity duration-500`}></div>
                   <div className={`absolute -inset-2 bg-gradient-to-r ${feature.gradient} rounded-3xl blur-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-700`}></div>
                   
-                  <div className="relative z-10">
+                  <div className="relative z-10 flex flex-col h-full">
                     {/* Icon with enhanced glow */}
                     <div className="relative mb-8">
                       <div className="absolute inset-0 bg-orange-400/20 rounded-full blur-xl scale-150 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -340,7 +340,7 @@ export default function LandingPage() {
                     <h3 className="text-2xl md:text-3xl font-bold text-white mb-4 group-hover:text-orange-50 transition-colors duration-300">
                       {feature.title}
                     </h3>
-                    <p className="text-slate-300 group-hover:text-slate-200 leading-relaxed text-lg transition-colors duration-300">
+                    <p className="text-slate-300 group-hover:text-slate-200 leading-relaxed text-lg transition-colors duration-300 flex-grow">
                       {feature.description}
                     </p>
                   </div>
