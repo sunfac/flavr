@@ -21,22 +21,22 @@ export const formatEquipmentText = (quizData: any): string => {
 const budgetMappings = {
   "budget": {
     label: "Budget-friendly",
-    costRange: "£1–£3 per portion",
+    costRange: "£1–£2 per portion",
     guidance: "Focus on affordable staples like pasta, beans, eggs, and seasonal vegetables. Use simple preparation methods and versatile ingredients that provide good value."
   },
   "moderate": {
     label: "Moderate",
-    costRange: "£5–15 per portion", 
+    costRange: "£2–£4 per portion", 
     guidance: "Balanced cost-conscious meals with quality ingredients and some flexibility in preparation time or brand. A mix of fresh and pantry ingredients."
   },
   "premium": {
     label: "Premium",
-    costRange: "£15–25 per portion",
+    costRange: "£4–£7 per portion",
     guidance: "Higher-quality ingredients with focus on flavour and presentation. Some specialty items are acceptable."
   },
   "luxury": {
     label: "Luxury",
-    costRange: "£25+ per portion",
+    costRange: "£7+ per portion",
     guidance: "Premium ingredients, luxury items, specialty cuts, artisanal products, exotic spices, and high-end components."
   }
 };
@@ -176,20 +176,24 @@ const dietMap: Record<string, { label: string; description: string }> = {
   }
 };
 
-// Equipment mappings
+// Equipment mappings - aligned with quiz keys
 const equipmentMappings: Record<string, string> = {
+  "stovetop": "Stovetop/Hob for sautéing, boiling, and pan-frying",
+  "oven": "Oven for baking, roasting, and broiling",
+  "microwave": "Microwave for quick reheating and steam-cooking",
+  "airfryer": "Air fryer for crispy textures with less oil",
+  "grill": "Grill for outdoor cooking and smoky flavors",
+  "slowcooker": "Slow cooker for hands-off, tender results",
+  "pressure": "Pressure cooker for quick pressure cooking",
+  "blender": "Blender/Food processor for smoothies and sauces",
+  "rice": "Rice cooker for perfect grains",
+  "bbq": "BBQ for authentic barbecue flavors",
+  "basics": "Basic kitchen tools and standard cooking methods",
+  "all": "Full kitchen setup with all equipment available",
+  // Legacy support for any existing keys
   "airFryer": "Air fryer for crispy textures with less oil",
   "slowCooker": "Slow cooker for hands-off, tender results",
-  "instantPot": "Instant Pot for quick pressure cooking",
-  "standMixer": "Stand mixer for baking and mixing",
-  "foodProcessor": "Food processor for chopping and blending",
-  "immersionBlender": "Immersion blender for soups and sauces",
-  "grill": "Grill for outdoor cooking and smoky flavors",
-  "wok": "Wok for high-heat stir-frying",
-  "dutchOven": "Dutch oven for braising and one-pot meals",
-  "kitchenAid": "KitchenAid mixer for professional-level mixing",
-  "vitamix": "High-powered blender for smoothies and purees",
-  "smoker": "Smoker for authentic barbecue flavors"
+  "instantPot": "Instant Pot for quick pressure cooking"
 };
 
 // === DERIVED MAPPINGS FOR COMPATIBILITY ===
