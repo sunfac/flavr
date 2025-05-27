@@ -15,6 +15,7 @@ import ChatBot from "@/components/ChatBot";
 import UpgradeModal from "@/components/UpgradeModal";
 import { shoppingQuestions } from "@/config/shoppingQuestions";
 import { useQuery } from "@tanstack/react-query";
+import { checkQuotaBeforeGPT } from "@/lib/quotaManager";
 
 export default function ShoppingMode() {
   const [, navigate] = useLocation();
