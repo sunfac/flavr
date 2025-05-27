@@ -1182,41 +1182,39 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
       console.log(message);
       console.log("=".repeat(80));
 
-      // Check if this is a recipe modification request (exclude translation requests)
-      const recipeChangeKeywords = [
-        'substitute', 'replace', 'swap', 'use instead', 'instead of',
-        'use chicken', 'use beef', 'use pork', 'use fish', 
-        'make vegetarian', 'make vegan', 'gluten free', 'dairy free',
-        'make it spicier', 'add more', 'less salt', 'increase servings'
-      ];
-      
-      const translationKeywords = [
-        'english', 'translate', 'translation', 'in english', 'to english'
-      ];
-      
-      const isTranslationRequest = translationKeywords.some(keyword => 
-        message.toLowerCase().includes(keyword.toLowerCase())
-      );
-      
-      const isRecipeModification = !isTranslationRequest && recipeChangeKeywords.some(keyword => 
-        message.toLowerCase().includes(keyword.toLowerCase())
+      // Intelligent recipe modification detection - only when user explicitly wants changes
+      const shouldUpdateRecipe = currentRecipe && (
+        message.toLowerCase().includes('substitute') ||
+        message.toLowerCase().includes('replace') ||
+        message.toLowerCase().includes('use instead') ||
+        message.toLowerCase().includes('make it vegetarian') ||
+        message.toLowerCase().includes('make it vegan') ||
+        message.toLowerCase().includes('use chicken') ||
+        message.toLowerCase().includes('use beef') ||
+        message.toLowerCase().includes('use fish') ||
+        message.toLowerCase().includes('increase servings') ||
+        message.toLowerCase().includes('make it spicier') ||
+        message.toLowerCase().includes('less spicy') ||
+        message.toLowerCase().includes('dairy free') ||
+        message.toLowerCase().includes('gluten free')
       );
 
       let updatedRecipe = null;
       let botResponse = "";
 
-      if (isRecipeModification && currentRecipe) {
-        // Enhanced prompt for recipe modifications
-        const modificationPrompt = `You are a professional chef assistant. The user wants to modify this recipe: "${currentRecipe.title}".
+      if (shouldUpdateRecipe) {
+        // Recipe modification prompt with intelligent detection
+        const modificationPrompt = `You are Zest, a bold and clever private chef assistant. The user wants to modify this recipe: "${currentRecipe.title}".
 
-Current ingredients: ${currentRecipe.ingredients?.join(', ')}
-Current instructions: ${currentRecipe.instructions?.join(' ')}
+Current recipe:
+- Ingredients: ${currentRecipe.ingredients?.join(', ')}
+- Instructions: ${currentRecipe.instructions?.join(' ')}
 
 User request: "${message}"
 
-Please provide:
-1. A helpful response explaining the modification
-2. If this is a major change (protein substitution, dietary modification, etc.), also provide an updated recipe in this exact JSON format:
+INSTRUCTIONS:
+1. First, provide a helpful response explaining the modification in Zest's confident, encouraging voice
+2. If this requires updating the actual recipe (ingredient changes, major modifications), provide the updated recipe in this exact JSON format at the end:
 
 {
   "shouldUpdateRecipe": true,
@@ -1225,14 +1223,13 @@ Please provide:
     "ingredients": ["updated ingredient 1", "updated ingredient 2"],
     "instructions": ["updated step 1", "updated step 2"],
     "description": "Updated description"
-  },
-  "response": "Your helpful explanation"
+  }
 }
 
-If it's just advice without major changes, respond normally without JSON.`;
+Use Zest's voice: bold, clever, builds confidence. Make the user feel like a culinary rockstar.`;
 
         const response = await openai.chat.completions.create({
-          model: "gpt-4o",
+          model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
           messages: [
             {
               role: "system",
@@ -1245,15 +1242,32 @@ If it's just advice without major changes, respond normally without JSON.`;
         });
 
         const fullResponse = response.choices[0]?.message?.content || "";
+        const inputTokens = response.usage?.prompt_tokens || 0;
+        const outputTokens = response.usage?.completion_tokens || 0;
+        
+        // Log chatbot interaction for cost tracking
+        await logGPTInteraction(
+          'chatbot',
+          { userMessage: message, currentRecipe: currentRecipe?.title },
+          modificationPrompt,
+          fullResponse,
+          {},
+          {},
+          inputTokens,
+          outputTokens,
+          userId,
+          null // no image for chatbot
+        );
         
         try {
-          // Try to parse JSON response
+          // Try to parse JSON response for recipe updates
           const jsonMatch = fullResponse.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             const parsed = JSON.parse(jsonMatch[0]);
             if (parsed.shouldUpdateRecipe && parsed.updatedRecipe) {
               updatedRecipe = { ...currentRecipe, ...parsed.updatedRecipe };
-              botResponse = parsed.response;
+              // Remove JSON from response text
+              botResponse = fullResponse.replace(/\{[\s\S]*\}/, '').trim();
             } else {
               botResponse = fullResponse;
             }
@@ -1264,13 +1278,17 @@ If it's just advice without major changes, respond normally without JSON.`;
           botResponse = fullResponse;
         }
       } else {
-        // Regular chat response
+        // Regular chat response with Zest personality
+        const regularChatPrompt = `You are Zest, a bold and clever private chef assistant. Respond to the user's cooking question with confidence and enthusiasm. Keep responses helpful but concise. Build the user's confidence and make them feel like a culinary rockstar.
+
+Use Zest's voice: bold, clever, encouraging. Provide practical cooking advice without modifying any recipes.`;
+
         const response = await openai.chat.completions.create({
-          model: "gpt-4o",
+          model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
           messages: [
             {
               role: "system",
-              content: systemPrompt
+              content: regularChatPrompt
             },
             { role: "user", content: message }
           ],
@@ -1279,6 +1297,23 @@ If it's just advice without major changes, respond normally without JSON.`;
         });
 
         botResponse = response.choices[0]?.message?.content || "I'm sorry, I couldn't process that request. Please try again.";
+        
+        const inputTokens = response.usage?.prompt_tokens || 0;
+        const outputTokens = response.usage?.completion_tokens || 0;
+        
+        // Log regular chatbot interaction for cost tracking
+        await logGPTInteraction(
+          'chatbot',
+          { userMessage: message },
+          regularChatPrompt,
+          botResponse,
+          {},
+          {},
+          inputTokens,
+          outputTokens,
+          userId,
+          null // no image for chatbot
+        );
       }
       
       // Save chat message
