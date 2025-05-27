@@ -61,12 +61,14 @@ export default function ChatBot({
 
   // Conversation suggestion chips
   const suggestionChips = [
-    { text: "Add wine pairing", icon: "🍷" },
-    { text: "Make it spicier", icon: "🌶️" },
-    { text: "Increase servings", icon: "👥" },
-    { text: "Add a side dish", icon: "🥗" },
-    { text: "Substitute an ingredient", icon: "🔄" },
-    { text: "Change the protein", icon: "🥩" }
+    { text: "Use chicken instead", icon: "🍗", updatesRecipe: true },
+    { text: "Use beef instead", icon: "🥩", updatesRecipe: true },
+    { text: "Make it vegetarian", icon: "🌱", updatesRecipe: true },
+    { text: "Make it dairy-free", icon: "🥛", updatesRecipe: true },
+    { text: "Make it spicier", icon: "🌶️", updatesRecipe: true },
+    { text: "Add wine pairing", icon: "🍷", updatesRecipe: false },
+    { text: "Add a side dish", icon: "🥗", updatesRecipe: false },
+    { text: "Increase servings", icon: "👥", updatesRecipe: true }
   ];
 
   // Get chat history
@@ -91,6 +93,11 @@ export default function ChatBot({
       };
       setLocalMessages(prev => [...prev, newMessage]);
       setMessage("");
+
+      // Check if the response includes recipe updates
+      if (result.updatedRecipe && onRecipeUpdate) {
+        onRecipeUpdate(result.updatedRecipe);
+      }
     },
   });
 
@@ -249,7 +256,7 @@ export default function ChatBot({
           </Button>
         </CardHeader>
         
-        <ScrollArea className="flex-1 p-4 min-h-0" ref={scrollAreaRef}>
+        <ScrollArea className="flex-1 p-4 min-h-0 max-h-64 overflow-y-auto" ref={scrollAreaRef}>
           <div className="space-y-4">
             {localMessages.map((msg) => (
               <div key={msg.id} className={`flex space-x-3 ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
@@ -263,7 +270,7 @@ export default function ChatBot({
                     ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white ml-4" 
                     : "bg-card/90 backdrop-blur-sm text-foreground border border-border"
                 }`}>
-                  <p className="text-sm leading-relaxed">{msg.text}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.text}</p>
                 </div>
                 {msg.isUser && (
                   <div className="w-8 h-8 bg-slate-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">

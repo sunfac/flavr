@@ -1089,24 +1089,95 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
       console.log(message);
       console.log("=".repeat(80));
 
-      // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt
-          },
-          { role: "user", content: message }
-        ],
-        max_tokens: 300,
-        temperature: 0.7,
-      });
-
-      const botResponse = response.choices[0]?.message?.content || "I'm sorry, I couldn't process that request. Please try again.";
+      // Check if this is a recipe modification request
+      const recipeChangeKeywords = [
+        'substitute', 'replace', 'change', 'swap', 'use instead', 'instead of',
+        'update', 'modify', 'make it', 'use chicken', 'use beef', 'use pork',
+        'use fish', 'make vegetarian', 'make vegan', 'gluten free', 'dairy free'
+      ];
       
-      // For now, don't update recipes through chat - just provide advice
+      const isRecipeModification = recipeChangeKeywords.some(keyword => 
+        message.toLowerCase().includes(keyword.toLowerCase())
+      );
+
       let updatedRecipe = null;
+      let botResponse = "";
+
+      if (isRecipeModification && currentRecipe) {
+        // Enhanced prompt for recipe modifications
+        const modificationPrompt = `You are a professional chef assistant. The user wants to modify this recipe: "${currentRecipe.title}".
+
+Current ingredients: ${currentRecipe.ingredients?.join(', ')}
+Current instructions: ${currentRecipe.instructions?.join(' ')}
+
+User request: "${message}"
+
+Please provide:
+1. A helpful response explaining the modification
+2. If this is a major change (protein substitution, dietary modification, etc.), also provide an updated recipe in this exact JSON format:
+
+{
+  "shouldUpdateRecipe": true,
+  "updatedRecipe": {
+    "title": "Updated Recipe Title",
+    "ingredients": ["updated ingredient 1", "updated ingredient 2"],
+    "instructions": ["updated step 1", "updated step 2"],
+    "description": "Updated description"
+  },
+  "response": "Your helpful explanation"
+}
+
+If it's just advice without major changes, respond normally without JSON.`;
+
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: modificationPrompt
+            },
+            { role: "user", content: message }
+          ],
+          max_tokens: 800,
+          temperature: 0.7,
+        });
+
+        const fullResponse = response.choices[0]?.message?.content || "";
+        
+        try {
+          // Try to parse JSON response
+          const jsonMatch = fullResponse.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            if (parsed.shouldUpdateRecipe && parsed.updatedRecipe) {
+              updatedRecipe = { ...currentRecipe, ...parsed.updatedRecipe };
+              botResponse = parsed.response;
+            } else {
+              botResponse = fullResponse;
+            }
+          } else {
+            botResponse = fullResponse;
+          }
+        } catch (e) {
+          botResponse = fullResponse;
+        }
+      } else {
+        // Regular chat response
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: systemPrompt
+            },
+            { role: "user", content: message }
+          ],
+          max_tokens: 300,
+          temperature: 0.7,
+        });
+
+        botResponse = response.choices[0]?.message?.content || "I'm sorry, I couldn't process that request. Please try again.";
+      }
       
       // Save chat message
       await storage.createChatMessage({
