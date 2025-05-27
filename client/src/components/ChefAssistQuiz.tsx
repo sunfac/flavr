@@ -1,11 +1,24 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { 
+  Clock, 
+  ChefHat, 
+  Users, 
+  Flame, 
+  Zap, 
+  Microwave,
+  Wind,
+  Home,
+  Utensils,
+  Timer,
+  ArrowLeft, 
+  ArrowRight 
+} from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -105,19 +118,19 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
     "Paleo", "Keto", "Halal", "Kosher", "Nut-free", "No restrictions"
   ];
 
-  // Match exact equipment options from other modes  
+  // Match exact equipment options from other modes with lucide icons
   const equipmentOptions = [
-    { value: "stovetop", label: "Stovetop", icon: "🔥" },
-    { value: "oven", label: "Oven", icon: "🏠" },
-    { value: "microwave", label: "Microwave", icon: "📻" },
-    { value: "airfryer", label: "Air Fryer", icon: "💨" },
-    { value: "grill", label: "Grill", icon: "🔥" },
-    { value: "slowcooker", label: "Slow Cooker", icon: "⏰" },
-    { value: "pressure", label: "Pressure Cooker", icon: "⚡" },
-    { value: "blender", label: "Blender", icon: "🌪️" },
-    { value: "rice", label: "Rice Cooker", icon: "🍚" },
-    { value: "bbq", label: "BBQ", icon: "🍖" },
-    { value: "basics", label: "Just the basics", icon: "🔪" }
+    { value: "stovetop", label: "Stovetop", icon: Flame },
+    { value: "oven", label: "Oven", icon: Home },
+    { value: "microwave", label: "Microwave", icon: Microwave },
+    { value: "airfryer", label: "Air Fryer", icon: Wind },
+    { value: "grill", label: "Grill", icon: Flame },
+    { value: "slowcooker", label: "Slow Cooker", icon: Timer },
+    { value: "pressure", label: "Pressure Cooker", icon: Zap },
+    { value: "blender", label: "Blender", icon: Zap },
+    { value: "rice", label: "Rice Cooker", icon: ChefHat },
+    { value: "bbq", label: "BBQ", icon: Flame },
+    { value: "basics", label: "Just the basics", icon: Utensils }
   ];
 
   // Match exact ambition labels from other modes
@@ -346,7 +359,9 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
                   onClick={() => toggleArrayItem('equipment', option.value)}
                 >
                   <CardContent className="p-4 text-center">
-                    <div className="text-2xl mb-2">{option.icon}</div>
+                    <div className="w-8 h-8 mx-auto mb-2 text-primary flex items-center justify-center">
+                      {React.createElement(option.icon, { className: "w-6 h-6" })}
+                    </div>
                     <div className="font-medium text-sm">{option.label}</div>
                     {quizData.equipment?.includes(option.value) && (
                       <div className="w-4 h-4 gradient-primary rounded-full flex items-center justify-center mx-auto mt-2">
