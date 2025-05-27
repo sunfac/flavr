@@ -283,12 +283,31 @@ export default function SlideQuizShell({
 
       case 'textarea':
         return (
-          <Textarea
-            placeholder={currentQ.placeholder}
-            value={currentAnswer || ''}
-            onChange={(e) => updateAnswer(currentQ.id, e.target.value)}
-            className="min-h-32 text-lg bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-orange-400 rounded-xl"
-          />
+          <div className="space-y-4">
+            <Textarea
+              placeholder={currentQ.placeholder}
+              value={currentAnswer || ''}
+              onChange={(e) => updateAnswer(currentQ.id, e.target.value)}
+              className="min-h-32 text-lg bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-orange-400 rounded-xl"
+            />
+            {currentQ.examples && currentQ.examples.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm text-slate-400">Need inspiration? Try these:</p>
+                <div className="flex flex-wrap gap-2">
+                  {currentQ.examples.map((example, index) => (
+                    <Badge 
+                      key={index} 
+                      variant="outline" 
+                      className="cursor-pointer hover:bg-orange-500/20 border-slate-600 text-slate-300 text-xs"
+                      onClick={() => updateAnswer(currentQ.id, example)}
+                    >
+                      {example}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         );
 
       case 'dropdown':

@@ -9,18 +9,14 @@ export const chefQuestions: QuestionConfig[] = [
     required: true,
     placeholder: "Tell me about the dish you have in mind...",
     examples: [
-      "I want to make a comforting pasta dish with fresh herbs and garlic",
-      "Something impressive for a dinner party with seafood and wine",
-      "A hearty breakfast that will wow my family on the weekend",
-      "An elegant dessert with chocolate and berries for a special occasion",
-      "A warming soup perfect for a cold evening",
-      "A show-stopping main course that looks restaurant-quality",
-      "A healthy salad that's actually filling and satisfying",
-      "A decadent treat to celebrate good news",
-      "Something exotic I've never tried cooking before",
-      "A fusion dish combining my two favorite cuisines",
-      "A nostalgic recipe that reminds me of childhood",
-      "A quick but delicious meal after a long day"
+      "A special BBQ dish to show off at the weekend",
+      "A romantic Italian pasta dish for date night",
+      "Something impressive for dinner guests",
+      "A comforting soup for a cold evening",
+      "A show-stopping dessert with chocolate",
+      "A healthy meal that actually tastes amazing",
+      "Something exotic I've never tried before",
+      "A quick but restaurant-quality dish"
     ]
   },
   {
