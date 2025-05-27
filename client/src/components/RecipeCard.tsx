@@ -237,9 +237,9 @@ export default function RecipeCard({
   // Full recipe view
   return (
     <div className="bg-background min-h-screen">
-      {/* Recipe Header - Enhanced with larger image */}
+      {/* Recipe Header - Mobile optimized */}
       <div className="relative">
-        <div className="w-full h-80 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center shadow-lg">
+        <div className="w-full h-64 sm:h-80 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center shadow-lg">
           {fullRecipe.imageUrl ? (
             <img 
               src={fullRecipe.imageUrl} 
@@ -247,7 +247,7 @@ export default function RecipeCard({
               className="w-full h-full object-cover" 
             />
           ) : (
-            <div className="text-8xl animate-pulse">🍽️</div>
+            <div className="text-6xl sm:text-8xl animate-pulse">🍽️</div>
           )}
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
@@ -277,19 +277,19 @@ export default function RecipeCard({
           )}
         </Button>
 
-        {/* Recipe Info Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-          <h1 className="font-playfair font-bold text-3xl mb-3 drop-shadow-lg">{fullRecipe.title}</h1>
-          <div className="flex items-center flex-wrap gap-4 text-sm">
-            <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+        {/* Recipe Info Overlay - Mobile optimized */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-white">
+          <h1 className="font-playfair font-bold text-2xl sm:text-3xl mb-2 sm:mb-3 drop-shadow-lg leading-tight">{fullRecipe.title}</h1>
+          <div className="flex items-center flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
+            <Badge variant="secondary" className="bg-white/20 text-white border-white/30 px-2 py-1">
               <Clock className="w-3 h-3 mr-1" />
               {fullRecipe.cookTime} min
             </Badge>
-            <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+            <Badge variant="secondary" className="bg-white/20 text-white border-white/30 px-2 py-1">
               <Users className="w-3 h-3 mr-1" />
               {fullRecipe.servings} servings
             </Badge>
-            <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+            <Badge variant="secondary" className="bg-white/20 text-white border-white/30 px-2 py-1">
               <Signal className="w-3 h-3 mr-1" />
               {fullRecipe.difficulty || "Easy"}
             </Badge>
@@ -297,22 +297,22 @@ export default function RecipeCard({
         </div>
       </div>
 
-      {/* Recipe Content */}
-      <div className="p-6 space-y-8">
+      {/* Recipe Content - Mobile optimized spacing */}
+      <div className="p-4 sm:p-6 space-y-6 sm:space-y-8">
         {/* Ingredients Section - Mobile Optimized */}
         <div>
-          <h2 className="text-xl font-playfair font-bold text-foreground mb-4">Ingredients</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+          <h2 className="text-lg sm:text-xl font-playfair font-bold text-foreground mb-3 sm:mb-4">Ingredients</h2>
+          <div className="space-y-2">
             {fullRecipe.ingredients?.map((ingredient: string, index: number) => (
               <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg text-sm">
-                <span className="flex-1 text-foreground leading-relaxed">
+                <span className="flex-1 text-foreground leading-relaxed pr-2">
                   {ingredient}
                 </span>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => handleSubstitution(ingredient)}
-                  className="ml-2 p-1 h-6 w-6 text-muted-foreground hover:text-orange-400 hover:bg-orange-500/10"
+                  className="ml-2 p-1 h-7 w-7 text-muted-foreground hover:text-orange-400 hover:bg-orange-500/10 flex-shrink-0"
                   title="Get substitution suggestions"
                 >
                   <RotateCcw className="w-3 h-3" />
