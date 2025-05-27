@@ -252,7 +252,7 @@ export default function TinderRecipeCards({
           </div>
 
           {/* Tinder-Style Controls - Fixed position from bottom */}
-          <div className="fixed bottom-32 left-0 right-0 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent pt-6 pb-4">
+          <div className="fixed bottom-40 left-0 right-0 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent pt-8 pb-6">
             <div className="flex justify-center items-center space-x-4 max-w-md mx-auto px-4">
               {/* Navigate Previous */}
               <Button
@@ -268,17 +268,17 @@ export default function TinderRecipeCards({
               <Button
                 variant="outline"
                 onClick={handleRejectRecipe}
-                className="w-16 h-16 rounded-full border-red-500/50 text-red-400 hover:text-red-300 hover:border-red-400 hover:bg-red-500/10 transition-all duration-300 bg-slate-800/80 backdrop-blur-sm"
+                className="w-12 h-12 rounded-full border-red-500/50 text-red-400 hover:text-red-300 hover:border-red-400 hover:bg-red-500/10 transition-all duration-300 bg-slate-800/80 backdrop-blur-sm"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </Button>
               
               {/* Confirm Recipe (Swipe Right Action) */}
               <Button
                 onClick={handleConfirmRecipe}
-                className={`w-16 h-16 rounded-full bg-gradient-to-r ${themeColors[theme]} hover:scale-110 shadow-lg hover:shadow-orange-500/25 text-white transition-all duration-300`}
+                className={`w-12 h-12 rounded-full bg-gradient-to-r ${themeColors[theme]} hover:scale-110 shadow-lg hover:shadow-orange-500/25 text-white transition-all duration-300`}
               >
-                <Heart className="w-5 h-5" />
+                <Heart className="w-4 h-4" />
               </Button>
 
               {/* Navigate Next */}
