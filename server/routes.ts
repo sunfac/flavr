@@ -861,9 +861,14 @@ Make the ingredients specific with quantities and the instructions detailed and 
         const difficultyMap: { [key: string]: string } = {
           'easy': 'Easy',
           'challenging': 'Hard', 
-          'michelin': 'Hard'
+          'michelin': 'Hard',
+          '1': 'Easy',
+          '2': 'Easy', 
+          '3': 'Medium',
+          '4': 'Hard',
+          '5': 'Hard'
         };
-        fullRecipe.difficulty = difficultyMap[quizData.ambition] || 'Medium';
+        fullRecipe.difficulty = difficultyMap[quizData.ambition.toString()] || 'Medium';
       }
       
       console.log(`CORRECTED VALUES - Final servings: ${fullRecipe.servings}, cookTime: ${fullRecipe.cookTime}`);

@@ -73,7 +73,8 @@ export default function FridgeMode() {
       time: data.time || 30,
       dietary: data.dietary || [],
       equipment: data.equipment || [],
-      ambition: data.ambition || 3
+      ambition: data.ambition || 3,
+      servings: data.servings || 4
     };
 
     console.log("Transformed data:", transformedData);
