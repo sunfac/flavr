@@ -228,6 +228,7 @@ const equipmentMappings: Record<string, string> = {
   "bbq": "BBQ for authentic barbecue flavors",
   "basics": "Basic kitchen tools and standard cooking methods",
   "all": "Full kitchen setup with all equipment available",
+  "any": "Full kitchen access - use any cooking method or equipment needed for the best results",
   // Legacy support for any existing keys
   "airFryer": "Air fryer for crispy textures with less oil",
   "slowCooker": "Slow cooker for hands-off, tender results",

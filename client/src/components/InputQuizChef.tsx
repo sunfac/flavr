@@ -70,6 +70,7 @@ export default function InputQuizChef({ onComplete, onLoading }: InputQuizChefPr
       occasion: quizData.occasion,
       skill: quizData.skill,
       equipment: quizData.equipment,
+      cookingTime: quizData.cookingTime,
       time: parseInt(quizData.cookingTime),
       servings: parseInt(quizData.servings),
       // Map skill to ambition level
@@ -173,12 +174,14 @@ export default function InputQuizChef({ onComplete, onLoading }: InputQuizChefPr
                 <SelectValue placeholder="Primary tool" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="stovetop">Stovetop</SelectItem>
-                <SelectItem value="oven">Oven</SelectItem>
-                <SelectItem value="airfryer">Air Fryer</SelectItem>
-                <SelectItem value="grill">Grill</SelectItem>
-                <SelectItem value="slowcooker">Slow Cooker</SelectItem>
-                <SelectItem value="all">Full kitchen</SelectItem>
+                <SelectItem value="stovetop">Stovetop only</SelectItem>
+                <SelectItem value="oven">Oven only</SelectItem>
+                <SelectItem value="airfryer">Air fryer</SelectItem>
+                <SelectItem value="microwave">Microwave</SelectItem>
+                <SelectItem value="grill">BBQ/Grill</SelectItem>
+                <SelectItem value="slowcooker">Slow cooker</SelectItem>
+                <SelectItem value="blender">Blender</SelectItem>
+                <SelectItem value="any">Any equipment</SelectItem>
               </SelectContent>
             </Select>
           </div>
