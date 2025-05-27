@@ -171,14 +171,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
         
-        // Fix difficulty mapping for Shopping Mode Prompt 1
-        const difficultyMap: { [key: string]: string } = {
-          easy: 'Easy',
-          balanced: 'Medium',
-          challenging: 'Hard',
-          michelin: 'Hard'
-        };
-        const difficulty = difficultyMap[quizData.ambition] || 'Medium';
+        // Use centralized difficulty mapping
+        const difficulty = getDifficulty(quizData.ambition);
         
         // Fix cooking time mapping
         const cookTime = typeof quizData.time === 'number' ? quizData.time : 30;
@@ -227,14 +221,8 @@ Return a JSON object with this exact structure:
   ]
 }`;
       } else if (mode === 'fridge') {
-        // Fix difficulty mapping for Fridge Mode Prompt 1
-        const difficultyMap: { [key: string]: string } = {
-          easy: 'Easy',
-          balanced: 'Medium',
-          challenging: 'Hard',
-          michelin: 'Hard'
-        };
-        const difficulty = difficultyMap[quizData.ambition] || 'Medium';
+        // Use centralized difficulty mapping
+        const difficulty = getDifficulty(quizData.ambition);
         
         // Fix cooking time mapping
         const cookTime = typeof quizData.time === 'number' ? quizData.time : 30;
