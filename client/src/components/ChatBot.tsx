@@ -242,8 +242,8 @@ export default function ChatBot({
               <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 text-lg">Chef Assistant</h3>
-              <p className="text-sm text-slate-600">Ask me anything about cooking!</p>
+              <h3 className="font-bold text-white text-lg">Chef Assistant</h3>
+              <p className="text-sm text-white/80">Ask me anything about cooking!</p>
             </div>
           </div>
           <Button

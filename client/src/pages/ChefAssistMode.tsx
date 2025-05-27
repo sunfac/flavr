@@ -95,11 +95,19 @@ export default function ChefAssistMode() {
         })
       });
       
+      if (!fetchResponse.ok) {
+        throw new Error(`API call failed with status: ${fetchResponse.status}`);
+      }
+
       const response = await fetchResponse.json();
       console.log("Chef API Response:", response);
-      setGeneratedRecipe(response);
-
-      setCurrentStep("recipe");
+      
+      if (response && (response.title || response.recipe)) {
+        setGeneratedRecipe(response.recipe || response);
+        setCurrentStep("recipe");
+      } else {
+        throw new Error("No recipe data received");
+      }
     } catch (error) {
       console.error("Failed to generate recipe:", error);
       setCurrentStep("recipe");
