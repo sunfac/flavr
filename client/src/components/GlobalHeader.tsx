@@ -66,11 +66,13 @@ export default function GlobalHeader({
           {/* Show Flavr+ button only if user is not already a Flavr+ member */}
           {(!user?.user?.hasFlavrPlus) && (
             <Button 
+              variant="ghost"
+              size="sm"
               onClick={handleFlavrPlusClick}
-              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold px-3 py-1 text-sm border border-orange-400 shadow-lg relative z-10"
+              className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-2 py-1 text-sm relative z-10 border border-orange-400/30 hover:border-orange-400/50"
             >
               <Crown className="w-4 h-4 mr-1" />
-              Flavr+
+              Plus
             </Button>
           )}
           
