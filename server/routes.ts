@@ -915,38 +915,11 @@ Make the ingredients specific with quantities and the instructions detailed and 
       
       console.log(`CORRECTED VALUES - Final servings: ${fullRecipe.servings}, cookTime: ${fullRecipe.cookTime}`);
 
-      // Log GPT interaction for developer analysis
-      if (req.session?.userId) {
-        const expectedOutput = {
-          servings: quizData.servings || 4,
-          cookTime: quizData.time || 30,
-          difficulty: getDifficulty(quizData.ambition || 'moderate'),
-          budget: quizData.budget || 'moderate',
-          cuisine: quizData.cuisine || 'any'
-        };
-        
-        const actualOutput = {
-          servings: fullRecipe.servings,
-          cookTime: fullRecipe.cookTime,
-          difficulty: fullRecipe.difficulty,
-          budget: fullRecipe.budget,
-          cuisine: fullRecipe.cuisine,
-          title: fullRecipe.title
-        };
-        
-        await logGPTInteraction(
-          req.session.userId,
-          mode,
-          quizData,
-          testPrompt,
-          response.choices[0].message.content!,
-          expectedOutput,
-          actualOutput
-        );
-      }
-
       // Generate sophisticated recipe image
       let imageUrl = null;
+      let imagePrompt = null;
+      let imageGenerated = false;
+      let imageCost = null;
       if (true) {
         try {
           // Create enhanced image prompt based on recipe details

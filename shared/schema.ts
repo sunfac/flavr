@@ -72,6 +72,11 @@ export const developerLogs = pgTable("developer_logs", {
   estimatedCost: text("estimated_cost").notNull(), // in USD
   matchStatus: boolean("match_status").notNull(),
   discrepancies: jsonb("discrepancies").$type<string[]>(),
+  // Stable Diffusion tracking
+  imagePrompt: text("image_prompt"),
+  imageGenerated: boolean("image_generated").default(false),
+  imageUrl: text("image_url"),
+  imageCost: text("image_cost"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

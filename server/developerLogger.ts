@@ -50,7 +50,11 @@ export async function logGPTInteraction(
   promptSent: string,
   gptResponse: string,
   expectedOutput: Record<string, any>,
-  actualOutput: Record<string, any>
+  actualOutput: Record<string, any>,
+  imagePrompt?: string,
+  imageGenerated?: boolean,
+  imageUrl?: string,
+  imageCost?: string
 ): Promise<void> {
   try {
     const inputTokens = estimateTokens(promptSent);
@@ -72,6 +76,10 @@ export async function logGPTInteraction(
       estimatedCost,
       matchStatus: analysis.matches,
       discrepancies: analysis.discrepancies.length > 0 ? analysis.discrepancies : null,
+      imagePrompt,
+      imageGenerated: imageGenerated || false,
+      imageUrl,
+      imageCost,
     };
     
     await storage.createDeveloperLog(logEntry);

@@ -210,25 +210,25 @@ export default function DeveloperLogs() {
                         <TableRow>
                           <TableCell colSpan={8} className="bg-gray-50">
                             <div className="p-4 space-y-4">
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                  <h4 className="font-semibold text-sm mb-2">Quiz Inputs</h4>
-                                  <pre className="text-xs bg-white p-2 rounded border overflow-auto max-h-32">
+                                  <h4 className="font-semibold text-sm mb-2 text-gray-900">Quiz Inputs</h4>
+                                  <pre className="text-xs bg-white p-3 rounded border overflow-auto max-h-32 text-gray-900 font-mono border-gray-300 shadow-sm">
                                     {JSON.stringify(log.quizInputs, null, 2)}
                                   </pre>
                                 </div>
                                 <div>
-                                  <h4 className="font-semibold text-sm mb-2">Expected vs Actual</h4>
-                                  <div className="space-y-2">
+                                  <h4 className="font-semibold text-sm mb-2 text-gray-900">Expected vs Actual</h4>
+                                  <div className="space-y-3">
                                     <div>
-                                      <span className="text-xs text-gray-600">Expected:</span>
-                                      <pre className="text-xs bg-green-50 p-2 rounded border overflow-auto max-h-20">
+                                      <span className="text-xs font-medium text-green-700 block mb-1">Expected:</span>
+                                      <pre className="text-xs bg-green-50 p-3 rounded border overflow-auto max-h-24 text-gray-900 font-mono border-green-200">
                                         {JSON.stringify(log.expectedOutput, null, 2)}
                                       </pre>
                                     </div>
                                     <div>
-                                      <span className="text-xs text-gray-600">Actual:</span>
-                                      <pre className="text-xs bg-blue-50 p-2 rounded border overflow-auto max-h-20">
+                                      <span className="text-xs font-medium text-blue-700 block mb-1">Actual:</span>
+                                      <pre className="text-xs bg-blue-50 p-3 rounded border overflow-auto max-h-24 text-gray-900 font-mono border-blue-200">
                                         {JSON.stringify(log.actualOutput, null, 2)}
                                       </pre>
                                     </div>
