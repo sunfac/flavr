@@ -75,11 +75,13 @@ export class MemStorage implements IStorage {
       username: "william@blycontracting.co.uk",
       email: "william@blycontracting.co.uk",
       password: "flavr1", // In production, this would be hashed
+      hasFlavrPlus: true,
       subscriptionTier: "premium",
-      recipesGenerated: 0,
-      imagesGenerated: 0,
+      recipesThisMonth: 0,
+      imagesThisMonth: 0,
       monthlyRecipeLimit: 999999,
       monthlyImageLimit: 999999,
+      lastMonthlyReset: new Date(),
       createdAt: new Date(),
       stripeCustomerId: null,
       stripeSubscriptionId: null
@@ -110,9 +112,12 @@ export class MemStorage implements IStorage {
     const user: User = { 
       ...insertUser, 
       id,
-      isPlus: false,
+      hasFlavrPlus: false,
       recipesThisMonth: 0,
       imagesThisMonth: 0,
+      monthlyRecipeLimit: 3,
+      monthlyImageLimit: 10,
+      lastMonthlyReset: new Date(),
       stripeCustomerId: null,
       stripeSubscriptionId: null,
       createdAt: new Date(),
@@ -243,6 +248,87 @@ export class MemStorage implements IStorage {
     return Array.from(this.developerLogs.values())
       .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime())
       .slice(0, limit);
+  }
+
+  // Pseudo-user operations for free tier gating
+  async getPseudoUser(pseudoId: string): Promise<PseudoUser | undefined> {
+    return this.pseudoUsers.get(pseudoId);
+  }
+
+  async createPseudoUser(insertPseudoUser: InsertPseudoUser): Promise<PseudoUser> {
+    const pseudoUser: PseudoUser = {
+      id: this.currentPseudoId++,
+      pseudoId: insertPseudoUser.pseudoId,
+      browserFingerprint: insertPseudoUser.browserFingerprint || null,
+      recipesThisMonth: insertPseudoUser.recipesThisMonth || 0,
+      monthlyRecipeLimit: insertPseudoUser.monthlyRecipeLimit || 3,
+      lastMonthlyReset: new Date(),
+      createdAt: new Date()
+    };
+
+    this.pseudoUsers.set(insertPseudoUser.pseudoId, pseudoUser);
+    return pseudoUser;
+  }
+
+  async updatePseudoUserUsage(pseudoId: string, recipes: number): Promise<PseudoUser> {
+    const pseudoUser = this.pseudoUsers.get(pseudoId);
+    if (!pseudoUser) {
+      throw new Error(`Pseudo user with ID ${pseudoId} not found`);
+    }
+
+    pseudoUser.recipesThisMonth = recipes;
+    this.pseudoUsers.set(pseudoId, pseudoUser);
+    return pseudoUser;
+  }
+
+  async resetPseudoUserMonthlyUsage(pseudoId: string): Promise<PseudoUser> {
+    const pseudoUser = this.pseudoUsers.get(pseudoId);
+    if (!pseudoUser) {
+      throw new Error(`Pseudo user with ID ${pseudoId} not found`);
+    }
+
+    pseudoUser.recipesThisMonth = 0;
+    pseudoUser.lastMonthlyReset = new Date();
+    this.pseudoUsers.set(pseudoId, pseudoUser);
+    return pseudoUser;
+  }
+
+  async checkUsageLimit(userIdOrPseudoId: string | number, isAuthenticated: boolean): Promise<{
+    canGenerate: boolean;
+    recipesUsed: number;
+    recipesLimit: number;
+    hasFlavrPlus: boolean;
+  }> {
+    if (isAuthenticated && typeof userIdOrPseudoId === 'number') {
+      const user = await this.getUser(userIdOrPseudoId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      return {
+        canGenerate: user.hasFlavrPlus || (user.recipesThisMonth || 0) < (user.monthlyRecipeLimit || 3),
+        recipesUsed: user.recipesThisMonth || 0,
+        recipesLimit: user.monthlyRecipeLimit || 3,
+        hasFlavrPlus: user.hasFlavrPlus || false
+      };
+    } else {
+      const pseudoUser = await this.getPseudoUser(userIdOrPseudoId as string);
+      if (!pseudoUser) {
+        return {
+          canGenerate: true,
+          recipesUsed: 0,
+          recipesLimit: 3,
+          hasFlavrPlus: false
+        };
+      }
+
+      return {
+        canGenerate: (pseudoUser.recipesThisMonth || 0) < (pseudoUser.monthlyRecipeLimit || 3),
+        recipesUsed: pseudoUser.recipesThisMonth || 0,
+        recipesLimit: pseudoUser.monthlyRecipeLimit || 3,
+        hasFlavrPlus: false
+      };
+    }
   }
 }
 
