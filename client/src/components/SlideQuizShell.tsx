@@ -609,11 +609,11 @@ export default function SlideQuizShell({
   }
 
   return (
-    <div className="h-screen w-full flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-black overflow-hidden" style={{ height: '100vh' }}>
+    <div className="h-screen w-full flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-black" style={{ height: '100vh' }}>
       {/* Header */}
       <div className="flex-shrink-0 bg-slate-900/80 backdrop-blur-lg border-b border-slate-700 z-10">
-        <div className="max-w-md mx-auto px-4 py-2">
-          <div className="text-center mb-2">
+        <div className="max-w-md mx-auto px-4 py-3">
+          <div className="text-center mb-3">
             <h1 className="text-lg font-bold text-white">{title}</h1>
             {subtitle && <p className="text-slate-400 mt-1 text-xs">{subtitle}</p>}
           </div>
@@ -663,38 +663,32 @@ export default function SlideQuizShell({
 
       {/* Navigation - Always visible at bottom */}
       <div className="flex-shrink-0 bg-slate-900/90 backdrop-blur-lg border-t border-slate-700 relative z-50">
-        <div className="max-w-lg mx-auto px-6 py-4">
-          <div className="flex justify-between items-center gap-10">
-            <div className="w-20 flex-shrink-0">
-              <Button
-                variant="outline"
-                onClick={prevQuestion}
-                disabled={currentQuestionIndex === 0}
-                className="flex items-center gap-1 border-slate-600 bg-slate-800/50 text-white hover:bg-slate-700 text-sm px-2 py-2 w-full justify-center overflow-hidden"
-                style={{ transform: 'none' }}
-              >
-                <ArrowLeft className="w-3 h-3" />
-                <span className="text-xs">Back</span>
-              </Button>
-            </div>
+        <div className="w-full max-w-sm mx-auto px-8 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <Button
+              variant="outline"
+              onClick={prevQuestion}
+              disabled={currentQuestionIndex === 0}
+              className="flex items-center gap-2 border-slate-600 bg-slate-800/50 text-white hover:bg-slate-700 text-sm px-4 py-2 min-w-0 flex-shrink-0"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back</span>
+            </Button>
 
-            <div className="text-center flex-1 px-2">
+            <div className="text-center flex-1 min-w-0">
               {currentQ.required && !canProceed() && (
                 <p className="text-orange-400 text-xs">This question is required</p>
               )}
             </div>
 
-            <div className="w-24 flex-shrink-0">
-              <Button
-                onClick={nextQuestion}
-                disabled={!canProceed()}
-                className="flex items-center gap-1 bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 text-sm px-2 py-2 w-full justify-center overflow-hidden"
-                style={{ transform: 'none' }}
-              >
-                <span className="whitespace-nowrap text-xs">{currentQuestionIndex === questions.length - 1 ? 'Generate' : 'Next'}</span>
-                <ArrowRight className="w-3 h-3" />
-              </Button>
-            </div>
+            <Button
+              onClick={nextQuestion}
+              disabled={!canProceed()}
+              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 text-sm px-4 py-2 min-w-0 flex-shrink-0"
+            >
+              <span className="whitespace-nowrap">{currentQuestionIndex === questions.length - 1 ? 'Generate' : 'Next'}</span>
+              <ArrowRight className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </div>
