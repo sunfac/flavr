@@ -332,7 +332,7 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
         const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
         const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
-        const equipmentText = formatEquipmentText(quizData);
+        const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : "";
         
         // Build Shopping Mode mapped prompt (Prompt 1)
         const creativeGuidance = getCreativeGuidanceBlock();
@@ -381,7 +381,7 @@ Return a JSON object with this exact structure:
         const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
         const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
-        const equipmentText = formatEquipmentText(quizData);
+        const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : "";
         
         // Build Fridge Mode mapped prompt (Prompt 1)
         const creativeGuidance = getCreativeGuidanceBlock();
@@ -515,7 +515,7 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
         const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
         const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
-        const equipmentText = formatEquipmentText(quizData);
+        const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : "";
         
         // Use centralized mapping utilities for specific elements only
         const difficulty = getDifficulty(quizData.ambition);
@@ -594,7 +594,7 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
         const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
         const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
-        const equipmentText = formatEquipmentText(quizData);
+        const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : "";
         
         // Use centralized mapping utilities
         const difficulty = getDifficulty(quizData.ambition);
