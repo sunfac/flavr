@@ -797,47 +797,7 @@ Return a JSON object with this exact structure. THE SERVINGS VALUE IS LOCKED AND
 FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown above. This value cannot be modified.`;
       } else {
         // Fallback to existing enhanced prompt for other modes
-        const budgetGuidance = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
-        const moodGuidance = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
-        const ambitionGuidance = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
-        const timeGuidance = quizData.time ? getTimePromptText(quizData.time) : '';
-        const dietaryGuidance = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
-        const equipmentGuidance = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
-        
-        enhancedPrompt = `IMPORTANT: You must respond ONLY in English. Do not use any other language under any circumstances.
-
-Generate a complete, detailed recipe for "${selectedRecipe.title}" based on these preferences:
-
-Mode: ${mode}
-Quiz Data: ${JSON.stringify(quizData)}
-Recipe Description: ${selectedRecipe.description}
-
-${moodGuidance}
-
-${ambitionGuidance}
-
-${timeGuidance}
-
-${budgetGuidance}
-
-${dietaryGuidance}
-
-${equipmentGuidance}
-
-Return a JSON object with this exact structure:
-{
-  "title": "${selectedRecipe.title}",
-  "description": "${selectedRecipe.description}",
-  "ingredients": ["ingredient 1", "ingredient 2", "etc"],
-  "instructions": ["step 1", "step 2", "etc"],
-  "cookTime": ${quizData.time || 30},
-  "servings": ${quizData.servings || 4},
-  "difficulty": "${quizData.ambition === 'easy' ? 'Easy' : quizData.ambition === 'challenging' || quizData.ambition === 'michelin' ? 'Hard' : 'Medium'}",
-  "cuisine": "${quizData.cuisine || 'International'}",
-  "tips": "helpful cooking tips"
-}
-
-Make the ingredients specific with quantities and the instructions detailed and clear. Ensure all ingredient selections and quantities align with the specified mood, ambition level, time constraints, and budget constraints.`;
+        // This section should not be used - the detailed fridge mode prompt is handled above
       }
 
       // Simplified test for OpenAI API call
@@ -989,7 +949,7 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
           req.session.userId,
           mode,
           quizData,
-          testPrompt,
+          enhancedPrompt, // Use the actual Prompt 2 that was sent to GPT
           response.choices[0].message.content!,
           expectedOutput,
           actualOutput,
