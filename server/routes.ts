@@ -796,29 +796,17 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
       let enhancedPrompt;
       
       if (mode === 'shopping') {
-        // Get mapped guidance text for Shopping Mode
+        // Get mapped guidance text for Shopping Mode using centralized mapping
         const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
         const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
         const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
-        const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
+        const budgetText = quizData.budget ? getBudgetText(quizData.budget) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
-        // Fix equipment mapping - ensure array is passed correctly
-        const equipmentText = (quizData.equipment && Array.isArray(quizData.equipment) && quizData.equipment.length > 0) 
-          ? getEquipmentPromptText(quizData.equipment) 
-          : 'Available Equipment: Standard kitchen setup - use basic cooking methods suitable for most home kitchens.';
+        const equipmentText = formatEquipmentText(quizData);
         
-        // Create difficulty mapping based on ambition
-        const difficultyMap: { [key: string]: string } = {
-          'Just get fed': 'Easy',
-          'Simple & tasty': 'Easy', 
-          'Confident cook': 'Medium',
-          'Ambitious chef': 'Hard',
-          'Michelin effort': 'Hard'
-        };
-        const difficulty = difficultyMap[quizData.ambition] || 'Medium';
-        
-        // Fix cooking time mapping for Prompt 2 - treat as MAXIMUM limit
-        const cookTime = quizData.time?.value || quizData.time || 30;
+        // Use centralized mapping utilities
+        const difficulty = getDifficulty(quizData.ambition);
+        const cookTime = getCookTime(quizData);
         
         // Build Shopping Mode mapped prompt (Prompt 2) - NO variation seed for deterministic results
         const creativeGuidance = getCreativeGuidanceBlock();
@@ -888,25 +876,16 @@ Return a JSON object with this exact structure. THE SERVINGS VALUE IS LOCKED AND
 
 FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown above. This value cannot be modified.`;
       } else if (mode === 'fridge') {
-        // Get mapped guidance text for Fridge Mode (omit budget and cuisine)
+        // Get mapped guidance text for Fridge Mode (omit budget and cuisine) using centralized mapping
         const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
         const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
         const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
-        const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
+        const equipmentText = formatEquipmentText(quizData);
         
-        // Create difficulty mapping based on ambition for Fridge Mode
-        const difficultyMap: { [key: string]: string } = {
-          'Just get fed': 'Easy',
-          'Simple & tasty': 'Easy', 
-          'Confident cook': 'Medium',
-          'Ambitious chef': 'Hard',
-          'Michelin effort': 'Hard'
-        };
-        const difficulty = difficultyMap[quizData.ambition] || 'Medium';
-        
-        // Fix cooking time mapping for Fridge Mode Prompt 2 - treat as MAXIMUM limit
-        const cookTime = quizData.time?.value || quizData.time || 30;
+        // Use centralized mapping utilities
+        const difficulty = getDifficulty(quizData.ambition);
+        const cookTime = getCookTime(quizData);
         
         // Build Fridge Mode mapped prompt (Prompt 2) - NO variation seed for deterministic results
         const creativeGuidance = getCreativeGuidanceBlock();
