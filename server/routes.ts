@@ -808,10 +808,11 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
         
         // Create difficulty mapping based on ambition
         const difficultyMap: { [key: string]: string } = {
-          easy: 'Easy',
-          balanced: 'Medium',
-          challenging: 'Hard',
-          michelin: 'Hard'
+          'Just get fed': 'Easy',
+          'Simple & tasty': 'Easy', 
+          'Confident cook': 'Medium',
+          'Ambitious chef': 'Hard',
+          'Michelin effort': 'Hard'
         };
         const difficulty = difficultyMap[quizData.ambition] || 'Medium';
         
@@ -895,10 +896,11 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
         
         // Create difficulty mapping based on ambition for Fridge Mode
         const difficultyMap: { [key: string]: string } = {
-          easy: 'Easy',
-          balanced: 'Medium',
-          challenging: 'Hard',
-          michelin: 'Hard'
+          'Just get fed': 'Easy',
+          'Simple & tasty': 'Easy', 
+          'Confident cook': 'Medium',
+          'Ambitious chef': 'Hard',
+          'Michelin effort': 'Hard'
         };
         const difficulty = difficultyMap[quizData.ambition] || 'Medium';
         
