@@ -131,14 +131,14 @@ export default function TinderRecipeCards({
               >
                 <Card className="w-full h-full bg-slate-800/90 backdrop-blur-lg border border-slate-700 rounded-2xl overflow-hidden shadow-2xl">
                   <CardContent className="p-6 h-full flex flex-col">
-                    {/* Recipe Title */}
+                    {/* Recipe Title & Description */}
                     <div className="text-center mb-4">
-                      <h3 className="text-xl font-bold text-white mb-2 leading-tight">
+                      <h3 className="text-xl font-bold text-white mb-3 leading-tight">
                         {currentRecipe.title}
                       </h3>
-                      <p className="text-slate-300 text-base leading-relaxed">
-                        {currentRecipe.description}
-                      </p>
+                      <div className="text-slate-300 text-base leading-relaxed px-2">
+                        {currentRecipe.description || "Delicious recipe waiting for you to discover!"}
+                      </div>
                     </div>
 
                     {/* Recipe Visual */}
