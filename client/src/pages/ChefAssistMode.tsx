@@ -6,7 +6,7 @@ import GlobalFooter from "@/components/GlobalFooter";
 import GlobalNavigation from "@/components/GlobalNavigation";
 import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
-import InputQuizChef from "@/components/InputQuizChef";
+import ChefAssistQuiz from "@/components/ChefAssistQuiz";
 import RecipeCard from "@/components/RecipeCard";
 import ChatBot from "@/components/ChatBot";
 import Loading from "@/components/Loading";
@@ -144,12 +144,8 @@ export default function ChefAssistMode() {
       <main className="flex-1 pt-20 pb-24 p-4">
 
         {currentStep === "quiz" && (
-          <InputQuizChef
-            onComplete={(data, recipe) => {
-              setQuizData(data);
-              setGeneratedRecipe(recipe);
-              setCurrentStep("recipe");
-            }}
+          <ChefAssistQuiz
+            onComplete={handleQuizComplete}
             onLoading={setIsLoading}
           />
         )}
