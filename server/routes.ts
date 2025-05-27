@@ -1182,14 +1182,23 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
       console.log(message);
       console.log("=".repeat(80));
 
-      // Check if this is a recipe modification request
+      // Check if this is a recipe modification request (exclude translation requests)
       const recipeChangeKeywords = [
-        'substitute', 'replace', 'change', 'swap', 'use instead', 'instead of',
-        'update', 'modify', 'make it', 'use chicken', 'use beef', 'use pork',
-        'use fish', 'make vegetarian', 'make vegan', 'gluten free', 'dairy free'
+        'substitute', 'replace', 'swap', 'use instead', 'instead of',
+        'use chicken', 'use beef', 'use pork', 'use fish', 
+        'make vegetarian', 'make vegan', 'gluten free', 'dairy free',
+        'make it spicier', 'add more', 'less salt', 'increase servings'
       ];
       
-      const isRecipeModification = recipeChangeKeywords.some(keyword => 
+      const translationKeywords = [
+        'english', 'translate', 'translation', 'in english', 'to english'
+      ];
+      
+      const isTranslationRequest = translationKeywords.some(keyword => 
+        message.toLowerCase().includes(keyword.toLowerCase())
+      );
+      
+      const isRecipeModification = !isTranslationRequest && recipeChangeKeywords.some(keyword => 
         message.toLowerCase().includes(keyword.toLowerCase())
       );
 
