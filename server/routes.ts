@@ -714,7 +714,7 @@ Return a JSON object with this exact structure. THE SERVINGS VALUE IS LOCKED AND
   "description": "${selectedRecipe.description}",
   "ingredients": ["ingredient 1", "ingredient 2", "etc"],
   "instructions": ["step 1", "step 2", "etc"],
-  "cookTime": ${quizData.time || quizData.cookingTime || 30},
+  "cookTime": ${cookTime},
   "servings": ${quizData.servings || 4},
   "difficulty": "${difficulty}",
   "cuisine": "Fridge-to-Fork",
