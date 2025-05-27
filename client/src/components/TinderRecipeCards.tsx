@@ -118,7 +118,7 @@ export default function TinderRecipeCards({
       <div className="flex-1 px-4 min-h-0">
         <div className="max-w-md mx-auto h-full flex flex-col">
           {/* Recipe Card Area */}
-          <div className="relative" style={{ height: '350px' }}>
+          <div className="relative" style={{ height: '280px' }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
@@ -130,13 +130,13 @@ export default function TinderRecipeCards({
                 className="absolute inset-0 w-full h-full"
               >
                 <Card className="w-full h-full bg-slate-800/90 backdrop-blur-lg border border-slate-700 rounded-2xl overflow-hidden shadow-2xl">
-                  <CardContent className="p-6 flex flex-col h-full">
+                  <CardContent className="p-4 flex flex-col h-full">
                     {/* Recipe Title & Description */}
-                    <div className="text-center mb-8">
-                      <h3 className="text-xl font-bold text-white mb-4 leading-tight">
+                    <div className="text-center mb-4">
+                      <h3 className="text-lg font-bold text-white mb-3 leading-tight">
                         {currentRecipe.title}
                       </h3>
-                      <p className="text-slate-300 text-base leading-relaxed px-3">
+                      <p className="text-slate-300 text-sm leading-relaxed px-2">
                         {typeof currentRecipe.description === 'string' 
                           ? currentRecipe.description 
                           : "Delicious recipe waiting for you to discover!"
