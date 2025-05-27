@@ -114,8 +114,8 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
 
   // Match exact dietary options from other modes
   const dietaryOptions = [
-    "Vegetarian", "Vegan", "Gluten-free", "Dairy-free", "Low-carb", "Low-calorie",
-    "Paleo", "Keto", "Halal", "Kosher", "Nut-free", "No restrictions"
+    "No restrictions", "Vegetarian", "Vegan", "Gluten-free", "Dairy-free", "Low-carb", "Low-calorie",
+    "Paleo", "Keto", "Halal", "Kosher", "Nut-free"
   ];
 
   // Match exact equipment options from other modes  

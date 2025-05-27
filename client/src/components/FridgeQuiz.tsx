@@ -92,8 +92,8 @@ export default function FridgeQuiz({ onComplete, onLoading }: FridgeQuizProps) {
   ];
 
   const dietaryOptions = [
-    "Vegetarian", "Vegan", "Gluten-free", "Dairy-free", "Low-carb", "Low-calorie",
-    "Paleo", "Keto", "Halal", "Kosher", "No restrictions"
+    "No restrictions", "Vegetarian", "Vegan", "Gluten-free", "Dairy-free", "Low-carb", "Low-calorie",
+    "Paleo", "Keto", "Halal", "Kosher"
   ];
 
   const equipmentOptions = [

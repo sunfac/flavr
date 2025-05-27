@@ -107,8 +107,8 @@ export default function ShoppingQuiz({ onComplete, onLoading }: ShoppingQuizProp
   ];
 
   const dietaryOptions = [
-    "Vegetarian", "Vegan", "Gluten-free", "Dairy-free", "Low-carb", "Low-calorie",
-    "Paleo", "Keto", "Halal", "Kosher", "Nut-free", "None"
+    "None", "Vegetarian", "Vegan", "Gluten-free", "Dairy-free", "Low-carb", "Low-calorie",
+    "Paleo", "Keto", "Halal", "Kosher", "Nut-free"
   ];
 
   const equipmentOptions = [
