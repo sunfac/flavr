@@ -221,17 +221,18 @@ export default function ChatBot({
 
       {/* Chat Panel */}
       <div 
-        className={`fixed bottom-20 left-4 right-4 glass border border-white/20 rounded-t-3xl max-h-[28rem] transition-all duration-500 z-50 backdrop-blur-xl ${
+        className={`fixed bottom-24 left-4 right-4 glass border border-white/20 rounded-t-3xl transition-all duration-500 z-50 backdrop-blur-xl flex flex-col ${
           isOpen ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
         }`}
+        style={{ maxHeight: 'calc(100vh - 200px)' }}
       >
-        <CardHeader className="p-6 border-b border-white/10 flex flex-row items-center justify-between space-y-0">
-          <div className="flex items-center space-x-4">
+        <CardHeader className="p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
+          <div className="flex items-center space-x-3">
             <div className="relative group">
-              <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300">
-                <ChefHat className="text-white w-5 h-5" />
+              <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300">
+                <ChefHat className="text-white w-4 h-4" />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
             </div>
             <div>
               <h3 className="font-bold text-slate-800 text-lg">Chef Assistant</h3>
@@ -241,14 +242,14 @@ export default function ChatBot({
           <Button
             variant="ghost"
             size="sm"
-            className="w-10 h-10 p-0 rounded-xl glass hover:scale-110 transition-all duration-300 group"
+            className="w-8 h-8 p-0 rounded-xl glass hover:scale-110 transition-all duration-300 group"
             onClick={() => setIsOpen(false)}
           >
             <X className="w-4 h-4 text-slate-600 group-hover:text-slate-800" />
           </Button>
         </CardHeader>
         
-        <ScrollArea className="h-72 p-6" ref={scrollAreaRef}>
+        <ScrollArea className="flex-1 p-4 min-h-0" ref={scrollAreaRef}>
           <div className="space-y-4">
             {localMessages.map((msg) => (
               <div key={msg.id} className={`flex space-x-3 ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
@@ -288,43 +289,47 @@ export default function ChatBot({
           </div>
         </ScrollArea>
 
-        <div className="p-6 border-t border-white/10 space-y-4">
-          {/* Suggestion Chips */}
-          {showSuggestions && currentRecipe && (
-            <div className="space-y-3">
-              <p className="text-sm font-medium text-slate-600">Quick suggestions:</p>
-              <div className="flex flex-wrap gap-2">
-                {suggestionChips.map((chip, index) => (
-                  <Badge
-                    key={index}
-                    variant="outline"
-                    className="cursor-pointer bg-orange-500/10 border-orange-400/30 text-orange-400 hover:bg-orange-500/20 hover:border-orange-400/50 hover:scale-105 transition-all duration-300 px-3 py-2 text-sm"
-                    onClick={handleSuggestionClick(chip.text)}
-                  >
-                    <span className="mr-2">{chip.icon}</span>
-                    {chip.text}
-                  </Badge>
-                ))}
-              </div>
+        {/* Suggestion Chips - Above input */}
+        {showSuggestions && currentRecipe && (
+          <div className="px-4 py-2 border-t border-white/10 flex-shrink-0">
+            <p className="text-xs font-medium text-slate-600 mb-2">Quick suggestions:</p>
+            <div className="flex flex-wrap gap-1">
+              {suggestionChips.map((chip, index) => (
+                <Badge
+                  key={index}
+                  variant="outline"
+                  className="cursor-pointer bg-orange-500/10 border-orange-400/30 text-orange-400 hover:bg-orange-500/20 hover:border-orange-400/50 hover:scale-105 transition-all duration-300 px-2 py-1 text-xs"
+                  onClick={handleSuggestionClick(chip.text)}
+                >
+                  <span className="mr-1">{chip.icon}</span>
+                  {chip.text}
+                </Badge>
+              ))}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Input Area */}
-          <div className="flex space-x-3">
+        {/* Input Area */}
+        <div className="p-4 border-t border-white/10 flex-shrink-0">
+          <div className="flex space-x-2">
             <Input
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask about substitutions, cooking tips..."
-              className="flex-1 h-12 input-modern glass border-white/20 placeholder:text-slate-500"
+              className="flex-1 h-10 input-modern glass border-white/20 placeholder:text-slate-500 text-sm"
               disabled={sendMessageMutation.isPending}
             />
             <Button 
               onClick={() => handleSend()}
-              className="w-12 h-12 p-0 gradient-primary btn-modern shadow-lg hover:shadow-xl"
+              className="h-10 px-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
               disabled={!message.trim() || sendMessageMutation.isPending}
             >
-              <i className="fas fa-paper-plane text-white"></i>
+              {sendMessageMutation.isPending ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
             </Button>
           </div>
         </div>
