@@ -815,6 +815,9 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
         };
         const difficulty = difficultyMap[quizData.ambition] || 'Medium';
         
+        // Fix cooking time mapping for Prompt 2
+        const cookTime = typeof quizData.time === 'number' ? quizData.time : 30;
+        
         // Build Shopping Mode mapped prompt (Prompt 2) - NO variation seed for deterministic results
         const creativeGuidance = getCreativeGuidanceBlock();
         
@@ -894,6 +897,9 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
           michelin: 'Hard'
         };
         const difficulty = difficultyMap[quizData.ambition] || 'Medium';
+        
+        // Fix cooking time mapping for Fridge Mode Prompt 2
+        const cookTime = typeof quizData.time === 'number' ? quizData.time : 30;
         
         // Build Fridge Mode mapped prompt (Prompt 2) - NO variation seed for deterministic results
         const creativeGuidance = getCreativeGuidanceBlock();
