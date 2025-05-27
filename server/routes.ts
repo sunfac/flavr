@@ -1059,6 +1059,92 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
     }
   });
 
+  // Flavr+ Gating System Routes
+  app.post("/api/usage/check", async (req, res) => {
+    try {
+      const { pseudoId, browserFingerprint } = req.body;
+      const isAuthenticated = req.isAuthenticated();
+      
+      let usageStatus;
+      
+      if (isAuthenticated) {
+        const user = req.user;
+        usageStatus = {
+          canGenerate: user.hasFlavrPlus || (user.recipesThisMonth || 0) < (user.monthlyRecipeLimit || 3),
+          recipesUsed: user.recipesThisMonth || 0,
+          recipesLimit: user.monthlyRecipeLimit || 3,
+          hasFlavrPlus: user.hasFlavrPlus || false
+        };
+      } else {
+        // Handle pseudo-user (free user without account)
+        let pseudoUser = await storage.getPseudoUser(pseudoId);
+        
+        if (!pseudoUser) {
+          pseudoUser = await storage.createPseudoUser({
+            pseudoId,
+            browserFingerprint,
+            recipesThisMonth: 0,
+            monthlyRecipeLimit: 3
+          });
+        }
+        
+        usageStatus = {
+          canGenerate: (pseudoUser.recipesThisMonth || 0) < (pseudoUser.monthlyRecipeLimit || 3),
+          recipesUsed: pseudoUser.recipesThisMonth || 0,
+          recipesLimit: pseudoUser.monthlyRecipeLimit || 3,
+          hasFlavrPlus: false
+        };
+      }
+      
+      res.json(usageStatus);
+    } catch (error) {
+      console.error('Usage check failed:', error);
+      res.status(500).json({ message: 'Failed to check usage limits' });
+    }
+  });
+
+  app.post("/api/usage/increment", async (req, res) => {
+    try {
+      const { pseudoId } = req.body;
+      const isAuthenticated = req.isAuthenticated();
+      
+      if (isAuthenticated) {
+        const user = req.user;
+        if (!user.hasFlavrPlus) {
+          await storage.updateUserUsage(user.id, (user.recipesThisMonth || 0) + 1, user.imagesThisMonth || 0);
+        }
+      } else {
+        const pseudoUser = await storage.getPseudoUser(pseudoId);
+        if (pseudoUser) {
+          await storage.updatePseudoUserUsage(pseudoId, (pseudoUser.recipesThisMonth || 0) + 1);
+        }
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Usage increment failed:', error);
+      res.status(500).json({ message: 'Failed to increment usage' });
+    }
+  });
+
+  app.post("/api/usage/reset", async (req, res) => {
+    try {
+      const { pseudoId } = req.body;
+      const isAuthenticated = req.isAuthenticated();
+      
+      if (isAuthenticated) {
+        await storage.resetMonthlyUsage(req.user.id);
+      } else {
+        await storage.resetPseudoUserMonthlyUsage(pseudoId);
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Usage reset failed:', error);
+      res.status(500).json({ message: 'Failed to reset usage' });
+    }
+  });
+
   // Enhanced Chat routes with recipe context
   app.post("/api/chat", requireAuth, async (req, res) => {
     try {

@@ -1,4 +1,4 @@
-import { users, recipes, chatMessages, developerLogs, type User, type InsertUser, type Recipe, type InsertRecipe, type ChatMessage, type InsertChatMessage, type DeveloperLog, type InsertDeveloperLog } from "@shared/schema";
+import { users, recipes, chatMessages, developerLogs, pseudoUsers, type User, type InsertUser, type Recipe, type InsertRecipe, type ChatMessage, type InsertChatMessage, type DeveloperLog, type InsertDeveloperLog, type PseudoUser, type InsertPseudoUser } from "@shared/schema";
 
 export interface IStorage {
   // User operations
@@ -9,6 +9,20 @@ export interface IStorage {
   updateUserUsage(id: number, recipes: number, images: number): Promise<User>;
   updateUserStripeInfo(id: number, customerId: string, subscriptionId?: string): Promise<User>;
   resetMonthlyUsage(id: number): Promise<User>;
+  
+  // Pseudo-user operations for free users
+  getPseudoUser(pseudoId: string): Promise<PseudoUser | undefined>;
+  createPseudoUser(pseudoUser: InsertPseudoUser): Promise<PseudoUser>;
+  updatePseudoUserUsage(pseudoId: string, recipes: number): Promise<PseudoUser>;
+  resetPseudoUserMonthlyUsage(pseudoId: string): Promise<PseudoUser>;
+  
+  // Usage checking for gating
+  checkUsageLimit(userIdOrPseudoId: string | number, isAuthenticated: boolean): Promise<{
+    canGenerate: boolean;
+    recipesUsed: number;
+    recipesLimit: number;
+    hasFlavrPlus: boolean;
+  }>;
   
   // Recipe operations
   createRecipe(recipe: InsertRecipe): Promise<Recipe>;
@@ -32,20 +46,24 @@ export class MemStorage implements IStorage {
   private recipes: Map<number, Recipe>;
   private chatMessages: Map<number, ChatMessage>;
   private developerLogs: Map<number, DeveloperLog>;
+  private pseudoUsers: Map<string, PseudoUser>;
   private currentUserId: number;
   private currentRecipeId: number;
   private currentChatId: number;
   private currentLogId: number;
+  private currentPseudoId: number;
 
   constructor() {
     this.users = new Map();
     this.recipes = new Map();
     this.chatMessages = new Map();
     this.developerLogs = new Map();
+    this.pseudoUsers = new Map();
     this.currentUserId = 1;
     this.currentRecipeId = 1;
     this.currentChatId = 1;
     this.currentLogId = 1;
+    this.currentPseudoId = 1;
     
     // Create developer account with unlimited access
     this.createDeveloperAccount();
