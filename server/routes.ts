@@ -869,12 +869,16 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
       if (quizData.ambition !== undefined) {
         const ambitionValue = quizData.ambition.toString().toLowerCase();
         const difficultyMap: { [key: string]: string } = {
+          // Quiz ambition keys (camelCase)
+          'justfed': 'Easy',
+          'simpletasty': 'Easy',
+          'confidentcook': 'Medium',
+          'ambitiouschef': 'Hard',
+          'michelineffort': 'Hard',
           // String values
           'easy': 'Easy',
           'challenging': 'Hard', 
-          'michelin': 'Hard',
           'ambitious': 'Hard',
-          'ambitiouschef': 'Hard',
           'simple': 'Easy',
           'moderate': 'Medium',
           // Numeric values (1-5 scale)
@@ -936,11 +940,22 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
 
       // Log GPT interaction for developer analysis (after image generation)
       if (req.session?.userId) {
-        console.log(`🔍 PROMPT 2 DEBUG - Ambition: ${quizData.ambition}, Expected difficulty: ${getDifficulty(quizData.ambition || 'simpleTasty')}`);
+        // Use the SAME difficulty mapping as the post-processing section
+        const ambitionValue = (quizData.ambition || 'simpleTasty').toString().toLowerCase();
+        const difficultyMap: { [key: string]: string } = {
+          'justfed': 'Easy',
+          'simpletasty': 'Easy',
+          'confidentcook': 'Medium',
+          'ambitiouschef': 'Hard',
+          'michelineffort': 'Hard',
+        };
+        const expectedDifficulty = difficultyMap[ambitionValue] || 'Medium';
+        
+        console.log(`🔍 PROMPT 2 DEBUG - Ambition: ${quizData.ambition}, Expected difficulty: ${expectedDifficulty}`);
         const expectedOutput = {
           servings: parseInt(quizData.servings) || quizData.portions || 4,
           cookTime: quizData.time || quizData.cookingTime || 30,
-          difficulty: getDifficulty(quizData.ambition || 'simpleTasty'),
+          difficulty: expectedDifficulty,
           budget: quizData.budget || 'moderate',
           cuisine: quizData.cuisines?.[0] || quizData.cuisine || 'any'
         };
@@ -1084,11 +1099,11 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
           },
           { role: "user", content: message }
         ],
-        max_tokens: 500,
+        max_tokens: 300,
         temperature: 0.7,
       });
 
-      const botResponse = response.choices[0].message.content || "I'm sorry, I couldn't process that request. Please try again.";
+      const botResponse = response.choices[0]?.message?.content || "I'm sorry, I couldn't process that request. Please try again.";
       
       // For now, don't update recipes through chat - just provide advice
       let updatedRecipe = null;
