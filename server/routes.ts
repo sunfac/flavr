@@ -815,7 +815,7 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
         };
         const difficulty = difficultyMap[quizData.ambition] || 'Medium';
         
-        // Fix cooking time mapping for Prompt 2
+        // Fix cooking time mapping for Prompt 2 - treat as MAXIMUM limit
         const cookTime = quizData.time?.value || quizData.time || 30;
         
         // Build Shopping Mode mapped prompt (Prompt 2) - NO variation seed for deterministic results
@@ -840,13 +840,17 @@ ${getStrictDietaryInstruction(quizData.dietary)}
 
 ${budgetText}
 
-${timeText}
+The total cooking time must NOT exceed ${cookTime} minutes. This is the user's hard time limit.
 
 ${equipmentText}
 
 Ingredients: ${quizData.ingredients || 'Use suitable ingredients'}
 
 ${creativeGuidance}
+
+DIETARY OVERRIDE: If any creative direction conflicts with the user's dietary requirements, the dietary rules take absolute priority.
+
+Do not exceed the user's specified cooking time. This is a maximum limit, not a suggestion.
 
 CRITICAL INSTRUCTION: You MUST use these exact values in your JSON response:
 - Servings: EXACTLY ${quizData.servings || 4} people (DO NOT change this number)
@@ -898,7 +902,7 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
         };
         const difficulty = difficultyMap[quizData.ambition] || 'Medium';
         
-        // Fix cooking time mapping for Fridge Mode Prompt 2
+        // Fix cooking time mapping for Fridge Mode Prompt 2 - treat as MAXIMUM limit
         const cookTime = quizData.time?.value || quizData.time || 30;
         
         // Build Fridge Mode mapped prompt (Prompt 2) - NO variation seed for deterministic results
@@ -920,7 +924,7 @@ ${ambitionText}
 
 ${dietaryText}
 
-${timeText}
+The total cooking time must NOT exceed ${cookTime} minutes. This is the user's hard time limit.
 
 ${equipmentText}
 
@@ -928,6 +932,10 @@ Ingredients available: ${Array.isArray(quizData.ingredients) ? quizData.ingredie
 ${getStrictDietaryInstruction(quizData.dietary)}
 
 ${creativeGuidance}
+
+DIETARY OVERRIDE: If any creative direction conflicts with the user's dietary requirements, the dietary rules take absolute priority.
+
+Do not exceed the user's specified cooking time. This is a maximum limit, not a suggestion.
 
 CRITICAL INSTRUCTION: You MUST use these exact values in your JSON response:
 - Servings: EXACTLY ${quizData.servings || 4} people (DO NOT change this number)
