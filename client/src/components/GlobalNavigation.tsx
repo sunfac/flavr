@@ -74,6 +74,13 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
       label: "Settings",
       href: "/settings",
       requiresAuth: true
+    },
+    {
+      icon: Database,
+      label: "Developer Logs",
+      href: "/developer-logs",
+      requiresAuth: true,
+      adminOnly: true
     }
   ];
 
