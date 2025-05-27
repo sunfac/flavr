@@ -1,18 +1,22 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
+import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface QuizData {
   intent: string;
   dietary: string[];
   time: number;
-  ambition: string;
+  ambition: number;
   equipment: string[];
-  servings: string;
+  servings: number;
 }
 
 interface ChefAssistQuizProps {
@@ -27,12 +31,31 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
     dietary: [],
     equipment: [],
     time: 60,
-    ambition: "confidentCook",
-    servings: "4"
+    ambition: 3,
+    servings: 4
   });
+  const { toast } = useToast();
 
   const totalSteps = 6;
   const progress = ((currentStep + 1) / totalSteps) * 100;
+
+  const generateRecipeMutation = useMutation({
+    mutationFn: (data: { selectedRecipe: any; mode: string; quizData: any; prompt?: string }) =>
+      apiRequest("POST", "/api/generate-full-recipe", data),
+    onSuccess: async (response) => {
+      const result = await response.json();
+      onComplete(result.recipe);
+      onLoading(false);
+    },
+    onError: (error: any) => {
+      onLoading(false);
+      toast({
+        title: "Failed to generate recipe",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const questions = [
     {
@@ -41,18 +64,18 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
       type: "intent"
     },
     {
-      title: "Dietary considerations",
-      subtitle: "Any restrictions or preferences?",
+      title: "Dietary preferences",
+      subtitle: "Any restrictions or goals?",
       type: "dietary"
     },
     {
-      title: "Time to create",
-      subtitle: "How long can you dedicate to this?",
+      title: "How much time?",
+      subtitle: "From quick fixes to weekend projects",
       type: "time"
     },
     {
-      title: "Your ambition level",
-      subtitle: "How challenging should this be?",
+      title: "Ambition level",
+      subtitle: "How adventurous are we feeling?",
       type: "ambition"
     },
     {
@@ -62,7 +85,7 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
     },
     {
       title: "Available equipment",
-      subtitle: "What tools do you have access to?",
+      subtitle: "What can you cook with?",
       type: "equipment"
     }
   ];
@@ -76,47 +99,43 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
     "Comfort food with a gourmet twist"
   ];
 
+  // Match exact dietary options from other modes
   const dietaryOptions = [
-    { value: "vegan", label: "Vegan", icon: "🌱" },
-    { value: "vegetarian", label: "Vegetarian", icon: "🥕" },
-    { value: "glutenFree", label: "Gluten-free", icon: "🌾" },
-    { value: "dairyFree", label: "Dairy-free", icon: "🥛" },
-    { value: "nutFree", label: "Nut-free", icon: "🥜" },
-    { value: "pescatarian", label: "Pescatarian", icon: "🐟" },
-    { value: "keto", label: "Keto", icon: "🥑" },
-    { value: "paleo", label: "Paleo", icon: "🥩" },
-    { value: "lowCarb", label: "Low-carb", icon: "🥬" },
-    { value: "highProtein", label: "High-protein", icon: "💪" },
-    { value: "lowCalorie", label: "Low-calorie", icon: "⚖️" },
-    { value: "noRestrictions", label: "No restrictions", icon: "🍽️" }
+    "Vegetarian", "Vegan", "Gluten-free", "Dairy-free", "Low-carb", "Low-calorie",
+    "Paleo", "Keto", "Halal", "Kosher", "Nut-free", "No restrictions"
   ];
 
+  // Match exact equipment options from other modes  
   const equipmentOptions = [
-    { value: "stovetop", label: "Stovetop only", icon: "🔥" },
-    { value: "oven", label: "Oven only", icon: "🏠" },
-    { value: "airfryer", label: "Air fryer", icon: "💨" },
+    { value: "stovetop", label: "Stovetop", icon: "🔥" },
+    { value: "oven", label: "Oven", icon: "🏠" },
     { value: "microwave", label: "Microwave", icon: "📻" },
-    { value: "grill", label: "BBQ/Grill", icon: "🔥" },
-    { value: "slowcooker", label: "Slow cooker", icon: "⏰" },
+    { value: "airfryer", label: "Air Fryer", icon: "💨" },
+    { value: "grill", label: "Grill", icon: "🔥" },
+    { value: "slowcooker", label: "Slow Cooker", icon: "⏰" },
+    { value: "pressure", label: "Pressure Cooker", icon: "⚡" },
     { value: "blender", label: "Blender", icon: "🌪️" },
-    { value: "any", label: "Any equipment", icon: "🔪" }
+    { value: "rice", label: "Rice Cooker", icon: "🍚" },
+    { value: "bbq", label: "BBQ", icon: "🍖" },
+    { value: "basics", label: "Just the basics", icon: "🔪" }
   ];
 
-  const ambitionOptions = [
-    { value: "justFed", label: "Just get fed", icon: "☕", desc: "Minimal effort" },
-    { value: "simpleTasty", label: "Simple & tasty", icon: "❤️", desc: "Easy but delicious" },
-    { value: "confidentCook", label: "Confident cook", icon: "✨", desc: "Touch of flair" },
-    { value: "ambitiousChef", label: "Ambitious chef", icon: "🎯", desc: "Multi-step prep" },
-    { value: "michelinEffort", label: "Michelin effort", icon: "👑", desc: "Restaurant quality" }
-  ];
+  // Match exact ambition labels from other modes
+  const ambitionLabels = {
+    1: "Just get fed",
+    2: "Simple & tasty", 
+    3: "Confident cook",
+    4: "Ambitious home chef",
+    5: "Michelin star effort"
+  };
 
-  const servingsOptions = [
-    { value: "1", label: "Just me", icon: "👤", desc: "1 serving" },
-    { value: "2", label: "For two", icon: "👥", desc: "2 servings" },
-    { value: "4", label: "Small family", icon: "🏠", desc: "4 servings" },
-    { value: "6", label: "Large family", icon: "👨‍👩‍👧‍👦", desc: "6 servings" },
-    { value: "8", label: "Party time", icon: "🎉", desc: "8+ servings" }
-  ];
+  // Match exact time labels from other modes
+  const timeLabels = (time: number) => {
+    if (time <= 15) return "Quick fix";
+    if (time <= 30) return "Easy weeknight";
+    if (time <= 60) return "Weekend cooking";
+    return "No time limit";
+  };
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
@@ -134,15 +153,32 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
 
   const handleSubmit = () => {
     onLoading(true);
+    
+    // Transform data to match server expectations
     const finalData: QuizData = {
       intent: quizData.intent || "",
       dietary: quizData.dietary || [],
       time: quizData.time || 60,
-      ambition: quizData.ambition || "confidentCook",
+      ambition: quizData.ambition || 3,
       equipment: quizData.equipment || [],
-      servings: quizData.servings || "4"
+      servings: quizData.servings || 4
     };
-    onComplete(finalData);
+
+    // Convert to server format and generate recipe directly (Chef mode bypasses Tinder cards)
+    const serverQuizData = {
+      intent: finalData.intent,
+      dietary: finalData.dietary,
+      time: finalData.time,
+      ambition: finalData.ambition,
+      equipment: finalData.equipment,
+      servings: finalData.servings
+    };
+
+    generateRecipeMutation.mutate({
+      selectedRecipe: { title: "Custom Chef Recipe", description: finalData.intent },
+      mode: "chef",
+      quizData: serverQuizData
+    });
   };
 
   const updateQuizData = (key: keyof QuizData, value: any) => {
@@ -198,47 +234,48 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
 
       case "dietary":
         return (
-          <div className="grid grid-cols-2 gap-3">
-            {dietaryOptions.map((option) => (
-              <Button
-                key={option.value}
-                variant={quizData.dietary?.includes(option.value) ? "default" : "outline"}
-                className="h-auto p-4 flex flex-col items-center gap-2"
-                onClick={() => toggleArrayItem("dietary", option.value)}
-              >
-                <span className="text-2xl">{option.icon}</span>
-                <span className="text-sm font-medium">{option.label}</span>
-              </Button>
-            ))}
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-3">
+              {dietaryOptions.map((option) => (
+                <Badge
+                  key={option}
+                  variant={quizData.dietary?.includes(option) ? "default" : "secondary"}
+                  className={`cursor-pointer transition-all duration-300 px-4 py-2 text-sm hover:scale-105 ${
+                    quizData.dietary?.includes(option)
+                      ? 'gradient-primary text-white shadow-lg'
+                      : 'hover:shadow-md'
+                  }`}
+                  onClick={() => toggleArrayItem('dietary', option)}
+                >
+                  {option}
+                </Badge>
+              ))}
+            </div>
+            <p className="text-sm text-slate-600 text-center">
+              Select any dietary preferences or restrictions
+            </p>
           </div>
         );
 
       case "time":
         return (
           <div className="space-y-6">
+            <div className="text-center">
+              <div className="text-4xl font-bold text-primary mb-2">{quizData.time} min</div>
+              <div className="text-lg text-slate-600">{timeLabels(quizData.time || 60)}</div>
+            </div>
             <div className="px-4">
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-sm text-muted-foreground">10 min</span>
-                <span className="text-lg font-semibold">
-                  {quizData.time === 120 ? "No time limit" : `${quizData.time} minutes`}
-                </span>
-                <span className="text-sm text-muted-foreground">2+ hours</span>
-              </div>
-              
-              <input
-                type="range"
-                min="10"
-                max="120"
-                step="10"
-                value={quizData.time || 60}
-                onChange={(e) => updateQuizData("time", parseInt(e.target.value))}
-                className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer slider"
+              <Slider
+                value={[quizData.time || 60]}
+                onValueChange={(value) => updateQuizData('time', value[0])}
+                max={90}
+                min={5}
+                step={5}
+                className="w-full"
               />
-              
-              <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                <span>Quick</span>
-                <span>Standard</span>
-                <span>No rush</span>
+              <div className="flex justify-between text-sm text-slate-500 mt-2">
+                <span>5 min</span>
+                <span>90 min</span>
               </div>
             </div>
           </div>
@@ -246,58 +283,80 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
 
       case "ambition":
         return (
-          <div className="grid gap-3">
-            {ambitionOptions.map((option) => (
-              <Button
-                key={option.value}
-                variant={quizData.ambition === option.value ? "default" : "outline"}
-                className="h-auto p-4 flex items-center gap-4 justify-start"
-                onClick={() => updateQuizData("ambition", option.value)}
-              >
-                <span className="text-2xl">{option.icon}</span>
-                <div className="text-left">
-                  <div className="font-medium">{option.label}</div>
-                  <div className="text-sm text-muted-foreground">{option.desc}</div>
-                </div>
-              </Button>
-            ))}
+          <div className="space-y-6">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-primary mb-2">Level {quizData.ambition}</div>
+              <div className="text-lg text-slate-600">
+                {ambitionLabels[quizData.ambition as keyof typeof ambitionLabels]}
+              </div>
+            </div>
+            <div className="px-4">
+              <Slider
+                value={[quizData.ambition || 3]}
+                onValueChange={(value) => updateQuizData('ambition', value[0])}
+                max={5}
+                min={1}
+                step={1}
+                className="w-full"
+              />
+              <div className="flex justify-between text-sm text-slate-500 mt-2">
+                <span>Just get fed</span>
+                <span>Michelin effort</span>
+              </div>
+            </div>
           </div>
         );
 
       case "servings":
         return (
-          <div className="grid gap-3">
-            {servingsOptions.map((option) => (
-              <Button
-                key={option.value}
-                variant={quizData.servings === option.value ? "default" : "outline"}
-                className="h-auto p-4 flex items-center gap-4 justify-start"
-                onClick={() => updateQuizData("servings", option.value)}
-              >
-                <span className="text-2xl">{option.icon}</span>
-                <div className="text-left">
-                  <div className="font-medium">{option.label}</div>
-                  <div className="text-sm text-muted-foreground">{option.desc}</div>
-                </div>
-              </Button>
-            ))}
+          <div className="space-y-6">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-primary mb-2">{quizData.servings} servings</div>
+              <div className="text-lg text-slate-600">Perfect portion size</div>
+            </div>
+            <div className="px-4">
+              <Slider
+                value={[quizData.servings || 4]}
+                onValueChange={(value) => updateQuizData('servings', value[0])}
+                max={12}
+                min={1}
+                step={1}
+                className="w-full"
+              />
+              <div className="flex justify-between text-sm text-slate-500 mt-2">
+                <span>1 person</span>
+                <span>Large party</span>
+              </div>
+            </div>
           </div>
         );
 
       case "equipment":
         return (
-          <div className="grid grid-cols-2 gap-3">
-            {equipmentOptions.map((option) => (
-              <Button
-                key={option.value}
-                variant={quizData.equipment?.includes(option.value) ? "default" : "outline"}
-                className="h-auto p-4 flex flex-col items-center gap-2"
-                onClick={() => toggleArrayItem("equipment", option.value)}
-              >
-                <span className="text-2xl">{option.icon}</span>
-                <span className="text-sm font-medium text-center">{option.label}</span>
-              </Button>
-            ))}
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              {equipmentOptions.map((option) => (
+                <Card
+                  key={option.value}
+                  className={`cursor-pointer transition-all duration-300 hover:scale-105 ${
+                    quizData.equipment?.includes(option.value)
+                      ? 'ring-2 ring-primary shadow-lg scale-105'
+                      : 'hover:shadow-md'
+                  }`}
+                  onClick={() => toggleArrayItem('equipment', option.value)}
+                >
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl mb-2">{option.icon}</div>
+                    <div className="font-medium text-sm">{option.label}</div>
+                    {quizData.equipment?.includes(option.value) && (
+                      <div className="w-4 h-4 gradient-primary rounded-full flex items-center justify-center mx-auto mt-2">
+                        <i className="fas fa-check text-white text-xs"></i>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         );
 
@@ -307,53 +366,61 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-8">
-      {/* Progress */}
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Step {currentStep + 1} of {totalSteps}</span>
-          <span className="font-medium">{Math.round(progress)}%</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-emerald-50 relative">
+      {/* Progress Header */}
+      <div className="sticky top-0 z-10 glass backdrop-blur-xl border-b border-white/20 p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-sm font-medium text-slate-600">
+            Step {currentStep + 1} of {totalSteps}
+          </div>
+          <div className="text-sm font-medium text-slate-600">
+            {Math.round(progress)}%
+          </div>
         </div>
-        <Progress value={progress} className="h-2" />
+        <Progress value={progress} className="h-2 bg-white/30" />
       </div>
 
-      {/* Question */}
-      <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-foreground">
-          {questions[currentStep].title}
-        </h2>
-        <p className="text-muted-foreground">
-          {questions[currentStep].subtitle}
-        </p>
-      </div>
+      {/* Content */}
+      <div className="p-6 max-w-2xl mx-auto space-y-8">
+        {/* Question */}
+        <div className="text-center space-y-2">
+          <h2 className="text-3xl font-bold gradient-text">
+            {questions[currentStep].title}
+          </h2>
+          <p className="text-slate-600 text-lg">
+            {questions[currentStep].subtitle}
+          </p>
+        </div>
 
-      {/* Answer Options */}
-      <Card>
-        <CardContent className="p-6">
-          {renderQuestion()}
-        </CardContent>
-      </Card>
+        {/* Answer Options */}
+        <Card className="glass border-white/20 shadow-xl">
+          <CardContent className="p-8">
+            {renderQuestion()}
+          </CardContent>
+        </Card>
 
-      {/* Navigation */}
-      <div className="flex justify-between">
-        <Button
-          variant="outline"
-          onClick={handleBack}
-          disabled={currentStep === 0}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </Button>
+        {/* Navigation */}
+        <div className="flex justify-between">
+          <Button
+            variant="outline"
+            onClick={handleBack}
+            disabled={currentStep === 0}
+            className="flex items-center gap-2 glass border-white/20"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
 
-        <Button
-          onClick={handleNext}
-          disabled={!isStepValid()}
-          className="flex items-center gap-2"
-        >
-          {currentStep === totalSteps - 1 ? "Create Recipe" : "Next"}
-          <ArrowRight className="w-4 h-4" />
-        </Button>
+          <Button
+            onClick={handleNext}
+            disabled={!isStepValid() || generateRecipeMutation.isPending}
+            className="flex items-center gap-2 gradient-primary text-white font-semibold px-8"
+          >
+            {generateRecipeMutation.isPending ? "Creating..." : 
+             currentStep === totalSteps - 1 ? "Create Recipe" : "Next"}
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );
