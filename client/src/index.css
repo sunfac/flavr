@@ -99,10 +99,6 @@
     @apply antialiased bg-background text-foreground;
     font-feature-settings: 'rlig' 1, 'calt' 1;
     font-optical-sizing: auto;
-    overflow: hidden;
-    height: 100vh;
-    position: fixed;
-    width: 100%;
   }
 
   /* Hide scrollbars completely */
@@ -115,15 +111,22 @@
     display: none;
   }
 
-  /* Ensure quiz content doesn't cause page scrolling */
-  html {
-    overflow: hidden;
-    height: 100vh;
+  /* Quiz-specific no-scroll styles */
+  body.quiz-mode {
+    overflow: hidden !important;
+    height: 100vh !important;
+    position: fixed !important;
+    width: 100% !important;
   }
 
-  #root {
-    height: 100vh;
-    overflow: hidden;
+  html.quiz-mode {
+    overflow: hidden !important;
+    height: 100vh !important;
+  }
+
+  .quiz-mode #root {
+    height: 100vh !important;
+    overflow: hidden !important;
   }
 
   h1, h2, h3, h4, h5, h6 {
