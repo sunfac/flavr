@@ -252,7 +252,7 @@ export default function TinderRecipeCards({
           </div>
 
           {/* Tinder-Style Controls - Fixed position from bottom */}
-          <div className="fixed bottom-40 left-0 right-0 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent pt-8 pb-6">
+          <div className="fixed bottom-16 left-0 right-0 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent pt-8 pb-4">
             <div className="flex justify-center items-center space-x-4 max-w-md mx-auto px-4">
               {/* Navigate Previous */}
               <Button
