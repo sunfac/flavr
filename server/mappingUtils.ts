@@ -48,22 +48,22 @@ export const getBudgetText = (budget: string): string => {
 const budgetMappings = {
   "budget": {
     label: "Budget-friendly",
-    costRange: "£1–£3 per portion",
+    costRange: "£1–£2 per portion",
     guidance: "Focus on affordable staples like pasta, beans, eggs, and seasonal vegetables. Use simple preparation methods and versatile ingredients that provide good value."
   },
   "moderate": {
     label: "Moderate",
-    costRange: "£5–15 per portion", 
+    costRange: "£2–4 per portion", 
     guidance: "Balanced cost-conscious meals with quality ingredients and some flexibility in preparation time or brand. A mix of fresh and pantry ingredients."
   },
   "premium": {
     label: "Premium",
-    costRange: "£15–25 per portion",
+    costRange: "£4–7 per portion",
     guidance: "Higher-quality ingredients with focus on flavour and presentation. Some specialty items are acceptable."
   },
   "luxury": {
     label: "Luxury",
-    costRange: "£25+ per portion",
+    costRange: "7+ per portion",
     guidance: "Premium ingredients, luxury items, specialty cuts, artisanal products, exotic spices, and high-end components."
   }
 };
