@@ -3,13 +3,15 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import ShoppingList from "./ShoppingList";
 import ChatBot from "./ChatBot";
+import RecipeShareTools from "./RecipeShareTools";
 import { generateShoppingPrompt2 } from "@/prompts/shoppingPrompt2";
 import { generateFridgePrompt2 } from "@/prompts/fridgePrompt2";
 import { motion, AnimatePresence } from "framer-motion";
+import { Heart, BookmarkPlus, RotateCcw, Clock, Users, Signal, ArrowLeft } from "lucide-react";
 
 interface RecipeCardProps {
   recipe: any;
@@ -34,7 +36,9 @@ export default function RecipeCard({
 }: RecipeCardProps) {
   const [fullRecipe, setFullRecipe] = useState<any>(isFullView ? recipe : null);
   const [showShoppingList, setShowShoppingList] = useState(false);
-  const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
+  const [isSaved, setIsSaved] = useState(false);
+  const [showChatbot, setShowChatbot] = useState(false);
+  const [chatbotMessage, setChatbotMessage] = useState("");
   const { toast } = useToast();
 
   const generateFullRecipeMutation = useMutation({
@@ -78,14 +82,29 @@ export default function RecipeCard({
     }
   };
 
-  const handleIngredientCheck = (index: number) => {
-    const newChecked = new Set(checkedIngredients);
-    if (newChecked.has(index)) {
-      newChecked.delete(index);
-    } else {
-      newChecked.add(index);
-    }
-    setCheckedIngredients(newChecked);
+  // Save recipe mutation
+  const saveRecipeMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/save-recipe", { recipe: fullRecipe }),
+    onSuccess: () => {
+      setIsSaved(true);
+      toast({
+        title: "Recipe saved!",
+        description: "Added to your recipe collection",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Save failed",
+        description: "Could not save recipe",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handle ingredient substitution
+  const handleSubstitution = (ingredient: string) => {
+    setChatbotMessage(`Suggest a substitution for ${ingredient}`);
+    setShowChatbot(true);
   };
 
   if (!isFullView) {
@@ -218,9 +237,9 @@ export default function RecipeCard({
   // Full recipe view
   return (
     <div className="bg-background min-h-screen">
-      {/* Recipe Header */}
+      {/* Recipe Header - Enhanced with larger image */}
       <div className="relative">
-        <div className="w-full h-64 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+        <div className="w-full h-80 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center shadow-lg">
           {fullRecipe.imageUrl ? (
             <img 
               src={fullRecipe.imageUrl} 
@@ -228,43 +247,76 @@ export default function RecipeCard({
               className="w-full h-full object-cover" 
             />
           ) : (
-            <i className="fas fa-utensils text-6xl text-muted-foreground"></i>
+            <div className="text-8xl animate-pulse">🍽️</div>
           )}
         </div>
-        <div className="gradient-overlay absolute inset-0"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+        
+        {/* Back Button */}
         <Button
           variant="ghost"
           size="sm"
-          className="absolute top-4 left-4 w-10 h-10 bg-white bg-opacity-20 backdrop-blur-sm rounded-full text-white hover:bg-white hover:bg-opacity-30"
+          className="absolute top-4 left-4 w-10 h-10 bg-black/20 backdrop-blur-sm rounded-full text-white hover:bg-black/40 border border-white/20"
           onClick={onBack}
         >
-          <i className="fas fa-arrow-left"></i>
+          <ArrowLeft className="w-4 h-4" />
         </Button>
+
+        {/* Save Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute top-4 right-4 w-10 h-10 bg-black/20 backdrop-blur-sm rounded-full text-white hover:bg-black/40 border border-white/20"
+          onClick={() => saveRecipeMutation.mutate()}
+          disabled={isSaved || saveRecipeMutation.isPending}
+        >
+          {isSaved ? (
+            <Heart className="w-4 h-4 fill-red-500 text-red-500" />
+          ) : (
+            <BookmarkPlus className="w-4 h-4" />
+          )}
+        </Button>
+
+        {/* Recipe Info Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-          <h1 className="font-playfair font-bold text-3xl mb-2">{fullRecipe.title}</h1>
-          <div className="flex items-center space-x-4 text-sm">
-            <span><i className="fas fa-clock mr-1"></i>{fullRecipe.cookTime} min</span>
-            <span><i className="fas fa-users mr-1"></i>{fullRecipe.servings} servings</span>
-            <span><i className="fas fa-signal mr-1"></i>{fullRecipe.difficulty || "Easy"}</span>
+          <h1 className="font-playfair font-bold text-3xl mb-3 drop-shadow-lg">{fullRecipe.title}</h1>
+          <div className="flex items-center flex-wrap gap-4 text-sm">
+            <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+              <Clock className="w-3 h-3 mr-1" />
+              {fullRecipe.cookTime} min
+            </Badge>
+            <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+              <Users className="w-3 h-3 mr-1" />
+              {fullRecipe.servings} servings
+            </Badge>
+            <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+              <Signal className="w-3 h-3 mr-1" />
+              {fullRecipe.difficulty || "Easy"}
+            </Badge>
           </div>
         </div>
       </div>
 
       {/* Recipe Content */}
       <div className="p-6 space-y-8">
-        {/* Ingredients Section */}
+        {/* Ingredients Section - Mobile Optimized */}
         <div>
           <h2 className="text-xl font-playfair font-bold text-foreground mb-4">Ingredients</h2>
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-64 overflow-y-auto">
             {fullRecipe.ingredients?.map((ingredient: string, index: number) => (
-              <div key={index} className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
-                <Checkbox 
-                  checked={checkedIngredients.has(index)}
-                  onCheckedChange={() => handleIngredientCheck(index)}
-                />
-                <span className={`flex-1 ${checkedIngredients.has(index) ? "line-through text-muted-foreground" : "text-foreground"}`}>
+              <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg text-sm">
+                <span className="flex-1 text-foreground leading-relaxed">
                   {ingredient}
                 </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleSubstitution(ingredient)}
+                  className="ml-2 p-1 h-6 w-6 text-muted-foreground hover:text-orange-400 hover:bg-orange-500/10"
+                  title="Get substitution suggestions"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                </Button>
               </div>
             ))}
           </div>
@@ -307,6 +359,38 @@ export default function RecipeCard({
           </Card>
         )}
 
+        {/* Save & Share Tools */}
+        {fullRecipe.id && (
+          <div className="mb-8">
+            <RecipeShareTools
+              id={fullRecipe.id}
+              shareId={fullRecipe.shareId}
+              title={fullRecipe.title}
+              description={fullRecipe.description}
+              imageUrl={fullRecipe.imageUrl}
+              isShared={fullRecipe.isShared || false}
+              onShareToggle={async () => {
+                // Handle share toggle logic here
+                try {
+                  await apiRequest("POST", `/api/recipe/${fullRecipe.id}/share`, { 
+                    isShared: !fullRecipe.isShared 
+                  });
+                  toast({
+                    title: "Sharing updated",
+                    description: fullRecipe.isShared ? "Recipe is now private" : "Recipe is now public",
+                  });
+                } catch (error) {
+                  toast({
+                    title: "Error",
+                    description: "Failed to update sharing settings",
+                    variant: "destructive",
+                  });
+                }
+              }}
+            />
+          </div>
+        )}
+
         {/* New Search Button (for chef mode) */}
         {showNewSearchButton && onNewSearch && (
           <Button 
@@ -314,17 +398,10 @@ export default function RecipeCard({
             variant="outline"
             className="w-full"
           >
-            <i className="fas fa-redo mr-2"></i>Create Another Recipe
+            <RotateCcw className="w-4 h-4 mr-2" />
+            Create Another Recipe
           </Button>
         )}
-        
-        {/* AI Chef Chat */}
-        <div className="mt-6">
-          <ChatBot 
-            currentRecipe={fullRecipe}
-            currentMode={mode}
-          />
-        </div>
       </div>
 
       {/* Shopping List Modal */}

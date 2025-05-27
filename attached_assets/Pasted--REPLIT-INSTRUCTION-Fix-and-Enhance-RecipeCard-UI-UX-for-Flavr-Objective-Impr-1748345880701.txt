@@ -1,0 +1,56 @@
+/*
+  === REPLIT INSTRUCTION: Fix and Enhance RecipeCard UI/UX for Flavr ===
+
+  Objective:
+  Improve the RecipeCard component to fix missing UI elements and optimise layout for mobile users. Ensure full integration with the existing floating Zest chatbot and resolve visual/component mounting issues.
+
+  Context:
+  The save and share components have already been created (e.g. `RecipeShareTools` and save button), but they are currently **not displaying** on the RecipeCard. These need to be correctly mounted and styled.
+
+  Required Fixes and Enhancements:
+
+  1. ✅ Debug and Display Save + Share Features
+     - Ensure the existing save and share components are correctly imported and rendered within the RecipeCard.
+     - Check conditional rendering logic — confirm that they are not hidden due to missing recipe ID, user session, or visibility checks.
+     - Position save/share tools near the bottom of the card, but **not overlapping the floating chatbot**.
+     - Share should use `/api/recipe/:id/share` and include copy-to-clipboard, print, and share link.
+     - Save should persist the recipe to user history.
+
+  2. 📱 Improve Ingredient List Layout
+     - Optimise for mobile view:
+       - Use smaller font size and line spacing
+       - Use a scrollable or 2-column layout for long lists
+       - Optionally group by type (“For the sauce”, “For the base”, etc.)
+
+  3. 🔁 Add Substitution Icon for Each Ingredient
+     - Add a small “Substitute” icon (🔄) next to each ingredient
+     - On click, trigger the **floating Zest chatbot popup** with a pre-filled message like:
+       “Suggest a substitution for [ingredient]”
+     - Ensure the chatbot opens automatically with that message populated in the input
+
+  4. ❌ Remove Ingredient Crossout/Radio Feature
+     - Remove the cross-out radio/tick buttons from the ingredients list
+     - They are unnecessary and create visual clutter on mobile
+
+  5. 🖼 Enlarge Recipe Image
+     - Slightly increase the size of the main recipe image
+     - Keep it responsive and prevent layout shifts
+     - Add padding or subtle shadow if needed to improve visual impact
+
+  6. 💬 Integrate with Floating Zest Chatbot
+     - Do not embed chat inside the RecipeCard
+     - All interactions (like ingredient substitutions) should route through the floating Zest popup
+     - Ensure only one chat instance appears at a time and that it’s tied to the current recipe context
+
+  7. 🧪 Optional Styling Enhancements
+     - Add hover/tap animations for save and share icons
+     - Use toasts for actions like “Copied!”, “Saved to your recipes”, etc.
+     - Apply Tailwind or styled-components for responsive spacing
+
+  Deliverable:
+  RecipeCard should:
+  - Correctly display the already-built save/share tools
+  - Be fully mobile-optimised
+  - Offer smart ingredient substitution via Zest
+  - Integrate visually and functionally with Flavr’s overall experience
+*/
