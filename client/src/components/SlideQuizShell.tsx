@@ -597,13 +597,13 @@ export default function SlideQuizShell({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-black overflow-hidden">
       {/* Header */}
-      <div className="sticky top-0 bg-slate-900/80 backdrop-blur-lg border-b border-slate-700 z-10">
-        <div className="max-w-md mx-auto px-4 py-4">
-          <div className="text-center mb-4">
-            <h1 className="text-2xl font-bold text-white">{title}</h1>
-            {subtitle && <p className="text-slate-400 mt-1">{subtitle}</p>}
+      <div className="flex-shrink-0 bg-slate-900/80 backdrop-blur-lg border-b border-slate-700 z-10">
+        <div className="max-w-md mx-auto px-4 py-3">
+          <div className="text-center mb-3">
+            <h1 className="text-xl font-bold text-white">{title}</h1>
+            {subtitle && <p className="text-slate-400 mt-1 text-sm">{subtitle}</p>}
           </div>
           <Progress value={progress} className="h-2 bg-slate-800" />
           <div className="flex justify-between items-center mt-2">
@@ -618,8 +618,8 @@ export default function SlideQuizShell({
       </div>
 
       {/* Question Content */}
-      <div ref={containerRef} className="flex-1 overflow-y-auto">
-        <div className="max-w-md mx-auto px-4 py-6">
+      <div ref={containerRef} className="flex-1 flex flex-col min-h-0">
+        <div className="max-w-md mx-auto px-4 py-4 flex-1 flex flex-col justify-center">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={currentQuestionIndex}
@@ -628,10 +628,10 @@ export default function SlideQuizShell({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: direction > 0 ? -300 : 300, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="space-y-6"
+              className="space-y-4"
             >
               <div className="text-center space-y-2">
-                <h2 className="text-xl font-semibold text-white">
+                <h2 className="text-lg font-semibold text-white">
                   {currentQ.label}
                 </h2>
                 {currentQ.subtitle && (
@@ -639,15 +639,17 @@ export default function SlideQuizShell({
                 )}
               </div>
 
-              {renderQuestion()}
+              <div className="max-h-96 overflow-y-auto">
+                {renderQuestion()}
+              </div>
             </motion.div>
           </AnimatePresence>
         </div>
       </div>
 
       {/* Navigation */}
-      <div className="sticky bottom-0 bg-slate-900/90 backdrop-blur-lg border-t border-slate-700">
-        <div className="max-w-md mx-auto px-4 py-4">
+      <div className="flex-shrink-0 bg-slate-900/90 backdrop-blur-lg border-t border-slate-700">
+        <div className="max-w-md mx-auto px-4 py-3">
           <div className="flex justify-between items-center gap-4">
             <Button
               variant="outline"
