@@ -40,3 +40,261 @@ export const getDifficulty = (ambition: string): string => {
 export const getBudgetText = (budget: string): string => {
   return budgetMap[budget] || 'Any budget';
 };
+
+// === EXISTING MAPPING FUNCTIONS CONSOLIDATED ===
+// Moved from routes.ts to centralize all mapping logic
+
+// Budget mappings for detailed prompt text
+const budgetMappings = {
+  "budget": {
+    label: "Budget-friendly",
+    costRange: "£1–£3 per portion",
+    guidance: "Focus on affordable staples like pasta, beans, eggs, and seasonal vegetables. Use simple preparation methods and versatile ingredients that provide good value."
+  },
+  "moderate": {
+    label: "Moderate",
+    costRange: "£5–15 per portion", 
+    guidance: "Balanced cost-conscious meals with quality ingredients and some flexibility in preparation time or brand. A mix of fresh and pantry ingredients."
+  },
+  "premium": {
+    label: "Premium",
+    costRange: "£15–25 per portion",
+    guidance: "Higher-quality ingredients with focus on flavour and presentation. Some specialty items are acceptable."
+  },
+  "luxury": {
+    label: "Luxury",
+    costRange: "£25+ per portion",
+    guidance: "Premium ingredients, luxury items, specialty cuts, artisanal products, exotic spices, and high-end components."
+  }
+};
+
+// Mood mappings
+const moodMappings = {
+  "light": {
+    label: "Light & refreshing",
+    description: "Focus on vibrant, fresh flavours with citrus, herbs, and vegetables. Emphasize clean, bright tastes that feel energizing rather than heavy."
+  },
+  "comfort": {
+    label: "Comfort & warmth",
+    description: "Create hearty, soul-warming dishes that provide emotional satisfaction. Think rich, familiar flavours that feel like a warm hug."
+  },
+  "luxury": {
+    label: "Luxury & indulgence", 
+    description: "Seeking luxury with premium ingredients, restaurant-quality plating, and sophisticated flavor layering for an elevated dining experience."
+  },
+  "adventure": {
+    label: "Adventure & excitement",
+    description: "Bold, exciting flavours from global cuisines. Incorporate unexpected spice combinations, unique cooking techniques, or fusion elements."
+  }
+};
+
+// Ambition mappings
+const ambitionMappings = {
+  "Just get fed": {
+    label: "Just get fed",
+    description: "Simple, quick preparation with minimal effort and basic techniques that anyone can master."
+  },
+  "Simple & tasty": {
+    label: "Simple & tasty",
+    description: "Easy techniques with enhanced flavor using straightforward methods that build confidence in the kitchen."
+  },
+  "Confident cook": {
+    label: "Confident cook",
+    description: "Intermediate techniques with balanced complexity, perfect for expanding culinary skills while maintaining achievable results."
+  },
+  "Ambitious chef": {
+    label: "Ambitious chef", 
+    description: "Hard techniques with restaurant-level precision, complex flavor development, and professional presentation standards."
+  },
+  "Michelin effort": {
+    label: "Michelin effort",
+    description: "Hard techniques with restaurant-level precision, complex flavor development, and professional presentation standards."
+  }
+};
+
+// Time range mappings
+const timeRanges = [
+  {
+    min: 0,
+    max: 15,
+    label: "Quick (15 min or less)",
+    description: "Lightning-fast recipes perfect for busy schedules. Focus on minimal prep and fast cooking methods."
+  },
+  {
+    min: 16,
+    max: 30,
+    label: "Express (16-30 min)",
+    description: "Efficient recipes with streamlined preparation that don't compromise on flavour."
+  },
+  {
+    min: 31,
+    max: 60,
+    label: "Relaxed (30-60 min)",
+    description: "Comfortable cooking pace allowing for proper technique development and flavour building."
+  },
+  {
+    min: 61,
+    max: 120,
+    label: "Weekend project (1-2 hours)",
+    description: "Leisurely cooking sessions perfect for when you want to take time and enjoy the process."
+  },
+  {
+    min: 121,
+    max: 999,
+    label: "Long & slow (2+ hours)",
+    description: "Slow-cooked perfection for special occasions, with emphasis on depth of flavour and traditional techniques."
+  }
+];
+
+// Diet mappings
+const dietMap: Record<string, { label: string; description: string }> = {
+  vegan: {
+    label: "Vegan",
+    description: "Exclude all animal-derived ingredients, including meat, dairy, eggs, honey, and gelatin. Use only plant-based alternatives.",
+  },
+  vegetarian: {
+    label: "Vegetarian",
+    description: "Exclude all meat and fish. Dairy and eggs are allowed.",
+  },
+  glutenFree: {
+    label: "Gluten-free",
+    description: "Exclude all gluten-containing ingredients including wheat, barley, rye, and soy sauce unless certified gluten-free.",
+  },
+  dairyFree: {
+    label: "Dairy-free",
+    description: "Exclude all dairy ingredients including milk, butter, cheese, cream, and yogurt. Use plant-based alternatives.",
+  },
+  nutFree: {
+    label: "Nut-free",
+    description: "Strictly exclude all nuts and nut-based products, including nut oils and butters.",
+  },
+  pescatarian: {
+    label: "Pescatarian",
+    description: "No meat or poultry. Fish and seafood are allowed.",
+  },
+  keto: {
+    label: "Keto",
+    description: "Keep net carbs very low. Avoid sugar, grains, and starchy vegetables. Prioritise fats, protein, and low-carb greens.",
+  },
+  paleo: {
+    label: "Paleo",
+    description: "Avoid all processed foods, grains, dairy, and legumes. Focus on whole foods, meats, fish, vegetables, nuts, and seeds.",
+  },
+  lowCarb: {
+    label: "Low-carb",
+    description: "Reduce starchy foods and sugars. Focus on non-starchy vegetables, proteins, and healthy fats.",
+  },
+  highProtein: {
+    label: "High-protein",
+    description: "Ensure meals are protein-rich using meat, fish, eggs, dairy, or plant-based alternatives. Support muscle recovery and satiety.",
+  },
+  lowCalorie: {
+    label: "Low-calorie",
+    description: "Design meals with reduced calorie density using lean proteins, non-starchy vegetables, and minimal added fats.",
+  },
+  noRestrictions: {
+    label: "No restrictions",
+    description: "There are no dietary limitations. Use any ingredients freely.",
+  }
+};
+
+// Equipment mappings
+const equipmentMappings: Record<string, string> = {
+  "airFryer": "Air fryer for crispy textures with less oil",
+  "slowCooker": "Slow cooker for hands-off, tender results",
+  "instantPot": "Instant Pot for quick pressure cooking",
+  "standMixer": "Stand mixer for baking and mixing",
+  "foodProcessor": "Food processor for chopping and blending",
+  "immersionBlender": "Immersion blender for soups and sauces",
+  "grill": "Grill for outdoor cooking and smoky flavors",
+  "wok": "Wok for high-heat stir-frying",
+  "dutchOven": "Dutch oven for braising and one-pot meals",
+  "kitchenAid": "KitchenAid mixer for professional-level mixing",
+  "vitamix": "High-powered blender for smoothies and purees",
+  "smoker": "Smoker for authentic barbecue flavors"
+};
+
+// === EXPORTED MAPPING FUNCTIONS ===
+// Preserve existing function signatures for compatibility
+
+export function getBudgetPromptText(budgetLevel: string): string {
+  const mapping = budgetMappings[budgetLevel as keyof typeof budgetMappings];
+  if (!mapping) {
+    return "Budget: Moderate. Please ensure the cost per portion reflects this: £2–£4 per portion. Balanced cost-conscious meals with quality ingredients and some flexibility in preparation time or brand. Currency: GBP (British Pounds). Assume supermarket prices.";
+  }
+
+  return `Budget: ${mapping.label}
+Please ensure the cost per portion reflects this: ${mapping.costRange} ${mapping.guidance}
+Currency: GBP (British Pounds). Assume supermarket prices.`;
+}
+
+export function getMoodPromptText(moodKey: string): string {
+  const mood = moodMappings[moodKey as keyof typeof moodMappings];
+  if (!mood) {
+    return "Create a balanced, appealing dish that satisfies the user's preferences.";
+  }
+
+  return `Mood: ${mood.label}
+${mood.description}`;
+}
+
+export function getAmbitionPromptText(ambitionKey: string): string {
+  const ambition = ambitionMappings[ambitionKey as keyof typeof ambitionMappings];
+  if (!ambition) {
+    return "Create a recipe with moderate complexity that balances flavor and achievability.";
+  }
+
+  return `Cooking Ambition: ${ambition.label}
+${ambition.description}`;
+}
+
+export function getTimePromptText(timeValue: number): string {
+  const timeRange = timeRanges.find(range => timeValue >= range.min && timeValue <= range.max);
+  if (!timeRange) {
+    return "Cooking time should be reasonable and efficient for the home cook.";
+  }
+
+  return `Cooking Time: ${timeRange.label}
+${timeRange.description}`;
+}
+
+export function getDietPromptText(dietKeys: string[]): string {
+  if (!dietKeys || dietKeys.length === 0 || dietKeys.includes('noRestrictions')) {
+    return "Dietary Requirements: No restrictions - use any ingredients freely.";
+  }
+
+  const dietDescriptions = dietKeys
+    .filter(key => key !== 'noRestrictions')
+    .map(key => {
+      const diet = dietMap[key];
+      return diet ? `${diet.label}: ${diet.description}` : null;
+    })
+    .filter(Boolean);
+
+  if (dietDescriptions.length === 0) {
+    return "Dietary Requirements: No specific restrictions.";
+  }
+
+  return `Dietary Requirements: ${dietDescriptions.join(' | ')}`;
+}
+
+export function getEquipmentPromptText(equipmentKeys: string[]): string {
+  if (!equipmentKeys || equipmentKeys.length === 0) {
+    return "Available Equipment: Standard kitchen setup - use basic cooking methods suitable for most home kitchens.";
+  }
+
+  const equipmentDescriptions = equipmentKeys
+    .map(key => equipmentMappings[key] || key)
+    .join(', ');
+
+  return `Available Equipment: ${equipmentDescriptions}`;
+}
+
+export function getStrictDietaryInstruction(dietKeys: string[]): string {
+  if (!dietKeys || dietKeys.length === 0 || dietKeys.includes('noRestrictions')) {
+    return "";
+  }
+
+  return `
+DIETARY OVERRIDE: If any creative direction conflicts with the user's dietary requirements, the dietary rules take absolute priority.`;
+}

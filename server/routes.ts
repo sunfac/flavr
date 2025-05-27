@@ -6,7 +6,21 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 import { insertRecipeSchema, insertChatMessageSchema } from "@shared/schema";
 import { getCreativeGuidanceBlock } from "./shoppingPromptBlocks";
-import { difficultyMap, getCookTime, budgetMap, formatEquipmentText, getDifficulty, getBudgetText } from "./mappingUtils";
+import { 
+  difficultyMap, 
+  getCookTime, 
+  budgetMap, 
+  formatEquipmentText, 
+  getDifficulty, 
+  getBudgetText,
+  getBudgetPromptText,
+  getMoodPromptText,
+  getAmbitionPromptText,
+  getTimePromptText,
+  getDietPromptText,
+  getEquipmentPromptText,
+  getStrictDietaryInstruction 
+} from "./mappingUtils";
 
 // Budget mapping functions for GPT prompts
 const budgetMappings = {
