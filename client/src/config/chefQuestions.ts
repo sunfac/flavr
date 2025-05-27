@@ -14,9 +14,7 @@ export const chefQuestions: QuestionConfig[] = [
       "Something impressive for dinner guests",
       "A comforting soup for a cold evening",
       "A show-stopping dessert with chocolate",
-      "A healthy meal that actually tastes amazing",
-      "Something exotic I've never tried before",
-      "A quick but restaurant-quality dish"
+      "Something exotic I've never tried before"
     ]
   },
   {
