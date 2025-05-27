@@ -49,6 +49,7 @@ export default function ChatBot({
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [hasShownWelcome, setHasShownWelcome] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [location] = useLocation();
@@ -97,6 +98,19 @@ export default function ChatBot({
       // Check if the response includes recipe updates
       if (result.updatedRecipe && onRecipeUpdate) {
         onRecipeUpdate(result.updatedRecipe);
+        
+        // Add a recipe update notification message
+        const updateMessage: ChatMessage = {
+          id: Date.now() + 1,
+          message: "",
+          response: "🔥 Recipe updated! Check out the changes above.",
+          isUser: false,
+          text: "🔥 Recipe updated! Check out the changes above.",
+          timestamp: new Date(),
+        };
+        setTimeout(() => {
+          setLocalMessages(prev => [...prev, updateMessage]);
+        }, 500);
       }
     },
   });
@@ -129,15 +143,18 @@ export default function ChatBot({
     if (isOpen && historyData?.history) {
       const messages: ChatMessage[] = [];
       
-      // Add welcome message
-      messages.push({
-        id: 0,
-        message: "",
-        response: "Hi! I'm here to help with any cooking questions. Need substitutions, cooking tips, or modifications to your recipe?",
-        isUser: false,
-        text: "Hi! I'm here to help with any cooking questions. Need substitutions, cooking tips, or modifications to your recipe?",
-        timestamp: new Date(),
-      });
+      // Add Zest's welcome message if we have a recipe
+      if (currentRecipe && !hasShownWelcome) {
+        messages.push({
+          id: 0,
+          message: "",
+          response: "Boom — you picked a flavour bomb. Want to swap something, spice it up, or make it your own? I've got ideas. Just ask.",
+          isUser: false,
+          text: "Boom — you picked a flavour bomb. Want to swap something, spice it up, or make it your own? I've got ideas. Just ask.",
+          timestamp: new Date(),
+        });
+        setHasShownWelcome(true);
+      }
 
       // Add history messages
       historyData.history.forEach((msg: any) => {
@@ -305,11 +322,7 @@ export default function ChatBot({
                 <Badge
                   key={index}
                   variant="outline"
-                  className={`cursor-pointer transition-all duration-300 px-2 py-1 text-xs hover:scale-105 ${
-                    chip.updatesRecipe 
-                      ? 'bg-blue-500/10 border-blue-400/30 text-blue-600 hover:bg-blue-500/20 hover:border-blue-400/50' 
-                      : 'bg-orange-500/10 border-orange-400/30 text-orange-400 hover:bg-orange-500/20 hover:border-orange-400/50'
-                  }`}
+                  className="cursor-pointer transition-all duration-300 px-2 py-1 text-xs hover:scale-105 bg-orange-500/10 border-orange-400/30 text-orange-400 hover:bg-orange-500/20 hover:border-orange-400/50"
                   onClick={handleSuggestionClick(chip.text)}
                 >
                   <span className="mr-1">{chip.icon}</span>
