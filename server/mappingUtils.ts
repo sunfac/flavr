@@ -90,37 +90,49 @@ const moodMappings = {
   }
 };
 
-// Time range mappings
+// Time range mappings - aligned with quiz slider (0-80 minutes in 10-minute increments)
 const timeRanges = [
   {
     min: 0,
-    max: 15,
-    label: "Quick (15 min or less)",
-    description: "Lightning-fast recipes perfect for busy schedules. Focus on minimal prep and fast cooking methods."
+    max: 10,
+    label: "Lightning fast (10 min)",
+    description: "Ultra-quick recipes using minimal prep and instant cooking methods. Perfect for emergencies or when time is extremely limited."
   },
   {
-    min: 16,
+    min: 11,
+    max: 20,
+    label: "Quick fix (15-20 min)",
+    description: "Fast and efficient recipes that don't compromise on taste. Focus on simple techniques and readily available ingredients."
+  },
+  {
+    min: 21,
     max: 30,
-    label: "Express (16-30 min)",
-    description: "Efficient recipes with streamlined preparation that don't compromise on flavour."
+    label: "Express cooking (25-30 min)",
+    description: "Balanced recipes with streamlined preparation that deliver satisfying results without rushing."
   },
   {
     min: 31,
+    max: 45,
+    label: "Comfortable pace (35-45 min)",
+    description: "Relaxed cooking allowing for proper technique development and flavor building without time pressure."
+  },
+  {
+    min: 46,
     max: 60,
-    label: "Relaxed (30-60 min)",
-    description: "Comfortable cooking pace allowing for proper technique development and flavour building."
+    label: "Leisurely cooking (45-60 min)",
+    description: "Take your time to develop complex flavors and enjoy the cooking process with multiple steps if needed."
   },
   {
     min: 61,
-    max: 120,
-    label: "Weekend project (1-2 hours)",
-    description: "Leisurely cooking sessions perfect for when you want to take time and enjoy the process."
+    max: 80,
+    label: "Extended session (60-80 min)",
+    description: "Longer cooking projects perfect for weekends, allowing for advanced techniques and slow-cooked perfection."
   },
   {
-    min: 121,
+    min: 81,
     max: 999,
-    label: "Long & slow (2+ hours)",
-    description: "Slow-cooked perfection for special occasions, with emphasis on depth of flavour and traditional techniques."
+    label: "No time limit",
+    description: "Unlimited time for elaborate preparations, slow cooking, marination, or multi-component dishes. Focus purely on achieving the best possible result."
   }
 ];
 
