@@ -67,6 +67,32 @@ const ambitionMappings = {
     label: "Michelin effort",
     difficulty: "Hard",
     description: "Hard techniques with restaurant-level precision, complex flavor development, and professional presentation standards."
+  },
+  // Quiz camelCase keys for compatibility
+  "justFed": {
+    label: "Just get fed",
+    difficulty: "Easy",
+    description: "Simple, quick preparation with minimal effort and basic techniques that anyone can master."
+  },
+  "simpleTasty": {
+    label: "Simple & tasty", 
+    difficulty: "Easy",
+    description: "Easy techniques with enhanced flavor using straightforward methods that build confidence in the kitchen."
+  },
+  "confidentCook": {
+    label: "Confident cook",
+    difficulty: "Medium",
+    description: "Intermediate techniques with balanced complexity, perfect for expanding culinary skills while maintaining achievable results."
+  },
+  "ambitiousChef": {
+    label: "Ambitious chef",
+    difficulty: "Hard", 
+    description: "Hard techniques with restaurant-level precision, complex flavor development, and professional presentation standards."
+  },
+  "michelinEffort": {
+    label: "Michelin effort",
+    difficulty: "Hard",
+    description: "Hard techniques with restaurant-level precision, complex flavor development, and professional presentation standards."
   }
 };
 
