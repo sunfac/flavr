@@ -63,7 +63,7 @@ export default function ChefAssistMode() {
       time: data.time || 30,
       ambition: data.ambition || 3,
       equipment: data.equipment || [],
-      extras: data.extras || []
+      servings: data.servings || "2"
     };
 
     setQuizData(transformedData);

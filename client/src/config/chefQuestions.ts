@@ -56,19 +56,7 @@ export const chefQuestions: QuestionConfig[] = [
       return `${value} minutes`;
     }
   },
-  {
-    id: "budget",
-    label: "What's your budget?",
-    subtitle: "How much are you looking to spend?",
-    type: "cards",
-    required: true,
-    options: [
-      { value: "budget", label: "Budget Friendly", icon: "PoundSterling", desc: "£1–£2 per portion" },
-      { value: "moderate", label: "Moderate", icon: "CreditCard", desc: "£2–£4 per portion" },
-      { value: "premium", label: "Premium Ingredients", icon: "Crown", desc: "£4–£7 per portion" },
-      { value: "luxury", label: "Sky's the Limit", icon: "Star", desc: "£7+ per portion" }
-    ]
-  },
+
   {
     id: "ambition",
     label: "Your ambition level",
@@ -103,34 +91,14 @@ export const chefQuestions: QuestionConfig[] = [
     subtitle: "What tools do you have access to?",
     type: "equipment-grid",
     options: [
-      { value: "hob", label: "Hob", icon: "Flame" },
-      { value: "oven", label: "Oven", icon: "Building" },
-      { value: "microwave", label: "Microwave", icon: "Waves" },
-      { value: "airfryer", label: "Air Fryer", icon: "Wind" },
-      { value: "grill", label: "Grill", icon: "Beef" },
-      { value: "slowcooker", label: "Slow Cooker", icon: "Clock" },
-      { value: "pressure", label: "Pressure Cooker", icon: "Timer" },
-      { value: "blender", label: "Blender", icon: "Blend" },
-      { value: "mixer", label: "Stand Mixer", icon: "RotateCcw" },
-      { value: "castiron", label: "Cast Iron", icon: "Utensils" },
-      { value: "pizza", label: "Pizza Oven", icon: "Pizza" },
-      { value: "bbq", label: "BBQ", icon: "Grill" },
-      { value: "kamado", label: "Kamado", icon: "Soup" },
-      { value: "basics", label: "Just the basics", icon: "ChefHat" }
-    ]
-  },
-  {
-    id: "extras",
-    label: "Extra touches",
-    subtitle: "Want to make it even more special?",
-    type: "cards",
-    options: [
-      { value: "wine", label: "Wine pairing", icon: "🍷" },
-      { value: "sides", label: "Side dish suggestion", icon: "🥗" },
-      { value: "dessert", label: "Dessert to match", icon: "🍰" },
-      { value: "presentation", label: "Presentation tips", icon: "✨" },
-      { value: "prep", label: "Batch/prep suggestions", icon: "📋" },
-      { value: "restaurant", label: "Make it restaurant-worthy", icon: "⭐" }
+      { value: "stovetop", label: "Stovetop only", icon: "🔥" },
+      { value: "oven", label: "Oven only", icon: "🏠" },
+      { value: "airfryer", label: "Air fryer", icon: "💨" },
+      { value: "microwave", label: "Microwave", icon: "📻" },
+      { value: "grill", label: "BBQ/Grill", icon: "🔥" },
+      { value: "slowcooker", label: "Slow cooker", icon: "⏰" },
+      { value: "blender", label: "Blender", icon: "🌪️" },
+      { value: "any", label: "Any equipment", icon: "🔪" }
     ]
   }
 ];
