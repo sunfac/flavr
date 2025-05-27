@@ -849,26 +849,39 @@ Make the ingredients specific with quantities and the instructions detailed and 
       
       // Override AI's incorrect values with user's actual quiz selections
       if (quizData.servings) {
-        fullRecipe.servings = quizData.servings;
+        fullRecipe.servings = parseInt(quizData.servings.toString());
       }
       if (quizData.time) {
-        fullRecipe.cookTime = quizData.time;
+        fullRecipe.cookTime = parseInt(quizData.time.toString());
       }
       if (quizData.cuisine && mode === 'shopping') {
         fullRecipe.cuisine = quizData.cuisine;
       }
-      if (quizData.ambition) {
+      if (quizData.budget) {
+        fullRecipe.budget = quizData.budget;
+      }
+      
+      // Map ambition level to difficulty for all modes
+      if (quizData.ambition !== undefined) {
+        const ambitionValue = quizData.ambition.toString().toLowerCase();
         const difficultyMap: { [key: string]: string } = {
+          // String values
           'easy': 'Easy',
           'challenging': 'Hard', 
           'michelin': 'Hard',
+          'ambitious': 'Hard',
+          'ambitiouschef': 'Hard',
+          'simple': 'Easy',
+          'moderate': 'Medium',
+          // Numeric values (1-5 scale)
           '1': 'Easy',
           '2': 'Easy', 
           '3': 'Medium',
           '4': 'Hard',
           '5': 'Hard'
         };
-        fullRecipe.difficulty = difficultyMap[quizData.ambition.toString()] || 'Medium';
+        fullRecipe.difficulty = difficultyMap[ambitionValue] || 'Medium';
+        console.log(`DIFFICULTY MAPPING - Ambition: ${quizData.ambition} -> Difficulty: ${fullRecipe.difficulty}`);
       }
       
       console.log(`CORRECTED VALUES - Final servings: ${fullRecipe.servings}, cookTime: ${fullRecipe.cookTime}`);
