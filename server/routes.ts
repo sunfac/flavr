@@ -1182,21 +1182,64 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
       console.log(message);
       console.log("=".repeat(80));
 
-      // Intelligent recipe modification detection - only when user explicitly wants changes
+      // Comprehensive recipe modification detection for clear user directives
       const shouldUpdateRecipe = currentRecipe && (
+        // Direct substitutions
         message.toLowerCase().includes('substitute') ||
         message.toLowerCase().includes('replace') ||
         message.toLowerCase().includes('use instead') ||
-        message.toLowerCase().includes('make it vegetarian') ||
-        message.toLowerCase().includes('make it vegan') ||
+        message.toLowerCase().includes('swap') ||
+        message.toLowerCase().includes('change to') ||
+        
+        // Protein changes
         message.toLowerCase().includes('use chicken') ||
         message.toLowerCase().includes('use beef') ||
         message.toLowerCase().includes('use fish') ||
-        message.toLowerCase().includes('increase servings') ||
-        message.toLowerCase().includes('make it spicier') ||
-        message.toLowerCase().includes('less spicy') ||
+        message.toLowerCase().includes('use pork') ||
+        message.toLowerCase().includes('use turkey') ||
+        
+        // Dietary modifications
+        message.toLowerCase().includes('make it vegetarian') ||
+        message.toLowerCase().includes('make it vegan') ||
         message.toLowerCase().includes('dairy free') ||
-        message.toLowerCase().includes('gluten free')
+        message.toLowerCase().includes('gluten free') ||
+        message.toLowerCase().includes('make vegetarian') ||
+        message.toLowerCase().includes('make vegan') ||
+        
+        // Spice level changes
+        message.toLowerCase().includes('make it spicier') ||
+        message.toLowerCase().includes('make it spicy') ||
+        message.toLowerCase().includes('add spice') ||
+        message.toLowerCase().includes('more spicy') ||
+        message.toLowerCase().includes('less spicy') ||
+        message.toLowerCase().includes('make it milder') ||
+        
+        // Portion/serving changes
+        message.toLowerCase().includes('change portion') ||
+        message.toLowerCase().includes('change serving') ||
+        message.toLowerCase().includes('increase serving') ||
+        message.toLowerCase().includes('decrease serving') ||
+        message.toLowerCase().includes('more serving') ||
+        message.toLowerCase().includes('less serving') ||
+        message.toLowerCase().includes('portion size') ||
+        
+        // Time modifications
+        message.toLowerCase().includes('make it quicker') ||
+        message.toLowerCase().includes('make it faster') ||
+        message.toLowerCase().includes('reduce time') ||
+        message.toLowerCase().includes('cook faster') ||
+        message.toLowerCase().includes('speed up') ||
+        
+        // Ingredient changes
+        message.toLowerCase().includes('change ingredient') ||
+        message.toLowerCase().includes('add ingredient') ||
+        message.toLowerCase().includes('remove ingredient') ||
+        message.toLowerCase().includes('without') ||
+        
+        // Clear directive patterns
+        /^change\s/.test(message.toLowerCase()) ||
+        /^make\s.*\s(more|less|spicier|milder|quicker|faster)/.test(message.toLowerCase()) ||
+        /^add\s(more|some)/.test(message.toLowerCase())
       );
 
       let updatedRecipe = null;
@@ -1207,24 +1250,41 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
         const modificationPrompt = `You are Zest, a bold and clever private chef assistant. The user wants to modify this recipe: "${currentRecipe.title}".
 
 Current recipe:
+- Title: ${currentRecipe.title}
+- Description: ${currentRecipe.description}
 - Ingredients: ${currentRecipe.ingredients?.join(', ')}
 - Instructions: ${currentRecipe.instructions?.join(' ')}
+- Cook Time: ${currentRecipe.cookTime} minutes
+- Servings: ${currentRecipe.servings}
+- Difficulty: ${currentRecipe.difficulty}
 
 User request: "${message}"
 
 INSTRUCTIONS:
 1. First, provide a helpful response explaining the modification in Zest's confident, encouraging voice
-2. If this requires updating the actual recipe (ingredient changes, major modifications), provide the updated recipe in this exact JSON format at the end:
+2. Always provide an updated recipe in this exact JSON format:
 
 {
   "shouldUpdateRecipe": true,
   "updatedRecipe": {
-    "title": "Updated Recipe Title",
+    "title": "Updated Recipe Title (change if modification is significant like protein change, cuisine change, or major technique change)",
+    "description": "Updated description reflecting the changes",
     "ingredients": ["updated ingredient 1", "updated ingredient 2"],
-    "instructions": ["updated step 1", "updated step 2"],
-    "description": "Updated description"
+    "instructions": ["updated step 1 with specific timing", "updated step 2 with specific timing"],
+    "cookTime": updated_minutes_as_number,
+    "servings": updated_servings_as_number,
+    "difficulty": "Easy/Medium/Hard",
+    "cuisine": "updated cuisine if significantly changed"
   }
 }
+
+CRITICAL RULES:
+- If changing protein (chicken to beef), cuisine style, or cooking method: UPDATE THE TITLE
+- If changing spice level significantly: mention in title (e.g., "Spicy Pork Belly Salad")
+- If changing servings: adjust ALL ingredient quantities proportionally
+- If making quicker: reduce cook times and suggest faster cooking methods
+- Always include specific timings in instructions ("cook for 15 minutes", "sauté for 5 minutes")
+- Keep Zest's voice: bold, clever, builds confidence
 
 Use Zest's voice: bold, clever, builds confidence. Make the user feel like a culinary rockstar.`;
 
@@ -1266,6 +1326,37 @@ Use Zest's voice: bold, clever, builds confidence. Make the user feel like a cul
             const parsed = JSON.parse(jsonMatch[0]);
             if (parsed.shouldUpdateRecipe && parsed.updatedRecipe) {
               updatedRecipe = { ...currentRecipe, ...parsed.updatedRecipe };
+              
+              // Check if the title changed significantly (indicates major modification)
+              const titleChanged = updatedRecipe.title !== currentRecipe.title;
+              
+              // Generate new image for Flavr+ users if title changed significantly
+              if (titleChanged && user?.hasFlavrPlus) {
+                try {
+                  console.log(`\n🖼️ GENERATING NEW IMAGE for modified recipe: ${updatedRecipe.title}`);
+                  
+                  const imagePrompt = `A professional food photography shot of ${updatedRecipe.title}. The dish should look appetizing, vibrant, and restaurant-quality. Shot from a 45-degree angle with natural lighting, garnished beautifully, on a clean white plate against a neutral background. High resolution, photorealistic style.`;
+                  
+                  const imageResponse = await openai.images.generate({
+                    model: "dall-e-3",
+                    prompt: imagePrompt,
+                    n: 1,
+                    size: "1024x1024",
+                    quality: "standard",
+                  });
+                  
+                  updatedRecipe.imageUrl = imageResponse.data[0].url;
+                  
+                  // Update user's image usage
+                  await storage.updateUserUsage(userId, 0, 1);
+                  
+                  console.log(`✅ NEW IMAGE GENERATED for ${updatedRecipe.title}`);
+                } catch (imageError) {
+                  console.log(`❌ IMAGE GENERATION FAILED:`, imageError);
+                  // Continue without image if generation fails
+                }
+              }
+              
               // Remove JSON from response text
               botResponse = fullResponse.replace(/\{[\s\S]*\}/, '').trim();
             } else {
