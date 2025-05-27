@@ -959,6 +959,47 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
         }
       }
 
+      // Log GPT interaction for developer analysis (after image generation)
+      if (req.session?.userId) {
+        const expectedOutput = {
+          servings: quizData.servings || 4,
+          cookTime: quizData.time || 30,
+          difficulty: getDifficulty(quizData.ambition || 'moderate'),
+          budget: quizData.budget || 'moderate',
+          cuisine: quizData.cuisine || 'any'
+        };
+        
+        const actualOutput = {
+          servings: fullRecipe.servings,
+          cookTime: fullRecipe.cookTime,
+          difficulty: fullRecipe.difficulty,
+          budget: fullRecipe.budget,
+          cuisine: fullRecipe.cuisine,
+          title: fullRecipe.title
+        };
+        
+        // Track image generation details
+        if (imageUrl) {
+          imagePrompt = `A stunning food photograph of ${fullRecipe.title}, featuring ${fullRecipe.cuisine} cuisine, professional food styling, natural lighting, appetizing presentation`;
+          imageGenerated = true;
+          imageCost = "$0.040"; // Standard DALL-E 3 cost
+        }
+
+        await logGPTInteraction(
+          req.session.userId,
+          mode,
+          quizData,
+          testPrompt,
+          response.choices[0].message.content!,
+          expectedOutput,
+          actualOutput,
+          imagePrompt,
+          imageGenerated,
+          imageUrl || undefined,
+          imageCost
+        );
+      }
+
       // Save recipe to database with complete context
       let savedRecipe = null;
       try {
