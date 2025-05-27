@@ -38,6 +38,7 @@ export const fridgeQuestions: QuestionConfig[] = [
     subtitle: "Any particular flavors? (optional)",
     type: "multi-select",
     options: [
+      { value: "any", label: "Any" },
       { value: "italian", label: "Italian" },
       { value: "indian", label: "Indian" },
       { value: "thai", label: "Thai" },
