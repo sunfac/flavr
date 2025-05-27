@@ -252,24 +252,23 @@ export default function ChatBot({
         </div>
       </div>
 
-      {/* Chat Panel */}
+      {/* Chat Panel - Mobile optimized */}
       <div 
-        className={`fixed bottom-24 left-4 right-4 glass border border-white/20 rounded-t-3xl transition-all duration-500 z-50 backdrop-blur-xl flex flex-col ${
+        className={`fixed bottom-20 left-2 right-2 sm:left-4 sm:right-4 glass border border-white/20 rounded-t-3xl transition-all duration-500 z-50 backdrop-blur-xl flex flex-col ${
           isOpen ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
         }`}
-        style={{ maxHeight: 'calc(100vh - 200px)' }}
+        style={{ maxHeight: 'calc(100vh - 120px)' }}
       >
-        <CardHeader className="p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
-          <div className="flex items-center space-x-3">
+        <CardHeader className="p-3 sm:p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="relative group">
-              <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300">
-                <ChefHat className="text-white w-4 h-4" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                <ChefHat className="text-white w-3 h-3 sm:w-4 sm:h-4" />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
             </div>
             <div>
-              <h3 className="font-bold text-white text-lg">Chef Assistant</h3>
-              <p className="text-sm text-white/80">Ask me anything about cooking!</p>
+              <h3 className="font-bold text-white text-sm sm:text-lg">Chef Assistant</h3>
+              <p className="text-xs sm:text-sm text-white/80 hidden sm:block">Ask me anything about cooking!</p>
             </div>
           </div>
           <Button
