@@ -1,0 +1,88 @@
+// Replit Prompt Update — Shopping Mode & Fridge Mode (Prompt 2 ONLY)
+
+// OBJECTIVE:
+// This prompt is to apply specific upgrades to Shopping Mode and Fridge Mode Prompt 2 ONLY.
+// Do NOT remove or restructure any other part of the app. DO NOT touch Prompt 1 or Chef Assist Mode.
+// Apply only the following changes to the existing Prompt 2 structure in both Shopping Mode and Fridge Mode:
+
+// --------------------------------------------------
+// 1. REMOVE VARIATION SEED FROM PROMPT 2
+// --------------------------------------------------
+// Remove any usage of `variationSeed`, `randomSeed`, or `seedForCreativity` in Prompt 2.
+// Prompt 2 is based on a user-selected recipe and must remain deterministic and repeatable.
+// DO NOT remove it from Prompt 1 — Prompt 1 still needs variation.
+// Just eliminate it fully from Prompt 2 in both Shopping Mode and Fridge Mode.
+
+
+// --------------------------------------------------
+// 2. CREATE MAPPING FOR DIFFICULTY BASED ON AMBITION
+// --------------------------------------------------
+// Create a mapping function to determine "difficulty" in the recipe JSON output based on user ambition level:
+
+const difficultyMap = {
+  easy: 'Easy',
+  balanced: 'Medium',
+  challenging: 'Hard',
+  michelin: 'Hard'
+};
+
+const difficulty = difficultyMap[quizData.ambition] || 'Medium';
+
+Then in the JSON response section, ensure this is inserted:
+  "difficulty": "${difficulty}",
+
+
+// --------------------------------------------------
+// 3. ENSURE COOKING TIME IS CORRECTLY INPUTTED
+// --------------------------------------------------
+// Use the user's selected cook time in the output recipe JSON.
+// In the JSON response:
+  "cookTime": ${quizData.time || 30},
+
+If `quizData.time` is not correctly mapping, verify the quiz output structure and key.
+// For example:
+console.log(quizData.time) // Should return a number like 30, 45, etc.
+
+
+// --------------------------------------------------
+// 4. FIX CREATIVE GUIDANCE BLOCK RESOLUTION
+// --------------------------------------------------
+// Ensure `creativeGuidance` is not a string literal like "${creativeGuidance}" or a placeholder label.
+// It must be injected from a resolved function such as:
+
+const creativeGuidance = getCreativeGuidanceBlock(); // already defined globally
+
+Ensure this appears in the final prompt string with:
+  prompt += `\n${creativeGuidance}`;
+
+// The `getCreativeGuidanceBlock()` function should dynamically return the full guidance text including one variation string from your curated array.
+
+// Example creative block:
+function getCreativeGuidanceBlock(): string {
+  const variations = [
+    "Emphasise contrast in texture or temperature using the available ingredients.",
+    "Include a bold or balanced flavour element using allowed herbs, spices, or acid.",
+    "Add a seasonal element using a common fresh ingredient typical for the time of year.",
+    "Use an elevated cooking technique that intensifies flavour (e.g. charring, glazing, toasting)."
+  ];
+  const randomCreativeVariation = variations[Math.floor(Math.random() * variations.length)];
+  return `
+Creative Guidance:
+Do not include kitchen equipment in the recipe title. Focus on flavor, cuisine, or emotional theme. Assume the user has access to standard kitchen tools.
+
+Add a subtle variation or elevated element that enhances the recipe without violating any of the user's dietary, time, ingredient, or equipment constraints.
+
+${randomCreativeVariation}
+
+Always prioritise maximising flavour to the highest possible level while keeping outputs efficient to generate.
+  `;
+}
+
+// Inject this block into the middle of the prompt where `${creativeGuidance}` is currently expected.
+
+
+// --------------------------------------------------
+// FINAL OUTCOME:
+// ✅ Prompt 2 remains fully deterministic
+// ✅ GPT will respect correct time, difficulty, and creative structure
+// ✅ Structure is untouched — only instructed changes are applied

@@ -782,7 +782,16 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
           ? getEquipmentPromptText(quizData.equipment) 
           : 'Available Equipment: Standard kitchen setup - use basic cooking methods suitable for most home kitchens.';
         
-        // Build Shopping Mode mapped prompt (Prompt 2)
+        // Create difficulty mapping based on ambition
+        const difficultyMap: { [key: string]: string } = {
+          easy: 'Easy',
+          balanced: 'Medium',
+          challenging: 'Hard',
+          michelin: 'Hard'
+        };
+        const difficulty = difficultyMap[quizData.ambition] || 'Medium';
+        
+        // Build Shopping Mode mapped prompt (Prompt 2) - NO variation seed for deterministic results
         const creativeGuidance = getCreativeGuidanceBlock();
         
         enhancedPrompt = `You are an elite private chef.
@@ -837,9 +846,9 @@ Return a JSON object with this exact structure. THE SERVINGS VALUE IS LOCKED AND
   "description": "${selectedRecipe.description}",
   "ingredients": ["ingredient 1", "ingredient 2", "etc"],
   "instructions": ["step 1", "step 2", "etc"],
-  "cookTime": ${quizData.time || 30},
+  "cookTime": ${quizData.time || quizData.cookingTime || 30},
   "servings": ${quizData.servings || 4},
-  "difficulty": "${quizData.ambition === 'easy' ? 'Easy' : quizData.ambition === 'challenging' || quizData.ambition === 'michelin' ? 'Hard' : 'Medium'}",
+  "difficulty": "${difficulty}",
   "cuisine": "${quizData.cuisine || 'International'}",
   "tips": "helpful cooking tips"
 }
@@ -853,7 +862,16 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
         
-        // Build Fridge Mode mapped prompt (Prompt 2)
+        // Create difficulty mapping based on ambition for Fridge Mode
+        const difficultyMap: { [key: string]: string } = {
+          easy: 'Easy',
+          balanced: 'Medium',
+          challenging: 'Hard',
+          michelin: 'Hard'
+        };
+        const difficulty = difficultyMap[quizData.ambition] || 'Medium';
+        
+        // Build Fridge Mode mapped prompt (Prompt 2) - NO variation seed for deterministic results
         const creativeGuidance = getCreativeGuidanceBlock();
         
         enhancedPrompt = `You are an elite private chef.
@@ -908,9 +926,9 @@ Return a JSON object with this exact structure. THE SERVINGS VALUE IS LOCKED AND
   "description": "${selectedRecipe.description}",
   "ingredients": ["ingredient 1", "ingredient 2", "etc"],
   "instructions": ["step 1", "step 2", "etc"],
-  "cookTime": ${quizData.time || 30},
+  "cookTime": ${quizData.time || quizData.cookingTime || 30},
   "servings": ${quizData.servings || 4},
-  "difficulty": "${quizData.ambition === 'easy' ? 'Easy' : quizData.ambition === 'challenging' || quizData.ambition === 'michelin' ? 'Hard' : 'Medium'}",
+  "difficulty": "${difficulty}",
   "cuisine": "Fridge-to-Fork",
   "tips": "helpful cooking tips"
 }
