@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useUser } from "@/hooks/use-user";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -26,15 +25,22 @@ interface DeveloperLog {
 }
 
 export default function DeveloperLogs() {
-  const { user } = useUser();
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+
+  // Get current user data
+  const { data: userData } = useQuery({
+    queryKey: ["/api/me"],
+    retry: false,
+  });
+
+  const user = userData?.user;
 
   const { data: logsData, isLoading, error } = useQuery({
     queryKey: ["/api/developer-logs"],
     enabled: user?.email === "william@blycontracting.co.uk",
   });
 
-  const logs: DeveloperLog[] = logsData?.logs || [];
+  const logs: DeveloperLog[] = (logsData as any)?.logs || [];
 
   // Check if user has admin access
   if (!user || user.email !== "william@blycontracting.co.uk") {

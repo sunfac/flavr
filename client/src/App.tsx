@@ -12,6 +12,7 @@ import SettingsPage from "@/pages/SettingsPage";
 import Subscribe from "@/pages/Subscribe";
 import MyRecipes from "@/pages/MyRecipes";
 import RecipeView from "@/pages/RecipeView";
+import DeveloperLogs from "@/pages/DeveloperLogs";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -29,6 +30,7 @@ function Router() {
       <Route path="/recipe/:id" component={RecipeView} />
       <Route path="/settings" component={SettingsPage} />
       <Route path="/subscribe" component={Subscribe} />
+      <Route path="/developer-logs" component={DeveloperLogs} />
       <Route component={NotFound} />
     </Switch>
   );
