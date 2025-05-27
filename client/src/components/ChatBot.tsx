@@ -297,8 +297,8 @@ export default function ChatBot({
                 {suggestionChips.map((chip, index) => (
                   <Badge
                     key={index}
-                    variant="secondary"
-                    className="cursor-pointer glass border border-white/20 hover:scale-105 transition-all duration-300 px-3 py-2 text-sm"
+                    variant="outline"
+                    className="cursor-pointer bg-orange-500/10 border-orange-400/30 text-orange-400 hover:bg-orange-500/20 hover:border-orange-400/50 hover:scale-105 transition-all duration-300 px-3 py-2 text-sm"
                     onClick={handleSuggestionClick(chip.text)}
                   >
                     <span className="mr-2">{chip.icon}</span>
