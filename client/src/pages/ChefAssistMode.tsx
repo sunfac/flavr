@@ -144,8 +144,12 @@ export default function ChefAssistMode() {
       <main className="flex-1 pt-20 pb-24 p-4">
 
         {currentStep === "quiz" && (
-          <ChefAssistQuiz
-            onComplete={handleQuizComplete}
+          <InputQuizChef
+            onComplete={(data, recipe) => {
+              setQuizData(data);
+              setGeneratedRecipe(recipe);
+              setCurrentStep("recipe");
+            }}
             onLoading={setIsLoading}
           />
         )}
