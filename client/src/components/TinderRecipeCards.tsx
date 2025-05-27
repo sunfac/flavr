@@ -118,7 +118,7 @@ export default function TinderRecipeCards({
       <div className="flex-1 px-4 min-h-0">
         <div className="max-w-md mx-auto h-full flex flex-col">
           {/* Recipe Card Area */}
-          <div className="flex-1 relative min-h-0">
+          <div className="flex-1 relative" style={{ minHeight: '400px' }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
@@ -127,29 +127,29 @@ export default function TinderRecipeCards({
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: direction > 0 ? -300 : 300, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className="absolute inset-0"
+                className="absolute inset-0 w-full h-full"
               >
-                <Card className="h-full w-full bg-slate-800/90 backdrop-blur-lg border-slate-700 rounded-2xl overflow-hidden flex flex-col">
-                  <CardContent className="p-4 flex-1 flex flex-col">
+                <Card className="w-full h-full bg-slate-800/90 backdrop-blur-lg border border-slate-700 rounded-2xl overflow-hidden shadow-2xl">
+                  <CardContent className="p-6 h-full flex flex-col">
                     {/* Recipe Title */}
-                    <div className="text-center mb-3">
-                      <h3 className="text-lg font-bold text-white mb-1 leading-tight">
+                    <div className="text-center mb-4">
+                      <h3 className="text-xl font-bold text-white mb-2 leading-tight">
                         {currentRecipe.title}
                       </h3>
-                      <p className="text-slate-300 text-sm leading-snug">
+                      <p className="text-slate-300 text-base leading-relaxed">
                         {currentRecipe.description}
                       </p>
                     </div>
 
                     {/* Recipe Visual */}
-                    <div className="flex-1 bg-gradient-to-br from-orange-500/20 via-amber-500/20 to-yellow-500/20 rounded-xl flex items-center justify-center mb-3">
+                    <div className="flex-1 bg-gradient-to-br from-orange-500/20 via-amber-500/20 to-yellow-500/20 rounded-xl flex items-center justify-center mb-4 min-h-0">
                       <motion.div
                         animate={{ 
                           rotate: [0, 5, -5, 0],
                           scale: [1, 1.05, 1]
                         }}
                         transition={{ duration: 3, repeat: Infinity }}
-                        className="text-4xl"
+                        className="text-6xl"
                       >
                         🍽️
                       </motion.div>
@@ -158,7 +158,7 @@ export default function TinderRecipeCards({
                     {/* Action Button */}
                     <Button
                       onClick={() => onSelectRecipe(currentRecipe)}
-                      className={`w-full h-10 font-semibold rounded-xl transition-all duration-300 bg-gradient-to-r ${themeColors[theme]} hover:scale-105 shadow-lg hover:shadow-orange-500/25 text-white`}
+                      className={`w-full h-12 font-semibold rounded-xl transition-all duration-300 bg-gradient-to-r ${themeColors[theme]} hover:scale-105 shadow-lg hover:shadow-orange-500/25 text-white`}
                     >
                       <Heart className="w-4 h-4 mr-2" />
                       Use This Recipe
