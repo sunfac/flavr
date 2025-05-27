@@ -457,6 +457,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
         
+        // Fix difficulty mapping for Shopping Mode Prompt 1
+        const difficultyMap: { [key: string]: string } = {
+          easy: 'Easy',
+          balanced: 'Medium',
+          challenging: 'Hard',
+          michelin: 'Hard'
+        };
+        const difficulty = difficultyMap[quizData.ambition] || 'Medium';
+        
+        // Fix cooking time mapping
+        const cookTime = typeof quizData.time === 'number' ? quizData.time : 30;
+        
         // Build Shopping Mode mapped prompt (Prompt 1)
         const creativeGuidance = getCreativeGuidanceBlock();
         
@@ -501,6 +513,18 @@ Return a JSON object with this exact structure:
   ]
 }`;
       } else if (mode === 'fridge') {
+        // Fix difficulty mapping for Fridge Mode Prompt 1
+        const difficultyMap: { [key: string]: string } = {
+          easy: 'Easy',
+          balanced: 'Medium',
+          challenging: 'Hard',
+          michelin: 'Hard'
+        };
+        const difficulty = difficultyMap[quizData.ambition] || 'Medium';
+        
+        // Fix cooking time mapping
+        const cookTime = typeof quizData.time === 'number' ? quizData.time : 30;
+        
         // Build Fridge Mode mapped prompt (Prompt 1)
         const creativeGuidance = getCreativeGuidanceBlock();
         
@@ -846,7 +870,7 @@ Return a JSON object with this exact structure. THE SERVINGS VALUE IS LOCKED AND
   "description": "${selectedRecipe.description}",
   "ingredients": ["ingredient 1", "ingredient 2", "etc"],
   "instructions": ["step 1", "step 2", "etc"],
-  "cookTime": ${quizData.time || quizData.cookingTime || 30},
+  "cookTime": ${cookTime},
   "servings": ${quizData.servings || 4},
   "difficulty": "${difficulty}",
   "cuisine": "${quizData.cuisine || 'International'}",
