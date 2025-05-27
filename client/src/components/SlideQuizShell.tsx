@@ -663,19 +663,19 @@ export default function SlideQuizShell({
 
       {/* Navigation - Always visible at bottom */}
       <div className="flex-shrink-0 bg-slate-900/90 backdrop-blur-lg border-t border-slate-700">
-        <div className="max-w-md mx-auto px-6 py-3">
-          <div className="flex justify-between items-center gap-6">
+        <div className="max-w-md mx-auto px-8 py-3">
+          <div className="flex justify-between items-center gap-8">
             <Button
               variant="outline"
               onClick={prevQuestion}
               disabled={currentQuestionIndex === 0}
-              className="flex items-center gap-2 border-slate-600 bg-slate-800/50 text-white hover:bg-slate-700 transition-colors duration-200 px-3 py-2 flex-shrink-0"
+              className="flex items-center gap-2 border-slate-600 bg-slate-800/50 text-white hover:bg-slate-700 transition-colors duration-200 px-4 py-2 flex-shrink-0 min-w-fit"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back</span>
             </Button>
 
-            <div className="text-center flex-1 min-w-0">
+            <div className="text-center flex-1 min-w-0 mx-4">
               {currentQ.required && !canProceed() && (
                 <p className="text-orange-400 text-xs">This question is required</p>
               )}
@@ -684,9 +684,9 @@ export default function SlideQuizShell({
             <Button
               onClick={nextQuestion}
               disabled={!canProceed()}
-              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 transition-colors duration-200 px-3 py-2 flex-shrink-0"
+              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 transition-colors duration-200 px-4 py-2 flex-shrink-0 min-w-fit"
             >
-              <span>{currentQuestionIndex === questions.length - 1 ? 'Generate Recipe' : 'Next'}</span>
+              <span className="whitespace-nowrap">{currentQuestionIndex === questions.length - 1 ? 'Generate Recipe' : 'Next'}</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
