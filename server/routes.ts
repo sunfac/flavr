@@ -294,9 +294,9 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
 
       console.log("Making OpenAI API call with prompt length:", enhancedPrompt.length);
       
-      // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      // Using GPT-3.5 Turbo for cost efficiency
       const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-3.5-turbo",
         messages: [{ role: "user", content: enhancedPrompt }],
         response_format: { type: "json_object" },
       });
@@ -507,9 +507,9 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
       console.log(enhancedPrompt);
       console.log("=".repeat(80));
       
-      // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      // Using GPT-3.5 Turbo for cost efficiency
       const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-3.5-turbo",
         messages: [{ role: "user", content: enhancedPrompt }],
         response_format: { type: "json_object" },
       });
@@ -1298,7 +1298,7 @@ CRITICAL RULES:
 Use Zest's voice: bold, clever, builds confidence. Make the user feel like a culinary rockstar.`;
 
         const response = await openai.chat.completions.create({
-          model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+          model: "gpt-3.5-turbo", // Using GPT-3.5 Turbo for cost efficiency
           messages: [
             {
               role: "system",
@@ -1346,15 +1346,21 @@ Use Zest's voice: bold, clever, builds confidence. Make the user feel like a cul
                   
                   const imagePrompt = `A professional food photography shot of ${updatedRecipe.title}. The dish should look appetizing, vibrant, and restaurant-quality. Shot from a 45-degree angle with natural lighting, garnished beautifully, on a clean white plate against a neutral background. High resolution, photorealistic style.`;
                   
-                  const imageResponse = await openai.images.generate({
-                    model: "dall-e-3",
-                    prompt: imagePrompt,
-                    n: 1,
-                    size: "1024x1024",
-                    quality: "standard",
-                  });
+                  const imageOutput = await replicate.run(
+                    "stability-ai/stable-diffusion:ac732df83cea7fff18b8472768c88ad041fa750ff7682a21affe81863cbe77e4", 
+                    {
+                      input: {
+                        prompt: imagePrompt,
+                        width: 1024,
+                        height: 1024,
+                        num_outputs: 1,
+                        guidance_scale: 7.5,
+                        num_inference_steps: 50
+                      }
+                    }
+                  );
                   
-                  updatedRecipe.imageUrl = imageResponse.data[0].url;
+                  updatedRecipe.imageUrl = Array.isArray(imageOutput) ? imageOutput[0] : imageOutput;
                   
                   // Update user's image usage
                   await storage.updateUserUsage(userId, 0, 1);
@@ -1384,7 +1390,7 @@ Use Zest's voice: bold, clever, builds confidence. Make the user feel like a cul
 Use Zest's voice: bold, clever, encouraging. Provide practical cooking advice without modifying any recipes.`;
 
         const response = await openai.chat.completions.create({
-          model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+          model: "gpt-3.5-turbo", // Using GPT-3.5 Turbo for cost efficiency
           messages: [
             {
               role: "system",
