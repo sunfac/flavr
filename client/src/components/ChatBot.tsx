@@ -305,11 +305,16 @@ export default function ChatBot({
                 <Badge
                   key={index}
                   variant="outline"
-                  className="cursor-pointer bg-orange-500/10 border-orange-400/30 text-orange-400 hover:bg-orange-500/20 hover:border-orange-400/50 hover:scale-105 transition-all duration-300 px-2 py-1 text-xs"
+                  className={`cursor-pointer transition-all duration-300 px-2 py-1 text-xs hover:scale-105 ${
+                    chip.updatesRecipe 
+                      ? 'bg-blue-500/10 border-blue-400/30 text-blue-600 hover:bg-blue-500/20 hover:border-blue-400/50' 
+                      : 'bg-orange-500/10 border-orange-400/30 text-orange-400 hover:bg-orange-500/20 hover:border-orange-400/50'
+                  }`}
                   onClick={handleSuggestionClick(chip.text)}
                 >
                   <span className="mr-1">{chip.icon}</span>
                   {chip.text}
+                  {chip.updatesRecipe && <span className="ml-1 text-xs">📝</span>}
                 </Badge>
               ))}
             </div>
