@@ -17,13 +17,13 @@ export const fridgeQuestions: QuestionConfig[] = [
   },
   {
     id: "ingredientFlexibility",
-    label: "Ingredient flexibility",
-    subtitle: "Should we stick to what you have or add a few extras?",
+    label: "Ingredient approach",
+    subtitle: "Work with what you have or add some extras?",
     type: "cards",
     required: true,
     options: [
-      { value: "strict", label: "Stick with what I have", icon: "Lock", desc: "Use only listed ingredients + pantry staples" },
-      { value: "flexible", label: "Add a few extras", icon: "Plus", desc: "Include some additional complementary ingredients" }
+      { value: "strict", label: "Use what I have", icon: "ShieldCheck", desc: "Only my ingredients + pantry basics" },
+      { value: "flexible", label: "Add a few extras", icon: "PlusCircle", desc: "Include 2-4 complementary ingredients" }
     ]
   },
   {
