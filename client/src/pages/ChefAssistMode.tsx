@@ -6,7 +6,7 @@ import GlobalFooter from "@/components/GlobalFooter";
 import GlobalNavigation from "@/components/GlobalNavigation";
 import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
-import ChefAssistQuiz from "@/components/ChefAssistQuiz";
+import InputQuizChef from "@/components/InputQuizChef";
 import RecipeCard from "@/components/RecipeCard";
 import ChatBot from "@/components/ChatBot";
 import Loading from "@/components/Loading";
