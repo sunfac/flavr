@@ -1,0 +1,49 @@
+{
+  "name": "Flavr - AI Recipe Generator",
+  "short_name": "Flavr",
+  "description": "Your AI-powered culinary companion for personalized recipes",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#f97316",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512", 
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["food", "lifestyle", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Shopping Mode",
+      "short_name": "Shopping",
+      "description": "Generate recipes with shopping lists",
+      "url": "/shopping",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Fridge Mode", 
+      "short_name": "Fridge",
+      "description": "Cook with what you have",
+      "url": "/fridge",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Chef Assist",
+      "short_name": "Chef",
+      "description": "Get culinary guidance",
+      "url": "/chef", 
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
