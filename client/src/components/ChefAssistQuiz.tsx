@@ -87,14 +87,7 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
     { value: "any", label: "Any equipment", icon: "🔪" }
   ];
 
-  const extrasOptions = [
-    { value: "wine", label: "Wine pairing", icon: "🍷" },
-    { value: "sides", label: "Side dish suggestion", icon: "🥗" },
-    { value: "dessert", label: "Dessert to match", icon: "🍰" },
-    { value: "presentation", label: "Presentation tips", icon: "✨" },
-    { value: "prep", label: "Batch/prep suggestions", icon: "📋" },
-    { value: "restaurant", label: "Make it restaurant-worthy", icon: "⭐" }
-  ];
+
 
   const ambitionLabels = {
     1: "Just need something edible",
@@ -132,8 +125,7 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
       dietary: quizData.dietary || [],
       time: quizData.time || 60,
       ambition: quizData.ambition || 3,
-      equipment: quizData.equipment || [],
-      extras: quizData.extras || []
+      equipment: quizData.equipment || []
     };
     onComplete(finalData);
   };
@@ -142,7 +134,7 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
     setQuizData(prev => ({ ...prev, [key]: value }));
   };
 
-  const toggleArrayItem = (key: 'dietary' | 'equipment' | 'extras', value: string) => {
+  const toggleArrayItem = (key: 'dietary' | 'equipment', value: string) => {
     const currentArray = quizData[key] || [];
     const updatedArray = currentArray.includes(value)
       ? currentArray.filter(item => item !== value)
