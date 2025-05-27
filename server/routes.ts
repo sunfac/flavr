@@ -744,24 +744,29 @@ Return a JSON object with this exact structure. THE SERVINGS VALUE IS LOCKED AND
 
 FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown above. This value cannot be modified.`;
       } else if (mode === 'chef') {
-        // Get mapped guidance text for Chef Assist Mode (include budget, omit cuisine)
+        // Get mapped guidance text for Chef Assist Mode using centralized mapping
         const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
         const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
         const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
-        const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
         
-        // Build Chef Assist Mode mapped prompt (Prompt 2 only)
+        // Use centralized mapping utilities for specific elements
+        const difficulty = getDifficulty(quizData.ambition);
+        const cookTime = getCookTime(quizData);
+        
+        // Build Chef Assist Mode mapped prompt (Prompt 2) with creative guidance
+        const creativeGuidance = getCreativeGuidanceBlock();
+        
         enhancedPrompt = `IMPORTANT: You must respond ONLY in English. Do not use any other language under any circumstances.
 
 You are an elite private chef.
 
-Based on the user's culinary vision and quiz preferences, generate a detailed, flavour-rich recipe.
-
-User's Culinary Vision: ${quizData.intent || selectedRecipe.description || 'Custom chef-guided recipe'}
+Based on the user's culinary vision and quiz preferences, generate the complete recipe for:
 
 **${selectedRecipe.title}**
+
+User's Culinary Vision: ${quizData.intent || selectedRecipe.description || 'Custom chef-guided recipe'}
 
 Servings needed: ${quizData.servings || 4} people
 
@@ -770,28 +775,23 @@ ${moodText}
 ${ambitionText}
 
 ${dietaryText}
-${getStrictDietaryInstruction(quizData.dietary)}
 
-${budgetText}
-
-${timeText}
+The total cooking time must NOT exceed ${cookTime} minutes. This is the user's hard time limit.
 
 AVAILABLE EQUIPMENT: ${equipmentText}
 COOKING CONSTRAINT: You may ONLY use the equipment listed above. Do not suggest any cooking methods that require equipment the user doesn't have.
 
-Important: The following values must be strictly used when creating the recipe:
-- Servings: ${quizData.servings || 4} people
-- Cuisine: Chef-Guided
-- Cooking Time: ${quizData.time || 30} minutes
-- Dietary Restrictions: ${quizData.dietary ? quizData.dietary.join(', ') : 'None'}
-- Ambition Level: ${quizData.ambition || 'Medium'}
+${getStrictDietaryInstruction(quizData.dietary)}
 
-Do not override these values. They were chosen by the user and must appear accurately in the recipe output metadata and instructions.
+${creativeGuidance}
 
-Please return:
-- Title
-- Ingredient list (with specific quantities)
-- Step-by-step instructions WITH SPECIFIC TIMINGS for every cooking action
+DIETARY OVERRIDE: If any creative direction conflicts with the user's dietary requirements, the dietary rules take absolute priority.
+
+MANDATORY REQUIREMENTS: You MUST enforce these exact quiz values in the recipe output:
+- Servings: EXACTLY ${quizData.servings || 4} people (do not modify this number)
+- Cook Time: Maximum ${cookTime} minutes total
+- Difficulty: ${difficulty} level
+- Equipment: ONLY use ${equipmentText || 'basic kitchen equipment'}
 
 CRITICAL INSTRUCTION REQUIREMENTS:
 - Every cooking step MUST include specific timing (e.g., "sauté for 3-4 minutes until golden", "simmer for 15 minutes", "bake for 20-25 minutes")
@@ -799,13 +799,11 @@ CRITICAL INSTRUCTION REQUIREMENTS:
 - Make each instruction clear and actionable
 - Focus on WHAT to do and HOW LONG it takes
 
-Use a confident and friendly tone. The recipe should feel tailored, aspirational, and achievable.
+Use a friendly, helpful tone. Ensure the recipe is flavour-rich, realistic, and achievable within the user's constraints.
 Write in the voice of Zest — a bold, clever private chef. Be helpful, but never dull. Make each step feel like part of a masterclass. If a technique is optional, say so. Always aim to build confidence.
-Steps should be thorough to guide the user through each technique with clear timing and visual cues.
+Steps should be thorough to guide the user through each technique with clear explanations of what to look for and why each step matters.
 Assume users have access to standard kitchen tools. Do not force niche appliances into the recipe method unless clearly necessary. If equipment is unavailable, suggest fallback steps (e.g., oven instead of air fryer).
-Always prioritise maximising flavour to the highest possible level while respecting the user's time, skill level, and equipment.
-
-Avoid unnecessary complexity or inaccessible ingredients unless clearly aligned with ambition level and user skill.
+Avoid unnecessary complexity or ingredients requiring unavailable equipment.
 
 Return a JSON object with this exact structure. THE SERVINGS VALUE IS LOCKED AND CANNOT BE CHANGED:
 {
@@ -813,9 +811,9 @@ Return a JSON object with this exact structure. THE SERVINGS VALUE IS LOCKED AND
   "description": "${selectedRecipe.description}",
   "ingredients": ["ingredient 1", "ingredient 2", "etc"],
   "instructions": ["step 1", "step 2", "etc"],
-  "cookTime": ${quizData.time || 30},
+  "cookTime": ${cookTime},
   "servings": ${quizData.servings || 4},
-  "difficulty": "${quizData.ambition === 'easy' ? 'Easy' : quizData.ambition === 'challenging' || quizData.ambition === 'michelin' ? 'Hard' : 'Medium'}",
+  "difficulty": "${difficulty}",
   "cuisine": "Chef-Guided",
   "tips": "helpful cooking tips"
 }

@@ -6,8 +6,7 @@ import GlobalFooter from "@/components/GlobalFooter";
 import GlobalNavigation from "@/components/GlobalNavigation";
 import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
-import SlideQuizShell from "@/components/SlideQuizShell";
-import { chefQuestions } from "@/config/chefQuestions";
+import ChefAssistQuiz from "@/components/ChefAssistQuiz";
 import RecipeCard from "@/components/RecipeCard";
 import ChatBot from "@/components/ChatBot";
 import Loading from "@/components/Loading";
@@ -56,14 +55,14 @@ export default function ChefAssistMode() {
   const isAuthenticated = user?.user;
 
   const handleQuizComplete = async (data: any) => {
-    // Transform quiz data
+    // Transform quiz data for server-side processing
     const transformedData = {
       intent: data.intent,
       dietary: data.dietary || [],
-      time: data.time || 30,
-      ambition: data.ambition || 3,
+      time: data.time || 60,
+      ambition: data.ambition || "confidentCook",
       equipment: data.equipment || [],
-      servings: data.servings || "2"
+      servings: data.servings || "4"
     };
 
     setQuizData(transformedData);
@@ -145,12 +144,9 @@ export default function ChefAssistMode() {
       <main className="flex-1 pt-20 pb-24 p-4">
 
         {currentStep === "quiz" && (
-          <SlideQuizShell
-            title="Chef Assist Mode"
-            subtitle="Let's create the perfect recipe for your culinary goals"
-            questions={chefQuestions}
-            onSubmit={handleQuizComplete}
-            theme="chef"
+          <ChefAssistQuiz
+            onComplete={handleQuizComplete}
+            onLoading={setIsLoading}
           />
         )}
 
