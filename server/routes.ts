@@ -964,7 +964,17 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
         await logGPTInteraction(
           req.session.userId,
           mode,
-          quizData,
+          {
+            // Pass recipe generation context instead of quiz data for Prompt 2
+            selectedRecipe: selectedRecipe.title,
+            mode: mode,
+            prompt_type: "recipe_generation",
+            ambition: quizData.ambition,
+            servings: quizData.servings || quizData.portions,
+            time: quizData.time || quizData.cookingTime,
+            budget: quizData.budget,
+            dietary: quizData.dietary
+          },
           enhancedPrompt, // Use the actual Prompt 2 that was sent to GPT
           response.choices[0].message.content!,
           expectedOutput,
