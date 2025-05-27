@@ -15,7 +15,7 @@ import {
   FileDown,
   Copy
 } from "lucide-react";
-import QRCode from 'qrcode.react';
+import { QRCodeSVG as QRCode } from 'qrcode.react';
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
 
