@@ -1,23 +1,9 @@
 // === CENTRALIZED MAPPING UTILITIES FOR PROMPT GENERATION ===
-// Clean separation of mapping logic from prompt construction
-
-// 🟢 Difficulty Mapping — from quizData.ambition
-export const difficultyMap: { [key: string]: string } = {
-  'Just get fed': 'Easy',
-  'Simple & tasty': 'Easy',
-  'Confident cook': 'Medium',
-  'Ambitious chef': 'Hard',
-  'Michelin effort': 'Hard'
-};
+// Single source of truth for all mapping logic - NO DUPLICATES
 
 // 🟢 Cooking Time — ensure it's a numeric upper limit
 export const getCookTime = (quizData: any): number => {
   return Number(quizData?.time?.value) || Number(quizData?.time) || 30;
-};
-
-// 🟢 Get Difficulty from Ambition
-export const getDifficulty = (ambition: string): string => {
-  return difficultyMap[ambition] || 'Medium';
 };
 
 // 🟢 Equipment Text — map raw selections to readable text
@@ -55,17 +41,33 @@ const budgetMappings = {
   }
 };
 
-// 🟢 Budget Label Mapping (Shopping Mode ONLY) — derived from budgetMappings
-export const budgetMap: { [key: string]: string } = {
-  budget: `${budgetMappings.budget.label} (${budgetMappings.budget.costRange})`,
-  moderate: `${budgetMappings.moderate.label} (${budgetMappings.moderate.costRange})`,
-  premium: `${budgetMappings.premium.label} (${budgetMappings.premium.costRange})`,
-  luxury: `${budgetMappings.luxury.label} (${budgetMappings.luxury.costRange})`
-};
-
-// 🟢 Get Budget Text (Shopping Mode Only)
-export const getBudgetText = (budget: string): string => {
-  return budgetMap[budget] || 'Any budget';
+// Ambition mappings - SINGLE SOURCE with both difficulty and prompt text
+const ambitionMappings = {
+  "Just get fed": {
+    label: "Just get fed",
+    difficulty: "Easy",
+    description: "Simple, quick preparation with minimal effort and basic techniques that anyone can master."
+  },
+  "Simple & tasty": {
+    label: "Simple & tasty", 
+    difficulty: "Easy",
+    description: "Easy techniques with enhanced flavor using straightforward methods that build confidence in the kitchen."
+  },
+  "Confident cook": {
+    label: "Confident cook",
+    difficulty: "Medium",
+    description: "Intermediate techniques with balanced complexity, perfect for expanding culinary skills while maintaining achievable results."
+  },
+  "Ambitious chef": {
+    label: "Ambitious chef",
+    difficulty: "Hard", 
+    description: "Hard techniques with restaurant-level precision, complex flavor development, and professional presentation standards."
+  },
+  "Michelin effort": {
+    label: "Michelin effort",
+    difficulty: "Hard",
+    description: "Hard techniques with restaurant-level precision, complex flavor development, and professional presentation standards."
+  }
 };
 
 // Mood mappings
@@ -85,30 +87,6 @@ const moodMappings = {
   "adventure": {
     label: "Adventure & excitement",
     description: "Bold, exciting flavours from global cuisines. Incorporate unexpected spice combinations, unique cooking techniques, or fusion elements."
-  }
-};
-
-// Ambition mappings
-const ambitionMappings = {
-  "Just get fed": {
-    label: "Just get fed",
-    description: "Simple, quick preparation with minimal effort and basic techniques that anyone can master."
-  },
-  "Simple & tasty": {
-    label: "Simple & tasty",
-    description: "Easy techniques with enhanced flavor using straightforward methods that build confidence in the kitchen."
-  },
-  "Confident cook": {
-    label: "Confident cook",
-    description: "Intermediate techniques with balanced complexity, perfect for expanding culinary skills while maintaining achievable results."
-  },
-  "Ambitious chef": {
-    label: "Ambitious chef", 
-    description: "Hard techniques with restaurant-level precision, complex flavor development, and professional presentation standards."
-  },
-  "Michelin effort": {
-    label: "Michelin effort",
-    description: "Hard techniques with restaurant-level precision, complex flavor development, and professional presentation standards."
   }
 };
 
@@ -214,8 +192,31 @@ const equipmentMappings: Record<string, string> = {
   "smoker": "Smoker for authentic barbecue flavors"
 };
 
-// === EXPORTED MAPPING FUNCTIONS ===
-// Preserve existing function signatures for compatibility
+// === DERIVED MAPPINGS FOR COMPATIBILITY ===
+
+// 🟢 Difficulty Map - derived from ambitionMappings to avoid conflicts
+export const difficultyMap: { [key: string]: string } = Object.fromEntries(
+  Object.entries(ambitionMappings).map(([key, value]) => [key, value.difficulty])
+);
+
+// 🟢 Budget Label Mapping - derived from budgetMappings  
+export const budgetMap: { [key: string]: string } = Object.fromEntries(
+  Object.entries(budgetMappings).map(([key, value]) => [key, `${value.label} (${value.costRange})`])
+);
+
+// === EXPORTED UTILITY FUNCTIONS ===
+
+// 🟢 Get Difficulty from Ambition
+export const getDifficulty = (ambition: string): string => {
+  return ambitionMappings[ambition as keyof typeof ambitionMappings]?.difficulty || 'Medium';
+};
+
+// 🟢 Get Budget Text
+export const getBudgetText = (budget: string): string => {
+  return budgetMap[budget] || 'Any budget';
+};
+
+// === EXPORTED PROMPT FUNCTIONS ===
 
 export function getBudgetPromptText(budgetLevel: string): string {
   const mapping = budgetMappings[budgetLevel as keyof typeof budgetMappings];
