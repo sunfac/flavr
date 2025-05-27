@@ -936,10 +936,11 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
 
       // Log GPT interaction for developer analysis (after image generation)
       if (req.session?.userId) {
+        console.log(`🔍 PROMPT 2 DEBUG - Ambition: ${quizData.ambition}, Expected difficulty: ${getDifficulty(quizData.ambition || 'simpleTasty')}`);
         const expectedOutput = {
           servings: parseInt(quizData.servings) || quizData.portions || 4,
           cookTime: quizData.time || quizData.cookingTime || 30,
-          difficulty: getDifficulty(quizData.ambition || 'moderate'),
+          difficulty: getDifficulty(quizData.ambition || 'simpleTasty'),
           budget: quizData.budget || 'moderate',
           cuisine: quizData.cuisines?.[0] || quizData.cuisine || 'any'
         };
@@ -1073,9 +1074,11 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
           },
           { role: "user", content: message }
         ],
+        max_tokens: 500,
+        temperature: 0.7,
       });
 
-      const botResponse = response.choices[0].message.content!;
+      const botResponse = response.choices[0].message.content || "I'm sorry, I couldn't process that request. Please try again.";
       
       // For now, don't update recipes through chat - just provide advice
       let updatedRecipe = null;
