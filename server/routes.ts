@@ -5,6 +5,7 @@ import OpenAI from "openai";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import { insertRecipeSchema, insertChatMessageSchema } from "@shared/schema";
+import { logGPTInteraction } from "./developerLogger";
 import { getCreativeGuidanceBlock } from "./shoppingPromptBlocks";
 import { 
   difficultyMap, 
@@ -506,6 +507,34 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
 
       console.log("OpenAI API response received successfully");
       const result = JSON.parse(response.choices[0].message.content!);
+      
+      // Log GPT interaction for developer analysis
+      if (req.session?.userId) {
+        const expectedOutput = {
+          mode,
+          servings: quizData.servings || 4,
+          cookTime: quizData.time || 30,
+          difficulty: getDifficulty(quizData.ambition || 'moderate'),
+          budget: quizData.budget || 'moderate',
+          cuisine: quizData.cuisine || 'any'
+        };
+        
+        const actualOutput = {
+          recipeCount: result.recipes?.length || 0,
+          firstRecipeExample: result.recipes?.[0] || null
+        };
+        
+        await logGPTInteraction(
+          req.session.userId,
+          mode,
+          quizData,
+          enhancedPrompt,
+          response.choices[0].message.content!,
+          expectedOutput,
+          actualOutput
+        );
+      }
+      
       res.json({ recipes: result.recipes || [] });
     } catch (error: any) {
       console.error("Recipe ideas generation error details:", {
@@ -886,6 +915,36 @@ Make the ingredients specific with quantities and the instructions detailed and 
       
       console.log(`CORRECTED VALUES - Final servings: ${fullRecipe.servings}, cookTime: ${fullRecipe.cookTime}`);
 
+      // Log GPT interaction for developer analysis
+      if (req.session?.userId) {
+        const expectedOutput = {
+          servings: quizData.servings || 4,
+          cookTime: quizData.time || 30,
+          difficulty: getDifficulty(quizData.ambition || 'moderate'),
+          budget: quizData.budget || 'moderate',
+          cuisine: quizData.cuisine || 'any'
+        };
+        
+        const actualOutput = {
+          servings: fullRecipe.servings,
+          cookTime: fullRecipe.cookTime,
+          difficulty: fullRecipe.difficulty,
+          budget: fullRecipe.budget,
+          cuisine: fullRecipe.cuisine,
+          title: fullRecipe.title
+        };
+        
+        await logGPTInteraction(
+          req.session.userId,
+          mode,
+          quizData,
+          testPrompt,
+          response.choices[0].message.content!,
+          expectedOutput,
+          actualOutput
+        );
+      }
+
       // Generate sophisticated recipe image
       let imageUrl = null;
       if (true) {
@@ -1076,6 +1135,24 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
       res.json({ recipes });
     } catch (error: any) {
       res.status(500).json({ message: "Failed to get recipe history: " + error.message });
+    }
+  });
+
+  // Developer logs (admin only - william@blycontracting.co.uk)
+  app.get("/api/developer-logs", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session!.userId;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.email !== "william@blycontracting.co.uk") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const limit = parseInt(req.query.limit as string) || 50;
+      const logs = await storage.getDeveloperLogs(limit);
+      res.json({ logs });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch developer logs: " + error.message });
     }
   });
 

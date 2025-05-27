@@ -1,0 +1,277 @@
+import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@/hooks/use-user";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown, Database, Clock, DollarSign, AlertTriangle, CheckCircle } from "lucide-react";
+import { useState } from "react";
+
+interface DeveloperLog {
+  id: number;
+  userId: number;
+  mode: string;
+  quizInputs: Record<string, any>;
+  promptSent: string;
+  gptResponse: string;
+  expectedOutput: Record<string, any>;
+  actualOutput: Record<string, any>;
+  inputTokens: number;
+  outputTokens: number;
+  estimatedCost: string;
+  matchStatus: boolean;
+  discrepancies: string[] | null;
+  createdAt: string;
+}
+
+export default function DeveloperLogs() {
+  const { user } = useUser();
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+
+  const { data: logsData, isLoading, error } = useQuery({
+    queryKey: ["/api/developer-logs"],
+    enabled: user?.email === "william@blycontracting.co.uk",
+  });
+
+  const logs: DeveloperLog[] = logsData?.logs || [];
+
+  // Check if user has admin access
+  if (!user || user.email !== "william@blycontracting.co.uk") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center space-y-4 p-6">
+            <AlertTriangle className="h-12 w-12 text-red-500" />
+            <h1 className="text-xl font-bold text-gray-900">Access Denied</h1>
+            <p className="text-gray-600 text-center">This section is only available to authorized administrators.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const toggleRow = (id: number) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpandedRows(newExpanded);
+  };
+
+  const totalCost = logs.reduce((sum, log) => {
+    const cost = parseFloat(log.estimatedCost.replace('$', ''));
+    return sum + cost;
+  }, 0);
+
+  const totalTokens = logs.reduce((sum, log) => sum + log.inputTokens + log.outputTokens, 0);
+  const matchRate = logs.length > 0 ? (logs.filter(log => log.matchStatus).length / logs.length * 100) : 0;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center space-y-4 p-6">
+            <AlertTriangle className="h-12 w-12 text-red-500" />
+            <h1 className="text-xl font-bold text-gray-900">Error Loading Logs</h1>
+            <p className="text-gray-600 text-center">Failed to fetch developer logs. Please try again.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 p-4">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="h-6 w-6 text-orange-500" />
+              Developer Analytics Dashboard
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="flex items-center space-x-2">
+                <DollarSign className="h-5 w-5 text-green-500" />
+                <div>
+                  <p className="text-sm text-gray-600">Total Cost</p>
+                  <p className="text-lg font-bold">${totalCost.toFixed(6)}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Clock className="h-5 w-5 text-blue-500" />
+                <div>
+                  <p className="text-sm text-gray-600">Total Tokens</p>
+                  <p className="text-lg font-bold">{totalTokens.toLocaleString()}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <div>
+                  <p className="text-sm text-gray-600">Match Rate</p>
+                  <p className="text-lg font-bold">{matchRate.toFixed(1)}%</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Database className="h-5 w-5 text-purple-500" />
+                <div>
+                  <p className="text-sm text-gray-600">Total Logs</p>
+                  <p className="text-lg font-bold">{logs.length}</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Logs Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>GPT Interaction Logs</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <ScrollArea className="h-[600px]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12"></TableHead>
+                    <TableHead>Time</TableHead>
+                    <TableHead>Mode</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Tokens</TableHead>
+                    <TableHead>Cost</TableHead>
+                    <TableHead>Match</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {logs.map((log) => (
+                    <>
+                      <TableRow 
+                        key={log.id}
+                        className="cursor-pointer hover:bg-gray-50"
+                        onClick={() => toggleRow(log.id)}
+                      >
+                        <TableCell>
+                          <ChevronDown 
+                            className={`h-4 w-4 transition-transform ${
+                              expandedRows.has(log.id) ? 'rotate-180' : ''
+                            }`}
+                          />
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {new Date(log.createdAt).toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={log.mode === 'shopping' ? 'default' : log.mode === 'fridge' ? 'secondary' : 'outline'}>
+                            {log.mode}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm">#{log.userId}</TableCell>
+                        <TableCell className="text-sm">
+                          {(log.inputTokens + log.outputTokens).toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-sm font-mono">
+                          {log.estimatedCost}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={log.matchStatus ? 'default' : 'destructive'}>
+                            {log.matchStatus ? '✅' : '❌'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {log.discrepancies && log.discrepancies.length > 0 && (
+                            <Badge variant="outline" className="text-xs">
+                              {log.discrepancies.length} issues
+                            </Badge>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                      
+                      {expandedRows.has(log.id) && (
+                        <TableRow>
+                          <TableCell colSpan={8} className="bg-gray-50">
+                            <div className="p-4 space-y-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <h4 className="font-semibold text-sm mb-2">Quiz Inputs</h4>
+                                  <pre className="text-xs bg-white p-2 rounded border overflow-auto max-h-32">
+                                    {JSON.stringify(log.quizInputs, null, 2)}
+                                  </pre>
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-sm mb-2">Expected vs Actual</h4>
+                                  <div className="space-y-2">
+                                    <div>
+                                      <span className="text-xs text-gray-600">Expected:</span>
+                                      <pre className="text-xs bg-green-50 p-2 rounded border overflow-auto max-h-20">
+                                        {JSON.stringify(log.expectedOutput, null, 2)}
+                                      </pre>
+                                    </div>
+                                    <div>
+                                      <span className="text-xs text-gray-600">Actual:</span>
+                                      <pre className="text-xs bg-blue-50 p-2 rounded border overflow-auto max-h-20">
+                                        {JSON.stringify(log.actualOutput, null, 2)}
+                                      </pre>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {log.discrepancies && log.discrepancies.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold text-sm mb-2 text-red-600">Discrepancies</h4>
+                                  <ul className="text-xs space-y-1">
+                                    {log.discrepancies.map((disc, idx) => (
+                                      <li key={idx} className="text-red-600">• {disc}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                              
+                              <Collapsible>
+                                <CollapsibleTrigger className="text-sm font-semibold text-blue-600 hover:text-blue-800">
+                                  View Full Prompt & Response ↓
+                                </CollapsibleTrigger>
+                                <CollapsibleContent className="mt-2 space-y-2">
+                                  <div>
+                                    <span className="text-xs text-gray-600">Prompt Sent:</span>
+                                    <pre className="text-xs bg-yellow-50 p-2 rounded border overflow-auto max-h-40">
+                                      {log.promptSent}
+                                    </pre>
+                                  </div>
+                                  <div>
+                                    <span className="text-xs text-gray-600">GPT Response:</span>
+                                    <pre className="text-xs bg-purple-50 p-2 rounded border overflow-auto max-h-40">
+                                      {log.gptResponse}
+                                    </pre>
+                                  </div>
+                                </CollapsibleContent>
+                              </Collapsible>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </>
+                  ))}
+                </TableBody>
+              </Table>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
