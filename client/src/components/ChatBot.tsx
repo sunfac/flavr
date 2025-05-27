@@ -198,7 +198,7 @@ export default function ChatBot({
   return (
     <>
       {/* WhatsApp-style Floating Chat Button */}
-      <div className="fixed bottom-20 right-4 z-40">
+      <div className="fixed bottom-24 right-4 z-50">
         <div className="relative">
           <Button
             onClick={() => setIsOpen(!isOpen)}
@@ -221,7 +221,7 @@ export default function ChatBot({
 
       {/* Chat Panel */}
       <div 
-        className={`fixed bottom-0 left-0 right-0 glass border-t border-white/20 max-h-[32rem] transition-all duration-500 z-50 backdrop-blur-xl ${
+        className={`fixed bottom-20 left-4 right-4 glass border border-white/20 rounded-t-3xl max-h-[28rem] transition-all duration-500 z-50 backdrop-blur-xl ${
           isOpen ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
         }`}
       >
