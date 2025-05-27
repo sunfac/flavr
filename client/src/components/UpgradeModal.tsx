@@ -91,7 +91,7 @@ export default function UpgradeModal({
 
           {/* Pricing */}
           <div className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 border border-orange-500/20 rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-orange-400 mb-1">£4.99</div>
+            <div className="text-2xl font-bold text-orange-400 mb-1">£3.49</div>
             <div className="text-sm text-slate-400">per month</div>
           </div>
 
