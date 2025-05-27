@@ -684,7 +684,7 @@ export default function LandingPage() {
             </Button>
           </Link>
           <p className="text-sm text-slate-400 mt-4">
-            Just £3.49/month • Cancel anytime
+            Just £4.99/month • Cancel anytime
           </p>
         </div>
       </section>
