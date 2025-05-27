@@ -1160,10 +1160,10 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
   });
 
   // Enhanced Chat routes with recipe context
-  app.post("/api/chat", requireAuth, async (req, res) => {
+  app.post("/api/chat", async (req, res) => {
     try {
       const { message, currentRecipe, mode } = req.body;
-      const userId = req.session!.userId;
+      const userId = req.session?.userId;
 
       // Build context-aware system prompt
       let systemPrompt = "You are a friendly, creative private chef who helps users adjust, enhance, and understand their AI-generated recipes. Provide cooking advice, substitutions, and modifications. Keep responses concise and practical.";
@@ -1449,9 +1449,12 @@ Use Zest's voice: bold, clever, encouraging. Provide practical cooking advice wi
     }
   });
 
-  app.get("/api/chat/history", requireAuth, async (req, res) => {
+  app.get("/api/chat/history", async (req, res) => {
     try {
-      const userId = req.session!.userId;
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.json({ history: [] }); // Return empty history for non-authenticated users
+      }
       const history = await storage.getChatHistory(userId, 20);
       res.json({ history });
     } catch (error: any) {
