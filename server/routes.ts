@@ -1229,6 +1229,13 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
         message.toLowerCase().includes('more serving') ||
         message.toLowerCase().includes('less serving') ||
         message.toLowerCase().includes('portion size') ||
+        message.toLowerCase().includes('for 2 people') ||
+        message.toLowerCase().includes('for 4 people') ||
+        message.toLowerCase().includes('for 6 people') ||
+        message.toLowerCase().includes('for 8 people') ||
+        /for\s+\d+\s+people/i.test(message) ||
+        /for\s+\d+$/i.test(message) ||
+        message.toLowerCase().includes('people') ||
         
         // Time modifications
         message.toLowerCase().includes('make it quicker') ||
@@ -1267,9 +1274,15 @@ Current recipe:
 
 User request: "${message}"
 
-INSTRUCTIONS:
-1. First, provide a helpful response explaining the modification in Zest's confident, encouraging voice
-2. Always provide an updated recipe in this exact JSON format:
+ANALYZE THE REQUEST:
+- If user mentions "for X people" or "X people" or serving numbers, scale ALL ingredients proportionally
+- If user wants spicier/milder, add/reduce spicy ingredients
+- If user wants substitutions, replace ingredients while keeping proportions
+- If user wants time changes, adjust cooking methods and times
+
+RESPONSE FORMAT:
+1. Start with an encouraging response in Zest's voice (2-3 sentences max)
+2. Then provide the updated recipe in this EXACT JSON format:
 
 {
   "shouldUpdateRecipe": true,
