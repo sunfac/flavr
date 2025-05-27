@@ -115,7 +115,7 @@ export const fridgeQuestions: QuestionConfig[] = [
       { value: "pressure", label: "Pressure Cooker", icon: "Timer" },
       { value: "blender", label: "Blender", icon: "Blend" },
       { value: "rice", label: "Rice Cooker", icon: "Star" },
-      { value: "bbq", label: "BBQ", icon: "Grill" },
+      { value: "bbq", label: "BBQ", icon: "Flame" },
       { value: "basics", label: "Just the basics", icon: "ChefHat" }
     ]
   },
