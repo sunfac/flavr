@@ -609,7 +609,7 @@ export default function SlideQuizShell({
   }
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black scrollable">
+    <div className="w-full min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black relative">
       {/* Header - Compact for mobile */}
       <div className="sticky top-0 bg-slate-900/95 backdrop-blur-lg border-b border-slate-700 z-10">
         <div className="max-w-md mx-auto px-3 py-2">
@@ -659,8 +659,17 @@ export default function SlideQuizShell({
         </div>
       </div>
 
-      {/* Navigation - Always visible and prominent */}
-      <div className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-700 z-[60] shadow-2xl">
+      {/* Navigation - Force always visible */}
+      <div 
+        className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-700 shadow-2xl"
+        style={{ 
+          zIndex: 9999,
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0
+        }}
+      >
         <div className="w-full max-w-md mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <Button
@@ -668,6 +677,7 @@ export default function SlideQuizShell({
               onClick={prevQuestion}
               disabled={currentQuestionIndex === 0}
               className="flex items-center gap-2 border-slate-600 bg-slate-800 text-white hover:bg-slate-700 px-4 py-3 min-w-[80px] flex-shrink-0"
+              style={{ minWidth: '80px' }}
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back</span>
@@ -683,6 +693,7 @@ export default function SlideQuizShell({
               onClick={nextQuestion}
               disabled={!canProceed()}
               className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 px-6 py-3 min-w-[100px] flex-shrink-0 font-medium"
+              style={{ minWidth: '100px', backgroundColor: '#f97316' }}
             >
               <span className="whitespace-nowrap">{currentQuestionIndex === questions.length - 1 ? 'Generate' : 'Next'}</span>
               <ArrowRight className="w-4 h-4" />
