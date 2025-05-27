@@ -659,7 +659,9 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
         // Build Fridge Mode mapped prompt (Prompt 2) - NO variation seed for deterministic results
         const creativeGuidance = getCreativeGuidanceBlock();
         
-        enhancedPrompt = `You are an elite private chef.
+        enhancedPrompt = `IMPORTANT: You must respond ONLY in English. Do not use any other language under any circumstances.
+
+You are an elite private chef.
 
 Based on the user's selected idea and quiz preferences, generate the complete recipe for:
 
@@ -811,8 +813,25 @@ Return a JSON object with this exact structure. THE SERVINGS VALUE IS LOCKED AND
 
 FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown above. This value cannot be modified.`;
       } else {
-        // Fallback to existing enhanced prompt for other modes
-        // This section should not be used - the detailed fridge mode prompt is handled above
+        // Fallback prompt for any missing modes
+        enhancedPrompt = `IMPORTANT: You must respond ONLY in English. Do not use any other language under any circumstances.
+
+You are an elite private chef. Generate a complete recipe for "${selectedRecipe.title}".
+
+Return a JSON object with this exact structure:
+{
+  "title": "${selectedRecipe.title}",
+  "description": "${selectedRecipe.description}",
+  "ingredients": ["ingredient 1", "ingredient 2", "etc"],
+  "instructions": ["step 1", "step 2", "etc"],
+  "cookTime": ${quizData.time || 30},
+  "servings": ${quizData.servings || 4},
+  "difficulty": "Medium",
+  "cuisine": "International",
+  "tips": "helpful cooking tips"
+}
+
+FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown above. This value cannot be modified.`;
       }
 
       // Simplified test for OpenAI API call
@@ -823,24 +842,12 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
       console.log(enhancedPrompt);
       console.log("=".repeat(80));
       
-      // Test with a simpler prompt first
-      const testPrompt = `Generate a complete Korean recipe for "${selectedRecipe.title}". Return only JSON with this structure:
-{
-  "title": "${selectedRecipe.title}",
-  "description": "${selectedRecipe.description}",
-  "ingredients": ["ingredient 1", "ingredient 2"],
-  "instructions": ["step 1", "step 2"],
-  "cookTime": 30,
-  "servings": 4,
-  "difficulty": "Medium"
-}`;
-
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
-        messages: [{ role: "user", content: testPrompt }],
+        messages: [{ role: "user", content: enhancedPrompt }],
         response_format: { type: "json_object" },
-        max_tokens: 1000,
+        max_tokens: 1500,
         temperature: 0.7
       });
 
