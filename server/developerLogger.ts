@@ -1,12 +1,12 @@
 import { storage } from "./storage";
 import type { InsertDeveloperLog } from "@shared/schema";
 
-// GPT-4o pricing (as of 2024)
-const GPT4O_INPUT_COST_PER_1K = 0.005;  // $0.005 per 1K input tokens
-const GPT4O_OUTPUT_COST_PER_1K = 0.015; // $0.015 per 1K output tokens
+// GPT-3.5 Turbo pricing (as of 2024)
+const GPT35_TURBO_INPUT_COST_PER_1K = 0.0005;  // $0.0005 per 1K input tokens
+const GPT35_TURBO_OUTPUT_COST_PER_1K = 0.0015; // $0.0015 per 1K output tokens
 
-// Stable Diffusion pricing (typical API costs)
-const STABLE_DIFFUSION_COST_PER_IMAGE = 0.02; // $0.02 per image generation
+// Stable Diffusion via Replicate pricing (typical API costs)
+const STABLE_DIFFUSION_COST_PER_IMAGE = 0.0023; // $0.0023 per image generation
 
 // Simple token estimation (rough approximation)
 function estimateTokens(text: string): number {
@@ -16,8 +16,8 @@ function estimateTokens(text: string): number {
 
 // Calculate cost based on token usage
 function calculateCost(inputTokens: number, outputTokens: number): string {
-  const inputCost = (inputTokens / 1000) * GPT4O_INPUT_COST_PER_1K;
-  const outputCost = (outputTokens / 1000) * GPT4O_OUTPUT_COST_PER_1K;
+  const inputCost = (inputTokens / 1000) * GPT35_TURBO_INPUT_COST_PER_1K;
+  const outputCost = (outputTokens / 1000) * GPT35_TURBO_OUTPUT_COST_PER_1K;
   const totalCost = inputCost + outputCost;
   return `$${totalCost.toFixed(6)}`;
 }
