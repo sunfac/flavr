@@ -24,7 +24,7 @@ export default function ModeSelection() {
     retry: false,
   });
 
-  const isAuthenticated = user?.user;
+  const isAuthenticated = user?.user?.id;
 
   const modes = [
     {
@@ -72,7 +72,6 @@ export default function ModeSelection() {
       <GlobalHeader 
         onMenuClick={() => setShowNavigation(true)}
         onSettingsClick={() => setShowSettings(true)}
-        onUserClick={() => setShowUserMenu(true)}
       />
       
       {/* Recipe Remaining Banner - positioned below header with proper spacing */}
