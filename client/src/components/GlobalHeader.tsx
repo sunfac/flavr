@@ -65,39 +65,39 @@ export default function GlobalHeader({
           <img src={FlavrLogo} alt="Flavr" className="w-10 h-10" />
         </div>
 
-        {/* Right: Authentication/Settings buttons with full text */}
-        <div className="flex items-center gap-2">
+        {/* Right: Compact authentication/settings buttons pushed further right */}
+        <div className="flex items-center gap-1 ml-auto">
           {user ? (
             // Authenticated user - show Settings only
             <Button 
               variant="ghost"
               size="sm"
               onClick={handleSettingsClick}
-              className="text-white hover:bg-white/10 relative z-10 px-2 py-1"
+              className="text-white hover:bg-white/10 relative z-10 px-1.5 py-0.5"
             >
               <Settings className="w-4 h-4" />
             </Button>
           ) : (
-            // Not authenticated - show Login and Sign Up buttons with text
+            // Not authenticated - show smaller Login and Sign Up buttons with text
             <>
               <Button 
                 variant="ghost"
                 size="sm"
                 onClick={handleLoginClick}
-                className="text-white hover:text-white hover:bg-white/10 font-medium px-2 py-1 text-xs relative z-10"
+                className="text-white hover:text-white hover:bg-white/10 font-medium px-1.5 py-0.5 text-xs relative z-10"
               >
-                <LogIn className="w-3 h-3 mr-1" />
-                Login
+                <LogIn className="w-3 h-3 mr-0.5" />
+                <span className="text-xs">Login</span>
               </Button>
               
               <Button 
                 variant="ghost"
                 size="sm"
                 onClick={handleLoginClick}
-                className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-2 py-1 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50"
+                className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1.5 py-0.5 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50"
               >
-                <UserPlus className="w-3 h-3 mr-1" />
-                Sign Up
+                <UserPlus className="w-3 h-3 mr-0.5" />
+                <span className="text-xs">Sign Up</span>
               </Button>
             </>
           )}
