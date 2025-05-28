@@ -149,6 +149,9 @@ export const recipeGenerationLogs = pgTable("recipe_generation_logs", {
   sourcePrompt1: text("source_prompt_1"), // Tinder card generation prompt
   sourcePrompt2: text("source_prompt_2"), // Full recipe generation prompt
   
+  // Data integrity and validation
+  recipeFingerprint: text("recipe_fingerprint").notNull(), // SHA256 hash for validation
+  
   // Analytics metadata
   sessionId: text("session_id"),
   browserFingerprint: text("browser_fingerprint"),

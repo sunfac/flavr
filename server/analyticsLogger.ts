@@ -1,5 +1,24 @@
 import { storage } from "./storage";
 import type { InsertRecipeGenerationLog } from "@shared/schema";
+import crypto from "crypto";
+
+/**
+ * 🔑 Generate SHA256 fingerprint for recipe content validation
+ * This ensures data integrity and prevents tampering
+ */
+export function generateRecipeFingerprint(recipeOutput: any): string {
+  const contentString = [
+    recipeOutput.title,
+    recipeOutput.cuisine || '',
+    recipeOutput.difficulty,
+    recipeOutput.servings.toString(),
+    recipeOutput.cookTime.toString(),
+    recipeOutput.ingredients.join(","),
+    recipeOutput.instructions.join(".")
+  ].join("|");
+
+  return crypto.createHash("sha256").update(contentString).digest("hex");
+}
 
 interface RecipeGenerationEvent {
   userId?: string; // email or anonymous ID
@@ -68,6 +87,9 @@ interface RecipeGenerationEvent {
  */
 export async function logRecipeGeneration(event: RecipeGenerationEvent): Promise<void> {
   try {
+    // Generate recipe fingerprint for data integrity
+    const recipeFingerprint = generateRecipeFingerprint(event.recipeOutput);
+    
     const logData: InsertRecipeGenerationLog = {
       userId: event.userId || 'anonymous',
       mode: event.mode,
@@ -79,6 +101,7 @@ export async function logRecipeGeneration(event: RecipeGenerationEvent): Promise
       userAction: event.userAction || {},
       sourcePrompt1: event.sourcePrompt1 || null,
       sourcePrompt2: event.sourcePrompt2 || null,
+      recipeFingerprint: recipeFingerprint,
       sessionId: event.sessionId || null,
       browserFingerprint: event.browserFingerprint || null,
       userAgent: event.userAgent || null,
