@@ -9,6 +9,7 @@ export const chefQuestions: QuestionConfig[] = [
     required: true,
     placeholder: "Tell me about the dish you have in mind...",
     examples: [
+      "A simple cheddar cheese and tomato omelette",
       "A special BBQ dish to show off at the weekend",
       "A romantic Italian pasta dish for date night",
       "Something impressive for dinner guests",
