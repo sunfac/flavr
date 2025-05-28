@@ -125,13 +125,17 @@ export default function FlavrRituals() {
   });
 
   const user = userData?.user;
-  const hasFlavrPlus = user?.hasFlavrPlus || false;
+  const hasFlavrPlus = userData?.user?.hasFlavrPlus || false;
 
   // Flavr+ Lock Screen for non-subscribers
   if (!hasFlavrPlus) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50">
-        <GlobalHeader />
+        <GlobalHeader 
+          onMenuClick={() => {}}
+          onSettingsClick={() => {}}
+          onAuthRequired={() => {}}
+        />
         
         <div className="flex items-center justify-center min-h-screen p-4">
           <motion.div
@@ -241,7 +245,11 @@ export default function FlavrRituals() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50">
-      <GlobalHeader />
+      <GlobalHeader 
+        onMenuClick={() => {}}
+        onSettingsClick={() => {}}
+        onAuthRequired={() => {}}
+      />
       
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <motion.div
