@@ -142,7 +142,10 @@ export default function FlavrRituals() {
             <p className="text-purple-200 mb-6">
               Please log in to access Flavr Rituals and start planning your weekly meals.
             </p>
-            <Button className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white">
+            <Button 
+              className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white"
+              onClick={() => window.location.href = "/api/login"}
+            >
               Sign In
             </Button>
           </motion.div>
