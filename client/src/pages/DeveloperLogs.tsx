@@ -1,11 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Database, Clock, DollarSign, AlertTriangle, CheckCircle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { ChevronDown, Database, Clock, DollarSign, AlertTriangle, CheckCircle, Search, Trash2, Eye, ExternalLink, Users } from "lucide-react";
 import { useState } from "react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { format } from "date-fns";
 
 interface DeveloperLog {
   id: number;
@@ -30,6 +36,9 @@ interface DeveloperLog {
 
 export default function DeveloperLogs() {
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRecipe, setSelectedRecipe] = useState<any>(null);
+  const { toast } = useToast();
 
   // Get current user data
   const { data: userData } = useQuery({
@@ -44,7 +53,55 @@ export default function DeveloperLogs() {
     enabled: user?.email === "william@blycontracting.co.uk",
   });
 
+  // Fetch all recipes for developer view
+  const { data: recipes = [], isLoading: recipesLoading, refetch: refetchRecipes } = useQuery({
+    queryKey: ['/api/recipes/all'],
+    enabled: user?.email === "william@blycontracting.co.uk",
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/recipes/all");
+      return response.json();
+    }
+  });
+
+  // Delete recipe mutation
+  const deleteRecipeMutation = useMutation({
+    mutationFn: async (recipeId: string) => {
+      await apiRequest("DELETE", `/api/recipes/${recipeId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/recipes/all'] });
+      toast({
+        title: "Recipe deleted",
+        description: "Recipe has been removed from the database",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Delete failed",
+        description: "Could not delete recipe",
+        variant: "destructive",
+      });
+    }
+  });
+
   const logs: DeveloperLog[] = (logsData as any)?.logs || [];
+
+  // Filter recipes based on search term
+  const filteredRecipes = recipes.filter((recipe: any) =>
+    recipe.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    recipe.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    recipe.mode?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleViewRecipe = (recipe: any) => {
+    setSelectedRecipe(recipe);
+  };
+
+  const handleDeleteRecipe = (recipeId: string) => {
+    if (confirm("Are you sure you want to delete this recipe? This action cannot be undone.")) {
+      deleteRecipeMutation.mutate(recipeId);
+    }
+  };
 
   // Check if user has admin access
   if (!user || user.email !== "william@blycontracting.co.uk") {
