@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { MessageCircle, X, Send, ChefHat, User, Bot } from "lucide-react";
+import { MessageCircle, X, Send, ChefHat, User, Bot, Flame, UtensilsCrossed, Clock, Wine, RefreshCw, Zap, Scale, Droplets } from "lucide-react";
 
 interface ChatMessage {
   id: number;
@@ -60,16 +60,16 @@ export default function ChatBot({
      location.includes('/fridge') ? 'fridge' : 
      location.includes('/chef') ? 'chef' : undefined);
 
-  // Conversation suggestion chips
+  // Conversation suggestion chips with Lucide icons
   const suggestionChips = [
-    { text: "Use chicken instead", icon: "🍗", updatesRecipe: true },
-    { text: "Use beef instead", icon: "🥩", updatesRecipe: true },
-    { text: "Make it vegetarian", icon: "🌱", updatesRecipe: true },
-    { text: "Make it dairy-free", icon: "🥛", updatesRecipe: true },
-    { text: "Make it spicier", icon: "🌶️", updatesRecipe: true },
-    { text: "Add wine pairing", icon: "🍷", updatesRecipe: false },
-    { text: "Add a side dish", icon: "🥗", updatesRecipe: false },
-    { text: "Increase servings", icon: "👥", updatesRecipe: true }
+    { text: "Make it spicier", icon: Flame, updatesRecipe: true },
+    { text: "Suggest a side dish", icon: UtensilsCrossed, updatesRecipe: false },
+    { text: "What can I prep ahead?", icon: Clock, updatesRecipe: false },
+    { text: "Give me a wine pairing", icon: Wine, updatesRecipe: false },
+    { text: "Swap an ingredient", icon: RefreshCw, updatesRecipe: true },
+    { text: "Simplify the method", icon: Zap, updatesRecipe: true },
+    { text: "Convert measurements", icon: Scale, updatesRecipe: true },
+    { text: "Make a sauce", icon: Droplets, updatesRecipe: false }
   ];
 
   // Get chat history
@@ -321,22 +321,23 @@ export default function ChatBot({
           </div>
         </ScrollArea>
 
-        {/* Suggestion Chips - Above input - Mobile optimized */}
-        {showSuggestions && currentRecipe && (
-          <div className="px-3 sm:px-4 py-2 border-t border-white/10 flex-shrink-0">
-            <p className="text-xs font-medium text-slate-600 mb-2">Quick suggestions:</p>
-            <div className="flex flex-wrap gap-1">
+        {/* Suggestion Chips - Mobile optimized with Lucide icons */}
+        {currentRecipe && (
+          <div className="px-3 sm:px-4 py-3 border-t border-white/10 flex-shrink-0">
+            <p className="text-xs font-medium text-white/80 mb-3">Quick suggestions:</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {suggestionChips.map((chip, index) => (
-                <Badge
+                <Button
                   key={index}
-                  variant="outline"
-                  className="cursor-pointer transition-all duration-300 px-2 py-1 text-xs bg-orange-500/10 border-orange-400/30 text-orange-400 hover:bg-orange-500/20 hover:border-orange-400/50"
+                  variant="ghost"
+                  size="sm"
+                  className="h-auto p-2 bg-orange-500/10 border border-orange-400/30 text-orange-400 hover:bg-orange-500/20 hover:border-orange-400/50 transition-all duration-200 flex flex-col items-center justify-center space-y-1 text-xs"
                   onClick={handleSuggestionClick(chip.text)}
                 >
-                  <span className="mr-1">{chip.icon}</span>
-                  {chip.text}
-                  {chip.updatesRecipe && <span className="ml-1 text-xs">📝</span>}
-                </Badge>
+                  {React.createElement(chip.icon, { className: "w-4 h-4" })}
+                  <span className="text-center leading-tight">{chip.text}</span>
+                  {chip.updatesRecipe && <span className="text-[10px] opacity-60">Updates recipe</span>}
+                </Button>
               ))}
             </div>
           </div>
