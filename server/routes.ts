@@ -31,6 +31,11 @@ import {
   hasActiveFlavrPlus,
   checkExpiredSubscriptions
 } from "./subscriptionManager";
+import {
+  AppleSubscriptionManager,
+  GoogleSubscriptionManager,
+  UniversalSubscriptionManager
+} from "./mobileSubscriptionManager";
 
 
 
@@ -1765,27 +1770,144 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
     }
   });
 
-  // Endpoint to check subscription status
+  // Universal subscription status endpoint (supports all providers)
   app.get('/api/subscription/status', async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ error: 'Not authenticated' });
     }
 
     try {
-      const hasPlus = await hasActiveFlavrPlus(req.user.id);
-      const user = await storage.getUser(req.user.id);
-      
-      res.json({
-        hasFlavrPlus: hasPlus,
-        subscriptionTier: user?.subscriptionTier || 'free',
-        subscriptionStatus: user?.subscriptionStatus || 'inactive',
-        subscriptionEndDate: user?.subscriptionEndDate,
-        recipesThisMonth: user?.recipesThisMonth || 0,
-        monthlyRecipeLimit: user?.monthlyRecipeLimit || 3,
-      });
+      const subscriptionDetails = await UniversalSubscriptionManager.getSubscriptionDetails(req.user.id);
+      res.json(subscriptionDetails);
     } catch (error) {
       console.error('Error checking subscription status:', error);
       res.status(500).json({ error: 'Failed to check subscription status' });
+    }
+  });
+
+  // Apple App Store receipt verification and subscription update
+  app.post('/api/subscription/apple/verify', async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    try {
+      const { receiptData, originalTransactionId } = req.body;
+      
+      if (!receiptData) {
+        return res.status(400).json({ error: 'Receipt data is required' });
+      }
+
+      // Verify receipt with Apple
+      const receiptResult = await AppleSubscriptionManager.verifyAppleReceipt(receiptData);
+      
+      if (receiptResult.status !== 0) {
+        return res.status(400).json({ error: 'Invalid receipt', details: receiptResult });
+      }
+
+      // Extract subscription info from receipt
+      const latestReceipt = receiptResult.latest_receipt_info?.[0];
+      if (!latestReceipt) {
+        return res.status(400).json({ error: 'No valid subscription found in receipt' });
+      }
+
+      const expiresDate = new Date(parseInt(latestReceipt.expires_date_ms));
+      const isActive = new Date() < expiresDate;
+      const subscriptionTier = latestReceipt.product_id.includes('annual') ? 'annual' : 'monthly';
+
+      // Update user subscription
+      await AppleSubscriptionManager.processAppleSubscription({
+        userId: req.user.id,
+        originalTransactionId: latestReceipt.original_transaction_id,
+        receiptData,
+        subscriptionTier,
+        expiresDate,
+        isActive
+      });
+
+      res.json({
+        success: true,
+        isActive,
+        subscriptionTier,
+        expiresDate,
+        message: `Apple subscription ${isActive ? 'activated' : 'expired'}`
+      });
+
+    } catch (error) {
+      console.error('Error verifying Apple subscription:', error);
+      res.status(500).json({ error: 'Failed to verify Apple subscription' });
+    }
+  });
+
+  // Google Play Store purchase verification and subscription update
+  app.post('/api/subscription/google/verify', async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    try {
+      const { purchaseToken, orderId, productId } = req.body;
+      
+      if (!purchaseToken || !productId) {
+        return res.status(400).json({ error: 'Purchase token and product ID are required' });
+      }
+
+      const packageName = process.env.GOOGLE_PLAY_PACKAGE_NAME || 'com.flavr.app';
+      
+      // Verify purchase with Google Play
+      const purchaseData = await GoogleSubscriptionManager.verifyGooglePurchase(
+        packageName,
+        productId,
+        purchaseToken
+      );
+
+      const expiryTimeMillis = parseInt(purchaseData.expiryTimeMillis);
+      const isActive = Date.now() < expiryTimeMillis;
+      const subscriptionTier = productId.includes('annual') ? 'annual' : 'monthly';
+
+      // Update user subscription
+      await GoogleSubscriptionManager.processGoogleSubscription({
+        userId: req.user.id,
+        purchaseToken,
+        orderId: orderId || '',
+        productId,
+        subscriptionTier,
+        expiryTimeMillis,
+        isActive
+      });
+
+      res.json({
+        success: true,
+        isActive,
+        subscriptionTier,
+        expiresDate: new Date(expiryTimeMillis),
+        message: `Google subscription ${isActive ? 'activated' : 'expired'}`
+      });
+
+    } catch (error) {
+      console.error('Error verifying Google subscription:', error);
+      res.status(500).json({ error: 'Failed to verify Google subscription' });
+    }
+  });
+
+  // Sync subscription status with provider
+  app.post('/api/subscription/sync', async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    try {
+      const isActive = await UniversalSubscriptionManager.hasActiveSubscription(req.user.id);
+      const subscriptionDetails = await UniversalSubscriptionManager.getSubscriptionDetails(req.user.id);
+      
+      res.json({
+        success: true,
+        isActive,
+        ...subscriptionDetails
+      });
+    } catch (error) {
+      console.error('Error syncing subscription:', error);
+      res.status(500).json({ error: 'Failed to sync subscription' });
     }
   });
 

@@ -10,14 +10,24 @@ export const users = pgTable("users", {
   hasFlavrPlus: boolean("has_flavr_plus").default(false),
   subscriptionTier: text("subscription_tier").default("free"), // "free", "monthly", "annual"
   subscriptionStatus: text("subscription_status").default("inactive"), // "active", "canceled", "past_due", "inactive"
+  subscriptionProvider: text("subscription_provider").default("none"), // "stripe", "apple", "google", "none"
   recipesThisMonth: integer("recipes_this_month").default(0),
   imagesThisMonth: integer("images_this_month").default(0),
   monthlyRecipeLimit: integer("monthly_recipe_limit").default(3),
   monthlyImageLimit: integer("monthly_image_limit").default(3),
   recipesGenerated: integer("recipes_generated").default(0),
   imagesGenerated: integer("images_generated").default(0),
+  // Stripe subscription data
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
+  // Apple App Store subscription data
+  appleOriginalTransactionId: text("apple_original_transaction_id"),
+  appleReceiptData: text("apple_receipt_data"),
+  // Google Play Store subscription data
+  googlePurchaseToken: text("google_purchase_token"),
+  googleOrderId: text("google_order_id"),
+  googleProductId: text("google_product_id"),
+  // Universal subscription tracking
   subscriptionStartDate: timestamp("subscription_start_date"),
   subscriptionEndDate: timestamp("subscription_end_date"),
   subscriptionRenewDate: timestamp("subscription_renew_date"),
