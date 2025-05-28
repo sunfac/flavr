@@ -28,7 +28,7 @@ export default function GlobalHeader({
     console.log("User data:", user);
     
     // Check if user is authenticated - fix the data structure check
-    if (!user || !user.id) {
+    if (!user || !user.user?.id) {
       console.log("User not authenticated, prompting sign-in");
       onAuthRequired?.();
       return;
