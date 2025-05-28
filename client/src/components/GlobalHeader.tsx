@@ -27,15 +27,7 @@ export default function GlobalHeader({
     console.log("Settings clicked");
     console.log("User data:", user);
     
-    // Check if user is authenticated - fix the data structure check
-    if (!user?.user?.id) {
-      console.log("User not authenticated, prompting sign-in");
-      onAuthRequired?.();
-      return;
-    }
-    
-    // User is authenticated, open settings
-    console.log("User authenticated, opening settings");
+    // Always allow navigation to settings/flavr-plus page
     onSettingsClick?.();
   };
 
