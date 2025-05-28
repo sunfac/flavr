@@ -38,65 +38,66 @@ export default function GlobalHeader({
   return (
     <header className="absolute top-0 left-0 right-0 z-50 px-6 py-4 pointer-events-auto">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Left: Hamburger Menu */}
-        <Button 
-          variant="ghost"
-          size="icon"
-          onClick={onMenuClick}
-          className="text-white hover:bg-white/10 relative z-10"
-        >
-          <Menu className="w-6 h-6" />
-        </Button>
+        {/* Left: Hamburger Menu and Flavr+ */}
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost"
+            size="icon"
+            onClick={onMenuClick}
+            className="text-white hover:bg-white/10 relative z-10"
+          >
+            <Menu className="w-6 h-6" />
+          </Button>
+          
+          {/* Flavr+ button - always visible as info page, icon only */}
+          <Button 
+            variant="ghost"
+            size="sm"
+            onClick={handleFlavrPlusClick}
+            className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1.5 py-1 relative z-10 border border-orange-400/30 hover:border-orange-400/50"
+          >
+            <Crown className="w-4 h-4" />
+          </Button>
+        </div>
 
         {/* Center: Chef Hat Logo */}
         <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
           <img src={FlavrLogo} alt="Flavr" className="w-10 h-10" />
         </div>
 
-        {/* Right: Ultra-compact buttons positioned safely away from logo */}
-        <div className="flex items-center gap-0.5 ml-auto">
-          {/* Flavr+ button - always visible as info page, icon only on mobile */}
-          <Button 
-            variant="ghost"
-            size="sm"
-            onClick={handleFlavrPlusClick}
-            className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1 py-0.5 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50 min-w-0"
-          >
-            <Crown className="w-3 h-3" />
-            <span className="hidden sm:inline ml-0.5 text-xs">Plus</span>
-          </Button>
-          
+        {/* Right: Authentication/Settings buttons with full text */}
+        <div className="flex items-center gap-2">
           {user ? (
             // Authenticated user - show Settings only
             <Button 
               variant="ghost"
               size="sm"
               onClick={handleSettingsClick}
-              className="text-white hover:bg-white/10 relative z-10 px-1 py-0.5 min-w-0"
+              className="text-white hover:bg-white/10 relative z-10 px-2 py-1"
             >
-              <Settings className="w-3 h-3" />
+              <Settings className="w-4 h-4" />
             </Button>
           ) : (
-            // Not authenticated - show ultra-compact Login and Sign Up buttons
+            // Not authenticated - show Login and Sign Up buttons with text
             <>
               <Button 
                 variant="ghost"
                 size="sm"
                 onClick={handleLoginClick}
-                className="text-white hover:text-white hover:bg-white/10 font-medium px-1 py-0.5 text-xs relative z-10 min-w-0"
+                className="text-white hover:text-white hover:bg-white/10 font-medium px-2 py-1 text-xs relative z-10"
               >
-                <LogIn className="w-3 h-3" />
-                <span className="hidden sm:inline ml-0.5 text-xs">Login</span>
+                <LogIn className="w-3 h-3 mr-1" />
+                Login
               </Button>
               
               <Button 
                 variant="ghost"
                 size="sm"
                 onClick={handleLoginClick}
-                className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1 py-0.5 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50 min-w-0"
+                className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-2 py-1 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50"
               >
-                <UserPlus className="w-3 h-3" />
-                <span className="hidden sm:inline ml-0.5 text-xs">Sign Up</span>
+                <UserPlus className="w-3 h-3 mr-1" />
+                Sign Up
               </Button>
             </>
           )}
