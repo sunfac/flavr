@@ -463,17 +463,31 @@ export default function FlavrRituals() {
       </div>
 
       {/* Auth Modal */}
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={() => {
-          setShowAuthModal(false);
-          // Refresh the page to show authenticated content
-          window.location.reload();
-        }}
-        title={authMode === "login" ? "Welcome back!" : "Join Flavr today!"}
-        description={authMode === "login" ? "Sign in to access Flavr Rituals" : "Create your account to unlock personalized meal planning"}
-      />
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Sign In Required</h2>
+            <p className="mb-4 text-gray-600">Please sign in to access Flavr Rituals</p>
+            <div className="flex gap-3">
+              <button 
+                className="flex-1 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+                onClick={() => {
+                  setShowAuthModal(false);
+                  window.location.href = "/api/login";
+                }}
+              >
+                Sign In
+              </button>
+              <button 
+                className="flex-1 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                onClick={() => setShowAuthModal(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
