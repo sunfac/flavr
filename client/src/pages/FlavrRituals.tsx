@@ -23,16 +23,24 @@ import GlobalFooter from "@/components/GlobalFooter";
 import AuthModal from "@/components/AuthModal";
 import { useLocation } from "wouter";
 
-// Quiz data matching other cooking modes
+// Complete cuisine options matching other cooking modes
 const cuisineOptions = [
+  { value: "any", label: "Any", icon: "🌍" },
   { value: "italian", label: "Italian", icon: "🍝" },
-  { value: "asian", label: "Asian", icon: "🥢" },
-  { value: "mexican", label: "Mexican", icon: "🌶️" },
-  { value: "mediterranean", label: "Mediterranean", icon: "🫒" },
   { value: "indian", label: "Indian", icon: "🍛" },
-  { value: "french", label: "French", icon: "🥖" },
-  { value: "american", label: "American", icon: "🍔" },
   { value: "thai", label: "Thai", icon: "🍜" },
+  { value: "greek", label: "Greek", icon: "🫒" },
+  { value: "french", label: "French", icon: "🥖" },
+  { value: "korean", label: "Korean", icon: "🥢" },
+  { value: "mexican", label: "Mexican", icon: "🌶️" },
+  { value: "chinese", label: "Chinese", icon: "🥡" },
+  { value: "japanese", label: "Japanese", icon: "🍣" },
+  { value: "spanish", label: "Spanish", icon: "🥘" },
+  { value: "lebanese", label: "Lebanese", icon: "🧆" },
+  { value: "vietnamese", label: "Vietnamese", icon: "🍲" },
+  { value: "moroccan", label: "Moroccan", icon: "🫖" },
+  { value: "american", label: "American", icon: "🍔" },
+  { value: "fusion", label: "Fusion", icon: "✨" }
 ];
 
 const moodOptions = [
