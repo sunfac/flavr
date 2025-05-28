@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useEffect } from "react";
 import { initializePWAUpdater } from "@/lib/pwaUpdater";
 import LandingPage from "@/pages/LandingPage";
+import LoginPage from "@/pages/LoginPage";
 import ModeSelection from "@/pages/ModeSelection";
 import ShoppingMode from "@/pages/ShoppingMode";
 import FridgeMode from "@/pages/FridgeMode";
@@ -25,6 +26,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={LandingPage} />
+      <Route path="/login" component={LoginPage} />
       <Route path="/app" component={ModeSelection} />
       <Route path="/app/shopping" component={ShoppingMode} />
       <Route path="/app/fridge" component={FridgeMode} />
