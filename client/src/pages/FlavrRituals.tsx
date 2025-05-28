@@ -150,9 +150,11 @@ export default function FlavrRituals() {
             <Button 
               className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white"
               onClick={() => {
-                console.log("Button clicked! User:", user);
+                console.log("Login button clicked! User:", user);
+                console.log("Setting auth modal to true");
                 setAuthMode("login");
                 setShowAuthModal(true);
+                console.log("Auth modal state should now be true");
               }}
             >
               Log In
@@ -461,6 +463,7 @@ export default function FlavrRituals() {
       </div>
 
       {/* Auth Modal */}
+      {console.log("Rendering AuthModal with isOpen:", showAuthModal)}
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
