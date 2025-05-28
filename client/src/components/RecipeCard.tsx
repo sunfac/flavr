@@ -272,18 +272,18 @@ export default function RecipeCard({
           <ArrowLeft className="w-4 h-4" />
         </Button>
 
-        {/* Save Button */}
+        {/* Save Button - More visible */}
         <Button
           variant="ghost"
           size="sm"
-          className="absolute top-4 right-4 w-10 h-10 bg-black/20 backdrop-blur-sm rounded-full text-white hover:bg-black/40 border border-white/20"
+          className="absolute top-4 right-4 w-12 h-12 bg-orange-500/80 backdrop-blur-sm rounded-full text-white hover:bg-orange-600 border-2 border-white/40 shadow-lg"
           onClick={() => saveRecipeMutation.mutate()}
           disabled={isSaved || saveRecipeMutation.isPending}
         >
           {isSaved ? (
-            <Heart className="w-4 h-4 fill-red-500 text-red-500" />
+            <Heart className="w-5 h-5 fill-red-500 text-red-500" />
           ) : (
-            <BookmarkPlus className="w-4 h-4" />
+            <BookmarkPlus className="w-5 h-5" />
           )}
         </Button>
 

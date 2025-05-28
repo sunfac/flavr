@@ -27,6 +27,7 @@ interface RecipeShareToolsProps {
   imageUrl?: string;
   isShared: boolean;
   onShareToggle?: () => void;
+  recipe?: any; // Full recipe data for PDF
 }
 
 const RecipeShareTools: React.FC<RecipeShareToolsProps> = ({
@@ -36,7 +37,8 @@ const RecipeShareTools: React.FC<RecipeShareToolsProps> = ({
   description,
   imageUrl,
   isShared,
-  onShareToggle
+  onShareToggle,
+  recipe
 }) => {
   const { toast } = useToast();
   const pdfRef = useRef<HTMLDivElement>(null);
@@ -176,8 +178,8 @@ ${publicUrl}`;
 
   return (
     <div className="space-y-6">
-      {/* Hidden PDF Content */}
-      <div ref={pdfRef} className="hidden print:block bg-white text-black p-8 font-sans">
+      {/* PDF Content - positioned off screen but visible for PDF generation */}
+      <div ref={pdfRef} className="fixed -top-[9999px] left-0 bg-white text-black p-8 font-sans w-[8.5in]">
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
           <p className="text-gray-600 text-lg">{description}</p>
@@ -194,6 +196,74 @@ ${publicUrl}`;
               className="max-w-full h-auto rounded-lg mx-auto"
               style={{ maxHeight: '400px' }}
             />
+          </div>
+        )}
+
+        {recipe && (
+          <div className="mb-8">
+            {/* Recipe Meta Info */}
+            {(recipe.cookTime || recipe.servings || recipe.difficulty) && (
+              <div className="grid grid-cols-3 gap-4 mb-6 text-center">
+                {recipe.cookTime && (
+                  <div>
+                    <p className="text-sm text-gray-500">Cook Time</p>
+                    <p className="font-semibold">{recipe.cookTime} min</p>
+                  </div>
+                )}
+                {recipe.servings && (
+                  <div>
+                    <p className="text-sm text-gray-500">Servings</p>
+                    <p className="font-semibold">{recipe.servings}</p>
+                  </div>
+                )}
+                {recipe.difficulty && (
+                  <div>
+                    <p className="text-sm text-gray-500">Difficulty</p>
+                    <p className="font-semibold">{recipe.difficulty}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Ingredients */}
+            {recipe.ingredients && recipe.ingredients.length > 0 && (
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-3">Ingredients</h2>
+                <ul className="space-y-2">
+                  {recipe.ingredients.map((ingredient: string, index: number) => (
+                    <li key={index} className="flex items-start">
+                      <span className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                      <span className="text-gray-700">{ingredient}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Instructions */}
+            {recipe.instructions && recipe.instructions.length > 0 && (
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-3">Instructions</h2>
+                <ol className="space-y-3">
+                  {recipe.instructions.map((instruction: string, index: number) => (
+                    <li key={index} className="flex items-start">
+                      <span className="w-6 h-6 bg-orange-500 text-white rounded-full text-sm font-bold flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
+                        {index + 1}
+                      </span>
+                      <span className="text-gray-700 leading-relaxed">{instruction}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+
+            {/* Tips */}
+            {recipe.tips && (
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-3">Chef's Tips</h2>
+                <p className="text-gray-700 italic bg-gray-50 p-4 rounded-lg">{recipe.tips}</p>
+              </div>
+            )}
           </div>
         )}
         
