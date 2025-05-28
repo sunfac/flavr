@@ -59,14 +59,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     secret: process.env.SESSION_SECRET || 'flavr-dev-secret-key',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+    cookie: { 
+      secure: process.env.NODE_ENV === 'production', 
+      maxAge: 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    }
   }));
 
   // Authentication middleware
   const requireAuth = (req: any, res: any, next: any) => {
     if (!req.session?.userId) {
+      console.log("Authentication failed - no session userId");
       return res.status(401).json({ message: "Authentication required" });
     }
+    console.log("Authentication successful for user:", req.session.userId);
     next();
   };
 
@@ -103,8 +110,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       req.session!.userId = user.id;
-      console.log("Login successful for user:", user.email);
-      res.json({ user: { id: user.id, username: user.username, email: user.email, subscriptionTier: user.subscriptionTier } });
+      
+      // Force session save for deployment reliability
+      req.session!.save((err: any) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.status(500).json({ message: "Session error" });
+        }
+        
+        console.log("Login successful for user:", user.email, "Session ID:", req.session!.userId);
+        res.json({ 
+          user: { 
+            id: user.id, 
+            username: user.username, 
+            email: user.email, 
+            subscriptionTier: user.subscriptionTier,
+            hasFlavrPlus: user.hasFlavrPlus || false
+          } 
+        });
+      });
     } catch (error: any) {
       console.log("Login error:", error.message);
       res.status(500).json({ message: error.message });
