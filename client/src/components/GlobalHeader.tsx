@@ -15,7 +15,7 @@ export default function GlobalHeader({
   onSettingsClick,
   onAuthRequired 
 }: GlobalHeaderProps) {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   
   // Check authentication status
   const { data: user } = useQuery({
@@ -43,7 +43,13 @@ export default function GlobalHeader({
           size="icon"
           onClick={() => {
             console.log("Menu clicked - navigating to home");
-            navigate('/');
+            console.log("Current location:", location);
+            try {
+              navigate('/');
+              console.log("Navigation called successfully");
+            } catch (error) {
+              console.error("Navigation error:", error);
+            }
           }}
           className="text-white hover:bg-white/10 relative z-10"
         >
