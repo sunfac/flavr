@@ -17,10 +17,11 @@ export default function GlobalHeader({
 }: GlobalHeaderProps) {
   const [, navigate] = useLocation();
   
-  // Check authentication status
+  // Check authentication status with error handling
   const { data: user } = useQuery({
     queryKey: ["/api/me"],
     retry: false,
+    enabled: false, // Disable auto-fetch to prevent 401 errors
   });
 
   const handleSettingsClick = () => {
