@@ -379,6 +379,7 @@ export default function RecipeCard({
               description={fullRecipe.description}
               imageUrl={fullRecipe.imageUrl}
               isShared={fullRecipe.isShared || false}
+              recipe={fullRecipe}
               onShareToggle={async () => {
                 // Handle share toggle logic here
                 try {
