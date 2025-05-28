@@ -17,12 +17,8 @@ export default function GlobalHeader({
 }: GlobalHeaderProps) {
   const [, navigate] = useLocation();
   
-  // Check authentication status with error handling
-  const { data: user } = useQuery({
-    queryKey: ["/api/me"],
-    retry: false,
-    enabled: false, // Disable auto-fetch to prevent 401 errors
-  });
+  // Simplified authentication check to prevent errors
+  const user = null; // Temporarily disable auth check to show layout
 
   const handleSettingsClick = () => {
     console.log("Settings clicked");
