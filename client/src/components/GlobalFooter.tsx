@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Refrigerator, ChefHat, History } from "lucide-react";
+import { ShoppingCart, Refrigerator, ChefHat, History, Calendar } from "lucide-react";
 import { useLocation } from "wouter";
 
 interface GlobalFooterProps {
-  currentMode?: "shopping" | "fridge" | "chef" | "history";
+  currentMode?: "shopping" | "fridge" | "chef" | "rituals" | "history";
 }
 
 export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
@@ -27,6 +27,12 @@ export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
       label: "Chef",
       icon: ChefHat,
       path: "/chef",
+    },
+    {
+      id: "rituals",
+      label: "Rituals",
+      icon: Calendar,
+      path: "/flavr-rituals",
     },
     {
       id: "history",
