@@ -1,0 +1,57 @@
+// === FINAL CHEF ASSIST SUGGESTIONS PROMPT ===
+// Each item is phrased to directly populate the user's input field upon selection
+
+const chefAssistSuggestions = [
+  // Copycat / High Street
+  "I want to recreate peri-peri chicken like Nando’s",
+  "I want to make a Zinger Tower Burger like the one from KFC",
+  "I want to cook a Greggs-style steak bake at home",
+  "I want to make a teriyaki chicken donburi like Itsu",
+  "I want to make a cheeseburger with homemade Big Mac-style sauce",
+  "I want to cook Wagamama-style chicken yaki soba",
+
+  // Showstopper / Indulgent
+  "I want to bake a luxurious chocolate and salted caramel celebration cake",
+  "I want to make sourdough pizza from scratch with honey and Nduja",
+  "I want to cook a Michelin-style mushroom risotto with truffle oil",
+  "I want to make a romantic date-night steak dinner with chimichurri",
+
+  // Seasonal / Smart
+  "I want to cook a dish using seasonal UK ingredients this month",
+  "I want to make a vibrant summer salad with strawberries and feta",
+  "I want to create the ultimate Christmas side dish for roast turkey",
+  "I want to make a spring pea and mint risotto",
+
+  // Quick & Comfort
+  "I want to make a 15-minute garlic and chilli prawn pasta",
+  "I want to make a comforting mac & cheese with three cheeses",
+  "I want to make chicken tikka masala completely from scratch",
+  "I want to cook a Moroccan chicken tagine in one pot",
+
+  // Social / Concept-Based
+  "I want to bring an amazing BBQ dish to a summer party",
+  "I want to make something impressive for a dinner party",
+  "I want to cook a crowd-pleasing dish everyone will fight over",
+  "I want to prepare a sharing platter for grazing with friends",
+  "I want to make something easy and impressive for last-minute guests",
+
+  // Plant-Based / Healthy
+  "I want to make a vegan lentil shepherd’s pie with crispy mash",
+  "I want to cook a Korean-inspired beef bulgogi rice bowl",
+
+  // Mood-Based
+  "I want to make a cosy dish for a cold, rainy evening",
+  "I’m craving something spicy that wakes up my taste buds",
+  "I want a light and refreshing meal for a hot summer day",
+  "I need a comforting dish after a stressful day",
+  "I want to treat myself with something rich and indulgent",
+  "I want a colourful, feel-good dinner that lifts my mood",
+  "I want to slow-cook something that fills the house with delicious smells",
+  "I want to cook something fun and playful with the kids"
+];
+
+const shuffledSuggestions = chefAssistSuggestions
+  .sort(() => 0.5 - Math.random())
+  .slice(0, 6);
+
+export const chefAssistRotationOutput = shuffledSuggestions;

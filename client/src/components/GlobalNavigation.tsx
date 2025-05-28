@@ -128,7 +128,7 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
                 if (item.requiresAuth && !user?.user?.id) {
                   return (
                     <motion.div
-                      key={item.href}
+                      key={`auth-${item.href}`}
                       whileHover={{ scale: 1.01 }}
                       whileTap={{ scale: 0.99 }}
                       className="flex items-center space-x-4 p-4 rounded-xl transition-all duration-200 min-h-[44px] group hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 cursor-pointer"
@@ -143,7 +143,7 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
                 }
                 
                 return (
-                  <Link key={item.href} href={item.href}>
+                  <Link key={`nav-${item.href}`} href={item.href}>
                     <motion.div
                       whileHover={{ scale: 1.01 }}
                       whileTap={{ scale: 0.99 }}
