@@ -221,9 +221,9 @@ export default function FlavrRituals() {
       {/* Fixed Header with proper z-index */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-900/90 via-indigo-900/90 to-blue-900/90 backdrop-blur-md border-b border-purple-500/20">
         <GlobalHeader 
-          onMenuClick={() => {}}
-          onSettingsClick={() => {}}
-          onAuthRequired={() => {}}
+          onMenuClick={() => navigate("/")}
+          onSettingsClick={() => navigate("/flavr-plus")}
+          onAuthRequired={() => setShowAuthModal(true)}
         />
       </div>
       
