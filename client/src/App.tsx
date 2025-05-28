@@ -32,6 +32,7 @@ function Router() {
       <Route path="/shopping" component={ShoppingMode} />
       <Route path="/fridge" component={FridgeMode} />
       <Route path="/chef" component={ChefAssistMode} />
+      <Route path="/rituals" component={FlavrRituals} />
       <Route path="/flavr-rituals" component={FlavrRituals} />
       <Route path="/flavr-rituals/phase2" component={FlavrRitualsPhase2} />
       <Route path="/flavr-plus" component={FlavrPlus} />
