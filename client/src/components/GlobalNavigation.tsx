@@ -27,11 +27,11 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
   // User query
   const { data: user } = useQuery({
     queryKey: ['/api/me'],
-    enabled: false, // Disable auto-fetching to prevent excessive calls
+    retry: false,
   });
 
   const handleNavigation = (href: string, requiresAuth: boolean = false) => {
-    if (requiresAuth && !user?.user) {
+    if (requiresAuth && !user?.id) {
       onClose?.();
       alert("Please sign in to access this feature");
       return;
@@ -48,7 +48,7 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
     {
       icon: Home,
       label: "Home", 
-      href: user?.user ? "/app" : "/",
+      href: user?.id ? "/app" : "/",
       requiresAuth: false
     },
     {
@@ -80,7 +80,8 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
       label: "Developer Logs",
       href: "/developer-logs",
       requiresAuth: true,
-      adminOnly: true
+      adminOnly: true,
+      developerOnly: true
     }
   ];
 
@@ -119,7 +120,7 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
                 const Icon = item.icon;
                 const isActive = location === item.href;
                 
-                if (item.requiresAuth && !user?.user) {
+                if (item.requiresAuth && !user?.id) {
                   return (
                     <motion.div
                       key={item.href}
