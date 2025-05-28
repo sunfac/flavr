@@ -1,0 +1,75 @@
+// Upgrade Flavr database structure in Replit's @replit/database
+// Maximise data value for analytics, monetisation, and AI training
+
+const Database = require("@replit/database");
+const db = new Database();
+
+// 🚀 Function to log a full recipe generation event
+async function logRecipeGeneration({
+  userId,
+  mode,
+  gptVersion,
+  recipeCardSelected,
+  recipeOutput,
+  imageGenerated,
+  intentData,
+  userAction,
+  sourcePrompt1,
+  sourcePrompt2
+}) {
+  const timestamp = new Date().toISOString();
+  const uniqueKey = `recipeLog:${userId}:${timestamp}`;
+
+  const logData = {
+    userId, // email or anon ID
+    mode, // e.g. "shopping", "rituals"
+    timestamp,
+    gptVersion,
+    recipeCardSelected: {
+      title: recipeCardSelected.title,
+      description: recipeCardSelected.description
+    },
+    recipeOutput: {
+      title: recipeOutput.title,
+      cuisine: recipeOutput.cuisine,
+      difficulty: recipeOutput.difficulty,
+      servings: recipeOutput.servings,
+      cookTime: recipeOutput.cookTime,
+      ingredients: recipeOutput.ingredients,
+      instructions: recipeOutput.instructions,
+      tips: recipeOutput.tips
+    },
+    imageGenerated, // Image URL or base64 if needed
+    intentData: {
+      mood: intentData.mood,
+      ambition: intentData.ambition,
+      diet: intentData.diet,
+      time: intentData.time,
+      budget: intentData.budget,
+      equipment: intentData.equipment,
+      cuisinePreference: intentData.cuisinePreference,
+      ingredientVariety: intentData.ingredientVariety,
+      reusabilityPreference: intentData.reusabilityPreference
+    },
+    userAction: {
+      saved: userAction.saved || false,
+      addedToShoppingList: userAction.addedToShoppingList || false,
+      shared: userAction.shared || false,
+      feedback: userAction.feedback || null,
+      chatbotUsed: userAction.chatbotUsed || false,
+      chatbotQueries: userAction.chatbotQueries || []
+    },
+    sourcePrompt1,
+    sourcePrompt2
+  };
+
+  await db.set(uniqueKey, logData);
+  console.log(`Recipe logged under key: ${uniqueKey}`);
+}
+
+// 🔍 You can later retrieve all logs like this:
+async function getAllLogs() {
+  const keys = await db.list("recipeLog:");
+  const logs = await Promise.all(keys.map(key => db.get(key)));
+  return logs;
+}

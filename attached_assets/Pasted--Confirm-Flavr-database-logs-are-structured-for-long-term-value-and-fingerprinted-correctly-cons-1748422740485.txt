@@ -1,0 +1,88 @@
+// ✅ Confirm Flavr database logs are structured for long-term value and fingerprinted correctly
+const Database = require("@replit/database");
+const crypto = require("crypto");
+const db = new Database();
+
+// 🔑 Recalculate the expected fingerprint for comparison
+function generateRecipeFingerprint(recipeOutput) {
+  const contentString = [
+    recipeOutput.title,
+    recipeOutput.cuisine,
+    recipeOutput.difficulty,
+    recipeOutput.servings,
+    recipeOutput.cookTime,
+    recipeOutput.ingredients.join(","),
+    recipeOutput.instructions.join(".")
+  ].join("|");
+
+  return crypto.createHash("sha256").update(contentString).digest("hex");
+}
+
+async function validateFlavrLogsWithFingerprintCheck() {
+  const keys = await db.list("recipeLog:");
+  const logs = await Promise.all(keys.map(key => db.get(key)));
+
+  let passed = 0;
+  let failed = 0;
+
+  for (const [i, log] of logs.entries()) {
+    const errors = [];
+
+    // ✅ Core meta
+    if (!log.userId) errors.push("Missing userId");
+    if (!log.mode) errors.push("Missing mode");
+    if (!log.timestamp) errors.push("Missing timestamp");
+    if (!log.gptVersion) errors.push("Missing gptVersion");
+
+    // ✅ Recipe card
+    if (!log.recipeCardSelected?.title) errors.push("Missing recipeCardSelected.title");
+
+    // ✅ Recipe output
+    const r = log.recipeOutput;
+    if (
+      !r || !r.title || !r.ingredients || !r.instructions ||
+      typeof r.servings !== "number" || typeof r.cookTime !== "number"
+    ) {
+      errors.push("Incomplete or invalid recipeOutput");
+    }
+
+    // ✅ Fingerprint validation
+    if (!log.recipeFingerprint || log.recipeFingerprint.length !== 64) {
+      errors.push("Missing or malformed recipeFingerprint");
+    } else {
+      const expectedFingerprint = generateRecipeFingerprint(r);
+      if (log.recipeFingerprint !== expectedFingerprint) {
+        errors.push("Stored fingerprint does not match calculated fingerprint");
+      }
+    }
+
+    // ✅ Intent
+    const iData = log.intentData;
+    if (
+      !iData || !iData.mood || !iData.ambition || !iData.diet || !iData.time ||
+      !iData.budget || !iData.equipment
+    ) {
+      errors.push("Incomplete intentData");
+    }
+
+    // ✅ User behaviour
+    const ua = log.userAction;
+    if (!ua || typeof ua.saved !== "boolean" || !Array.isArray(ua.chatbotQueries)) {
+      errors.push("Invalid userAction");
+    }
+
+    // ✅ Summary
+    if (errors.length === 0) {
+      passed++;
+    } else {
+      failed++;
+      console.log(`❌ Log #${i + 1} failed checks:`, errors);
+    }
+  }
+
+  console.log("📊 Recipe Log Structure + Fingerprint Check Complete");
+  console.log(`✔️ Passed: ${passed}`);
+  console.log(`❌ Failed: ${failed}`);
+}
+
+validateFlavrLogsWithFingerprintCheck();

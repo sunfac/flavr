@@ -39,6 +39,12 @@ export interface IStorage {
   // Developer logging operations
   createDeveloperLog(log: InsertDeveloperLog): Promise<DeveloperLog>;
   getDeveloperLogs(limit?: number): Promise<DeveloperLog[]>;
+  
+  // Enhanced recipe generation logging for analytics
+  createRecipeGenerationLog(log: InsertRecipeGenerationLog): Promise<RecipeGenerationLog>;
+  getRecipeGenerationLogs(limit?: number): Promise<RecipeGenerationLog[]>;
+  getAllRecipes(): Promise<Recipe[]>;
+  deleteRecipe(id: number): Promise<void>;
 }
 
 export class MemStorage implements IStorage {

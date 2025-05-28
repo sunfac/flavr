@@ -92,6 +92,70 @@ export const developerLogs = pgTable("developer_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Enhanced recipe generation logs for analytics and AI training
+export const recipeGenerationLogs = pgTable("recipe_generation_logs", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id"), // email or anonymous ID
+  mode: text("mode").notNull(), // shopping, fridge, chef, rituals
+  gptVersion: text("gpt_version").default("gpt-4o"),
+  
+  // Recipe card selected (from Tinder cards)
+  recipeCardSelected: jsonb("recipe_card_selected").$type<{
+    title: string;
+    description: string;
+  }>(),
+  
+  // Final recipe output
+  recipeOutput: jsonb("recipe_output").$type<{
+    title: string;
+    cuisine?: string;
+    difficulty: string;
+    servings: number;
+    cookTime: number;
+    ingredients: string[];
+    instructions: string[];
+    tips?: string;
+  }>().notNull(),
+  
+  // Image generation data
+  imageGenerated: text("image_generated"), // URL or base64
+  
+  // User intent and preferences
+  intentData: jsonb("intent_data").$type<{
+    mood?: string;
+    ambition?: string;
+    diet?: string[];
+    time?: number;
+    budget?: string;
+    equipment?: string[];
+    cuisinePreference?: string;
+    ingredientVariety?: string;
+    reusabilityPreference?: string;
+    ingredients?: string[]; // for fridge mode
+    flexibility?: string; // for fridge mode
+  }>().notNull(),
+  
+  // User actions and engagement
+  userAction: jsonb("user_action").$type<{
+    saved?: boolean;
+    addedToShoppingList?: boolean;
+    shared?: boolean;
+    feedback?: string;
+    chatbotUsed?: boolean;
+    chatbotQueries?: string[];
+  }>().default({}),
+  
+  // Source prompts for AI training
+  sourcePrompt1: text("source_prompt_1"), // Tinder card generation prompt
+  sourcePrompt2: text("source_prompt_2"), // Full recipe generation prompt
+  
+  // Analytics metadata
+  sessionId: text("session_id"),
+  browserFingerprint: text("browser_fingerprint"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -121,6 +185,11 @@ export const insertDeveloperLogSchema = createInsertSchema(developerLogs).omit({
   createdAt: true,
 });
 
+export const insertRecipeGenerationLogSchema = createInsertSchema(recipeGenerationLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertPseudoUser = z.infer<typeof insertPseudoUserSchema>;
@@ -131,3 +200,5 @@ export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type InsertDeveloperLog = z.infer<typeof insertDeveloperLogSchema>;
 export type DeveloperLog = typeof developerLogs.$inferSelect;
+export type InsertRecipeGenerationLog = z.infer<typeof insertRecipeGenerationLogSchema>;
+export type RecipeGenerationLog = typeof recipeGenerationLogs.$inferSelect;
