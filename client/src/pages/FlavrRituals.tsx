@@ -144,9 +144,9 @@ export default function FlavrRituals() {
             </p>
             <Button 
               className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white"
-              onClick={() => window.location.href = "/api/login"}
+              onClick={() => window.location.href = "/"}
             >
-              Sign In
+              Go to Login
             </Button>
           </motion.div>
         </div>
