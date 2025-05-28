@@ -42,8 +42,8 @@ export default function GlobalHeader({
           variant="ghost"
           size="icon"
           onClick={() => {
-            console.log("Menu clicked");
-            onMenuClick?.();
+            console.log("Menu clicked - navigating to home");
+            navigate('/');
           }}
           className="text-white hover:bg-white/10 relative z-10"
         >
