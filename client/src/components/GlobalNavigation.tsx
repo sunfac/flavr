@@ -120,6 +120,11 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
                 const Icon = item.icon;
                 const isActive = location === item.href;
                 
+                // Hide developer logs if not developer email
+                if (item.developerOnly && user?.email !== "william@blycontracting.co.uk") {
+                  return null;
+                }
+                
                 if (item.requiresAuth && !user?.id) {
                   return (
                     <motion.div
