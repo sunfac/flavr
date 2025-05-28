@@ -54,9 +54,11 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Toaster />
-      <Router />
-      <PWAInstallPrompt />
+      <TooltipProvider>
+        <Toaster />
+        <Router />
+        <PWAInstallPrompt />
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }
