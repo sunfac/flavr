@@ -78,6 +78,9 @@ export default function ChatBot({
     enabled: isOpen,
   });
 
+  // Extract history from response
+  const chatHistory = historyData?.history || [];
+
   // Send chat message
   const sendMessageMutation = useMutation({
     mutationFn: (data: { message: string; currentRecipe?: Recipe; mode?: string }) =>
@@ -149,7 +152,7 @@ export default function ChatBot({
 
   // Initialize with welcome message and history
   useEffect(() => {
-    if (isOpen && historyData?.history) {
+    if (isOpen && chatHistory) {
       const messages: ChatMessage[] = [];
       
       // Add Zest's welcome message if we have a recipe
@@ -166,7 +169,7 @@ export default function ChatBot({
       }
 
       // Add history messages
-      historyData.history.forEach((msg: any) => {
+      chatHistory.forEach((msg: any) => {
         messages.push({
           id: msg.id,
           message: msg.message,
@@ -187,7 +190,7 @@ export default function ChatBot({
 
       setLocalMessages(messages);
     }
-  }, [isOpen, historyData]);
+  }, [isOpen, chatHistory, currentRecipe, hasShownWelcome]);
 
   const handleSend = (messageText?: string) => {
     const textToSend = messageText || message;
