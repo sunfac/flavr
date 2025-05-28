@@ -53,50 +53,50 @@ export default function GlobalHeader({
           <img src={FlavrLogo} alt="Flavr" className="w-10 h-10" />
         </div>
 
-        {/* Right: Flavr+ (always visible) and Authentication/Settings */}
-        <div className="flex items-center gap-1.5">
+        {/* Right: Flavr+ (always visible) and Authentication/Settings - with proper spacing */}
+        <div className="flex items-center gap-1 ml-4">
           {/* Flavr+ button - always visible as info page */}
           <Button 
             variant="ghost"
             size="sm"
             onClick={handleFlavrPlusClick}
-            className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-2 py-1 text-sm relative z-10 border border-orange-400/30 hover:border-orange-400/50"
+            className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1.5 py-1 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50"
           >
-            <Crown className="w-4 h-4 mr-1" />
-            Plus
+            <Crown className="w-3 h-3 mr-0.5" />
+            <span className="text-xs">Plus</span>
           </Button>
           
           {user ? (
             // Authenticated user - show Settings only
             <Button 
               variant="ghost"
-              size="icon"
+              size="sm"
               onClick={handleSettingsClick}
-              className="text-white hover:bg-white/10 relative z-10"
+              className="text-white hover:bg-white/10 relative z-10 px-1.5 py-1"
             >
-              <Settings className="w-5 h-5" />
+              <Settings className="w-4 h-4" />
             </Button>
           ) : (
-            // Not authenticated - show compact Login and Sign Up buttons
+            // Not authenticated - show very compact Login and Sign Up buttons
             <>
               <Button 
                 variant="ghost"
                 size="sm"
                 onClick={handleLoginClick}
-                className="text-white hover:text-white hover:bg-white/10 font-medium px-2 py-1 text-xs relative z-10"
+                className="text-white hover:text-white hover:bg-white/10 font-medium px-1.5 py-1 text-xs relative z-10"
               >
-                <LogIn className="w-3 h-3 mr-1" />
-                Login
+                <LogIn className="w-3 h-3 mr-0.5" />
+                <span className="text-xs">Login</span>
               </Button>
               
               <Button 
                 variant="ghost"
                 size="sm"
                 onClick={handleLoginClick}
-                className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-2 py-1 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50"
+                className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1.5 py-1 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50"
               >
-                <UserPlus className="w-3 h-3 mr-1" />
-                Sign Up
+                <UserPlus className="w-3 h-3 mr-0.5" />
+                <span className="text-xs">Sign Up</span>
               </Button>
             </>
           )}
