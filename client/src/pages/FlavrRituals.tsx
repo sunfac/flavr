@@ -36,10 +36,16 @@ const cuisineOptions = [
 ];
 
 const moodOptions = [
-  { value: "adventurous", label: "Adventurous", icon: <Sparkles className="w-4 h-4" /> },
-  { value: "comfort", label: "Comfort", icon: <Heart className="w-4 h-4" /> },
-  { value: "healthy", label: "Healthy", icon: <Utensils className="w-4 h-4" /> },
-  { value: "quick", label: "Quick & Easy", icon: <Clock className="w-4 h-4" /> },
+  { value: "focused", label: "Focused", description: "Sharp, purposeful cooking for productivity", icon: <ChefHat className="w-4 h-4" /> },
+  { value: "tired", label: "Tired", description: "Simple, comforting meals that restore energy", icon: <Heart className="w-4 h-4" /> },
+  { value: "lightClean", label: "Light & Clean", description: "Fresh, healthy dishes that feel refreshing", icon: <Utensils className="w-4 h-4" /> },
+  { value: "effortlessJoy", label: "Effortless Joy", description: "Easy recipes that bring happiness", icon: <Heart className="w-4 h-4" /> },
+  { value: "indulgent", label: "Indulgent", description: "Rich, luxurious flavors for special moments", icon: <Crown className="w-4 h-4" /> },
+  { value: "creative", label: "Creative", description: "Experimental dishes to inspire imagination", icon: <Sparkles className="w-4 h-4" /> },
+  { value: "celebratory", label: "Celebratory", description: "Festive meals perfect for special occasions", icon: <Crown className="w-4 h-4" /> },
+  { value: "laidBack", label: "Laid-back", description: "Relaxed, casual cooking for easy days", icon: <Clock className="w-4 h-4" /> },
+  { value: "adventurous", label: "Adventurous", description: "Bold, exciting flavors from around the world", icon: <Sparkles className="w-4 h-4" /> },
+  { value: "minimalist", label: "Minimalist", description: "Simple, clean recipes with few ingredients", icon: <Utensils className="w-4 h-4" /> }
 ];
 
 const ambitionOptions = [
@@ -85,26 +91,35 @@ const defaultDayPreferences: DayPreferences = {
 const dayNames = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const;
 const dayLabels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
+
+
+// Default moods for each day
+const defaultMoods = {
+  monday: "focused",
+  tuesday: "lightClean", 
+  wednesday: "tired",
+  thursday: "effortlessJoy",
+  friday: "celebratory",
+  saturday: "creative",
+  sunday: "laidBack"
+};
+
 export default function FlavrRituals() {
   const [, navigate] = useLocation();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+
   const [weeklyPrefs, setWeeklyPrefs] = useState<WeeklyPreferences>({
-    monday: { ...defaultDayPreferences },
-    tuesday: { ...defaultDayPreferences },
-    wednesday: { ...defaultDayPreferences },
-    thursday: { ...defaultDayPreferences },
-    friday: { ...defaultDayPreferences },
-    saturday: { ...defaultDayPreferences },
-    sunday: { ...defaultDayPreferences },
+    monday: { ...defaultDayPreferences, mood: defaultMoods.monday },
+    tuesday: { ...defaultDayPreferences, mood: defaultMoods.tuesday },
+    wednesday: { ...defaultDayPreferences, mood: defaultMoods.wednesday },
+    thursday: { ...defaultDayPreferences, mood: defaultMoods.thursday },
+    friday: { ...defaultDayPreferences, mood: defaultMoods.friday },
+    saturday: { ...defaultDayPreferences, mood: defaultMoods.saturday },
+    sunday: { ...defaultDayPreferences, mood: defaultMoods.sunday },
   });
   
   const [expandedDay, setExpandedDay] = useState<string | null>("monday");
-
-  // Debug effect to track state changes
-  React.useEffect(() => {
-    console.log("showAuthModal state changed:", showAuthModal);
-  }, [showAuthModal]);
 
   // Get current user data
   const { data: userData, isLoading } = useQuery({
