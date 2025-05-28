@@ -28,7 +28,7 @@ export default function GlobalHeader({
     console.log("User data:", user);
     
     // Check if user is authenticated - fix the data structure check
-    if (!user?.id) {
+    if (!user?.user?.id) {
       console.log("User not authenticated, prompting sign-in");
       onAuthRequired?.();
       return;
@@ -66,7 +66,7 @@ export default function GlobalHeader({
         {/* Right: Flavr+ and Settings */}
         <div className="flex items-center gap-2">
           {/* Show Flavr+ button only if user is not already a Flavr+ member */}
-          {(!user?.hasFlavrPlus) && (
+          {(!user?.user?.hasFlavrPlus) && (
             <Button 
               variant="ghost"
               size="sm"
