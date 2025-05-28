@@ -53,17 +53,17 @@ export default function GlobalHeader({
           <img src={FlavrLogo} alt="Flavr" className="w-10 h-10" />
         </div>
 
-        {/* Right: Flavr+ (always visible) and Authentication/Settings - with proper spacing */}
-        <div className="flex items-center gap-1 ml-4">
-          {/* Flavr+ button - always visible as info page */}
+        {/* Right: Ultra-compact buttons positioned safely away from logo */}
+        <div className="flex items-center gap-0.5 ml-auto">
+          {/* Flavr+ button - always visible as info page, icon only on mobile */}
           <Button 
             variant="ghost"
             size="sm"
             onClick={handleFlavrPlusClick}
-            className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1.5 py-1 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50"
+            className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1 py-0.5 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50 min-w-0"
           >
-            <Crown className="w-3 h-3 mr-0.5" />
-            <span className="text-xs">Plus</span>
+            <Crown className="w-3 h-3" />
+            <span className="hidden sm:inline ml-0.5 text-xs">Plus</span>
           </Button>
           
           {user ? (
@@ -72,31 +72,31 @@ export default function GlobalHeader({
               variant="ghost"
               size="sm"
               onClick={handleSettingsClick}
-              className="text-white hover:bg-white/10 relative z-10 px-1.5 py-1"
+              className="text-white hover:bg-white/10 relative z-10 px-1 py-0.5 min-w-0"
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-3 h-3" />
             </Button>
           ) : (
-            // Not authenticated - show very compact Login and Sign Up buttons
+            // Not authenticated - show ultra-compact Login and Sign Up buttons
             <>
               <Button 
                 variant="ghost"
                 size="sm"
                 onClick={handleLoginClick}
-                className="text-white hover:text-white hover:bg-white/10 font-medium px-1.5 py-1 text-xs relative z-10"
+                className="text-white hover:text-white hover:bg-white/10 font-medium px-1 py-0.5 text-xs relative z-10 min-w-0"
               >
-                <LogIn className="w-3 h-3 mr-0.5" />
-                <span className="text-xs">Login</span>
+                <LogIn className="w-3 h-3" />
+                <span className="hidden sm:inline ml-0.5 text-xs">Login</span>
               </Button>
               
               <Button 
                 variant="ghost"
                 size="sm"
                 onClick={handleLoginClick}
-                className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1.5 py-1 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50"
+                className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1 py-0.5 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50 min-w-0"
               >
-                <UserPlus className="w-3 h-3 mr-0.5" />
-                <span className="text-xs">Sign Up</span>
+                <UserPlus className="w-3 h-3" />
+                <span className="hidden sm:inline ml-0.5 text-xs">Sign Up</span>
               </Button>
             </>
           )}
