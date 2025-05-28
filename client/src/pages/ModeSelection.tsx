@@ -3,7 +3,8 @@ import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Refrigerator, ChefHat, Clock } from "lucide-react";
+import { ShoppingCart, Refrigerator, ChefHat, Clock, Calendar, Crown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
 import GlobalNavigation from "@/components/GlobalNavigation";
@@ -46,11 +47,23 @@ export default function ModeSelection() {
       icon: ChefHat,
       description: "Expert guidance for special occasions",
       subtitle: "Elevate your culinary skills"
+    },
+    {
+      id: "flavr-rituals",
+      title: "Flavr Rituals",
+      icon: Calendar,
+      description: "Weekly meal planning with smart shopping",
+      subtitle: "Plan ahead, waste less, eat better",
+      premium: true
     }
   ];
 
   const handleModeSelect = (modeId: string) => {
-    navigate(`/app/${modeId}`);
+    if (modeId === "flavr-rituals") {
+      navigate("/flavr-rituals");
+    } else {
+      navigate(`/app/${modeId}`);
+    }
   };
 
   return (
@@ -86,14 +99,20 @@ export default function ModeSelection() {
         </div>
 
         {/* Minimal Mode Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
           {modes.map((mode, index) => (
             <Card 
               key={mode.id}
-              className="bg-card/90 backdrop-blur-xl border border-border/50 group shadow-lg hover:shadow-orange-500/20 transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:border-orange-500/40"
+              className="bg-card/90 backdrop-blur-xl border border-border/50 group shadow-lg hover:shadow-orange-500/20 transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:border-orange-500/40 relative"
               onClick={() => handleModeSelect(mode.id)}
             >
               <CardContent className="text-center p-8">
+                {mode.premium && (
+                  <Badge className="absolute top-3 right-3 bg-gradient-to-r from-orange-400 to-red-400 text-white border-0 text-xs">
+                    <Crown className="w-3 h-3 mr-1" />
+                    Plus
+                  </Badge>
+                )}
                 <div className="relative w-16 h-16 mx-auto mb-6">
                   <div className="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-orange-600/20 border border-orange-500/30 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-lg">
                     <mode.icon className="w-7 h-7 text-orange-400 group-hover:text-orange-300 transition-colors duration-300" strokeWidth={1.5} />
