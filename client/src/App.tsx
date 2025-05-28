@@ -3,6 +3,8 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useEffect } from "react";
+import { initializePWAUpdater } from "@/lib/pwaUpdater";
 import LandingPage from "@/pages/LandingPage";
 import ModeSelection from "@/pages/ModeSelection";
 import ShoppingMode from "@/pages/ShoppingMode";
@@ -42,6 +44,11 @@ function Router() {
 }
 
 function App() {
+  // Initialize PWA updater to prevent crashes on redeployment
+  useEffect(() => {
+    initializePWAUpdater();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
