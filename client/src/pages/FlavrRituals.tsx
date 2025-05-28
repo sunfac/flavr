@@ -20,6 +20,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
+import AuthModal from "@/components/AuthModal";
+import { useLocation } from "wouter";
 
 // Quiz data matching other cooking modes
 const cuisineOptions = [
@@ -84,6 +86,9 @@ const dayNames = ["monday", "tuesday", "wednesday", "thursday", "friday", "satur
 const dayLabels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 export default function FlavrRituals() {
+  const [, navigate] = useLocation();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [weeklyPrefs, setWeeklyPrefs] = useState<WeeklyPreferences>({
     monday: { ...defaultDayPreferences },
     tuesday: { ...defaultDayPreferences },
@@ -144,9 +149,13 @@ export default function FlavrRituals() {
             </p>
             <Button 
               className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white"
-              onClick={() => window.location.href = "/"}
+              onClick={() => {
+                console.log("Button clicked! User:", user);
+                setAuthMode("login");
+                setShowAuthModal(true);
+              }}
             >
-              Go to Login
+              Log In
             </Button>
           </motion.div>
         </div>
@@ -450,6 +459,19 @@ export default function FlavrRituals() {
       <div className="fixed bottom-0 left-0 right-0 z-40">
         <GlobalFooter currentMode="rituals" />
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => {
+          setShowAuthModal(false);
+          // Refresh the page to show authenticated content
+          window.location.reload();
+        }}
+        title={authMode === "login" ? "Welcome back!" : "Join Flavr today!"}
+        description={authMode === "login" ? "Sign in to access Flavr Rituals" : "Create your account to unlock personalized meal planning"}
+      />
     </div>
   );
 }
