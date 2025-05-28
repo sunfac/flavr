@@ -1911,6 +1911,106 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
     }
   });
 
+  // Flavr Rituals Phase 2: Generate daily recipe cards (Prompt 1 structure)
+  app.post('/api/generate-ritual-cards', async (req, res) => {
+    try {
+      const { inputs, day } = req.body;
+      
+      if (!inputs || !day) {
+        return res.status(400).json({ error: 'Missing inputs or day parameter' });
+      }
+
+      // Build the dedicated Rituals Prompt 1
+      const ritualsPrompt = `You are Flavr's AI chef assistant generating daily Tinder-style recipe preview cards for Flavr Rituals meal planning.
+
+CONTEXT: This is Day ${day.charAt(0).toUpperCase() + day.slice(1)} of weekly meal planning. Generate exactly 3 recipe preview cards based on today's mood and preferences.
+
+USER'S TODAY INPUTS:
+- Mood: ${inputs.mood}
+- Cooking Ambition: ${inputs.ambition}
+- Dietary Requirements: ${inputs.dietary?.join(', ') || 'None specified'}
+- Available Time: ${inputs.time}
+- Budget Level: ${inputs.budget}
+- Equipment Available: ${inputs.equipment?.join(', ') || 'Basic kitchen'}
+- Cuisine Preference: ${inputs.cuisine?.join(', ') || 'Any'}
+${inputs.creativeGuidance ? `- Creative Direction: ${inputs.creativeGuidance}` : ''}
+
+INSTRUCTIONS:
+1. Generate exactly 3 diverse recipe preview cards
+2. Each card should be a PREVIEW only, not a full recipe
+3. Match the user's mood, time constraints, and dietary needs
+4. Ensure variety across the 3 options (different cuisines, cooking methods, etc.)
+5. Consider it's ${day} - factor in the day of the week energy
+6. Make titles appealing and descriptive
+7. Keep descriptions to 1-2 sentences that inspire and entice
+
+OUTPUT FORMAT (JSON only):
+{
+  "recipes": [
+    {
+      "title": "Recipe name that matches mood and constraints",
+      "description": "One compelling sentence that makes you want to cook this."
+    },
+    {
+      "title": "Different style recipe for variety",
+      "description": "Another enticing description focusing on appeal."
+    },
+    {
+      "title": "Third unique option",
+      "description": "Final appetizing description that completes the trio."
+    }
+  ]
+}
+
+Generate 3 inspiring recipe preview cards for ${day} now:`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          { role: "system", content: "You are Flavr's expert AI chef creating daily recipe inspiration cards for meal planning. Focus on variety, appeal, and matching user preferences." },
+          { role: "user", content: ritualsPrompt }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.8, // Higher creativity for variety
+      });
+
+      const responseContent = completion.choices[0].message.content;
+      let parsedResponse;
+      
+      try {
+        parsedResponse = JSON.parse(responseContent);
+      } catch (parseError) {
+        console.error('Failed to parse GPT response:', responseContent);
+        return res.status(500).json({ error: 'Failed to parse recipe cards' });
+      }
+
+      // Validate response structure
+      if (!parsedResponse.recipes || !Array.isArray(parsedResponse.recipes) || parsedResponse.recipes.length !== 3) {
+        return res.status(500).json({ error: 'Invalid recipe card format from AI' });
+      }
+
+      // Log for developer tracking
+      await logGPTInteraction({
+        mode: 'rituals-cards',
+        userId: req.session.userId,
+        quizInputs: { day, ...inputs },
+        promptSent: ritualsPrompt,
+        gptResponse: responseContent,
+        expectedOutput: { recipes: [{ title: 'string', description: 'string' }] },
+        actualOutput: parsedResponse,
+        inputTokens: 0, // Will be calculated by logging function
+        outputTokens: 0,
+        totalCost: '0.00'
+      });
+
+      res.json(parsedResponse);
+
+    } catch (error) {
+      console.error('Error generating ritual recipe cards:', error);
+      res.status(500).json({ error: 'Failed to generate recipe cards' });
+    }
+  });
+
   // Run expired subscription check every hour
   setInterval(async () => {
     try {

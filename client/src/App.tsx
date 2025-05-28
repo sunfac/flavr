@@ -11,6 +11,7 @@ import ShoppingMode from "@/pages/ShoppingMode";
 import FridgeMode from "@/pages/FridgeMode";
 import ChefAssistMode from "@/pages/ChefAssistMode";
 import FlavrRituals from "@/pages/FlavrRituals";
+import FlavrRitualsPhase2 from "@/pages/FlavrRitualsPhase2";
 import FlavrPlus from "@/pages/FlavrPlus";
 import SettingsPage from "@/pages/SettingsPage";
 import Subscribe from "@/pages/Subscribe";
@@ -32,6 +33,7 @@ function Router() {
       <Route path="/fridge" component={FridgeMode} />
       <Route path="/chef" component={ChefAssistMode} />
       <Route path="/flavr-rituals" component={FlavrRituals} />
+      <Route path="/flavr-rituals/phase2" component={FlavrRitualsPhase2} />
       <Route path="/flavr-plus" component={FlavrPlus} />
       <Route path="/my-recipes" component={MyRecipes} />
       <Route path="/recipe/:id" component={RecipeView} />
