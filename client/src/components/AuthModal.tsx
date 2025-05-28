@@ -25,6 +25,7 @@ export default function AuthModal({
   title = "Join Flavr today!",
   description = "Create your account to unlock personalized AI-generated recipes"
 }: AuthModalProps) {
+  console.log("AuthModal component rendered with isOpen:", isOpen);
   const { toast } = useToast();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [registerData, setRegisterData] = useState({ username: "", email: "", password: "" });

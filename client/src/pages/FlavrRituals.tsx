@@ -463,7 +463,6 @@ export default function FlavrRituals() {
       </div>
 
       {/* Auth Modal */}
-      {console.log("Rendering AuthModal with isOpen:", showAuthModal)}
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
