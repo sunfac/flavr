@@ -1722,7 +1722,7 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
   });
 
   // Stripe webhook endpoint for subscription monitoring
-  app.post('/webhook/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
+  app.post('/webhook/stripe', async (req, res) => {
     const sig = req.headers['stripe-signature'] as string;
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
