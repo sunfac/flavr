@@ -20,6 +20,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
+import GlobalNavigation from "@/components/GlobalNavigation";
+import SettingsPanel from "@/components/SettingsPanel";
+import UserMenu from "@/components/UserMenu";
 import AuthModal from "@/components/AuthModal";
 import { useLocation } from "wouter";
 
@@ -116,6 +119,24 @@ export default function FlavrRituals() {
   const [, navigate] = useLocation();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [showNavigation, setShowNavigation] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Close all menus
+  const closeAllMenus = () => {
+    setShowNavigation(false);
+    setShowSettings(false);
+    setShowUserMenu(false);
+  };
+
+  // Open specific menu and close others
+  const openMenu = (menuType: 'navigation' | 'settings' | 'userMenu') => {
+    closeAllMenus();
+    if (menuType === 'navigation') setShowNavigation(true);
+    if (menuType === 'settings') setShowSettings(true);
+    if (menuType === 'userMenu') setShowUserMenu(true);
+  };
 
   const [weeklyPrefs, setWeeklyPrefs] = useState<WeeklyPreferences>({
     monday: { ...defaultDayPreferences, mood: defaultMoods.monday },
@@ -159,9 +180,9 @@ export default function FlavrRituals() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900">
         <GlobalHeader 
-          onMenuClick={() => {}}
-          onSettingsClick={() => {}}
-          onAuthRequired={() => {}}
+          onMenuClick={() => openMenu('navigation')}
+          onSettingsClick={() => openMenu('settings')}
+          onAuthRequired={() => navigate("/")}
         />
         
         <div className="flex items-center justify-center min-h-screen p-4">
@@ -221,9 +242,9 @@ export default function FlavrRituals() {
       {/* Fixed Header with proper z-index */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-900/90 via-indigo-900/90 to-blue-900/90 backdrop-blur-md border-b border-purple-500/20">
         <GlobalHeader 
-          onMenuClick={() => navigate("/")}
-          onSettingsClick={() => navigate("/flavr-plus")}
-          onAuthRequired={() => setShowAuthModal(true)}
+          onMenuClick={() => openMenu('navigation')}
+          onSettingsClick={() => openMenu('settings')}
+          onAuthRequired={() => navigate("/")}
         />
       </div>
       
@@ -489,6 +510,11 @@ export default function FlavrRituals() {
       <div className="fixed bottom-0 left-0 right-0 z-40">
         <GlobalFooter currentMode="rituals" />
       </div>
+
+      {/* Navigation Components */}
+      {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
+      {showSettings && <SettingsPanel onClose={closeAllMenus} />}
+      {showUserMenu && <UserMenu onClose={closeAllMenus} />}
 
       {/* Auth Modal */}
       <AuthModal
