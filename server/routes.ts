@@ -23,6 +23,14 @@ import {
   getEquipmentPromptText,
   getStrictDietaryInstruction 
 } from "./mappingUtils";
+import {
+  handleSubscriptionCreated,
+  handleSubscriptionUpdated,
+  handleSubscriptionCanceled,
+  handleInvoicePaymentFailed,
+  hasActiveFlavrPlus,
+  checkExpiredSubscriptions
+} from "./subscriptionManager";
 
 
 
@@ -1707,6 +1715,88 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
       res.status(400).json({ error: { message: error.message } });
     }
   });
+
+  // Stripe webhook endpoint for subscription monitoring
+  app.post('/webhook/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
+    const sig = req.headers['stripe-signature'] as string;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (!webhookSecret) {
+      console.error('Missing STRIPE_WEBHOOK_SECRET environment variable');
+      return res.status(400).send('Webhook secret not configured');
+    }
+
+    let event: Stripe.Event;
+
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+    } catch (err: any) {
+      console.error('Webhook signature verification failed:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    try {
+      // Handle subscription events
+      switch (event.type) {
+        case 'customer.subscription.created':
+          await handleSubscriptionCreated(event.data.object as Stripe.Subscription);
+          break;
+        
+        case 'customer.subscription.updated':
+          await handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
+          break;
+        
+        case 'customer.subscription.deleted':
+          await handleSubscriptionCanceled(event.data.object as Stripe.Subscription);
+          break;
+        
+        case 'invoice.payment_failed':
+          await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+          break;
+        
+        default:
+          console.log(`Unhandled event type: ${event.type}`);
+      }
+
+      res.json({ received: true });
+    } catch (error) {
+      console.error('Error processing webhook:', error);
+      res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
+  // Endpoint to check subscription status
+  app.get('/api/subscription/status', async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    try {
+      const hasPlus = await hasActiveFlavrPlus(req.user.id);
+      const user = await storage.getUser(req.user.id);
+      
+      res.json({
+        hasFlavrPlus: hasPlus,
+        subscriptionTier: user?.subscriptionTier || 'free',
+        subscriptionStatus: user?.subscriptionStatus || 'inactive',
+        subscriptionEndDate: user?.subscriptionEndDate,
+        recipesThisMonth: user?.recipesThisMonth || 0,
+        monthlyRecipeLimit: user?.monthlyRecipeLimit || 3,
+      });
+    } catch (error) {
+      console.error('Error checking subscription status:', error);
+      res.status(500).json({ error: 'Failed to check subscription status' });
+    }
+  });
+
+  // Run expired subscription check every hour
+  setInterval(async () => {
+    try {
+      await checkExpiredSubscriptions();
+    } catch (error) {
+      console.error('Error checking expired subscriptions:', error);
+    }
+  }, 60 * 60 * 1000); // 1 hour
 
   const httpServer = createServer(app);
   return httpServer;

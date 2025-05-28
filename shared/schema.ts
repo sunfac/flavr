@@ -8,7 +8,8 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   hasFlavrPlus: boolean("has_flavr_plus").default(false),
-  subscriptionTier: text("subscription_tier").default("free"),
+  subscriptionTier: text("subscription_tier").default("free"), // "free", "monthly", "annual"
+  subscriptionStatus: text("subscription_status").default("inactive"), // "active", "canceled", "past_due", "inactive"
   recipesThisMonth: integer("recipes_this_month").default(0),
   imagesThisMonth: integer("images_this_month").default(0),
   monthlyRecipeLimit: integer("monthly_recipe_limit").default(3),
@@ -17,6 +18,9 @@ export const users = pgTable("users", {
   imagesGenerated: integer("images_generated").default(0),
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
+  subscriptionStartDate: timestamp("subscription_start_date"),
+  subscriptionEndDate: timestamp("subscription_end_date"),
+  subscriptionRenewDate: timestamp("subscription_renew_date"),
   lastMonthlyReset: timestamp("last_monthly_reset").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
 });
