@@ -2,6 +2,8 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { ensureDeploymentReady, createMinimalBuild } from "./deploymentHelper";
+import fs from "fs";
+import path from "path";
 
 const app = express();
 app.use(express.json());
@@ -55,10 +57,31 @@ app.use((req, res, next) => {
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
   
-  // Always use Vite development server to ensure proper module compilation
-  // This prevents JavaScript MIME type issues when build assets are missing
-  await setupVite(app, server);
-  log("Using Vite development server for reliable module compilation");
+  // Check if we can serve static files, otherwise use Vite development server
+  const hasProductionBuild = ensureDeploymentReady();
+  const isProduction = app.get("env") === "production";
+  
+  if (isProduction && hasProductionBuild) {
+    // In production, check if we have proper build assets
+    const publicDir = path.resolve(import.meta.dirname, "public");
+    const assetsDir = path.join(publicDir, "assets");
+    
+    if (fs.existsSync(assetsDir) && fs.readdirSync(assetsDir).some(file => file.endsWith('.js'))) {
+      try {
+        serveStatic(app);
+        log("Serving production build with static assets");
+      } catch (error) {
+        log("Static serving failed, using development server");
+        await setupVite(app, server);
+      }
+    } else {
+      log("No compiled assets found, using development server for production");
+      await setupVite(app, server);
+    }
+  } else {
+    await setupVite(app, server);
+    log("Using Vite development server for module compilation");
+  }
 
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
