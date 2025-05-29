@@ -55,10 +55,10 @@ app.use((req, res, next) => {
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
   
-  // Always use Vite dev server until build timeout issues are resolved
-  // This ensures the app works in all environments
-  log("Using Vite development server for optimal compatibility");
+  // Use Vite dev server in all environments to ensure TypeScript compilation
+  // This hybrid approach serves static assets when available but ensures modules are compiled
   await setupVite(app, server);
+  log("Using Vite server for module compilation and static asset serving");
 
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.

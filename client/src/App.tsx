@@ -49,27 +49,15 @@ function Router() {
 }
 
 function App() {
-  console.log("App component rendering...");
-  
-  // Temporarily disable PWA updater to fix reload loop
-  // useEffect(() => {
-  //   initializePWAUpdater();
-  // }, []);
-
-  try {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-          <PWAInstallPrompt />
-        </TooltipProvider>
-      </QueryClientProvider>
-    );
-  } catch (error) {
-    console.error("Error in App component:", error);
-    return <div>Error loading application</div>;
-  }
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Router />
+        <PWAInstallPrompt />
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
 }
 
 export default App;
