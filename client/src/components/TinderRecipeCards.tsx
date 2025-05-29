@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, X, ChevronLeft, ChevronRight } from "@/lib/icons";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface RecipeIdea {

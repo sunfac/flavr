@@ -11,7 +11,7 @@ import RecipeShareTools from "./RecipeShareTools";
 import { generateShoppingPrompt2 } from "@/prompts/shoppingPrompt2";
 import { generateFridgePrompt2 } from "@/prompts/fridgePrompt2";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, BookmarkPlus, RotateCcw, Clock, Users, Signal, ArrowLeft } from "lucide-react";
+import { Heart, BookmarkPlus, RotateCcw, Clock, Users, Signal, ArrowLeft } from "@/lib/icons";
 
 interface RecipeCardProps {
   recipe: any;

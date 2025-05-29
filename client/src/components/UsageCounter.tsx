@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Crown, Zap } from "lucide-react";
+import { Crown, Zap } from "@/lib/icons";
 import { UsageStatus } from "@/lib/gating";
 
 interface UsageCounterProps {
