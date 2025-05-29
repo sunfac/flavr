@@ -30,8 +30,7 @@ import {
   Building, 
   Microwave, 
   Wind, 
-  Timer, 
-  ChefHat as Cooker,
+  Timer,
   Circle,
   CircleDot,
   Hand,
@@ -46,11 +45,7 @@ import {
   Users,
   Heart,
   Waves,
-  Beef,
-  Blend,
-  Soup,
   User,
-  Users2,
   PartyPopper,
   Snowflake,
   Globe,
@@ -172,10 +167,10 @@ export default function SlideQuizShell({
   const renderIcon = (iconName: string) => {
     const iconMap: Record<string, any> = {
       Home, Leaf, Crown, Target, Zap, Star, Shuffle, DollarSign, CreditCard, 
-      Flame, Building, Microwave, Wind, Timer, Cooker,
-      Clock, ChefHat, Utensils, Sparkles, ShoppingCart, Store,
+      Flame, Building, Microwave, Wind, Timer, ChefHat,
+      Clock, Utensils, Sparkles, ShoppingCart, Store,
       PoundSterling, ShoppingBag, Coins, Banknote, Users, Heart,
-      Waves, Beef, Blend, Soup, User, Users2, PartyPopper,
+      Waves, User, PartyPopper,
       Snowflake, Globe, Coffee, Smartphone, Shield, Plus
     };
     

@@ -55,24 +55,10 @@ app.use((req, res, next) => {
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
   
-  // Check environment and available build assets
-  const hasProductionBuild = ensureDeploymentReady();
-  const isProduction = app.get("env") === "production";
-  
-  if (isProduction && hasProductionBuild) {
-    // Try production static serving first
-    try {
-      serveStatic(app);
-      log("Serving production build from static files");
-    } catch (error) {
-      log("Production static serving failed, falling back to Vite development server");
-      await setupVite(app, server);
-    }
-  } else {
-    // Use Vite development server for module compilation
-    await setupVite(app, server);
-    log("Using Vite development server for module compilation");
-  }
+  // Always use Vite development server to ensure proper module compilation
+  // This prevents JavaScript MIME type issues when build assets are missing
+  await setupVite(app, server);
+  log("Using Vite development server for reliable module compilation");
 
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
