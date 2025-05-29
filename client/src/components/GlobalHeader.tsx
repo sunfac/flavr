@@ -86,7 +86,7 @@ export default function GlobalHeader({
                 onClick={handleLoginClick}
                 className="text-white hover:text-white hover:bg-white/10 font-medium px-1.5 py-0.5 text-xs relative z-10"
               >
-                <LogInIcon className="w-3 h-3 mr-0.5" />
+                <LogIn className="w-3 h-3 mr-0.5" />
                 <span className="text-xs">Login</span>
               </Button>
               
@@ -96,7 +96,7 @@ export default function GlobalHeader({
                 onClick={handleLoginClick}
                 className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1.5 py-0.5 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50"
               >
-                <UserPlusIcon className="w-3 h-3 mr-0.5" />
+                <UserPlus className="w-3 h-3 mr-0.5" />
                 <span className="text-xs">Sign Up</span>
               </Button>
             </>
