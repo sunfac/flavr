@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Menu, Settings, Crown, LogIn, UserPlus } from "@/lib/staticIcons";
+import { Menu, Settings, Crown, LogIn, UserPlus } from "@/lib/icons";
 import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -86,7 +86,7 @@ export default function GlobalHeader({
                 onClick={handleLoginClick}
                 className="text-white hover:text-white hover:bg-white/10 font-medium px-1.5 py-0.5 text-xs relative z-10"
               >
-                <LogIn className="w-3 h-3 mr-0.5" />
+                <LogInIcon className="w-3 h-3 mr-0.5" />
                 <span className="text-xs">Login</span>
               </Button>
               
@@ -96,7 +96,7 @@ export default function GlobalHeader({
                 onClick={handleLoginClick}
                 className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1.5 py-0.5 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50"
               >
-                <UserPlus className="w-3 h-3 mr-0.5" />
+                <UserPlusIcon className="w-3 h-3 mr-0.5" />
                 <span className="text-xs">Sign Up</span>
               </Button>
             </>
