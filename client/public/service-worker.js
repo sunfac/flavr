@@ -1,7 +1,10 @@
 // Update this version number on each deployment to force cache refresh
-const CACHE_VERSION = 'v' + Date.now();
+const CACHE_VERSION = 'v20240529-' + Date.now();
 const CACHE_NAME = 'flavr-' + CACHE_VERSION;
 const DATA_CACHE_NAME = 'flavr-data-' + CACHE_VERSION;
+
+// Force immediate cache clearing for fresh deployments
+const FORCE_CLEAR_CACHE = true;
 
 const STATIC_CACHE_URLS = [
   '/',
@@ -45,14 +48,20 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
   
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache:', CACHE_NAME);
-        return cache.addAll(STATIC_CACHE_URLS);
-      })
-      .catch((error) => {
-        console.log('Cache error during install:', error);
-      })
+    (async () => {
+      // Force clear all existing caches on fresh install
+      if (FORCE_CLEAR_CACHE) {
+        const existingCaches = await caches.keys();
+        await Promise.all(existingCaches.map(name => caches.delete(name)));
+        console.log('Cleared all existing caches for fresh deployment');
+      }
+      
+      const cache = await caches.open(CACHE_NAME);
+      console.log('Opened fresh cache:', CACHE_NAME);
+      return cache.addAll(STATIC_CACHE_URLS);
+    })().catch((error) => {
+      console.log('Cache error during install:', error);
+    })
   );
 });
 

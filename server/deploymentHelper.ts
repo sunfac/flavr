@@ -37,11 +37,12 @@ export function createMinimalBuild(): void {
         }
       }
     });
+    console.log("Cleared existing production files for fresh deployment");
   } catch (error) {
     // Directory might be empty, that's fine
   }
   
-  // Copy essential static files
+  // Copy essential static files with cache-busting timestamps
   const clientPublicDir = path.resolve(import.meta.dirname, "..", "client", "public");
   
   if (fs.existsSync(clientPublicDir)) {
@@ -60,10 +61,23 @@ export function createMinimalBuild(): void {
             fs.copyFileSync(path.join(sourcePath, subFile), path.join(targetPath, subFile));
           });
         } else {
-          fs.copyFileSync(sourcePath, targetPath);
+          // Update service worker with current timestamp for cache-busting
+          if (file.name === 'service-worker.js') {
+            let content = fs.readFileSync(sourcePath, 'utf8');
+            // Update the cache version with current timestamp
+            const timestamp = Date.now();
+            content = content.replace(
+              /const CACHE_VERSION = 'v\d+-\d+'/,
+              `const CACHE_VERSION = 'v${timestamp}-${timestamp}'`
+            );
+            fs.writeFileSync(targetPath, content);
+            console.log(`Updated service worker with timestamp: ${timestamp}`);
+          } else {
+            fs.copyFileSync(sourcePath, targetPath);
+          }
         }
       });
-      console.log("Copied client assets to production directory");
+      console.log("Copied client assets to production directory with cache-busting");
     } catch (error: any) {
       console.log("Could not copy client assets:", error.message);
     }
