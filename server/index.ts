@@ -7,8 +7,12 @@ import path from "path";
 
 // Ensure we're working from the correct directory for production
 // When running from dist/index.js, we need to adjust the working directory
-if (process.env.NODE_ENV === "production" && process.cwd().endsWith('/dist')) {
-  process.chdir(path.resolve(process.cwd(), '..'));
+if (process.env.NODE_ENV === "production") {
+  const projectRoot = path.resolve(import.meta.dirname, '..');
+  if (process.cwd() !== projectRoot) {
+    process.chdir(projectRoot);
+    console.log(`Changed working directory to: ${projectRoot}`);
+  }
 }
 
 const app = express();

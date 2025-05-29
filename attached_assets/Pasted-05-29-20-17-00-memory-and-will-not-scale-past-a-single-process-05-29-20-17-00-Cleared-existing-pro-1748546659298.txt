@@ -1,0 +1,56 @@
+05-29 20:17:00
+memory, and will not scale past a single process.
+05-29 20:17:00
+Cleared existing production files for fresh deployment
+05-29 20:17:00
+Updated service worker with timestamp: 1748546220998
+05-29 20:17:00
+Copied client assets to production directory with cache-busting
+05-29 20:17:01
+Re-optimizing dependencies because vite config has changed
+05-29 20:17:01
+7:17:01 PM [express] Using Vite development server for reliable module compilation
+05-29 20:17:01
+7:17:01 PM [express] serving on port 5000
+05-29 20:17:02
+7:17:02 PM [vite] Pre-transform error: Failed to load url /src/main.tsx?v=nikghsACW7mcq4zBJ_DF- (resolved id: /src/main.tsx?v=nikghsACW7mcq4zBJ_DF-). Does the file exist?
+05-29 20:17:02
+npm notice
+05-29 20:17:02
+npm notice New major version of npm available! 10.8.2 -> 11.4.1
+05-29 20:17:02
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.4.1
+05-29 20:17:02
+npm notice To update run: npm install -g npm@11.4.1
+05-29 20:17:02
+npm notice
+05-29 20:17:03
+command finished with error [npm run start]: exit status 1
+05-29 20:17:03
+> rest-express@1.0.0 start
+05-29 20:17:03
+> NODE_ENV=production node dist/index.js
+05-29 20:18:05
+Warning: connect.session() MemoryStore is not
+05-29 20:18:05
+designed for a production environment, as it will leak
+05-29 20:18:05
+memory, and will not scale past a single process.
+05-29 20:18:06
+Cleared existing production files for fresh deployment
+05-29 20:18:06
+Updated service worker with timestamp: 1748546286819
+05-29 20:18:06
+Copied client assets to production directory with cache-busting
+05-29 20:18:17
+7:18:15 PM [express] Using Vite development server for reliable module compilation
+05-29 20:18:18
+7:18:18 PM [express] serving on port 5000
+05-29 20:20:34
+system: received signal terminated
+05-29 20:22:53
+7:22:53 PM [vite] Pre-transform error: Failed to load url /src/main.tsx?v=Jxn8tmNjRLW3cWcUiEeR6 (resolved id: /src/main.tsx?v=Jxn8tmNjRLW3cWcUiEeR6). Does the file exist?
+05-29 20:22:53
+command finished with error [npm run start]: exit status 1
+05-29 20:22:54
+> rest-express@1.0.0 start
