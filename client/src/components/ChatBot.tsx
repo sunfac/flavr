@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { MessageCircle, X, Send, ChefHat, User, Bot, Flame, UtensilsCrossed, Clock, Wine, RefreshCw, Zap, Scale, Droplets } from "@/lib/icons";
+import { MessageCircle, X, Send, ChefHat, User, Bot, Flame, UtensilsCrossed, Clock, Wine, RefreshCw, Zap, Scale, Droplets } from "@/lib/staticIcons";
 
 interface ChatMessage {
   id: number;
