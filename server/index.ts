@@ -8,10 +8,15 @@ import path from "path";
 // Ensure we're working from the correct directory for production
 // When running from dist/index.js, we need to adjust the working directory
 if (process.env.NODE_ENV === "production") {
-  const projectRoot = path.resolve(import.meta.dirname, '..');
+  // The compiled file is in dist/, so we need to go up two levels to reach project root
+  const currentDir = import.meta.dirname || process.cwd();
+  const projectRoot = currentDir.includes('/dist') 
+    ? path.resolve(currentDir, '..') 
+    : currentDir;
+  
   if (process.cwd() !== projectRoot) {
     process.chdir(projectRoot);
-    console.log(`Changed working directory to: ${projectRoot}`);
+    console.log(`Changed working directory from ${process.cwd()} to: ${projectRoot}`);
   }
 }
 
