@@ -12,7 +12,7 @@ import {
   Sun,
   Heart,
   Database
-} from "lucide-react";
+} from "@/lib/icons";
 import { useQuery } from "@tanstack/react-query";
 
 interface GlobalNavigationProps {
