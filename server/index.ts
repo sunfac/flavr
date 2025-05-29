@@ -53,7 +53,13 @@ app.use((req, res, next) => {
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    // Try static serving first, fallback to development mode if build files don't exist
+    try {
+      serveStatic(app);
+    } catch (error) {
+      log("Production build not found, falling back to development mode");
+      await setupVite(app, server);
+    }
   }
 
   // ALWAYS serve the app on port 5000
