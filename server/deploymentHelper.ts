@@ -24,23 +24,48 @@ export function createMinimalBuild(): void {
     fs.mkdirSync(publicDir, { recursive: true });
   }
   
-  // Copy essential static files if they don't exist
-  const essentialFiles = [
-    "manifest.json",
-    "service-worker.js"
-  ];
-  
-  essentialFiles.forEach(file => {
-    const sourcePath = path.resolve(import.meta.dirname, "..", "client", "public", file);
-    const targetPath = path.join(publicDir, file);
-    
-    if (fs.existsSync(sourcePath) && !fs.existsSync(targetPath)) {
-      try {
-        fs.copyFileSync(sourcePath, targetPath);
-        console.log(`Copied ${file} to production directory`);
-      } catch (error: any) {
-        console.log(`Could not copy ${file}:`, error.message);
+  // Clear existing files to ensure fresh deployment
+  try {
+    const files = fs.readdirSync(publicDir);
+    files.forEach(file => {
+      if (file !== 'index.html') { // Keep our fallback HTML
+        const filePath = path.join(publicDir, file);
+        if (fs.statSync(filePath).isFile()) {
+          fs.unlinkSync(filePath);
+        } else {
+          fs.rmSync(filePath, { recursive: true, force: true });
+        }
       }
+    });
+  } catch (error) {
+    // Directory might be empty, that's fine
+  }
+  
+  // Copy essential static files
+  const clientPublicDir = path.resolve(import.meta.dirname, "..", "client", "public");
+  
+  if (fs.existsSync(clientPublicDir)) {
+    try {
+      // Copy all files from client/public
+      const files = fs.readdirSync(clientPublicDir, { withFileTypes: true });
+      files.forEach(file => {
+        const sourcePath = path.join(clientPublicDir, file.name);
+        const targetPath = path.join(publicDir, file.name);
+        
+        if (file.isDirectory()) {
+          fs.mkdirSync(targetPath, { recursive: true });
+          // Copy directory contents
+          const subFiles = fs.readdirSync(sourcePath);
+          subFiles.forEach(subFile => {
+            fs.copyFileSync(path.join(sourcePath, subFile), path.join(targetPath, subFile));
+          });
+        } else {
+          fs.copyFileSync(sourcePath, targetPath);
+        }
+      });
+      console.log("Copied client assets to production directory");
+    } catch (error: any) {
+      console.log("Could not copy client assets:", error.message);
     }
-  });
+  }
 }

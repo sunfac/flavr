@@ -39,25 +39,26 @@ const clearAllStorage = async () => {
 
 // Install service worker and cache static resources
 self.addEventListener('install', (event) => {
-  console.log('🔄 Installing new service worker version:', CACHE_VERSION);
+  console.log('Service worker installing:', CACHE_VERSION);
   
-  // Force immediate activation without waiting
+  // Skip waiting to activate immediately
   self.skipWaiting();
   
   event.waitUntil(
-    clearAllStorage().then(() => {
-      return caches.open(CACHE_NAME)
-        .then((cache) => {
-          console.log('✅ Opened fresh cache:', CACHE_NAME);
-          return cache.addAll(STATIC_CACHE_URLS);
-        });
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('Opened cache:', CACHE_NAME);
+        return cache.addAll(STATIC_CACHE_URLS);
+      })
+      .catch((error) => {
+        console.log('Cache error during install:', error);
+      })
   );
 });
 
 // Activate service worker and clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('🚀 Activating new service worker version:', CACHE_VERSION);
+  console.log('Service worker activating:', CACHE_VERSION);
   
   // Take control of all clients immediately
   self.clients.claim();
@@ -67,19 +68,13 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME && cacheName !== DATA_CACHE_NAME) {
-            console.log('🗑️ Deleting old cache:', cacheName);
+            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     }).then(() => {
-      console.log('✅ Service worker activation complete');
-      // Notify all clients to reload
-      self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
-          client.postMessage({ type: 'CACHE_UPDATED' });
-        });
-      });
+      console.log('Service worker activation complete');
     })
   );
 });
