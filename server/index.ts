@@ -5,6 +5,12 @@ import { ensureDeploymentReady, createMinimalBuild } from "./deploymentHelper";
 import fs from "fs";
 import path from "path";
 
+// Ensure we're working from the correct directory for production
+// When running from dist/index.js, we need to adjust the working directory
+if (process.env.NODE_ENV === "production" && process.cwd().endsWith('/dist')) {
+  process.chdir(path.resolve(process.cwd(), '..'));
+}
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
