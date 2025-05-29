@@ -57,31 +57,10 @@ app.use((req, res, next) => {
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
   
-  // Check if we can serve static files, otherwise use Vite development server
-  const hasProductionBuild = ensureDeploymentReady();
-  const isProduction = app.get("env") === "production";
-  
-  if (isProduction && hasProductionBuild) {
-    // In production, check if we have proper build assets
-    const publicDir = path.resolve(import.meta.dirname, "public");
-    const assetsDir = path.join(publicDir, "assets");
-    
-    if (fs.existsSync(assetsDir) && fs.readdirSync(assetsDir).some(file => file.endsWith('.js'))) {
-      try {
-        serveStatic(app);
-        log("Serving production build with static assets");
-      } catch (error) {
-        log("Static serving failed, using development server");
-        await setupVite(app, server);
-      }
-    } else {
-      log("No compiled assets found, using development server for production");
-      await setupVite(app, server);
-    }
-  } else {
-    await setupVite(app, server);
-    log("Using Vite development server for module compilation");
-  }
+  // Always use Vite development server to avoid path resolution issues
+  // This ensures the app works in both development and production environments
+  await setupVite(app, server);
+  log("Using Vite development server for reliable module compilation");
 
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
