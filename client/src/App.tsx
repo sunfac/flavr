@@ -49,10 +49,10 @@ function Router() {
 }
 
 function App() {
-  // Initialize PWA updater to prevent crashes on redeployment
-  useEffect(() => {
-    initializePWAUpdater();
-  }, []);
+  // Temporarily disable PWA updater to fix reload loop
+  // useEffect(() => {
+  //   initializePWAUpdater();
+  // }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
