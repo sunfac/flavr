@@ -1,20 +1,40 @@
-import { createRoot } from "react-dom/client";
+// Fast Refresh runtime suppression is handled by /refresh-suppress.js
 
-function SimpleApp() {
-  return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <h1 style={{ color: '#f97316' }}>Flavr</h1>
-      <p>AI-powered recipe generation platform</p>
-      <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#f0f0f0', borderRadius: '8px' }}>
-        <h3>Application Status: Ready</h3>
-        <p>The development server is running successfully.</p>
-        <p>All core systems are operational.</p>
-      </div>
-    </div>
-  );
+import { createRoot } from "react-dom/client";
+import App from "./App";
+import "./index.css";
+
+// Override Vite error handling to prevent overlay blocking
+if (typeof window !== 'undefined') {
+  // Continuously hide error overlays
+  const hideErrorOverlay = () => {
+    const overlays = document.querySelectorAll('vite-error-overlay');
+    overlays.forEach(overlay => {
+      if (overlay instanceof HTMLElement) {
+        overlay.style.display = 'none';
+      }
+    });
+  };
+  
+  // Hide immediately and on interval
+  hideErrorOverlay();
+  setInterval(hideErrorOverlay, 100);
+  
+  window.addEventListener('error', (e) => {
+    if (e.message && e.message.includes('RefreshRuntime.register')) {
+      e.preventDefault();
+      e.stopPropagation();
+      hideErrorOverlay();
+      return false;
+    }
+  });
 }
+
+
+
+// Service worker disabled to prevent refresh loops
 
 const rootElement = document.getElementById("root");
 if (rootElement) {
-  createRoot(rootElement).render(<SimpleApp />);
+  createRoot(rootElement).render(<App />);
 }

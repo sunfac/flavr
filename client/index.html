@@ -2,23 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>Flavr - AI Recipe Generator</title>
-    <meta
-      name="description"
-      content="Your AI-powered culinary companion for personalized recipes. Transform your kitchen into a culinary playground."
-    />
-
+    <meta name="description" content="Your AI-powered culinary companion for personalized recipes. Transform your kitchen into a culinary playground." />
+    
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
-
+    
     <!-- Theme colors -->
     <meta name="theme-color" content="#f97316" />
     <meta name="msapplication-TileColor" content="#f97316" />
-
+    
     <!-- iOS PWA support -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -26,58 +20,19 @@
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png" />
-
+    
     <!-- Standard favicon -->
     <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
-
+    
     <!-- Windows tiles -->
     <meta name="msapplication-TileImage" content="/icons/icon-192.png" />
   </head>
   <body>
     <div id="root"></div>
-
     <script src="/refresh-suppress.js"></script>
-
-    <script>
-      document.getElementById('root').innerHTML = `
-        <div style="padding: 20px; font-family: Arial, sans-serif; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); min-height: 100vh; color: white;">
-          <div style="max-width: 600px; margin: 0 auto; text-align: center;">
-            <h1>🍳 Flavr Development Server</h1>
-            <p>AI-powered recipe generation platform</p>
-            <div style="background: rgba(255,255,255,0.1); border-radius: 16px; padding: 30px; margin: 30px 0; backdrop-filter: blur(10px);">
-              <h3>Development Status</h3>
-              <p>✅ Express server running on port 5000</p>
-              <p>✅ Vite pre-transform error resolved</p>
-              <p>✅ Session management configured</p>
-              <p>✅ Ready for React app integration</p>
-              <button onclick="testAPI()" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3); color: white; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600;">
-                Test API Connection
-              </button>
-              <div id="api-result" style="margin-top: 15px;"></div>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      function testAPI() {
-        fetch('/api/health')
-          .then(response => response.json())
-          .then(data => {
-            document.getElementById('api-result').innerHTML = 
-              '<div style="background: rgba(34,197,94,0.2); padding: 10px; border-radius: 8px; margin-top: 10px;">✅ API Response: ' + JSON.stringify(data) + '</div>';
-          })
-          .catch(error => {
-            document.getElementById('api-result').innerHTML = 
-              '<div style="background: rgba(239,68,68,0.2); padding: 10px; border-radius: 8px; margin-top: 10px;">❌ API Error: ' + error.message + '</div>';
-          });
-      }
-    </script>
-
-    <!-- Replit Dev Banner -->
-    <script
-      type="text/javascript"
-      src="https://replit.com/public/js/replit-dev-banner.js"
-    ></script>
+    <script type="module" src="/src/main.tsx"></script>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
   </body>
 </html>

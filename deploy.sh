@@ -9,10 +9,10 @@ mkdir -p server/public
 echo "Attempting build with 2-minute timeout..."
 timeout 120s npm run build
 
-# Copy build files to server/public
-if [ -d "dist" ]; then
+# Check if build succeeded
+if [ -d "dist/public" ]; then
     echo "Build successful! Copying files to server/public..."
-    cp -r dist/* server/public/
+    cp -r dist/public/* server/public/
     echo "Files copied successfully"
 else
     echo "Build failed or timed out. Creating fallback configuration..."
