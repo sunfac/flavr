@@ -11,7 +11,7 @@ import RecipeShareTools from "./RecipeShareTools";
 import { generateShoppingPrompt2 } from "@/prompts/shoppingPrompt2";
 import { generateFridgePrompt2 } from "@/prompts/fridgePrompt2";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, BookmarkPlus, RotateCcw, Clock, Users, Signal, ArrowLeft } from "lucide-react";
+import { iconMap } from "@/lib/iconMap";
 
 interface RecipeCardProps {
   recipe: any;
@@ -269,7 +269,7 @@ export default function RecipeCard({
           className="absolute top-4 left-4 w-10 h-10 bg-black/20 backdrop-blur-sm rounded-full text-white hover:bg-black/40 border border-white/20"
           onClick={onBack}
         >
-          <ArrowLeft className="w-4 h-4" />
+          <iconMap.arrowLeft className="w-4 h-4" />
         </Button>
 
         {/* Save Button - More visible */}
@@ -281,9 +281,9 @@ export default function RecipeCard({
           disabled={isSaved || saveRecipeMutation.isPending}
         >
           {isSaved ? (
-            <Heart className="w-5 h-5 fill-red-500 text-red-500" />
+            <iconMap.heart className="w-5 h-5 fill-red-500 text-red-500" />
           ) : (
-            <BookmarkPlus className="w-5 h-5" />
+            <iconMap.bookmarkPlus className="w-5 h-5" />
           )}
         </Button>
 

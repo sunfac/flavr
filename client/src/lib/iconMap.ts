@@ -26,6 +26,9 @@ import {
   // Dietary & Health
   Leaf, Apple, Fish, Beef, Blend, Waves,
   
+  // Additional Icons
+  BookmarkPlus, Signal, Cookie,
+  
   // Misc
   Circle, CircleDot, Hand, CheckCircle2, XCircle, Eye, EyeOff
 } from "lucide-react";
@@ -120,6 +123,11 @@ export const iconMap = {
   beef: Beef,
   blend: Blend,
   waves: Waves,
+  
+  // Additional Icons
+  bookmarkPlus: BookmarkPlus,
+  signal: Signal,
+  cookie: Cookie,
   
   // Misc
   circle: Circle,

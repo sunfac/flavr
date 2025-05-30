@@ -9,56 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-  ArrowLeft, 
-  ArrowRight, 
-  CheckCircle, 
-  Clock, 
-  ChefHat, 
-  Utensils, 
-  Sparkles, 
-  Home, 
-  Leaf, 
-  Crown, 
-  Target, 
-  Zap, 
-  Star, 
-  Shuffle, 
-  DollarSign, 
-  CreditCard, 
-  Flame, 
-  Building, 
-  Microwave, 
-  Wind, 
-  Timer, 
-  ChefHat as Cooker,
-  Circle,
-  CircleDot,
-  Hand,
-  CheckCircle2,
-  XCircle,
-  ShoppingCart,
-  Store,
-  PoundSterling,
-  ShoppingBag,
-  Coins,
-  Banknote,
-  Users,
-  Heart,
-  Waves,
-  Beef,
-  Blend,
-  Soup,
-  User,
-  Users2,
-  PartyPopper,
-  Snowflake,
-  Globe,
-  Coffee,
-  Smartphone,
-  Shield,
-  Plus
-} from "lucide-react";
+import { iconMap } from "@/lib/iconMap";
 
 export interface QuestionConfig {
   id: string;
