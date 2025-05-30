@@ -1,3 +1,11 @@
+// Fast Refresh suppression patch
+try {
+  window.$RefreshReg$ = () => {};
+  window.$RefreshSig$ = () => type => type;
+} catch (err) {
+  console.warn('Fast Refresh suppression failed', err);
+}
+
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
