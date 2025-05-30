@@ -2,6 +2,8 @@
       import { registerRoutes } from "./routes";
       import { setupVite, serveStatic, log } from "./vite";
       import { ensureDeploymentReady, createMinimalBuild } from "./deploymentHelper";
+      import fs from "fs";
+      import path from "path";
 
       const app = express();
       app.use(express.json());
@@ -48,25 +50,34 @@
           throw err;
         });
 
-        // Always create minimal build setup
-        createMinimalBuild();
-
-        // Enforce production-first setup
+        // Production mode validation
         if (process.env.NODE_ENV === "production") {
+          // Check if dist directory exists (where esbuild outputs the server)
+          const distPath = path.resolve(import.meta.dirname, "..", "dist");
+          if (!fs.existsSync(distPath)) {
+            log("❌ Missing production build. Please run `npm run build` before starting.");
+            log("Expected dist/ directory not found at:", distPath);
+            process.exit(1);
+          }
+          
+          // Ensure deployment files are ready
           const hasProductionBuild = ensureDeploymentReady();
           if (hasProductionBuild) {
             try {
               serveStatic(app);
+              log("✅ Production mode: serving static files from server/public/");
             } catch (error) {
-              log("Production build found but failed to serve. Please rebuild.");
+              log("❌ Production build found but failed to serve. Please rebuild.");
+              log("Error:", error);
               process.exit(1);
             }
           } else {
-            log("Missing production build. Please run `npm run build` before starting.");
+            log("❌ Missing client build files. Please run `npm run build` before starting.");
             process.exit(1);
           }
         } else {
-          // Development fallback
+          // Development mode
+          createMinimalBuild();
           await setupVite(app, server);
         }
 

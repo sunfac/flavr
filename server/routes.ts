@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
+import MemoryStore from "memorystore";
 import OpenAI from "openai";
 import Replicate from "replicate";
 import Stripe from "stripe";
@@ -66,19 +67,35 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  
-  // Setup session middleware
-  app.use(session({
-    secret: process.env.SESSION_SECRET || 'flavr-dev-secret-key',
+
+  // Configure session store based on environment
+  const sessionConfig: any = {
+    secret: process.env.SESSION_SECRET || "your-secret-key",
     resave: false,
     saveUninitialized: false,
-    cookie: { 
-      secure: process.env.NODE_ENV === 'production', 
-      maxAge: 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
-    }
-  }));
+    cookie: {
+      secure: false, // Set to true if using HTTPS
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  };
+
+  if (process.env.NODE_ENV === "production") {
+    // Use MemoryStore with longer check periods for production
+    sessionConfig.store = new (MemoryStore as any)(session)({
+      checkPeriod: 3600000, // prune expired entries every hour
+      max: 1000000, // maximum number of sessions to store
+      dispose: (key: string) => {
+        // Optional: log session cleanup in production
+      },
+    });
+  } else {
+    // Development store
+    sessionConfig.store = new (MemoryStore as any)(session)({
+      checkPeriod: 86400000, // prune expired entries every 24h
+    });
+  }
+
+  app.use(session(sessionConfig));
 
   // Authentication middleware
   const requireAuth = (req: any, res: any, next: any) => {
@@ -94,7 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/register", async (req, res) => {
     try {
       const { username, email, password } = req.body;
-      
+
       // Check if user exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
@@ -113,24 +130,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = req.body;
       console.log("Login attempt:", email, password);
-      
+
       const user = await storage.getUserByEmail(email);
       console.log("Found user:", user ? "Yes" : "No");
-      
+
       if (!user || user.password !== password) {
         console.log("Login failed - invalid credentials");
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
       req.session!.userId = user.id;
-      
+
       // Force session save for deployment reliability
       req.session!.save((err: any) => {
         if (err) {
           console.error("Session save error:", err);
           return res.status(500).json({ message: "Session error" });
         }
-        
+
         console.log("Login successful for user:", user.email, "Session ID:", req.session!.userId);
         res.json({ 
           user: { 
@@ -208,7 +225,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Build mapped prompt for Shopping Mode (Prompt 1 - Recipe Idea Generator)
       let enhancedPrompt;
-      
+
       if (mode === 'shopping') {
         // Get mapped guidance text
         const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
@@ -217,16 +234,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
-        
+
         // Use centralized difficulty mapping
         const difficulty = getDifficulty(quizData.ambition);
-        
+
         // Fix cooking time mapping
         const cookTime = typeof quizData.time === 'number' ? quizData.time : 30;
-        
+
         // Build Shopping Mode mapped prompt (Prompt 1)
         const creativeGuidance = getCreativeGuidanceBlock();
-        
+
         // Generate random creativity injection for Shopping Mode
         const randomInstruction = shoppingCreativeInstructions[Math.floor(Math.random() * shoppingCreativeInstructions.length)];
         const variationSeed = `seed-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
@@ -270,13 +287,13 @@ Return a JSON object with this exact structure:
       } else if (mode === 'fridge') {
         // Use centralized difficulty mapping
         const difficulty = getDifficulty(quizData.ambition);
-        
+
         // Fix cooking time mapping
         const cookTime = typeof quizData.time === 'number' ? quizData.time : 30;
-        
+
         // Build Fridge Mode mapped prompt (Prompt 1)
         const creativeGuidance = getCreativeGuidanceBlock();
-        
+
         enhancedPrompt = `You are an elite private chef.
 
 Based on the user's available ingredients and preferences, suggest 5 exciting recipe ideas.
@@ -330,7 +347,7 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
       }
 
       console.log("Making OpenAI API call with prompt length:", enhancedPrompt.length);
-      
+
       // Using GPT-3.5 Turbo for cost efficiency
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -360,7 +377,7 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
       console.log("TIME INPUT:", quizData.time, typeof quizData.time);
       console.log("EQUIPMENT INPUT:", quizData.equipment, typeof quizData.equipment);
       console.log("=============QUIZ DEBUG END===============");
-      
+
       // === QUIZ INPUT DEBUGGING ===
       console.log("🔍 QUIZ INPUT DEBUG - Time:", quizData.time, "Type:", typeof quizData.time);
       console.log("🔍 QUIZ INPUT DEBUG - Equipment:", quizData.equipment, "Type:", typeof quizData.equipment);
@@ -368,7 +385,7 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
 
       // Build mapped prompt for Shopping Mode (Prompt 1 - Recipe Idea Generator)
       let enhancedPrompt;
-      
+
       if (mode === 'shopping') {
         // === QUIZ INPUT LOGGING FOR DEBUGGING ===
         console.log("=== SHOPPING MODE QUIZ INPUTS ===");
@@ -384,7 +401,7 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
         console.log("- cuisine:", quizData.cuisine);
         console.log("- ingredients:", quizData.ingredients);
         console.log("=====================================");
-        
+
         // Get mapped guidance text using existing functions (preserve Chef Assist compatibility)
         const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
         const ambitionText = quizData.ambition ? getAmbitionPromptText(quizData.ambition) : '';
@@ -392,16 +409,16 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
         const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : "";
-        
+
         // === MAPPED OUTPUT LOGGING FOR DEBUGGING ===
         console.log("🔧 MAPPED OUTPUT - timeText:", timeText);
         console.log("🔧 MAPPED OUTPUT - equipmentText:", equipmentText);
         console.log("🔧 MAPPED OUTPUT - moodText:", moodText);
         console.log("🔧 MAPPED OUTPUT - budgetText:", budgetText);
-        
+
         // Build Shopping Mode mapped prompt (Prompt 1)
         const creativeGuidance = getCreativeGuidanceBlock();
-        
+
         enhancedPrompt = `You are an elite private chef.
 
 Based on the following preferences, suggest 5 unique, flavour-packed recipe ideas that could be made. Each idea should have a title and a one-sentence description:
@@ -447,10 +464,10 @@ Return a JSON object with this exact structure:
         const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : "";
-        
+
         // Build Fridge Mode mapped prompt (Prompt 1)
         const creativeGuidance = getCreativeGuidanceBlock();
-        
+
         // Generate random creativity injection for Fridge Mode
         const randomInstruction = fridgeCreativeInstructions[Math.floor(Math.random() * fridgeCreativeInstructions.length)];
         const variationSeed = `fridge-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
@@ -507,7 +524,7 @@ Return a JSON object with this exact structure:
         const timeGuidance = quizData.time ? getTimePromptText(quizData.time) : '';
         const dietaryGuidance = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
         const equipmentGuidance = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
-        
+
         enhancedPrompt = `Generate exactly 6 diverse recipe suggestions based on these preferences:
 
 Mode: ${mode}
@@ -543,7 +560,7 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
       console.log("=".repeat(80));
       console.log(enhancedPrompt);
       console.log("=".repeat(80));
-      
+
       // Using GPT-3.5 Turbo for cost efficiency
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -553,7 +570,7 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
 
       console.log("OpenAI API response received successfully");
       const result = JSON.parse(response.choices[0].message.content!);
-      
+
       // Log GPT interaction for developer analysis
       if (req.session?.userId) {
         const expectedOutput = {
@@ -564,12 +581,12 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
           budget: quizData.budget || 'moderate',
           cuisine: quizData.cuisines?.[0] || quizData.cuisine || 'any'
         };
-        
+
         const actualOutput = {
           recipeCount: result.recipes?.length || 0,
           firstRecipeExample: result.recipes?.[0] || null
         };
-        
+
         await logGPTInteraction(
           req.session.userId,
           mode,
@@ -580,7 +597,7 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
           actualOutput
         );
       }
-      
+
       res.json({ recipes: result.recipes || [] });
     } catch (error: any) {
       console.error("Recipe ideas generation error details:", {
@@ -600,7 +617,7 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
 
       // Build mapped prompt for Shopping Mode (Prompt 2 - Final Recipe Builder)
       let enhancedPrompt;
-      
+
       if (mode === 'shopping') {
         // Get mapped guidance text for Shopping Mode using existing functions (preserve Chef Assist compatibility)
         const moodText = (quizData.mood || quizData.vibe) ? getMoodPromptText(quizData.mood || quizData.vibe) : '';
@@ -609,14 +626,14 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
         const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : "";
-        
+
         // Use centralized mapping utilities for specific elements only
         const difficulty = getDifficulty(quizData.ambition);
         const cookTime = getCookTime(quizData);
-        
+
         // Build Shopping Mode mapped prompt (Prompt 2) - NO variation seed for deterministic results
         const creativeGuidance = getCreativeGuidanceBlock();
-        
+
         enhancedPrompt = `You are an elite private chef.
 
 Based on the user's preferences and selected idea, generate the full recipe for:
@@ -697,14 +714,14 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
         const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : "";
-        
+
         // Use centralized mapping utilities
         const difficulty = getDifficulty(quizData.ambition);
         const cookTime = getCookTime(quizData);
-        
+
         // Build Fridge Mode mapped prompt (Prompt 2) - NO variation seed for deterministic results
         const creativeGuidance = getCreativeGuidanceBlock();
-        
+
         enhancedPrompt = `IMPORTANT: You must respond ONLY in English. Do not use any other language under any circumstances.
 
 You are an elite private chef.
@@ -763,7 +780,7 @@ CRITICAL INSTRUCTION REQUIREMENTS:
 Use a friendly, helpful tone. Ensure the recipe is flavour-rich, realistic, uses pantry basics, and only what the user has available.
 Write in the voice of Zest — a bold, clever private chef. Be helpful, but never dull. Make each step feel like part of a masterclass. If a technique is optional, say so. Always aim to build confidence.
 Steps should be thorough to guide the user through each technique with clear explanations of what to look for and why each step matters.
-Assume users have access to standard kitchen tools. Do not force niche appliances into the recipe method unless clearly necessary. If equipment is unavailable, suggest fallback steps (e.g., oven instead of air fryer).
+Assume users have access to standard kitchen tools. Do not force niche appliances into the recipe method unless clearly necessary. If equipment is unavailable, suggest fallback steps (e.g., oven instead of airfryer).
 Avoid unnecessary complexity or ingredients requiring unavailable equipment.
 
 Return a JSON object with this exact structure. THE SERVINGS VALUE IS LOCKED AND CANNOT BE CHANGED:
@@ -787,14 +804,14 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
         const dietaryText = quizData.dietary ? getDietPromptText(quizData.dietary) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
-        
+
         // Use centralized mapping utilities for specific elements
         const difficulty = getDifficulty(quizData.ambition);
         const cookTime = getCookTime(quizData);
-        
+
         // Build Chef Assist Mode mapped prompt (Prompt 2) with creative guidance
         const creativeGuidance = getCreativeGuidanceBlock();
-        
+
         enhancedPrompt = `IMPORTANT: You must respond ONLY in English. Do not use any other language under any circumstances.
 
 You are an elite private chef.
@@ -885,7 +902,7 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
       console.log("=".repeat(80));
       console.log(enhancedPrompt);
       console.log("=".repeat(80));
-      
+
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -898,10 +915,10 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
       console.log("OpenAI API response received for full recipe");
       console.log("Response content:", response.choices[0].message.content);
       const fullRecipe = JSON.parse(response.choices[0].message.content!);
-      
+
       // POST-PROCESSING: Force correct quiz values (AI keeps ignoring our instructions)
       console.log(`ENFORCING QUIZ VALUES - Original servings: ${fullRecipe.servings}, Required: ${quizData.servings || 4}`);
-      
+
       // Override AI's incorrect values with user's actual quiz selections
       if (quizData.servings) {
         fullRecipe.servings = parseInt(quizData.servings.toString());
@@ -915,7 +932,7 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
       if (quizData.budget) {
         fullRecipe.budget = quizData.budget;
       }
-      
+
       // Map ambition level to difficulty for all modes
       if (quizData.ambition !== undefined) {
         const ambitionValue = quizData.ambition.toString().toLowerCase();
@@ -942,7 +959,7 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
         fullRecipe.difficulty = difficultyMap[ambitionValue] || 'Medium';
         console.log(`DIFFICULTY MAPPING - Ambition: ${quizData.ambition} -> Difficulty: ${fullRecipe.difficulty}`);
       }
-      
+
       console.log(`CORRECTED VALUES - Final servings: ${fullRecipe.servings}, cookTime: ${fullRecipe.cookTime}`);
 
       // Generate sophisticated recipe image
@@ -958,7 +975,7 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
             const mainIngredients = ingredients.slice(0, 4).map(ing => 
               ing.replace(/^\d+.*?\s/, '').replace(/,.*$/, '').trim()
             );
-            
+
             return `High-resolution photo of a plated dish titled "${recipeTitle}". 
 Prepared with ingredients like: ${mainIngredients.join(", ")}.
 Styled to match the mood: ${mood || "elevated home comfort"}.
@@ -1001,7 +1018,7 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
           'michelineffort': 'Hard',
         };
         const expectedDifficulty = difficultyMap[ambitionValue] || 'Medium';
-        
+
         console.log(`🔍 PROMPT 2 DEBUG - Ambition: ${quizData.ambition}, Expected difficulty: ${expectedDifficulty}`);
         const expectedOutput = {
           servings: parseInt(quizData.servings) || quizData.portions || 4,
@@ -1010,7 +1027,7 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
           budget: quizData.budget || 'moderate',
           cuisine: quizData.cuisines?.[0] || quizData.cuisine || 'any'
         };
-        
+
         const actualOutput = {
           servings: fullRecipe.servings,
           cookTime: fullRecipe.cookTime,
@@ -1019,7 +1036,7 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
           cuisine: fullRecipe.cuisine,
           title: fullRecipe.title
         };
-        
+
         // Track image generation details
         if (imageUrl) {
           imagePrompt = `A stunning food photograph of ${fullRecipe.title}, featuring ${fullRecipe.cuisine} cuisine, professional food styling, natural lighting, appetizing presentation`;
@@ -1057,7 +1074,7 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
       try {
         // Generate unique share ID for potential sharing
         const shareId = `flavr-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        
+
         const recipeToSave = {
           userId: req.session?.userId || null,
           title: fullRecipe.title,
@@ -1115,9 +1132,9 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
     try {
       const { pseudoId, browserFingerprint } = req.body;
       const isAuthenticated = req.isAuthenticated();
-      
+
       let usageStatus;
-      
+
       if (isAuthenticated) {
         const user = req.user;
         usageStatus = {
@@ -1129,7 +1146,7 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
       } else {
         // Handle pseudo-user (free user without account)
         let pseudoUser = await storage.getPseudoUser(pseudoId);
-        
+
         if (!pseudoUser) {
           pseudoUser = await storage.createPseudoUser({
             pseudoId,
@@ -1138,7 +1155,7 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
             monthlyRecipeLimit: 3
           });
         }
-        
+
         usageStatus = {
           canGenerate: (pseudoUser.recipesThisMonth || 0) < (pseudoUser.monthlyRecipeLimit || 3),
           recipesUsed: pseudoUser.recipesThisMonth || 0,
@@ -1146,7 +1163,7 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
           hasFlavrPlus: false
         };
       }
-      
+
       res.json(usageStatus);
     } catch (error) {
       console.error('Usage check failed:', error);
@@ -1158,7 +1175,7 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
     try {
       const { pseudoId } = req.body;
       const isAuthenticated = req.isAuthenticated();
-      
+
       if (isAuthenticated) {
         const user = req.user;
         if (!user.hasFlavrPlus) {
@@ -1170,7 +1187,7 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
           await storage.updatePseudoUserUsage(pseudoId, (pseudoUser.recipesThisMonth || 0) + 1);
         }
       }
-      
+
       res.json({ success: true });
     } catch (error) {
       console.error('Usage increment failed:', error);
@@ -1182,13 +1199,13 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
     try {
       const { pseudoId } = req.body;
       const isAuthenticated = req.isAuthenticated();
-      
+
       if (isAuthenticated) {
         await storage.resetMonthlyUsage(req.user.id);
       } else {
         await storage.resetPseudoUserMonthlyUsage(pseudoId);
       }
-      
+
       res.json({ success: true });
     } catch (error) {
       console.error('Usage reset failed:', error);
@@ -1232,7 +1249,7 @@ CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`
           systemPrompt += `User: ${msg.message}\nYou: ${msg.response}\n`;
         });
       }
-      
+
       if (mode) {
         const modeContext = {
           shopping: "User is planning meals and shopping lists.",
@@ -1262,14 +1279,14 @@ CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`
         message.toLowerCase().includes('use instead') ||
         message.toLowerCase().includes('swap') ||
         message.toLowerCase().includes('change to') ||
-        
+
         // Protein changes
         message.toLowerCase().includes('use chicken') ||
         message.toLowerCase().includes('use beef') ||
         message.toLowerCase().includes('use fish') ||
         message.toLowerCase().includes('use pork') ||
         message.toLowerCase().includes('use turkey') ||
-        
+
         // Dietary modifications
         message.toLowerCase().includes('make it vegetarian') ||
         message.toLowerCase().includes('make it vegan') ||
@@ -1277,7 +1294,7 @@ CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`
         message.toLowerCase().includes('gluten free') ||
         message.toLowerCase().includes('make vegetarian') ||
         message.toLowerCase().includes('make vegan') ||
-        
+
         // Spice level changes
         message.toLowerCase().includes('make it spicier') ||
         message.toLowerCase().includes('make it spicy') ||
@@ -1285,7 +1302,7 @@ CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`
         message.toLowerCase().includes('more spicy') ||
         message.toLowerCase().includes('less spicy') ||
         message.toLowerCase().includes('make it milder') ||
-        
+
         // Portion/serving changes
         message.toLowerCase().includes('change portion') ||
         message.toLowerCase().includes('change serving') ||
@@ -1301,20 +1318,20 @@ CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`
         /for\s+\d+\s+people/i.test(message) ||
         /for\s+\d+$/i.test(message) ||
         message.toLowerCase().includes('people') ||
-        
+
         // Time modifications
         message.toLowerCase().includes('make it quicker') ||
         message.toLowerCase().includes('make it faster') ||
         message.toLowerCase().includes('reduce time') ||
         message.toLowerCase().includes('cook faster') ||
         message.toLowerCase().includes('speed up') ||
-        
+
         // Ingredient changes
         message.toLowerCase().includes('change ingredient') ||
         message.toLowerCase().includes('add ingredient') ||
         message.toLowerCase().includes('remove ingredient') ||
         message.toLowerCase().includes('without') ||
-        
+
         // Clear directive patterns
         /^change\s/.test(message.toLowerCase()) ||
         /^make\s.*\s(more|less|spicier|milder|quicker|faster)/.test(message.toLowerCase()) ||
@@ -1382,7 +1399,7 @@ Keep it SHORT and encouraging. The recipe card will show the changes!`;
         const fullResponse = response.choices[0]?.message?.content || "";
         const inputTokens = response.usage?.prompt_tokens || 0;
         const outputTokens = response.usage?.completion_tokens || 0;
-        
+
         // Log chatbot interaction for cost tracking
         await logGPTInteraction(
           'chatbot',
@@ -1396,7 +1413,7 @@ Keep it SHORT and encouraging. The recipe card will show the changes!`;
           userId,
           null // no image for chatbot
         );
-        
+
         try {
           // Try to parse JSON response for recipe updates
           const jsonMatch = fullResponse.match(/\{[\s\S]*\}/);
@@ -1409,20 +1426,20 @@ Keep it SHORT and encouraging. The recipe card will show the changes!`;
                 ...parsed.updatedRecipe,
                 id: currentRecipe.id // Preserve the original ID
               };
-              
+
               console.log(`🔄 RECIPE UPDATE DETECTED: ${currentRecipe.title} → ${updatedRecipe.title}`);
               console.log(`📊 Updated servings: ${currentRecipe.servings} → ${updatedRecipe.servings}`);
-              
+
               // Check if the title changed significantly (indicates major modification)
               const titleChanged = updatedRecipe.title !== currentRecipe.title;
-              
+
               // Generate new image for Flavr+ users if title changed significantly
               if (titleChanged && userId) {
                 try {
                   console.log(`\n🖼️ GENERATING NEW IMAGE for modified recipe: ${updatedRecipe.title}`);
-                  
+
                   const imagePrompt = `A professional food photography shot of ${updatedRecipe.title}. The dish should look appetizing, vibrant, and restaurant-quality. Shot from a 45-degree angle with natural lighting, garnished beautifully, on a clean white plate against a neutral background. High resolution, photorealistic style.`;
-                  
+
                   const imageOutput = await replicate.run(
                     "stability-ai/stable-diffusion:ac732df83cea7fff18b8472768c88ad041fa750ff7682a21affe81863cbe77e4", 
                     {
@@ -1436,19 +1453,19 @@ Keep it SHORT and encouraging. The recipe card will show the changes!`;
                       }
                     }
                   );
-                  
+
                   updatedRecipe.imageUrl = Array.isArray(imageOutput) ? imageOutput[0] : imageOutput;
-                  
+
                   // Update user's image usage
                   await storage.updateUserUsage(userId, 0, 1);
-                  
+
                   console.log(`✅ NEW IMAGE GENERATED for ${updatedRecipe.title}`);
                 } catch (imageError) {
                   console.log(`❌ IMAGE GENERATION FAILED:`, imageError);
                   // Continue without image if generation fails
                 }
               }
-              
+
               // Extract only the casual message before the JSON
               const jsonStart = fullResponse.indexOf('{');
               if (jsonStart > 0) {
@@ -1493,10 +1510,10 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
         });
 
         botResponse = response.choices[0]?.message?.content || "I'm sorry, I couldn't process that request. Please try again.";
-        
+
         const inputTokens = response.usage?.prompt_tokens || 0;
         const outputTokens = response.usage?.completion_tokens || 0;
-        
+
         // Log regular chatbot interaction for cost tracking
         await logGPTInteraction(
           'chatbot',
@@ -1511,7 +1528,7 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
           null // no image for chatbot
         );
       }
-      
+
       // Save chat message
       await storage.createChatMessage({
         userId,
@@ -1553,7 +1570,7 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
     try {
       const userId = req.session!.userId;
       const limit = parseInt(req.query.limit as string) || 20;
-      
+
       const recipes = await storage.getUserRecipeHistory(userId, limit);
       res.json({ recipes });
     } catch (error: any) {
@@ -1566,11 +1583,11 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
     try {
       const userId = req.session!.userId;
       const user = await storage.getUser(userId);
-      
+
       if (!user || user.email !== "william@blycontracting.co.uk") {
         return res.status(403).json({ message: "Admin access required" });
       }
-      
+
       const limit = parseInt(req.query.limit as string) || 50;
       const logs = await storage.getDeveloperLogs(limit);
       res.json({ logs });
@@ -1584,16 +1601,16 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
     try {
       const id = parseInt(req.params.id);
       const recipe = await storage.getRecipe(id);
-      
+
       if (!recipe) {
         return res.status(404).json({ message: "Recipe not found" });
       }
-      
+
       // If recipe is private, only owner can access
       if (!recipe.isShared && recipe.userId !== req.session?.userId) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       res.json({ recipe });
     } catch (error: any) {
       res.status(500).json({ message: "Failed to get recipe: " + error.message });
@@ -1605,11 +1622,11 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
     try {
       const shareId = req.params.shareId;
       const recipe = await storage.getRecipeByShareId(shareId);
-      
+
       if (!recipe || !recipe.isShared) {
         return res.status(404).json({ message: "Shared recipe not found" });
       }
-      
+
       res.json({ recipe });
     } catch (error: any) {
       res.status(500).json({ message: "Failed to get shared recipe: " + error.message });
@@ -1622,15 +1639,15 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
       const id = parseInt(req.params.id);
       const { isShared } = req.body;
       const userId = req.session!.userId;
-      
+
       const recipe = await storage.getRecipe(id);
       if (!recipe || recipe.userId !== userId) {
         return res.status(404).json({ message: "Recipe not found or access denied" });
       }
-      
+
       const shareId = isShared ? `flavr-${Date.now()}-${Math.random().toString(36).substr(2, 9)}` : undefined;
       const updatedRecipe = await storage.updateRecipeSharing(id, isShared, shareId);
-      
+
       res.json({ recipe: updatedRecipe });
     } catch (error: any) {
       res.status(500).json({ message: "Failed to update recipe sharing: " + error.message });
@@ -1746,19 +1763,19 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
         case 'customer.subscription.created':
           await handleSubscriptionCreated(event.data.object as Stripe.Subscription);
           break;
-        
+
         case 'customer.subscription.updated':
           await handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
           break;
-        
+
         case 'customer.subscription.deleted':
           await handleSubscriptionCanceled(event.data.object as Stripe.Subscription);
           break;
-        
+
         case 'invoice.payment_failed':
           await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
           break;
-        
+
         default:
           console.log(`Unhandled event type: ${event.type}`);
       }
@@ -1793,14 +1810,14 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
 
     try {
       const { receiptData, originalTransactionId } = req.body;
-      
+
       if (!receiptData) {
         return res.status(400).json({ error: 'Receipt data is required' });
       }
 
       // Verify receipt with Apple
       const receiptResult = await AppleSubscriptionManager.verifyAppleReceipt(receiptData);
-      
+
       if (receiptResult.status !== 0) {
         return res.status(400).json({ error: 'Invalid receipt', details: receiptResult });
       }
@@ -1847,13 +1864,13 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
 
     try {
       const { purchaseToken, orderId, productId } = req.body;
-      
+
       if (!purchaseToken || !productId) {
         return res.status(400).json({ error: 'Purchase token and product ID are required' });
       }
 
       const packageName = process.env.GOOGLE_PLAY_PACKAGE_NAME || 'com.flavr.app';
-      
+
       // Verify purchase with Google Play
       const purchaseData = await GoogleSubscriptionManager.verifyGooglePurchase(
         packageName,
@@ -1899,7 +1916,7 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
     try {
       const isActive = await UniversalSubscriptionManager.hasActiveSubscription(req.user.id);
       const subscriptionDetails = await UniversalSubscriptionManager.getSubscriptionDetails(req.user.id);
-      
+
       res.json({
         success: true,
         isActive,
@@ -1915,7 +1932,7 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
   app.post('/api/generate-ritual-cards', async (req, res) => {
     try {
       const { inputs, day } = req.body;
-      
+
       if (!inputs || !day) {
         return res.status(400).json({ error: 'Missing inputs or day parameter' });
       }
@@ -1976,7 +1993,7 @@ Generate 3 inspiring recipe preview cards for ${day} now:`;
 
       const responseContent = completion.choices[0].message.content;
       let parsedResponse;
-      
+
       try {
         parsedResponse = JSON.parse(responseContent);
       } catch (parseError) {
