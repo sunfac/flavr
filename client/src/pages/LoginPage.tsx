@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { motion } from "framer-motion";
-import { iconMap } from "@/lib/iconMap";
+import { Mail, Lock, ArrowLeft, Sparkles } from "lucide-react";
 import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 
 export default function LoginPage() {

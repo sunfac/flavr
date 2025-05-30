@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { iconMap } from "@/lib/iconMap";
+import { Crown, Calendar, ChefHat, Clock, ChevronLeft, ChevronRight, Heart, X, Sparkles, ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
 import GlobalHeader from "@/components/GlobalHeader";
 import { useToast } from "@/hooks/use-toast";

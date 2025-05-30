@@ -1,7 +1,18 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { iconMap } from "@/lib/iconMap";
+import { 
+  Home, 
+  ChefHat, 
+  Bookmark, 
+  Star, 
+  Settings, 
+  X,
+  Moon,
+  Sun,
+  Heart,
+  Database
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 interface GlobalNavigationProps {

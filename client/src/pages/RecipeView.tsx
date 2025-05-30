@@ -3,7 +3,16 @@ import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { iconMap } from "@/lib/iconMap";
+import { 
+  ArrowLeft, 
+  Clock, 
+  Users, 
+  ChefHat,
+  ShoppingCart,
+  Refrigerator,
+  Share2,
+  Copy
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import GlobalHeader from "@/components/GlobalHeader";
