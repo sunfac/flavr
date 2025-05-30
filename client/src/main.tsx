@@ -1,7 +1,7 @@
 // Fast Refresh runtime suppression is handled by /refresh-suppress.js
 
 import { createRoot } from "react-dom/client";
-import App from "./App";
+import TestApp from "./TestApp";
 import "./index.css";
 
 // Override Vite error handling to prevent overlay blocking
@@ -36,5 +36,5 @@ if (typeof window !== 'undefined') {
 
 const rootElement = document.getElementById("root");
 if (rootElement) {
-  createRoot(rootElement).render(<App />);
+  createRoot(rootElement).render(<TestApp />);
 }
