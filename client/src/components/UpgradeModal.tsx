@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Crown, Check, Sparkles, Image, Calendar } from "lucide-react";
+import { iconMap } from "@/lib/iconMap";
 import { useLocation } from "wouter";
 
 interface UpgradeModalProps {

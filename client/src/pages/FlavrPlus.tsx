@@ -8,7 +8,7 @@ import GlobalFooter from "@/components/GlobalFooter";
 import GlobalNavigation from "@/components/GlobalNavigation";
 import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
-import { Crown, Check, Sparkles, Image, Calendar, Star } from "lucide-react";
+import { iconMap } from "@/lib/iconMap";
 
 export default function FlavrPlus() {
   const [, navigate] = useLocation();
