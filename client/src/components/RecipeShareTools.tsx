@@ -3,18 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Share2,
-  Twitter,
-  Facebook,
-  Instagram,
-  MessageCircle,
-  Printer,
-  FileText,
-  QrCode,
-  FileDown,
-  Copy
-} from "lucide-react";
+import { iconMap } from "@/lib/iconMap";
 import { QRCodeSVG as QRCode } from 'qrcode.react';
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
@@ -279,7 +268,7 @@ ${publicUrl}`;
       <Card className="bg-card/90 backdrop-blur-xl border border-border/50">
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <Share2 className="w-5 h-5 text-orange-400" />
+            <iconMap.share className="w-5 h-5 text-orange-400" />
             <h3 className="text-lg font-semibold text-foreground">Share Recipe</h3>
             {isShared && (
               <Badge variant="secondary" className="bg-orange-500/20 text-orange-300">
@@ -296,7 +285,7 @@ ${publicUrl}`;
               onClick={() => handleSocialClick('twitter')}
               className="flex items-center gap-2 hover:bg-blue-500/10 hover:border-blue-500/50"
             >
-              <Twitter className="w-4 h-4" />
+              <iconMap.share className="w-4 h-4" />
               Twitter
             </Button>
             
@@ -306,7 +295,7 @@ ${publicUrl}`;
               onClick={() => handleSocialClick('instagram')}
               className="flex items-center gap-2 hover:bg-pink-500/10 hover:border-pink-500/50"
             >
-              <Instagram className="w-4 h-4" />
+              <iconMap.share className="w-4 h-4" />
               Instagram
             </Button>
             
@@ -316,7 +305,7 @@ ${publicUrl}`;
               onClick={() => handleSocialClick('facebook')}
               className="flex items-center gap-2 hover:bg-blue-600/10 hover:border-blue-600/50"
             >
-              <Facebook className="w-4 h-4" />
+              <iconMap.share className="w-4 h-4" />
               Facebook
             </Button>
             
@@ -326,7 +315,7 @@ ${publicUrl}`;
               onClick={() => handleSocialClick('whatsapp')}
               className="flex items-center gap-2 hover:bg-green-500/10 hover:border-green-500/50"
             >
-              <MessageCircle className="w-4 h-4" />
+              <iconMap.messageCircle className="w-4 h-4" />
               WhatsApp
             </Button>
           </div>
@@ -339,7 +328,7 @@ ${publicUrl}`;
               onClick={handlePrint}
               className="flex items-center gap-2 hover:bg-slate-500/10 hover:border-slate-500/50"
             >
-              <Printer className="w-4 h-4" />
+              <iconMap.share className="w-4 h-4" />
               Print
             </Button>
             
@@ -349,7 +338,7 @@ ${publicUrl}`;
               onClick={handleCopyFullRecipe}
               className="flex items-center gap-2 hover:bg-orange-500/10 hover:border-orange-500/50"
             >
-              <FileText className="w-4 h-4" />
+              <iconMap.share className="w-4 h-4" />
               Copy Recipe
             </Button>
             
@@ -359,7 +348,7 @@ ${publicUrl}`;
               onClick={downloadPDF}
               className="flex items-center gap-2 hover:bg-red-500/10 hover:border-red-500/50"
             >
-              <FileDown className="w-4 h-4" />
+              <iconMap.download className="w-4 h-4" />
               PDF
             </Button>
             
@@ -369,7 +358,7 @@ ${publicUrl}`;
               onClick={downloadQRCode}
               className="flex items-center gap-2 hover:bg-purple-500/10 hover:border-purple-500/50"
             >
-              <QrCode className="w-4 h-4" />
+              <iconMap.share className="w-4 h-4" />
               QR Code
             </Button>
           </div>
@@ -397,7 +386,7 @@ ${publicUrl}`;
                 onClick={() => navigator.clipboard.writeText(publicUrl)}
                 className="ml-3 hover:bg-orange-500/20"
               >
-                <Copy className="w-4 h-4" />
+                <iconMap.copy className="w-4 h-4" />
               </Button>
             </div>
           </div>

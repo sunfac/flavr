@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Refrigerator, ChefHat, History, Calendar } from "lucide-react";
+import { iconMap } from "@/lib/iconMap";
 import { useLocation } from "wouter";
 
 interface GlobalFooterProps {
@@ -13,31 +13,31 @@ export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
     {
       id: "shopping",
       label: "Shopping",
-      icon: ShoppingCart,
+      icon: iconMap.shoppingCart,
       path: "/shopping",
     },
     {
       id: "fridge", 
       label: "Fridge",
-      icon: Refrigerator,
+      icon: iconMap.refrigerator,
       path: "/fridge",
     },
     {
       id: "chef",
       label: "Chef",
-      icon: ChefHat,
+      icon: iconMap.chefHat,
       path: "/chef",
     },
     {
       id: "rituals",
       label: "Rituals",
-      icon: Calendar,
+      icon: iconMap.calendar,
       path: "/flavr-rituals",
     },
     {
       id: "history",
       label: "My Recipes", 
-      icon: History,
+      icon: iconMap.history,
       path: "/my-recipes",
     },
   ];

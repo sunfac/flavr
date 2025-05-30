@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, User, Sparkles, ChefHat } from "lucide-react";
+import { iconMap } from "@/lib/iconMap";
 import FlavrIcon from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 
 interface AuthModalProps {
@@ -97,7 +97,7 @@ export default function AuthModal({
                 alt="Flavr Chef Hat" 
                 className="w-12 h-12 drop-shadow-lg" 
               />
-              <Sparkles className="w-4 h-4 text-yellow-400 absolute -top-1 -right-1" />
+              <iconMap.sparkles className="w-4 h-4 text-yellow-400 absolute -top-1 -right-1" />
             </div>
           </motion.div>
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
@@ -114,14 +114,14 @@ export default function AuthModal({
               value="signup" 
               className="data-[state=active]:bg-orange-500 data-[state=active]:text-white transition-all duration-300"
             >
-              <Sparkles className="w-4 h-4 mr-2" />
+              <iconMap.sparkles className="w-4 h-4 mr-2" />
               Sign Up
             </TabsTrigger>
             <TabsTrigger 
               value="login"
               className="data-[state=active]:bg-orange-500 data-[state=active]:text-white transition-all duration-300"
             >
-              <User className="w-4 h-4 mr-2" />
+              <iconMap.user className="w-4 h-4 mr-2" />
               Log In
             </TabsTrigger>
           </TabsList>
@@ -129,7 +129,7 @@ export default function AuthModal({
           <TabsContent value="signup" className="space-y-4 mt-6">
             <form onSubmit={handleRegister} className="space-y-4">
               <div className="relative">
-                <User className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                <iconMap.user className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                 <Input
                   type="text"
                   placeholder="Username"
@@ -140,7 +140,7 @@ export default function AuthModal({
                 />
               </div>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                <iconMap.mail className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                 <Input
                   type="email"
                   placeholder="Email"
@@ -151,7 +151,7 @@ export default function AuthModal({
                 />
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                <iconMap.lock className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                 <Input
                   type="password"
                   placeholder="Password"
@@ -174,7 +174,7 @@ export default function AuthModal({
                   />
                 ) : (
                   <>
-                    <Sparkles className="w-5 h-5 mr-2" />
+                    <iconMap.sparkles className="w-5 h-5 mr-2" />
                     Create Account & See Recipes
                   </>
                 )}
@@ -185,7 +185,7 @@ export default function AuthModal({
           <TabsContent value="login" className="space-y-4 mt-6">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="relative">
-                <Mail className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                <iconMap.mail className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                 <Input
                   type="email"
                   placeholder="Email"
@@ -196,7 +196,7 @@ export default function AuthModal({
                 />
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                <iconMap.lock className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                 <Input
                   type="password"
                   placeholder="Password"
@@ -219,7 +219,7 @@ export default function AuthModal({
                   />
                 ) : (
                   <>
-                    <ChefHat className="w-5 h-5 mr-2" />
+                    <iconMap.chefHat className="w-5 h-5 mr-2" />
                     Log In & Start Cooking
                   </>
                 )}
