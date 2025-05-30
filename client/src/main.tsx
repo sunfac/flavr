@@ -2,6 +2,11 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
+// Disable React Fast Refresh temporarily to bypass Vite runtime error
+if (typeof window !== 'undefined' && window.__vite_plugin_react_preamble_installed__) {
+  delete window.__vite_plugin_react_preamble_installed__;
+}
+
 
 
 // Service worker registration with cache-busting
