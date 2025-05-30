@@ -31,7 +31,7 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
   });
 
   const handleNavigation = (href: string, requiresAuth: boolean = false) => {
-    if (requiresAuth && !user?.id) {
+    if (requiresAuth && !user?.user?.id) {
       onClose?.();
       alert("Please sign in to access this feature");
       return;
@@ -48,7 +48,7 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
     {
       icon: Home,
       label: "Home", 
-      href: user?.id ? "/app" : "/",
+      href: user?.user?.id ? "/app" : "/",
       requiresAuth: false
     },
     {

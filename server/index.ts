@@ -1,7 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { ensureDeploymentReady, createMinimalBuild } from "./deploymentHelper";
 
 const app = express();
 app.use(express.json());
@@ -48,28 +47,13 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Setup deployment configuration
-  createMinimalBuild();
-  
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    // Check if production build is ready, fallback to development mode if not
-    const hasProductionBuild = ensureDeploymentReady();
-    if (hasProductionBuild) {
-      try {
-        serveStatic(app);
-      } catch (error) {
-        log("Production build found but failed to serve, falling back to development mode");
-        await setupVite(app, server);
-      }
-    } else {
-      log("Using development mode for deployment due to missing production build");
-      await setupVite(app, server);
-    }
+    serveStatic(app);
   }
 
   // ALWAYS serve the app on port 5000

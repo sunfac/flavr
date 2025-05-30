@@ -1,10 +1,7 @@
 // Update this version number on each deployment to force cache refresh
-const CACHE_VERSION = 'v20240529-' + Date.now();
+const CACHE_VERSION = 'v' + Date.now();
 const CACHE_NAME = 'flavr-' + CACHE_VERSION;
 const DATA_CACHE_NAME = 'flavr-data-' + CACHE_VERSION;
-
-// Force immediate cache clearing for fresh deployments
-const FORCE_CLEAR_CACHE = true;
 
 const STATIC_CACHE_URLS = [
   '/',
@@ -42,32 +39,25 @@ const clearAllStorage = async () => {
 
 // Install service worker and cache static resources
 self.addEventListener('install', (event) => {
-  console.log('Service worker installing:', CACHE_VERSION);
+  console.log('🔄 Installing new service worker version:', CACHE_VERSION);
   
-  // Skip waiting to activate immediately
+  // Force immediate activation without waiting
   self.skipWaiting();
   
   event.waitUntil(
-    (async () => {
-      // Force clear all existing caches on fresh install
-      if (FORCE_CLEAR_CACHE) {
-        const existingCaches = await caches.keys();
-        await Promise.all(existingCaches.map(name => caches.delete(name)));
-        console.log('Cleared all existing caches for fresh deployment');
-      }
-      
-      const cache = await caches.open(CACHE_NAME);
-      console.log('Opened fresh cache:', CACHE_NAME);
-      return cache.addAll(STATIC_CACHE_URLS);
-    })().catch((error) => {
-      console.log('Cache error during install:', error);
+    clearAllStorage().then(() => {
+      return caches.open(CACHE_NAME)
+        .then((cache) => {
+          console.log('✅ Opened fresh cache:', CACHE_NAME);
+          return cache.addAll(STATIC_CACHE_URLS);
+        });
     })
   );
 });
 
 // Activate service worker and clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('Service worker activating:', CACHE_VERSION);
+  console.log('🚀 Activating new service worker version:', CACHE_VERSION);
   
   // Take control of all clients immediately
   self.clients.claim();
@@ -77,13 +67,19 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME && cacheName !== DATA_CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
+            console.log('🗑️ Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     }).then(() => {
-      console.log('Service worker activation complete');
+      console.log('✅ Service worker activation complete');
+      // Notify all clients to reload
+      self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({ type: 'CACHE_UPDATED' });
+        });
+      });
     })
   );
 });

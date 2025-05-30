@@ -11,7 +11,7 @@ import RecipeShareTools from "./RecipeShareTools";
 import { generateShoppingPrompt2 } from "@/prompts/shoppingPrompt2";
 import { generateFridgePrompt2 } from "@/prompts/fridgePrompt2";
 import { motion, AnimatePresence } from "framer-motion";
-import { iconMap } from "@/lib/iconMap";
+import { Heart, BookmarkPlus, RotateCcw, Clock, Users, Signal, ArrowLeft } from "lucide-react";
 
 interface RecipeCardProps {
   recipe: any;
@@ -269,7 +269,7 @@ export default function RecipeCard({
           className="absolute top-4 left-4 w-10 h-10 bg-black/20 backdrop-blur-sm rounded-full text-white hover:bg-black/40 border border-white/20"
           onClick={onBack}
         >
-          <iconMap.arrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4" />
         </Button>
 
         {/* Save Button - More visible */}
@@ -281,9 +281,9 @@ export default function RecipeCard({
           disabled={isSaved || saveRecipeMutation.isPending}
         >
           {isSaved ? (
-            <iconMap.heart className="w-5 h-5 fill-red-500 text-red-500" />
+            <Heart className="w-5 h-5 fill-red-500 text-red-500" />
           ) : (
-            <iconMap.bookmarkPlus className="w-5 h-5" />
+            <BookmarkPlus className="w-5 h-5" />
           )}
         </Button>
 
@@ -292,15 +292,15 @@ export default function RecipeCard({
           <h1 className="font-playfair font-bold text-2xl sm:text-3xl mb-2 sm:mb-3 drop-shadow-lg leading-tight">{fullRecipe.title}</h1>
           <div className="flex items-center flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
             <Badge variant="secondary" className="bg-white/20 text-white border-white/30 px-2 py-1">
-              <iconMap.clock className="w-3 h-3 mr-1" />
+              <Clock className="w-3 h-3 mr-1" />
               {fullRecipe.cookTime} min
             </Badge>
             <Badge variant="secondary" className="bg-white/20 text-white border-white/30 px-2 py-1">
-              <iconMap.users className="w-3 h-3 mr-1" />
+              <Users className="w-3 h-3 mr-1" />
               {fullRecipe.servings} servings
             </Badge>
             <Badge variant="secondary" className="bg-white/20 text-white border-white/30 px-2 py-1">
-              <iconMap.signal className="w-3 h-3 mr-1" />
+              <Signal className="w-3 h-3 mr-1" />
               {fullRecipe.difficulty || "Easy"}
             </Badge>
           </div>
@@ -325,7 +325,7 @@ export default function RecipeCard({
                   className="ml-2 p-1 h-7 w-7 text-muted-foreground hover:text-orange-400 hover:bg-orange-500/10 flex-shrink-0"
                   title="Get substitution suggestions"
                 >
-                  <iconMap.refresh className="w-3 h-3" />
+                  <RotateCcw className="w-3 h-3" />
                 </Button>
               </div>
             ))}
@@ -409,7 +409,7 @@ export default function RecipeCard({
             variant="outline"
             className="w-full"
           >
-            <iconMap.refresh className="w-4 h-4 mr-2" />
+            <RotateCcw className="w-4 h-4 mr-2" />
             Create Another Recipe
           </Button>
         )}

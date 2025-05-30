@@ -173,7 +173,12 @@ export default function LoginPage() {
               </button>
             </div>
 
-
+            {/* Test Account Info */}
+            <div className="mt-6 p-3 bg-slate-700/30 rounded-lg border border-slate-600/50">
+              <p className="text-xs text-slate-400 text-center">
+                Test Account: william@blycontracting.co.uk / flavr1
+              </p>
+            </div>
           </CardContent>
         </Card>
       </motion.div>
