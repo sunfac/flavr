@@ -1,45 +1,12 @@
-// PWA Update Handler - Fixes deployment crashes by managing cache updates
+// PWA Update Handler - Service worker disabled to prevent refresh loops
 export function initializePWAUpdater() {
-  // Register service worker
+  // Unregister any existing service workers to stop refresh loops
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then((registration) => {
-        console.log('✅ Service Worker registered:', registration);
-        
-        // Listen for updates
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('🔄 New version available, reloading...');
-                // Force reload to get fresh content
-                window.location.reload();
-              }
-            });
-          }
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for(let registration of registrations) {
+        registration.unregister().then(function(boolean) {
+          console.log('Service Worker unregistered:', boolean);
         });
-      })
-      .catch((error) => {
-        console.log('Service Worker registration failed:', error);
-      });
-
-    // Listen for cache update messages from service worker
-    navigator.serviceWorker.addEventListener('message', (event) => {
-      if (event.data.type === 'CACHE_UPDATED') {
-        console.log('📦 Cache updated, reloading app...');
-        // Clear any stored data that might conflict
-        localStorage.clear();
-        sessionStorage.clear();
-        // Reload to get fresh content
-        window.location.reload();
-      }
-    });
-
-    // Force update check on app focus
-    window.addEventListener('focus', () => {
-      if (navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({ type: 'CHECK_UPDATE' });
       }
     });
   }

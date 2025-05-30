@@ -1,10 +1,10 @@
-// Update this version number on each deployment to force cache refresh
-const CACHE_VERSION = 'v20240529-' + Date.now();
+// Stable cache version to prevent infinite refreshes
+const CACHE_VERSION = 'v20240529-stable';
 const CACHE_NAME = 'flavr-' + CACHE_VERSION;
 const DATA_CACHE_NAME = 'flavr-data-' + CACHE_VERSION;
 
-// Force immediate cache clearing for fresh deployments
-const FORCE_CLEAR_CACHE = true;
+// Disable aggressive cache clearing
+const FORCE_CLEAR_CACHE = false;
 
 const STATIC_CACHE_URLS = [
   '/',
