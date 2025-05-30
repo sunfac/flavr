@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
-import MemoryStore from "memorystore";
+import MemoryStoreFactory from "memorystore";
 import OpenAI from "openai";
 import Replicate from "replicate";
 import Stripe from "stripe";
@@ -68,32 +68,21 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
-  // Configure session store based on environment
+  // Configure session store using memorystore package
+  const MemoryStore = MemoryStoreFactory(session);
+  
   const sessionConfig: any = {
     secret: process.env.SESSION_SECRET || "your-secret-key",
     resave: false,
     saveUninitialized: false,
+    store: new MemoryStore({
+      checkPeriod: 86400000, // Clean expired sessions every 24h
+    }),
     cookie: {
       secure: false, // Set to true if using HTTPS
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
   };
-
-  if (process.env.NODE_ENV === "production") {
-    // Use MemoryStore with longer check periods for production
-    sessionConfig.store = new (MemoryStore as any)(session)({
-      checkPeriod: 3600000, // prune expired entries every hour
-      max: 1000000, // maximum number of sessions to store
-      dispose: (key: string) => {
-        // Optional: log session cleanup in production
-      },
-    });
-  } else {
-    // Development store
-    sessionConfig.store = new (MemoryStore as any)(session)({
-      checkPeriod: 86400000, // prune expired entries every 24h
-    });
-  }
 
   app.use(session(sessionConfig));
 
