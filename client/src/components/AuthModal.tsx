@@ -174,7 +174,7 @@ export default function AuthModal({
                   />
                 ) : (
                   <>
-                    <Sparkles className="w-5 h-5 mr-2" />
+                    <iconMap.sparkles className="w-5 h-5 mr-2" />
                     Create Account & See Recipes
                   </>
                 )}
@@ -185,7 +185,7 @@ export default function AuthModal({
           <TabsContent value="login" className="space-y-4 mt-6">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="relative">
-                <Mail className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                <iconMap.mail className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                 <Input
                   type="email"
                   placeholder="Email"
@@ -196,7 +196,7 @@ export default function AuthModal({
                 />
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                <iconMap.lock className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                 <Input
                   type="password"
                   placeholder="Password"
@@ -219,7 +219,7 @@ export default function AuthModal({
                   />
                 ) : (
                   <>
-                    <ChefHat className="w-5 h-5 mr-2" />
+                    <iconMap.chefHat className="w-5 h-5 mr-2" />
                     Log In & Start Cooking
                   </>
                 )}

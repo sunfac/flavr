@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Refrigerator, ChefHat, History, Calendar } from "lucide-react";
+import { iconMap } from "@/lib/iconMap";
 import { useLocation } from "wouter";
 
 interface GlobalFooterProps {
