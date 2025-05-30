@@ -61,17 +61,9 @@ export function createMinimalBuild(): void {
             fs.copyFileSync(path.join(sourcePath, subFile), path.join(targetPath, subFile));
           });
         } else {
-          // Update service worker with current timestamp for cache-busting
+          // Skip service worker files to prevent refresh loops
           if (file.name === 'service-worker.js') {
-            let content = fs.readFileSync(sourcePath, 'utf8');
-            // Update the cache version with current timestamp
-            const timestamp = Date.now();
-            content = content.replace(
-              /const CACHE_VERSION = 'v\d+-\d+'/,
-              `const CACHE_VERSION = 'v${timestamp}-${timestamp}'`
-            );
-            fs.writeFileSync(targetPath, content);
-            console.log(`Updated service worker with timestamp: ${timestamp}`);
+            console.log(`Skipped service worker file to prevent refresh loops`);
           } else {
             fs.copyFileSync(sourcePath, targetPath);
           }
