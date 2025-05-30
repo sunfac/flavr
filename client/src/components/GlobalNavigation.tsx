@@ -1,33 +1,14 @@
-import { useState } from "react";
-import { Heart, X } from 'lucide-react';
-import { Link, useLocation } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
-import { iconMap } from "@/lib/iconMap";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState } from 'react';
+import { Link } from 'wouter';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Home, ChefHat, Bookmark, Star, Settings, Database, Menu, X, Sun, Moon } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
-interface GlobalNavigationProps {
-  onClose?: () => void;
-  onAuthRequired?: () => void;
-}
-
-export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavigationProps) {
-  const [location] = useLocation();
+export default function GlobalNavigation() {
+  const [isOpen, setIsOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-
-  // User query
-  const { data: user } = useQuery({
-    queryKey: ['/api/me'],
-    retry: false,
-  });
-
-  const handleNavigation = (href: string, requiresAuth: boolean = false) => {
-    if (requiresAuth && !user?.id) {
-      onClose?.();
-      alert("Please sign in to access this feature");
-      return;
-    }
-    onClose?.();
-  };
+  const { user } = useAuth();
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -35,154 +16,93 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
   };
 
   const navigationItems = [
-    {
-      icon: Home,
-      label: "Home", 
-      href: user?.id ? "/app" : "/",
-      requiresAuth: false
-    },
-    {
-      icon: ChefHat,
-      label: "Cooking Modes",
-      href: "/app",
-      requiresAuth: false
-    },
-    {
-      icon: Bookmark,
-      label: "Saved Recipes",
-      href: "/my-recipes",
-      requiresAuth: true
-    },
-    {
-      icon: Star,
-      label: "Flavr+",
-      href: "/flavr-plus",
-      requiresAuth: false
-    },
-    {
-      icon: Settings,
-      label: "Settings",
-      href: "/settings",
-      requiresAuth: true
-    },
-    {
-      icon: Database,
-      label: "Developer Logs",
-      href: "/developer-logs",
-      requiresAuth: true,
-      adminOnly: true,
-      developerOnly: true
-    }
+    { id: 'home', label: 'Home', href: '/', icon: Home },
+    { id: 'modes', label: 'Recipe Modes', href: '/modes', icon: ChefHat },
+    { id: 'my-recipes', label: 'My Recipes', href: '/my-recipes', icon: Bookmark },
+    { id: 'flavr-plus', label: 'Flavr+', href: '/flavr-plus', icon: Star },
+    { id: 'settings', label: 'Settings', href: '/settings', icon: Settings },
+    { id: 'developer', label: 'Developer', href: '/developer', icon: Database },
   ];
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[10000]"
-        onClick={onClose}
-      >
-        <motion.div
-          initial={{ x: "-100%" }}
-          animate={{ x: 0 }}
-          exit={{ x: "-100%" }}
-          transition={{ type: "spring", damping: 25, stiffness: 200 }}
-          className="fixed left-0 top-0 bottom-0 w-72 max-w-[85vw] bg-white dark:bg-gray-900 shadow-xl"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Menu</h2>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-            >
-              {<X className="w-5 h-5 text-gray-500 dark:text-gray-400" />}
-            </button>
-          </div>
+    <div className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden"
+          >
+            <Menu className="w-5 h-5" />
+          </Button>
+          <Link href="/">
+            <div className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+              Flavr
+            </div>
+          </Link>
+        </div>
 
-          {/* Navigation Items */}
-          <nav className="flex-1 py-6">
-            <div className="space-y-1 px-4">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleTheme}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          </Button>
+
+          {user ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                Welcome, {user.firstName || 'User'}
+              </span>
+              <Link href="/api/logout">
+                <Button variant="outline" size="sm">
+                  Logout
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <Link href="/api/login">
+              <Button size="sm">
+                Login
+              </Button>
+            </Link>
+          )}
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700"
+          >
+            <div className="p-4 space-y-2">
               {navigationItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = location === item.href;
-                
-                // Hide developer logs if not developer email
-                if (item.developerOnly && user?.user?.email !== "william@blycontracting.co.uk") {
-                  return null;
-                }
-                
-                if (item.requiresAuth && !user?.user?.id) {
-                  return (
-                    <motion.div
-                      key={`auth-${item.href}`}
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
-                      className="flex items-center space-x-4 p-4 rounded-xl transition-all duration-200 min-h-[44px] group hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 cursor-pointer"
-                      onClick={() => handleNavigation(item.href, item.requiresAuth)}
-                    >
-                      <Icon className="w-5 h-5 flex-shrink-0" />
-                      <span className="font-medium text-sm sm:text-base">
-                        {item.label}
-                      </span>
-                    </motion.div>
-                  );
-                }
-                
+                const IconComponent = item.icon;
                 return (
-                  <Link key={`nav-${item.href}`} href={item.href}>
-                    <motion.div
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
-                      className={`flex items-center space-x-4 p-4 rounded-xl transition-all duration-200 min-h-[44px] group ${
-                        isActive 
-                          ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400' 
-                          : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
-                      }`}
-                      onClick={onClose}
+                  <Link key={item.id} href={item.href}>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start gap-3"
+                      onClick={() => setIsOpen(false)}
                     >
-                      <Icon className="w-5 h-5 flex-shrink-0" />
-                      <span className="font-medium text-sm sm:text-base">
-                        {item.label}
-                      </span>
-                    </motion.div>
+                      <IconComponent className="w-4 h-4" />
+                      {item.label}
+                    </Button>
                   </Link>
                 );
               })}
             </div>
-          </nav>
-
-          {/* Footer */}
-          <div className="p-4 border-t border-gray-100 dark:border-gray-800">
-            {/* Theme Toggle */}
-            <div className="flex justify-end mb-4">
-              <button
-                onClick={toggleTheme}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                {isDarkMode ? (
-                  {<span>🔧</span>}
-                ) : (
-                  {<span>🔧</span>}
-                )}
-              </button>
-            </div>
-            
-            {/* Footer Text */}
-            <div className="text-center">
-              <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center justify-center space-x-1">
-                <span>Made with</span>
-                {<Heart className="w-3 h-3 text-red-400 fill-current" />}
-                <span>for home cooks</span>
-              </p>
-            </div>
-          </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
