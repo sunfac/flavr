@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { iconMap } from "@/lib/iconMap";
+import Icon from "@/components/ui/Icon";
 import { useLocation } from "wouter";
 
 interface UpgradeModalProps {
@@ -29,19 +29,19 @@ export default function UpgradeModal({
 
   const features = [
     {
-      icon: <iconMap.sparkles className="w-5 h-5 text-orange-400" />,
+      icon: <Icon name="sparkles" className="w-5 h-5 text-orange-400" />,
       text: "Unlimited recipe generation"
     },
     {
-      icon: <iconMap.crown className="w-5 h-5 text-orange-400" />,
+      icon: <Icon name="crown" className="w-5 h-5 text-orange-400" />,
       text: "GPT-4 Turbo for smarter recipes"
     },
     {
-      icon: <div className="w-5 h-5 bg-orange-400 rounded" />,
+      icon: <Icon name="image" className="w-5 h-5 text-orange-400" />,
       text: "High-quality recipe images"
     },
     {
-      icon: <iconMap.calendar className="w-5 h-5 text-orange-400" />,
+      icon: <Icon name="calendar" className="w-5 h-5 text-orange-400" />,
       text: "Weekly meal plans & Flavr Rituals"
     }
   ];
@@ -51,7 +51,7 @@ export default function UpgradeModal({
       <DialogContent className="sm:max-w-md bg-slate-900 border-slate-700 text-white">
         <DialogHeader className="text-center">
           <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
-            <iconMap.crown className="w-8 h-8 text-white" />
+            <Icon name="crown" className="w-8 h-8 text-white" />
           </div>
           <DialogTitle className="text-xl font-bold text-white mb-2">
             {title}
