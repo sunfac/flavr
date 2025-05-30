@@ -1,10 +1,4 @@
-// Fast Refresh suppression patch
-try {
-  window.$RefreshReg$ = () => {};
-  window.$RefreshSig$ = () => type => type;
-} catch (err) {
-  console.warn('Fast Refresh suppression failed', err);
-}
+// Fast Refresh runtime suppression is handled by /refresh-suppress.js
 
 import { createRoot } from "react-dom/client";
 import App from "./App";
