@@ -3,18 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Share2,
-  Twitter,
-  Facebook,
-  Instagram,
-  MessageCircle,
-  Printer,
-  FileText,
-  QrCode,
-  FileDown,
-  Copy
-} from "lucide-react";
+import { iconMap } from "@/lib/iconMap";
 import { QRCodeSVG as QRCode } from 'qrcode.react';
 // @ts-ignore
 import html2pdf from 'html2pdf.js';

@@ -5,20 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Clock, 
-  ChefHat, 
-  Users, 
-  Flame, 
-  Zap, 
-  Microwave,
-  Wind,
-  Home,
-  Utensils,
-  Timer,
-  ArrowLeft, 
-  ArrowRight 
-} from "lucide-react";
+import { iconMap } from "@/lib/iconMap";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -425,7 +412,7 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
                 onClick={handleBack}
                 className="flex items-center gap-2 px-6 py-3 h-12"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <iconMap.chevronLeft className="w-4 h-4" />
                 Back
               </Button>
             )}
@@ -438,7 +425,7 @@ export default function ChefAssistQuiz({ onComplete, onLoading }: ChefAssistQuiz
             >
               {generateRecipeMutation.isPending ? "Creating..." : 
                currentStep === totalSteps - 1 ? "Create Recipe" : "Next"}
-              <ArrowRight className="w-4 h-4" />
+              <iconMap.chevronRight className="w-4 h-4" />
             </Button>
           </div>
         </div>
