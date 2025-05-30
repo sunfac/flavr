@@ -36,5 +36,25 @@ if (typeof window !== 'undefined') {
 
 const rootElement = document.getElementById("root");
 if (rootElement) {
-  createRoot(rootElement).render(<App />);
+  try {
+    createRoot(rootElement).render(<App />);
+    console.log("Flavr app rendered successfully");
+  } catch (error) {
+    console.error("Failed to render Flavr app:", error);
+    rootElement.innerHTML = `
+      <div style="padding: 20px; background: #1e293b; color: white; min-height: 100vh; font-family: sans-serif;">
+        <h1>Flavr - Diagnostic Mode</h1>
+        <p>App failed to render. Error details:</p>
+        <pre style="background: #0f172a; padding: 10px; border-radius: 5px; color: #f87171;">${error}</pre>
+        <button onclick="window.location.reload()" style="padding: 10px 20px; background: #f97316; color: white; border: none; border-radius: 5px; margin-top: 10px;">Retry</button>
+      </div>
+    `;
+  }
+} else {
+  document.body.innerHTML = `
+    <div style="padding: 20px; background: #1e293b; color: white; min-height: 100vh; font-family: sans-serif;">
+      <h1>Flavr - Missing Root Element</h1>
+      <p>Could not find root element to mount the application.</p>
+    </div>
+  `;
 }
