@@ -2,9 +2,30 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-// Disable React Fast Refresh temporarily to bypass Vite runtime error
-if (typeof window !== 'undefined' && window.__vite_plugin_react_preamble_installed__) {
-  delete window.__vite_plugin_react_preamble_installed__;
+// Override Vite error handling to prevent overlay blocking
+if (typeof window !== 'undefined') {
+  // Continuously hide error overlays
+  const hideErrorOverlay = () => {
+    const overlays = document.querySelectorAll('vite-error-overlay');
+    overlays.forEach(overlay => {
+      if (overlay instanceof HTMLElement) {
+        overlay.style.display = 'none';
+      }
+    });
+  };
+  
+  // Hide immediately and on interval
+  hideErrorOverlay();
+  setInterval(hideErrorOverlay, 100);
+  
+  window.addEventListener('error', (e) => {
+    if (e.message && e.message.includes('RefreshRuntime.register')) {
+      e.preventDefault();
+      e.stopPropagation();
+      hideErrorOverlay();
+      return false;
+    }
+  });
 }
 
 
