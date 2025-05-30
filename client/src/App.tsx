@@ -4,6 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import LandingPage from "@/pages/LandingPage";
 import LoginPage from "@/pages/LoginPage";
 import ModeSelection from "@/pages/ModeSelection";
@@ -49,14 +50,10 @@ function Router() {
 
 function App() {
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Router />
-          <Toaster />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </React.StrictMode>
+    <div className="min-h-screen bg-slate-900 text-white p-8">
+      <h1 className="text-2xl">Flavr App Loading Test</h1>
+      <p>Minimal React app without providers</p>
+    </div>
   );
 }
 
