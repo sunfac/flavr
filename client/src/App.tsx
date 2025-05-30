@@ -10,7 +10,7 @@ import LoginPage from "@/pages/LoginPage";
 import ModeSelection from "@/pages/ModeSelection";
 import ShoppingMode from "@/pages/ShoppingMode";
 import FridgeMode from "@/pages/FridgeMode";
-import ChefAssistMode from "@/pages/ChefAssistMode";
+// import ChefAssistMode from "@/pages/ChefAssistMode"; // Temporarily disabled due to icon issues
 import FlavrRituals from "@/pages/FlavrRituals";
 import FlavrRitualsPhase2 from "@/pages/FlavrRitualsPhase2";
 import FlavrPlus from "@/pages/FlavrPlus";
