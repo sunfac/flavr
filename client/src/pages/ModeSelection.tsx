@@ -79,7 +79,7 @@ export default function ModeSelection() {
         <div className="w-full bg-card/90 backdrop-blur-sm border-b border-border mt-16 md:mt-20">
           <div className="max-w-sm mx-auto px-4 py-2">
             <div className="flex items-center justify-center gap-1.5 text-xs md:text-sm text-muted-foreground">
-              <Clock className="w-3 h-3 md:w-4 md:h-4" />
+              {React.createElement(iconMap.clock, { className="w-3 h-3 md:w-4 md:h-4" / })}
               <span>{getRemainingRecipes()} free recipes remaining</span>
             </div>
           </div>
@@ -108,7 +108,7 @@ export default function ModeSelection() {
               <CardContent className="text-center p-8">
                 {mode.premium && (
                   <Badge className="absolute top-3 right-3 bg-gradient-to-r from-orange-400 to-red-400 text-white border-0 text-xs">
-                    <Crown className="w-3 h-3 mr-1" />
+                    {React.createElement(iconMap.crown, { className="w-3 h-3 mr-1" / })}
                     Plus
                   </Badge>
                 )}
@@ -156,7 +156,7 @@ export default function ModeSelection() {
       )}
       
       {showUserMenu && (
-        <UserMenu onClose={() => setShowUserMenu(false)} />
+        {React.createElement(iconMap.userMenu, { onClose={() = })} setShowUserMenu(false)} />
       )}
     </div>
   );

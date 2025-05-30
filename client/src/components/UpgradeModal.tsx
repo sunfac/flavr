@@ -29,11 +29,11 @@ export default function UpgradeModal({
 
   const features = [
     {
-      icon: <Sparkles className="w-5 h-5 text-orange-400" />,
+      icon: {React.createElement(iconMap.sparkles, { className="w-5 h-5 text-orange-400" / })},
       text: "Unlimited recipe generation"
     },
     {
-      icon: <Crown className="w-5 h-5 text-orange-400" />,
+      icon: {React.createElement(iconMap.crown, { className="w-5 h-5 text-orange-400" / })},
       text: "GPT-4 Turbo for smarter recipes"
     },
     {
@@ -41,7 +41,7 @@ export default function UpgradeModal({
       text: "High-quality recipe images"
     },
     {
-      icon: <Calendar className="w-5 h-5 text-orange-400" />,
+      icon: {React.createElement(iconMap.calendar, { className="w-5 h-5 text-orange-400" / })},
       text: "Weekly meal plans & Flavr Rituals"
     }
   ];
@@ -51,7 +51,7 @@ export default function UpgradeModal({
       <DialogContent className="sm:max-w-md bg-slate-900 border-slate-700 text-white">
         <DialogHeader className="text-center">
           <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
-            <Crown className="w-8 h-8 text-white" />
+            {React.createElement(iconMap.crown, { className="w-8 h-8 text-white" / })}
           </div>
           <DialogTitle className="text-xl font-bold text-white mb-2">
             {title}
@@ -84,7 +84,7 @@ export default function UpgradeModal({
                   {feature.icon}
                 </div>
                 <span className="text-sm text-slate-300">{feature.text}</span>
-                <Check className="w-4 h-4 text-green-400 ml-auto" />
+                {React.createElement(iconMap.check, { className="w-4 h-4 text-green-400 ml-auto" / })}
               </div>
             ))}
           </div>
@@ -108,7 +108,7 @@ export default function UpgradeModal({
               onClick={handleUpgradeClick}
               className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold"
             >
-              <Crown className="w-4 h-4 mr-2" />
+              {React.createElement(iconMap.crown, { className="w-4 h-4 mr-2" / })}
               Upgrade to Flavr+
             </Button>
           </div>

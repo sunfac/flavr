@@ -122,7 +122,7 @@ ${publicUrl}`;
             onClick={() => handleSocialClick('twitter')}
             className="flex items-center gap-2 hover:bg-blue-500/10 hover:border-blue-500/50"
           >
-            <Twitter className="w-4 h-4" />
+            {React.createElement(iconMap.twitter, { className: "w-4 h-4" })}
             Twitter
           </Button>
           
@@ -132,7 +132,7 @@ ${publicUrl}`;
             onClick={() => handleSocialClick('instagram')}
             className="flex items-center gap-2 hover:bg-pink-500/10 hover:border-pink-500/50"
           >
-            <Instagram className="w-4 h-4" />
+            {React.createElement(iconMap.instagram, { className="w-4 h-4" / })}
             Instagram
           </Button>
           
@@ -142,7 +142,7 @@ ${publicUrl}`;
             onClick={() => handleSocialClick('facebook')}
             className="flex items-center gap-2 hover:bg-blue-600/10 hover:border-blue-600/50"
           >
-            <Facebook className="w-4 h-4" />
+            {React.createElement(iconMap.facebook, { className="w-4 h-4" / })}
             Facebook
           </Button>
           
@@ -152,7 +152,7 @@ ${publicUrl}`;
             onClick={() => handleSocialClick('whatsapp')}
             className="flex items-center gap-2 hover:bg-green-500/10 hover:border-green-500/50"
           >
-            <MessageCircle className="w-4 h-4" />
+            {React.createElement(iconMap.messageCircle, { className="w-4 h-4" / })}
             WhatsApp
           </Button>
         </div>
@@ -165,7 +165,7 @@ ${publicUrl}`;
             onClick={handlePrint}
             className="flex items-center gap-2 hover:bg-slate-500/10 hover:border-slate-500/50"
           >
-            <Printer className="w-4 h-4" />
+            {React.createElement(iconMap.printer, { className="w-4 h-4" / })}
             Print
           </Button>
           
@@ -175,7 +175,7 @@ ${publicUrl}`;
             onClick={handleCopyFullRecipe}
             className="flex items-center gap-2 hover:bg-orange-500/10 hover:border-orange-500/50"
           >
-            <FileText className="w-4 h-4" />
+            {React.createElement(iconMap.fileText, { className="w-4 h-4" / })}
             Copy Recipe
           </Button>
           
@@ -185,7 +185,7 @@ ${publicUrl}`;
             onClick={() => navigator.clipboard.writeText(publicUrl)}
             className="flex items-center gap-2 hover:bg-purple-500/10 hover:border-purple-500/50"
           >
-            <ExternalLink className="w-4 h-4" />
+            {React.createElement(iconMap.externalLink, { className="w-4 h-4" / })}
             Copy Link
           </Button>
         </div>
@@ -203,7 +203,7 @@ ${publicUrl}`;
               onClick={() => navigator.clipboard.writeText(publicUrl)}
               className="ml-3 hover:bg-orange-500/20"
             >
-              <Copy className="w-4 h-4" />
+              {React.createElement(iconMap.copy, { className="w-4 h-4" / })}
             </Button>
           </div>
         </div>
