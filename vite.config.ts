@@ -3,18 +3,20 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-export default defineConfig({
+// Define conditional Cartographer plugin for Replit
+const cartographerPlugin = async () => {
+  if (process.env.NODE_ENV !== "production" && process.env.REPL_ID !== undefined) {
+    const { cartographer } = await import("@replit/vite-plugin-cartographer");
+    return [cartographer()];
+  }
+  return [];
+};
+
+export default defineConfig(async () => ({
   plugins: [
     react(),
     runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer(),
-          ),
-        ]
-      : []),
+    ...(await cartographerPlugin()),
   ],
   resolve: {
     alias: {
@@ -23,9 +25,16 @@ export default defineConfig({
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
     },
   },
+  optimizeDeps: {
+    exclude: [
+      "lucide-react",
+      "@tanstack/react-query",
+      "@radix-ui/react-tooltip"
+    ],
+  },
   root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "server/public"), // ✅ FIXED HERE
+    outDir: path.resolve(import.meta.dirname, "server/public"),
     emptyOutDir: true,
   },
-});
+}));
