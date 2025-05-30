@@ -481,11 +481,11 @@ export default function SlideQuizShell({
           }
           if (currentQ.id === 'time') {
             return [
-              { value: 15, label: '15 min', icon: <Clock className="w-4 h-4" /> },
-              { value: 30, label: '30 min', icon: <Clock className="w-4 h-4" /> },
-              { value: 60, label: '60 min', icon: <Clock className="w-4 h-4" /> },
-              { value: 90, label: '90 min', icon: <Clock className="w-4 h-4" /> },
-              { value: 120, label: 'No limit', icon: <Sparkles className="w-4 h-4" /> }
+              { value: 15, label: '15 min', icon: <iconMap.clock className="w-4 h-4" /> },
+              { value: 30, label: '30 min', icon: <iconMap.clock className="w-4 h-4" /> },
+              { value: 60, label: '60 min', icon: <iconMap.clock className="w-4 h-4" /> },
+              { value: 90, label: '90 min', icon: <iconMap.clock className="w-4 h-4" /> },
+              { value: 120, label: 'No limit', icon: <iconMap.sparkles className="w-4 h-4" /> }
             ];
           }
           return [];
