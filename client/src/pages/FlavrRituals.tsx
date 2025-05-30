@@ -298,7 +298,7 @@ export default function FlavrRituals() {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
-                            <Calendar className="w-5 h-5 text-purple-400" />
+                            {React.createElement(iconMap.calendar, { className: "w-5 h-5 text-purple-400" })}
                             <CardTitle className="text-lg text-white">{dayLabels[index]}</CardTitle>
                             {!dayPrefs.skip && (
                               <Badge variant="outline" className="text-xs border-purple-400 text-purple-200">
@@ -342,7 +342,7 @@ export default function FlavrRituals() {
                                     "border-purple-400 text-purple-200 hover:bg-purple-700/20"
                                   }
                                 >
-                                  {dayPrefs.skip ? <Check className="w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                                  {dayPrefs.skip ? React.createElement(iconMap.check, { className: "w-4 h-4 mr-2" }) : React.createElement(iconMap.plus, { className: "w-4 h-4 mr-2" })}
                                   {dayPrefs.skip ? "Skipping" : "Cook"}
                                 </Button>
                               </div>
