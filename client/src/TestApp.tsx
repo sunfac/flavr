@@ -1,10 +1,16 @@
-import React from "react";
-
 export default function TestApp() {
+  console.log("TestApp component is executing");
+  
   return (
-    <div className="min-h-screen bg-blue-500 text-white p-8">
-      <h1 className="text-4xl font-bold">Test App Working</h1>
-      <p>If you see this, React is rendering correctly</p>
+    <div style={{ 
+      minHeight: "100vh", 
+      backgroundColor: "red", 
+      color: "white", 
+      padding: "20px",
+      fontSize: "24px"
+    }}>
+      <h1>BASIC TEST - React Working</h1>
+      <p>This is a minimal test component</p>
     </div>
   );
 }
