@@ -6,9 +6,9 @@
  * and ensures the application deploys successfully on Replit.
  */
 
-const esbuild = require('esbuild');
-const fs = require('fs');
-const path = require('path');
+import esbuild from 'esbuild';
+import fs from 'fs';
+import path from 'path';
 
 console.log('🚀 Starting production deployment build...');
 
