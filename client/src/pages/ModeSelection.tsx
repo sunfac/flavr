@@ -30,28 +30,28 @@ export default function ModeSelection() {
     {
       id: "shopping",
       title: "Shopping Mode",
-      icon: ShoppingCart,
+      icon: iconMap.shoppingCart,
       description: "Personalized recipes with shopping lists",
       subtitle: "Perfect for meal planning & grocery runs"
     },
     {
       id: "fridge",
       title: "Fridge to Fork",
-      icon: Refrigerator,
+      icon: iconMap.refrigerator,
       description: "Transform what you have into meals",
       subtitle: "Zero waste, maximum creativity"
     },
     {
       id: "chef",
       title: "Chef Assist",
-      icon: ChefHat,
+      icon: iconMap.chefHat,
       description: "Expert guidance for special occasions",
       subtitle: "Elevate your culinary skills"
     },
     {
       id: "flavr-rituals",
       title: "Flavr Rituals",
-      icon: Calendar,
+      icon: iconMap.calendar,
       description: "Weekly meal planning with smart shopping",
       subtitle: "Plan ahead, waste less, eat better",
       premium: true

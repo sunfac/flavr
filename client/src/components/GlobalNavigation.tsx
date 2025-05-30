@@ -35,37 +35,37 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
 
   const navigationItems = [
     {
-      icon: Home,
+      icon: iconMap.home,
       label: "Home", 
       href: user?.id ? "/app" : "/",
       requiresAuth: false
     },
     {
-      icon: ChefHat,
+      icon: iconMap.chefHat,
       label: "Cooking Modes",
       href: "/app",
       requiresAuth: false
     },
     {
-      icon: Bookmark,
+      icon: iconMap.bookmark,
       label: "Saved Recipes",
       href: "/my-recipes",
       requiresAuth: true
     },
     {
-      icon: Star,
+      icon: iconMap.star,
       label: "Flavr+",
       href: "/flavr-plus",
       requiresAuth: false
     },
     {
-      icon: Settings,
+      icon: iconMap.settings,
       label: "Settings",
       href: "/settings",
       requiresAuth: true
     },
     {
-      icon: Database,
+      icon: iconMap.database,
       label: "Developer Logs",
       href: "/developer-logs",
       requiresAuth: true,
@@ -98,7 +98,7 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
               onClick={onClose}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
             >
-              <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+              <iconMap.x className="w-5 h-5 text-gray-500 dark:text-gray-400" />
             </button>
           </div>
 
@@ -164,9 +164,9 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
                 title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 {isDarkMode ? (
-                  <Sun className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                  <iconMap.sun className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 ) : (
-                  <Moon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                  <iconMap.moon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 )}
               </button>
             </div>
@@ -175,7 +175,7 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
             <div className="text-center">
               <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center justify-center space-x-1">
                 <span>Made with</span>
-                <Heart className="w-3 h-3 text-red-400 fill-current" />
+                <iconMap.heart className="w-3 h-3 text-red-400 fill-current" />
                 <span>for home cooks</span>
               </p>
             </div>
