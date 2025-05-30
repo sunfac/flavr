@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { iconMap } from "@/lib/iconMap";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface RecipeIdea {
@@ -152,7 +152,7 @@ export default function TinderRecipeCards({
                       onClick={() => onSelectRecipe(currentRecipe)}
                       className={`w-full h-12 font-semibold rounded-xl transition-all duration-300 bg-gradient-to-r ${themeColors[theme]} hover:scale-105 shadow-lg hover:shadow-orange-500/25 text-white`}
                     >
-                      <Heart className="w-4 h-4 mr-2" />
+                      <iconMap.heart className="w-4 h-4 mr-2" />
                       Use This Recipe
                     </Button>
                   </CardContent>

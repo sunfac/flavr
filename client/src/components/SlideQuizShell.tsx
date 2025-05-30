@@ -663,7 +663,7 @@ export default function SlideQuizShell({
               disabled={currentQuestionIndex === 0}
               className="flex items-center gap-2 border-slate-600 bg-slate-800 text-white hover:bg-slate-700 px-4 py-2 min-w-[80px] flex-shrink-0"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <iconMap.arrowLeft className="w-4 h-4" />
               <span>Back</span>
             </Button>
 
@@ -680,7 +680,7 @@ export default function SlideQuizShell({
               style={{ minWidth: '100px', backgroundColor: '#f97316' }}
             >
               <span className="whitespace-nowrap">{currentQuestionIndex === questions.length - 1 ? 'Generate' : 'Next'}</span>
-              <ArrowRight className="w-4 h-4" />
+              <iconMap.arrowRight className="w-4 h-4" />
             </Button>
           </div>
         </div>
