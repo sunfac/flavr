@@ -1,7 +1,7 @@
 // Fast Refresh runtime suppression is handled by /refresh-suppress.js
 
 import { createRoot } from "react-dom/client";
-import App from "./App-minimal";
+import App from "./App";
 import "./index.css";
 
 // Override Vite error handling to prevent overlay blocking
