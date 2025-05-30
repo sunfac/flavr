@@ -348,7 +348,7 @@ ${publicUrl}`;
               onClick={downloadPDF}
               className="flex items-center gap-2 hover:bg-red-500/10 hover:border-red-500/50"
             >
-              <FileDown className="w-4 h-4" />
+              <iconMap.download className="w-4 h-4" />
               PDF
             </Button>
             
@@ -358,7 +358,7 @@ ${publicUrl}`;
               onClick={downloadQRCode}
               className="flex items-center gap-2 hover:bg-purple-500/10 hover:border-purple-500/50"
             >
-              <QrCode className="w-4 h-4" />
+              <iconMap.share className="w-4 h-4" />
               QR Code
             </Button>
           </div>
@@ -386,7 +386,7 @@ ${publicUrl}`;
                 onClick={() => navigator.clipboard.writeText(publicUrl)}
                 className="ml-3 hover:bg-orange-500/20"
               >
-                <Copy className="w-4 h-4" />
+                <iconMap.copy className="w-4 h-4" />
               </Button>
             </div>
           </div>
