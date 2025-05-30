@@ -48,19 +48,15 @@ function Router() {
 }
 
 function App() {
-  // Temporarily disable PWA updater to fix reload loop
-  // useEffect(() => {
-  //   initializePWAUpdater();
-  // }, []);
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-        <PWAInstallPrompt />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Router />
+          <Toaster />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
   );
 }
 
