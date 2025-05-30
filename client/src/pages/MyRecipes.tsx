@@ -7,7 +7,19 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { iconMap } from "@/lib/iconMap";
+import { 
+  Clock, 
+  Share2, 
+  Copy, 
+  Eye, 
+  ShoppingCart, 
+  Refrigerator, 
+  ChefHat,
+  Heart,
+  Smile,
+  Zap,
+  Coffee
+} from "lucide-react";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalNavigation from "@/components/GlobalNavigation";
 import SettingsPanel from "@/components/SettingsPanel";

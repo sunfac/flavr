@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Icon from "@/components/ui/Icon";
+import { iconMap } from "@/lib/iconMap";
 import { Badge } from "@/components/ui/badge";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
@@ -30,28 +30,28 @@ export default function ModeSelection() {
     {
       id: "shopping",
       title: "Shopping Mode",
-      icon: iconMap.shoppingCart,
+      icon: ShoppingCart,
       description: "Personalized recipes with shopping lists",
       subtitle: "Perfect for meal planning & grocery runs"
     },
     {
       id: "fridge",
       title: "Fridge to Fork",
-      icon: iconMap.refrigerator,
+      icon: Refrigerator,
       description: "Transform what you have into meals",
       subtitle: "Zero waste, maximum creativity"
     },
     {
       id: "chef",
       title: "Chef Assist",
-      icon: iconMap.chefHat,
+      icon: ChefHat,
       description: "Expert guidance for special occasions",
       subtitle: "Elevate your culinary skills"
     },
     {
       id: "flavr-rituals",
       title: "Flavr Rituals",
-      icon: iconMap.calendar,
+      icon: Calendar,
       description: "Weekly meal planning with smart shopping",
       subtitle: "Plan ahead, waste less, eat better",
       premium: true
