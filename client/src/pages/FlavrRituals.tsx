@@ -1,20 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { 
-  Calendar, 
-  Crown, 
-  ChefHat, 
-  Clock, 
-  DollarSign,
-  Heart,
-  Utensils,
-  Plus,
-  Check,
-  ChevronRight,
-  ChevronLeft,
-  Sparkles
-} from "lucide-react";
+import { iconMap } from "@/lib/iconMap";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
