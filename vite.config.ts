@@ -25,7 +25,13 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "server/public"), // ✅ FIXED HERE
+    outDir: path.resolve(import.meta.dirname, "server/public"),
     emptyOutDir: true,
+  },
+  optimizeDeps: {
+    include: ["lucide-react"],
+  },
+  esbuild: {
+    treeShaking: true,
   },
 });
