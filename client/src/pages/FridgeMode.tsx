@@ -17,7 +17,7 @@ import { apiRequest } from "@/lib/queryClient";
 import AuthModal from "@/components/AuthModal";
 import FlavrPlusGate from "@/components/FlavrPlusGate";
 import UpgradeModal from "@/components/UpgradeModal";
-import { Clock } from "lucide-react";
+import { iconMap } from "@/lib/iconMap";
 
 export default function FridgeMode() {
   const [, navigate] = useLocation();
