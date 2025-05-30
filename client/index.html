@@ -30,27 +30,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <script>
-      // Immediate error suppression before any modules load
-      window.addEventListener('error', function(e) {
-        if (e.message && e.message.includes('RefreshRuntime')) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          return false;
-        }
-      });
-      
-      // Override console methods to suppress plugin errors
-      const originalConsoleError = console.error;
-      console.error = function(...args) {
-        const message = args.join(' ');
-        if (message.includes('plugin:runtime-error-plugin') || 
-            message.includes('RefreshRuntime.register is not a function')) {
-          return; // Suppress these specific errors
-        }
-        originalConsoleError.apply(console, args);
-      };
-    </script>
     <script src="/refresh-suppress.js"></script>
     <script type="module" src="/src/main.tsx"></script>
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
