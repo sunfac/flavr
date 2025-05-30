@@ -3,17 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Share2,
-  Twitter,
-  Facebook,
-  Instagram,
-  MessageCircle,
-  Printer,
-  FileText,
-  Copy,
-  ExternalLink
-} from "lucide-react";
+import { iconMap } from "@/lib/iconMap";
 
 interface SocialShareToolsProps {
   id: string;
@@ -115,7 +105,7 @@ ${publicUrl}`;
     <Card className="bg-card/90 backdrop-blur-xl border border-border/50">
       <CardContent className="p-6">
         <div className="flex items-center gap-3 mb-6">
-          <Share2 className="w-5 h-5 text-orange-400" />
+          <iconMap.share className="w-5 h-5 text-orange-400" />
           <h3 className="text-lg font-semibold text-foreground">Share Recipe</h3>
           {isShared && (
             <Badge variant="secondary" className="bg-orange-500/20 text-orange-300">
