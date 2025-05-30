@@ -2,23 +2,6 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { ensureDeploymentReady, createMinimalBuild } from "./deploymentHelper";
-import fs from "fs";
-import path from "path";
-
-// Ensure we're working from the correct directory for production
-// When running from dist/index.js, we need to adjust the working directory
-if (process.env.NODE_ENV === "production") {
-  // The compiled file is in dist/, so we need to go up two levels to reach project root
-  const currentDir = import.meta.dirname || process.cwd();
-  const projectRoot = currentDir.includes('/dist') 
-    ? path.resolve(currentDir, '..') 
-    : currentDir;
-  
-  if (process.cwd() !== projectRoot) {
-    process.chdir(projectRoot);
-    console.log(`Changed working directory from ${process.cwd()} to: ${projectRoot}`);
-  }
-}
 
 const app = express();
 app.use(express.json());
@@ -71,11 +54,23 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  
-  // Always use Vite development server to avoid path resolution issues
-  // This ensures the app works in both development and production environments
-  await setupVite(app, server);
-  log("Using Vite development server for reliable module compilation");
+  if (app.get("env") === "development") {
+    await setupVite(app, server);
+  } else {
+    // Check if production build is ready, fallback to development mode if not
+    const hasProductionBuild = ensureDeploymentReady();
+    if (hasProductionBuild) {
+      try {
+        serveStatic(app);
+      } catch (error) {
+        log("Production build found but failed to serve, falling back to development mode");
+        await setupVite(app, server);
+      }
+    } else {
+      log("Using development mode for deployment due to missing production build");
+      await setupVite(app, server);
+    }
+  }
 
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.

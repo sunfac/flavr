@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Sparkles, Zap, Crown } from "@/lib/icons";
+import { Check, Sparkles, Zap, Crown } from "lucide-react";
 
 interface FlavrPlusUpgradeModalProps {
   isOpen: boolean;

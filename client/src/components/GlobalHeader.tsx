@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Menu, Settings, Crown, LogIn, UserPlus } from "@/lib/icons";
+import { Menu, Settings, Crown, LogIn, UserPlus } from "lucide-react";
 import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
