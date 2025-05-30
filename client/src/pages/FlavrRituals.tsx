@@ -34,28 +34,28 @@ const cuisineOptions = [
 ];
 
 const moodOptions = [
-  { value: "focused", label: "Focused", description: "Sharp, purposeful cooking for productivity", icon: <ChefHat className="w-4 h-4" /> },
-  { value: "tired", label: "Tired", description: "Simple, comforting meals that restore energy", icon: <Heart className="w-4 h-4" /> },
-  { value: "lightClean", label: "Light & Clean", description: "Fresh, healthy dishes that feel refreshing", icon: <Utensils className="w-4 h-4" /> },
-  { value: "effortlessJoy", label: "Effortless Joy", description: "Easy recipes that bring happiness", icon: <Heart className="w-4 h-4" /> },
-  { value: "indulgent", label: "Indulgent", description: "Rich, luxurious flavors for special moments", icon: <Crown className="w-4 h-4" /> },
-  { value: "creative", label: "Creative", description: "Experimental dishes to inspire imagination", icon: <Sparkles className="w-4 h-4" /> },
-  { value: "celebratory", label: "Celebratory", description: "Festive meals perfect for special occasions", icon: <Crown className="w-4 h-4" /> },
-  { value: "laidBack", label: "Laid-back", description: "Relaxed, casual cooking for easy days", icon: <Clock className="w-4 h-4" /> },
-  { value: "adventurous", label: "Adventurous", description: "Bold, exciting flavors from around the world", icon: <Sparkles className="w-4 h-4" /> },
-  { value: "minimalist", label: "Minimalist", description: "Simple, clean recipes with few ingredients", icon: <Utensils className="w-4 h-4" /> }
+  { value: "focused", label: "Focused", description: "Sharp, purposeful cooking for productivity", icon: React.createElement(iconMap.chefHat, { className: "w-4 h-4" }) },
+  { value: "tired", label: "Tired", description: "Simple, comforting meals that restore energy", icon: React.createElement(iconMap.heart, { className: "w-4 h-4" }) },
+  { value: "lightClean", label: "Light & Clean", description: "Fresh, healthy dishes that feel refreshing", icon: React.createElement(iconMap.utensils, { className: "w-4 h-4" }) },
+  { value: "effortlessJoy", label: "Effortless Joy", description: "Easy recipes that bring happiness", icon: React.createElement(iconMap.heart, { className: "w-4 h-4" }) },
+  { value: "indulgent", label: "Indulgent", description: "Rich, luxurious flavors for special moments", icon: React.createElement(iconMap.crown, { className: "w-4 h-4" }) },
+  { value: "creative", label: "Creative", description: "Experimental dishes to inspire imagination", icon: React.createElement(iconMap.sparkles, { className: "w-4 h-4" }) },
+  { value: "celebratory", label: "Celebratory", description: "Festive meals perfect for special occasions", icon: React.createElement(iconMap.crown, { className: "w-4 h-4" }) },
+  { value: "laidBack", label: "Laid-back", description: "Relaxed, casual cooking for easy days", icon: React.createElement(iconMap.clock, { className: "w-4 h-4" }) },
+  { value: "adventurous", label: "Adventurous", description: "Bold, exciting flavors from around the world", icon: React.createElement(iconMap.sparkles, { className: "w-4 h-4" }) },
+  { value: "minimalist", label: "Minimalist", description: "Simple, clean recipes with few ingredients", icon: React.createElement(iconMap.utensils, { className: "w-4 h-4" }) }
 ];
 
 const ambitionOptions = [
-  { value: "low", label: "Simple", icon: <Clock className="w-4 h-4" /> },
-  { value: "medium", label: "Moderate", icon: <ChefHat className="w-4 h-4" /> },
-  { value: "high", label: "Challenge", icon: <Crown className="w-4 h-4" /> },
+  { value: "low", label: "Simple", icon: React.createElement(iconMap.clock, { className: "w-4 h-4" }) },
+  { value: "medium", label: "Moderate", icon: React.createElement(iconMap.chefHat, { className: "w-4 h-4" }) },
+  { value: "high", label: "Challenge", icon: React.createElement(iconMap.crown, { className: "w-4 h-4" }) },
 ];
 
 const budgetOptions = [
-  { value: "low", label: "Budget", icon: <DollarSign className="w-4 h-4" /> },
-  { value: "medium", label: "Moderate", icon: <DollarSign className="w-4 h-4" /> },
-  { value: "high", label: "Premium", icon: <DollarSign className="w-4 h-4" /> },
+  { value: "low", label: "Budget", icon: React.createElement(iconMap.dollarSign, { className: "w-4 h-4" }) },
+  { value: "medium", label: "Moderate", icon: React.createElement(iconMap.dollarSign, { className: "w-4 h-4" }) },
+  { value: "high", label: "Premium", icon: React.createElement(iconMap.dollarSign, { className: "w-4 h-4" }) },
 ];
 
 interface DayPreferences {
@@ -178,7 +178,7 @@ export default function FlavrRituals() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center bg-white/10 backdrop-blur-md rounded-2xl p-8 max-w-md mx-auto border border-purple-500/20"
           >
-            <Crown className="w-16 h-16 text-purple-400 mx-auto mb-4" />
+            {React.createElement(iconMap.crown, { className: "w-16 h-16 text-purple-400 mx-auto mb-4" })}
             <h2 className="text-2xl font-bold text-white mb-4">Authentication Required</h2>
             <p className="text-purple-200 mb-6">
               Please log in to access Flavr Rituals and start planning your weekly meals.
@@ -263,10 +263,10 @@ export default function FlavrRituals() {
             className="text-center px-6 mb-8"
           >
             <div className="flex items-center justify-center mb-4">
-              <Calendar className="w-8 h-8 text-purple-400 mr-3" />
+              {React.createElement(iconMap.calendar, { className: "w-8 h-8 text-purple-400 mr-3" })}
               <h1 className="text-3xl font-bold text-white">✨ Flavr Rituals</h1>
               <Badge className="ml-3 bg-gradient-to-r from-purple-400 to-indigo-400 text-white border-0">
-                <Crown className="w-3 h-3 mr-1" />
+                {React.createElement(iconMap.crown, { className: "w-3 h-3 mr-1" })}
                 Premium
               </Badge>
             </div>
@@ -310,12 +310,12 @@ export default function FlavrRituals() {
                             )}
                           </div>
                           <div className="flex items-center space-x-2">
-                            {dayPrefs.mood && <Heart className="w-4 h-4 text-purple-400" />}
-                            {dayPrefs.ambition && <ChefHat className="w-4 h-4 text-purple-400" />}
-                            {dayPrefs.budget && <DollarSign className="w-4 h-4 text-purple-400" />}
+                            {dayPrefs.mood && React.createElement(iconMap.heart, { className: "w-4 h-4 text-purple-400" })}
+                            {dayPrefs.ambition && React.createElement(iconMap.chefHat, { className: "w-4 h-4 text-purple-400" })}
+                            {dayPrefs.budget && React.createElement(iconMap.dollarSign, { className: "w-4 h-4 text-purple-400" })}
                             {isExpanded ? 
-                              <ChevronLeft className="w-5 h-5 text-purple-400" /> : 
-                              <ChevronRight className="w-5 h-5 text-purple-400" />
+                              React.createElement(iconMap.chevronLeft, { className: "w-5 h-5 text-purple-400" }) : 
+                              React.createElement(iconMap.chevronRight, { className: "w-5 h-5 text-purple-400" })
                             }
                           </div>
                         </div>
@@ -479,7 +479,7 @@ export default function FlavrRituals() {
                 onClick={confirmWeeklyPlan}
                 className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-8 py-3 text-lg font-semibold rounded-xl shadow-lg shadow-purple-500/25"
               >
-                <Sparkles className="w-5 h-5 mr-2" />
+                {React.createElement(iconMap.sparkles, { className: "w-5 h-5 mr-2" })}
                 Generate Weekly Recipes
               </Button>
             </motion.div>
