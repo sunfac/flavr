@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Menu, Settings, Crown, LogIn, UserPlus } from "lucide-react";
+import { iconMap } from "@/lib/iconMap";
 import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -51,7 +51,7 @@ export default function GlobalHeader({
             onClick={onMenuClick}
             className="text-white hover:bg-white/10 relative z-10"
           >
-            <Menu className="w-6 h-6" />
+            <iconMap.menu className="w-6 h-6" />
           </Button>
           
           {/* Flavr+ button - always visible as info page, icon only */}
@@ -61,7 +61,7 @@ export default function GlobalHeader({
             onClick={handleFlavrPlusClick}
             className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1.5 py-1 relative z-10 border border-orange-400/30 hover:border-orange-400/50"
           >
-            <Crown className="w-4 h-4" />
+            <iconMap.crown className="w-4 h-4" />
           </Button>
         </div>
 
@@ -80,7 +80,7 @@ export default function GlobalHeader({
               onClick={handleSettingsClick}
               className="text-white hover:bg-white/10 relative z-10 px-1.5 py-0.5"
             >
-              <Settings className="w-4 h-4" />
+              <iconMap.settings className="w-4 h-4" />
             </Button>
           ) : (
             // Not authenticated - show smaller Login and Sign Up buttons with text
@@ -91,7 +91,7 @@ export default function GlobalHeader({
                 onClick={handleLoginClick}
                 className="text-white hover:text-white hover:bg-white/10 font-medium px-1.5 py-0.5 text-xs relative z-10"
               >
-                <LogIn className="w-3 h-3 mr-0.5" />
+                <iconMap.login className="w-3 h-3 mr-0.5" />
                 <span className="text-xs">Login</span>
               </Button>
               
@@ -101,7 +101,7 @@ export default function GlobalHeader({
                 onClick={handleLoginClick}
                 className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1.5 py-0.5 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50"
               >
-                <UserPlus className="w-3 h-3 mr-0.5" />
+                <iconMap.userPlus className="w-3 h-3 mr-0.5" />
                 <span className="text-xs">Sign Up</span>
               </Button>
             </>
