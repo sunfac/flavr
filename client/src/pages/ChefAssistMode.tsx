@@ -14,7 +14,7 @@ import { checkQuotaBeforeGPT, getRemainingRecipes } from "@/lib/quotaManager";
 import { apiRequest } from "@/lib/queryClient";
 import AuthModal from "@/components/AuthModal";
 import { chefQuestions } from "@/config/chefQuestions";
-import { iconMap } from "@/lib/iconMap";
+import Icon from "@/components/ui/Icon";
 
 export default function ChefAssistMode() {
   const [, navigate] = useLocation();

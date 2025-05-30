@@ -84,7 +84,7 @@ export default function UpgradeModal({
                   {feature.icon}
                 </div>
                 <span className="text-sm text-slate-300">{feature.text}</span>
-                <Check className="w-4 h-4 text-green-400 ml-auto" />
+                <Icon name="check" className="w-4 h-4 text-green-400 ml-auto" />
               </div>
             ))}
           </div>
@@ -108,7 +108,7 @@ export default function UpgradeModal({
               onClick={handleUpgradeClick}
               className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold"
             >
-              <Crown className="w-4 h-4 mr-2" />
+              <Icon name="crown" className="w-4 h-4 mr-2" />
               Upgrade to Flavr+
             </Button>
           </div>
