@@ -49,16 +49,27 @@ function Router() {
 }
 
 function App() {
-  return (
-    <ErrorBoundary>
+  try {
+    return (
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Router />
           <Toaster />
         </TooltipProvider>
       </QueryClientProvider>
-    </ErrorBoundary>
-  );
+    );
+  } catch (error) {
+    console.error('App rendering error:', error);
+    return (
+      <div className="min-h-screen bg-slate-900 text-white p-8">
+        <h1 className="text-2xl font-bold mb-4">Flavr</h1>
+        <p className="mb-4">App is initializing...</p>
+        <div className="text-sm text-slate-400">
+          If this message persists, please refresh the page.
+        </div>
+      </div>
+    );
+  }
 }
 
 export default App;
