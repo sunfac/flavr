@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { MessageCircle, X, Send, ChefHat, User, Bot, Flame, UtensilsCrossed, Clock, Wine, RefreshCw, Zap, Scale, Droplets } from "lucide-react";
+import { iconMap } from "@/lib/iconMap";
 
 interface ChatMessage {
   id: number;
@@ -62,14 +62,14 @@ export default function ChatBot({
 
   // Conversation suggestion chips with Lucide icons
   const suggestionChips = [
-    { text: "Make it spicier", icon: Flame, updatesRecipe: true },
-    { text: "Suggest a side dish", icon: UtensilsCrossed, updatesRecipe: false },
-    { text: "What can I prep ahead?", icon: Clock, updatesRecipe: false },
-    { text: "Give me a wine pairing", icon: Wine, updatesRecipe: false },
-    { text: "Swap an ingredient", icon: RefreshCw, updatesRecipe: true },
-    { text: "Simplify the method", icon: Zap, updatesRecipe: true },
-    { text: "Convert measurements", icon: Scale, updatesRecipe: true },
-    { text: "Make a sauce", icon: Droplets, updatesRecipe: false }
+    { text: "Make it spicier", icon: iconMap.flame, updatesRecipe: true },
+    { text: "Suggest a side dish", icon: iconMap.utensilsCrossed, updatesRecipe: false },
+    { text: "What can I prep ahead?", icon: iconMap.clock, updatesRecipe: false },
+    { text: "Give me a wine pairing", icon: iconMap.wine, updatesRecipe: false },
+    { text: "Swap an ingredient", icon: iconMap.refresh, updatesRecipe: true },
+    { text: "Simplify the method", icon: iconMap.zap, updatesRecipe: true },
+    { text: "Convert measurements", icon: iconMap.scale, updatesRecipe: true },
+    { text: "Make a sauce", icon: iconMap.droplets, updatesRecipe: false }
   ];
 
   // Get chat history
@@ -242,9 +242,9 @@ export default function ChatBot({
             size="sm"
           >
             {isOpen ? (
-              <X className="w-5 h-5" />
+              <iconMap.x className="w-5 h-5" />
             ) : (
-              <MessageCircle className="w-5 h-5" />
+              <iconMap.messageCircle className="w-5 h-5" />
             )}
           </Button>
           {!isOpen && (
@@ -266,7 +266,7 @@ export default function ChatBot({
           <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="relative group">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <ChefHat className="text-white w-3 h-3 sm:w-4 sm:h-4" />
+                <iconMap.chefHat className="text-white w-3 h-3 sm:w-4 sm:h-4" />
               </div>
             </div>
             <div>
@@ -280,7 +280,7 @@ export default function ChatBot({
             className="w-8 h-8 p-0 rounded-xl glass hover:scale-110 transition-all duration-300 group"
             onClick={() => setIsOpen(false)}
           >
-            <X className="w-4 h-4 text-slate-600 group-hover:text-slate-800" />
+            <iconMap.x className="w-4 h-4 text-slate-600 group-hover:text-slate-800" />
           </Button>
         </CardHeader>
         
@@ -290,7 +290,7 @@ export default function ChatBot({
               <div key={msg.id} className={`flex space-x-2 sm:space-x-3 ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
                 {!msg.isUser && (
                   <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                    <Bot className="text-white w-3 h-3 sm:w-4 sm:h-4" />
+                    <iconMap.bot className="text-white w-3 h-3 sm:w-4 sm:h-4" />
                   </div>
                 )}
                 <div className={`rounded-2xl p-2 sm:p-4 max-w-[240px] sm:max-w-xs shadow-lg ${
@@ -302,7 +302,7 @@ export default function ChatBot({
                 </div>
                 {msg.isUser && (
                   <div className="w-6 h-6 sm:w-8 sm:h-8 bg-slate-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                    <User className="text-white w-3 h-3 sm:w-4 sm:h-4" />
+                    <iconMap.user className="text-white w-3 h-3 sm:w-4 sm:h-4" />
                   </div>
                 )}
               </div>
@@ -365,7 +365,7 @@ export default function ChatBot({
               {sendMessageMutation.isPending ? (
                 <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <Send className="w-3 h-3 sm:w-4 sm:h-4" />
+                <iconMap.send className="w-3 h-3 sm:w-4 sm:h-4" />
               )}
             </Button>
           </div>
