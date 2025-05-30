@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Clock, MoreVertical } from 'lucide-react';
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import GlobalHeader from "@/components/GlobalHeader";
@@ -284,7 +283,7 @@ export default function FridgeMode() {
         <div className="w-full bg-card/90 backdrop-blur-sm border-b border-border mt-16 md:mt-20">
           <div className="max-w-sm mx-auto px-4 py-2">
             <div className="flex items-center justify-center gap-1.5 text-xs md:text-sm text-muted-foreground">
-              {<Clock className="w-3 h-3 md:w-4 md:h-4" />}
+              <Clock className="w-3 h-3 md:w-4 md:h-4" />
               <span>{getRemainingRecipes()} free recipes remaining</span>
             </div>
           </div>
@@ -357,7 +356,7 @@ export default function FridgeMode() {
       )}
       
       {showUserMenu && (
-        {<MoreVertical onClose={closeAllMenus />}
+        <UserMenu onClose={closeAllMenus} />
       )}
 
       <AuthModal

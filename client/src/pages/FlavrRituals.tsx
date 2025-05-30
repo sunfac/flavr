@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Calendar, Check, ChefHat, ChevronLeft, ChevronRight, Clock, Crown, Heart, MoreVertical, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { iconMap } from "@/lib/iconMap";
@@ -35,28 +34,28 @@ const cuisineOptions = [
 ];
 
 const moodOptions = [
-  { value: "focused", label: "Focused", description: "Sharp, purposeful cooking for productivity", icon: <ChefHat className: "w-4 h-4"  /> },
-  { value: "tired", label: "Tired", description: "Simple, comforting meals that restore energy", icon: <Heart className: "w-4 h-4"  /> },
-  { value: "lightClean", label: "Light & Clean", description: "Fresh, healthy dishes that feel refreshing", icon: <span>🔧</span> },
-  { value: "effortlessJoy", label: "Effortless Joy", description: "Easy recipes that bring happiness", icon: <Heart className: "w-4 h-4"  /> },
-  { value: "indulgent", label: "Indulgent", description: "Rich, luxurious flavors for special moments", icon: <Crown className: "w-4 h-4"  /> },
-  { value: "creative", label: "Creative", description: "Experimental dishes to inspire imagination", icon: <span>🔧</span> },
-  { value: "celebratory", label: "Celebratory", description: "Festive meals perfect for special occasions", icon: <Crown className: "w-4 h-4"  /> },
-  { value: "laidBack", label: "Laid-back", description: "Relaxed, casual cooking for easy days", icon: <Clock className: "w-4 h-4"  /> },
-  { value: "adventurous", label: "Adventurous", description: "Bold, exciting flavors from around the world", icon: <span>🔧</span> },
-  { value: "minimalist", label: "Minimalist", description: "Simple, clean recipes with few ingredients", icon: <span>🔧</span> }
+  { value: "focused", label: "Focused", description: "Sharp, purposeful cooking for productivity", icon: <ChefHat className="w-4 h-4" /> },
+  { value: "tired", label: "Tired", description: "Simple, comforting meals that restore energy", icon: <Heart className="w-4 h-4" /> },
+  { value: "lightClean", label: "Light & Clean", description: "Fresh, healthy dishes that feel refreshing", icon: <Utensils className="w-4 h-4" /> },
+  { value: "effortlessJoy", label: "Effortless Joy", description: "Easy recipes that bring happiness", icon: <Heart className="w-4 h-4" /> },
+  { value: "indulgent", label: "Indulgent", description: "Rich, luxurious flavors for special moments", icon: <Crown className="w-4 h-4" /> },
+  { value: "creative", label: "Creative", description: "Experimental dishes to inspire imagination", icon: <Sparkles className="w-4 h-4" /> },
+  { value: "celebratory", label: "Celebratory", description: "Festive meals perfect for special occasions", icon: <Crown className="w-4 h-4" /> },
+  { value: "laidBack", label: "Laid-back", description: "Relaxed, casual cooking for easy days", icon: <Clock className="w-4 h-4" /> },
+  { value: "adventurous", label: "Adventurous", description: "Bold, exciting flavors from around the world", icon: <Sparkles className="w-4 h-4" /> },
+  { value: "minimalist", label: "Minimalist", description: "Simple, clean recipes with few ingredients", icon: <Utensils className="w-4 h-4" /> }
 ];
 
 const ambitionOptions = [
-  { value: "low", label: "Simple", icon: <Clock className: "w-4 h-4"  /> },
-  { value: "medium", label: "Moderate", icon: <ChefHat className: "w-4 h-4"  /> },
-  { value: "high", label: "Challenge", icon: <Crown className: "w-4 h-4"  /> },
+  { value: "low", label: "Simple", icon: <Clock className="w-4 h-4" /> },
+  { value: "medium", label: "Moderate", icon: <ChefHat className="w-4 h-4" /> },
+  { value: "high", label: "Challenge", icon: <Crown className="w-4 h-4" /> },
 ];
 
 const budgetOptions = [
-  { value: "low", label: "Budget", icon: <span>🔧</span> },
-  { value: "medium", label: "Moderate", icon: <span>🔧</span> },
-  { value: "high", label: "Premium", icon: <span>🔧</span> },
+  { value: "low", label: "Budget", icon: <DollarSign className="w-4 h-4" /> },
+  { value: "medium", label: "Moderate", icon: <DollarSign className="w-4 h-4" /> },
+  { value: "high", label: "Premium", icon: <DollarSign className="w-4 h-4" /> },
 ];
 
 interface DayPreferences {
@@ -179,7 +178,7 @@ export default function FlavrRituals() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center bg-white/10 backdrop-blur-md rounded-2xl p-8 max-w-md mx-auto border border-purple-500/20"
           >
-            <span className="w-16 h-16 text-purple-400 mx-auto mb-4 inline-block">👑</span>
+            <Crown className="w-16 h-16 text-purple-400 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-white mb-4">Authentication Required</h2>
             <p className="text-purple-200 mb-6">
               Please log in to access Flavr Rituals and start planning your weekly meals.
@@ -264,10 +263,10 @@ export default function FlavrRituals() {
             className="text-center px-6 mb-8"
           >
             <div className="flex items-center justify-center mb-4">
-              {<Calendar className="w-8 h-8 text-purple-400 mr-3" />}
+              <Calendar className="w-8 h-8 text-purple-400 mr-3" />
               <h1 className="text-3xl font-bold text-white">✨ Flavr Rituals</h1>
               <Badge className="ml-3 bg-gradient-to-r from-purple-400 to-indigo-400 text-white border-0">
-                {<Crown className="w-3 h-3 mr-1" />}
+                <Crown className="w-3 h-3 mr-1" />
                 Premium
               </Badge>
             </div>
@@ -299,7 +298,7 @@ export default function FlavrRituals() {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
-                            {<Calendar className="w-5 h-5 text-purple-400" />}
+                            <Calendar className="w-5 h-5 text-purple-400" />
                             <CardTitle className="text-lg text-white">{dayLabels[index]}</CardTitle>
                             {!dayPrefs.skip && (
                               <Badge variant="outline" className="text-xs border-purple-400 text-purple-200">
@@ -311,12 +310,12 @@ export default function FlavrRituals() {
                             )}
                           </div>
                           <div className="flex items-center space-x-2">
-                            {dayPrefs.mood && {<Heart className="w-4 h-4 text-purple-400" />}}
-                            {dayPrefs.ambition && {<ChefHat className="w-4 h-4 text-purple-400" />}}
-                            {dayPrefs.budget && {<span>🔧</span>}}
+                            {dayPrefs.mood && <Heart className="w-4 h-4 text-purple-400" />}
+                            {dayPrefs.ambition && <ChefHat className="w-4 h-4 text-purple-400" />}
+                            {dayPrefs.budget && <DollarSign className="w-4 h-4 text-purple-400" />}
                             {isExpanded ? 
-                              {<ChevronLeft className="w-5 h-5 text-purple-400" />} : 
-                              {<ChevronRight className="w-5 h-5 text-purple-400" />}
+                              <ChevronLeft className="w-5 h-5 text-purple-400" /> : 
+                              <ChevronRight className="w-5 h-5 text-purple-400" />
                             }
                           </div>
                         </div>
@@ -343,7 +342,7 @@ export default function FlavrRituals() {
                                     "border-purple-400 text-purple-200 hover:bg-purple-700/20"
                                   }
                                 >
-                                  {dayPrefs.skip ? {<Check className="w-4 h-4 mr-2" />} : {<Plus className="w-4 h-4 mr-2" />}}
+                                  {dayPrefs.skip ? <Check className="w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
                                   {dayPrefs.skip ? "Skipping" : "Cook"}
                                 </Button>
                               </div>
@@ -480,7 +479,7 @@ export default function FlavrRituals() {
                 onClick={confirmWeeklyPlan}
                 className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-8 py-3 text-lg font-semibold rounded-xl shadow-lg shadow-purple-500/25"
               >
-                {<span>🔧</span>}
+                <Sparkles className="w-5 h-5 mr-2" />
                 Generate Weekly Recipes
               </Button>
             </motion.div>
@@ -496,7 +495,7 @@ export default function FlavrRituals() {
       {/* Navigation Components */}
       {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
       {showSettings && <SettingsPanel onClose={closeAllMenus} />}
-      {showUserMenu && {<MoreVertical onClose={closeAllMenus />}}
+      {showUserMenu && <UserMenu onClose={closeAllMenus} />}
 
       {/* Auth Modal */}
       <AuthModal

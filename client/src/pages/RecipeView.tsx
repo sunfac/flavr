@@ -1,5 +1,4 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ChefHat, Clock, Refrigerator, ShoppingCart, Users } from 'lucide-react';
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -77,25 +76,25 @@ export default function RecipeView() {
     switch (mode) {
       case "shopping":
         return {
-          icon: {<ShoppingCart className="w-5 h-5" />},
+          icon: <ShoppingCart className="w-5 h-5" />,
           label: "Shopping Mode",
           color: "bg-orange-500/20 text-orange-300 border-orange-500/30"
         };
       case "fridge":
         return {
-          icon: {<Refrigerator className="w-5 h-5" />},
+          icon: <Refrigerator className="w-5 h-5" />,
           label: "Fridge to Fork",
           color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
         };
       case "chef":
         return {
-          icon: {<ChefHat className="w-5 h-5" />},
+          icon: <ChefHat className="w-5 h-5" />,
           label: "Chef Assist",
           color: "bg-amber-500/20 text-amber-300 border-amber-500/30"
         };
       default:
         return {
-          icon: {<ChefHat className="w-5 h-5" />},
+          icon: <ChefHat className="w-5 h-5" />,
           label: "Recipe",
           color: "bg-slate-500/20 text-slate-300 border-slate-500/30"
         };
@@ -114,11 +113,11 @@ export default function RecipeView() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black flex items-center justify-center">
         <div className="text-center">
-          {<ChefHat className="w-16 h-16 text-slate-600 mx-auto mb-4" />}
+          <ChefHat className="w-16 h-16 text-slate-600 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-foreground mb-2">Recipe not found</h2>
           <p className="text-muted-foreground mb-6">This recipe may have been removed or is no longer available.</p>
           <Button onClick={() => navigate("/my-recipes")} variant="outline">
-            {<ArrowLeft className="w-4 h-4 mr-2" />}
+            <ArrowLeft className="w-4 h-4 mr-2" />
             Back to My Recipes
           </Button>
         </div>
@@ -140,7 +139,7 @@ export default function RecipeView() {
           onClick={() => navigate("/my-recipes")}
           className="mb-6 text-muted-foreground hover:text-foreground"
         >
-          {<ArrowLeft className="w-4 h-4 mr-2" />}
+          <ArrowLeft className="w-4 h-4 mr-2" />
           Back to My Recipes
         </Button>
 
@@ -170,7 +169,7 @@ export default function RecipeView() {
                   onClick={() => copyShareLink(recipe.shareId!)}
                   className="ml-4 hover:bg-orange-500/10 hover:border-orange-500/50"
                 >
-                  {<span>🔧</span>}
+                  <Share2 className="w-4 h-4 mr-2" />
                   Share
                 </Button>
               )}
@@ -180,14 +179,14 @@ export default function RecipeView() {
             <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
               {recipe.cookTime && (
                 <div className="flex items-center gap-1">
-                  {<Clock className="w-4 h-4" />}
+                  <Clock className="w-4 h-4" />
                   <span>{recipe.cookTime} minutes</span>
                 </div>
               )}
               
               {recipe.servings && (
                 <div className="flex items-center gap-1">
-                  {<Users className="w-4 h-4" />}
+                  <Users className="w-4 h-4" />
                   <span>{recipe.servings} servings</span>
                 </div>
               )}
@@ -218,7 +217,7 @@ export default function RecipeView() {
             <Card className="bg-card/90 backdrop-blur-xl border border-border/50">
               <CardContent className="p-6">
                 <h2 className="text-xl font-bold text-foreground mb-4 flex items-center">
-                  {<ChefHat className="w-5 h-5 mr-2 text-orange-400" />}
+                  <ChefHat className="w-5 h-5 mr-2 text-orange-400" />
                   Ingredients
                 </h2>
                 
@@ -237,7 +236,7 @@ export default function RecipeView() {
             <Card className="bg-card/90 backdrop-blur-xl border border-border/50">
               <CardContent className="p-6">
                 <h2 className="text-xl font-bold text-foreground mb-4 flex items-center">
-                  {<Clock className="w-5 h-5 mr-2 text-orange-400" />}
+                  <Clock className="w-5 h-5 mr-2 text-orange-400" />
                   Instructions
                 </h2>
                 
@@ -260,7 +259,7 @@ export default function RecipeView() {
             <Card className="bg-orange-500/10 border-orange-500/20 mt-8">
               <CardContent className="p-6">
                 <h3 className="font-bold text-orange-300 mb-2 flex items-center">
-                  {<ChefHat className="w-4 h-4 mr-2" />}
+                  <ChefHat className="w-4 h-4 mr-2" />
                   Chef's Tip
                 </h3>
                 <p className="text-foreground text-sm leading-relaxed">{recipe.tips}</p>
@@ -273,7 +272,7 @@ export default function RecipeView() {
             <Card className="bg-card/90 backdrop-blur-xl border border-border/50 mt-8">
               <CardContent className="p-6">
                 <h3 className="font-bold text-foreground mb-4 flex items-center">
-                  {<ShoppingCart className="w-5 h-5 mr-2 text-orange-400" />}
+                  <ShoppingCart className="w-5 h-5 mr-2 text-orange-400" />
                   Shopping List
                 </h3>
                 

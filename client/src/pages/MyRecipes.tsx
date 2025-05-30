@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { ChefHat, Clock, Copy, Eye, Heart, MoreVertical, Refrigerator, ShoppingCart, Zap } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
@@ -106,31 +105,31 @@ export default function MyRecipes() {
   const getModeIcon = (mode: string) => {
     switch (mode) {
       case "shopping":
-        return {<ShoppingCart className="w-4 h-4" />};
+        return <ShoppingCart className="w-4 h-4" />;
       case "fridge":
-        return {<Refrigerator className="w-4 h-4" />};
+        return <Refrigerator className="w-4 h-4" />;
       case "chef":
-        return {<ChefHat className="w-4 h-4" />};
+        return <ChefHat className="w-4 h-4" />;
       default:
-        return {<span>🔧</span>};
+        return <Coffee className="w-4 h-4" />;
     }
   };
 
   // Get mood icon
   const getMoodIcon = (mood?: string) => {
-    if (!mood) return {<span>🔧</span>};
+    if (!mood) return <Smile className="w-4 h-4" />;
     
     const lowerMood = mood.toLowerCase();
     if (lowerMood.includes("comfort") || lowerMood.includes("cozy")) {
-      return {<Heart className="w-4 h-4 text-red-400" />};
+      return <Heart className="w-4 h-4 text-red-400" />;
     }
     if (lowerMood.includes("energy") || lowerMood.includes("vibrant")) {
-      return {<Zap className="w-4 h-4 text-yellow-400" />};
+      return <Zap className="w-4 h-4 text-yellow-400" />;
     }
     if (lowerMood.includes("adventure") || lowerMood.includes("bold")) {
-      return {<Zap className="w-4 h-4 text-orange-400" />};
+      return <Zap className="w-4 h-4 text-orange-400" />;
     }
-    return {<span>🔧</span>};
+    return <Smile className="w-4 h-4 text-blue-400" />;
   };
 
   // Format date
@@ -202,7 +201,7 @@ export default function MyRecipes() {
         ) : recipes.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-orange-500/20 to-orange-600/20 rounded-full flex items-center justify-center">
-              {<ChefHat className="w-12 h-12 text-orange-400" />}
+              <ChefHat className="w-12 h-12 text-orange-400" />
             </div>
             <h3 className="text-xl font-semibold text-foreground mb-2">No recipes yet</h3>
             <p className="text-muted-foreground mb-6">Start creating delicious recipes with AI</p>
@@ -231,7 +230,7 @@ export default function MyRecipes() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      {<ChefHat className="w-12 h-12 text-slate-600" />}
+                      <ChefHat className="w-12 h-12 text-slate-600" />
                     </div>
                   )}
                   
@@ -266,13 +265,13 @@ export default function MyRecipes() {
                     
                     {recipe.cookTime && (
                       <div className="flex items-center gap-1">
-                        {<Clock className="w-4 h-4" />}
+                        <Clock className="w-4 h-4" />
                         <span>{recipe.cookTime}m</span>
                       </div>
                     )}
                     
                     <div className="flex items-center gap-1 text-orange-400">
-                      {<Clock className="w-3 h-3" />}
+                      <Clock className="w-3 h-3" />
                       <span>{formatDate(recipe.createdAt)}</span>
                     </div>
                   </div>
@@ -285,7 +284,7 @@ export default function MyRecipes() {
                       onClick={() => navigate(`/recipe/${recipe.id}`)}
                       className="hover:bg-orange-500/10 hover:border-orange-500/50"
                     >
-                      {<Eye className="w-4 h-4 mr-2" />}
+                      <Eye className="w-4 h-4 mr-2" />
                       View Recipe
                     </Button>
 
@@ -300,7 +299,7 @@ export default function MyRecipes() {
                         }
                         disabled={shareToggleMutation.isPending}
                       />
-                      {<span>🔧</span>}
+                      <Share2 className="w-4 h-4 text-muted-foreground" />
                     </div>
                   </div>
 
@@ -315,7 +314,7 @@ export default function MyRecipes() {
                           onClick={() => copyShareLink(recipe.shareId!)}
                           className="h-6 px-2 text-xs hover:bg-orange-500/20"
                         >
-                          {<Copy className="w-3 h-3 mr-1" />}
+                          <Copy className="w-3 h-3 mr-1" />
                           Copy
                         </Button>
                       </div>
@@ -347,7 +346,9 @@ export default function MyRecipes() {
 
       {/* User Menu */}
       {showUserMenu && (
-        {<MoreVertical onClose={closeAllMenus />}
+        <UserMenu 
+          onClose={closeAllMenus}
+        />
       )}
     </div>
   );

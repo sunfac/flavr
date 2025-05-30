@@ -1,5 +1,4 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Clock, Database } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -110,7 +109,7 @@ export default function DeveloperLogs() {
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="flex flex-col items-center space-y-4 p-6">
-            {<span>🔧</span>}
+            <AlertTriangle className="h-12 w-12 text-red-500" />
             <h1 className="text-xl font-bold text-gray-900">Access Denied</h1>
             <p className="text-gray-600 text-center">This section is only available to authorized administrators.</p>
           </CardContent>
@@ -150,7 +149,7 @@ export default function DeveloperLogs() {
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="flex flex-col items-center space-y-4 p-6">
-            {<span>🔧</span>}
+            <AlertTriangle className="h-12 w-12 text-red-500" />
             <h1 className="text-xl font-bold text-gray-900">Error Loading Logs</h1>
             <p className="text-gray-600 text-center">Failed to fetch developer logs. Please try again.</p>
           </CardContent>
@@ -166,35 +165,35 @@ export default function DeveloperLogs() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              {<Database className="h-6 w-6 text-orange-500" />}
+              <Database className="h-6 w-6 text-orange-500" />
               Developer Analytics Dashboard
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="flex items-center space-x-2">
-                {<span>🔧</span>}
+                <DollarSign className="h-5 w-5 text-green-500" />
                 <div>
                   <p className="text-sm text-gray-600">Total Cost</p>
                   <p className="text-lg font-bold">${totalCost.toFixed(6)}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                {<Clock className="h-5 w-5 text-blue-500" />}
+                <Clock className="h-5 w-5 text-blue-500" />
                 <div>
                   <p className="text-sm text-gray-600">Total Tokens</p>
                   <p className="text-lg font-bold">{totalTokens.toLocaleString()}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                {<span>🔧</span>}
+                <CheckCircle className="h-5 w-5 text-green-500" />
                 <div>
                   <p className="text-sm text-gray-600">Match Rate</p>
                   <p className="text-lg font-bold">{matchRate.toFixed(1)}%</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                {<Database className="h-5 w-5 text-purple-500" />}
+                <Database className="h-5 w-5 text-purple-500" />
                 <div>
                   <p className="text-sm text-gray-600">Total Logs</p>
                   <p className="text-lg font-bold">{logs.length}</p>
@@ -234,10 +233,11 @@ export default function DeveloperLogs() {
                         onClick={() => toggleRow(log.id)}
                       >
                         <TableCell>
-                          {React.createElement(iconMap.chevronDown, { className={`h-4 w-4 transition-transform ${
+                          <ChevronDown 
+                            className={`h-4 w-4 transition-transform ${
                               expandedRows.has(log.id) ? 'rotate-180' : ''
                             }`}
-                          / })}
+                          />
                         </TableCell>
                         <TableCell className="text-sm">
                           {new Date(log.createdAt).toLocaleString()}
@@ -257,7 +257,7 @@ export default function DeveloperLogs() {
                         <TableCell className="text-sm">
                           {log.imageGenerated ? (
                             <div className="flex items-center space-x-1">
-                              {<span>🔧</span>}
+                              <CheckCircle className="h-3 w-3 text-green-500" />
                               <span className="text-xs text-green-600 font-mono">{log.imageCost}</span>
                             </div>
                           ) : (
