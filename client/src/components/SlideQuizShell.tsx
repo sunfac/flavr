@@ -121,16 +121,50 @@ export default function SlideQuizShell({
   const currentAnswer = answers[currentQ.id];
 
   const renderIcon = (iconName: string) => {
-    const iconMap: Record<string, any> = {
-      Home, Leaf, Crown, Target, Zap, Star, Shuffle, DollarSign, CreditCard, 
-      Flame, Building, Microwave, Wind, Timer, Cooker,
-      Clock, ChefHat, Utensils, Sparkles, ShoppingCart, Store,
-      PoundSterling, ShoppingBag, Coins, Banknote, Users, Heart,
-      Waves, Beef, Blend, Soup, User, Users2, PartyPopper,
-      Snowflake, Globe, Coffee, Smartphone, Shield, Plus
+    const iconLookup: Record<string, keyof typeof iconMap> = {
+      'Home': 'home',
+      'Leaf': 'leaf',
+      'Crown': 'crown',
+      'Target': 'target',
+      'Zap': 'zap',
+      'Star': 'star',
+      'Shuffle': 'shuffle',
+      'DollarSign': 'dollarSign',
+      'CreditCard': 'creditCard',
+      'Flame': 'flame',
+      'Building': 'building',
+      'Microwave': 'microwave',
+      'Wind': 'wind',
+      'Timer': 'timer',
+      'Clock': 'clock',
+      'ChefHat': 'chefHat',
+      'Utensils': 'utensils',
+      'Sparkles': 'sparkles',
+      'ShoppingCart': 'shoppingCart',
+      'Store': 'store',
+      'PoundSterling': 'poundSterling',
+      'ShoppingBag': 'shoppingBag',
+      'Coins': 'coins',
+      'Banknote': 'banknote',
+      'Users': 'users',
+      'Heart': 'heart',
+      'Waves': 'waves',
+      'Beef': 'beef',
+      'Blend': 'blend',
+      'Soup': 'soup',
+      'User': 'user',
+      'Users2': 'users2',
+      'PartyPopper': 'partyPopper',
+      'Snowflake': 'snowflake',
+      'Globe': 'globe',
+      'Coffee': 'coffee',
+      'Smartphone': 'smartphone',
+      'Shield': 'shield',
+      'Plus': 'plus'
     };
     
-    const IconComponent = iconMap[iconName];
+    const iconKey = iconLookup[iconName];
+    const IconComponent = iconKey ? iconMap[iconKey] : null;
     return IconComponent ? <IconComponent className="w-4 h-4" /> : <div className="w-4 h-4" />;
   };
 
@@ -416,7 +450,7 @@ export default function SlideQuizShell({
                             ? 'bg-orange-400 border-orange-400' 
                             : 'border-slate-400'
                         }`}>
-                          {isSelected && <CheckCircle className="w-3 h-3 text-white" />}
+                          {isSelected && <iconMap.checkCircle className="w-3 h-3 text-white" />}
                         </div>
                       </CardContent>
                     </Card>
@@ -438,11 +472,11 @@ export default function SlideQuizShell({
         const getSliderOptions = () => {
           if (currentQ.id === 'ambition') {
             return [
-              { value: 1, label: 'Just Get Fed', icon: <Clock className="w-4 h-4" /> },
-              { value: 2, label: 'Casual Cook', icon: <Utensils className="w-4 h-4" /> },
-              { value: 3, label: 'Weekend Chef', icon: <ChefHat className="w-4 h-4" /> },
-              { value: 4, label: 'Passionate Cook', icon: <Sparkles className="w-4 h-4" /> },
-              { value: 5, label: 'Michelin Madness', icon: <CheckCircle className="w-4 h-4" /> }
+              { value: 1, label: 'Just Get Fed', icon: <iconMap.clock className="w-4 h-4" /> },
+              { value: 2, label: 'Casual Cook', icon: <iconMap.utensils className="w-4 h-4" /> },
+              { value: 3, label: 'Weekend Chef', icon: <iconMap.chefHat className="w-4 h-4" /> },
+              { value: 4, label: 'Passionate Cook', icon: <iconMap.sparkles className="w-4 h-4" /> },
+              { value: 5, label: 'Michelin Madness', icon: <iconMap.checkCircle className="w-4 h-4" /> }
             ];
           }
           if (currentQ.id === 'time') {

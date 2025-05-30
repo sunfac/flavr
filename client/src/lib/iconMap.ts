@@ -27,7 +27,7 @@ import {
   Leaf, Apple, Fish, Beef, Blend, Waves,
   
   // Additional Icons
-  BookmarkPlus, Signal, Cookie,
+  BookmarkPlus, Signal, Cookie, Shuffle,
   
   // Misc
   Circle, CircleDot, Hand, CheckCircle2, XCircle, Eye, EyeOff
@@ -128,6 +128,7 @@ export const iconMap = {
   bookmarkPlus: BookmarkPlus,
   signal: Signal,
   cookie: Cookie,
+  shuffle: Shuffle,
   
   // Misc
   circle: Circle,

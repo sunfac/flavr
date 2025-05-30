@@ -292,15 +292,15 @@ export default function RecipeCard({
           <h1 className="font-playfair font-bold text-2xl sm:text-3xl mb-2 sm:mb-3 drop-shadow-lg leading-tight">{fullRecipe.title}</h1>
           <div className="flex items-center flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
             <Badge variant="secondary" className="bg-white/20 text-white border-white/30 px-2 py-1">
-              <Clock className="w-3 h-3 mr-1" />
+              <iconMap.clock className="w-3 h-3 mr-1" />
               {fullRecipe.cookTime} min
             </Badge>
             <Badge variant="secondary" className="bg-white/20 text-white border-white/30 px-2 py-1">
-              <Users className="w-3 h-3 mr-1" />
+              <iconMap.users className="w-3 h-3 mr-1" />
               {fullRecipe.servings} servings
             </Badge>
             <Badge variant="secondary" className="bg-white/20 text-white border-white/30 px-2 py-1">
-              <Signal className="w-3 h-3 mr-1" />
+              <iconMap.signal className="w-3 h-3 mr-1" />
               {fullRecipe.difficulty || "Easy"}
             </Badge>
           </div>
@@ -325,7 +325,7 @@ export default function RecipeCard({
                   className="ml-2 p-1 h-7 w-7 text-muted-foreground hover:text-orange-400 hover:bg-orange-500/10 flex-shrink-0"
                   title="Get substitution suggestions"
                 >
-                  <RotateCcw className="w-3 h-3" />
+                  <iconMap.refresh className="w-3 h-3" />
                 </Button>
               </div>
             ))}
@@ -409,7 +409,7 @@ export default function RecipeCard({
             variant="outline"
             className="w-full"
           >
-            <RotateCcw className="w-4 h-4 mr-2" />
+            <iconMap.refresh className="w-4 h-4 mr-2" />
             Create Another Recipe
           </Button>
         )}
