@@ -140,7 +140,7 @@ export default function AuthModal({
                 />
               </div>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                <iconMap.mail className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                 <Input
                   type="email"
                   placeholder="Email"
@@ -151,7 +151,7 @@ export default function AuthModal({
                 />
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                <iconMap.lock className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                 <Input
                   type="password"
                   placeholder="Password"
