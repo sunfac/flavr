@@ -171,7 +171,7 @@ export default function TinderRecipeCards({
                 disabled={currentIndex === 0}
                 className="w-12 h-12 rounded-full border-slate-600 text-slate-300 hover:text-white hover:border-orange-400 disabled:opacity-30 disabled:cursor-not-allowed bg-slate-800/80 backdrop-blur-sm"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <iconMap.chevronLeft className="w-4 h-4" />
               </Button>
               
               {/* Reject Recipe (Swipe Left Action) */}
@@ -180,7 +180,7 @@ export default function TinderRecipeCards({
                 onClick={handleRejectRecipe}
                 className="w-12 h-12 rounded-full border-red-500/50 text-red-400 hover:text-red-300 hover:border-red-400 hover:bg-red-500/10 transition-all duration-300 bg-slate-800/80 backdrop-blur-sm"
               >
-                <X className="w-4 h-4" />
+                <iconMap.x className="w-4 h-4" />
               </Button>
               
               {/* Confirm Recipe (Swipe Right Action) */}
@@ -188,7 +188,7 @@ export default function TinderRecipeCards({
                 onClick={handleConfirmRecipe}
                 className={`w-12 h-12 rounded-full bg-gradient-to-r ${themeColors[theme]} hover:scale-110 shadow-lg hover:shadow-orange-500/25 text-white transition-all duration-300`}
               >
-                <Heart className="w-4 h-4" />
+                <iconMap.heart className="w-4 h-4" />
               </Button>
 
               {/* Navigate Next */}
@@ -198,7 +198,7 @@ export default function TinderRecipeCards({
                 disabled={currentIndex === availableRecipes.length - 1}
                 className="w-12 h-12 rounded-full border-slate-600 text-slate-300 hover:text-white hover:border-orange-400 disabled:opacity-30 disabled:cursor-not-allowed bg-slate-800/80 backdrop-blur-sm"
               >
-                <ChevronRight className="w-4 h-4" />
+                <iconMap.chevronRight className="w-4 h-4" />
               </Button>
             </div>
           </div>
