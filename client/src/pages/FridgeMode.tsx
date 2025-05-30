@@ -17,7 +17,7 @@ import { apiRequest } from "@/lib/queryClient";
 import AuthModal from "@/components/AuthModal";
 import FlavrPlusGate from "@/components/FlavrPlusGate";
 import UpgradeModal from "@/components/UpgradeModal";
-import { iconMap } from "@/lib/iconMap";
+import Icon from "@/components/ui/Icon";
 
 export default function FridgeMode() {
   const [, navigate] = useLocation();
