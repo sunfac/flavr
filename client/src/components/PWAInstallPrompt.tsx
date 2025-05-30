@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Download, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { iconMap } from "@/lib/iconMap";
 import { motion, AnimatePresence } from "framer-motion";
@@ -89,7 +90,7 @@ export default function PWAInstallPrompt() {
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                  {React.createElement(iconMap.smartphone, { className="w-5 h-5 text-white" / })}
+                  {<span>🔧</span>}
                 </div>
                 <div>
                   <h3 className="text-white font-semibold text-sm">Install Flavr</h3>
@@ -102,7 +103,7 @@ export default function PWAInstallPrompt() {
                 onClick={handleDismiss}
                 className="text-slate-400 hover:text-white h-6 w-6 p-0"
               >
-                {React.createElement(iconMap.x, { className="w-4 h-4" / })}
+                {<X className="w-4 h-4" />}
               </Button>
             </div>
             
@@ -125,7 +126,7 @@ export default function PWAInstallPrompt() {
                     size="sm"
                     className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white flex-1"
                   >
-                    {React.createElement(iconMap.download, { className="w-4 h-4 mr-2" / })}
+                    {<Download className="w-4 h-4 mr-2" />}
                     Install
                   </Button>
                   <Button

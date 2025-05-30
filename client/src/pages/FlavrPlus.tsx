@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Calendar, Check, Crown, MoreVertical, Star } from 'lucide-react';
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -47,12 +48,12 @@ export default function FlavrPlus() {
 
   const features = [
     {
-      icon: {React.createElement(iconMap.sparkles, { className="w-5 h-5 text-orange-400" / })},
+      icon: {<span>🔧</span>},
       title: "Unlimited Recipes",
       description: "Generate as many recipes as you want, no monthly limits"
     },
     {
-      icon: {React.createElement(iconMap.crown, { className="w-5 h-5 text-orange-400" / })},
+      icon: {<Crown className="w-5 h-5 text-orange-400" />},
       title: "GPT-4 Turbo",
       description: "Access to the most advanced AI for smarter, more creative recipes"
     },
@@ -62,7 +63,7 @@ export default function FlavrPlus() {
       description: "High-quality DALL·E generated images for every recipe"
     },
     {
-      icon: {React.createElement(iconMap.calendar, { className="w-5 h-5 text-orange-400" / })},
+      icon: {<Calendar className="w-5 h-5 text-orange-400" />},
       title: "Flavr Rituals",
       description: "Weekly curated meal plans and cooking challenges"
     }
@@ -81,7 +82,7 @@ export default function FlavrPlus() {
           <div className="max-w-2xl mx-auto text-center">
             <div className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 border border-orange-500/20 rounded-lg p-8">
               <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                {React.createElement(iconMap.crown, { className="w-8 h-8 text-white" / })}
+                {<Crown className="w-8 h-8 text-white" />}
               </div>
               <h1 className="text-2xl font-bold text-white mb-4">You're already a Flavr+ member!</h1>
               <p className="text-slate-400 mb-6">
@@ -91,7 +92,7 @@ export default function FlavrPlus() {
                 onClick={() => navigate('/flavr-rituals')}
                 className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold"
               >
-                {React.createElement(iconMap.calendar, { className="w-4 h-4 mr-2" / })}
+                {<Calendar className="w-4 h-4 mr-2" />}
                 Explore Flavr Rituals
               </Button>
             </div>
@@ -102,7 +103,7 @@ export default function FlavrPlus() {
         
         {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
         {showSettings && <SettingsPanel onClose={closeAllMenus} />}
-        {showUserMenu && {React.createElement(iconMap.userMenu, { onClose={closeAllMenus} / })}}
+        {showUserMenu && {<MoreVertical onClose={closeAllMenus />}}
       </div>
     );
   }
@@ -120,7 +121,7 @@ export default function FlavrPlus() {
           {/* Hero Section */}
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-2 mb-6">
-              {React.createElement(iconMap.crown, { className="w-12 h-12 text-orange-400" / })}
+              {<Crown className="w-12 h-12 text-orange-400" />}
               <h1 className="text-4xl font-bold text-white">Flavr+</h1>
             </div>
             <p className="text-xl text-slate-400 max-w-2xl mx-auto">
@@ -144,7 +145,7 @@ export default function FlavrPlus() {
                   size="lg"
                   className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold mb-6"
                 >
-                  {React.createElement(iconMap.crown, { className="w-5 h-5 mr-2" / })}
+                  {<Crown className="w-5 h-5 mr-2" />}
                   Start Your Flavr+ Journey
                 </Button>
                 
@@ -189,24 +190,24 @@ export default function FlavrPlus() {
               </div>
               <div>
                 <h4 className="font-semibold text-orange-400 mb-4 flex items-center gap-2">
-                  {React.createElement(iconMap.star, { className="w-4 h-4" / })}
+                  {<Star className="w-4 h-4" />}
                   Flavr+ Plan
                 </h4>
                 <ul className="space-y-2 text-sm text-white">
                   <li className="flex items-center gap-2">
-                    {React.createElement(iconMap.check, { className="w-4 h-4 text-green-400" / })}
+                    {<Check className="w-4 h-4 text-green-400" />}
                     Unlimited recipes
                   </li>
                   <li className="flex items-center gap-2">
-                    {React.createElement(iconMap.check, { className="w-4 h-4 text-green-400" / })}
+                    {<Check className="w-4 h-4 text-green-400" />}
                     GPT-4 Turbo AI
                   </li>
                   <li className="flex items-center gap-2">
-                    {React.createElement(iconMap.check, { className="w-4 h-4 text-green-400" / })}
+                    {<Check className="w-4 h-4 text-green-400" />}
                     Premium DALL·E images
                   </li>
                   <li className="flex items-center gap-2">
-                    {React.createElement(iconMap.check, { className="w-4 h-4 text-green-400" / })}
+                    {<Check className="w-4 h-4 text-green-400" />}
                     Flavr Rituals access
                   </li>
                 </ul>
@@ -220,7 +221,7 @@ export default function FlavrPlus() {
       
       {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
       {showSettings && <SettingsPanel onClose={closeAllMenus} />}
-      {showUserMenu && {React.createElement(iconMap.userMenu, { onClose={closeAllMenus} / })}}
+      {showUserMenu && {<MoreVertical onClose={closeAllMenus />}}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ArrowLeft } from 'lucide-react';
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -82,7 +83,7 @@ export default function LoginPage() {
                 onClick={() => navigate("/")}
                 className="absolute left-4 top-4 text-slate-400 hover:text-white"
               >
-                {React.createElement(iconMap.arrowLeft, { className="w-5 h-5" / })}
+                {<ArrowLeft className="w-5 h-5" />}
               </Button>
               <img src={FlavrLogo} alt="Flavr" className="w-12 h-12" />
             </div>
@@ -106,7 +107,7 @@ export default function LoginPage() {
                       className="pl-10 bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400"
                       required={!isLogin}
                     />
-                    {React.createElement(iconMap.mail, { className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" / })}
+                    {<span>🔧</span>}
                   </div>
                 </div>
               )}
@@ -121,7 +122,7 @@ export default function LoginPage() {
                     className="pl-10 bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400"
                     required
                   />
-                  {React.createElement(iconMap.mail, { className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" / })}
+                  {<span>🔧</span>}
                 </div>
               </div>
 
@@ -151,7 +152,7 @@ export default function LoginPage() {
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    {React.createElement(iconMap.sparkles, { className="w-4 h-4" / })}
+                    {<span>🔧</span>}
                     {isLogin ? "Sign In" : "Create Account"}
                   </div>
                 )}

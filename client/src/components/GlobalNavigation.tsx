@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Heart, X } from 'lucide-react';
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { iconMap } from "@/lib/iconMap";
@@ -98,7 +99,7 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
               onClick={onClose}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
             >
-              {React.createElement(iconMap.x, { className="w-5 h-5 text-gray-500 dark:text-gray-400" / })}
+              {<X className="w-5 h-5 text-gray-500 dark:text-gray-400" />}
             </button>
           </div>
 
@@ -164,9 +165,9 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
                 title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 {isDarkMode ? (
-                  {React.createElement(iconMap.sun, { className="w-5 h-5 text-gray-600 dark:text-gray-400" / })}
+                  {<span>🔧</span>}
                 ) : (
-                  {React.createElement(iconMap.moon, { className="w-5 h-5 text-gray-600 dark:text-gray-400" / })}
+                  {<span>🔧</span>}
                 )}
               </button>
             </div>
@@ -175,7 +176,7 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
             <div className="text-center">
               <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center justify-center space-x-1">
                 <span>Made with</span>
-                {React.createElement(iconMap.heart, { className="w-3 h-3 text-red-400 fill-current" / })}
+                {<Heart className="w-3 h-3 text-red-400 fill-current" />}
                 <span>for home cooks</span>
               </p>
             </div>

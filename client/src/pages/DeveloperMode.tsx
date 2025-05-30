@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Clock, Database, ExternalLink, Eye, Search, Users } from 'lucide-react';
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -79,7 +80,7 @@ export default function DeveloperMode() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
-            {React.createElement(iconMap.database, { className="w-8 h-8 text-orange-600" / })}
+            {<Database className="w-8 h-8 text-orange-600" />}
             <h1 className="text-3xl font-bold text-gray-900">Developer Mode</h1>
             <Badge variant="destructive" className="ml-auto">DEV ONLY</Badge>
           </div>
@@ -91,7 +92,7 @@ export default function DeveloperMode() {
           <Card className="md:col-span-2">
             <CardContent className="p-4">
               <div className="relative">
-                {React.createElement(iconMap.search, { className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" / })}
+                {<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />}
                 <Input
                   placeholder="Search recipes by title, description, or mode..."
                   value={searchTerm}
@@ -121,7 +122,7 @@ export default function DeveloperMode() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              {React.createElement(iconMap.database, { className="w-5 h-5" / })}
+              {<Database className="w-5 h-5" />}
               Recipe Database
               <Button 
                 variant="outline" 
@@ -174,13 +175,13 @@ export default function DeveloperMode() {
                         <div className="flex gap-2 text-xs">
                           {recipe.cookTime && (
                             <div className="flex items-center gap-1">
-                              {React.createElement(iconMap.clock, { className="w-3 h-3" / })}
+                              {<Clock className="w-3 h-3" />}
                               {recipe.cookTime}m
                             </div>
                           )}
                           {recipe.servings && (
                             <div className="flex items-center gap-1">
-                              {React.createElement(iconMap.users, { className="w-3 h-3" / })}
+                              {<Users className="w-3 h-3" />}
                               {recipe.servings}
                             </div>
                           )}
@@ -194,7 +195,7 @@ export default function DeveloperMode() {
                             onClick={() => handleViewRecipe(recipe)}
                             className="w-8 h-8 p-0"
                           >
-                            {React.createElement(iconMap.eye, { className="w-4 h-4" / })}
+                            {<Eye className="w-4 h-4" />}
                           </Button>
                           {recipe.shareId && (
                             <Button
@@ -203,7 +204,7 @@ export default function DeveloperMode() {
                               onClick={() => window.open(`/share/${recipe.shareId}`, '_blank')}
                               className="w-8 h-8 p-0"
                             >
-                              {React.createElement(iconMap.externalLink, { className="w-4 h-4" / })}
+                              {<ExternalLink className="w-4 h-4" />}
                             </Button>
                           )}
                           <Button
@@ -213,7 +214,7 @@ export default function DeveloperMode() {
                             className="w-8 h-8 p-0"
                             disabled={deleteRecipeMutation.isPending}
                           >
-                            {React.createElement(iconMap.trash2, { className="w-4 h-4" / })}
+                            {<span>🔧</span>}
                           </Button>
                         </div>
                       </td>
@@ -224,7 +225,7 @@ export default function DeveloperMode() {
 
               {filteredRecipes.length === 0 && (
                 <div className="text-center py-12">
-                  {React.createElement(iconMap.database, { className="w-16 h-16 text-gray-300 mx-auto mb-4" / })}
+                  {<Database className="w-16 h-16 text-gray-300 mx-auto mb-4" />}
                   <p className="text-gray-500">
                     {searchTerm ? "No recipes match your search" : "No recipes found"}
                   </p>
