@@ -66,8 +66,8 @@ import {
   Zap,
 } from "lucide-react";
 
-// Only export icons that are actually used in the application
-export const optimizedIconMap = {
+// Centralized icon map for all Lucide icons used in the application
+export const iconMap = {
   alertCircle: AlertCircle,
   alertTriangle: AlertTriangle,
   arrowLeft: ArrowLeft,
@@ -134,4 +134,4 @@ export const optimizedIconMap = {
   zap: Zap,
 } as const;
 
-export type OptimizedIconName = keyof typeof optimizedIconMap;
+export type IconName = keyof typeof iconMap;
