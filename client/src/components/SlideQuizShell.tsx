@@ -28,7 +28,7 @@ import {
   Users,
   Heart,
   User
-} from "@/lib/icons";
+} from "lucide-react";
 
 export interface QuestionConfig {
   id: string;

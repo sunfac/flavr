@@ -4,16 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Share2,
-  Twitter,
-  Facebook,
-  Instagram,
-  MessageCircle,
-  Printer,
-  FileText,
-  Copy,
   ExternalLink
-} from "lucide-react";
+} from "@/lib/icons";
 
 interface SocialShareToolsProps {
   id: string;
