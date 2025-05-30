@@ -2017,6 +2017,25 @@ Generate 3 inspiring recipe preview cards for ${day} now:`;
     }
   });
 
+  // Health check endpoint
+  app.get('/api/health', (req, res) => {
+    res.json({ 
+      status: 'healthy', 
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development'
+    });
+  });
+
+  // Status endpoint
+  app.get('/api/status', (req, res) => {
+    res.json({
+      env: process.env.NODE_ENV || 'development',
+      nodeVersion: process.version,
+      uptime: `${Math.floor(process.uptime())} seconds`,
+      timestamp: new Date().toISOString()
+    });
+  });
+
   // Run expired subscription check every hour
   setInterval(async () => {
     try {
