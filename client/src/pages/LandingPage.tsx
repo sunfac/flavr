@@ -15,7 +15,7 @@ import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 import FlavrFullLogo from "@assets/AD24FB4E-3BFB-4891-8859-5DEA19E45222.png";
 import HeroFoodImage from "@assets/3D8C8E94-9BC0-4F6A-95F2-8951941A709B.png";
 import { motion } from "framer-motion";
-import { ChefHat, Sparkles, Timer, Star, ArrowRight, Menu, Settings, User, ChevronUp, Crown } from "lucide-react";
+import { iconMap } from "@/lib/iconMap";
 import AuthModal from "@/components/AuthModal";
 
 export default function LandingPage() {
