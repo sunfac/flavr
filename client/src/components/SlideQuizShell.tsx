@@ -27,7 +27,28 @@ import {
   ShoppingCart,
   Users,
   Heart,
-  User
+  User,
+  Leaf,
+  Target,
+  Shuffle,
+  CreditCard,
+  Building,
+  Microwave,
+  Wind,
+  Utensils,
+  Store,
+  PoundSterling,
+  ShoppingBag,
+  Coins,
+  Banknote,
+  Waves,
+  PartyPopper,
+  Snowflake,
+  Globe,
+  Coffee,
+  Smartphone,
+  Shield,
+  Plus
 } from "lucide-react";
 
 export interface QuestionConfig {
