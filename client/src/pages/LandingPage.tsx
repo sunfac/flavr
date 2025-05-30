@@ -248,7 +248,7 @@ export default function LandingPage() {
             >
               <span className="relative z-10 flex items-center justify-center">
                 Get Cooking Now
-                <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
+                <iconMap.arrowRight className="ml-3 w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
               </span>
             </Button>
           </div>
@@ -298,19 +298,19 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             {[
               {
-                icon: ChefHat,
+                icon: iconMap.chefHat,
                 title: "Intuitive Recipe Creation",
                 description: "Your AI chef reads your cravings, dietary needs, and skill level—then crafts recipes that feel like they were made just for you. No more guesswork, just pure culinary magic.",
                 gradient: "from-orange-500/20 to-red-500/20"
               },
               {
-                icon: Sparkles,
+                icon: iconMap.sparkles,
                 title: "Learns Your Taste",
                 description: "Every dish you make teaches your AI chef more about your preferences. Watch as it evolves to suggest flavor combinations that surprise and delight your palate.",
                 gradient: "from-amber-500/20 to-orange-500/20"
               },
               {
-                icon: Timer,
+                icon: iconMap.timer,
                 title: "Adapts to Your Life",
                 description: "Whether you're rushing through a 15-minute dinner or savoring a weekend cooking session, your AI chef crafts experiences that fit perfectly into your rhythm.",
                 gradient: "from-yellow-500/20 to-amber-500/20"
@@ -511,7 +511,7 @@ export default function LandingPage() {
                       <p className="text-slate-400 text-sm">Ask about wine pairings...</p>
                     </div>
                     <button className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center hover:from-orange-400 hover:to-orange-500 transition-all duration-300 shadow-lg hover:scale-105">
-                      <ArrowRight className="w-5 h-5 text-white" />
+                      <iconMap.arrowRight className="w-5 h-5 text-white" />
                     </button>
                   </div>
                 </div>
@@ -679,7 +679,7 @@ export default function LandingPage() {
               size="lg"
               className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <Crown className="w-5 h-5 mr-2" />
+              <iconMap.crown className="w-5 h-5 mr-2" />
               Sign up for Flavr+
             </Button>
           </Link>
