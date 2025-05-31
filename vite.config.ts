@@ -13,8 +13,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "../dist", // Place outside client folder for Vercel
+    outDir: path.resolve(__dirname, "dist/public"), // ✅ Clear and absolute
     emptyOutDir: true,
   },
 });
-
