@@ -27,9 +27,15 @@
     
     <!-- Windows tiles -->
     <meta name="msapplication-TileImage" content="/icons/icon-192.png" />
+    
+    <!-- Prevent caching issues -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
   </head>
   <body>
     <div id="root"></div>
+    <script src="/cache-clear.js"></script>
     <script src="/refresh-suppress.js"></script>
     <script type="module" src="/src/main.tsx"></script>
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
