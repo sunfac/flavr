@@ -1,0 +1,58 @@
+06-01 15:14:45
+Cleared existing production files for fresh deployment
+06-01 15:14:45
+Updated service worker with timestamp: 1748787285167
+06-01 15:14:45
+Copied client assets to production directory with cache-busting
+06-01 15:14:45
+Using development mode for deployment stability
+06-01 15:14:45
+2:14:45 PM [express] Using development mode for deployment due to missing production build
+06-01 15:14:45
+Re-optimizing dependencies because vite config has changed
+06-01 15:14:47
+2:14:47 PM [express] serving on port 5000
+06-01 15:14:47
+2:14:47 PM [vite] Pre-transform error: Failed to load url /src/main.tsx?v=NtRgYGdY54pEg5SDdPmc- (resolved id: /src/main.tsx?v=NtRgYGdY54pEg5SDdPmc-). Does the file exist?
+06-01 15:14:47
+npm notice
+06-01 15:14:47
+npm notice New major version of npm available! 10.8.2 -> 11.4.1
+06-01 15:14:47
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.4.1
+06-01 15:14:47
+npm notice To update run: npm install -g npm@11.4.1
+06-01 15:14:47
+npm notice
+06-01 15:14:47
+command finished with error [npm run start]: exit status 1
+06-01 15:14:47
+> rest-express@1.0.0 start
+06-01 15:14:47
+> NODE_ENV=production node dist/index.js
+06-01 15:14:48
+Warning: connect.session() MemoryStore is not
+06-01 15:14:48
+designed for a production environment, as it will leak
+06-01 15:14:48
+memory, and will not scale past a single process.
+06-01 15:14:48
+Cleared existing production files for fresh deployment
+06-01 15:14:48
+Updated service worker with timestamp: 1748787288572
+06-01 15:14:48
+Copied client assets to production directory with cache-busting
+06-01 15:14:48
+Using development mode for deployment stability
+06-01 15:14:48
+2:14:48 PM [express] Using development mode for deployment due to missing production build
+06-01 15:14:48
+2:14:48 PM [express] serving on port 5000
+06-01 15:17:15
+2:17:15 PM [vite] Pre-transform error: Failed to load url /src/main.tsx?v=cuSWkDmoHHntYvSPBJdar (resolved id: /src/main.tsx?v=cuSWkDmoHHntYvSPBJdar). Does the file exist?
+06-01 15:17:16
+command finished with error [npm run start]: exit status 1
+06-01 15:17:16
+> rest-express@1.0.0 start
+06-01 15:17:16
+> NODE_ENV=production node dist/index.js
