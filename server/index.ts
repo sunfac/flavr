@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import path from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { ensureDeploymentReady, createMinimalBuild } from "./deploymentHelper";
@@ -70,17 +71,24 @@ app.use((req, res, next) => {
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    // Check if production build is ready, fallback to development mode if not
-    const hasProductionBuild = ensureDeploymentReady();
-    if (hasProductionBuild) {
-      try {
-        serveStatic(app);
-      } catch (error) {
-        log("Production build found but failed to serve, falling back to development mode");
-        await setupVite(app, server);
-      }
+    // Check for production build first in dist/public (standard Vite build)
+    const distPublicDir = path.resolve(import.meta.dirname, "..", "dist", "public");
+    const serverPublicDir = path.resolve(import.meta.dirname, "public");
+    
+    if (fs.existsSync(distPublicDir) && fs.existsSync(path.join(distPublicDir, "index.html"))) {
+      log("Using standard production build from dist/public");
+      app.use(express.static(distPublicDir));
+      app.use("*", (_req, res) => {
+        res.sendFile(path.resolve(distPublicDir, "index.html"));
+      });
+    } else if (fs.existsSync(serverPublicDir) && fs.existsSync(path.join(serverPublicDir, "index.html"))) {
+      log("Using fallback production build from server/public");
+      app.use(express.static(serverPublicDir));
+      app.use("*", (_req, res) => {
+        res.sendFile(path.resolve(serverPublicDir, "index.html"));
+      });
     } else {
-      log("Using development mode for deployment due to missing production build");
+      log("No production build found, using development mode");
       await setupVite(app, server);
     }
   }

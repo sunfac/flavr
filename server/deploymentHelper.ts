@@ -2,13 +2,23 @@ import fs from "fs";
 import path from "path";
 
 export function ensureDeploymentReady(): boolean {
-  const publicDir = path.resolve(import.meta.dirname, "public");
+  const distPublicDir = path.resolve(import.meta.dirname, "..", "dist", "public");
+  const serverPublicDir = path.resolve(import.meta.dirname, "public");
   
-  // Check if production build exists
-  if (fs.existsSync(publicDir)) {
-    const indexExists = fs.existsSync(path.join(publicDir, "index.html"));
+  // Check if Vite build exists in dist/public
+  if (fs.existsSync(distPublicDir)) {
+    const indexExists = fs.existsSync(path.join(distPublicDir, "index.html"));
     if (indexExists) {
-      console.log("Production build found, using static files");
+      console.log("Production build found in dist/public, using static files");
+      return true;
+    }
+  }
+  
+  // Check if manual build exists in server/public
+  if (fs.existsSync(serverPublicDir)) {
+    const indexExists = fs.existsSync(path.join(serverPublicDir, "index.html"));
+    if (indexExists) {
+      console.log("Production build found in server/public, using static files");
       return true;
     }
   }
@@ -40,21 +50,54 @@ export function createMinimalBuild(): void {
     // Directory might be empty, that's fine
   }
   
-  // Create a production HTML that works with the development server setup
+  // Create a production HTML that mirrors the working development setup
   const productionHTML = `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flavr - AI-Powered Recipe Generation</title>
-    <link rel="icon" type="image/png" href="/generated-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Flavr - AI Recipe Generator</title>
+    <meta name="description" content="Your AI-powered culinary companion for personalized recipes. Transform your kitchen into a culinary playground." />
+    
+    <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Theme colors -->
     <meta name="theme-color" content="#f97316" />
-    <meta name="description" content="Generate personalized recipes with AI" />
+    <meta name="msapplication-TileColor" content="#f97316" />
+    
+    <!-- iOS PWA support -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Flavr" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    
+    <!-- Standard favicon -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+    
+    <!-- Prevent deployment caching issues -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div style="padding: 20px; background: #1e293b; color: white; min-height: 100vh; font-family: sans-serif; text-align: center;">
+        <h1 style="margin-top: 50px;">Flavr</h1>
+        <p>Loading your AI-powered recipe assistant...</p>
+        <div style="margin-top: 20px;">
+          <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f97316; border-top: 4px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        </div>
+      </div>
+    </div>
+    <script src="/refresh-suppress.js"></script>
     <script type="module" src="/src/main.tsx"></script>
+    <style>
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
   </body>
 </html>`;
   
