@@ -9,6 +9,22 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Fix MIME type issues for JavaScript modules before other middleware
+app.use((req, res, next) => {
+  const url = req.originalUrl;
+  
+  // Set correct MIME types for JavaScript modules
+  if (url.includes('/src/') && (url.endsWith('.tsx') || url.endsWith('.ts') || url.endsWith('.jsx') || url.endsWith('.js'))) {
+    res.setHeader('Content-Type', 'application/javascript');
+  } else if (url.endsWith('.css')) {
+    res.setHeader('Content-Type', 'text/css');
+  } else if (url.endsWith('.json')) {
+    res.setHeader('Content-Type', 'application/json');
+  }
+  
+  next();
+});
+
 // Add stable headers for both development and production
 app.use((req, res, next) => {
   res.set({
