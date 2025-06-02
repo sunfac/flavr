@@ -78,13 +78,33 @@ app.use((req, res, next) => {
     
     if (fs.existsSync(distPublicDir) && fs.existsSync(path.join(distPublicDir, "index.html"))) {
       log("Using standard production build from dist/public");
-      app.use(express.static(distPublicDir));
+      app.use(express.static(distPublicDir, {
+        setHeaders: (res, path) => {
+          if (path.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
+          } else if (path.endsWith('.mjs')) {
+            res.setHeader('Content-Type', 'application/javascript');
+          } else if (path.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css');
+          }
+        }
+      }));
       app.use("*", (_req, res) => {
         res.sendFile(path.resolve(distPublicDir, "index.html"));
       });
     } else if (fs.existsSync(serverPublicDir) && fs.existsSync(path.join(serverPublicDir, "index.html"))) {
       log("Using fallback production build from server/public");
-      app.use(express.static(serverPublicDir));
+      app.use(express.static(serverPublicDir, {
+        setHeaders: (res, path) => {
+          if (path.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
+          } else if (path.endsWith('.mjs')) {
+            res.setHeader('Content-Type', 'application/javascript');
+          } else if (path.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css');
+          }
+        }
+      }));
       app.use("*", (_req, res) => {
         res.sendFile(path.resolve(serverPublicDir, "index.html"));
       });
