@@ -109,7 +109,10 @@ app.use((req, res, next) => {
         res.sendFile(path.resolve(serverPublicDir, "index.html"));
       });
     } else {
-      log("No production build found, using development mode");
+      log("No production build found, forcing development mode in production");
+      // Force development mode even in production when build is missing
+      process.env.NODE_ENV = "development";
+      app.set("env", "development");
       await setupVite(app, server);
     }
   }
