@@ -65,7 +65,7 @@ app.use((req, res, next) => {
 
   // Setup deployment configuration
   createMinimalBuild();
-  
+
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
@@ -75,7 +75,7 @@ app.use((req, res, next) => {
     // Check for production build first in dist/public (standard Vite build)
     const distPublicDir = path.resolve(import.meta.dirname, "..", "dist", "public");
     const serverPublicDir = path.resolve(import.meta.dirname, "public");
-    
+
     if (fs.existsSync(distPublicDir) && fs.existsSync(path.join(distPublicDir, "index.html"))) {
       log("Using standard production build from dist/public");
       app.use(express.static(distPublicDir, {
@@ -86,8 +86,12 @@ app.use((req, res, next) => {
             res.setHeader('Content-Type', 'application/javascript');
           } else if (path.endsWith('.css')) {
             res.setHeader('Content-Type', 'text/css');
+          } else if (path.endsWith('manifest.json')) {
+            res.setHeader('Content-Type', 'application/manifest+json');
           } else if (path.endsWith('.json')) {
             res.setHeader('Content-Type', 'application/json');
+          } else if (path.endsWith('service-worker.js') || path.endsWith('.worker.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
           }
         }
       }));
@@ -104,8 +108,12 @@ app.use((req, res, next) => {
             res.setHeader('Content-Type', 'application/javascript');
           } else if (path.endsWith('.css')) {
             res.setHeader('Content-Type', 'text/css');
+          } else if (path.endsWith('manifest.json')) {
+            res.setHeader('Content-Type', 'application/manifest+json');
           } else if (path.endsWith('.json')) {
             res.setHeader('Content-Type', 'application/json');
+          } else if (path.endsWith('service-worker.js') || path.endsWith('.worker.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
           }
         }
       }));

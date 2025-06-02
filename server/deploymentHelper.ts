@@ -4,7 +4,7 @@ import path from "path";
 export function ensureDeploymentReady(): boolean {
   const distPublicDir = path.resolve(import.meta.dirname, "..", "dist", "public");
   const serverPublicDir = path.resolve(import.meta.dirname, "public");
-  
+
   // Check if Vite build exists in dist/public
   if (fs.existsSync(distPublicDir)) {
     const indexExists = fs.existsSync(path.join(distPublicDir, "index.html"));
@@ -13,7 +13,7 @@ export function ensureDeploymentReady(): boolean {
       return true;
     }
   }
-  
+
   // Check if manual build exists in server/public
   if (fs.existsSync(serverPublicDir)) {
     const indexExists = fs.existsSync(path.join(serverPublicDir, "index.html"));
@@ -22,18 +22,18 @@ export function ensureDeploymentReady(): boolean {
       return true;
     }
   }
-  
+
   console.log("No production build found, will use development mode");
   return false;
 }
 
 export function createMinimalBuild(): void {
   const publicDir = path.resolve(import.meta.dirname, "public");
-  
+
   if (!fs.existsSync(publicDir)) {
     fs.mkdirSync(publicDir, { recursive: true });
   }
-  
+
   // Clear existing files to ensure fresh deployment
   try {
     const files = fs.readdirSync(publicDir);
@@ -49,7 +49,7 @@ export function createMinimalBuild(): void {
   } catch (error) {
     // Directory might be empty, that's fine
   }
-  
+
   // Create a production HTML that mirrors the working development setup
   const productionHTML = `<!DOCTYPE html>
 <html lang="en">
@@ -58,23 +58,23 @@ export function createMinimalBuild(): void {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>Flavr - AI Recipe Generator</title>
     <meta name="description" content="Your AI-powered culinary companion for personalized recipes. Transform your kitchen into a culinary playground." />
-    
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
-    
+
     <!-- Theme colors -->
     <meta name="theme-color" content="#f97316" />
     <meta name="msapplication-TileColor" content="#f97316" />
-    
+
     <!-- iOS PWA support -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Flavr" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    
+
     <!-- Standard favicon -->
     <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
-    
+
     <!-- Prevent deployment caching issues -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
@@ -100,21 +100,21 @@ export function createMinimalBuild(): void {
     </style>
   </body>
 </html>`;
-  
+
   fs.writeFileSync(path.join(publicDir, 'index.html'), productionHTML);
-  
+
   // Copy essential static files
   const clientPublicDir = path.resolve(import.meta.dirname, "..", "client", "public");
-  
+
   if (fs.existsSync(clientPublicDir)) {
     try {
       const files = fs.readdirSync(clientPublicDir, { withFileTypes: true });
       files.forEach(file => {
         if (file.name === 'index.html') return; // Skip, we use our custom one
-        
+
         const sourcePath = path.join(clientPublicDir, file.name);
         const targetPath = path.join(publicDir, file.name);
-        
+
         if (file.isDirectory()) {
           fs.mkdirSync(targetPath, { recursive: true });
           const subFiles = fs.readdirSync(sourcePath);
@@ -142,3 +142,4 @@ export function createMinimalBuild(): void {
     }
   }
 }
+```
