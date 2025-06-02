@@ -52,19 +52,7 @@ export default function LandingPage() {
     }
   };
 
-  // User query - completely disable to prevent loading issues
-  const { data: user, isLoading: userLoading } = useQuery({
-    queryKey: ['/api/me'],
-    enabled: false, // Disable auto-fetching to prevent excessive calls
-    retry: false,
-  });
-
-  // Redirect if already logged in
-  useEffect(() => {
-    if (user?.user) {
-      navigate("/shopping");
-    }
-  }, [user, navigate]);
+  // No authentication check on landing page to prevent loading issues
 
   const loginMutation = useMutation({
     mutationFn: (credentials: { username: string; password: string }) =>
@@ -107,7 +95,7 @@ export default function LandingPage() {
   });
 
   const handleStartCooking = () => {
-    console.log("Button clicked! User:", user);
+    console.log("Button clicked! Starting cooking journey");
     // Always navigate to app - let quota system handle auth when needed
     navigate("/app");
   };
@@ -117,19 +105,7 @@ export default function LandingPage() {
     setShowAuthModal(true);
   };
 
-  // Show loading while checking auth
-  if (userLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-amber-900 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-orange-400 border-t-transparent rounded-full" />
-      </div>
-    );
-  }
-
-  // Don't render if user is logged in (will redirect)
-  if (user?.user) {
-    return null;
-  }
+  // Landing page always renders - authentication handled by app flow
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black relative overflow-hidden">
