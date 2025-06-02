@@ -5,7 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import LandingPage from "@/pages/LandingPage";
+import SimpleLanding from "@/components/SimpleLanding";
 import LoginPage from "@/pages/LoginPage";
 import ModeSelection from "@/pages/ModeSelection";
 import ShoppingMode from "@/pages/ShoppingMode";
@@ -25,7 +25,7 @@ import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={LandingPage} />
+      <Route path="/" component={SimpleLanding} />
       <Route path="/login" component={LoginPage} />
       <Route path="/app" component={ModeSelection} />
       <Route path="/app/shopping" component={ShoppingMode} />
