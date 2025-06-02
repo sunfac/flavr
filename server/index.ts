@@ -80,18 +80,20 @@ app.use((req, res, next) => {
       log("Using standard production build from dist/public");
       app.use(express.static(distPublicDir, {
         setHeaders: (res, path) => {
-          if (path.endsWith('.js') || path.endsWith('.mjs')) {
+          // Set proper MIME types
+          const ext = path.extname(path);
+          if (ext === '.js' || ext === '.mjs' || ext === '.jsx' || ext === '.tsx') {
             res.setHeader('Content-Type', 'application/javascript');
-          } else if (path.endsWith('.jsx') || path.endsWith('.tsx')) {
-            res.setHeader('Content-Type', 'application/javascript');
-          } else if (path.endsWith('.css')) {
+          } else if (ext === '.css') {
             res.setHeader('Content-Type', 'text/css');
           } else if (path.endsWith('manifest.json')) {
             res.setHeader('Content-Type', 'application/manifest+json');
-          } else if (path.endsWith('.json')) {
+          } else if (ext === '.json') {
             res.setHeader('Content-Type', 'application/json');
           } else if (path.endsWith('service-worker.js') || path.endsWith('.worker.js')) {
             res.setHeader('Content-Type', 'application/javascript');
+          } else if (ext === '.html') {
+            res.setHeader('Content-Type', 'text/html');
           }
         }
       }));
@@ -102,18 +104,20 @@ app.use((req, res, next) => {
       log("Using fallback production build from server/public");
       app.use(express.static(serverPublicDir, {
         setHeaders: (res, path) => {
-          if (path.endsWith('.js') || path.endsWith('.mjs')) {
+          // Set proper MIME types
+          const ext = path.extname(path);
+          if (ext === '.js' || ext === '.mjs' || ext === '.jsx' || ext === '.tsx') {
             res.setHeader('Content-Type', 'application/javascript');
-          } else if (path.endsWith('.jsx') || path.endsWith('.tsx')) {
-            res.setHeader('Content-Type', 'application/javascript');
-          } else if (path.endsWith('.css')) {
+          } else if (ext === '.css') {
             res.setHeader('Content-Type', 'text/css');
           } else if (path.endsWith('manifest.json')) {
             res.setHeader('Content-Type', 'application/manifest+json');
-          } else if (path.endsWith('.json')) {
+          } else if (ext === '.json') {
             res.setHeader('Content-Type', 'application/json');
           } else if (path.endsWith('service-worker.js') || path.endsWith('.worker.js')) {
             res.setHeader('Content-Type', 'application/javascript');
+          } else if (ext === '.html') {
+            res.setHeader('Content-Type', 'text/html');
           }
         }
       }));
