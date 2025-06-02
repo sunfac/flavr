@@ -40,6 +40,19 @@ export async function setupVite(app: Express, server: Server) {
     appType: "custom",
   });
 
+  // Add middleware to set proper MIME types for JavaScript modules
+  app.use((req, res, next) => {
+    const url = req.originalUrl;
+    if (url.endsWith('.js') || url.endsWith('.mjs')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (url.endsWith('.jsx') || url.endsWith('.tsx')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (url.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+    next();
+  });
+
   app.use(vite.middlewares);
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;

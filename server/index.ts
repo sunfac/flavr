@@ -80,12 +80,14 @@ app.use((req, res, next) => {
       log("Using standard production build from dist/public");
       app.use(express.static(distPublicDir, {
         setHeaders: (res, path) => {
-          if (path.endsWith('.js')) {
+          if (path.endsWith('.js') || path.endsWith('.mjs')) {
             res.setHeader('Content-Type', 'application/javascript');
-          } else if (path.endsWith('.mjs')) {
+          } else if (path.endsWith('.jsx') || path.endsWith('.tsx')) {
             res.setHeader('Content-Type', 'application/javascript');
           } else if (path.endsWith('.css')) {
             res.setHeader('Content-Type', 'text/css');
+          } else if (path.endsWith('.json')) {
+            res.setHeader('Content-Type', 'application/json');
           }
         }
       }));
@@ -96,12 +98,14 @@ app.use((req, res, next) => {
       log("Using fallback production build from server/public");
       app.use(express.static(serverPublicDir, {
         setHeaders: (res, path) => {
-          if (path.endsWith('.js')) {
+          if (path.endsWith('.js') || path.endsWith('.mjs')) {
             res.setHeader('Content-Type', 'application/javascript');
-          } else if (path.endsWith('.mjs')) {
+          } else if (path.endsWith('.jsx') || path.endsWith('.tsx')) {
             res.setHeader('Content-Type', 'application/javascript');
           } else if (path.endsWith('.css')) {
             res.setHeader('Content-Type', 'text/css');
+          } else if (path.endsWith('.json')) {
+            res.setHeader('Content-Type', 'application/json');
           }
         }
       }));
