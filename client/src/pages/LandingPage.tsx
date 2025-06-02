@@ -616,7 +616,7 @@ export default function LandingPage() {
               
               <Button 
                 onClick={() => {
-                  setAuthMode("register");
+                  setAuthMode("signup");
                   setShowAuthModal(true);
                 }}
                 className="relative px-6 py-3 md:px-12 md:py-6 text-base md:text-xl font-bold bg-gradient-to-r from-white via-orange-50 to-white text-orange-600 hover:from-orange-50 hover:via-white hover:to-orange-50 shadow-2xl hover:shadow-orange-500/30 hover:scale-105 transition-all duration-500 rounded-full backdrop-blur-sm group border-2 border-orange-200/50 flex items-center justify-center max-w-xs md:max-w-none mx-auto"
