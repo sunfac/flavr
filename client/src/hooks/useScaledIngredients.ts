@@ -1,107 +1,106 @@
 import { useMemo } from 'react';
 
-interface Ingredient {
-  id?: string;
+interface ScaledIngredient {
+  id: string;
   text: string;
-  amount?: number;
-  unit?: string;
+  checked: boolean;
 }
 
 export function useScaledIngredients(
-  originalIngredients: string[] | Ingredient[],
-  originalServings: number,
+  originalIngredients: string[], 
+  originalServings: number, 
   currentServings: number
-) {
+): ScaledIngredient[] {
   return useMemo(() => {
-    if (!originalIngredients || originalServings === 0) return [];
+    const scalingFactor = currentServings / originalServings;
     
-    const scaleFactor = currentServings / originalServings;
-    
-    return originalIngredients.map((ingredient, index) => {
-      let scaledText: string;
-      
-      if (typeof ingredient === 'string') {
-        scaledText = scaleIngredientText(ingredient, scaleFactor);
-      } else {
-        scaledText = scaleIngredientText(ingredient.text, scaleFactor);
-      }
-      
-      return {
-        id: typeof ingredient === 'object' ? ingredient.id || `ingredient-${index}` : `ingredient-${index}`,
-        text: scaledText,
-        checked: false
-      };
-    });
+    return originalIngredients.map((ingredient, index) => ({
+      id: `ingredient-${index}`,
+      text: scaleIngredientText(ingredient, scalingFactor),
+      checked: false
+    }));
   }, [originalIngredients, originalServings, currentServings]);
 }
 
-function scaleIngredientText(text: string, scaleFactor: number): string {
-  // Match common fraction and decimal patterns at the start of ingredient text
-  const fractionRegex = /^(\d+(?:\/\d+)?|\d*\.?\d+)\s*(.+)/;
-  const match = text.match(fractionRegex);
+function scaleIngredientText(ingredient: string, scalingFactor: number): string {
+  // Handle common fraction patterns
+  const fractionPatterns = [
+    /(\d+)\/(\d+)/g, // 1/2, 3/4, etc.
+    /(\d+)\s+(\d+)\/(\d+)/g, // 1 1/2, 2 3/4, etc.
+  ];
+
+  // Handle decimal numbers
+  const decimalPattern = /(\d+\.?\d*)/g;
   
-  if (!match) return text;
-  
-  const [, amountStr, remainder] = match;
-  
-  // Convert fraction to decimal
-  let amount: number;
-  if (amountStr.includes('/')) {
-    const [numerator, denominator] = amountStr.split('/').map(Number);
-    amount = numerator / denominator;
-  } else {
-    amount = parseFloat(amountStr);
-  }
-  
-  const scaledAmount = amount * scaleFactor;
-  
-  // Format the scaled amount nicely
-  let formattedAmount: string;
-  if (scaledAmount < 1) {
-    // Convert to fraction for small amounts
-    const fraction = decimalToFraction(scaledAmount);
-    formattedAmount = fraction;
-  } else if (scaledAmount % 1 === 0) {
-    // Whole number
-    formattedAmount = scaledAmount.toString();
-  } else {
-    // Round to reasonable decimal places
-    formattedAmount = scaledAmount.toFixed(1).replace(/\.0$/, '');
-  }
-  
-  return `${formattedAmount} ${remainder}`;
+  let scaledText = ingredient;
+
+  // Scale fractions first
+  scaledText = scaledText.replace(/(\d+)\s+(\d+)\/(\d+)/g, (match, whole, num, den) => {
+    const wholeNum = parseInt(whole);
+    const numerator = parseInt(num);
+    const denominator = parseInt(den);
+    const totalValue = wholeNum + (numerator / denominator);
+    const scaledValue = totalValue * scalingFactor;
+    return formatScaledNumber(scaledValue);
+  });
+
+  scaledText = scaledText.replace(/(\d+)\/(\d+)/g, (match, num, den) => {
+    const numerator = parseInt(num);
+    const denominator = parseInt(den);
+    const value = numerator / denominator;
+    const scaledValue = value * scalingFactor;
+    return formatScaledNumber(scaledValue);
+  });
+
+  // Scale remaining decimal numbers
+  scaledText = scaledText.replace(/\b(\d+\.?\d*)\b/g, (match, num) => {
+    // Skip if this number was already processed as part of a fraction
+    if (scaledText.indexOf(match) !== scaledText.lastIndexOf(match)) {
+      return match; // Keep original if multiple occurrences
+    }
+    
+    const value = parseFloat(num);
+    if (isNaN(value)) return match;
+    
+    const scaledValue = value * scalingFactor;
+    return formatScaledNumber(scaledValue);
+  });
+
+  return scaledText;
 }
 
-function decimalToFraction(decimal: number): string {
-  const commonFractions: { [key: number]: string } = {
-    0.125: '1/8',
-    0.25: '1/4',
-    0.333: '1/3',
-    0.375: '3/8',
-    0.5: '1/2',
-    0.625: '5/8',
-    0.667: '2/3',
-    0.75: '3/4',
-    0.875: '7/8'
-  };
+function formatScaledNumber(value: number): string {
+  // Round to reasonable precision
+  const rounded = Math.round(value * 100) / 100;
   
-  // Find closest common fraction
-  let closest = 0;
-  let closestDiff = Infinity;
-  
-  for (const [value, fraction] of Object.entries(commonFractions)) {
-    const diff = Math.abs(decimal - parseFloat(value));
-    if (diff < closestDiff) {
-      closestDiff = diff;
-      closest = parseFloat(value);
+  // Try to convert to simple fractions for common values
+  const commonFractions = [
+    { decimal: 0.125, fraction: '1/8' },
+    { decimal: 0.25, fraction: '1/4' },
+    { decimal: 0.333, fraction: '1/3' },
+    { decimal: 0.5, fraction: '1/2' },
+    { decimal: 0.667, fraction: '2/3' },
+    { decimal: 0.75, fraction: '3/4' },
+    { decimal: 0.875, fraction: '7/8' },
+  ];
+
+  // Check if it's close to a common fraction
+  for (const { decimal, fraction } of commonFractions) {
+    if (Math.abs(rounded - decimal) < 0.05) {
+      return fraction;
+    }
+    // Check for whole number + fraction
+    const whole = Math.floor(rounded);
+    const fractional = rounded - whole;
+    if (whole > 0 && Math.abs(fractional - decimal) < 0.05) {
+      return `${whole} ${fraction}`;
     }
   }
-  
-  // If very close to a common fraction, use it
-  if (closestDiff < 0.05) {
-    return commonFractions[closest];
+
+  // Return as decimal, removing unnecessary trailing zeros
+  if (rounded % 1 === 0) {
+    return rounded.toString();
   }
   
-  // Otherwise, return rounded decimal
-  return decimal.toFixed(2).replace(/\.?0+$/, '');
+  return rounded.toFixed(2).replace(/\.?0+$/, '');
 }

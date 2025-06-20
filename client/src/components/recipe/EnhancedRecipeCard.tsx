@@ -1,0 +1,232 @@
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Share2, BookOpen } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { useScaledIngredients } from '@/hooks/useScaledIngredients';
+import HeaderSection from './HeaderSection';
+import IngredientPanel from './IngredientPanel';
+import StepStack from './StepStack';
+import ProgressBar from './ProgressBar';
+import FooterSection from './FooterSection';
+import { animations, layout } from '@/styles/tokens';
+
+interface Recipe {
+  id: string;
+  title: string;
+  description?: string;
+  cookTime: number;
+  servings: number;
+  difficulty: string;
+  cuisine?: string;
+  image?: string;
+  ingredients: string[];
+  instructions: string[];
+  tips?: string;
+}
+
+interface EnhancedRecipeCardProps {
+  recipe: Recipe;
+  onBack?: () => void;
+  onShare?: () => void;
+  className?: string;
+}
+
+export default function EnhancedRecipeCard({ 
+  recipe, 
+  onBack,
+  onShare,
+  className = '' 
+}: EnhancedRecipeCardProps) {
+  const [currentServings, setCurrentServings] = useState(recipe.servings);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [ingredientStates, setIngredientStates] = useState<Record<string, boolean>>({});
+  const { toast } = useToast();
+
+  // Scale ingredients based on serving adjustments
+  const scaledIngredients = useScaledIngredients(
+    recipe.ingredients, 
+    recipe.servings, 
+    currentServings
+  );
+
+  // Convert instructions to steps
+  const steps = recipe.instructions.map((instruction, index) => ({
+    id: `step-${index}`,
+    title: `Step ${index + 1}`,
+    description: instruction,
+    duration: extractDuration(instruction) // Extract timing from instruction text
+  }));
+
+  const handleStepComplete = (stepId: string) => {
+    const stepIndex = steps.findIndex(step => step.id === stepId);
+    if (stepIndex >= 0 && !completedSteps.includes(stepIndex)) {
+      setCompletedSteps(prev => [...prev, stepIndex]);
+      toast({
+        title: "Step completed!",
+        description: `Step ${stepIndex + 1} marked as complete`,
+      });
+    }
+  };
+
+  const handleIngredientToggle = (ingredientId: string) => {
+    setIngredientStates(prev => ({
+      ...prev,
+      [ingredientId]: !prev[ingredientId]
+    }));
+  };
+
+  const handleRating = (recipeId: string, rating: number) => {
+    // Store rating (implement your rating logic here)
+    toast({
+      title: "Rating saved",
+      description: `You rated this recipe ${rating} stars`,
+    });
+  };
+
+  // Update ingredient states when scaled ingredients change
+  useEffect(() => {
+    const newStates: Record<string, boolean> = {};
+    scaledIngredients.forEach(ingredient => {
+      newStates[ingredient.id] = ingredientStates[ingredient.id] || false;
+    });
+    setIngredientStates(newStates);
+  }, [scaledIngredients]);
+
+  const ingredientsWithState = scaledIngredients.map(ingredient => ({
+    ...ingredient,
+    checked: ingredientStates[ingredient.id] || false
+  }));
+
+  return (
+    <div className={`min-h-screen bg-slate-900 text-white ${className}`}>
+      {/* Progress Bar */}
+      <ProgressBar
+        currentStep={currentStep}
+        totalSteps={steps.length}
+        completedSteps={completedSteps}
+      />
+
+      {/* Header Controls */}
+      <div className="flex items-center justify-between p-4 md:p-6 relative z-30">
+        {onBack && (
+          <Button
+            onClick={onBack}
+            variant="outline"
+            size="sm"
+            className="bg-slate-800/80 border-slate-600 text-slate-200 hover:bg-slate-700/80 backdrop-blur-sm"
+          >
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Back
+          </Button>
+        )}
+        
+        <div className="flex gap-2 ml-auto">
+          {onShare && (
+            <Button
+              onClick={onShare}
+              variant="outline"
+              size="sm"
+              className="bg-slate-800/80 border-slate-600 text-slate-200 hover:bg-slate-700/80 backdrop-blur-sm"
+            >
+              <Share2 className="w-4 h-4 mr-1" />
+              Share
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Main Recipe Card */}
+      <motion.div
+        className="max-w-7xl mx-auto bg-slate-800/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-2xl"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        {/* Header Section */}
+        <HeaderSection
+          recipe={recipe}
+          currentServings={currentServings}
+          onServingsChange={setCurrentServings}
+        />
+
+        {/* Main Grid - Responsive Layout */}
+        <div 
+          className="recipe-main-grid relative"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1fr)',
+            gap: '0',
+            containerType: 'inline-size'
+          }}
+        >
+          {/* CSS for container queries */}
+          <style dangerouslySetInnerHTML={{
+            __html: `
+              @container (min-width: 768px) {
+                .recipe-main-grid {
+                  grid-template-columns: ${layout.ingredientPanelWidth} minmax(0, 1fr);
+                  gap: 0;
+                }
+              }
+            `
+          }} />
+
+          {/* Ingredient Panel */}
+          <IngredientPanel
+            ingredients={ingredientsWithState}
+            onToggle={handleIngredientToggle}
+            className="md:h-[600px] md:sticky md:top-0"
+          />
+
+          {/* Step Stack */}
+          <StepStack
+            steps={steps}
+            currentStep={currentStep}
+            onStepComplete={handleStepComplete}
+            onStepChange={setCurrentStep}
+            className="min-h-[600px]"
+          />
+        </div>
+
+        {/* Footer Section */}
+        <FooterSection
+          recipeId={recipe.id}
+          onRate={handleRating}
+        />
+
+        {/* Recipe Tips */}
+        {recipe.tips && (
+          <div className="p-6 bg-slate-800/20 border-t border-slate-700/50">
+            <div className="flex items-start gap-3">
+              <BookOpen className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-medium text-orange-400 mb-2">Chef's Tips</h4>
+                <p className="text-slate-300 leading-relaxed">{recipe.tips}</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
+// Helper function to extract duration from instruction text
+function extractDuration(instruction: string): number | undefined {
+  const timePattern = /(\d+)\s*(?:minute|min|hour|hr)s?/i;
+  const match = instruction.match(timePattern);
+  if (match) {
+    const value = parseInt(match[1]);
+    const unit = match[0].toLowerCase();
+    if (unit.includes('hour') || unit.includes('hr')) {
+      return value * 60; // Convert hours to minutes
+    }
+    return value;
+  }
+  return undefined;
+}
+
+// Export enhanced version as named export
+export { EnhancedRecipeCard };
