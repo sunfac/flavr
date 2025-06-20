@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { iconMap } from "@/lib/iconMap";
+import { useRecipeStore, recipeActions } from "@/stores/recipeStore";
+import { useTimerStore } from "@/stores/timerStore";
 
 interface ChatMessage {
   id: number;
@@ -48,6 +50,10 @@ export default function ChatBot({
   const [message, setMessage] = useState("");
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
+  
+  // Connect to global recipe store
+  const recipeStore = useRecipeStore();
+  const timerStore = useTimerStore();
   const [hasInitialized, setHasInitialized] = useState(false);
   const [hasShownWelcome, setHasShownWelcome] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
