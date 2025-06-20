@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Share2, BookOpen } from 'lucide-react';
+import { ArrowLeft, Share2, BookOpen, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useScaledIngredients } from '@/hooks/useScaledIngredients';
+import { useRecipeStore, recipeActions } from '@/stores/recipeStore';
+import VoiceControl from '@/components/VoiceControl';
 import HeaderSection from './HeaderSection';
 import IngredientPanel from './IngredientPanel';
 import StepStack from './StepStack';
@@ -42,7 +44,10 @@ function EnhancedRecipeCard({
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [ingredientStates, setIngredientStates] = useState<Record<string, boolean>>({});
+  const [showVoiceControl, setShowVoiceControl] = useState(false);
   const { toast } = useToast();
+  
+  const recipeStore = useRecipeStore();
 
   // Scale ingredients based on serving adjustments
   const scaledIngredients = useScaledIngredients(
@@ -50,6 +55,59 @@ function EnhancedRecipeCard({
     recipe.servings, 
     currentServings
   );
+
+  // Sync with Zustand store for voice commands
+  useEffect(() => {
+    // Transform recipe data to Zustand format
+    const zustandRecipe = {
+      id: recipe.id,
+      servings: currentServings,
+      ingredients: scaledIngredients.map((ingredient, index) => {
+        const ingredientText = typeof ingredient === 'string' ? ingredient : 
+          (ingredient as any).text || (ingredient as any).original || String(ingredient);
+        return {
+          id: `ingredient-${index}`,
+          text: ingredientText,
+          amount: typeof ingredient === 'object' ? (ingredient as any).amount || '' : '',
+          unit: typeof ingredient === 'object' ? (ingredient as any).unit || '' : '',
+          checked: ingredientStates[ingredientText] || false
+        };
+      }),
+      steps: recipe.instructions.map((instruction, index) => ({
+        id: `step-${index}`,
+        title: `Step ${index + 1}`,
+        description: instruction,
+        duration: index === 0 ? 5 : index === recipe.instructions.length - 1 ? 10 : 8 // Estimate durations
+      })),
+      meta: {
+        title: recipe.title,
+        description: recipe.description || '',
+        cookTime: recipe.cookTime,
+        difficulty: recipe.difficulty,
+        cuisine: recipe.cuisine || '',
+        image: recipe.image
+      },
+      currentStep: currentStep,
+      completedSteps: completedSteps,
+      lastUpdated: Date.now()
+    };
+
+    // Update Zustand store
+    recipeActions.replaceRecipe(zustandRecipe);
+  }, [recipe, currentServings, scaledIngredients, currentStep, completedSteps, ingredientStates]);
+
+  // Listen for voice command changes from Zustand store
+  useEffect(() => {
+    if (recipeStore.currentStep !== currentStep) {
+      setCurrentStep(recipeStore.currentStep);
+    }
+    if (recipeStore.servings !== currentServings) {
+      setCurrentServings(recipeStore.servings);
+    }
+    if (recipeStore.completedSteps !== completedSteps) {
+      setCompletedSteps(recipeStore.completedSteps);
+    }
+  }, [recipeStore.currentStep, recipeStore.servings, recipeStore.completedSteps]);
 
   // Convert instructions to steps
   const steps = recipe.instructions.map((instruction, index) => ({
@@ -123,6 +181,16 @@ function EnhancedRecipeCard({
         )}
         
         <div className="flex gap-2 ml-auto">
+          <Button
+            onClick={() => setShowVoiceControl(!showVoiceControl)}
+            variant={showVoiceControl ? "default" : "outline"}
+            size="sm"
+            className="bg-slate-800/80 border-slate-600 text-slate-200 hover:bg-slate-700/80 backdrop-blur-sm"
+          >
+            <Mic className="w-4 h-4 mr-1" />
+            Voice
+          </Button>
+          
           {onShare && (
             <Button
               onClick={onShare}
@@ -209,6 +277,32 @@ function EnhancedRecipeCard({
           </div>
         )}
       </motion.div>
+
+      {/* Voice Control Panel */}
+      <AnimatePresence>
+        {showVoiceControl && (
+          <motion.div
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-0 left-0 right-0 z-50 bg-slate-800/95 backdrop-blur-md border-t border-slate-600 p-4"
+          >
+            <div className="max-w-7xl mx-auto">
+              <VoiceControl 
+                onChatMessage={(message) => {
+                  // Handle voice messages sent to chatbot
+                  toast({
+                    title: "Voice Command",
+                    description: `Sent to Zest: "${message}"`,
+                  });
+                }}
+                className="max-w-lg mx-auto"
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
