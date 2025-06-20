@@ -141,7 +141,7 @@ export default function StepStack({
             <motion.div
               key={step.id}
               ref={el => stepRefs.current[index] = el}
-              className="w-full max-w-2xl mx-auto scroll-snap-align-start"
+              className="w-full max-w-[600px] mx-auto scroll-snap-align-start"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}

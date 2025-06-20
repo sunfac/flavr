@@ -29,6 +29,13 @@
   --ring: 20 91% 56%; /* Match primary */
   --radius: 0.75rem; /* Tighter radius for modern feel */
   
+  /* Modular Typography Scale */
+  --step--1: clamp(0.825rem, 0.80rem + 0.20vw, 0.90rem);
+  --step-0: clamp(1.00rem, 0.98rem + 0.25vw, 1.10rem);
+  --step-1: clamp(1.25rem, 1.20rem + 0.35vw, 1.40rem);
+  --step-2: clamp(1.56rem, 1.50rem + 0.45vw, 1.75rem);
+  --step-3: clamp(1.95rem, 1.90rem + 0.55vw, 2.15rem);
+  
   /* Modern Premium Gradients */
   --gradient-primary: linear-gradient(135deg, #F97316 0%, #FB923C 100%);
   --gradient-secondary: linear-gradient(135deg, #059669 0%, #10B981 100%);

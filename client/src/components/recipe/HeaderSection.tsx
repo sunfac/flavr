@@ -54,11 +54,11 @@ export default function HeaderSection({
         
         {/* Recipe Title Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-          <h1 className="text-2xl md:text-3xl font-bold mb-2 text-shadow-lg">
+          <h1 className="font-bold mb-2 text-shadow-lg" style={{ fontSize: 'var(--step-3)' }}>
             {recipe.title}
           </h1>
           {recipe.description && (
-            <p className="text-sm md:text-base text-white/90 text-shadow">
+            <p className="text-white/90 text-shadow" style={{ fontSize: 'var(--step-0)' }}>
               {recipe.description}
             </p>
           )}

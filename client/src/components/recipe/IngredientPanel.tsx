@@ -26,8 +26,8 @@ export default function IngredientPanel({
     <>
       {/* Desktop: Fixed Sidebar */}
       <div className={`hidden md:block ${className}`}>
-        <div className="h-full overflow-y-auto bg-slate-800/50 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">
+        <div className="h-full overflow-y-auto bg-slate-800/50 rounded-xl p-6" style={{ scrollbarGutter: 'stable' }}>
+          <h3 className="font-semibold text-white mb-4" style={{ fontSize: 'var(--step-1)' }}>
             Ingredients ({ingredients.filter(i => !i.checked).length}/{ingredients.length})
           </h3>
           
@@ -43,21 +43,32 @@ export default function IngredientPanel({
         </div>
       </div>
 
-      {/* Mobile: Horizontal Scroll Chips */}
+      {/* Mobile: Horizontal Scroll Chips with Gradient Hints */}
       <div className={`md:hidden ${className}`}>
         <div className="pb-4">
-          <h3 className="text-sm font-semibold text-slate-300 mb-3 px-4">
+          <h3 className="font-semibold text-slate-300 mb-3 px-4" style={{ fontSize: 'var(--step--1)' }}>
             Ingredients ({ingredients.filter(i => !i.checked).length}/{ingredients.length})
           </h3>
           
-          <div className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
-            {ingredients.map((ingredient) => (
-              <IngredientChip
-                key={ingredient.id}
-                ingredient={ingredient}
-                onToggle={onToggle}
-              />
-            ))}
+          <div className="relative">
+            {/* Gradient fade hints for overflow */}
+            <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-slate-900 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-slate-900 to-transparent z-10 pointer-events-none" />
+            
+            <div 
+              className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide"
+              style={{ 
+                scrollSnapType: 'x mandatory',
+              }}
+            >
+              {ingredients.map((ingredient) => (
+                <IngredientChip
+                  key={ingredient.id}
+                  ingredient={ingredient}
+                  onToggle={onToggle}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -111,9 +122,15 @@ function IngredientChip({
   return (
     <motion.div
       className="flex-shrink-0"
+      style={{ scrollSnapAlign: 'start' }}
       whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      transition={{ duration: 0.15 }}
+      whileTap={{ scale: 0.94 }}
+      transition={{ 
+        type: "spring", 
+        stiffness: 400, 
+        damping: 20,
+        duration: 0.12
+      }}
     >
       <Badge
         variant={ingredient.checked ? "secondary" : "outline"}
@@ -124,6 +141,7 @@ function IngredientChip({
             : 'bg-slate-700/50 border-slate-600 text-slate-200 hover:bg-slate-600/50 hover:border-orange-400/50'
           }
         `}
+        style={{ fontSize: 'var(--step--1)' }}
         onClick={() => onToggle(ingredient.id)}
       >
         {ingredient.checked && (

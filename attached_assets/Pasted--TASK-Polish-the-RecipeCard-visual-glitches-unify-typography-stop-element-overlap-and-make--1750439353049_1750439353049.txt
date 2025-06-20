@@ -1,0 +1,74 @@
+🔧 **TASK:** Polish the RecipeCard visual glitches—unify typography, stop element overlap, and make the ingredients scroller feel obvious and delightful.
+
+────────────────────────────────────────────────
+1. TYPOGRAPHY  (tokens.css / styles/tokens.ts)
+────────────────────────────────────────────────
+• Introduce a **single modular scale** and reference it everywhere:
+  :root {
+    --step--1: clamp(0.825rem, 0.80rem + 0.20vw, 0.90rem);
+    --step-0 : clamp(1.00rem , 0.98rem + 0.25vw, 1.10rem);
+    --step-1 : clamp(1.25rem , 1.20rem + 0.35vw, 1.40rem);
+    --step-2 : clamp(1.56rem , 1.50rem + 0.45vw, 1.75rem);
+    --step-3 : clamp(1.95rem , 1.90rem + 0.55vw, 2.15rem);
+  }
+• Map components:
+  - Hero title → var(--step-3)
+  - Step card title → var(--step-1)
+  - Body text → var(--step-0)
+  - Tiny chips / meta → var(--step--1)
+• Replace all hard-coded `px` / `em` with these vars.
+
+Result: headings scale fluidly from 320 px to 2 K displays—no manual media queries.
+
+────────────────────────────────────────────────
+2. LAYOUT OVERLAP FIXES (RecipeCard.vue / .tsx)
+────────────────────────────────────────────────
+• Guard the **MainGrid** with a min column width:
+  @container card (min-width: 720px) {
+     .grid { grid-template-columns: 280px 1fr; }
+  }
+• Add a **max‐width: 600px; margin-inline: auto;** on StepStack cards so
+  they never bleed into the IngredientPanel.
+• Ensure images use `aspect-ratio: 16/9; object-fit: cover;` to stop tall
+  photos pushing text.
+
+────────────────────────────────────────────────
+3. INGREDIENT SCROLLER UX (IngredientPanel.vue)
+────────────────────────────────────────────────
+Desktop (sidebar):
+  • Keep as fixed list but add **`scrollbar-gutter: stable;`**
+Mobile (chip strip):
+  • Add subtle **gradient fades** at left/right edges to imply overflow:
+      background:
+        linear-gradient(to right, var(--bg) 60%, transparent),
+        linear-gradient(to left , var(--bg) 60%, transparent) right;
+      background-size: 20px 100%;
+      background-repeat: no-repeat;
+  • `scroll-snap-type: x mandatory;`
+  • Each chip: `scroll-snap-align: start;`
+  • Show a **scroll hint arrow** for first 1.5 s:
+      .scroll-hint { animation: nudge 1.5s ease-in-out 1; }
+  • On chip check/unclick, **scale** 1 → 0.94 for 120 ms with spring easing for tactile feel.
+
+────────────────────────────────────────────────
+4. RESPONSIVE TESTS (Cypress or Playwright)
+────────────────────────────────────────────────
+• Viewports: 320, 480, 768, 1024, 1440.
+• Assertions:
+  - No element has `overflow: visible` cutting text.
+  - Heading font-size equals `var(--step-3)` at ≥1024 px.
+  - Ingredients scroller shows gradient when overflow exists.
+  - Step card always ≥ 16 px body font.
+
+────────────────────────────────────────────────
+5. DELIVERY ORDER
+────────────────────────────────────────────────
+Sprint-patch:
+  1. Tokens & font-var refactor.
+  2. Grid/container-query overlap guard.
+  3. Ingredient scroller gradient + snap.
+  4. Playwright regression suite.
+
+Toggle under `FEATURE_RECIPECARD_POLISH` so QA can A/B with current build.
+
+✅ After this patch the recipe reads consistently, never overlaps, and the ingredient list invites the user to swipe—no frustration.
