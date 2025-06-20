@@ -32,7 +32,7 @@ interface EnhancedRecipeCardProps {
   className?: string;
 }
 
-export default function EnhancedRecipeCard({ 
+function EnhancedRecipeCard({ 
   recipe, 
   onBack,
   onShare,
@@ -228,5 +228,6 @@ function extractDuration(instruction: string): number | undefined {
   return undefined;
 }
 
-// Export enhanced version as named export
+// Export enhanced version as both named and default export
 export { EnhancedRecipeCard };
+export default EnhancedRecipeCard;

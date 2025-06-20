@@ -391,3 +391,54 @@
   0%, 100% { box-shadow: 0 0 5px rgba(255, 107, 53, 0.2); }
   50% { box-shadow: 0 0 20px rgba(255, 107, 53, 0.4), 0 0 30px rgba(255, 107, 53, 0.2); }
 }
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.95); }
+  to { transform: scale(1); }
+}
+
+/* Text shadow utilities for recipe headers */
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  }
+  
+  .text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  }
+  
+  .text-shadow-none {
+    text-shadow: none;
+  }
+  
+  /* Scroll snap utilities */
+  .scroll-snap-x {
+    scroll-snap-type: x mandatory;
+  }
+  
+  .scroll-snap-y {
+    scroll-snap-type: y mandatory;
+  }
+  
+  .scroll-snap-start {
+    scroll-snap-align: start;
+  }
+  
+  .scroll-snap-center {
+    scroll-snap-align: center;
+  }
+  
+  .scroll-snap-end {
+    scroll-snap-align: end;
+  }
+  
+  /* Container query support */
+  .container-query {
+    container-type: inline-size;
+  }
+}

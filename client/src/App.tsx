@@ -18,6 +18,7 @@ import SettingsPage from "@/pages/SettingsPage";
 import Subscribe from "@/pages/Subscribe";
 import MyRecipes from "@/pages/MyRecipes";
 import RecipeView from "@/pages/RecipeView";
+import RecipeCardTest from "@/pages/RecipeCardTest";
 import DeveloperLogs from "@/pages/DeveloperLogs";
 import NotFound from "@/pages/not-found";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
