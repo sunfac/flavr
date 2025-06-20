@@ -1,0 +1,91 @@
+🔧 **TASK:** Refactor the RecipeCard component for a truly fluid, desktop-plus-mobile experience—no gimmicks, just cleaner UX.
+
+────────────────────────────────────────────────
+1. OVERALL STRUCTURE  (RecipeCard.vue / .tsx)
+────────────────────────────────────────────────
+<RecipeCard>
+  <HeaderSection>        <!-- hero + fast-facts + serving slider -->
+  <MainGrid>
+    <IngredientPanel/>   <!-- sidebar on desktop, chip-strip on mobile -->
+    <StepStack/>         <!-- snapping cards -->
+  </MainGrid>
+  <ProgressBar/>         <!-- fixed at top -->
+  <FooterSection/>       <!-- rating + notes -->
+</RecipeCard>
+
+Use **CSS Grid + @container** so MainGrid auto-swaps:
+- ≥768 px → `grid-template-columns: 280px 1fr;`
+- <768 px → single column, IngredientPanel hides as chips.
+
+────────────────────────────────────────────────
+2. HEADERSECTION
+────────────────────────────────────────────────
+- **Hero**: 16:9 responsive background-image (`object-fit: cover`).
+- **Fast-facts chips** (time · serves · difficulty) in a flex row.
+- **Serving slider**:
+  • Desktop: range input under hero.  
+  • Mobile: collapsible pill in header; tap => slide-over with range.
+
+Bind slider value to a `servings` ref and compute scaled amounts via a composable (`useScaledIngredients.ts`).
+
+────────────────────────────────────────────────
+3. INGREDIENTPANEL
+────────────────────────────────────────────────
+Desktop:
+  - Fixed-position sidebar, 100 % height, `overflow-y: auto`.
+  - Checkbox list.  Strike-through + opacity 0.4 when checked.
+
+Mobile:
+  - Horizontal scroll chips (`display: inline-flex`).
+  - Chips tick/untick with a subtle scale-up Lottie check.
+
+Both views pull from `scaledIngredients` and emit `toggle(id)`.
+
+────────────────────────────────────────────────
+4. STEPSTACK
+────────────────────────────────────────────────
+Each step card:
+  - Max-width 600 px, margin auto.
+  - `scroll-snap-align: start;`
+  - Title, description, optional `TimerButton`.
+  - On `startTimer()` → emits an event that:
+      • Starts countdown (store/timerSlice.ts)
+      • Programmatically scrolls to next card.
+
+Add “Cook Mode” (mobile only): full-screen modal with
+  `currentStep.text` in XL font + large timer; dismiss with swipe-down.
+
+────────────────────────────────────────────────
+5. PROGRESSBAR
+────────────────────────────────────────────────
+Fixed 4 px bar at top; width = completedDuration / totalDuration.
+Use CSS var `--progress` and animate with `transition: width 0.4s ease`.
+
+Mobile: convert to 5 px dot stack under header (`flex gap-2`);
+current step pulses via `animation: heartbeat 1.2s infinite`.
+
+────────────────────────────────────────────────
+6. FOOTERSECTION
+────────────────────────────────────────────────
+- Stars (1-5) component → emits `rate(recipeId, value)`.
+- “Save notes” textarea autosaves on blur to `localStorage['notes-'+id]`.
+
+Mobile accordion: hide stars + textarea until tap.
+
+────────────────────────────────────────────────
+7. TECH + PERF
+────────────────────────────────────────────────
+- **Skeleton loaders** for hero + step images (“blur-up” technique).
+- **Prefetch** next step image once 80 % of current card visible
+  (`IntersectionObserver`).
+- All durations/easings/timings stored in `/styles/tokens.ts`.
+
+────────────────────────────────────────────────
+8. PHASED ROLLOUT
+────────────────────────────────────────────────
+Sprint 1: HeaderSection + scaled serving slider.  
+Sprint 2: IngredientPanel swap & snapping StepStack.  
+Sprint 3: ProgressBar, timers, Cook Mode, footer notes.
+
+Add `FEATURE_REDESIGN_CARD` flag; expose toggle in `.env.local` so QA
+can switch between legacy and new layouts during testing.
