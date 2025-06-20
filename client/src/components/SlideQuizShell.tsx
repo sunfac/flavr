@@ -211,11 +211,11 @@ export default function SlideQuizShell({
               onChange={(e) => updateAnswer(currentQ.id, e.target.value)}
               className="h-14 text-lg bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-orange-400 rounded-xl"
             />
-            {currentQ.examples && (
+            {randomExamples && randomExamples.length > 0 && (
               <div className="space-y-2">
                 <p className="text-sm text-slate-400">Examples:</p>
                 <div className="flex flex-wrap gap-2">
-                  {currentQ.examples.map((example, index) => (
+                  {randomExamples.map((example, index) => (
                     <Badge 
                       key={index} 
                       variant="outline" 
