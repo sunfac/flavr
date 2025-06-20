@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import ShoppingList from "./ShoppingList";
 import ChatBot from "./ChatBot";
 import RecipeShareTools from "./RecipeShareTools";
+import VoiceControl from "./VoiceControl";
 import { generateShoppingPrompt2 } from "@/prompts/shoppingPrompt2";
 import { generateFridgePrompt2 } from "@/prompts/fridgePrompt2";
 import { motion, AnimatePresence } from "framer-motion";
@@ -40,6 +41,7 @@ export default function RecipeCard({
   const [isSaved, setIsSaved] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
   const [chatbotMessage, setChatbotMessage] = useState("");
+  const [showVoiceControl, setShowVoiceControl] = useState(false);
   const { toast } = useToast();
 
   // Handle recipe updates from chatbot
