@@ -1,0 +1,37 @@
+Please update the *Fridge Mode* quiz.  
+
+1. **First screen – choice of input**  
+   • Keep the existing text field for manual entry.  
+   • Add a second CTA button labelled **‘📷 Take a photo instead’**.  
+   • When tapped:  
+     – On browsers that support `getUserMedia`, open the rear camera in 16:9.  
+     – Fallback: render a standard `<input type="file" accept="image/*" capture="environment">`.  
+
+2. **Photo workflow**  
+   • After the user captures (or selects) an image, immediately upload/base-64 it to the backend route `POST /vision/fridge-scan`.  
+   • That route should call **Google Cloud Vision v1 `images:annotate`** with `OBJECT_LOCALIZATION` and `LABEL_DETECTION` (maxResults = 50).  
+   • Filter the returned labels through the existing `foodWhitelist` util and drop anything below `0.70` confidence.  
+   • Map synonyms via `synonymTable.json` (bell pepper → capsicum, etc.).  
+
+3. **Confirmation UI**  
+   • Show a modal headed **“Found these ingredients – edit before continuing”**.  
+   • Render each item in a scrollable list with a checked checkbox; unchecked items are discarded.  
+   • Provide an **“Add another”** text input at the bottom so the user can type extras.  
+   • Only when the user hits **“Looks good →”** do we persist the final `ingredients[]`.  
+
+4. **Hand-off to the existing quiz logic**  
+   • For the rest of the fridge-mode flow treat the confirmed `ingredients[]` exactly as if the user had typed them in prompt 1.  
+   • Maintain the JSON contract already used by `openai.chat` calls:  
+     ```json
+     { "mode": "fridge-scan", "ingredients": [ /* … */ ] }
+     ```  
+   • No other prompts change; fridge Q1 still shows the typed list, fridge Q2 proceeds unchanged.  
+
+5. **Code placement**  
+   • Front-end changes live in `components/FridgeQuiz.vue` (or `FridgeQuiz.tsx` if TS/React).  
+   • Create a new serverless function `api/vision.ts` that wraps the Vision API and returns the cleaned array.  
+   • Update the env sample file with `GOOGLE_PROJECT_ID`, `GOOGLE_VISION_KEY`, and mention these in README.  
+
+6. **UX / error handling**  
+   • If Vision returns nothing, fall back to the manual entry flow with a toast: *“Couldn’t recognise foods – please list ingredients manually.”*  
+   • Grey-out the **“Take a photo”** button while the network request is in flight; use the existing spinner component.  

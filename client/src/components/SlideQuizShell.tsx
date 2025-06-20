@@ -9,7 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Camera, Loader2 } from "lucide-react";
 import { iconMap } from "@/lib/iconMap";
+import { useToast } from "@/hooks/use-toast";
 
 // Utility function to get random selection from array
 const getRandomSelection = (array: string[], count: number): string[] => {
@@ -57,7 +60,14 @@ export default function SlideQuizShell({
   const [direction, setDirection] = useState(0);
   const [isCompleting, setIsCompleting] = useState(false);
   const [tempInput, setTempInput] = useState('');
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [isProcessingPhoto, setIsProcessingPhoto] = useState(false);
+  const [detectedIngredients, setDetectedIngredients] = useState<string[]>([]);
+  const [selectedIngredients, setSelectedIngredients] = useState<Record<string, boolean>>({});
+  const [additionalIngredient, setAdditionalIngredient] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const currentQ = questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
@@ -253,6 +263,89 @@ export default function SlideQuizShell({
           updateAnswer(currentQ.id, updatedIngredients);
         };
 
+        const handlePhotoCapture = () => {
+          if (fileInputRef.current) {
+            fileInputRef.current.click();
+          }
+        };
+
+        const processPhoto = async (file: File) => {
+          setIsProcessingPhoto(true);
+          try {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const response = await fetch('/api/vision/fridge-scan', {
+              method: 'POST',
+              body: formData
+            });
+
+            if (!response.ok) {
+              throw new Error('Failed to process image');
+            }
+
+            const result = await response.json();
+            
+            if (result.ingredients && result.ingredients.length > 0) {
+              setDetectedIngredients(result.ingredients);
+              // Initialize all detected ingredients as selected
+              const initialSelection: Record<string, boolean> = {};
+              result.ingredients.forEach((ingredient: string) => {
+                initialSelection[ingredient] = true;
+              });
+              setSelectedIngredients(initialSelection);
+              setShowPhotoModal(true);
+            } else {
+              toast({
+                title: "No ingredients detected",
+                description: "Couldn't recognise foods – please list ingredients manually.",
+                variant: "default"
+              });
+            }
+          } catch (error) {
+            console.error('Error processing photo:', error);
+            toast({
+              title: "Photo processing failed",
+              description: "Couldn't recognise foods – please list ingredients manually.",
+              variant: "destructive"
+            });
+          } finally {
+            setIsProcessingPhoto(false);
+          }
+        };
+
+        const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+          const file = event.target.files?.[0];
+          if (file) {
+            processPhoto(file);
+          }
+        };
+
+        const confirmPhotoIngredients = () => {
+          const confirmedIngredients = detectedIngredients.filter(ingredient => 
+            selectedIngredients[ingredient]
+          );
+          
+          // Add additional ingredient if provided
+          if (additionalIngredient.trim()) {
+            const additionalIngredients = additionalIngredient
+              .split(',')
+              .map(ing => ing.trim())
+              .filter(ing => ing.length > 0);
+            confirmedIngredients.push(...additionalIngredients);
+          }
+          
+          // Combine with existing ingredients
+          const updatedIngredients = [...ingredients, ...confirmedIngredients];
+          updateAnswer(currentQ.id, updatedIngredients);
+          
+          // Reset photo modal state
+          setShowPhotoModal(false);
+          setDetectedIngredients([]);
+          setSelectedIngredients({});
+          setAdditionalIngredient('');
+        };
+
         return (
           <div className="space-y-4">
             <div className="flex gap-2">
@@ -271,6 +364,39 @@ export default function SlideQuizShell({
                 Add
               </Button>
             </div>
+            
+            {/* Photo capture button for Fridge Mode */}
+            {currentQ.id === 'ingredients' && (
+              <div className="flex justify-center">
+                <Button
+                  onClick={handlePhotoCapture}
+                  disabled={isProcessingPhoto}
+                  variant="outline"
+                  className="bg-slate-800/50 border-slate-600 text-slate-300 hover:bg-slate-700/50 hover:border-orange-400 rounded-xl"
+                >
+                  {isProcessingPhoto ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Camera className="w-4 h-4 mr-2" />
+                      📷 Take a photo instead
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
             
             <p className="text-xs text-slate-400">
               Add multiple ingredients separated by commas (e.g., "eggs, spinach, tomatoes")
@@ -293,6 +419,70 @@ export default function SlideQuizShell({
                 </div>
               </div>
             )}
+
+            {/* Photo Ingredients Confirmation Modal */}
+            <Dialog open={showPhotoModal} onOpenChange={setShowPhotoModal}>
+              <DialogContent className="bg-slate-800 border-slate-600 text-white max-w-md max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-orange-400">Found these ingredients – edit before continuing</DialogTitle>
+                </DialogHeader>
+                
+                <div className="space-y-4">
+                  {/* Detected ingredients with checkboxes */}
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {detectedIngredients.map((ingredient, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`ingredient-${index}`}
+                          checked={selectedIngredients[ingredient] || false}
+                          onCheckedChange={(checked) => {
+                            setSelectedIngredients(prev => ({
+                              ...prev,
+                              [ingredient]: checked as boolean
+                            }));
+                          }}
+                          className="border-slate-500 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                        />
+                        <label 
+                          htmlFor={`ingredient-${index}`}
+                          className="text-sm text-slate-200 cursor-pointer flex-1"
+                        >
+                          {ingredient}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Add additional ingredients */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-300">Add another:</label>
+                    <Input
+                      placeholder="Type additional ingredients..."
+                      value={additionalIngredient}
+                      onChange={(e) => setAdditionalIngredient(e.target.value)}
+                      className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-orange-400"
+                    />
+                  </div>
+
+                  {/* Confirm button */}
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => setShowPhotoModal(false)}
+                      variant="outline"
+                      className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700/50"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={confirmPhotoIngredients}
+                      className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+                    >
+                      Looks good →
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         );
 
