@@ -215,63 +215,73 @@ function EnhancedRecipeCard({
           onServingsChange={setCurrentServings}
         />
 
-        {/* Main Grid - Responsive Layout */}
-        <div 
-          className="recipe-main-grid relative"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1fr)',
-            gap: '0',
-            containerType: 'inline-size'
-          }}
-        >
-          {/* CSS for container queries */}
-          <style dangerouslySetInnerHTML={{
-            __html: `
-              @container (min-width: 720px) {
-                .recipe-main-grid {
-                  grid-template-columns: 280px 1fr;
-                  gap: 0;
-                }
-              }
-            `
-          }} />
+        {/* Ingredients Section - Always Visible on Mobile */}
+        <IngredientPanel
+          ingredients={ingredientsWithState}
+          onToggle={handleIngredientToggle}
+          className="border-b border-slate-700/50"
+        />
 
-          {/* Ingredient Panel */}
-          <IngredientPanel
-            ingredients={ingredientsWithState}
-            onToggle={handleIngredientToggle}
-            className="md:h-[600px] md:sticky md:top-0"
-          />
+        {/* Main Grid - Desktop Layout Only */}
+        <div className="hidden md:block">
+          <div 
+            className="recipe-main-grid relative"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '280px 1fr',
+              gap: '0',
+              containerType: 'inline-size'
+            }}
+          >
+            {/* Desktop Ingredient Panel - Hidden on Mobile */}
+            <div className="hidden md:block">
+              <IngredientPanel
+                ingredients={ingredientsWithState}
+                onToggle={handleIngredientToggle}
+                className="h-[600px] sticky top-0"
+              />
+            </div>
 
-          {/* Step Stack */}
+            {/* Step Stack */}
+            <StepStack
+              steps={steps}
+              currentStep={currentStep}
+              onStepComplete={handleStepComplete}
+              onStepChange={setCurrentStep}
+              className="min-h-[600px]"
+            />
+          </div>
+        </div>
+
+        {/* Mobile Step Stack */}
+        <div className="md:hidden">
           <StepStack
             steps={steps}
             currentStep={currentStep}
             onStepComplete={handleStepComplete}
             onStepChange={setCurrentStep}
-            className="min-h-[600px]"
+            className="min-h-[400px]"
           />
         </div>
+
+        {/* Recipe Tips - Above Footer to Prevent Overlap */}
+        {recipe.tips && (
+          <div className="p-6 bg-slate-800/20 border-t border-slate-700/50 mb-4">
+            <div className="flex items-start gap-3">
+              <BookOpen className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
+              <div className="w-full">
+                <h4 className="font-medium text-orange-400 mb-2">Chef's Tips</h4>
+                <p className="text-slate-300 leading-relaxed pr-4">{recipe.tips}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Footer Section */}
         <FooterSection
           recipeId={recipe.id}
           onRate={handleRating}
         />
-
-        {/* Recipe Tips */}
-        {recipe.tips && (
-          <div className="p-6 bg-slate-800/20 border-t border-slate-700/50">
-            <div className="flex items-start gap-3">
-              <BookOpen className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
-              <div>
-                <h4 className="font-medium text-orange-400 mb-2">Chef's Tips</h4>
-                <p className="text-slate-300 leading-relaxed">{recipe.tips}</p>
-              </div>
-            </div>
-          </div>
-        )}
       </motion.div>
 
       {/* Voice Control Panel */}
