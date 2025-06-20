@@ -67,12 +67,12 @@ export default function IngredientPanel({
             <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-slate-900 to-transparent z-10 pointer-events-none" />
             
             <div 
-              className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide"
+              className={`flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide ${showScrollHint ? 'scroll-hint' : ''}`}
               style={{ 
                 scrollSnapType: 'x mandatory',
               }}
             >
-              {ingredients.map((ingredient) => (
+              {ingredients.map((ingredient, index) => (
                 <IngredientChip
                   key={ingredient.id}
                   ingredient={ingredient}
@@ -125,10 +125,10 @@ function IngredientCheckboxItem({
 
 function IngredientChip({ 
   ingredient, 
-  onToggle 
+  onToggle
 }: { 
   ingredient: ScaledIngredient; 
-  onToggle: (id: string) => void; 
+  onToggle: (id: string) => void;
 }) {
   return (
     <motion.div
