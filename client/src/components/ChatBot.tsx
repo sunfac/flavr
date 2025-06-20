@@ -87,18 +87,21 @@ export default function ChatBot({
   // Extract history from response
   const chatHistory = historyData?.history || [];
 
-  // Send chat message
+  // Send chat message with function calling support
   const sendMessageMutation = useMutation({
     mutationFn: (data: { message: string; currentRecipe?: Recipe; mode?: string }) =>
-      apiRequest("POST", "/api/chat", data),
+      apiRequest("POST", "/api/chat", {
+        ...data,
+        currentRecipe: data.currentRecipe || recipeStore,
+        enableFunctionCalling: true
+      }),
     onSuccess: async (response) => {
       const result = await response.json();
       
-      // Debug logging to see what we receive
       console.log('🔍 CHAT RESPONSE RECEIVED:', {
+        hasFunctionCalls: !!result.functionCalls,
         hasUpdatedRecipe: !!result.updatedRecipe,
-        updatedRecipeTitle: result.updatedRecipe?.title || 'none',
-        onRecipeUpdateExists: !!onRecipeUpdate
+        responseLength: result.response?.length || 0
       });
       
       const newMessage: ChatMessage = {
@@ -112,18 +115,59 @@ export default function ChatBot({
       setLocalMessages(prev => [...prev, newMessage]);
       setMessage("");
 
-      // Check if the response includes recipe updates
+      // Handle OpenAI function calls for live recipe updates
+      if (result.functionCalls && Array.isArray(result.functionCalls)) {
+        result.functionCalls.forEach((functionCall: any) => {
+          if (functionCall.name === 'updateRecipe') {
+            try {
+              const { mode, data } = functionCall.arguments;
+              console.log(`🔧 Function Call: ${mode} recipe update`, data);
+              
+              if (mode === 'replace') {
+                recipeActions.replaceRecipe(data);
+              } else if (mode === 'patch') {
+                recipeActions.patchRecipe(data);
+                
+                // Handle timer rescaling if step durations changed
+                if (data.steps) {
+                  data.steps.forEach((step: any) => {
+                    if (step.duration && timerStore.timers[step.id]) {
+                      timerStore.rescaleTimer(step.id, step.duration);
+                    }
+                  });
+                }
+              }
+              
+              // Add success notification
+              const updateMessage: ChatMessage = {
+                id: Date.now() + Math.random(),
+                message: "",
+                response: "Recipe updated! Changes are reflected above.",
+                isUser: false,
+                text: "Recipe updated! Changes are reflected above.",
+                timestamp: new Date(),
+              };
+              setTimeout(() => {
+                setLocalMessages(prev => [...prev, updateMessage]);
+              }, 500);
+            } catch (error) {
+              console.error('Error processing function call:', error);
+            }
+          }
+        });
+      }
+
+      // Legacy recipe update support (fallback)
       if (result.updatedRecipe && onRecipeUpdate) {
-        console.log('📝 UPDATING RECIPE:', result.updatedRecipe);
+        console.log('📝 Legacy recipe update:', result.updatedRecipe);
         onRecipeUpdate(result.updatedRecipe);
         
-        // Add a recipe update notification message
         const updateMessage: ChatMessage = {
           id: Date.now() + 1,
           message: "",
-          response: "🔥 Recipe updated! Check out the changes above.",
+          response: "Recipe updated! Check out the changes above.",
           isUser: false,
-          text: "🔥 Recipe updated! Check out the changes above.",
+          text: "Recipe updated! Check out the changes above.",
           timestamp: new Date(),
         };
         setTimeout(() => {
@@ -131,6 +175,14 @@ export default function ChatBot({
         }, 500);
       }
     },
+    onError: (error) => {
+      console.error('Chat error:', error);
+      toast({
+        title: "Chat Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    }
   });
 
   // Initialize with Zest's welcome message when we have a recipe

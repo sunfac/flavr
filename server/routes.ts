@@ -1197,11 +1197,72 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
     }
   });
 
-  // Enhanced Chat routes with recipe context and conversation memory
+  // Enhanced Chat routes with recipe context and function calling support
   app.post("/api/chat", async (req, res) => {
     try {
-      const { message, currentRecipe, mode } = req.body;
+      const { message, currentRecipe, mode, enableFunctionCalling } = req.body;
       const userId = req.session?.userId;
+
+      // Define function tools for OpenAI function calling
+      const tools = enableFunctionCalling ? [{
+        type: "function" as const,
+        function: {
+          name: "updateRecipe",
+          description: "Replace or patch the current recipe displayed in the UI when user requests modifications",
+          parameters: {
+            type: "object",
+            properties: {
+              mode: {
+                type: "string",
+                enum: ["replace", "patch"],
+                description: "Use 'patch' for minor tweaks, 'replace' for complete overhaul"
+              },
+              data: {
+                type: "object",
+                description: "Full recipe object for replace mode, or partial changes for patch mode",
+                properties: {
+                  id: { type: "string" },
+                  servings: { type: "number" },
+                  ingredients: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string" },
+                        text: { type: "string" },
+                        checked: { type: "boolean" }
+                      }
+                    }
+                  },
+                  steps: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string" },
+                        title: { type: "string" },
+                        description: { type: "string" },
+                        duration: { type: "number" }
+                      }
+                    }
+                  },
+                  meta: {
+                    type: "object",
+                    properties: {
+                      title: { type: "string" },
+                      description: { type: "string" },
+                      cookTime: { type: "number" },
+                      difficulty: { type: "string" },
+                      cuisine: { type: "string" }
+                    }
+                  }
+                }
+              }
+            },
+            required: ["mode", "data"]
+          }
+        }
+      }] : undefined;
 
       // Get recent chat history for conversation memory
       let chatHistory: any[] = [];
@@ -1213,7 +1274,7 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
         }
       }
 
-      // Build context-aware system prompt with personality
+      // Build context-aware system prompt with personality and function calling instructions
       let systemPrompt = `You are Zest, Flavr's bold and encouraging AI cooking assistant. You help users modify recipes with confidence and flair.
 
 PERSONALITY: Be casual, enthusiastic, and supportive. Use phrases like "Nice!", "Let's do it!", "That's a great idea!", "Perfect!". Keep responses short and conversational.
@@ -1223,6 +1284,8 @@ RESPONSE RULES:
 2. When updating a recipe, just say what you changed casually (e.g., "Swapped in chicken and bumped the spice!")
 3. Keep responses under 50 words when possible
 4. Be encouraging and make cooking feel fun and accessible
+
+FUNCTION CALLING: You may invoke **updateRecipe** whenever the user's request implies a change to any ingredients, servings, or steps. Use *mode:'patch'* for minor tweaks; use *mode:'replace'* for a complete overhaul.
 
 CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`;
 
@@ -1368,7 +1431,7 @@ Then respond with this JSON format:
 Keep it SHORT and encouraging. The recipe card will show the changes!`;
 
         const response = await openai.chat.completions.create({
-          model: "gpt-3.5-turbo", // Using GPT-3.5 Turbo for cost efficiency
+          model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
           messages: [
             {
               role: "system",
@@ -1376,11 +1439,15 @@ Keep it SHORT and encouraging. The recipe card will show the changes!`;
             },
             { role: "user", content: message }
           ],
+          tools: tools,
+          tool_choice: enableFunctionCalling ? "auto" : undefined,
           max_tokens: 800,
           temperature: 0.7,
         });
 
-        const fullResponse = response.choices[0]?.message?.content || "";
+        const message = response.choices[0]?.message;
+        const fullResponse = message?.content || "";
+        const toolCalls = message?.tool_calls || [];
         const inputTokens = response.usage?.prompt_tokens || 0;
         const outputTokens = response.usage?.completion_tokens || 0;
         
