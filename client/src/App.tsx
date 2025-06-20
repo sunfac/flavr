@@ -41,6 +41,7 @@ function Router() {
       <Route path="/flavr-plus" component={FlavrPlus} />
       <Route path="/my-recipes" component={MyRecipes} />
       <Route path="/recipe/:id" component={RecipeView} />
+      <Route path="/recipe-test" component={RecipeCardTest} />
       <Route path="/settings" component={SettingsPage} />
       <Route path="/subscribe" component={Subscribe} />
       <Route path="/developer-logs" component={DeveloperLogs} />
