@@ -75,12 +75,26 @@ const initializeVisionClient = () => {
   }
 
   try {
-    visionClient = new ImageAnnotatorClient({
+    const config: any = {
       projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-      keyFilename: process.env.GOOGLE_CLOUD_KEY_FILE, // Optional: path to service account key
-      // If using environment variable for credentials:
-      // credentials: JSON.parse(process.env.GOOGLE_CLOUD_CREDENTIALS || '{}')
-    });
+    };
+
+    // Use credentials from environment variable if available
+    if (process.env.GOOGLE_CLOUD_CREDENTIALS) {
+      try {
+        config.credentials = JSON.parse(process.env.GOOGLE_CLOUD_CREDENTIALS);
+      } catch (parseError) {
+        console.error('Failed to parse GOOGLE_CLOUD_CREDENTIALS:', parseError);
+        return null;
+      }
+    } else if (process.env.GOOGLE_CLOUD_KEY_FILE) {
+      config.keyFilename = process.env.GOOGLE_CLOUD_KEY_FILE;
+    } else {
+      console.warn('No Google Cloud credentials provided - vision functionality disabled');
+      return null;
+    }
+
+    visionClient = new ImageAnnotatorClient(config);
     return visionClient;
   } catch (error) {
     console.error('Failed to initialize Google Cloud Vision client:', error);
