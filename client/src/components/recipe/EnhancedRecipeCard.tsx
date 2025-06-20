@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useScaledIngredients } from '@/hooks/useScaledIngredients';
 import { useRecipeStore, recipeActions } from '@/stores/recipeStore';
-import VoiceControl from '@/components/VoiceControl';
+import VoiceAssistant from '@/components/VoiceAssistant';
 import HeaderSection from './HeaderSection';
 import IngredientPanel from './IngredientPanel';
 import StepStack from './StepStack';
@@ -62,17 +62,13 @@ function EnhancedRecipeCard({
     const zustandRecipe = {
       id: recipe.id,
       servings: currentServings,
-      ingredients: scaledIngredients.map((ingredient, index) => {
-        const ingredientText = typeof ingredient === 'string' ? ingredient : 
-          (ingredient as any).text || (ingredient as any).original || String(ingredient);
-        return {
-          id: `ingredient-${index}`,
-          text: ingredientText,
-          amount: typeof ingredient === 'object' ? (ingredient as any).amount || '' : '',
-          unit: typeof ingredient === 'object' ? (ingredient as any).unit || '' : '',
-          checked: ingredientStates[ingredientText] || false
-        };
-      }),
+      ingredients: recipe.ingredients.map((ingredient, index) => ({
+        id: `ingredient-${index}`,
+        text: ingredient,
+        amount: '',
+        unit: '',
+        checked: ingredientStates[ingredient] || false
+      })),
       steps: recipe.instructions.map((instruction, index) => ({
         id: `step-${index}`,
         title: `Step ${index + 1}`,
@@ -94,7 +90,7 @@ function EnhancedRecipeCard({
 
     // Update Zustand store
     recipeActions.replaceRecipe(zustandRecipe);
-  }, [recipe, currentServings, scaledIngredients, currentStep, completedSteps, ingredientStates]);
+  }, [recipe, currentServings, currentStep, completedSteps, ingredientStates]);
 
   // Listen for voice command changes from Zustand store
   useEffect(() => {
@@ -289,8 +285,8 @@ function EnhancedRecipeCard({
             className="fixed bottom-0 left-0 right-0 z-50 bg-slate-800/95 backdrop-blur-md border-t border-slate-600 p-4"
           >
             <div className="max-w-7xl mx-auto">
-              <VoiceControl 
-                onChatMessage={(message) => {
+              <VoiceAssistant 
+                onChatMessage={(message: string) => {
                   // Handle voice messages sent to chatbot
                   toast({
                     title: "Voice Command",
