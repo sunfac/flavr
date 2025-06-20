@@ -80,7 +80,7 @@ export default function RecipeView() {
     );
   }
 
-  if (error || !recipeData) {
+  if (error || !recipeData?.recipe) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black flex items-center justify-center">
         <div className="text-center">
@@ -96,8 +96,7 @@ export default function RecipeView() {
     );
   }
 
-  // Handle both response formats - direct recipe object or wrapped in recipe property
-  const recipe: Recipe = (recipeData as any).recipe || (recipeData as Recipe);
+  const recipe = recipeData.recipe;
 
   // Transform recipe data to match EnhancedRecipeCard interface
   const enhancedRecipe = {
