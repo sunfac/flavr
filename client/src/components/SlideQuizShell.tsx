@@ -382,7 +382,7 @@ export default function SlideQuizShell({
                   ) : (
                     <>
                       <Camera className="w-4 h-4 mr-2" />
-                      📷 Take a photo instead
+                      Take a photo instead
                     </>
                   )}
                 </Button>
