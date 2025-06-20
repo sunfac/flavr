@@ -7,6 +7,7 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 import { insertRecipeSchema, insertChatMessageSchema } from "@shared/schema";
 import { logGPTInteraction } from "./developerLogger";
+import { processFridgeImage, uploadMiddleware } from "./vision";
 import { getCreativeGuidanceBlock } from "./shoppingPromptBlocks";
 import { 
   difficultyMap, 
@@ -2010,6 +2011,9 @@ Generate 3 inspiring recipe preview cards for ${day} now:`;
       res.status(500).json({ error: 'Failed to generate recipe cards' });
     }
   });
+
+  // Google Cloud Vision API route for fridge photo scanning
+  app.post("/api/vision/fridge-scan", uploadMiddleware, processFridgeImage);
 
   // Run expired subscription check every hour
   setInterval(async () => {
