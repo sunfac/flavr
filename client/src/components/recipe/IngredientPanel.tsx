@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -22,6 +22,17 @@ export default function IngredientPanel({
   onToggle, 
   className = '' 
 }: IngredientPanelProps) {
+  const [showScrollHint, setShowScrollHint] = useState(true);
+
+  // Hide scroll hint after 1.5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowScrollHint(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <>
       {/* Desktop: Fixed Sidebar */}

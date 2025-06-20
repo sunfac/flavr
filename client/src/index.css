@@ -300,6 +300,16 @@
     animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  /* Scroll hint animation for ingredient chips */
+  .scroll-hint {
+    animation: nudge 1.5s ease-in-out 1;
+  }
+
+  @keyframes nudge {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(8px); }
+  }
+
   .animate-scale-in {
     animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }

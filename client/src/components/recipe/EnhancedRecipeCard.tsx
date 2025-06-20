@@ -164,9 +164,9 @@ function EnhancedRecipeCard({
           {/* CSS for container queries */}
           <style dangerouslySetInnerHTML={{
             __html: `
-              @container (min-width: 768px) {
+              @container (min-width: 720px) {
                 .recipe-main-grid {
-                  grid-template-columns: ${layout.ingredientPanelWidth} minmax(0, 1fr);
+                  grid-template-columns: 280px 1fr;
                   gap: 0;
                 }
               }

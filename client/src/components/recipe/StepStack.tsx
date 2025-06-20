@@ -305,19 +305,19 @@ function StepCard({
       </div>
 
       {/* Step Content */}
-      <h3 className="text-xl font-semibold text-white mb-3">{step.title}</h3>
+      <h3 className="font-semibold text-white mb-3" style={{ fontSize: 'var(--step-1)' }}>{step.title}</h3>
       
       {step.image && (
-        <div className="mb-4 rounded-lg overflow-hidden bg-slate-700/30">
+        <div className="mb-4 rounded-lg overflow-hidden bg-slate-700/30" style={{ aspectRatio: '16/9' }}>
           <img 
             src={step.image} 
             alt={step.title}
-            className="w-full h-48 object-cover"
+            className="w-full h-full object-cover"
           />
         </div>
       )}
       
-      <p className="text-slate-300 leading-relaxed mb-6">{step.description}</p>
+      <p className="text-slate-300 leading-relaxed mb-6" style={{ fontSize: 'var(--step-0)' }}>{step.description}</p>
 
       {/* Step Actions */}
       <div className="flex justify-end">
