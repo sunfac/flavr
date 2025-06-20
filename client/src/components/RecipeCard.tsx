@@ -12,6 +12,7 @@ import { generateShoppingPrompt2 } from "@/prompts/shoppingPrompt2";
 import { generateFridgePrompt2 } from "@/prompts/fridgePrompt2";
 import { motion, AnimatePresence } from "framer-motion";
 import { iconMap } from "@/lib/iconMap";
+import EnhancedRecipeCard from "./recipe/EnhancedRecipeCard";
 
 interface RecipeCardProps {
   recipe: any;
@@ -244,134 +245,65 @@ export default function RecipeCard({
     return null;
   }
 
-  // Full recipe view
+  // Transform recipe data to match EnhancedRecipeCard interface
+  const enhancedRecipe = {
+    id: fullRecipe.id?.toString() || 'temp-recipe',
+    title: fullRecipe.title,
+    description: fullRecipe.description,
+    cookTime: fullRecipe.cookTime || 30,
+    servings: fullRecipe.servings || 4,
+    difficulty: fullRecipe.difficulty || "Medium",
+    cuisine: mode === "fridge" ? "Fresh & Simple" : mode === "chef" ? "Gourmet" : "Everyday",
+    image: fullRecipe.imageUrl,
+    ingredients: fullRecipe.ingredients || [],
+    instructions: fullRecipe.instructions || [],
+    tips: fullRecipe.tips
+  };
+
+  const handleShare = () => {
+    if (fullRecipe.shareId) {
+      // Copy share link logic would go here
+      toast({
+        title: "Share Recipe",
+        description: "Share functionality activated",
+      });
+    }
+  };
+
+  const handleRating = (recipeId: string, rating: number) => {
+    toast({
+      title: "Rating saved",
+      description: `You rated "${fullRecipe.title}" ${rating} stars`,
+    });
+  };
+
+  // Full recipe view using EnhancedRecipeCard
   return (
-    <div className="bg-background min-h-screen">
-      {/* Recipe Header - Mobile optimized */}
-      <div className="relative">
-        <div className="w-full h-64 sm:h-80 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center shadow-lg">
-          {fullRecipe.imageUrl ? (
-            <img 
-              src={fullRecipe.imageUrl} 
-              alt={fullRecipe.title}
-              className="w-full h-full object-cover" 
-            />
-          ) : (
-            <div className="text-6xl sm:text-8xl animate-pulse">🍽️</div>
-          )}
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-        
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="absolute top-4 left-4 w-10 h-10 bg-black/20 backdrop-blur-sm rounded-full text-white hover:bg-black/40 border border-white/20"
-          onClick={onBack}
-        >
-          <iconMap.arrowLeft className="w-4 h-4" />
-        </Button>
+    <div className="min-h-screen bg-slate-900">
+      <EnhancedRecipeCard
+        recipe={enhancedRecipe}
+        onBack={onBack}
+        onShare={handleShare}
+      />
 
-        {/* Save Button - More visible */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="absolute top-4 right-4 w-12 h-12 bg-orange-500/80 backdrop-blur-sm rounded-full text-white hover:bg-orange-600 border-2 border-white/40 shadow-lg"
-          onClick={() => saveRecipeMutation.mutate()}
-          disabled={isSaved || saveRecipeMutation.isPending}
-        >
-          {isSaved ? (
-            <iconMap.heart className="w-5 h-5 fill-red-500 text-red-500" />
-          ) : (
-            <iconMap.bookmarkPlus className="w-5 h-5" />
-          )}
-        </Button>
-
-        {/* Recipe Info Overlay - Mobile optimized */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-white">
-          <h1 className="font-playfair font-bold text-2xl sm:text-3xl mb-2 sm:mb-3 drop-shadow-lg leading-tight">{fullRecipe.title}</h1>
-          <div className="flex items-center flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
-            <Badge variant="secondary" className="bg-white/20 text-white border-white/30 px-2 py-1">
-              <iconMap.clock className="w-3 h-3 mr-1" />
-              {fullRecipe.cookTime} min
-            </Badge>
-            <Badge variant="secondary" className="bg-white/20 text-white border-white/30 px-2 py-1">
-              <iconMap.users className="w-3 h-3 mr-1" />
-              {fullRecipe.servings} servings
-            </Badge>
-            <Badge variant="secondary" className="bg-white/20 text-white border-white/30 px-2 py-1">
-              <iconMap.signal className="w-3 h-3 mr-1" />
-              {fullRecipe.difficulty || "Easy"}
-            </Badge>
-          </div>
-        </div>
-      </div>
-
-      {/* Recipe Content - Mobile optimized spacing */}
-      <div className="p-4 sm:p-6 space-y-6 sm:space-y-8">
-        {/* Ingredients Section - Mobile Optimized */}
-        <div>
-          <h2 className="text-lg sm:text-xl font-playfair font-bold text-foreground mb-3 sm:mb-4">Ingredients</h2>
-          <div className="space-y-2">
-            {fullRecipe.ingredients?.map((ingredient: string, index: number) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg text-sm">
-                <span className="flex-1 text-foreground leading-relaxed pr-2">
-                  {ingredient}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleSubstitution(ingredient)}
-                  className="ml-2 p-1 h-7 w-7 text-muted-foreground hover:text-orange-400 hover:bg-orange-500/10 flex-shrink-0"
-                  title="Get substitution suggestions"
-                >
-                  <iconMap.refresh className="w-3 h-3" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-
+      {/* Additional Legacy Features */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Shopping List Button (only for shopping mode) */}
         {mode === "shopping" && fullRecipe.shoppingList && (
-          <Button 
-            onClick={() => setShowShoppingList(true)}
-            className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90"
-          >
-            <i className="fas fa-shopping-cart mr-2"></i>Generate Shopping List
-          </Button>
-        )}
-
-        {/* Instructions Section */}
-        <div>
-          <h2 className="text-xl font-playfair font-bold text-foreground mb-4">Instructions</h2>
-          <div className="space-y-4">
-            {fullRecipe.instructions?.map((step: string, index: number) => (
-              <div key={index} className="flex space-x-4">
-                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
-                  {index + 1}
-                </div>
-                <p className="text-foreground leading-relaxed pt-1">{step}</p>
-              </div>
-            ))}
+          <div className="mb-8">
+            <Button 
+              onClick={() => setShowShoppingList(true)}
+              className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90"
+            >
+              <iconMap.shoppingCart className="w-4 h-4 mr-2" />
+              Generate Shopping List
+            </Button>
           </div>
-        </div>
-
-        {/* Chef Tips */}
-        {fullRecipe.tips && (
-          <Card className="bg-accent/10 border-accent/20">
-            <CardContent className="pt-4">
-              <h3 className="font-bold text-foreground mb-2">
-                <i className="fas fa-lightbulb text-accent mr-2"></i>Chef's Tip
-              </h3>
-              <p className="text-foreground text-sm">{fullRecipe.tips}</p>
-            </CardContent>
-          </Card>
         )}
 
         {/* Save & Share Tools */}
         {fullRecipe.id && (
-          <div className="mb-8">
+          <div className="mb-8 bg-slate-800/30 rounded-xl backdrop-blur-sm">
             <RecipeShareTools
               id={fullRecipe.id}
               shareId={fullRecipe.shareId}
@@ -381,7 +313,6 @@ export default function RecipeCard({
               isShared={fullRecipe.isShared || false}
               recipe={fullRecipe}
               onShareToggle={async () => {
-                // Handle share toggle logic here
                 try {
                   await apiRequest("POST", `/api/recipe/${fullRecipe.id}/share`, { 
                     isShared: !fullRecipe.isShared 
@@ -404,14 +335,16 @@ export default function RecipeCard({
 
         {/* New Search Button (for chef mode) */}
         {showNewSearchButton && onNewSearch && (
-          <Button 
-            onClick={onNewSearch}
-            variant="outline"
-            className="w-full"
-          >
-            <iconMap.refresh className="w-4 h-4 mr-2" />
-            Create Another Recipe
-          </Button>
+          <div className="mb-8">
+            <Button 
+              onClick={onNewSearch}
+              variant="outline"
+              className="w-full"
+            >
+              <iconMap.refresh className="w-4 h-4 mr-2" />
+              Create Another Recipe
+            </Button>
+          </div>
         )}
       </div>
 
