@@ -32,7 +32,12 @@ export const chefQuestions: QuestionConfig[] = [
       "I want to treat myself with something rich and indulgent",
       "I want a colourful, feel-good dinner that lifts my mood",
       "I want to slow-cook something that fills the house with delicious smells",
-      "I want to cook something fun and playful with the kids"
+      "I want to cook something fun and playful with the kids",
+      "A light summery meal",
+      "I want to make a healthy weeknight dinner that's still exciting",
+      "I want to cook something warming and hearty for winter",
+      "I want to create a fresh and zesty dish with citrus flavours",
+      "I want to make a one-pot wonder that's both filling and flavourful"
     ]
   },
   {

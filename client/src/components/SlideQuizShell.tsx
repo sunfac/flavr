@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,14 @@ import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { iconMap } from "@/lib/iconMap";
+
+// Utility function to get random selection from array
+const getRandomSelection = (array: string[], count: number): string[] => {
+  if (array.length <= count) return array;
+  
+  const shuffled = [...array].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+};
 
 export interface QuestionConfig {
   id: string;
@@ -53,6 +61,14 @@ export default function SlideQuizShell({
 
   const currentQ = questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+
+  // Generate random examples for the current question (memoized to prevent re-shuffling on re-renders)
+  const randomExamples = useMemo(() => {
+    if (currentQ.examples && currentQ.examples.length > 6) {
+      return getRandomSelection(currentQ.examples, 6);
+    }
+    return currentQ.examples || [];
+  }, [currentQuestionIndex, currentQ.id]); // Re-shuffle when question changes
 
   useEffect(() => {
     if (containerRef.current) {
@@ -289,11 +305,11 @@ export default function SlideQuizShell({
               onChange={(e) => updateAnswer(currentQ.id, e.target.value)}
               className="min-h-32 text-lg bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-orange-400 rounded-xl"
             />
-            {currentQ.examples && currentQ.examples.length > 0 && (
+            {randomExamples && randomExamples.length > 0 && (
               <div className="space-y-2">
                 <p className="text-sm text-slate-400">Need inspiration? Try these:</p>
                 <div className="flex flex-wrap gap-2">
-                  {currentQ.examples.map((example, index) => (
+                  {randomExamples.map((example, index) => (
                     <Badge 
                       key={index} 
                       variant="outline" 
