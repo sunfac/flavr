@@ -1274,8 +1274,30 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
         }
       }
 
-      // Build context-aware system prompt with personality and function calling instructions
-      let systemPrompt = `You are Zest, Flavr's bold and encouraging AI cooking assistant. You help users modify recipes with confidence and flair.
+      // Build enhanced system prompt for function calling
+      let systemPrompt = enableFunctionCalling ? 
+        `You are Zest, Flavr's bold and encouraging AI cooking assistant. You help users modify recipes with confidence and flair.
+
+PERSONALITY: Be casual, enthusiastic, and supportive. Use phrases like "Nice!", "Let's do it!", "That's a great idea!", "Perfect!". Keep responses short and conversational.
+
+FUNCTION CALLING RULES:
+- Use the updateRecipe function whenever the user requests any recipe modification
+- Use mode:'patch' for small changes (servings, spice level, single ingredient swaps)
+- Use mode:'replace' for major overhauls (complete dietary changes, cooking method changes)
+- Always transform the current recipe structure to match the Zustand store format:
+  * ingredients: array of {id, text, checked} objects
+  * steps: array of {id, title, description, duration} objects  
+  * meta: {title, description, cookTime, difficulty, cuisine}
+
+RESPONSE STYLE:
+- Keep your text response short and encouraging (under 30 words)
+- Just mention what you're changing casually
+- Let the function call handle the actual recipe updates
+
+Current recipe context: ${currentRecipe ? `"${currentRecipe.title}" with ${currentRecipe.servings} servings` : 'No recipe loaded'}
+
+CONVERSATION MEMORY: Here's our recent chat:` :
+        `You are Zest, Flavr's bold and encouraging AI cooking assistant. You help users modify recipes with confidence and flair.
 
 PERSONALITY: Be casual, enthusiastic, and supportive. Use phrases like "Nice!", "Let's do it!", "That's a great idea!", "Perfect!". Keep responses short and conversational.
 
@@ -1284,8 +1306,6 @@ RESPONSE RULES:
 2. When updating a recipe, just say what you changed casually (e.g., "Swapped in chicken and bumped the spice!")
 3. Keep responses under 50 words when possible
 4. Be encouraging and make cooking feel fun and accessible
-
-FUNCTION CALLING: You may invoke **updateRecipe** whenever the user's request implies a change to any ingredients, servings, or steps. Use *mode:'patch'* for minor tweaks; use *mode:'replace'* for a complete overhaul.
 
 CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`;
 
@@ -1387,6 +1407,7 @@ CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`
 
       let updatedRecipe = null;
       let botResponse = "";
+      let functionCalls: any[] = [];
 
       if (shouldUpdateRecipe) {
         // Recipe modification prompt with casual updates
@@ -1401,7 +1422,7 @@ Current recipe details:
 - Servings: ${currentRecipe.servings}
 - Cook Time: ${currentRecipe.cookTime} minutes
 
-User request: "${message}"
+User request: "${req.body.message}"
 
 RESPONSE RULES:
 1. Give a SHORT, casual response about what you're changing (1-2 sentences max)
@@ -1437,7 +1458,7 @@ Keep it SHORT and encouraging. The recipe card will show the changes!`;
               role: "system",
               content: modificationPrompt
             },
-            { role: "user", content: message }
+            { role: "user", content: req.body.message }
           ],
           tools: tools,
           tool_choice: enableFunctionCalling ? "auto" : undefined,
@@ -1451,10 +1472,20 @@ Keep it SHORT and encouraging. The recipe card will show the changes!`;
         const inputTokens = response.usage?.prompt_tokens || 0;
         const outputTokens = response.usage?.completion_tokens || 0;
         
+        // Process function calls for live updates
+        if (enableFunctionCalling && toolCalls.length > 0) {
+          functionCalls = toolCalls.map((toolCall: any) => ({
+            name: toolCall.function.name,
+            arguments: JSON.parse(toolCall.function.arguments)
+          }));
+          
+          console.log('🔧 Function calls detected:', functionCalls);
+        }
+
         // Log chatbot interaction for cost tracking
         await logGPTInteraction(
           'chatbot',
-          { userMessage: message, currentRecipe: currentRecipe?.title },
+          { userMessage: req.body.message, currentRecipe: currentRecipe?.title },
           modificationPrompt,
           fullResponse,
           {},
@@ -1590,13 +1621,15 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
       // Debug logging to see what we're sending back
       console.log(`🚀 CHAT RESPONSE SENDING:`, {
         hasUpdatedRecipe: !!updatedRecipe,
+        hasFunctionCalls: functionCalls.length > 0,
         responseLength: botResponse.length,
         updatedRecipeTitle: updatedRecipe?.title || 'none'
       });
 
       res.json({ 
         response: botResponse,
-        updatedRecipe
+        updatedRecipe,
+        functionCalls: functionCalls.length > 0 ? functionCalls : undefined
       });
     } catch (error: any) {
       res.status(500).json({ message: "Failed to process chat: " + error.message });
