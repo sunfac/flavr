@@ -85,7 +85,7 @@ export default function ChatBot({
   });
 
   // Extract history from response
-  const chatHistory = historyData?.history || [];
+  const chatHistory = Array.isArray(historyData) ? historyData : (historyData as any)?.history || [];
 
   // Send chat message with function calling support
   const sendMessageMutation = useMutation({

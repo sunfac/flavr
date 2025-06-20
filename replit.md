@@ -131,6 +131,7 @@ Flavr is a modern full-stack web application that serves as an AI-powered culina
 Changelog:
 - June 20, 2025. Initial setup
 - June 20, 2025. Enhanced RecipeCard refactor complete - structured sections with responsive CSS Grid layout
+- June 20, 2025. Chatbot upgrade complete - OpenAI function calling for live recipe updates without page refreshes
 ```
 
 ## User Preferences
