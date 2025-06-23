@@ -285,7 +285,6 @@ export default function RecipeCard({
   return (
     <div className="min-h-screen bg-slate-900">
       <EnhancedRecipeCard
-        key={`recipe-${enhancedRecipe.id}-${recipeStore.lastUpdated || Date.now()}`}
         recipe={enhancedRecipe}
         onBack={onBack}
         onShare={handleShare}

@@ -304,9 +304,11 @@ export default function ChatBot({
 
   // Auto-scroll to latest message
   useEffect(() => {
-    if (scrollAreaRef.current) {
+    if (scrollAreaRef.current && scrollAreaRef.current.scrollHeight) {
       setTimeout(() => {
-        scrollAreaRef.current!.scrollTop = scrollAreaRef.current!.scrollHeight;
+        if (scrollAreaRef.current) {
+          scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+        }
       }, 100);
     }
   }, [localMessages]);

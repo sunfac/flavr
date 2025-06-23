@@ -1,0 +1,40 @@
+Error Details
+Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
+
+    at span
+    at https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-5SRUYHBP.js?v=52fbee5f:122:13
+    at https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-slider.js?v=52fbee5f:314:7
+    at Provider (https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-5SRUYHBP.js?v=52fbee5f:44:15)
+    at https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-slider.js?v=52fbee5f:180:7
+    at https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-K27R4B7K.js?v=52fbee5f:79:13
+    at https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-K27R4B7K.js?v=52fbee5f:56:13
+    at https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OJK76UTA.js?v=52fbee5f:41:15
+    at Provider (https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-5SRUYHBP.js?v=52fbee5f:44:15)
+    at CollectionProvider (https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OJK76UTA.js?v=52fbee5f:31:13)
+    at Provider (https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-5SRUYHBP.js?v=52fbee5f:44:15)
+    at https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-slider.js?v=52fbee5f:61:7
+    at _c (https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/components/ui/slider.tsx:21:11)
+    at div
+    at div
+    at div
+    at div
+    at div
+    at HeaderSection (https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/components/recipe/HeaderSection.tsx:25:3)
+    at div
+    at MotionComponent (https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js?v=52fbee5f:945:40)
+    at div
+    at EnhancedRecipeCard (https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/components/recipe/EnhancedRecipeCard.tsx:66:3)
+    at div
+    at RecipeCard (https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/components/RecipeCard.tsx:33:3)
+    at main
+    at div
+    at ShoppingMode (https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/pages/ShoppingMode.tsx:38:24)
+    at Route (https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=52fbee5f:280:16)
+    at Switch (https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=52fbee5f:336:17)
+    at Router
+    at ErrorBoundary (https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+    at Provider (https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-5SRUYHBP.js?v=52fbee5f:44:15)
+    at TooltipProvider (https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=52fbee5f:62:5)
+    at QueryClientProvider (https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=52fbee5f:2923:3)
+    at ErrorBoundary (https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+    at App

@@ -97,72 +97,49 @@ function EnhancedRecipeCard({
 
   // Force re-render when recipe store updates from chatbot
   useEffect(() => {
-    if (recipeStore.lastUpdated && recipeStore.id === recipe.id) {
-      console.log('🔄 Recipe store changed, forcing re-render:', {
+    if (recipeStore.lastUpdated && recipeStore.id === recipe.id && recipeStore.servings !== currentServings) {
+      console.log('🔄 Recipe store changed, syncing servings:', {
         storeServings: recipeStore.servings,
         currentServings,
-        storeIngredientsLength: recipeStore.ingredients.length,
-        storeStepsLength: recipeStore.steps.length,
         lastUpdated: recipeStore.lastUpdated
       });
       
-      // Update all local state to match store
+      // Only update servings if they actually changed
       setCurrentServings(recipeStore.servings);
-      setCurrentStep(0);
-      setCompletedSteps([]);
-      setIngredientStates({});
-      
-      // Force a complete re-render by updating a dummy state
-      const dummyUpdate = Math.random();
-      console.log('🔄 Triggering force refresh:', dummyUpdate);
     }
-  }, [recipeStore.lastUpdated]);
+  }, [recipeStore.lastUpdated, recipeStore.servings, currentServings, recipeStore.id, recipe.id]);
 
   // Use updated data from store if available, otherwise fall back to original
   const activeIngredients = useMemo(() => {
-    if (recipeStore.id === recipe.id && recipeStore.ingredients.length > 0) {
-      console.log('🔄 Using store ingredients:', recipeStore.ingredients.length);
+    const isStoreActive = recipeStore.id === recipe.id && recipeStore.ingredients.length > 0;
+    if (isStoreActive) {
       return recipeStore.ingredients.map(ing => ing.text);
     }
-    console.log('🔄 Using original ingredients:', recipe.ingredients.length);
     return recipe.ingredients;
-  }, [recipeStore.id, recipe.id, recipeStore.ingredients, recipe.ingredients, recipeStore.lastUpdated]);
+  }, [recipeStore.id, recipe.id, recipeStore.ingredients, recipe.ingredients]);
 
   const activeInstructions = useMemo(() => {
-    if (recipeStore.id === recipe.id && recipeStore.steps.length > 0) {
-      console.log('🔄 Using store instructions:', recipeStore.steps.length);
+    const isStoreActive = recipeStore.id === recipe.id && recipeStore.steps.length > 0;
+    if (isStoreActive) {
       return recipeStore.steps.map(step => step.description);
     }
-    console.log('🔄 Using original instructions:', recipe.instructions.length);
     return recipe.instructions;
-  }, [recipeStore.id, recipe.id, recipeStore.steps, recipe.instructions, recipeStore.lastUpdated]);
+  }, [recipeStore.id, recipe.id, recipeStore.steps, recipe.instructions]);
 
   const activeTitle = useMemo(() => {
-    if (recipeStore.id === recipe.id && recipeStore.meta.title) {
-      console.log('🔄 Using store title:', recipeStore.meta.title);
-      return recipeStore.meta.title;
-    }
-    console.log('🔄 Using original title:', recipe.title);
-    return recipe.title;
-  }, [recipeStore.id, recipe.id, recipeStore.meta.title, recipe.title, recipeStore.lastUpdated]);
+    const isStoreActive = recipeStore.id === recipe.id && recipeStore.meta.title;
+    return isStoreActive ? recipeStore.meta.title : recipe.title;
+  }, [recipeStore.id, recipe.id, recipeStore.meta.title, recipe.title]);
 
   const activeCookTime = useMemo(() => {
-    if (recipeStore.id === recipe.id && recipeStore.meta.cookTime) {
-      console.log('🔄 Using store cookTime:', recipeStore.meta.cookTime);
-      return recipeStore.meta.cookTime;
-    }
-    console.log('🔄 Using original cookTime:', recipe.cookTime);
-    return recipe.cookTime;
-  }, [recipeStore.id, recipe.id, recipeStore.meta.cookTime, recipe.cookTime, recipeStore.lastUpdated]);
+    const isStoreActive = recipeStore.id === recipe.id && recipeStore.meta.cookTime;
+    return isStoreActive ? recipeStore.meta.cookTime : recipe.cookTime;
+  }, [recipeStore.id, recipe.id, recipeStore.meta.cookTime, recipe.cookTime]);
 
   const activeDifficulty = useMemo(() => {
-    if (recipeStore.id === recipe.id && recipeStore.meta.difficulty) {
-      console.log('🔄 Using store difficulty:', recipeStore.meta.difficulty);
-      return recipeStore.meta.difficulty;
-    }
-    console.log('🔄 Using original difficulty:', recipe.difficulty);
-    return recipe.difficulty;
-  }, [recipeStore.id, recipe.id, recipeStore.meta.difficulty, recipe.difficulty, recipeStore.lastUpdated]);
+    const isStoreActive = recipeStore.id === recipe.id && recipeStore.meta.difficulty;
+    return isStoreActive ? recipeStore.meta.difficulty : recipe.difficulty;
+  }, [recipeStore.id, recipe.id, recipeStore.meta.difficulty, recipe.difficulty]);
 
   const activeServings = recipeStore.id === recipe.id 
     ? recipeStore.servings 
