@@ -1280,11 +1280,14 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
 
 PERSONALITY: Be casual, enthusiastic, and supportive. Use phrases like "Nice!", "Let's do it!", "That's a great idea!", "Perfect!". Keep responses short and conversational.
 
+CRITICAL: YOU MUST USE THE updateRecipe FUNCTION FOR ANY RECIPE CHANGES!
+
 FUNCTION CALLING RULES:
-- Use the updateRecipe function whenever the user requests any recipe modification
+- ALWAYS call the updateRecipe function when user asks for ANY recipe modification
+- Recipe changes include: ingredient swaps, serving changes, spice adjustments, cooking method changes, etc.
 - Use mode:'patch' for small changes (servings, spice level, single ingredient swaps)
 - Use mode:'replace' for major overhauls (complete dietary changes, cooking method changes)
-- Always transform the current recipe structure to match the Zustand store format:
+- Transform the recipe to match the Zustand store format:
   * ingredients: array of {id, text, checked} objects
   * steps: array of {id, title, description, duration} objects  
   * meta: {title, description, cookTime, difficulty, cuisine}
@@ -1292,7 +1295,7 @@ FUNCTION CALLING RULES:
 RESPONSE STYLE:
 - Keep your text response short and encouraging (under 30 words)
 - Just mention what you're changing casually
-- Let the function call handle the actual recipe updates
+- ALWAYS call the updateRecipe function - don't just describe changes
 
 Current recipe context: ${currentRecipe ? `"${currentRecipe.title}" with ${currentRecipe.servings} servings` : 'No recipe loaded'}
 
@@ -1498,7 +1501,7 @@ Keep it super short and casual!`;
             { role: "user", content: req.body.message }
           ],
           tools: tools,
-          tool_choice: enableFunctionCalling ? "auto" : undefined,
+          tool_choice: enableFunctionCalling ? "required" : undefined,
           max_tokens: 800,
           temperature: 0.7,
         });
@@ -1698,6 +1701,7 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
         // Log regular chatbot interaction for cost tracking
         try {
           await logGPTInteraction(
+            parseInt(userId?.toString() || '0'),
             'chat',
             { userMessage: message },
             regularChatPrompt,
@@ -1706,7 +1710,6 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
             {},
             inputTokens,
             outputTokens,
-            parseInt(userId?.toString() || '0'),
             null // no image for chatbot
           );
         } catch (logError) {
