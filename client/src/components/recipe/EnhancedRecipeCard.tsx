@@ -191,13 +191,10 @@ function EnhancedRecipeCard({
     if (recipeStore.currentStep !== currentStep) {
       setCurrentStep(recipeStore.currentStep);
     }
-    if (recipeStore.servings !== currentServings) {
-      setCurrentServings(recipeStore.servings);
-    }
     if (recipeStore.completedSteps !== completedSteps) {
       setCompletedSteps(recipeStore.completedSteps);
     }
-  }, [recipeStore.currentStep, recipeStore.servings, recipeStore.completedSteps]);
+  }, [recipeStore.currentStep, recipeStore.completedSteps]);
 
 
 
@@ -305,10 +302,10 @@ function EnhancedRecipeCard({
             difficulty: activeDifficulty,
             servings: activeServings
           }}
-          currentServings={currentServings}
+          currentServings={activeServings}
           onServingsChange={(newServings) => {
-            setCurrentServings(newServings);
-            // Also update the recipe store to keep everything in sync
+            // Note: HeaderSection slider was removed to prevent infinite loops
+            // Servings are now managed through the recipe store only
             recipeActions.updateServings(newServings);
           }}
         />
