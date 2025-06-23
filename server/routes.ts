@@ -1459,34 +1459,33 @@ CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`
 
       if (shouldUpdateRecipe) {
         // Recipe modification prompt with casual updates
-        const modificationPrompt = `You are Zest, Flavr's friendly AI cooking assistant. You love helping people cook and chat about food naturally!
+        const modificationPrompt = `You are Zest, Flavr's casual cooking assistant. Keep responses SHORT and conversational!
 
-${chatHistory.length > 0 ? `Our conversation:\n${chatHistory.slice(-3).map(msg => `User: ${msg.message}\nYou: ${msg.response}`).join('\n')}\n` : ''}
+Current recipe: "${currentRecipe.title}" (serves ${currentRecipe.servings})
+User wants: "${req.body.message}"
 
-Current recipe: "${currentRecipe.title}"
-Serves ${currentRecipe.servings}, takes ${currentRecipe.cookTime} minutes
-Main ingredients: ${currentRecipe.ingredients?.slice(0, 4).join(', ')}
+CRITICAL RULES:
+1. Give a SHORT casual response (1-2 sentences max) like "Nice! Made it spicier and doubled for 8 people!"
+2. NO ingredient lists or cooking steps in your response
+3. Just mention what you changed briefly
+4. Then provide ONLY the JSON
 
-User: "${req.body.message}"
-
-Chat naturally about cooking! Be conversational like ChatGPT. If they want to modify the recipe, chat about it and include updated recipe JSON. For general cooking questions or comments, just chat normally without JSON.
-
-For recipe changes, format like this:
-"[Natural response about the change]
+Format:
+[SHORT casual comment about change]
 
 {
   "shouldUpdateRecipe": true,
   "updatedRecipe": {
-    "title": "New title if changed",
-    "ingredients": ["updated ingredients with proper scaling"],
-    "instructions": ["updated steps"],
+    "title": "Updated title",
+    "ingredients": ["scaled ingredients array"],
+    "instructions": ["updated steps array"],
     "cookTime": number,
     "servings": number,
     "difficulty": "Easy/Medium/Hard"
   }
-}"
+}
 
-Be helpful, enthusiastic, and natural in conversation!`;
+Keep it super short and casual!`;
 
         const response = await openai.chat.completions.create({
           model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
