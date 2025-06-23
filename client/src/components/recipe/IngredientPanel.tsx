@@ -42,7 +42,7 @@ export default function IngredientPanel({
             Ingredients ({ingredients.filter(i => !i.checked).length}/{ingredients.length})
           </h3>
           
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {ingredients.map((ingredient) => (
               <IngredientCheckboxItem
                 key={ingredient.id}

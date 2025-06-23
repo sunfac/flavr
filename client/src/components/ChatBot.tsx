@@ -175,18 +175,19 @@ export default function ChatBot({
               
               console.log('✅ Recipe store updated successfully');
               
-              // Add success notification
+              // Force re-render of recipe card by triggering store listeners
+              console.log('🔄 Forcing recipe card re-render');
+              
+              // Add success notification without delay to preserve chat history
               const updateMessage: ChatMessage = {
                 id: Date.now() + Math.random(),
                 message: "",
-                response: "Recipe updated! Changes are reflected above.",
+                response: "✅ Recipe updated successfully!",
                 isUser: false,
-                text: "Recipe updated! Changes are reflected above.",
+                text: "✅ Recipe updated successfully!",
                 timestamp: new Date(),
               };
-              setTimeout(() => {
-                setLocalMessages(prev => [...prev, updateMessage]);
-              }, 500);
+              setLocalMessages(prev => [...prev, updateMessage]);
             } catch (error) {
               console.error('Error processing function call:', error);
             }
@@ -396,12 +397,11 @@ export default function ChatBot({
         </div>
       </div>
 
-      {/* Chat Panel - Mobile optimized */}
+      {/* Chat Panel - Right Side Panel */}
       <div 
-        className={`fixed bottom-20 left-2 right-2 sm:left-4 sm:right-4 glass border border-white/20 rounded-t-3xl transition-all duration-500 z-50 backdrop-blur-xl flex flex-col ${
-          isOpen ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
+        className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-slate-900/95 backdrop-blur-md border-l border-orange-500/30 shadow-2xl transition-all duration-500 z-50 flex flex-col ${
+          isOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
         }`}
-        style={{ maxHeight: 'calc(100vh - 140px)' }}
       >
         <CardHeader className="p-3 sm:p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-3">
