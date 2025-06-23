@@ -40,29 +40,35 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
     }
   }, []);
 
-  // Initialize speech recognition
+  // Initialize speech recognition with proper error handling
   useEffect(() => {
     if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'en-US';
-      
-      recognitionRef.current.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setInputValue(transcript);
-        setIsListening(false);
-      };
-      
-      recognitionRef.current.onerror = () => {
-        setIsListening(false);
-      };
-      
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
+      try {
+        const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+        recognitionRef.current = new SpeechRecognition();
+        
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = false;
+        recognitionRef.current.lang = 'en-US';
+        
+        recognitionRef.current.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          setInputValue(transcript);
+          setIsListening(false);
+        };
+        
+        recognitionRef.current.onerror = (event: any) => {
+          console.log('Speech recognition error:', event.error);
+          setIsListening(false);
+        };
+        
+        recognitionRef.current.onend = () => {
+          setIsListening(false);
+        };
+      } catch (error) {
+        console.log('Speech recognition not available:', error);
+        recognitionRef.current = null;
+      }
     }
   }, []);
 
@@ -149,10 +155,19 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                   ));
                 } else if (data.type === 'recipeUpdate') {
                   // Live recipe card refresh
+                  console.log('🔄 Received recipe update from stream:', data.recipe);
                   updateActiveRecipe(data.recipe);
                   if (onRecipeUpdate) {
                     onRecipeUpdate(data.recipe);
                   }
+                  
+                  // Add confirmation message
+                  fullResponse += `\n\n✅ Recipe updated: "${data.recipe.title}"`;
+                  setMessages(prev => prev.map(msg => 
+                    msg.id === assistantMessage.id 
+                      ? { ...msg, text: fullResponse }
+                      : msg
+                  ));
                 } else if (data.type === 'done') {
                   setIsStreaming(false);
                   // Mark message as complete
@@ -248,43 +263,48 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
   ];
 
   return (
-    <div className="flex flex-col h-full max-h-[600px]">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b">
-        <div>
-          <h3 className="font-semibold">Zest AI Assistant</h3>
-          <p className="text-sm text-muted-foreground">
-            {isStreaming ? 'Thinking...' : 'Ask me anything about cooking!'}
-          </p>
+    <div className="flex flex-col h-full">
+      {/* Compact Header */}
+      <div className="flex items-center justify-between p-2 border-b border-white/10">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
+            <span className="text-white text-xs font-bold">Z</span>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-white">
+              {isStreaming ? 'Thinking...' : 'Chat with Zest'}
+            </p>
+          </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           {speechSynthRef.current && (
             <Button
               variant="ghost"
               size="sm"
               onClick={isSpeaking ? stopSpeaking : undefined}
               disabled={!isSpeaking}
+              className="w-6 h-6 p-0"
             >
-              {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              {isSpeaking ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
             </Button>
           )}
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Messages Area - Optimized for visibility */}
+      <div className="flex-1 overflow-y-auto p-2 space-y-2 min-h-0">
         {messages.length === 0 && (
-          <div className="text-center text-muted-foreground">
-            <p className="mb-4">Hi! I'm Zest, your cooking assistant.</p>
+          <div className="text-center text-white/70 p-2">
+            <p className="text-sm mb-2">Hi! I'm Zest, your cooking assistant.</p>
             {currentRecipe && (
-              <p className="mb-4">I can help modify "{currentRecipe.title}" or answer any cooking questions!</p>
+              <p className="text-xs mb-3">I can help modify "{currentRecipe.title}" or answer cooking questions!</p>
             )}
-            <div className="flex flex-wrap gap-2 justify-center">
+            <div className="flex flex-wrap gap-1 justify-center">
               {suggestedQuestions.map((question, index) => (
                 <Badge 
                   key={index}
                   variant="secondary"
-                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                  className="cursor-pointer hover:bg-orange-500 hover:text-white transition-colors text-xs px-2 py-1"
                   onClick={() => setInputValue(question)}
                 >
                   {question}
@@ -299,28 +319,28 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
             key={message.id}
             className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <Card className={`max-w-[80%] p-3 ${
+            <div className={`max-w-[85%] p-2 rounded-lg text-sm ${
               message.sender === 'user' 
-                ? 'bg-primary text-primary-foreground' 
-                : 'bg-muted'
+                ? 'bg-orange-500 text-white' 
+                : 'bg-slate-700/80 text-white border border-slate-600'
             }`}>
-              <p className="text-sm whitespace-pre-wrap">
+              <p className="whitespace-pre-wrap break-words leading-relaxed">
                 {message.text}
                 {message.isStreaming && (
-                  <span className="inline-block w-2 h-4 bg-current ml-1 animate-pulse" />
+                  <span className="inline-block w-1 h-3 bg-current ml-1 animate-pulse" />
                 )}
               </p>
-              <p className="text-xs opacity-70 mt-1">
+              <p className="text-xs opacity-60 mt-1">
                 {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
-            </Card>
+            </div>
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="p-4 border-t">
+      {/* Compact Input Area */}
+      <div className="p-2 border-t border-white/10 bg-slate-800/50">
         <div className="flex gap-2">
           <div className="flex-1 relative">
             <Input
@@ -328,9 +348,9 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={isListening ? "Listening..." : "Ask me anything about cooking..."}
+              placeholder={isListening ? "Listening..." : "Ask about cooking..."}
               disabled={isStreaming || isListening}
-              className="pr-12"
+              className="h-8 text-sm bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 pr-10"
             />
             {recognitionRef.current && (
               <Button
@@ -338,20 +358,25 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                 size="sm"
                 onClick={toggleListening}
                 disabled={isStreaming}
-                className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${
-                  isListening ? 'text-red-500' : ''
+                className={`absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 p-0 ${
+                  isListening ? 'text-red-400 bg-red-500/20' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                {isListening ? <MicOff className="w-3 h-3" /> : <Mic className="w-3 h-3" />}
               </Button>
             )}
           </div>
           <Button 
             onClick={handleSendMessage} 
             disabled={!inputValue.trim() || isStreaming}
-            size="icon"
+            size="sm"
+            className="h-8 px-3 bg-orange-500 hover:bg-orange-600 text-white"
           >
-            <Send className="w-4 h-4" />
+            {isStreaming ? (
+              <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Send className="w-3 h-3" />
+            )}
           </Button>
         </div>
       </div>

@@ -1632,22 +1632,28 @@ Be conversational, helpful, and maintain context from our conversation history. 
         if (chunk.choices[0]?.finish_reason === 'function_call') {
           try {
             functionCallData = JSON.parse(functionArgs);
+            console.log('🔧 Function call completed:', functionName, functionCallData);
             
             // Send recipe update event immediately for live refresh
+            const updatedRecipe = {
+              id: currentRecipe?.id || Date.now(),
+              title: functionCallData.title,
+              servings: functionCallData.servings || currentRecipe?.servings || 4,
+              cookTime: functionCallData.cookTime || currentRecipe?.cookTime || 30,
+              difficulty: functionCallData.difficulty || currentRecipe?.difficulty || "Medium",
+              ingredients: functionCallData.ingredients,
+              instructions: functionCallData.instructions,
+              description: currentRecipe?.description || functionCallData.title
+            };
+            
+            console.log('📤 Sending recipe update event:', updatedRecipe);
             res.write(`data: ${JSON.stringify({ 
               type: 'recipeUpdate', 
-              recipe: {
-                title: functionCallData.title,
-                servings: functionCallData.servings || currentRecipe?.servings || 4,
-                cookTime: functionCallData.cookTime || currentRecipe?.cookTime || 30,
-                difficulty: functionCallData.difficulty || currentRecipe?.difficulty || "Medium",
-                ingredients: functionCallData.ingredients,
-                instructions: functionCallData.instructions
-              }
+              recipe: updatedRecipe
             })}\n\n`);
             
             // Generate a brief response about the recipe update
-            const updateResponse = `I've updated the recipe for "${functionCallData.title}"${functionCallData.servings ? ` (serves ${functionCallData.servings})` : ''}. The recipe card should now show the changes!`;
+            const updateResponse = `Perfect! I've updated "${functionCallData.title}" for you. Check the recipe card - it should show all the changes immediately!`;
             fullResponse += updateResponse;
             res.write(`data: ${JSON.stringify({ type: 'content', content: updateResponse })}\n\n`);
             
