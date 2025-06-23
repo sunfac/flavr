@@ -154,11 +154,23 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                       : msg
                   ));
                 } else if (data.type === 'recipeUpdate') {
-                  // Live recipe card refresh
+                  // Live recipe card refresh - force immediate update
                   console.log('🔄 Received recipe update from stream:', data.recipe);
-                  updateActiveRecipe(data.recipe);
+                  
+                  // Force recipe store update
+                  updateActiveRecipe({
+                    ...data.recipe,
+                    id: currentRecipe?.id || data.recipe.id,
+                    lastUpdated: Date.now() // Force re-render trigger
+                  });
+                  
+                  // Trigger parent callback for recipe card refresh
                   if (onRecipeUpdate) {
-                    onRecipeUpdate(data.recipe);
+                    onRecipeUpdate({
+                      ...data.recipe,
+                      id: currentRecipe?.id || data.recipe.id,
+                      lastUpdated: Date.now()
+                    });
                   }
                   
                   // Add confirmation message

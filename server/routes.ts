@@ -1514,34 +1514,33 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
         }
       };
 
-      // Build conversation history with memory management
+      // Use conversation history from frontend for seamless context flow
       let conversationMessages: Array<{role: "system" | "user" | "assistant", content: string}> = [];
-      let totalTokens = 0;
-      const maxTokens = 3000; // Reserve space for new message and response
       
-      // Add recent history first, working backwards
-      for (let i = fullChatHistory.length - 1; i >= 0; i--) {
-        const msg = fullChatHistory[i];
-        const content = msg.message || msg.response;
-        const tokens = estimateTokens(content);
+      if (conversationHistory && conversationHistory.length > 0) {
+        console.log('🔄 Using frontend conversation history:', conversationHistory.length, 'messages');
+        conversationMessages = conversationHistory.slice(-10); // Last 10 messages for context
+      } else {
+        console.log('📚 No frontend history, using database fallback');
+        let totalTokens = 0;
+        const maxTokens = 3000;
         
-        if (totalTokens + tokens > maxTokens && conversationMessages.length > 0) {
-          // If adding this message would exceed limit, summarize older messages
-          const summary = await summarizeOldHistory(fullChatHistory.slice(0, i + 1));
-          if (summary) {
-            conversationMessages.unshift({
-              role: "system",
-              content: `Previous conversation summary: ${summary}`
-            });
+        // Add recent history first, working backwards
+        for (let i = fullChatHistory.length - 1; i >= 0; i--) {
+          const msg = fullChatHistory[i];
+          const content = msg.message || msg.response;
+          const tokens = estimateTokens(content);
+          
+          if (totalTokens + tokens > maxTokens && conversationMessages.length > 0) {
+            break;
           }
-          break;
+          
+          conversationMessages.unshift({
+            role: msg.userId ? "user" : "assistant",
+            content: content
+          });
+          totalTokens += tokens;
         }
-        
-        conversationMessages.unshift({
-          role: msg.userId ? "user" : "assistant",
-          content: content
-        });
-        totalTokens += tokens;
       }
 
       // Build system prompt with current recipe context and function calling
