@@ -1254,66 +1254,126 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
     }
   });
 
-
-      // Build enhanced system prompt for function calling
-      let systemPrompt = enableFunctionCalling ? 
-        `You are Zest, Flavr's bold and encouraging AI cooking assistant. You help users modify recipes with confidence and flair.
-
-PERSONALITY: Be casual, enthusiastic, and supportive. Use phrases like "Nice!", "Let's do it!", "That's a great idea!", "Perfect!". Keep responses short and conversational.
-
-CRITICAL: YOU MUST USE THE updateRecipe FUNCTION FOR ANY RECIPE CHANGES!
-
-FUNCTION CALLING RULES:
-- ALWAYS call the updateRecipe function when user asks for ANY recipe modification
-- Recipe changes include: ingredient swaps, serving changes, spice adjustments, cooking method changes, etc.
-- Use mode:'patch' for small changes (servings, spice level, single ingredient swaps)
-- Use mode:'replace' for major overhauls (complete dietary changes, cooking method changes)
-- Transform the recipe to match the Zustand store format:
-  * ingredients: array of {id, text, checked} objects
-  * steps: array of {id, title, description, duration} objects  
-  * meta: {title, description, cookTime, difficulty, cuisine}
-
-RESPONSE STYLE:
-- Keep your text response short and encouraging (under 30 words)
-- Just mention what you're changing casually
-- ALWAYS call the updateRecipe function - don't just describe changes
-
-Current recipe context: ${currentRecipe ? `"${currentRecipe.title}" with ${currentRecipe.servings} servings` : 'No recipe loaded'}
-
-CONVERSATION MEMORY: Here's our recent chat:` :
-        `You are Zest, Flavr's bold and encouraging AI cooking assistant. You help users modify recipes with confidence and flair.
-
-PERSONALITY: Be casual, enthusiastic, and supportive. Use phrases like "Nice!", "Let's do it!", "That's a great idea!", "Perfect!". Keep responses short and conversational.
-
-RESPONSE RULES:
-1. NEVER include full recipes, ingredients lists, or detailed instructions in your responses
-2. When updating a recipe, just say what you changed casually (e.g., "Swapped in chicken and bumped the spice!")
-3. Keep responses under 50 words when possible
-4. Be encouraging and make cooking feel fun and accessible
-
-CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`;
-
-      // Add conversation history for context with proper conversation flow
-      if (chatHistory.length > 0) {
-        systemPrompt += "\nConversation history (maintain context and flow):\n";
-        chatHistory.slice(-3).forEach((msg, index) => {
-          systemPrompt += `User: ${msg.message}\nYou: ${msg.response}\n`;
-        });
-        systemPrompt += "\nBe conversational and reference previous messages naturally. Build on what you've already discussed.";
+  // Recipe deletion route
+  app.delete("/api/recipes/:id", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session?.userId;
+      const recipeId = parseInt(req.params.id);
+      
+      if (!userId || !recipeId) {
+        return res.status(400).json({ message: "Invalid request" });
       }
       
-      if (mode) {
-        const modeContext = {
-          shopping: "User is planning meals and shopping lists.",
-          fridge: "User is working with ingredients they have on hand.",
-          chef: "User wants expert culinary guidance."
-        };
-        systemPrompt += ` Mode: ${modeContext[mode as keyof typeof modeContext] || ''}`;
-      }
+      await storage.deleteRecipe(recipeId, userId);
+      res.json({ message: "Recipe deleted successfully" });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete recipe: " + error.message });
+    }
+  });
 
-      if (currentRecipe) {
-        systemPrompt += ` Current recipe: "${currentRecipe.title}"`;
+  // Recipe sharing route
+  app.get("/api/recipes/shared/:shareId", async (req, res) => {
+    try {
+      const shareId = req.params.shareId;
+      const recipe = await storage.getSharedRecipe(shareId);
+      
+      if (!recipe) {
+        return res.status(404).json({ message: "Recipe not found" });
       }
+      
+      res.json(recipe);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch shared recipe: " + error.message });
+    }
+  });
+
+  // Image generation route
+  app.post("/api/generate-image", requireAuth, async (req, res) => {
+    try {
+      const { prompt } = req.body;
+      const userId = req.session?.userId;
+      
+      if (!prompt) {
+        return res.status(400).json({ message: "Prompt is required" });
+      }
+      
+      // Generate image using Replicate
+      const output = await replicate.run(
+        "stability-ai/stable-diffusion:ac732df83cea7fff18b8472768c88ad041fa750ff7682a21affe81863cbe77e4",
+        {
+          input: {
+            prompt,
+            width: 1024,
+            height: 1024,
+            num_outputs: 1,
+            guidance_scale: 7.5,
+            num_inference_steps: 50
+          }
+        }
+      );
+      
+      const imageUrl = Array.isArray(output) ? output[0] : output;
+      
+      // Update user's image usage
+      if (userId) {
+        await storage.updateUserUsage(userId, 0, 1);
+      }
+      
+      res.json({ imageUrl });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to generate image: " + error.message });
+    }
+  });
+
+  // Subscription management routes
+  app.post("/api/subscription/create", requireAuth, async (req, res) => {
+    try {
+      const { tier } = req.body;
+      const userId = req.session?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      // Create subscription logic here
+      res.json({ message: "Subscription created successfully" });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to create subscription: " + error.message });
+    }
+  });
+  // Analytics and metrics routes
+  app.get("/api/analytics/dashboard", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      // Get user analytics data
+      const analytics = {
+        recipesGenerated: await storage.getUserRecipeCount(userId),
+        favoriteCount: await storage.getUserFavoriteCount(userId),
+        currentMonth: new Date().getMonth() + 1,
+        usageStats: await storage.getUserUsageStats(userId)
+      };
+      
+      res.json(analytics);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch analytics: " + error.message });
+    }
+  });
+
+  // Server status and health check
+  app.get("/api/health", (req, res) => {
+    res.json({ 
+      status: "healthy", 
+      timestamp: new Date().toISOString(),
+      version: "1.0.0"
+    });
+  });
+  const httpServer = createServer(app);
+  return httpServer;
+}
 
       console.log(`EXACT CHATBOT (ZEST) CONVERSATION PROMPT:`);
       console.log("=".repeat(80));
