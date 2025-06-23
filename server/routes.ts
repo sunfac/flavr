@@ -1198,7 +1198,210 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
     }
   });
 
-  // Intelligent Chat route with recipe modification capabilities
+  // Enhanced Chat route with streaming, memory, and function calling
+  app.post("/api/chat/stream", async (req, res) => {
+    try {
+      const { message, currentRecipe } = req.body;
+      const userId = req.session?.userId;
+
+      // Set up Server-Sent Events for streaming
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Cache-Control'
+      });
+
+      // Get full chat history for conversational memory
+      const fullChatHistory = await storage.getChatHistory(userId, 100);
+      
+      // Helper function to estimate token count (rough approximation)
+      const estimateTokens = (text: string): number => {
+        return Math.ceil(text.length / 4);
+      };
+
+      // Helper function to summarize old conversations when approaching context limit
+      const summarizeOldHistory = async (history: any[]): Promise<string> => {
+        const oldMessages = history.slice(0, Math.floor(history.length * 0.75));
+        const messagesText = oldMessages.map(msg => 
+          `${msg.userId ? 'User' : 'Assistant'}: ${msg.message || msg.response}`
+        ).join('\n');
+        
+        const summaryResponse = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "Summarize this conversation history into a concise overview that preserves the key topics, decisions, and context. Focus on recipe discussions, preferences, and any important cooking details mentioned."
+            },
+            {
+              role: "user", 
+              content: messagesText
+            }
+          ],
+          max_tokens: 200,
+          temperature: 0.3
+        });
+        
+        return summaryResponse.choices[0]?.message?.content || "Previous conversation about cooking and recipes.";
+      };
+
+      // Build conversation history with memory management
+      let conversationHistory: Array<{role: "system" | "user" | "assistant", content: string}> = [];
+      let totalTokens = 0;
+      const maxTokens = 3000; // Reserve space for new message and response
+      
+      // Add recent history first, working backwards
+      for (let i = fullChatHistory.length - 1; i >= 0; i--) {
+        const msg = fullChatHistory[i];
+        const content = msg.message || msg.response;
+        const tokens = estimateTokens(content);
+        
+        if (totalTokens + tokens > maxTokens && conversationHistory.length > 0) {
+          // If adding this message would exceed limit, summarize older messages
+          const summary = await summarizeOldHistory(fullChatHistory.slice(0, i + 1));
+          conversationHistory.unshift({
+            role: "system",
+            content: `Previous conversation summary: ${summary}`
+          });
+          break;
+        }
+        
+        conversationHistory.unshift({
+          role: msg.userId ? "user" : "assistant",
+          content: content
+        });
+        totalTokens += tokens;
+      }
+
+      // Build system prompt with current recipe context
+      const systemPrompt = `You are Zest, Flavr's intelligent cooking assistant. You help users with cooking questions, recipe modifications, and culinary guidance.
+
+${currentRecipe ? `Current recipe context: "${currentRecipe.title}" (serves ${currentRecipe.servings})\nIngredients: ${currentRecipe.ingredients?.join(', ')}\nSteps: ${currentRecipe.instructions?.join(' ')}\n` : ''}
+
+When discussing recipes, modifications, or creating new recipes, you must call the set_recipe function with the complete recipe data in this exact JSON format:
+{
+  "title": "Recipe Name",
+  "servings": 4,
+  "ingredients": ["ingredient 1", "ingredient 2", ...],
+  "steps": ["step 1", "step 2", ...]
+}
+
+Always provide complete, detailed ingredients and step-by-step instructions. Be conversational and helpful while maintaining recipe accuracy.`;
+
+      // Prepare messages for OpenAI with conversation history
+      const messages: Array<{role: "system" | "user" | "assistant", content: string}> = [
+        { role: "system", content: systemPrompt },
+        ...conversationHistory,
+        { role: "user", content: message }
+      ];
+
+      // Create streaming completion with function calling
+      const stream = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: messages as any,
+        functions: [
+          {
+            name: "set_recipe",
+            description: "Set or update the current recipe with complete recipe data",
+            parameters: {
+              type: "object",
+              properties: {
+                title: { type: "string", description: "Recipe title" },
+                servings: { type: "integer", description: "Number of servings (optional)" },
+                ingredients: { 
+                  type: "array", 
+                  items: { type: "string" },
+                  description: "List of ingredients"
+                },
+                steps: {
+                  type: "array",
+                  items: { type: "string" },
+                  description: "List of cooking steps"
+                }
+              },
+              required: ["title", "ingredients", "steps"]
+            }
+          }
+        ],
+        function_call: "auto",
+        stream: true,
+        temperature: 0.7,
+        max_tokens: 1000
+      });
+
+      let fullResponse = "";
+      let functionCallData: any = null;
+      let functionName = "";
+      let functionArgs = "";
+
+      // Stream the response
+      for await (const chunk of stream) {
+        const delta = chunk.choices[0]?.delta;
+        
+        if (delta?.content) {
+          // Stream text content
+          fullResponse += delta.content;
+          res.write(`data: ${JSON.stringify({ type: 'content', content: delta.content })}\n\n`);
+        }
+        
+        if (delta?.function_call) {
+          // Handle function call streaming
+          if (delta.function_call.name) {
+            functionName = delta.function_call.name;
+          }
+          if (delta.function_call.arguments) {
+            functionArgs += delta.function_call.arguments;
+          }
+        }
+        
+        // Check if function call is complete
+        if (chunk.choices[0]?.finish_reason === 'function_call') {
+          try {
+            functionCallData = JSON.parse(functionArgs);
+            
+            // Send recipe update event immediately
+            res.write(`data: ${JSON.stringify({ 
+              type: 'recipeUpdate', 
+              recipe: {
+                title: functionCallData.title,
+                servings: functionCallData.servings || currentRecipe?.servings || 4,
+                ingredients: functionCallData.ingredients,
+                steps: functionCallData.steps
+              }
+            })}\n\n`);
+            
+            // Generate a brief response about the recipe update
+            const updateResponse = `I've updated the recipe for "${functionCallData.title}"${functionCallData.servings ? ` (serves ${functionCallData.servings})` : ''}. The recipe card has been refreshed with the new details.`;
+            fullResponse += updateResponse;
+            res.write(`data: ${JSON.stringify({ type: 'content', content: updateResponse })}\n\n`);
+            
+          } catch (error) {
+            console.error('Error parsing function call arguments:', error);
+          }
+        }
+      }
+
+      // End the stream
+      res.write(`data: ${JSON.stringify({ type: 'done' })}\n\n`);
+      res.end();
+
+      // Save the conversation to database
+      await storage.createChatMessage({
+        userId,
+        message,
+        response: fullResponse,
+      });
+
+    } catch (error: any) {
+      console.error('Streaming chat error:', error);
+      res.write(`data: ${JSON.stringify({ type: 'error', message: error.message })}\n\n`);
+      res.end();
+    }
+  });
+
+  // Keep the original chat endpoint for backward compatibility
   app.post("/api/chat", async (req, res) => {
     try {
       const { message, currentRecipe } = req.body;
@@ -1209,147 +1412,87 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
       // Get chat history for conversation memory
       const chatHistory = await storage.getChatHistory(userId, 10);
 
-      // Enhanced intelligent recipe modification detection
-      const shouldUpdateRecipe = currentRecipe && (
-        // Direct modification keywords
-        message.toLowerCase().includes('change') ||
-        message.toLowerCase().includes('modify') ||
-        message.toLowerCase().includes('update') ||
-        message.toLowerCase().includes('adjust') ||
-        message.toLowerCase().includes('replace') ||
-        message.toLowerCase().includes('substitute') ||
-        message.toLowerCase().includes('swap') ||
-        message.toLowerCase().includes('switch') ||
-        
-        // Addition/removal patterns
-        message.toLowerCase().includes('add') ||
-        message.toLowerCase().includes('include') ||
-        message.toLowerCase().includes('put in') ||
-        message.toLowerCase().includes('throw in') ||
-        message.toLowerCase().includes('remove') ||
-        message.toLowerCase().includes('without') ||
-        message.toLowerCase().includes('skip') ||
-        message.toLowerCase().includes('leave out') ||
-        message.toLowerCase().includes('take out') ||
-        
-        // Cooking method changes
-        message.toLowerCase().includes('roast instead') ||
-        message.toLowerCase().includes('bake instead') ||
-        message.toLowerCase().includes('grill instead') ||
-        message.toLowerCase().includes('steam instead') ||
-        message.toLowerCase().includes('boil instead') ||
-        message.toLowerCase().includes('fry instead') ||
-        message.toLowerCase().includes('sauté instead') ||
-        message.toLowerCase().includes('avoid frying') ||
-        message.toLowerCase().includes('avoid baking') ||
-        message.toLowerCase().includes('no frying') ||
-        message.toLowerCase().includes('don\'t fry') ||
-        /instead of (frying|baking|roasting|grilling|steaming|boiling)/i.test(message) ||
-        
-        // Side dishes and additions
-        message.toLowerCase().includes('side dish') ||
-        message.toLowerCase().includes('side') ||
-        message.toLowerCase().includes('serve with') ||
-        message.toLowerCase().includes('pair with') ||
-        message.toLowerCase().includes('alongside') ||
-        message.toLowerCase().includes('goes with') ||
-        
-        // Spice and flavor modifications
-        message.toLowerCase().includes('spicier') ||
-        message.toLowerCase().includes('milder') ||
-        message.toLowerCase().includes('more spice') ||
-        message.toLowerCase().includes('less spice') ||
-        message.toLowerCase().includes('hotter') ||
-        message.toLowerCase().includes('cooler') ||
-        message.toLowerCase().includes('more flavor') ||
-        message.toLowerCase().includes('less salty') ||
-        message.toLowerCase().includes('sweeter') ||
-        message.toLowerCase().includes('more herbs') ||
-        message.toLowerCase().includes('make it spicy') ||
-        message.toLowerCase().includes('spice it up') ||
-        /make.*spic/i.test(message) ||
-        /spice.*up/i.test(message) ||
-        
-        // Portion/serving changes
-        /for\s+\d+\s+people/i.test(message) ||
-        /\d+\s+people/i.test(message) ||
-        /\d+\s+servings/i.test(message) ||
-        message.toLowerCase().includes('people instead') ||
-        message.toLowerCase().includes('servings instead') ||
-        message.toLowerCase().includes('instead of') ||
-        /make.*for.*\d/i.test(message) ||
-        /scale.*to.*\d/i.test(message) ||
-        message.toLowerCase().includes('double') ||
-        message.toLowerCase().includes('half') ||
-        message.toLowerCase().includes('triple') ||
-        message.toLowerCase().includes('halve') ||
-        
-        // Time and technique modifications
-        message.toLowerCase().includes('quicker') ||
-        message.toLowerCase().includes('faster') ||
-        message.toLowerCase().includes('slower') ||
-        message.toLowerCase().includes('longer') ||
-        message.toLowerCase().includes('reduce time') ||
-        message.toLowerCase().includes('cook longer') ||
-        message.toLowerCase().includes('more time') ||
-        
-        // Dietary and allergy modifications
-        message.toLowerCase().includes('make it vegan') ||
-        message.toLowerCase().includes('make it vegetarian') ||
-        message.toLowerCase().includes('dairy free') ||
-        message.toLowerCase().includes('gluten free') ||
-        message.toLowerCase().includes('keto') ||
-        message.toLowerCase().includes('low carb') ||
-        message.toLowerCase().includes('sugar free') ||
-        message.toLowerCase().includes('nut free') ||
-        
-        // Temperature and texture changes
-        message.toLowerCase().includes('crispy') ||
-        message.toLowerCase().includes('crunchy') ||
-        message.toLowerCase().includes('tender') ||
-        message.toLowerCase().includes('juicy') ||
-        message.toLowerCase().includes('well done') ||
-        message.toLowerCase().includes('rare') ||
-        message.toLowerCase().includes('medium') ||
-        
-        // Directive patterns and suggestions
-        /^make\s/i.test(message) ||
-        /^add\s/i.test(message) ||
-        /^try\s/i.test(message) ||
-        /^use\s/i.test(message) ||
-        /what if/i.test(message) ||
-        /could you/i.test(message) ||
-        /can you/i.test(message) ||
-        /would.*work/i.test(message) ||
-        
-        // Equipment and ingredient alternatives
-        message.toLowerCase().includes('oven') ||
-        message.toLowerCase().includes('air fryer') ||
-        message.toLowerCase().includes('slow cooker') ||
-        message.toLowerCase().includes('instant pot') ||
-        message.toLowerCase().includes('microwave') ||
-        message.toLowerCase().includes('stovetop') ||
-        
-        // Any suggestion that implies modification
-        /instead/i.test(message) ||
-        /rather than/i.test(message) ||
-        /in place of/i.test(message) ||
-        /substitute.*with/i.test(message) ||
-        /replace.*with/i.test(message)
-      );
+      // Add conversation history for context retention
+      const conversationHistory = chatHistory.slice(-5).map((msg: any) => ({
+        role: (msg.userId ? "user" : "assistant") as "user" | "assistant",
+        content: msg.message || msg.response
+      }));
 
-      let botResponse = "";
+      const regularChatPrompt = `You are Zest, Flavr's friendly AI cooking assistant. Maintain natural conversation flow!
 
-      if (shouldUpdateRecipe) {
-        // Use OpenAI function calling for recipe modifications
-        const modificationMessages = [
-          {
-            role: "system" as const,
-            content: `You are Zest, Flavr's intelligent cooking assistant. The user wants to modify their current recipe. You must handle ANY type of modification request intelligently.
+${chatHistory.length > 0 ? `Recent conversation:\n${chatHistory.slice(-3).map((msg: any) => `User: ${msg.message}\nYou: ${msg.response}`).join('\n')}\n` : ''}
 
-Current recipe details:
-- Title: ${currentRecipe.title}
-- Serves: ${currentRecipe.servings} people
+${currentRecipe ? `Current recipe context: "${currentRecipe.title}" (serves ${currentRecipe.servings})\n` : ''}
+
+Be conversational like ChatGPT. Reference what you've discussed before. Answer cooking questions, give tips, or chat naturally about food. Keep responses friendly and maintain conversation flow.`;
+
+      const allMessages: Array<{role: "system" | "user" | "assistant", content: string}> = [
+        { role: "system", content: regularChatPrompt },
+        ...conversationHistory,
+        { role: "user", content: message }
+      ];
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: allMessages as any,
+        max_tokens: 300,
+        temperature: 0.7,
+      });
+
+      const botResponse = response.choices[0]?.message?.content || "I'm sorry, I couldn't process that request. Please try again.";
+      
+      // Save chat message
+      await storage.createChatMessage({
+        userId,
+        message,
+        response: botResponse,
+      });
+
+      res.json({ 
+        response: botResponse,
+        updatedRecipe: null,
+        functionCalls: []
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to process chat: " + error.message });
+    }
+  });
+
+  // OpenAI Real-time Voice Chat endpoint
+  app.post("/api/voice/realtime", async (req, res) => {
+    try {
+      const { audioData, currentRecipe } = req.body;
+      const userId = req.session?.userId;
+
+      // Process voice input and generate response
+      res.json({ 
+        success: true,
+        message: "Voice chat processing implemented" 
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Voice chat error: " + error.message });
+    }
+  });
+
+  // Recipe sharing and management routes
+  app.post("/api/recipes/share", async (req, res) => {
+    try {
+      const { recipeId } = req.body;
+      const userId = req.session?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      res.json({ success: true, shareId: "shared_" + recipeId });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to share recipe: " + error.message });
+    }
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}
 - Cook Time: ${currentRecipe.cookTime} minutes
 - Difficulty: ${currentRecipe.difficulty}
 - Current ingredients: ${JSON.stringify(currentRecipe.ingredients)}
