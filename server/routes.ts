@@ -1277,63 +1277,117 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
       let botResponse = "";
 
       if (shouldUpdateRecipe) {
-        // Recipe modification prompt
-        const modificationPrompt = `You are Zest, Flavr's casual cooking assistant. Keep responses SHORT!
+        // Use OpenAI function calling for recipe modifications
+        const modificationMessages = [
+          {
+            role: "system" as const,
+            content: `You are Zest, Flavr's intelligent cooking assistant. The user wants to modify their current recipe.
 
-Current recipe: "${currentRecipe.title}" (serves ${currentRecipe.servings})
-User wants: "${message}"
+Current recipe details:
+- Title: ${currentRecipe.title}
+- Serves: ${currentRecipe.servings} people
+- Cook Time: ${currentRecipe.cookTime} minutes
+- Difficulty: ${currentRecipe.difficulty}
+- Current ingredients: ${currentRecipe.ingredients?.join(', ') || 'N/A'}
 
-RULES:
-1. Give a SHORT casual response (1-2 sentences max) like "Nice! Made it spicier!"
-2. NO ingredient lists or cooking steps in your response
-3. Just mention what you changed briefly
-4. Then provide ONLY the JSON
+Instructions:
+1. Analyze the user's request and determine what changes are needed
+2. If the request requires recipe updates, call the updateRecipe function with the modified recipe
+3. Provide a friendly, casual response about what you changed
+4. Keep responses conversational and brief (1-2 sentences)`
+          },
+          {
+            role: "user" as const,
+            content: message
+          }
+        ];
 
-Format:
-[SHORT casual comment]
+        // Add chat history for context
+        const conversationHistory = chatHistory.slice(-3).map(msg => ({
+          role: msg.isUser ? "user" as const : "assistant" as const,
+          content: msg.message
+        }));
 
-{
-  "shouldUpdateRecipe": true,
-  "updatedRecipe": {
-    "title": "Updated title",
-    "ingredients": ["scaled ingredients array"],
-    "instructions": ["updated steps array"],
-    "cookTime": number,
-    "servings": number,
-    "difficulty": "Easy/Medium/Hard"
-  }
-}
-
-Keep it super short!`;
+        const allMessages = [...conversationHistory, ...modificationMessages];
 
         const response = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [
-            { role: "system", content: modificationPrompt },
-            { role: "user", content: message }
+          model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+          messages: allMessages,
+          functions: [
+            {
+              name: "updateRecipe",
+              description: "Update the current recipe with modifications based on user request",
+              parameters: {
+                type: "object",
+                properties: {
+                  title: {
+                    type: "string",
+                    description: "Updated recipe title if changed"
+                  },
+                  servings: {
+                    type: "number",
+                    description: "Number of servings/people the recipe serves"
+                  },
+                  cookTime: {
+                    type: "number",
+                    description: "Updated cooking time in minutes"
+                  },
+                  difficulty: {
+                    type: "string",
+                    enum: ["Easy", "Medium", "Hard"],
+                    description: "Recipe difficulty level"
+                  },
+                  ingredients: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Complete updated ingredients list with quantities"
+                  },
+                  instructions: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Complete updated cooking instructions/steps"
+                  },
+                  spiceLevel: {
+                    type: "string",
+                    enum: ["Mild", "Medium", "Hot", "Very Hot"],
+                    description: "Spice level if changed"
+                  }
+                },
+                required: ["servings", "ingredients", "instructions"]
+              }
+            }
           ],
-          max_tokens: 800,
+          function_call: "auto",
+          max_tokens: 1000,
           temperature: 0.7,
         });
 
-        const fullResponse = response.choices[0]?.message?.content || "";
+        botResponse = response.choices[0]?.message?.content || "";
         
-        try {
-          // Parse JSON response for recipe updates
-          const jsonMatch = fullResponse.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            const parsed = JSON.parse(jsonMatch[0]);
-            if (parsed.shouldUpdateRecipe && parsed.updatedRecipe) {
-              // Update the recipe in storage
-              updatedRecipe = { 
-                ...currentRecipe, 
-                ...parsed.updatedRecipe,
-                id: currentRecipe.id
+        // Handle function calls from OpenAI
+        if (response.choices[0]?.message?.function_call) {
+          const functionCall = response.choices[0].message.function_call;
+          
+          if (functionCall.name === "updateRecipe") {
+            try {
+              const functionArgs = JSON.parse(functionCall.arguments);
+              
+              // Update the recipe with new data
+              updatedRecipe = {
+                ...currentRecipe,
+                title: functionArgs.title || currentRecipe.title,
+                servings: functionArgs.servings || currentRecipe.servings,
+                cookTime: functionArgs.cookTime || currentRecipe.cookTime,
+                difficulty: functionArgs.difficulty || currentRecipe.difficulty,
+                ingredients: functionArgs.ingredients || currentRecipe.ingredients,
+                instructions: functionArgs.instructions || currentRecipe.instructions,
+                spiceLevel: functionArgs.spiceLevel || currentRecipe.spiceLevel
               };
               
+              // Save updated recipe to database
               await storage.updateRecipe(currentRecipe.id, updatedRecipe);
               
-              // Create function call for frontend
+              // Create function call for frontend live update
               functionCalls = [{
                 name: 'updateRecipe',
                 arguments: {
@@ -1346,7 +1400,8 @@ Keep it super short!`;
                       description: updatedRecipe.description || currentRecipe.description,
                       cookTime: updatedRecipe.cookTime,
                       difficulty: updatedRecipe.difficulty,
-                      cuisine: updatedRecipe.cuisine || currentRecipe.cuisine
+                      cuisine: updatedRecipe.cuisine || currentRecipe.cuisine,
+                      spiceLevel: updatedRecipe.spiceLevel
                     },
                     ingredients: updatedRecipe.ingredients.map((ing: string, index: number) => ({
                       id: `ingredient-${index}`,
