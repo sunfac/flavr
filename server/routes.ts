@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
-import WebSocket from "ws";
+import WebSocket, { WebSocketServer } from "ws";
 import OpenAI from "openai";
 import Replicate from "replicate";
 import Stripe from "stripe";
@@ -1580,7 +1580,7 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
           content: msg.message || msg.response
         }));
 
-        const allMessages = [
+        const allMessages: Array<{role: "system" | "user" | "assistant", content: string}> = [
           { role: "system", content: regularChatPrompt },
           ...conversationHistory,
           { role: "user", content: message }
@@ -1588,7 +1588,7 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
 
         const response = await openai.chat.completions.create({
           model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-          messages: allMessages,
+          messages: allMessages as any,
           max_tokens: 300,
           temperature: 0.7,
         });
@@ -1774,86 +1774,5 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
     });
   });
   const httpServer = createServer(app);
-  
-  // WebSocket server for OpenAI Realtime API  
-  const wss = new WebSocket.WebSocketServer({ server: httpServer, path: '/api/voice/realtime' });
-  
-  wss.on('connection', (ws: any) => {
-    console.log('Voice chat WebSocket connection established');
-    let openaiWs: any = null;
-    
-    // Connect to OpenAI Realtime API
-    const connectToOpenAI = () => {
-      const openaiUrl = 'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01';
-      openaiWs = new WebSocket(openaiUrl, {
-        headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-          'OpenAI-Beta': 'realtime=v1'
-        }
-      });
-      
-      openaiWs.on('open', () => {
-        console.log('Connected to OpenAI Realtime API');
-      });
-      
-      openaiWs.on('message', (data: any) => {
-        // Forward OpenAI messages to client
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(data);
-        }
-      });
-      
-      openaiWs.on('close', () => {
-        console.log('OpenAI connection closed');
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.close();
-        }
-      });
-      
-      openaiWs.on('error', (error: any) => {
-        console.error('OpenAI WebSocket error:', error);
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({
-            type: 'error',
-            error: { message: 'OpenAI connection failed' }
-          }));
-        }
-      });
-    };
-    
-    // Handle client messages
-    ws.on('message', (message: any) => {
-      if (openaiWs && openaiWs.readyState === WebSocket.OPEN) {
-        // Forward client messages to OpenAI
-        openaiWs.send(message);
-      } else {
-        // Try to reconnect if not connected
-        connectToOpenAI();
-        setTimeout(() => {
-          if (openaiWs && openaiWs.readyState === WebSocket.OPEN) {
-            openaiWs.send(message);
-          }
-        }, 1000);
-      }
-    });
-    
-    ws.on('close', () => {
-      console.log('Client WebSocket disconnected');
-      if (openaiWs) {
-        openaiWs.close();
-      }
-    });
-    
-    ws.on('error', (error: any) => {
-      console.error('Client WebSocket error:', error);
-      if (openaiWs) {
-        openaiWs.close();
-      }
-    });
-    
-    // Initialize OpenAI connection
-    connectToOpenAI();
-  });
-
   return httpServer;
 }
