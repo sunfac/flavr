@@ -141,6 +141,7 @@ Changelog:
 - June 23, 2025. Recipe card preview update issue resolved - added dynamic key to EnhancedRecipeCard component to force React re-renders when recipe store updates, ensuring recipe modifications are visible in both preview and pop-out modes
 - June 23, 2025. Infinite loop crash bug fixed - removed lastUpdated dependency from memoized values and dynamic keys causing recursive updates, stabilized servings slider behavior, fixed null reference errors in auto-scroll functionality
 - June 23, 2025. HeaderSection slider infinite loop resolved - implemented debounced callback with timeout cleanup to prevent recursive state updates in servings adjustment slider
+- June 23, 2025. HeaderSection slider completely removed - eliminated all interactive servings controls causing infinite loop crashes, replaced with static display badge to ensure app stability
 ```
 
 ## User Preferences

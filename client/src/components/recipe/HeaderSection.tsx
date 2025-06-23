@@ -1,10 +1,7 @@
-import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Users, ChefHat, Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
+import { Clock, Users, ChefHat } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { animations, spacing } from '@/styles/tokens';
 
 interface HeaderSectionProps {
@@ -18,48 +15,18 @@ interface HeaderSectionProps {
     image?: string;
   };
   currentServings: number;
-  onServingsChange: (servings: number) => void;
+  onServingsChange?: (servings: number) => void;
 }
 
 export default function HeaderSection({ 
   recipe, 
-  currentServings, 
-  onServingsChange 
+  currentServings
 }: HeaderSectionProps) {
-  const [isServingSheetOpen, setIsServingSheetOpen] = useState(false);
-
   const fastFacts = useMemo(() => [
     { icon: Clock, label: `${recipe.cookTime}min`, value: 'time' },
     { icon: Users, label: `Serves ${currentServings}`, value: 'servings' },
     { icon: ChefHat, label: recipe.difficulty, value: 'difficulty' },
   ], [recipe.cookTime, currentServings, recipe.difficulty]);
-
-  const timeoutRef = useRef<NodeJS.Timeout>();
-  
-  const handleServingsChange = useCallback((values: number[]) => {
-    const newValue = values[0];
-    
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    
-    // Debounce the update to prevent infinite loops
-    timeoutRef.current = setTimeout(() => {
-      if (newValue !== currentServings) {
-        onServingsChange(newValue);
-      }
-    }, 100);
-  }, [currentServings, onServingsChange]);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
 
   return (
     <div className="relative">
@@ -115,68 +82,11 @@ export default function HeaderSection({
           )}
         </div>
 
-        {/* Serving Controls */}
-        <div className="flex items-center justify-between">
-          {/* Desktop: Inline Slider */}
-          <div className="hidden md:flex items-center gap-4 flex-1">
-            <label className="text-sm font-medium text-slate-300 whitespace-nowrap">
-              Adjust servings:
-            </label>
-            <div className="flex items-center gap-3 flex-1 max-w-xs">
-              <span className="text-sm text-slate-400 w-8 text-center">1</span>
-              <Slider
-                value={[currentServings]}
-                onValueChange={handleServingsChange}
-                min={1}
-                max={12}
-                step={1}
-                className="flex-1"
-              />
-              <span className="text-sm text-slate-400 w-8 text-center">12</span>
-            </div>
-            <Badge variant="secondary" className="bg-orange-500/20 text-orange-200 px-3 py-1">
-              {currentServings} servings
-            </Badge>
-          </div>
-
-          {/* Mobile: Collapsible Sheet */}
-          <div className="md:hidden w-full">
-            <Sheet open={isServingSheetOpen} onOpenChange={setIsServingSheetOpen}>
-              <SheetTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  className="w-full bg-slate-700/50 border-slate-600 text-slate-200 hover:bg-slate-600/50"
-                >
-                  <Settings className="w-4 h-4 mr-2" />
-                  Adjust servings ({currentServings})
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="bg-slate-800 border-slate-600">
-                <SheetHeader>
-                  <SheetTitle className="text-white">Adjust Servings</SheetTitle>
-                </SheetHeader>
-                <div className="py-6">
-                  <div className="flex items-center gap-4 mb-6">
-                    <span className="text-sm text-slate-400 w-8 text-center">1</span>
-                    <Slider
-                      value={[currentServings]}
-                      onValueChange={handleServingsChange}
-                      min={1}
-                      max={12}
-                      step={1}
-                      className="flex-1"
-                    />
-                    <span className="text-sm text-slate-400 w-8 text-center">12</span>
-                  </div>
-                  <div className="text-center">
-                    <Badge variant="secondary" className="bg-orange-500/20 text-orange-200 px-4 py-2 text-lg">
-                      {currentServings} servings
-                    </Badge>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
+        {/* Servings Display - No Interactive Controls */}
+        <div className="flex items-center justify-center">
+          <Badge variant="secondary" className="bg-orange-500/20 text-orange-200 px-4 py-2 text-lg border border-orange-400/30">
+            Serves {currentServings}
+          </Badge>
         </div>
       </div>
     </div>
