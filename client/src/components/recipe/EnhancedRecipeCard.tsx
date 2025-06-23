@@ -150,51 +150,11 @@ function EnhancedRecipeCard({
     duration: extractDuration(instruction)
   }));
 
-  // Sync with Zustand store for voice commands
-  useEffect(() => {
-    // Transform recipe data to Zustand format
-    const zustandRecipe = {
-      id: recipe.id,
-      servings: activeServings,
-      ingredients: recipe.ingredients.map((ingredient, index) => ({
-        id: `ingredient-${index}`,
-        text: ingredient,
-        amount: '',
-        unit: '',
-        checked: ingredientStates[ingredient] || false
-      })),
-      steps: activeInstructions.map((instruction, index) => ({
-        id: `step-${index}`,
-        title: `Step ${index + 1}`,
-        description: instruction,
-        duration: extractDuration(instruction)
-      })),
-      meta: {
-        title: recipe.title,
-        description: recipe.description || '',
-        cookTime: recipe.cookTime,
-        difficulty: recipe.difficulty,
-        cuisine: recipe.cuisine || '',
-        image: recipe.image
-      },
-      currentStep: currentStep,
-      completedSteps: completedSteps,
-      lastUpdated: Date.now()
-    };
+  // Note: Removed Zustand store sync useEffect that was causing infinite loops
+  // Voice commands and recipe updates are now handled through other mechanisms
 
-    // Update Zustand store
-    recipeActions.replaceRecipe(zustandRecipe);
-  }, [recipe, activeServings, currentStep, completedSteps, ingredientStates]);
-
-  // Listen for voice command changes from Zustand store
-  useEffect(() => {
-    if (recipeStore.currentStep !== currentStep) {
-      setCurrentStep(recipeStore.currentStep);
-    }
-    if (recipeStore.completedSteps !== completedSteps) {
-      setCompletedSteps(recipeStore.completedSteps);
-    }
-  }, [recipeStore.currentStep, recipeStore.completedSteps]);
+  // Note: Removed voice command listener useEffect to prevent infinite loops
+  // Voice commands are handled through other mechanisms
 
 
 
@@ -224,14 +184,8 @@ function EnhancedRecipeCard({
     });
   };
 
-  // Update ingredient states when scaled ingredients change
-  useEffect(() => {
-    const newStates: Record<string, boolean> = {};
-    scaledIngredients.forEach(ingredient => {
-      newStates[ingredient.id] = ingredientStates[ingredient.id] || false;
-    });
-    setIngredientStates(newStates);
-  }, [scaledIngredients]);
+  // Note: Removed ingredient state sync useEffect to prevent infinite loops
+  // Ingredient states are now managed directly through user interactions
 
   const ingredientsWithState = scaledIngredients.map(ingredient => ({
     ...ingredient,

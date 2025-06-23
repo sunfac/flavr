@@ -144,6 +144,7 @@ Changelog:
 - June 23, 2025. HeaderSection slider completely removed - eliminated all interactive servings controls causing infinite loop crashes, replaced with static display badge to ensure app stability
 - June 23, 2025. ChatBot scroll area infinite loop fixed - implemented stable auto-scroll with proper Radix UI viewport targeting and debounced message count dependencies
 - June 23, 2025. ChatBot ScrollArea component replaced - removed problematic Radix UI ScrollArea with standard div to eliminate infinite loop crashes, maintaining scroll functionality
+- June 23, 2025. EnhancedRecipeCard infinite loop eliminated - removed all problematic useEffect hooks causing recursive updates, replaced currentServings state with memoized activeServings, eliminated Zustand store sync and ingredient state sync useEffects
 ```
 
 ## User Preferences
