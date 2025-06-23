@@ -11,6 +11,7 @@ import { useLocation } from "wouter";
 import { iconMap } from "@/lib/iconMap";
 import { useRecipeStore, recipeActions } from "@/stores/recipeStore";
 import { useTimerStore } from "@/stores/timerStore";
+import ZestVoiceChat from "@/components/ZestVoiceChat";
 
 interface ChatMessage {
   id: number;
@@ -530,6 +531,25 @@ export default function ChatBot({
             </div>
           </div>
         )}
+
+        {/* Voice Chat Integration */}
+        <div className="px-3 sm:px-4 py-2 border-t border-white/10 flex-shrink-0">
+          <ZestVoiceChat
+            onChatMessage={(voiceMessage) => {
+              setMessage(voiceMessage);
+              // Auto-send voice messages
+              setTimeout(() => handleSend(), 100);
+            }}
+            recipeContext={currentRecipe ? {
+              title: currentRecipe.title,
+              currentStep: recipeStore.currentStep,
+              totalSteps: currentRecipe.instructions?.length || 0,
+              ingredients: currentRecipe.ingredients || [],
+              instructions: currentRecipe.instructions || []
+            } : undefined}
+            className="mb-3"
+          />
+        </div>
 
         {/* Input Area - Mobile optimized */}
         <div className="p-3 sm:p-4 border-t border-white/10 flex-shrink-0">

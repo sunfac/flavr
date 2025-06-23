@@ -1,11 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Share2, BookOpen, Mic } from 'lucide-react';
+import { ArrowLeft, Share2, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useScaledIngredients } from '@/hooks/useScaledIngredients';
 import { useRecipeStore, recipeActions } from '@/stores/recipeStore';
-import VoiceAssistant from '@/components/VoiceAssistant';
 
 // Extract duration from instruction text
 function extractDuration(instruction: string): number | undefined {
@@ -90,7 +89,6 @@ function EnhancedRecipeCard({
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [ingredientStates, setIngredientStates] = useState<Record<string, boolean>>({});
-  const [showVoiceControl, setShowVoiceControl] = useState(false);
   const { toast } = useToast();
   
   const recipeStore = useRecipeStore();
@@ -216,16 +214,6 @@ function EnhancedRecipeCard({
         )}
         
         <div className="flex gap-2 ml-auto">
-          <Button
-            onClick={() => setShowVoiceControl(!showVoiceControl)}
-            variant={showVoiceControl ? "default" : "outline"}
-            size="sm"
-            className="bg-slate-800/80 border-slate-600 text-slate-200 hover:bg-slate-700/80 backdrop-blur-sm"
-          >
-            <Mic className="w-4 h-4 mr-1" />
-            Voice
-          </Button>
-          
           {onShare && (
             <Button
               onClick={onShare}
