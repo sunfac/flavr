@@ -210,6 +210,23 @@ export default function SlideQuizShell({
     return `${value}`;
   };
 
+  // Stable slider value to prevent flickering - always computed to avoid conditional hooks
+  const sliderValue = useMemo(() => {
+    if (currentAnswer !== undefined && currentAnswer !== null) {
+      return Number(currentAnswer);
+    }
+    return currentQ.min || 1;
+  }, [currentAnswer, currentQ.min]);
+
+  // Slider update function - always defined to avoid conditional hooks
+  const handleSliderChange = React.useCallback(
+    (values: number[]) => {
+      const newValue = values[0];
+      updateAnswer(currentQ.id, newValue);
+    },
+    [currentQ.id, updateAnswer]
+  );
+
   const renderQuestion = () => {
     switch (currentQ.type) {
       case 'text':
@@ -674,14 +691,6 @@ export default function SlideQuizShell({
         );
 
       case 'slider':
-        // Stabilize slider value to prevent flickering
-        const sliderValue = React.useMemo(() => {
-          if (currentAnswer !== undefined && currentAnswer !== null) {
-            return Number(currentAnswer);
-          }
-          return currentQ.min || 1;
-        }, [currentAnswer, currentQ.min]);
-
         const getSliderOptions = () => {
           if (currentQ.id === 'ambition') {
             return [
@@ -705,17 +714,6 @@ export default function SlideQuizShell({
         };
 
         const sliderOptions = getSliderOptions();
-        
-        // Debounced update function to prevent rapid changes
-        const handleSliderChange = React.useCallback(
-          (values: number[]) => {
-            const newValue = values[0];
-            if (newValue !== sliderValue) {
-              updateAnswer(currentQ.id, newValue);
-            }
-          },
-          [currentQ.id, sliderValue, updateAnswer]
-        );
 
         return (
           <div className="space-y-6">
