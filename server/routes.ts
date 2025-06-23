@@ -1197,17 +1197,193 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
     }
   });
 
-  // Simple Chat route with conversation memory
+  // Intelligent Chat route with recipe modification capabilities
   app.post("/api/chat", async (req, res) => {
     try {
       const { message, currentRecipe } = req.body;
       const userId = req.session?.userId;
+      let updatedRecipe = null;
+      let functionCalls: any[] = [];
 
       // Get chat history for conversation memory
       const chatHistory = await storage.getChatHistory(userId, 10);
 
-      // Simple chat response with conversation memory
-      const regularChatPrompt = `You are Zest, Flavr's friendly AI cooking assistant. Maintain natural conversation flow!
+      // Detect if the user wants to modify the current recipe
+      const shouldUpdateRecipe = currentRecipe && (
+        // Direct recipe modification requests
+        message.toLowerCase().includes('change') ||
+        message.toLowerCase().includes('modify') ||
+        message.toLowerCase().includes('update') ||
+        message.toLowerCase().includes('adjust') ||
+        message.toLowerCase().includes('replace') ||
+        message.toLowerCase().includes('substitute') ||
+        message.toLowerCase().includes('swap') ||
+        
+        // Spice level modifications
+        message.toLowerCase().includes('spicier') ||
+        message.toLowerCase().includes('milder') ||
+        message.toLowerCase().includes('more spice') ||
+        message.toLowerCase().includes('less spice') ||
+        message.toLowerCase().includes('hotter') ||
+        message.toLowerCase().includes('cooler') ||
+        
+        // Portion/serving changes - Enhanced detection
+        message.toLowerCase().includes('change portion') ||
+        message.toLowerCase().includes('change serving') ||
+        message.toLowerCase().includes('for 2 people') ||
+        message.toLowerCase().includes('for 4 people') ||
+        message.toLowerCase().includes('for 6 people') ||
+        message.toLowerCase().includes('for 8 people') ||
+        message.toLowerCase().includes('for 1 person') ||
+        message.toLowerCase().includes('for 3 people') ||
+        message.toLowerCase().includes('for 5 people') ||
+        /for\s+\d+\s+people/i.test(message) ||
+        /\d+\s+people/i.test(message) ||
+        message.toLowerCase().includes('people instead') ||
+        message.toLowerCase().includes('servings instead') ||
+        message.toLowerCase().includes('instead of') ||
+        /make.*for.*\d/i.test(message) ||
+        /scale.*to.*\d/i.test(message) ||
+        
+        // Time modifications
+        message.toLowerCase().includes('make it quicker') ||
+        message.toLowerCase().includes('make it faster') ||
+        message.toLowerCase().includes('reduce time') ||
+        
+        // Ingredient changes
+        message.toLowerCase().includes('without') ||
+        message.toLowerCase().includes('skip the') ||
+        message.toLowerCase().includes('leave out') ||
+        
+        // Dietary modifications
+        message.toLowerCase().includes('make it vegan') ||
+        message.toLowerCase().includes('make it vegetarian') ||
+        message.toLowerCase().includes('dairy free') ||
+        message.toLowerCase().includes('gluten free') ||
+        
+        // Scale adjustments
+        message.toLowerCase().includes('double') ||
+        message.toLowerCase().includes('half') ||
+        message.toLowerCase().includes('triple') ||
+        message.toLowerCase().includes('halve') ||
+        
+        // Clear directive patterns
+        /^change\s/.test(message.toLowerCase()) ||
+        /^make\s.*\s(more|less|spicier|milder|quicker|faster)/.test(message.toLowerCase()) ||
+        /^make\s.*for\s*\d+/i.test(message) ||
+        /instead/i.test(message)
+      );
+
+      let botResponse = "";
+
+      if (shouldUpdateRecipe) {
+        // Recipe modification prompt
+        const modificationPrompt = `You are Zest, Flavr's casual cooking assistant. Keep responses SHORT!
+
+Current recipe: "${currentRecipe.title}" (serves ${currentRecipe.servings})
+User wants: "${message}"
+
+RULES:
+1. Give a SHORT casual response (1-2 sentences max) like "Nice! Made it spicier!"
+2. NO ingredient lists or cooking steps in your response
+3. Just mention what you changed briefly
+4. Then provide ONLY the JSON
+
+Format:
+[SHORT casual comment]
+
+{
+  "shouldUpdateRecipe": true,
+  "updatedRecipe": {
+    "title": "Updated title",
+    "ingredients": ["scaled ingredients array"],
+    "instructions": ["updated steps array"],
+    "cookTime": number,
+    "servings": number,
+    "difficulty": "Easy/Medium/Hard"
+  }
+}
+
+Keep it super short!`;
+
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            { role: "system", content: modificationPrompt },
+            { role: "user", content: message }
+          ],
+          max_tokens: 800,
+          temperature: 0.7,
+        });
+
+        const fullResponse = response.choices[0]?.message?.content || "";
+        
+        try {
+          // Parse JSON response for recipe updates
+          const jsonMatch = fullResponse.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            if (parsed.shouldUpdateRecipe && parsed.updatedRecipe) {
+              // Update the recipe in storage
+              updatedRecipe = { 
+                ...currentRecipe, 
+                ...parsed.updatedRecipe,
+                id: currentRecipe.id
+              };
+              
+              await storage.updateRecipe(currentRecipe.id, updatedRecipe);
+              
+              // Create function call for frontend
+              functionCalls = [{
+                name: 'updateRecipe',
+                arguments: {
+                  mode: 'patch',
+                  data: {
+                    id: currentRecipe.id,
+                    servings: updatedRecipe.servings,
+                    meta: {
+                      title: updatedRecipe.title,
+                      description: updatedRecipe.description || currentRecipe.description,
+                      cookTime: updatedRecipe.cookTime,
+                      difficulty: updatedRecipe.difficulty,
+                      cuisine: updatedRecipe.cuisine || currentRecipe.cuisine
+                    },
+                    ingredients: updatedRecipe.ingredients.map((ing: string, index: number) => ({
+                      id: `ingredient-${index}`,
+                      text: ing,
+                      checked: false
+                    })),
+                    steps: updatedRecipe.instructions.map((instruction: string, index: number) => ({
+                      id: `step-${index}`,
+                      title: `Step ${index + 1}`,
+                      description: instruction,
+                      duration: 0
+                    }))
+                  }
+                }
+              }];
+              
+              // Extract casual message before JSON
+              const jsonStart = fullResponse.indexOf('{');
+              if (jsonStart > 0) {
+                let casualResponse = fullResponse.substring(0, jsonStart).trim();
+                const sentences = casualResponse.split(/[.!?]+/).filter((s: string) => s.trim().length > 0);
+                botResponse = sentences.slice(0, 2).join('. ').trim() + (sentences.length > 2 ? '.' : '');
+              } else {
+                botResponse = "Perfect! Updated the recipe for you!";
+              }
+            } else {
+              botResponse = fullResponse;
+            }
+          } else {
+            botResponse = fullResponse;
+          }
+        } catch (e) {
+          botResponse = fullResponse;
+        }
+      } else {
+        // Regular chat response
+        const regularChatPrompt = `You are Zest, Flavr's friendly AI cooking assistant. Maintain natural conversation flow!
 
 ${chatHistory.length > 0 ? `Recent conversation:\n${chatHistory.slice(-3).map((msg: any) => `User: ${msg.message}\nYou: ${msg.response}`).join('\n')}\n` : ''}
 
@@ -1215,17 +1391,18 @@ ${currentRecipe ? `Current recipe context: "${currentRecipe.title}" (serves ${cu
 
 Be conversational like ChatGPT. Reference what you've discussed before. Answer cooking questions, give tips, or chat naturally about food. Keep responses friendly and maintain conversation flow.`;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          { role: "system", content: regularChatPrompt },
-          { role: "user", content: message }
-        ],
-        max_tokens: 300,
-        temperature: 0.7,
-      });
+        const response = await openai.chat.completions.create({
+          model: "gpt-3.5-turbo",
+          messages: [
+            { role: "system", content: regularChatPrompt },
+            { role: "user", content: message }
+          ],
+          max_tokens: 300,
+          temperature: 0.7,
+        });
 
-      const botResponse = response.choices[0]?.message?.content || "I'm sorry, I couldn't process that request. Please try again.";
+        botResponse = response.choices[0]?.message?.content || "I'm sorry, I couldn't process that request. Please try again.";
+      }
       
       // Save chat message
       await storage.createChatMessage({
@@ -1235,7 +1412,9 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
       });
 
       res.json({ 
-        response: botResponse
+        response: botResponse,
+        updatedRecipe,
+        functionCalls: functionCalls.length > 0 ? functionCalls : undefined
       });
     } catch (error: any) {
       res.status(500).json({ message: "Failed to process chat: " + error.message });

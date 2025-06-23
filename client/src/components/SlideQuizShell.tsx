@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -674,7 +674,14 @@ export default function SlideQuizShell({
         );
 
       case 'slider':
-        const sliderValue = currentAnswer || currentQ.min || 1;
+        // Stabilize slider value to prevent flickering
+        const sliderValue = React.useMemo(() => {
+          if (currentAnswer !== undefined && currentAnswer !== null) {
+            return Number(currentAnswer);
+          }
+          return currentQ.min || 1;
+        }, [currentAnswer, currentQ.min]);
+
         const getSliderOptions = () => {
           if (currentQ.id === 'ambition') {
             return [
@@ -698,6 +705,18 @@ export default function SlideQuizShell({
         };
 
         const sliderOptions = getSliderOptions();
+        
+        // Debounced update function to prevent rapid changes
+        const handleSliderChange = React.useCallback(
+          (values: number[]) => {
+            const newValue = values[0];
+            if (newValue !== sliderValue) {
+              updateAnswer(currentQ.id, newValue);
+            }
+          },
+          [currentQ.id, sliderValue, updateAnswer]
+        );
+
         return (
           <div className="space-y-6">
             {/* Scale at the top for time slider */}
@@ -764,7 +783,7 @@ export default function SlideQuizShell({
             <div className="px-4">
               <Slider
                 value={[sliderValue]}
-                onValueChange={([value]) => updateAnswer(currentQ.id, value)}
+                onValueChange={handleSliderChange}
                 min={currentQ.min || 1}
                 max={currentQ.max || 5}
                 step={currentQ.step || 1}
