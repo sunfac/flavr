@@ -1197,86 +1197,63 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
     }
   });
 
-  // Enhanced Chat routes with recipe context and function calling support
+  // Simple Chat route with conversation memory
   app.post("/api/chat", async (req, res) => {
     try {
-      const { message, currentRecipe, mode, enableFunctionCalling } = req.body;
+      const { message, currentRecipe } = req.body;
       const userId = req.session?.userId;
+
+      // Get chat history for conversation memory
+      const chatHistory = await storage.getChatHistory(userId, 10);
+
+      // Simple chat response with conversation memory
+      const regularChatPrompt = `You are Zest, Flavr's friendly AI cooking assistant. Maintain natural conversation flow!
+
+${chatHistory.length > 0 ? `Recent conversation:\n${chatHistory.slice(-3).map((msg: any) => `User: ${msg.message}\nYou: ${msg.response}`).join('\n')}\n` : ''}
+
+${currentRecipe ? `Current recipe context: "${currentRecipe.title}" (serves ${currentRecipe.servings})\n` : ''}
+
+Be conversational like ChatGPT. Reference what you've discussed before. Answer cooking questions, give tips, or chat naturally about food. Keep responses friendly and maintain conversation flow.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          { role: "system", content: regularChatPrompt },
+          { role: "user", content: message }
+        ],
+        max_tokens: 300,
+        temperature: 0.7,
+      });
+
+      const botResponse = response.choices[0]?.message?.content || "I'm sorry, I couldn't process that request. Please try again.";
       
-      let updatedRecipe = null;
-      let botResponse = "";
-      let functionCalls: any[] = [];
+      // Save chat message
+      await storage.createChatMessage({
+        userId,
+        message,
+        response: botResponse,
+      });
 
-      // Define function tools for OpenAI function calling
-      const tools = enableFunctionCalling ? [{
-        type: "function" as const,
-        function: {
-          name: "updateRecipe",
-          description: "Replace or patch the current recipe displayed in the UI when user requests modifications",
-          parameters: {
-            type: "object",
-            properties: {
-              mode: {
-                type: "string",
-                enum: ["replace", "patch"],
-                description: "Use 'patch' for minor tweaks, 'replace' for complete overhaul"
-              },
-              data: {
-                type: "object",
-                description: "Full recipe object for replace mode, or partial changes for patch mode",
-                properties: {
-                  id: { type: "string" },
-                  servings: { type: "number" },
-                  ingredients: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        id: { type: "string" },
-                        text: { type: "string" },
-                        checked: { type: "boolean" }
-                      }
-                    }
-                  },
-                  steps: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        id: { type: "string" },
-                        title: { type: "string" },
-                        description: { type: "string" },
-                        duration: { type: "number" }
-                      }
-                    }
-                  },
-                  meta: {
-                    type: "object",
-                    properties: {
-                      title: { type: "string" },
-                      description: { type: "string" },
-                      cookTime: { type: "number" },
-                      difficulty: { type: "string" },
-                      cuisine: { type: "string" }
-                    }
-                  }
-                }
-              }
-            },
-            required: ["mode", "data"]
-          }
-        }
-      }] : undefined;
-
-      // Get recent chat history for conversation memory
-      let chatHistory: any[] = [];
-      if (userId) {
-        try {
-          chatHistory = await storage.getChatHistory(userId, 4); // Last 4 messages for context
-        } catch (error) {
-          console.log("No chat history found, starting fresh conversation");
-        }
+      res.json({ 
+        response: botResponse
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to process chat: " + error.message });
+    }
+  });
+  app.get("/api/chat/history", async (req, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.json({ history: [] }); // Return empty history for non-authenticated users
       }
+      const history = await storage.getChatHistory(userId, 10);
+      res.json({ history });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch chat history: " + error.message });
+    }
+  });
+
 
       // Build enhanced system prompt for function calling
       let systemPrompt = enableFunctionCalling ? 
@@ -1799,7 +1776,6 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
     } catch (error: any) {
       res.status(500).json({ message: "Failed to process chat: " + error.message });
     }
-  });
   });
 
   app.get("/api/chat/history", async (req, res) => {
