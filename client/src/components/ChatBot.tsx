@@ -161,7 +161,18 @@ export default function ChatBot({
                 recipeActions.replaceRecipe(data);
               } else if (mode === 'patch') {
                 console.log('🩹 PATCHING recipe in store with data:', data);
-                recipeActions.patchRecipe(data);
+                
+                // Force complete update to ensure UI refresh
+                recipeActions.replaceRecipe({
+                  id: data.id,
+                  servings: data.servings || recipeStore.servings,
+                  meta: data.meta || recipeStore.meta,
+                  ingredients: data.ingredients || recipeStore.ingredients,
+                  steps: data.steps || recipeStore.steps,
+                  currentStep: recipeStore.currentStep,
+                  completedSteps: recipeStore.completedSteps,
+                  lastUpdated: Date.now()
+                });
                 
                 // Handle timer rescaling if step durations changed
                 if (data.steps) {

@@ -1547,10 +1547,9 @@ CRITICAL RULES:
                   }
                 }];
                 
-                // If we successfully updated the recipe, provide a confirmation message
-                if (!botResponse) {
-                  botResponse = "Perfect! I've updated the recipe for you.";
-                }
+                // Force the response to include update confirmation
+                console.log('Recipe update successful, sending confirmation');
+                botResponse = botResponse || "Perfect! I've updated the recipe for you. You should see the changes right now.";
               }
               
             } catch (error) {
