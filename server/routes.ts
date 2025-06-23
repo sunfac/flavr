@@ -1625,12 +1625,15 @@ Be helpful, enthusiastic, and natural in conversation!`;
                 }
               }
               
-              // Extract only the casual message before the JSON
+              // Extract only the casual message before the JSON - limit to first 2 sentences
               const jsonStart = fullResponse.indexOf('{');
               if (jsonStart > 0) {
-                botResponse = fullResponse.substring(0, jsonStart).trim();
+                let casualResponse = fullResponse.substring(0, jsonStart).trim();
+                // Limit to first 2 sentences to prevent verbose responses
+                const sentences = casualResponse.split(/[.!?]+/).filter(s => s.trim().length > 0);
+                botResponse = sentences.slice(0, 2).join('. ').trim() + (sentences.length > 2 ? '.' : '');
               } else {
-                botResponse = "Great! I've updated your recipe with those changes.";
+                botResponse = "Perfect! Updated the recipe for you!";
               }
             } else {
               botResponse = fullResponse;
@@ -1643,17 +1646,11 @@ Be helpful, enthusiastic, and natural in conversation!`;
         }
       } else {
         // Regular chat response with Zest personality and conversation memory
-        const regularChatPrompt = `${systemPrompt}
+        const regularChatPrompt = `You are Zest, Flavr's friendly AI cooking assistant. Chat naturally like ChatGPT would about cooking and food!
 
-REGULAR CHAT RULES:
-- Keep responses casual and conversational (2-3 sentences max)
-- Reference previous conversation naturally if relevant
-- Give cooking tips, advice, and encouragement
-- NEVER include code, JSON, or technical formatting
-- Be supportive and make cooking feel fun and accessible
-- Use phrases like "That sounds amazing!", "Great question!", "You've got this!"
+${chatHistory.length > 0 ? `Our conversation so far:\n${chatHistory.slice(-2).map(msg => `User: ${msg.message}\nYou: ${msg.response}`).join('\n')}\n` : ''}
 
-Current conversation topic: User is asking about cooking/recipes in general.`;
+Be conversational, helpful, and enthusiastic about cooking. Answer questions naturally, give cooking tips, or just chat about food. Keep responses friendly and natural.`;
 
         const response = await openai.chat.completions.create({
           model: "gpt-3.5-turbo", // Using GPT-3.5 Turbo for cost efficiency
@@ -1674,18 +1671,23 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
         const outputTokens = response.usage?.completion_tokens || 0;
         
         // Log regular chatbot interaction for cost tracking
-        await logGPTInteraction(
-          'chat',
-          { userMessage: message },
-          regularChatPrompt,
-          botResponse,
-          {},
-          {},
-          inputTokens,
-          outputTokens,
-          userId || 0,
-          null // no image for chatbot
-        );
+        try {
+          await logGPTInteraction(
+            'chat',
+            { userMessage: message },
+            regularChatPrompt,
+            botResponse,
+            {},
+            {},
+            inputTokens,
+            outputTokens,
+            parseInt(userId?.toString() || '0'),
+            null // no image for chatbot
+          );
+        } catch (logError) {
+          console.log('Chat logging failed:', logError);
+          // Continue without logging to prevent chatbot from breaking
+        }
       }
       
       // Save chat message
