@@ -158,7 +158,7 @@ function EnhancedRecipeCard({
         unit: '',
         checked: ingredientStates[ingredient] || false
       })),
-      steps: recipe.instructions.map((instruction, index) => ({
+      steps: activeInstructions.map((instruction, index) => ({
         id: `step-${index}`,
         title: `Step ${index + 1}`,
         description: instruction,
