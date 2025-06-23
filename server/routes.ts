@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
+import WebSocket from "ws";
 import OpenAI from "openai";
 import Replicate from "replicate";
 import Stripe from "stripe";
@@ -1612,6 +1613,44 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
       res.json({ history });
     } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch chat history: " + error.message });
+    }
+  });
+
+  // Voice chat endpoint for ZestVoiceChat component
+  app.post("/api/chat/voice", async (req, res) => {
+    try {
+      const { message, context } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ message: "Message is required" });
+      }
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: context || "You are Zest, a helpful cooking assistant. Respond conversationally and concisely."
+          },
+          {
+            role: "user", 
+            content: message
+          }
+        ],
+        max_tokens: 150,
+        temperature: 0.8
+      });
+
+      const botResponse = response.choices[0].message.content;
+      
+      res.json({ 
+        response: botResponse,
+        message: message
+      });
+      
+    } catch (error: any) {
+      console.error("Voice chat error:", error);
+      res.status(500).json({ message: "Failed to process voice chat: " + error.message });
     }
   });
 
