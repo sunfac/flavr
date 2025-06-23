@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Timer, Play, Pause, RotateCcw, X, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { Timer as TimerIcon, Play, Pause, RotateCcw, X, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { animations, layout } from '@/styles/tokens';
-import { useTimerStore } from '@/stores/timerStore';
+import { useTimerStore, type Timer } from '@/stores/timerStore';
 
 interface Step {
   id: string;
@@ -23,12 +23,7 @@ interface StepStackProps {
   className?: string;
 }
 
-interface Timer {
-  id: string;
-  duration: number; // in seconds
-  remaining: number;
-  isActive: boolean;
-}
+
 
 export default function StepStack({ 
   steps, 
@@ -37,37 +32,27 @@ export default function StepStack({
   onStepChange,
   className = '' 
 }: StepStackProps) {
-  const [timers, setTimers] = useState<Record<string, Timer>>({});
+  const timerStore = useTimerStore();
   const [showCookMode, setShowCookMode] = useState(false);
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Timer management
+  // Auto-scroll to next step when timer completes
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTimers(prev => {
-        const updated = { ...prev };
-        let hasChanges = false;
-
-        Object.keys(updated).forEach(id => {
-          if (updated[id].isActive && updated[id].remaining > 0) {
-            updated[id].remaining -= 1;
-            hasChanges = true;
-            
-            // Auto-scroll to next step when timer completes
-            if (updated[id].remaining === 0) {
-              updated[id].isActive = false;
-              setTimeout(() => scrollToNextStep(id), 1000);
-            }
+    const checkTimerCompletion = () => {
+      Object.values(timerStore.timers).forEach(timer => {
+        if (timer.remaining === 0 && !timer.isActive) {
+          const stepIndex = steps.findIndex(step => step.id === timer.id);
+          if (stepIndex >= 0 && stepIndex < steps.length - 1) {
+            setTimeout(() => scrollToNextStep(timer.id), 1000);
           }
-        });
-
-        return hasChanges ? updated : prev;
+        }
       });
-    }, 1000);
+    };
 
+    const interval = setInterval(checkTimerCompletion, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [timerStore.timers, steps]);
 
   const scrollToNextStep = (completedStepId: string) => {
     const currentIndex = steps.findIndex(step => step.id === completedStepId);
@@ -86,39 +71,20 @@ export default function StepStack({
 
   const startTimer = (stepId: string, durationMinutes: number) => {
     const durationSeconds = durationMinutes * 60;
-    setTimers(prev => ({
-      ...prev,
-      [stepId]: {
-        id: stepId,
-        duration: durationSeconds,
-        remaining: durationSeconds,
-        isActive: true
-      }
-    }));
+    timerStore.startTimer(stepId, durationSeconds);
   };
 
   const toggleTimer = (stepId: string) => {
-    setTimers(prev => ({
-      ...prev,
-      [stepId]: {
-        ...prev[stepId],
-        isActive: !prev[stepId]?.isActive
-      }
-    }));
+    const timer = timerStore.timers[stepId];
+    if (timer?.isActive) {
+      timerStore.pauseTimer(stepId);
+    } else if (timer?.isPaused) {
+      timerStore.resumeTimer(stepId);
+    }
   };
 
   const resetTimer = (stepId: string) => {
-    setTimers(prev => {
-      if (!prev[stepId]) return prev;
-      return {
-        ...prev,
-        [stepId]: {
-          ...prev[stepId],
-          remaining: prev[stepId].duration,
-          isActive: false
-        }
-      };
-    });
+    timerStore.resetTimer(stepId);
   };
 
   const formatTime = (seconds: number): string => {
@@ -128,7 +94,7 @@ export default function StepStack({
   };
 
   const currentStepData = steps[currentStep];
-  const currentTimer = currentStepData ? timers[currentStepData.id] : null;
+  const currentTimer = currentStepData ? timerStore.timers[currentStepData.id] : null;
 
   return (
     <>
@@ -151,7 +117,7 @@ export default function StepStack({
                 step={step}
                 stepNumber={index + 1}
                 totalSteps={steps.length}
-                timer={timers[step.id]}
+                timer={timerStore.timers[step.id]}
                 isActive={index === currentStep}
                 onStartTimer={startTimer}
                 onToggleTimer={toggleTimer}
