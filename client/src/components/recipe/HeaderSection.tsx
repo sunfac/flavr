@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Users, ChefHat, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -34,12 +34,32 @@ export default function HeaderSection({
     { icon: ChefHat, label: recipe.difficulty, value: 'difficulty' },
   ], [recipe.cookTime, currentServings, recipe.difficulty]);
 
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  
   const handleServingsChange = useCallback((values: number[]) => {
     const newValue = values[0];
-    if (newValue !== currentServings) {
-      onServingsChange(newValue);
+    
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
+    
+    // Debounce the update to prevent infinite loops
+    timeoutRef.current = setTimeout(() => {
+      if (newValue !== currentServings) {
+        onServingsChange(newValue);
+      }
+    }, 100);
   }, [currentServings, onServingsChange]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="relative">
