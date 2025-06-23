@@ -302,16 +302,20 @@ export default function ChatBot({
     }
   }, [isOpen, hasInitialized, currentRecipe]);
 
-  // Auto-scroll to latest message
+  // Auto-scroll to latest message with debouncing
   useEffect(() => {
-    if (scrollAreaRef.current && scrollAreaRef.current.scrollHeight) {
-      setTimeout(() => {
-        if (scrollAreaRef.current) {
-          scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-        }
-      }, 100);
+    const scrollToBottom = () => {
+      const scrollElement = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollElement) {
+        scrollElement.scrollTop = scrollElement.scrollHeight;
+      }
+    };
+
+    if (localMessages.length > 0) {
+      const timeoutId = setTimeout(scrollToBottom, 150);
+      return () => clearTimeout(timeoutId);
     }
-  }, [localMessages]);
+  }, [localMessages.length]); // Only depend on message count, not the entire array
 
   // Initialize with welcome message and history
   useEffect(() => {
