@@ -34,10 +34,26 @@ if (typeof window !== 'undefined') {
 
 // Service worker disabled to prevent refresh loops
 
-const rootElement = document.getElementById("root");
-if (rootElement) {
+// Add better error handling and diagnostics
+const renderApp = () => {
+  const rootElement = document.getElementById("root");
+  
+  if (!rootElement) {
+    console.error("Root element not found");
+    document.body.innerHTML = `
+      <div style="padding: 20px; background: #1e293b; color: white; min-height: 100vh; font-family: sans-serif;">
+        <h1>Flavr - Missing Root Element</h1>
+        <p>Could not find root element to mount the application.</p>
+        <button onclick="window.location.reload()" style="padding: 10px 20px; background: #f97316; color: white; border: none; border-radius: 5px; margin-top: 10px;">Retry</button>
+      </div>
+    `;
+    return;
+  }
+
   try {
-    createRoot(rootElement).render(<App />);
+    console.log("Starting Flavr app render...");
+    const root = createRoot(rootElement);
+    root.render(<App />);
     console.log("Flavr app rendered successfully");
   } catch (error) {
     console.error("Failed to render Flavr app:", error);
@@ -45,16 +61,25 @@ if (rootElement) {
       <div style="padding: 20px; background: #1e293b; color: white; min-height: 100vh; font-family: sans-serif;">
         <h1>Flavr - Diagnostic Mode</h1>
         <p>App failed to render. Error details:</p>
-        <pre style="background: #0f172a; padding: 10px; border-radius: 5px; color: #f87171;">${error}</pre>
+        <pre style="background: #0f172a; padding: 10px; border-radius: 5px; color: #f87171; overflow: auto; max-height: 300px;">${String(error)}</pre>
         <button onclick="window.location.reload()" style="padding: 10px 20px; background: #f97316; color: white; border: none; border-radius: 5px; margin-top: 10px;">Retry</button>
+        <div style="margin-top: 20px; font-size: 14px; color: #94a3b8;">
+          <p>Debug info:</p>
+          <ul>
+            <li>Root element found: ${!!rootElement}</li>
+            <li>React available: ${typeof React !== 'undefined'}</li>
+            <li>Location: ${window.location.href}</li>
+            <li>User agent: ${navigator.userAgent}</li>
+          </ul>
+        </div>
       </div>
     `;
   }
+};
+
+// Wait for DOM to be ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderApp);
 } else {
-  document.body.innerHTML = `
-    <div style="padding: 20px; background: #1e293b; color: white; min-height: 100vh; font-family: sans-serif;">
-      <h1>Flavr - Missing Root Element</h1>
-      <p>Could not find root element to mount the application.</p>
-    </div>
-  `;
+  renderApp();
 }
