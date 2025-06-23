@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { animations, layout } from '@/styles/tokens';
-import { useTimerStore, type Timer } from '@/stores/timerStore';
+import { useTimerStore, type Timer as TimerType } from '@/stores/timerStore';
 
 interface Step {
   id: string;
@@ -136,7 +136,7 @@ export default function StepStack({
           size="lg"
           className="rounded-full bg-orange-500 hover:bg-orange-600 text-white shadow-lg"
         >
-          <Timer className="w-5 h-5 mr-2" />
+          <TimerIcon className="w-5 h-5 mr-2" />
           Cook Mode
         </Button>
       </div>
@@ -214,14 +214,14 @@ export default function StepStack({
                         size="lg"
                         className="bg-orange-500 hover:bg-orange-600 text-white"
                       >
-                        <Timer className="w-5 h-5 mr-2" />
+                        <TimerIcon className="w-5 h-5 mr-2" />
                         Start {currentStepData.duration}min Timer
                       </Button>
                     )}
                   </div>
                 ) : (
                   <div className="text-center">
-                    <Timer className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+                    <TimerIcon className="w-12 h-12 text-slate-500 mx-auto mb-4" />
                     <p className="text-slate-400">No timer for this step</p>
                   </div>
                 )}
@@ -277,7 +277,7 @@ function StepCard({
   step: Step;
   stepNumber: number;
   totalSteps: number;
-  timer?: Timer;
+  timer?: TimerType;
   isActive: boolean;
   onStartTimer: (stepId: string, duration: number) => void;
   onToggleTimer: (stepId: string) => void;
@@ -330,7 +330,7 @@ function StepCard({
                 variant="outline"
                 className="border-orange-400 text-orange-300 hover:bg-orange-400/10"
               >
-                <Timer className="w-4 h-4 mr-1" />
+                <TimerIcon className="w-4 h-4 mr-1" />
                 {step.duration}min
               </Button>
             )}
