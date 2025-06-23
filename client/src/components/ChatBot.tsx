@@ -12,6 +12,7 @@ import { iconMap } from "@/lib/iconMap";
 import { useRecipeStore, recipeActions } from "@/stores/recipeStore";
 import { useTimerStore } from "@/stores/timerStore";
 import ZestVoiceChat from "@/components/ZestVoiceChat";
+import { StreamingChatBot } from "@/components/StreamingChatBot";
 
 interface ChatMessage {
   id: number;
@@ -458,47 +459,11 @@ export default function ChatBot({
           </Button>
         </CardHeader>
         
-        <div 
-          className="flex-1 p-2 sm:p-4 min-h-0 max-h-96 sm:max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800" 
-          ref={scrollAreaRef}
-        >
-          <div className="space-y-3 sm:space-y-4">
-            {localMessages.map((msg) => (
-              <div key={msg.id} className={`flex space-x-2 sm:space-x-3 ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
-                {!msg.isUser && (
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                    <iconMap.bot className="text-white w-3 h-3 sm:w-4 sm:h-4" />
-                  </div>
-                )}
-                <div className={`rounded-2xl p-2 sm:p-4 max-w-[240px] sm:max-w-xs shadow-lg ${
-                  msg.isUser 
-                    ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white ml-2 sm:ml-4" 
-                    : "bg-card/90 backdrop-blur-sm text-foreground border border-border"
-                }`}>
-                  <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.text}</p>
-                </div>
-                {msg.isUser && (
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-slate-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                    <iconMap.user className="text-white w-3 h-3 sm:w-4 sm:h-4" />
-                  </div>
-                )}
-              </div>
-            ))}
-            {sendMessageMutation.isPending && (
-              <div className="flex space-x-3 justify-start">
-                <div className="w-8 h-8 gradient-primary rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                  <i className="fas fa-robot text-white text-sm"></i>
-                </div>
-                <div className="glass rounded-2xl p-4 max-w-xs border border-white/20">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+        <div className="flex-1 min-h-0">
+          <StreamingChatBot 
+            currentRecipe={currentRecipe}
+            onRecipeUpdate={onRecipeUpdate}
+          />
         </div>
 
         {/* Recipe Context Summary */}

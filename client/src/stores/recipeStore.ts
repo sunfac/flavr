@@ -42,6 +42,7 @@ interface RecipeStore extends RecipeState {
   // Actions
   replaceRecipe: (payload: RecipeState) => void;
   patchRecipe: (payload: DeepPartial<RecipeState>) => void;
+  updateActiveRecipe: (recipe: any) => void;
   updateServings: (servings: number) => void;
   toggleIngredient: (ingredientId: string) => void;
   setCurrentStep: (stepIndex: number) => void;
@@ -157,6 +158,37 @@ export const useRecipeStore = create<RecipeStore>()(
         }));
       },
 
+      updateActiveRecipe: (recipe: any) => {
+        console.log('🔄 Recipe Store: Updating active recipe from chat', recipe);
+        const updatedState: RecipeState = {
+          id: recipe.id || Date.now().toString(),
+          servings: recipe.servings || 4,
+          ingredients: recipe.ingredients?.map((ing: string, index: number) => ({
+            id: `ingredient-${index}`,
+            text: ing,
+            checked: false
+          })) || [],
+          steps: recipe.instructions?.map((instruction: string, index: number) => ({
+            id: `step-${index}`,
+            title: `Step ${index + 1}`,
+            description: instruction,
+            duration: 0
+          })) || [],
+          meta: {
+            title: recipe.title || 'Updated Recipe',
+            description: recipe.description,
+            cookTime: recipe.cookTime || 30,
+            difficulty: recipe.difficulty || 'Medium',
+            cuisine: recipe.cuisine,
+            image: recipe.image
+          },
+          currentStep: 0,
+          completedSteps: [],
+          lastUpdated: Date.now(),
+        };
+        set(updatedState);
+      },
+
       resetRecipe: () => {
         set({
           ...initialState,
@@ -174,6 +206,7 @@ export const useRecipeStore = create<RecipeStore>()(
 export const recipeActions = {
   replaceRecipe: (payload: RecipeState) => useRecipeStore.getState().replaceRecipe(payload),
   patchRecipe: (payload: DeepPartial<RecipeState>) => useRecipeStore.getState().patchRecipe(payload),
+  updateActiveRecipe: (recipe: any) => useRecipeStore.getState().updateActiveRecipe(recipe),
   updateServings: (servings: number) => useRecipeStore.getState().updateServings(servings),
   toggleIngredient: (ingredientId: string) => useRecipeStore.getState().toggleIngredient(ingredientId),
   setCurrentStep: (stepIndex: number) => useRecipeStore.getState().setCurrentStep(stepIndex),
