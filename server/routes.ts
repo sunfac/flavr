@@ -1550,9 +1550,9 @@ ${currentRecipe ? `Current recipe context: "${currentRecipe.title}" (serves ${cu
 Ingredients: ${currentRecipe.ingredients?.join(', ')}
 Instructions: ${currentRecipe.instructions?.join(' ')}
 
-` : ''}When the user wants to modify the current recipe, create new recipes, or make any cooking-related changes, you must call the set_recipe function with complete recipe data.
+` : ''}IMPORTANT: When the user requests ANY recipe modification (substitutions, additions, changes), you MUST call the set_recipe function with the COMPLETE updated recipe data. Do not just suggest changes - implement them immediately by calling the function.
 
-Be conversational, helpful, and maintain context from our conversation history. Reference what we've discussed before when relevant.`;
+Be conversational, helpful, and maintain context from our conversation history. Reference previous messages and continue the conversation naturally. If the user mentions something from earlier in our conversation, acknowledge it specifically.`;
 
       // Prepare messages for OpenAI with full conversation history
       const messages: Array<{role: "system" | "user" | "assistant", content: string}> = [

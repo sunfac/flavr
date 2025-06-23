@@ -146,6 +146,7 @@ Changelog:
 - June 23, 2025. ChatBot ScrollArea component replaced - removed problematic Radix UI ScrollArea with standard div to eliminate infinite loop crashes, maintaining scroll functionality
 - June 23, 2025. EnhancedRecipeCard infinite loop eliminated - removed all problematic useEffect hooks causing recursive updates, replaced currentServings state with memoized activeServings, eliminated Zustand store sync and ingredient state sync useEffects
 - June 23, 2025. OpenAI voice chat integration complete - replaced old microphone controls with ZestVoiceChat component using OpenAI real-time audio API, enabling natural voice conversations with Zest chatbot for step-by-step cooking guidance and recipe assistance
+- June 23, 2025. Enhanced conversational memory system implemented - chatbot now receives full conversation context with every message, maintains conversation flow across interactions, and implements live recipe card updates via streaming function calls. Text-to-speech disabled per user feedback due to robotic voice quality.
 ```
 
 ## User Preferences
