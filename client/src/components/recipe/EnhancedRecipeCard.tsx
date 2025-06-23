@@ -215,52 +215,42 @@ function EnhancedRecipeCard({
           onServingsChange={setCurrentServings}
         />
 
-        {/* Ingredients Section - Always Visible on Mobile */}
-        <IngredientPanel
-          ingredients={ingredientsWithState}
-          onToggle={handleIngredientToggle}
-          className="border-b border-slate-700/50"
-        />
+        {/* Main Grid - Responsive Layout */}
+        <div 
+          className="recipe-main-grid relative"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1fr)',
+            gap: '0',
+            containerType: 'inline-size'
+          }}
+        >
+          {/* CSS for container queries */}
+          <style dangerouslySetInnerHTML={{
+            __html: `
+              @container (min-width: 768px) {
+                .recipe-main-grid {
+                  grid-template-columns: 320px 1fr;
+                  gap: 0;
+                }
+              }
+            `
+          }} />
 
-        {/* Main Grid - Desktop Layout Only */}
-        <div className="hidden md:block">
-          <div 
-            className="recipe-main-grid relative"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '280px 1fr',
-              gap: '0',
-              containerType: 'inline-size'
-            }}
-          >
-            {/* Desktop Ingredient Panel - Hidden on Mobile */}
-            <div className="hidden md:block">
-              <IngredientPanel
-                ingredients={ingredientsWithState}
-                onToggle={handleIngredientToggle}
-                className="h-[600px] sticky top-0"
-              />
-            </div>
+          {/* Ingredient Panel */}
+          <IngredientPanel
+            ingredients={ingredientsWithState}
+            onToggle={handleIngredientToggle}
+            className="md:h-[600px] md:sticky md:top-0"
+          />
 
-            {/* Step Stack */}
-            <StepStack
-              steps={steps}
-              currentStep={currentStep}
-              onStepComplete={handleStepComplete}
-              onStepChange={setCurrentStep}
-              className="min-h-[600px]"
-            />
-          </div>
-        </div>
-
-        {/* Mobile Step Stack */}
-        <div className="md:hidden">
+          {/* Step Stack */}
           <StepStack
             steps={steps}
             currentStep={currentStep}
             onStepComplete={handleStepComplete}
             onStepChange={setCurrentStep}
-            className="min-h-[400px]"
+            className="min-h-[600px]"
           />
         </div>
 
