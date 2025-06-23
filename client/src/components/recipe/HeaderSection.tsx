@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Users, ChefHat, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -28,15 +28,18 @@ export default function HeaderSection({
 }: HeaderSectionProps) {
   const [isServingSheetOpen, setIsServingSheetOpen] = useState(false);
 
-  const fastFacts = [
+  const fastFacts = useMemo(() => [
     { icon: Clock, label: `${recipe.cookTime}min`, value: 'time' },
     { icon: Users, label: `Serves ${currentServings}`, value: 'servings' },
     { icon: ChefHat, label: recipe.difficulty, value: 'difficulty' },
-  ];
+  ], [recipe.cookTime, currentServings, recipe.difficulty]);
 
-  const handleServingsChange = (values: number[]) => {
-    onServingsChange(values[0]);
-  };
+  const handleServingsChange = useCallback((values: number[]) => {
+    const newValue = values[0];
+    if (newValue !== currentServings) {
+      onServingsChange(newValue);
+    }
+  }, [currentServings, onServingsChange]);
 
   return (
     <div className="relative">

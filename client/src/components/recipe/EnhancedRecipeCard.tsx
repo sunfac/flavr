@@ -98,23 +98,43 @@ function EnhancedRecipeCard({
   // Force re-render when recipe store updates from chatbot
   useEffect(() => {
     if (recipeStore.lastUpdated && recipeStore.id === recipe.id) {
+      console.log('🔄 Recipe store changed, forcing re-render:', {
+        storeServings: recipeStore.servings,
+        currentServings,
+        storeIngredientsLength: recipeStore.ingredients.length,
+        storeStepsLength: recipeStore.steps.length
+      });
+      
       // Update servings if they changed in the store
       if (recipeStore.servings !== currentServings) {
         setCurrentServings(recipeStore.servings);
       }
-      // Force component re-render by updating a state
-      setCurrentStep(prev => prev);
+      
+      // Force complete component refresh
+      setCurrentStep(0);
+      setCompletedSteps([]);
+      setIngredientStates({});
     }
   }, [recipeStore.servings, recipeStore.lastUpdated, recipeStore.id, recipe.id, currentServings, recipeStore.meta, recipeStore.ingredients, recipeStore.steps]);
 
   // Use updated data from store if available, otherwise fall back to original
-  const activeIngredients = recipeStore.id === recipe.id && recipeStore.ingredients.length > 0 
-    ? recipeStore.ingredients.map(ing => ing.text)
-    : recipe.ingredients;
+  const activeIngredients = useMemo(() => {
+    if (recipeStore.id === recipe.id && recipeStore.ingredients.length > 0) {
+      console.log('🔄 Using store ingredients:', recipeStore.ingredients.length);
+      return recipeStore.ingredients.map(ing => ing.text);
+    }
+    console.log('🔄 Using original ingredients:', recipe.ingredients.length);
+    return recipe.ingredients;
+  }, [recipeStore.id, recipe.id, recipeStore.ingredients, recipe.ingredients]);
 
-  const activeInstructions = recipeStore.id === recipe.id && recipeStore.steps.length > 0
-    ? recipeStore.steps.map(step => step.description)
-    : recipe.instructions;
+  const activeInstructions = useMemo(() => {
+    if (recipeStore.id === recipe.id && recipeStore.steps.length > 0) {
+      console.log('🔄 Using store instructions:', recipeStore.steps.length);
+      return recipeStore.steps.map(step => step.description);
+    }
+    console.log('🔄 Using original instructions:', recipe.instructions.length);
+    return recipe.instructions;
+  }, [recipeStore.id, recipe.id, recipeStore.steps, recipe.instructions]);
 
   const activeTitle = recipeStore.id === recipe.id && recipeStore.meta.title
     ? recipeStore.meta.title

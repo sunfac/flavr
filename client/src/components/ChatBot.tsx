@@ -196,8 +196,8 @@ export default function ChatBot({
       // Add the message to local state AFTER processing function calls
       setLocalMessages(prev => [...prev, newMessage]);
 
-      // Legacy recipe update support and direct recipe store sync
-      if (result.updatedRecipe) {
+      // Legacy recipe update support - only if no function calls were processed
+      if (result.updatedRecipe && (!result.functionCalls || result.functionCalls.length === 0)) {
         console.log('📝 Recipe update detected:', result.updatedRecipe);
         
         // Update the recipe store directly to sync with live recipe card
