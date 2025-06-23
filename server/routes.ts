@@ -1208,9 +1208,9 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
       // Get chat history for conversation memory
       const chatHistory = await storage.getChatHistory(userId, 10);
 
-      // Detect if the user wants to modify the current recipe
+      // Enhanced intelligent recipe modification detection
       const shouldUpdateRecipe = currentRecipe && (
-        // Direct recipe modification requests
+        // Direct modification keywords
         message.toLowerCase().includes('change') ||
         message.toLowerCase().includes('modify') ||
         message.toLowerCase().includes('update') ||
@@ -1218,60 +1218,119 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
         message.toLowerCase().includes('replace') ||
         message.toLowerCase().includes('substitute') ||
         message.toLowerCase().includes('swap') ||
+        message.toLowerCase().includes('switch') ||
         
-        // Spice level modifications
+        // Addition/removal patterns
+        message.toLowerCase().includes('add') ||
+        message.toLowerCase().includes('include') ||
+        message.toLowerCase().includes('put in') ||
+        message.toLowerCase().includes('throw in') ||
+        message.toLowerCase().includes('remove') ||
+        message.toLowerCase().includes('without') ||
+        message.toLowerCase().includes('skip') ||
+        message.toLowerCase().includes('leave out') ||
+        message.toLowerCase().includes('take out') ||
+        
+        // Cooking method changes
+        message.toLowerCase().includes('roast instead') ||
+        message.toLowerCase().includes('bake instead') ||
+        message.toLowerCase().includes('grill instead') ||
+        message.toLowerCase().includes('steam instead') ||
+        message.toLowerCase().includes('boil instead') ||
+        message.toLowerCase().includes('fry instead') ||
+        message.toLowerCase().includes('sauté instead') ||
+        message.toLowerCase().includes('avoid frying') ||
+        message.toLowerCase().includes('avoid baking') ||
+        message.toLowerCase().includes('no frying') ||
+        message.toLowerCase().includes('don\'t fry') ||
+        /instead of (frying|baking|roasting|grilling|steaming|boiling)/i.test(message) ||
+        
+        // Side dishes and additions
+        message.toLowerCase().includes('side dish') ||
+        message.toLowerCase().includes('side') ||
+        message.toLowerCase().includes('serve with') ||
+        message.toLowerCase().includes('pair with') ||
+        message.toLowerCase().includes('alongside') ||
+        message.toLowerCase().includes('goes with') ||
+        
+        // Spice and flavor modifications
         message.toLowerCase().includes('spicier') ||
         message.toLowerCase().includes('milder') ||
         message.toLowerCase().includes('more spice') ||
         message.toLowerCase().includes('less spice') ||
         message.toLowerCase().includes('hotter') ||
         message.toLowerCase().includes('cooler') ||
+        message.toLowerCase().includes('more flavor') ||
+        message.toLowerCase().includes('less salty') ||
+        message.toLowerCase().includes('sweeter') ||
+        message.toLowerCase().includes('more herbs') ||
         
-        // Portion/serving changes - Enhanced detection
-        message.toLowerCase().includes('change portion') ||
-        message.toLowerCase().includes('change serving') ||
-        message.toLowerCase().includes('for 2 people') ||
-        message.toLowerCase().includes('for 4 people') ||
-        message.toLowerCase().includes('for 6 people') ||
-        message.toLowerCase().includes('for 8 people') ||
-        message.toLowerCase().includes('for 1 person') ||
-        message.toLowerCase().includes('for 3 people') ||
-        message.toLowerCase().includes('for 5 people') ||
+        // Portion/serving changes
         /for\s+\d+\s+people/i.test(message) ||
         /\d+\s+people/i.test(message) ||
+        /\d+\s+servings/i.test(message) ||
         message.toLowerCase().includes('people instead') ||
         message.toLowerCase().includes('servings instead') ||
         message.toLowerCase().includes('instead of') ||
         /make.*for.*\d/i.test(message) ||
         /scale.*to.*\d/i.test(message) ||
-        
-        // Time modifications
-        message.toLowerCase().includes('make it quicker') ||
-        message.toLowerCase().includes('make it faster') ||
-        message.toLowerCase().includes('reduce time') ||
-        
-        // Ingredient changes
-        message.toLowerCase().includes('without') ||
-        message.toLowerCase().includes('skip the') ||
-        message.toLowerCase().includes('leave out') ||
-        
-        // Dietary modifications
-        message.toLowerCase().includes('make it vegan') ||
-        message.toLowerCase().includes('make it vegetarian') ||
-        message.toLowerCase().includes('dairy free') ||
-        message.toLowerCase().includes('gluten free') ||
-        
-        // Scale adjustments
         message.toLowerCase().includes('double') ||
         message.toLowerCase().includes('half') ||
         message.toLowerCase().includes('triple') ||
         message.toLowerCase().includes('halve') ||
         
-        // Clear directive patterns
-        /^change\s/.test(message.toLowerCase()) ||
-        /^make\s.*\s(more|less|spicier|milder|quicker|faster)/.test(message.toLowerCase()) ||
-        /^make\s.*for\s*\d+/i.test(message) ||
-        /instead/i.test(message)
+        // Time and technique modifications
+        message.toLowerCase().includes('quicker') ||
+        message.toLowerCase().includes('faster') ||
+        message.toLowerCase().includes('slower') ||
+        message.toLowerCase().includes('longer') ||
+        message.toLowerCase().includes('reduce time') ||
+        message.toLowerCase().includes('cook longer') ||
+        message.toLowerCase().includes('more time') ||
+        
+        // Dietary and allergy modifications
+        message.toLowerCase().includes('make it vegan') ||
+        message.toLowerCase().includes('make it vegetarian') ||
+        message.toLowerCase().includes('dairy free') ||
+        message.toLowerCase().includes('gluten free') ||
+        message.toLowerCase().includes('keto') ||
+        message.toLowerCase().includes('low carb') ||
+        message.toLowerCase().includes('sugar free') ||
+        message.toLowerCase().includes('nut free') ||
+        
+        // Temperature and texture changes
+        message.toLowerCase().includes('crispy') ||
+        message.toLowerCase().includes('crunchy') ||
+        message.toLowerCase().includes('tender') ||
+        message.toLowerCase().includes('juicy') ||
+        message.toLowerCase().includes('well done') ||
+        message.toLowerCase().includes('rare') ||
+        message.toLowerCase().includes('medium') ||
+        
+        // Directive patterns and suggestions
+        /^make\s/i.test(message) ||
+        /^add\s/i.test(message) ||
+        /^try\s/i.test(message) ||
+        /^use\s/i.test(message) ||
+        /what if/i.test(message) ||
+        /could you/i.test(message) ||
+        /can you/i.test(message) ||
+        /would.*work/i.test(message) ||
+        
+        // Equipment and ingredient alternatives
+        message.toLowerCase().includes('oven') ||
+        message.toLowerCase().includes('air fryer') ||
+        message.toLowerCase().includes('slow cooker') ||
+        message.toLowerCase().includes('instant pot') ||
+        message.toLowerCase().includes('microwave') ||
+        message.toLowerCase().includes('stovetop') ||
+        
+        // Any suggestion that implies modification
+        /instead/i.test(message) ||
+        /rather than/i.test(message) ||
+        /in place of/i.test(message) ||
+        /substitute.*with/i.test(message) ||
+        /replace.*with/i.test(message)
       );
 
       let botResponse = "";
@@ -1281,7 +1340,7 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
         const modificationMessages = [
           {
             role: "system" as const,
-            content: `You are Zest, Flavr's intelligent cooking assistant. The user wants to modify their current recipe.
+            content: `You are Zest, Flavr's intelligent cooking assistant. The user wants to modify their current recipe. You must handle ANY type of modification request intelligently.
 
 Current recipe details:
 - Title: ${currentRecipe.title}
@@ -1291,18 +1350,45 @@ Current recipe details:
 - Current ingredients: ${JSON.stringify(currentRecipe.ingredients)}
 - Current instructions: ${JSON.stringify(currentRecipe.instructions)}
 
-CRITICAL INSTRUCTIONS:
-1. When scaling recipes, calculate EXACT proportions. For example:
-   - Original: "1.6 kg Secreto Iberico" for 8 people → "0.8 kg Secreto Iberico" for 4 people
-   - Original: "200ml Sherry" for 8 people → "100ml Sherry" for 4 people
-   - Original: "2 tbsp Olive oil" for 8 people → "1 tbsp Olive oil" for 4 people
+COMPREHENSIVE MODIFICATION HANDLING:
 
-2. NEVER use placeholder text like "scaled ingredients array" or "updated steps array"
-3. Always provide complete, realistic ingredient lists and cooking instructions
-4. Scale ALL quantities proportionally based on the serving change
-5. Maintain cooking times and techniques unless specifically requested to change them
-6. Call updateRecipe function with the complete, scaled recipe data
-7. Keep your response message brief and casual`
+1. SERVING SCALING: Calculate exact proportions for all ingredients
+   - Example: 1.6 kg for 8 people → 0.8 kg for 4 people
+
+2. COOKING METHOD CHANGES: Replace techniques completely
+   - "avoid frying" or "roast instead" → Change frying to roasting with adjusted times/temps
+   - Update cooking times, temperatures, and techniques accordingly
+
+3. SIDE DISH ADDITIONS: Add complete side dish recipes
+   - "add a side dish" → Include ingredients and steps for appropriate sides
+   - Integrate side dish preparation into the main cooking timeline
+
+4. INGREDIENT SUBSTITUTIONS: Replace ingredients intelligently
+   - Maintain flavor profiles and cooking properties
+   - Adjust quantities and techniques as needed
+
+5. DIETARY MODIFICATIONS: Transform recipes for dietary needs
+   - Vegan/vegetarian: Replace animal products with plant alternatives
+   - Gluten-free: Substitute wheat products appropriately
+   - Low-carb/keto: Remove or replace high-carb ingredients
+
+6. FLAVOR ADJUSTMENTS: Modify spice levels, herbs, seasonings
+   - Add new ingredients for flavor enhancement
+   - Adjust existing quantities for taste preferences
+
+7. TEXTURE/DONENESS CHANGES: Modify cooking techniques for desired results
+   - Crispy, tender, well-done, etc. → Adjust methods and times
+
+CRITICAL RULES:
+- ALWAYS call updateRecipe function for ANY modification request - no exceptions
+- When user asks for side dishes, ADD complete side dish ingredients and cooking steps
+- When user wants cooking method changes, REPLACE the cooking technique entirely
+- When user requests additions, INCLUDE them in the updated recipe
+- Provide complete, realistic ingredients and instructions - NO placeholders
+- Think creatively about user intent and implement comprehensive solutions immediately
+- Adjust cooking times, temperatures, and techniques based on changes made
+- Don't just suggest - IMPLEMENT the changes by calling updateRecipe function
+- Keep conversational responses brief and friendly while executing the modification`
           },
           {
             role: "user" as const,
@@ -1324,13 +1410,13 @@ CRITICAL INSTRUCTIONS:
           functions: [
             {
               name: "updateRecipe",
-              description: "Update the current recipe with modifications based on user request",
+              description: "Update the current recipe with ANY modifications requested by the user, including ingredient changes, cooking method alterations, side dish additions, dietary modifications, serving adjustments, or any other culinary improvements",
               parameters: {
                 type: "object",
                 properties: {
                   title: {
                     type: "string",
-                    description: "Updated recipe title if changed"
+                    description: "Updated recipe title reflecting any changes made"
                   },
                   servings: {
                     type: "number",
@@ -1338,34 +1424,43 @@ CRITICAL INSTRUCTIONS:
                   },
                   cookTime: {
                     type: "number",
-                    description: "Updated cooking time in minutes"
+                    description: "Updated cooking time in minutes, adjusted for any technique changes"
                   },
                   difficulty: {
                     type: "string",
                     enum: ["Easy", "Medium", "Hard"],
-                    description: "Recipe difficulty level"
+                    description: "Recipe difficulty level, may change based on modifications"
                   },
                   ingredients: {
                     type: "array",
                     items: { type: "string" },
-                    description: "Complete updated ingredients list with properly scaled quantities. For example: if original was '1.6 kg Secreto Iberico' for 8 people, scale to '0.8 kg Secreto Iberico' for 4 people. Include actual measurements, not placeholders."
+                    description: "Complete updated ingredients list including: scaled quantities for serving changes, new ingredients for additions (side dishes, spices, etc.), substituted ingredients for dietary needs, and all modifications requested. Always provide actual measurements and ingredient names, never use placeholders."
                   },
                   instructions: {
                     type: "array",
                     items: { type: "string" },
-                    description: "Complete updated cooking instructions with any timing or quantity adjustments needed for the new serving size. Use actual step descriptions, not placeholders."
+                    description: "Complete updated cooking instructions reflecting all changes: cooking method alterations (roasting instead of frying), timing adjustments, new preparation steps for side dishes, dietary modifications, technique changes, and any other requested modifications. Provide detailed, actionable steps."
                   },
                   spiceLevel: {
                     type: "string",
                     enum: ["Mild", "Medium", "Hot", "Very Hot"],
-                    description: "Spice level if changed"
+                    description: "Spice level if modified"
+                  },
+                  cuisine: {
+                    type: "string",
+                    description: "Cuisine type if it changes due to modifications"
+                  },
+                  tags: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Recipe tags reflecting dietary modifications (vegan, gluten-free, keto, etc.) or cooking methods (roasted, grilled, etc.)"
                   }
                 },
-                required: ["servings", "ingredients", "instructions"]
+                required: ["ingredients", "instructions"]
               }
             }
           ],
-          function_call: "auto",
+          function_call: { name: "updateRecipe" },
           max_tokens: 1000,
           temperature: 0.7,
         });
