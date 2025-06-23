@@ -95,10 +95,29 @@ function EnhancedRecipeCard({
   
   const recipeStore = useRecipeStore();
 
+  // Sync with recipe store updates from chatbot (servings and ingredients)
+  useEffect(() => {
+    if (recipeStore.lastUpdated && recipeStore.id === recipe.id) {
+      // Update servings if they changed in the store
+      if (recipeStore.servings !== currentServings) {
+        setCurrentServings(recipeStore.servings);
+      }
+    }
+  }, [recipeStore.servings, recipeStore.lastUpdated, recipeStore.id, recipe.id, currentServings]);
+
+  // Use updated ingredients from store if available, otherwise fall back to original
+  const activeIngredients = recipeStore.id === recipe.id && recipeStore.ingredients.length > 0 
+    ? recipeStore.ingredients.map(ing => ing.text)
+    : recipe.ingredients;
+
+  const activeServings = recipeStore.id === recipe.id 
+    ? recipeStore.servings 
+    : recipe.servings;
+
   // Scale ingredients based on serving adjustments
   const scaledIngredients = useScaledIngredients(
-    recipe.ingredients, 
-    recipe.servings, 
+    activeIngredients, 
+    activeServings, 
     currentServings
   );
 
