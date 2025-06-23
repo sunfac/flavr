@@ -1351,6 +1351,12 @@ CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`
         message.toLowerCase().includes('swap') ||
         message.toLowerCase().includes('change to') ||
         message.toLowerCase().includes('switch') ||
+        message.toLowerCase().includes('i want to use') ||
+        message.toLowerCase().includes('can you substitute') ||
+        message.toLowerCase().includes('dont have') ||
+        message.toLowerCase().includes("don't have") ||
+        /\bi want to use (\w+)/i.test(message) ||
+        /\buse (\w+) instead/i.test(message) ||
         
         // Flavor modifications
         message.toLowerCase().includes('spicier') ||
@@ -1501,7 +1507,7 @@ Keep it super short and casual!`;
             { role: "user", content: req.body.message }
           ],
           tools: tools,
-          tool_choice: enableFunctionCalling ? "required" : undefined,
+          tool_choice: enableFunctionCalling ? { type: "function", function: { name: "updateRecipe" } } : undefined,
           max_tokens: 800,
           temperature: 0.7,
         });
@@ -1520,6 +1526,55 @@ Keep it super short and casual!`;
           }));
           
           console.log('🔧 Function calls detected:', functionCalls);
+        } else if (enableFunctionCalling && shouldUpdateRecipe) {
+          // Force function call generation when OpenAI doesn't create them
+          console.log('🔧 FORCING function call generation for recipe modification');
+          try {
+            const parsedResponse = JSON.parse(fullResponse.match(/\{[\s\S]*\}/)?.[0] || '{}');
+            if (parsedResponse.updatedRecipe) {
+              functionCalls = [{
+                name: 'updateRecipe',
+                arguments: {
+                  mode: 'patch',
+                  data: {
+                    id: currentRecipe.id,
+                    servings: parsedResponse.updatedRecipe.servings || currentRecipe.servings,
+                    meta: {
+                      title: parsedResponse.updatedRecipe.title || currentRecipe.title,
+                      description: parsedResponse.updatedRecipe.description || currentRecipe.description,
+                      cookTime: parsedResponse.updatedRecipe.cookTime || currentRecipe.cookTime,
+                      difficulty: parsedResponse.updatedRecipe.difficulty || currentRecipe.difficulty,
+                      cuisine: parsedResponse.updatedRecipe.cuisine || currentRecipe.cuisine
+                    },
+                    ingredients: parsedResponse.updatedRecipe.ingredients?.map((ing: string, index: number) => ({
+                      id: `ingredient-${index}`,
+                      text: ing,
+                      checked: false
+                    })) || currentRecipe.ingredients.map((ing: string, index: number) => ({
+                      id: `ingredient-${index}`,
+                      text: ing,
+                      checked: false
+                    })),
+                    steps: parsedResponse.updatedRecipe.instructions?.map((instruction: string, index: number) => ({
+                      id: `step-${index}`,
+                      title: `Step ${index + 1}`,
+                      description: instruction,
+                      duration: 0
+                    })) || currentRecipe.instructions.map((instruction: string, index: number) => ({
+                      id: `step-${index}`,
+                      title: `Step ${index + 1}`,
+                      description: instruction,
+                      duration: 0
+                    }))
+                  }
+                }
+              }];
+              console.log('✅ Generated synthetic function call:', functionCalls[0]);
+            }
+          } catch (error) {
+            console.log('Failed to generate synthetic function call:', error);
+          }
+        }
           
           // Execute function calls immediately
           for (const call of functionCalls) {
