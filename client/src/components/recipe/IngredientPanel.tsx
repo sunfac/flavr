@@ -56,7 +56,7 @@ export default function IngredientPanel({
 
       {/* Mobile: Compact Card Layout */}
       <div className={`md:hidden ${className}`}>
-        <div className="p-4 bg-slate-800/40 border-b border-slate-700/50">
+        <div className="p-4 bg-slate-800/40 border-b border-slate-700/50 mb-0">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-white" style={{ fontSize: 'var(--step-0)' }}>
               Ingredients

@@ -137,10 +137,10 @@ export default function ChatBot({
         text: result.response,
         timestamp: new Date(),
       };
-      setLocalMessages(prev => [...prev, newMessage]);
+      // Don't add the message to local state yet - preserve chat history
       setMessage("");
 
-      // Handle OpenAI function calls for live recipe updates
+      // Handle OpenAI function calls for live recipe updates FIRST
       console.log('🔍 CHATBOT RESPONSE:', {
         hasFunctionCalls: !!result.functionCalls,
         functionCallsLength: result.functionCalls?.length || 0,
@@ -175,25 +175,15 @@ export default function ChatBot({
               
               console.log('✅ Recipe store updated successfully');
               
-              // Force re-render of recipe card by triggering store listeners
-              console.log('🔄 Forcing recipe card re-render');
-              
-              // Add success notification without delay to preserve chat history
-              const updateMessage: ChatMessage = {
-                id: Date.now() + Math.random(),
-                message: "",
-                response: "✅ Recipe updated successfully!",
-                isUser: false,
-                text: "✅ Recipe updated successfully!",
-                timestamp: new Date(),
-              };
-              setLocalMessages(prev => [...prev, updateMessage]);
             } catch (error) {
               console.error('Error processing function call:', error);
             }
           }
         });
       }
+
+      // Add the message to local state AFTER processing function calls
+      setLocalMessages(prev => [...prev, newMessage]);
 
       // Legacy recipe update support and direct recipe store sync
       if (result.updatedRecipe) {
