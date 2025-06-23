@@ -1419,6 +1419,33 @@ CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`
         message.toLowerCase().includes('add ingredient') ||
         message.toLowerCase().includes('remove ingredient') ||
         message.toLowerCase().includes('without') ||
+        message.toLowerCase().includes('skip the') ||
+        message.toLowerCase().includes('leave out') ||
+        
+        // Cooking method changes
+        message.toLowerCase().includes('bake instead') ||
+        message.toLowerCase().includes('grill instead') ||
+        message.toLowerCase().includes('air fry') ||
+        message.toLowerCase().includes('oven') ||
+        message.toLowerCase().includes('stovetop') ||
+        message.toLowerCase().includes('slow cooker') ||
+        message.toLowerCase().includes('instant pot') ||
+        
+        // Texture/consistency changes
+        message.toLowerCase().includes('thicker') ||
+        message.toLowerCase().includes('thinner') ||
+        message.toLowerCase().includes('creamy') ||
+        message.toLowerCase().includes('chunky') ||
+        message.toLowerCase().includes('smooth') ||
+        
+        // General modification language
+        message.toLowerCase().includes('modify') ||
+        message.toLowerCase().includes('update') ||
+        message.toLowerCase().includes('edit') ||
+        message.toLowerCase().includes('adjust') ||
+        message.toLowerCase().includes('tweak') ||
+        message.toLowerCase().includes('customize') ||
+        message.toLowerCase().includes('without') ||
         
         // Clear directive patterns
         /^change\s/.test(message.toLowerCase()) ||

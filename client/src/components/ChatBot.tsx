@@ -96,15 +96,9 @@ export default function ChatBot({
       servings: recipeStore.servings,
       difficulty: recipeStore.meta.difficulty,
       cuisine: recipeStore.meta.cuisine,
-      ingredients: recipeStore.ingredients.map(ing => ({
-        id: ing.id,
-        name: ing.name,
-        amount: ing.amount,
-        unit: ing.unit,
-        checked: ing.checked
-      })),
+      ingredients: recipeStore.ingredients.map(ing => ing.text),
       instructions: recipeStore.steps.map(step => step.description),
-      tips: recipeStore.meta.tips || "",
+      tips: "",
       image: recipeStore.meta.image
     };
 
@@ -349,7 +343,7 @@ export default function ChatBot({
         className={`fixed bottom-20 left-2 right-2 sm:left-4 sm:right-4 glass border border-white/20 rounded-t-3xl transition-all duration-500 z-50 backdrop-blur-xl flex flex-col ${
           isOpen ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
         }`}
-        style={{ maxHeight: 'calc(100vh - 120px)' }}
+        style={{ maxHeight: 'calc(100vh - 140px)' }}
       >
         <CardHeader className="p-3 sm:p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-3">
@@ -357,10 +351,15 @@ export default function ChatBot({
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
                 <iconMap.chefHat className="text-white w-3 h-3 sm:w-4 sm:h-4" />
               </div>
+              {currentRecipe && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-white"></div>
+              )}
             </div>
             <div>
-              <h3 className="font-bold text-white text-sm sm:text-lg">Chef Assistant</h3>
-              <p className="text-xs sm:text-sm text-white/80 hidden sm:block">Ask me anything about cooking!</p>
+              <h3 className="font-bold text-white text-sm sm:text-lg">Zest</h3>
+              <p className="text-xs sm:text-sm text-white/80">
+                {currentRecipe ? `Helping with "${currentRecipe.title}"` : "Ask me anything about cooking!"}
+              </p>
             </div>
           </div>
           <Button
@@ -373,7 +372,7 @@ export default function ChatBot({
           </Button>
         </CardHeader>
         
-        <ScrollArea className="flex-1 p-2 sm:p-4 min-h-0 max-h-72 sm:max-h-80 overflow-y-auto" ref={scrollAreaRef}>
+        <ScrollArea className="flex-1 p-2 sm:p-4 min-h-0 max-h-96 sm:max-h-96 overflow-y-auto" ref={scrollAreaRef}>
           <div className="space-y-3 sm:space-y-4">
             {localMessages.map((msg) => (
               <div key={msg.id} className={`flex space-x-2 sm:space-x-3 ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
@@ -412,6 +411,16 @@ export default function ChatBot({
             )}
           </div>
         </ScrollArea>
+
+        {/* Recipe Context Summary */}
+        {currentRecipe && (
+          <div className="px-3 sm:px-4 py-2 border-t border-white/10 bg-orange-500/5 flex-shrink-0">
+            <div className="text-xs text-white/70 mb-1">Current Recipe Context:</div>
+            <div className="text-xs text-orange-300 truncate">
+              {currentRecipe.title} • {currentRecipe.servings} servings • {currentRecipe.cookTime}min • {currentRecipe.difficulty}
+            </div>
+          </div>
+        )}
 
         {/* Suggestion Chips - Mobile optimized with Lucide icons */}
         {currentRecipe && (
