@@ -16,6 +16,11 @@ interface VoiceAssistantProps {
 export default function VoiceAssistant({ onChatMessage, className }: VoiceAssistantProps) {
   const [isMinimized, setIsMinimized] = useState(false);
   const [showCommands, setShowCommands] = useState(false);
+  const [voiceSettings, setVoiceSettings] = useState({
+    rate: 0.85,
+    pitch: 0.95,
+    volume: 0.75
+  });
   
   const recipeStore = useRecipeStore();
   const timerStore = useTimerStore();
@@ -253,14 +258,90 @@ export default function VoiceAssistant({ onChatMessage, className }: VoiceAssist
           </div>
         )}
 
+        {/* Voice Quality Controls */}
+        <div className="space-y-2">
+          <h4 className="font-medium text-sm text-slate-200">Voice Settings</h4>
+          
+          <div className="grid grid-cols-3 gap-2 text-xs">
+            <div>
+              <label className="text-slate-400">Speed</label>
+              <input
+                type="range"
+                min="0.5"
+                max="1.5"
+                step="0.1"
+                value={voiceSettings.rate}
+                onChange={(e) => setVoiceSettings(prev => ({ ...prev, rate: parseFloat(e.target.value) }))}
+                className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+              />
+              <span className="text-slate-500">{voiceSettings.rate}x</span>
+            </div>
+            
+            <div>
+              <label className="text-slate-400">Pitch</label>
+              <input
+                type="range"
+                min="0.5"
+                max="1.5"
+                step="0.1"
+                value={voiceSettings.pitch}
+                onChange={(e) => setVoiceSettings(prev => ({ ...prev, pitch: parseFloat(e.target.value) }))}
+                className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+              />
+              <span className="text-slate-500">{voiceSettings.pitch}</span>
+            </div>
+            
+            <div>
+              <label className="text-slate-400">Volume</label>
+              <input
+                type="range"
+                min="0.1"
+                max="1.0"
+                step="0.1"
+                value={voiceSettings.volume}
+                onChange={(e) => setVoiceSettings(prev => ({ ...prev, volume: parseFloat(e.target.value) }))}
+                className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+              />
+              <span className="text-slate-500">{Math.round(voiceSettings.volume * 100)}%</span>
+            </div>
+          </div>
+        </div>
+
         {/* Test Voice */}
         <Button
           variant="outline"
           size="sm"
-          onClick={() => speak('Voice assistant is ready. Try saying next step, start timer, or ask Zest a question.')}
+          onClick={() => {
+            const testText = 'Voice assistant is ready with improved natural speech. Try saying next step, start timer, or ask Zest a question.';
+            // Use improved speech with custom settings
+            if ('speechSynthesis' in window) {
+              speechSynthesis.cancel();
+              const utterance = new SpeechSynthesisUtterance(testText);
+              
+              const voices = speechSynthesis.getVoices();
+              const preferredVoices = voices.filter(voice => 
+                voice.lang.startsWith('en') && (
+                  voice.name.toLowerCase().includes('natural') ||
+                  voice.name.toLowerCase().includes('enhanced') ||
+                  voice.name.toLowerCase().includes('samantha') ||
+                  voice.name.toLowerCase().includes('alex')
+                )
+              );
+              
+              if (preferredVoices.length > 0) {
+                utterance.voice = preferredVoices[0];
+              }
+              
+              utterance.rate = voiceSettings.rate;
+              utterance.pitch = voiceSettings.pitch;
+              utterance.volume = voiceSettings.volume;
+              
+              speechSynthesis.speak(utterance);
+            }
+          }}
           className="w-full text-xs"
         >
-          Test Voice Output
+          Test Natural Voice
         </Button>
       </CardContent>
     </Card>

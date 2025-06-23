@@ -5,9 +5,14 @@ import { useTimerStore } from '@/stores/timerStore';
 interface VoiceCommandsConfig {
   onChatMessage?: (message: string) => void;
   isEnabled?: boolean;
+  voiceSettings?: {
+    rate: number;
+    pitch: number;
+    volume: number;
+  };
 }
 
-export function useVoiceCommands({ onChatMessage, isEnabled = true }: VoiceCommandsConfig = {}) {
+export function useVoiceCommands({ onChatMessage, isEnabled = true, voiceSettings = { rate: 0.85, pitch: 0.95, volume: 0.75 } }: VoiceCommandsConfig = {}) {
   const [isListening, setIsListening] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
   const [lastCommand, setLastCommand] = useState<string>('');
@@ -190,10 +195,60 @@ export function useVoiceCommands({ onChatMessage, isEnabled = true }: VoiceComma
 
   const speak = (text: string) => {
     if ('speechSynthesis' in window) {
+      // Cancel any ongoing speech
+      speechSynthesis.cancel();
+      
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      utterance.volume = 0.8;
+      
+      // Get available voices and prefer natural-sounding ones
+      const voices = speechSynthesis.getVoices();
+      
+      // Prefer voices with better quality (usually neural/premium voices)
+      const preferredVoices = voices.filter(voice => 
+        voice.lang.startsWith('en') && (
+          voice.name.toLowerCase().includes('neural') ||
+          voice.name.toLowerCase().includes('premium') ||
+          voice.name.toLowerCase().includes('enhanced') ||
+          voice.name.toLowerCase().includes('natural') ||
+          voice.name.toLowerCase().includes('aria') ||
+          voice.name.toLowerCase().includes('jenny') ||
+          voice.name.toLowerCase().includes('guy') ||
+          voice.name.toLowerCase().includes('samantha') ||
+          voice.name.toLowerCase().includes('alex') ||
+          voice.name.toLowerCase().includes('karen') ||
+          voice.name.toLowerCase().includes('daniel')
+        )
+      );
+      
+      // Fallback to any English voice if no preferred ones found
+      const englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
+      
+      if (preferredVoices.length > 0) {
+        utterance.voice = preferredVoices[0];
+      } else if (englishVoices.length > 0) {
+        utterance.voice = englishVoices[0];
+      }
+      
+      // Use dynamic voice settings
+      utterance.rate = voiceSettings.rate;
+      utterance.pitch = voiceSettings.pitch;
+      utterance.volume = voiceSettings.volume;
+      
+      // Add slight pauses for natural flow
+      const processedText = text
+        .replace(/\./g, '. ') // Add pause after periods
+        .replace(/,/g, ', ') // Add pause after commas
+        .replace(/:/g, ': ') // Add pause after colons
+        .replace(/\s+/g, ' ') // Clean up extra spaces
+        .trim();
+      
+      utterance.text = processedText;
+      
+      // Error handling
+      utterance.onerror = (event) => {
+        console.error('Speech synthesis error:', event);
+      };
+      
       speechSynthesis.speak(utterance);
     }
   };
