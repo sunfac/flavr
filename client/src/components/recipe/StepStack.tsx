@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { animations, layout } from '@/styles/tokens';
+import { useTimerStore } from '@/stores/timerStore';
 
 interface Step {
   id: string;

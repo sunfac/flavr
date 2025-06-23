@@ -6,6 +6,52 @@ import { useToast } from '@/hooks/use-toast';
 import { useScaledIngredients } from '@/hooks/useScaledIngredients';
 import { useRecipeStore, recipeActions } from '@/stores/recipeStore';
 import VoiceAssistant from '@/components/VoiceAssistant';
+
+// Extract duration from instruction text
+function extractDuration(instruction: string): number | undefined {
+  const text = instruction.toLowerCase();
+  
+  // Look for time patterns
+  const patterns = [
+    /(\d+)\s*(?:to\s*)?(\d+)?\s*minutes?/,
+    /(\d+)\s*(?:to\s*)?(\d+)?\s*mins?/,
+    /(\d+)\s*(?:to\s*)?(\d+)?\s*hours?/,
+    /(\d+)\s*(?:to\s*)?(\d+)?\s*hrs?/,
+    /(\d+)\s*(?:to\s*)?(\d+)?\s*seconds?/,
+    /(\d+)\s*(?:to\s*)?(\d+)?\s*secs?/
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) {
+      const firstNum = parseInt(match[1]);
+      const secondNum = match[2] ? parseInt(match[2]) : firstNum;
+      
+      // Use the average if it's a range, otherwise use the single value
+      const duration = match[2] ? Math.round((firstNum + secondNum) / 2) : firstNum;
+      
+      // Convert to minutes if needed
+      if (text.includes('hour') || text.includes('hr')) {
+        return duration * 60;
+      } else if (text.includes('second') || text.includes('sec')) {
+        return Math.round(duration / 60);
+      } else {
+        return duration; // Already in minutes
+      }
+    }
+  }
+  
+  // Default durations based on common cooking terms
+  if (text.includes('bring to a boil') || text.includes('boil')) return 5;
+  if (text.includes('simmer')) return 15;
+  if (text.includes('bake') || text.includes('roast')) return 30;
+  if (text.includes('sauté') || text.includes('fry')) return 8;
+  if (text.includes('marinate')) return 30;
+  if (text.includes('rest') || text.includes('cool')) return 10;
+  if (text.includes('preheat')) return 10;
+  
+  return undefined;
+}
 import HeaderSection from './HeaderSection';
 import IngredientPanel from './IngredientPanel';
 import StepStack from './StepStack';
@@ -73,7 +119,7 @@ function EnhancedRecipeCard({
         id: `step-${index}`,
         title: `Step ${index + 1}`,
         description: instruction,
-        duration: index === 0 ? 5 : index === recipe.instructions.length - 1 ? 10 : 8 // Estimate durations
+        duration: extractDuration(instruction)
       })),
       meta: {
         title: recipe.title,
@@ -303,20 +349,7 @@ function EnhancedRecipeCard({
   );
 }
 
-// Helper function to extract duration from instruction text
-function extractDuration(instruction: string): number | undefined {
-  const timePattern = /(\d+)\s*(?:minute|min|hour|hr)s?/i;
-  const match = instruction.match(timePattern);
-  if (match) {
-    const value = parseInt(match[1]);
-    const unit = match[0].toLowerCase();
-    if (unit.includes('hour') || unit.includes('hr')) {
-      return value * 60; // Convert hours to minutes
-    }
-    return value;
-  }
-  return undefined;
-}
+
 
 // Export enhanced version as both named and default export
 export { EnhancedRecipeCard };
