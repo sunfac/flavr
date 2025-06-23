@@ -1458,6 +1458,224 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
     }
   });
 
+  // Enhanced Streaming Chat with Conversational Memory
+  app.post("/api/chat/stream", async (req, res) => {
+    try {
+      const { message, currentRecipe, conversationHistory = [] } = req.body;
+      const userId = req.session?.userId;
+
+      // Set up Server-Sent Events for streaming
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Cache-Control'
+      });
+
+      // Get full chat history for enhanced conversational memory
+      const fullChatHistory = await storage.getChatHistory(userId, 50);
+      
+      // Helper function to estimate token count (rough approximation)
+      const estimateTokens = (text: string): number => {
+        return Math.ceil(text.length / 4);
+      };
+
+      // Helper function to summarize old conversations when approaching context limit
+      const summarizeOldHistory = async (history: any[]): Promise<string> => {
+        if (history.length === 0) return "";
+        
+        const oldMessages = history.slice(0, Math.floor(history.length * 0.7));
+        const messagesText = oldMessages.map(msg => 
+          `${msg.userId ? 'User' : 'Assistant'}: ${msg.message || msg.response}`
+        ).join('\n');
+        
+        try {
+          const summaryResponse = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              {
+                role: "system",
+                content: "Summarize this conversation history into a concise overview that preserves key cooking topics, recipe discussions, preferences, and important culinary context. Focus on what the user likes, dislikes, and any specific cooking requirements mentioned."
+              },
+              {
+                role: "user", 
+                content: messagesText
+              }
+            ],
+            max_tokens: 200,
+            temperature: 0.3
+          });
+          
+          return summaryResponse.choices[0]?.message?.content || "Previous conversation about cooking and recipes.";
+        } catch (error) {
+          console.error('Error summarizing history:', error);
+          return "Previous conversation about cooking and recipes.";
+        }
+      };
+
+      // Build conversation history with memory management
+      let conversationMessages: Array<{role: "system" | "user" | "assistant", content: string}> = [];
+      let totalTokens = 0;
+      const maxTokens = 3000; // Reserve space for new message and response
+      
+      // Add recent history first, working backwards
+      for (let i = fullChatHistory.length - 1; i >= 0; i--) {
+        const msg = fullChatHistory[i];
+        const content = msg.message || msg.response;
+        const tokens = estimateTokens(content);
+        
+        if (totalTokens + tokens > maxTokens && conversationMessages.length > 0) {
+          // If adding this message would exceed limit, summarize older messages
+          const summary = await summarizeOldHistory(fullChatHistory.slice(0, i + 1));
+          if (summary) {
+            conversationMessages.unshift({
+              role: "system",
+              content: `Previous conversation summary: ${summary}`
+            });
+          }
+          break;
+        }
+        
+        conversationMessages.unshift({
+          role: msg.userId ? "user" : "assistant",
+          content: content
+        });
+        totalTokens += tokens;
+      }
+
+      // Build system prompt with current recipe context and function calling
+      const systemPrompt = `You are Zest, Flavr's intelligent cooking assistant. You help users with cooking questions, recipe modifications, and culinary guidance.
+
+${currentRecipe ? `Current recipe context: "${currentRecipe.title}" (serves ${currentRecipe.servings})
+Ingredients: ${currentRecipe.ingredients?.join(', ')}
+Instructions: ${currentRecipe.instructions?.join(' ')}
+
+` : ''}When the user wants to modify the current recipe, create new recipes, or make any cooking-related changes, you must call the set_recipe function with complete recipe data.
+
+Be conversational, helpful, and maintain context from our conversation history. Reference what we've discussed before when relevant.`;
+
+      // Prepare messages for OpenAI with full conversation history
+      const messages: Array<{role: "system" | "user" | "assistant", content: string}> = [
+        { role: "system", content: systemPrompt },
+        ...conversationMessages,
+        { role: "user", content: message }
+      ];
+
+      // Create streaming completion with function calling
+      const stream = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: messages as any,
+        functions: [
+          {
+            name: "set_recipe",
+            description: "Set or update the current recipe with complete recipe data when user requests modifications or creates new recipes",
+            parameters: {
+              type: "object",
+              properties: {
+                title: { type: "string", description: "Recipe title" },
+                servings: { type: "integer", description: "Number of servings", default: 4 },
+                cookTime: { type: "integer", description: "Cooking time in minutes", default: 30 },
+                difficulty: { 
+                  type: "string", 
+                  enum: ["Easy", "Medium", "Hard"], 
+                  description: "Recipe difficulty level",
+                  default: "Medium"
+                },
+                ingredients: { 
+                  type: "array", 
+                  items: { type: "string" },
+                  description: "Complete list of ingredients with measurements"
+                },
+                instructions: {
+                  type: "array",
+                  items: { type: "string" },
+                  description: "Step-by-step cooking instructions"
+                }
+              },
+              required: ["title", "ingredients", "instructions"]
+            }
+          }
+        ],
+        function_call: "auto",
+        stream: true,
+        temperature: 0.7,
+        max_tokens: 1000
+      });
+
+      let fullResponse = "";
+      let functionCallData: any = null;
+      let functionName = "";
+      let functionArgs = "";
+
+      // Stream the response
+      for await (const chunk of stream) {
+        const delta = chunk.choices[0]?.delta;
+        
+        if (delta?.content) {
+          // Stream text content
+          fullResponse += delta.content;
+          res.write(`data: ${JSON.stringify({ type: 'content', content: delta.content })}\n\n`);
+        }
+        
+        if (delta?.function_call) {
+          // Handle function call streaming
+          if (delta.function_call.name) {
+            functionName = delta.function_call.name;
+          }
+          if (delta.function_call.arguments) {
+            functionArgs += delta.function_call.arguments;
+          }
+        }
+        
+        // Check if function call is complete
+        if (chunk.choices[0]?.finish_reason === 'function_call') {
+          try {
+            functionCallData = JSON.parse(functionArgs);
+            
+            // Send recipe update event immediately for live refresh
+            res.write(`data: ${JSON.stringify({ 
+              type: 'recipeUpdate', 
+              recipe: {
+                title: functionCallData.title,
+                servings: functionCallData.servings || currentRecipe?.servings || 4,
+                cookTime: functionCallData.cookTime || currentRecipe?.cookTime || 30,
+                difficulty: functionCallData.difficulty || currentRecipe?.difficulty || "Medium",
+                ingredients: functionCallData.ingredients,
+                instructions: functionCallData.instructions
+              }
+            })}\n\n`);
+            
+            // Generate a brief response about the recipe update
+            const updateResponse = `I've updated the recipe for "${functionCallData.title}"${functionCallData.servings ? ` (serves ${functionCallData.servings})` : ''}. The recipe card should now show the changes!`;
+            fullResponse += updateResponse;
+            res.write(`data: ${JSON.stringify({ type: 'content', content: updateResponse })}\n\n`);
+            
+          } catch (error) {
+            console.error('Error parsing function call arguments:', error);
+            res.write(`data: ${JSON.stringify({ type: 'content', content: "I've made some changes to the recipe. Please check the updated recipe card!" })}\n\n`);
+          }
+        }
+      }
+
+      // End the stream
+      res.write(`data: ${JSON.stringify({ type: 'done' })}\n\n`);
+      res.end();
+
+      // Save the conversation to database for memory retention
+      await storage.createChatMessage({
+        userId,
+        message,
+        response: fullResponse,
+      });
+
+    } catch (error: any) {
+      console.error('Streaming chat error:', error);
+      res.write(`data: ${JSON.stringify({ type: 'error', message: error.message })}\n\n`);
+      res.end();
+    }
+  });
+
   // OpenAI Real-time Voice Chat endpoint
   app.post("/api/voice/realtime", async (req, res) => {
     try {
@@ -1490,432 +1708,6 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
     }
   });
 
-  const httpServer = createServer(app);
-  return httpServer;
-}
-- Cook Time: ${currentRecipe.cookTime} minutes
-- Difficulty: ${currentRecipe.difficulty}
-- Current ingredients: ${JSON.stringify(currentRecipe.ingredients)}
-- Current instructions: ${JSON.stringify(currentRecipe.instructions)}
-
-COMPREHENSIVE MODIFICATION HANDLING:
-
-1. SERVING SCALING: Calculate exact proportions for all ingredients
-   - Example: 1.6 kg for 8 people → 0.8 kg for 4 people
-
-2. COOKING METHOD CHANGES: Replace techniques completely
-   - "avoid frying" or "roast instead" → Change frying to roasting with adjusted times/temps
-   - Update cooking times, temperatures, and techniques accordingly
-
-3. SIDE DISH ADDITIONS: Add complete side dish recipes
-   - "add a side dish" → Include ingredients and steps for appropriate sides
-   - Integrate side dish preparation into the main cooking timeline
-
-4. INGREDIENT SUBSTITUTIONS: Replace ingredients intelligently
-   - Maintain flavor profiles and cooking properties
-   - Adjust quantities and techniques as needed
-
-5. DIETARY MODIFICATIONS: Transform recipes for dietary needs
-   - Vegan/vegetarian: Replace animal products with plant alternatives
-   - Gluten-free: Substitute wheat products appropriately
-   - Low-carb/keto: Remove or replace high-carb ingredients
-
-6. FLAVOR ADJUSTMENTS: Modify spice levels, herbs, seasonings
-   - Add new ingredients for flavor enhancement
-   - Adjust existing quantities for taste preferences
-
-7. TEXTURE/DONENESS CHANGES: Modify cooking techniques for desired results
-   - Crispy, tender, well-done, etc. → Adjust methods and times
-
-CRITICAL RULES:
-- ALWAYS call updateRecipe function for ANY modification request - no exceptions
-- When user asks for side dishes, ADD complete side dish ingredients and cooking steps
-- When user wants cooking method changes, REPLACE the cooking technique entirely
-- When user requests additions, INCLUDE them in the updated recipe
-- When user asks to "substitute ingredients" without specifying which ones, ask for clarification FIRST
-- For vague requests like "make it spicier", ADD specific spices and increase quantities appropriately
-- Provide complete, realistic ingredients and instructions - NO placeholders
-- Think creatively about user intent and implement comprehensive solutions immediately
-- Adjust cooking times, temperatures, and techniques based on changes made
-- Don't just suggest - IMPLEMENT the changes by calling updateRecipe function
-- Keep conversational responses brief and friendly while executing the modification`
-          },
-          {
-            role: "user" as const,
-            content: message
-          }
-        ];
-
-        // Add chat history for context
-        const conversationHistory = chatHistory.slice(-3).map(msg => ({
-          role: msg.userId ? "user" as const : "assistant" as const,
-          content: msg.message
-        }));
-
-        const allMessages = [...conversationHistory, ...modificationMessages];
-
-        const response = await openai.chat.completions.create({
-          model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-          messages: allMessages,
-          functions: [
-            {
-              name: "updateRecipe",
-              description: "Update the current recipe with ANY modifications requested by the user, including ingredient changes, cooking method alterations, side dish additions, dietary modifications, serving adjustments, or any other culinary improvements",
-              parameters: {
-                type: "object",
-                properties: {
-                  title: {
-                    type: "string",
-                    description: "Updated recipe title reflecting any changes made"
-                  },
-                  servings: {
-                    type: "number",
-                    description: "Number of servings/people the recipe serves"
-                  },
-                  cookTime: {
-                    type: "number",
-                    description: "Updated cooking time in minutes, adjusted for any technique changes"
-                  },
-                  difficulty: {
-                    type: "string",
-                    enum: ["Easy", "Medium", "Hard"],
-                    description: "Recipe difficulty level, may change based on modifications"
-                  },
-                  ingredients: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Complete updated ingredients list including: scaled quantities for serving changes, new ingredients for additions (side dishes, spices, etc.), substituted ingredients for dietary needs, and all modifications requested. Always provide actual measurements and ingredient names, never use placeholders."
-                  },
-                  instructions: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Complete updated cooking instructions reflecting all changes: cooking method alterations (roasting instead of frying), timing adjustments, new preparation steps for side dishes, dietary modifications, technique changes, and any other requested modifications. Provide detailed, actionable steps."
-                  },
-                  spiceLevel: {
-                    type: "string",
-                    enum: ["Mild", "Medium", "Hot", "Very Hot"],
-                    description: "Spice level if modified"
-                  },
-                  cuisine: {
-                    type: "string",
-                    description: "Cuisine type if it changes due to modifications"
-                  },
-                  tags: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Recipe tags reflecting dietary modifications (vegan, gluten-free, keto, etc.) or cooking methods (roasted, grilled, etc.)"
-                  }
-                },
-                required: ["ingredients", "instructions"]
-              }
-            }
-          ],
-          function_call: { name: "updateRecipe" },
-          max_tokens: 1000,
-          temperature: 0.7,
-        });
-
-        botResponse = response.choices[0]?.message?.content || "";
-        
-        // Handle function calls from OpenAI
-        if (response.choices[0]?.message?.function_call) {
-          const functionCall = response.choices[0].message.function_call;
-          
-          if (functionCall.name === "updateRecipe") {
-            try {
-              console.log('Function call arguments received:', functionCall.arguments);
-              const functionArgs = JSON.parse(functionCall.arguments);
-              
-              // Validate function arguments have actual data, not placeholders
-              const hasValidIngredients = functionArgs.ingredients && 
-                Array.isArray(functionArgs.ingredients) && 
-                functionArgs.ingredients.length > 0 &&
-                !functionArgs.ingredients.some((ing: string) => ing.includes('array') || ing.includes('placeholder') || ing.includes('[') || ing.includes(']'));
-              
-              const hasValidInstructions = functionArgs.instructions && 
-                Array.isArray(functionArgs.instructions) && 
-                functionArgs.instructions.length > 0 &&
-                !functionArgs.instructions.some((inst: string) => inst.includes('array') || inst.includes('placeholder') || inst.includes('[') || inst.includes(']'));
-              
-              console.log('Validation results:', { hasValidIngredients, hasValidInstructions });
-              console.log('Ingredients sample:', functionArgs.ingredients?.slice(0, 2));
-              console.log('Instructions sample:', functionArgs.instructions?.slice(0, 2));
-              
-              if (!hasValidIngredients || !hasValidInstructions) {
-                console.log('Function call contains placeholder data, rejecting update');
-                botResponse = "I understand you want to modify the recipe, but I need to properly calculate the scaled quantities. Let me try a different approach.";
-              } else {
-                // Update the recipe with new data
-                updatedRecipe = {
-                  ...currentRecipe,
-                  title: functionArgs.title || currentRecipe.title,
-                  servings: functionArgs.servings || currentRecipe.servings,
-                  cookTime: functionArgs.cookTime || currentRecipe.cookTime,
-                  difficulty: functionArgs.difficulty || currentRecipe.difficulty,
-                  ingredients: functionArgs.ingredients,
-                  instructions: functionArgs.instructions,
-                  spiceLevel: functionArgs.spiceLevel || currentRecipe.spiceLevel
-                };
-                
-                // Save updated recipe to database
-                await storage.updateRecipe(currentRecipe.id, updatedRecipe);
-                
-                // Create function call for frontend live update
-                functionCalls = [{
-                  name: 'updateRecipe',
-                  arguments: {
-                    mode: 'patch',
-                    data: {
-                      id: currentRecipe.id,
-                      servings: updatedRecipe.servings,
-                      meta: {
-                        title: updatedRecipe.title,
-                        description: updatedRecipe.description || currentRecipe.description,
-                        cookTime: updatedRecipe.cookTime,
-                        difficulty: updatedRecipe.difficulty,
-                        cuisine: updatedRecipe.cuisine || currentRecipe.cuisine,
-                        spiceLevel: updatedRecipe.spiceLevel
-                      },
-                      ingredients: updatedRecipe.ingredients.map((ing: string, index: number) => ({
-                        id: `ingredient-${index}`,
-                        text: ing,
-                        checked: false
-                      })),
-                      steps: updatedRecipe.instructions.map((instruction: string, index: number) => ({
-                        id: `step-${index}`,
-                        title: `Step ${index + 1}`,
-                        description: instruction,
-                        duration: 0
-                      }))
-                    }
-                  }
-                }];
-                
-                // Force the response to include update confirmation
-                console.log('Recipe update successful, sending confirmation');
-                botResponse = botResponse || "Perfect! I've updated the recipe for you. You should see the changes right now.";
-              }
-              
-            } catch (error) {
-              console.error('Error processing function call:', error);
-              botResponse = "I understand what you want to change, but had trouble updating the recipe. Could you try rephrasing your request?";
-            }
-          }
-        } else {
-          // No function call was made, use the response content
-          if (!botResponse) {
-            botResponse = "I understand your request, but I'm not sure how to modify the recipe. Could you be more specific about what you'd like to change?";
-          }
-        }
-      } else {
-        // Regular chat response
-        const regularChatPrompt = `You are Zest, Flavr's friendly AI cooking assistant. Maintain natural conversation flow!
-
-${chatHistory.length > 0 ? `Recent conversation:\n${chatHistory.slice(-3).map((msg: any) => `User: ${msg.message}\nYou: ${msg.response}`).join('\n')}\n` : ''}
-
-${currentRecipe ? `Current recipe context: "${currentRecipe.title}" (serves ${currentRecipe.servings})\n` : ''}
-
-Be conversational like ChatGPT. Reference what you've discussed before. Answer cooking questions, give tips, or chat naturally about food. Keep responses friendly and maintain conversation flow.`;
-
-        // Add conversation history for context retention
-        const conversationHistory = chatHistory.slice(-5).map((msg: any) => ({
-          role: (msg.userId ? "user" : "assistant") as "user" | "assistant",
-          content: msg.message || msg.response
-        }));
-
-        const allMessages: Array<{role: "system" | "user" | "assistant", content: string}> = [
-          { role: "system", content: regularChatPrompt },
-          ...conversationHistory,
-          { role: "user", content: message }
-        ];
-
-        const response = await openai.chat.completions.create({
-          model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-          messages: allMessages as any,
-          max_tokens: 300,
-          temperature: 0.7,
-        });
-
-        botResponse = response.choices[0]?.message?.content || "I'm sorry, I couldn't process that request. Please try again.";
-      }
-      
-      // Save chat message
-      await storage.createChatMessage({
-        userId,
-        message,
-        response: botResponse,
-      });
-
-      res.json({ 
-        response: botResponse,
-        updatedRecipe,
-        functionCalls: functionCalls.length > 0 ? functionCalls : undefined
-      });
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to process chat: " + error.message });
-    }
-  });
-  app.get("/api/chat/history", async (req, res) => {
-    try {
-      const userId = req.session?.userId;
-      if (!userId) {
-        return res.json({ history: [] }); // Return empty history for non-authenticated users
-      }
-      const history = await storage.getChatHistory(userId, 10);
-      res.json({ history });
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch chat history: " + error.message });
-    }
-  });
-
-  // OpenAI Text-to-Speech endpoint for natural voice
-  app.post("/api/chat/tts", async (req, res) => {
-    try {
-      const { text, voice = 'nova' } = req.body;
-      
-      if (!text) {
-        return res.status(400).json({ message: "Text is required" });
-      }
-
-      const response = await openai.audio.speech.create({
-        model: "tts-1",
-        voice: voice,
-        input: text,
-        response_format: "mp3"
-      });
-
-      const buffer = Buffer.from(await response.arrayBuffer());
-      
-      res.set({
-        'Content-Type': 'audio/mpeg',
-        'Content-Length': buffer.length
-      });
-      
-      res.send(buffer);
-      
-    } catch (error: any) {
-      console.error("TTS error:", error);
-      res.status(500).json({ message: "Failed to generate speech: " + error.message });
-    }
-  });
-
-  // Recipe deletion route
-  app.delete("/api/recipes/:id", requireAuth, async (req, res) => {
-    try {
-      const userId = req.session?.userId;
-      const recipeId = parseInt(req.params.id);
-      
-      if (!userId || !recipeId) {
-        return res.status(400).json({ message: "Invalid request" });
-      }
-      
-      await storage.deleteRecipe(recipeId, userId);
-      res.json({ message: "Recipe deleted successfully" });
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete recipe: " + error.message });
-    }
-  });
-
-  // Recipe sharing route
-  app.get("/api/recipes/shared/:shareId", async (req, res) => {
-    try {
-      const shareId = req.params.shareId;
-      const recipe = await storage.getSharedRecipe(shareId);
-      
-      if (!recipe) {
-        return res.status(404).json({ message: "Recipe not found" });
-      }
-      
-      res.json(recipe);
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch shared recipe: " + error.message });
-    }
-  });
-
-  // Image generation route
-  app.post("/api/generate-image", requireAuth, async (req, res) => {
-    try {
-      const { prompt } = req.body;
-      const userId = req.session?.userId;
-      
-      if (!prompt) {
-        return res.status(400).json({ message: "Prompt is required" });
-      }
-      
-      // Generate image using Replicate
-      const output = await replicate.run(
-        "stability-ai/stable-diffusion:ac732df83cea7fff18b8472768c88ad041fa750ff7682a21affe81863cbe77e4",
-        {
-          input: {
-            prompt,
-            width: 1024,
-            height: 1024,
-            num_outputs: 1,
-            guidance_scale: 7.5,
-            num_inference_steps: 50
-          }
-        }
-      );
-      
-      const imageUrl = Array.isArray(output) ? output[0] : output;
-      
-      // Update user's image usage
-      if (userId) {
-        await storage.updateUserUsage(userId, 0, 1);
-      }
-      
-      res.json({ imageUrl });
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to generate image: " + error.message });
-    }
-  });
-
-  // Subscription management routes
-  app.post("/api/subscription/create", requireAuth, async (req, res) => {
-    try {
-      const { tier } = req.body;
-      const userId = req.session?.userId;
-      
-      if (!userId) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-      
-      // Create subscription logic here
-      res.json({ message: "Subscription created successfully" });
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to create subscription: " + error.message });
-    }
-  });
-  // Analytics and metrics routes
-  app.get("/api/analytics/dashboard", requireAuth, async (req, res) => {
-    try {
-      const userId = req.session?.userId;
-      if (!userId) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-      
-      // Get user analytics data
-      const analytics = {
-        recipesGenerated: await storage.getUserRecipeCount(userId),
-        favoriteCount: await storage.getUserFavoriteCount(userId),
-        currentMonth: new Date().getMonth() + 1,
-        usageStats: await storage.getUserUsageStats(userId)
-      };
-      
-      res.json(analytics);
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch analytics: " + error.message });
-    }
-  });
-
-  // Server status and health check
-  app.get("/api/health", (req, res) => {
-    res.json({ 
-      status: "healthy", 
-      timestamp: new Date().toISOString(),
-      version: "1.0.0"
-    });
-  });
   const httpServer = createServer(app);
   return httpServer;
 }
