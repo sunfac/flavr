@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -305,9 +305,8 @@ export default function ChatBot({
   // Auto-scroll to latest message with debouncing
   useEffect(() => {
     const scrollToBottom = () => {
-      const scrollElement = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollElement) {
-        scrollElement.scrollTop = scrollElement.scrollHeight;
+      if (scrollAreaRef.current) {
+        scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
       }
     };
 
@@ -458,7 +457,10 @@ export default function ChatBot({
           </Button>
         </CardHeader>
         
-        <ScrollArea className="flex-1 p-2 sm:p-4 min-h-0 max-h-96 sm:max-h-96 overflow-y-auto" ref={scrollAreaRef}>
+        <div 
+          className="flex-1 p-2 sm:p-4 min-h-0 max-h-96 sm:max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800" 
+          ref={scrollAreaRef}
+        >
           <div className="space-y-3 sm:space-y-4">
             {localMessages.map((msg) => (
               <div key={msg.id} className={`flex space-x-2 sm:space-x-3 ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
@@ -496,7 +498,7 @@ export default function ChatBot({
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Recipe Context Summary */}
         {currentRecipe && (
