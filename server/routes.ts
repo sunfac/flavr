@@ -1528,21 +1528,57 @@ Keep it SHORT and encouraging. The recipe card will show the changes!`;
           }));
           
           console.log('🔧 Function calls detected:', functionCalls);
+          
+          // Execute function calls immediately
+          for (const call of functionCalls) {
+            if (call.name === 'updateRecipe' && currentRecipe) {
+              const { mode, data } = call.arguments;
+              console.log('🔄 Executing updateRecipe function:', { mode, recipeId: currentRecipe.id });
+              
+              try {
+                // Transform the function call data to match the recipe structure
+                const updatedRecipeData = {
+                  ...currentRecipe,
+                  title: data.meta?.title || currentRecipe.title,
+                  description: data.meta?.description || currentRecipe.description,
+                  cookTime: data.meta?.cookTime || currentRecipe.cookTime,
+                  difficulty: data.meta?.difficulty || currentRecipe.difficulty,
+                  cuisine: data.meta?.cuisine || currentRecipe.cuisine,
+                  servings: data.meta?.servings || currentRecipe.servings,
+                  ingredients: data.ingredients?.map((ing: any) => ing.text || ing) || currentRecipe.ingredients,
+                  instructions: data.steps?.map((step: any, index: number) => 
+                    `Step ${index + 1}: ${step.description || step.title || step}`
+                  ) || currentRecipe.instructions
+                };
+                
+                // Update the recipe in storage
+                updatedRecipe = await storage.updateRecipe(currentRecipe.id, updatedRecipeData);
+                console.log('✅ Recipe updated successfully:', updatedRecipe.title);
+                
+              } catch (error) {
+                console.error('❌ Failed to execute updateRecipe function:', error);
+              }
+            }
+          }
         }
 
         // Log chatbot interaction for cost tracking
-        await logGPTInteraction(
-          'chatbot',
-          { userMessage: req.body.message, currentRecipe: currentRecipe?.title },
-          modificationPrompt,
-          fullResponse,
-          {},
-          {},
-          inputTokens,
-          outputTokens,
-          userId,
-          null // no image for chatbot
-        );
+        try {
+          await logGPTInteraction(
+            parseInt(userId) || 0,
+            'chatbot',
+            { userMessage: req.body.message, currentRecipe: currentRecipe?.title },
+            modificationPrompt,
+            fullResponse,
+            {},
+            {},
+            undefined, // no image prompt
+            false, // no image generated
+            undefined // no image URL
+          );
+        } catch (logError) {
+          console.log('Failed to log chatbot interaction:', logError);
+        }
         
         try {
           // Try to parse JSON response for recipe updates

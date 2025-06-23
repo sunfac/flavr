@@ -32,6 +32,7 @@ export interface IStorage {
   getRecipe(id: number): Promise<Recipe | undefined>;
   getRecipeByShareId(shareId: string): Promise<Recipe | undefined>;
   updateRecipeSharing(id: number, isShared: boolean, shareId?: string): Promise<Recipe>;
+  updateRecipe(id: number, updates: Partial<Recipe>): Promise<Recipe>;
   getUserRecipeHistory(userId: number, limit?: number): Promise<Recipe[]>;
   
   // Chat operations
@@ -180,6 +181,14 @@ export class DatabaseStorage implements IStorage {
   async updateRecipeSharing(id: number, isShared: boolean, shareId?: string): Promise<Recipe> {
     const [recipe] = await db.update(recipes)
       .set({ isShared, shareId })
+      .where(eq(recipes.id, id))
+      .returning();
+    return recipe;
+  }
+
+  async updateRecipe(id: number, updates: Partial<Recipe>): Promise<Recipe> {
+    const [recipe] = await db.update(recipes)
+      .set(updates)
       .where(eq(recipes.id, id))
       .returning();
     return recipe;
