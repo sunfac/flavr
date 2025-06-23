@@ -1202,6 +1202,10 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
     try {
       const { message, currentRecipe, mode, enableFunctionCalling } = req.body;
       const userId = req.session?.userId;
+      
+      let updatedRecipe = null;
+      let botResponse = "";
+      let functionCalls: any[] = [];
 
       // Define function tools for OpenAI function calling
       const tools = enableFunctionCalling ? [{
@@ -1463,10 +1467,6 @@ CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`
         /^add\s(more|some)/.test(message.toLowerCase())
       );
 
-      let updatedRecipe = null;
-      let botResponse = "";
-      let functionCalls: any[] = [];
-
       if (shouldUpdateRecipe) {
         // Recipe modification prompt with casual updates
         const modificationPrompt = `You are Zest, Flavr's casual cooking assistant. Keep responses SHORT and conversational!
@@ -1575,10 +1575,10 @@ Keep it super short and casual!`;
             console.log('Failed to generate synthetic function call:', error);
           }
         }
-          
-          // Execute function calls immediately
-          for (const call of functionCalls) {
-            if (call.name === 'updateRecipe' && currentRecipe) {
+        
+        // Execute function calls immediately
+        for (const call of functionCalls) {
+          if (call.name === 'updateRecipe' && currentRecipe) {
               const { mode, data } = call.arguments;
               console.log('🔄 Executing updateRecipe function:', { mode, recipeId: currentRecipe.id });
               
@@ -1645,8 +1645,8 @@ Keep it super short and casual!`;
               fullResponse,
               {},
               {},
-              undefined, // no image prompt
-              false, // no image generated
+              inputTokens,
+              outputTokens,
               undefined // no image URL
             );
           } catch (logError) {
@@ -1711,7 +1711,7 @@ Keep it super short and casual!`;
               if (jsonStart > 0) {
                 let casualResponse = fullResponse.substring(0, jsonStart).trim();
                 // Limit to first 2 sentences to prevent verbose responses
-                const sentences = casualResponse.split(/[.!?]+/).filter(s => s.trim().length > 0);
+                const sentences = casualResponse.split(/[.!?]+/).filter((s: string) => s.trim().length > 0);
                 botResponse = sentences.slice(0, 2).join('. ').trim() + (sentences.length > 2 ? '.' : '');
               } else {
                 botResponse = "Perfect! Updated the recipe for you!";
@@ -1727,9 +1727,10 @@ Keep it super short and casual!`;
         }
       } else {
         // Regular chat response with Zest personality and conversation memory
+        const chatHistory = await storage.getChatHistory(userId, 10);
         const regularChatPrompt = `You are Zest, Flavr's friendly AI cooking assistant. Maintain natural conversation flow!
 
-${chatHistory.length > 0 ? `Recent conversation:\n${chatHistory.slice(-3).map(msg => `User: ${msg.message}\nYou: ${msg.response}`).join('\n')}\n` : ''}
+${chatHistory.length > 0 ? `Recent conversation:\n${chatHistory.slice(-3).map((msg: any) => `User: ${msg.message}\nYou: ${msg.response}`).join('\n')}\n` : ''}
 
 ${currentRecipe ? `Current recipe context: "${currentRecipe.title}" (serves ${currentRecipe.servings})\n` : ''}
 
@@ -1756,7 +1757,7 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
         // Log regular chatbot interaction for cost tracking
         try {
           await logGPTInteraction(
-            parseInt(userId?.toString() || '0'),
+            userId ? parseInt(userId.toString()) : 0,
             'chat',
             { userMessage: message },
             regularChatPrompt,
@@ -1798,6 +1799,7 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
     } catch (error: any) {
       res.status(500).json({ message: "Failed to process chat: " + error.message });
     }
+  });
   });
 
   app.get("/api/chat/history", async (req, res) => {
