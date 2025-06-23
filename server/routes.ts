@@ -1562,22 +1562,24 @@ Keep it SHORT and encouraging. The recipe card will show the changes!`;
           }
         }
 
-        // Log chatbot interaction for cost tracking
-        try {
-          await logGPTInteraction(
-            parseInt(userId) || 0,
-            'chatbot',
-            { userMessage: req.body.message, currentRecipe: currentRecipe?.title },
-            modificationPrompt,
-            fullResponse,
-            {},
-            {},
-            undefined, // no image prompt
-            false, // no image generated
-            undefined // no image URL
-          );
-        } catch (logError) {
-          console.log('Failed to log chatbot interaction:', logError);
+        // Log chatbot interaction for cost tracking (only for authenticated users)
+        if (userId && parseInt(userId) > 0) {
+          try {
+            await logGPTInteraction(
+              parseInt(userId),
+              'chatbot',
+              { userMessage: req.body.message, currentRecipe: currentRecipe?.title },
+              modificationPrompt,
+              fullResponse,
+              {},
+              {},
+              undefined, // no image prompt
+              false, // no image generated
+              undefined // no image URL
+            );
+          } catch (logError) {
+            console.log('Failed to log chatbot interaction:', logError);
+          }
         }
         
         try {
