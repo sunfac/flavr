@@ -1338,7 +1338,7 @@ CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`
       console.log(message);
       console.log("=".repeat(80));
 
-      // Comprehensive recipe modification detection for clear user directives
+      // Comprehensive recipe modification detection for natural language requests
       const shouldUpdateRecipe = currentRecipe && (
         // Direct substitutions
         message.toLowerCase().includes('substitute') ||
@@ -1346,6 +1346,27 @@ CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`
         message.toLowerCase().includes('use instead') ||
         message.toLowerCase().includes('swap') ||
         message.toLowerCase().includes('change to') ||
+        message.toLowerCase().includes('switch') ||
+        
+        // Flavor modifications
+        message.toLowerCase().includes('spicier') ||
+        message.toLowerCase().includes('spicy') ||
+        message.toLowerCase().includes('more heat') ||
+        message.toLowerCase().includes('kick') ||
+        message.toLowerCase().includes('mild') ||
+        message.toLowerCase().includes('less spicy') ||
+        message.toLowerCase().includes('sweet') ||
+        message.toLowerCase().includes('salty') ||
+        message.toLowerCase().includes('umami') ||
+        
+        // Dietary changes
+        message.toLowerCase().includes('vegetarian') ||
+        message.toLowerCase().includes('vegan') ||
+        message.toLowerCase().includes('dairy free') ||
+        message.toLowerCase().includes('gluten free') ||
+        message.toLowerCase().includes('keto') ||
+        message.toLowerCase().includes('low carb') ||
+        message.toLowerCase().includes('no meat') ||
         
         // Protein changes
         message.toLowerCase().includes('use chicken') ||

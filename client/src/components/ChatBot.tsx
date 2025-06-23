@@ -87,12 +87,43 @@ export default function ChatBot({
   // Extract history from response
   const chatHistory = Array.isArray(historyData) ? historyData : (historyData as any)?.history || [];
 
+  // Get current recipe data from store or props with full context
+  const getCurrentRecipeContext = () => {
+    const activeRecipe = currentRecipe || {
+      title: recipeStore.meta.title,
+      description: recipeStore.meta.description,
+      cookTime: recipeStore.meta.cookTime,
+      servings: recipeStore.servings,
+      difficulty: recipeStore.meta.difficulty,
+      cuisine: recipeStore.meta.cuisine,
+      ingredients: recipeStore.ingredients.map(ing => ({
+        id: ing.id,
+        name: ing.name,
+        amount: ing.amount,
+        unit: ing.unit,
+        checked: ing.checked
+      })),
+      instructions: recipeStore.steps.map(step => step.description),
+      tips: recipeStore.meta.tips || "",
+      image: recipeStore.meta.image
+    };
+
+    return {
+      recipe: activeRecipe,
+      mode: detectedMode,
+      currentStep: recipeStore.currentStep,
+      completedSteps: recipeStore.completedSteps,
+      activeTimers: Object.keys(timerStore.timers).filter(id => timerStore.timers[id].isActive)
+    };
+  };
+
   // Send chat message with function calling support
   const sendMessageMutation = useMutation({
     mutationFn: (data: { message: string; currentRecipe?: Recipe; mode?: string }) =>
       apiRequest("POST", "/api/chat", {
         ...data,
-        currentRecipe: data.currentRecipe || recipeStore,
+        currentRecipe: getCurrentRecipeContext().recipe,
+        contextData: getCurrentRecipeContext(),
         enableFunctionCalling: true
       }),
     onSuccess: async (response) => {
@@ -132,7 +163,7 @@ export default function ChatBot({
                 if (data.steps) {
                   data.steps.forEach((step: any) => {
                     if (step.duration && timerStore.timers[step.id]) {
-                      timerStore.rescaleTimer(step.id, step.duration);
+                      timerStore.resetTimer(step.id);
                     }
                   });
                 }
@@ -342,7 +373,7 @@ export default function ChatBot({
           </Button>
         </CardHeader>
         
-        <ScrollArea className="flex-1 p-2 sm:p-4 min-h-0 max-h-48 sm:max-h-64 overflow-y-auto" ref={scrollAreaRef}>
+        <ScrollArea className="flex-1 p-2 sm:p-4 min-h-0 max-h-72 sm:max-h-80 overflow-y-auto" ref={scrollAreaRef}>
           <div className="space-y-3 sm:space-y-4">
             {localMessages.map((msg) => (
               <div key={msg.id} className={`flex space-x-2 sm:space-x-3 ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
@@ -386,18 +417,17 @@ export default function ChatBot({
         {currentRecipe && (
           <div className="px-3 sm:px-4 py-3 border-t border-white/10 flex-shrink-0">
             <p className="text-xs font-medium text-white/80 mb-3">Quick suggestions:</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {suggestionChips.map((chip, index) => (
                 <Button
                   key={index}
                   variant="ghost"
                   size="sm"
-                  className="h-auto p-2 bg-orange-500/10 border border-orange-400/30 text-orange-400 hover:bg-orange-500/20 hover:border-orange-400/50 transition-all duration-200 flex flex-col items-center justify-center space-y-1 text-xs"
+                  className="h-7 px-2 py-1 bg-orange-500/10 border border-orange-400/30 text-orange-400 hover:bg-orange-500/20 hover:border-orange-400/50 transition-all duration-200 flex items-center space-x-1 text-xs rounded-full"
                   onClick={handleSuggestionClick(chip.text)}
                 >
-                  {React.createElement(chip.icon, { className: "w-4 h-4" })}
-                  <span className="text-center leading-tight">{chip.text}</span>
-                  {chip.updatesRecipe && <span className="text-[10px] opacity-60">Updates recipe</span>}
+                  {React.createElement(chip.icon, { className: "w-3 h-3" })}
+                  <span className="text-center leading-tight whitespace-nowrap">{chip.text}</span>
                 </Button>
               ))}
             </div>
