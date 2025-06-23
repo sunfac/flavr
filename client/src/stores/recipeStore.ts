@@ -174,4 +174,9 @@ export const useRecipeStore = create<RecipeStore>()(
 export const recipeActions = {
   replaceRecipe: (payload: RecipeState) => useRecipeStore.getState().replaceRecipe(payload),
   patchRecipe: (payload: DeepPartial<RecipeState>) => useRecipeStore.getState().patchRecipe(payload),
+  updateServings: (servings: number) => useRecipeStore.getState().updateServings(servings),
+  toggleIngredient: (ingredientId: string) => useRecipeStore.getState().toggleIngredient(ingredientId),
+  setCurrentStep: (stepIndex: number) => useRecipeStore.getState().setCurrentStep(stepIndex),
+  markStepComplete: (stepIndex: number) => useRecipeStore.getState().markStepComplete(stepIndex),
+  resetRecipe: () => useRecipeStore.getState().resetRecipe(),
 };

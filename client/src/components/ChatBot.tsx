@@ -182,10 +182,56 @@ export default function ChatBot({
         });
       }
 
-      // Legacy recipe update support (fallback)
-      if (result.updatedRecipe && onRecipeUpdate) {
-        console.log('📝 Legacy recipe update:', result.updatedRecipe);
-        onRecipeUpdate(result.updatedRecipe);
+      // Legacy recipe update support and direct recipe store sync
+      if (result.updatedRecipe) {
+        console.log('📝 Recipe update detected:', result.updatedRecipe);
+        
+        // Update the recipe store directly to sync with live recipe card
+        if (result.updatedRecipe.servings !== recipeStore.servings) {
+          console.log(`🔄 Updating servings: ${recipeStore.servings} → ${result.updatedRecipe.servings}`);
+          recipeActions.updateServings(result.updatedRecipe.servings);
+        }
+        
+        // Update recipe metadata
+        recipeActions.patchRecipe({
+          meta: {
+            title: result.updatedRecipe.title,
+            description: result.updatedRecipe.description,
+            cookTime: result.updatedRecipe.cookTime,
+            difficulty: result.updatedRecipe.difficulty,
+            cuisine: result.updatedRecipe.cuisine
+          }
+        });
+        
+        // Update ingredients if they changed
+        if (result.updatedRecipe.ingredients) {
+          const updatedIngredients = result.updatedRecipe.ingredients.map((ingredient: string, index: number) => ({
+            id: `ingredient-${index}`,
+            text: ingredient,
+            checked: false
+          }));
+          recipeActions.patchRecipe({
+            ingredients: updatedIngredients
+          });
+        }
+        
+        // Update instructions if they changed
+        if (result.updatedRecipe.instructions) {
+          const updatedSteps = result.updatedRecipe.instructions.map((instruction: string, index: number) => ({
+            id: `step-${index}`,
+            title: `Step ${index + 1}`,
+            description: instruction,
+            duration: 0
+          }));
+          recipeActions.patchRecipe({
+            steps: updatedSteps
+          });
+        }
+        
+        // Call legacy callback if provided
+        if (onRecipeUpdate) {
+          onRecipeUpdate(result.updatedRecipe);
+        }
         
         const updateMessage: ChatMessage = {
           id: Date.now() + 1,

@@ -1555,6 +1555,8 @@ Keep it SHORT and encouraging. The recipe card will show the changes!`;
                 updatedRecipe = await storage.updateRecipe(currentRecipe.id, updatedRecipeData);
                 console.log('✅ Recipe updated successfully:', updatedRecipe.title);
                 
+                // Ensure function calls are included in response for frontend sync
+                
               } catch (error) {
                 console.error('❌ Failed to execute updateRecipe function:', error);
               }
