@@ -1309,12 +1309,13 @@ RESPONSE RULES:
 
 CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`;
 
-      // Add conversation history for context
+      // Add conversation history for context with proper conversation flow
       if (chatHistory.length > 0) {
-        systemPrompt += "\nRecent conversation:\n";
-        chatHistory.slice(-4).forEach((msg, index) => {
+        systemPrompt += "\nConversation history (maintain context and flow):\n";
+        chatHistory.slice(-3).forEach((msg, index) => {
           systemPrompt += `User: ${msg.message}\nYou: ${msg.response}\n`;
         });
+        systemPrompt += "\nBe conversational and reference previous messages naturally. Build on what you've already discussed.";
       }
       
       if (mode) {
@@ -1645,11 +1646,13 @@ Keep it super short and casual!`;
         }
       } else {
         // Regular chat response with Zest personality and conversation memory
-        const regularChatPrompt = `You are Zest, Flavr's friendly AI cooking assistant. Chat naturally like ChatGPT would about cooking and food!
+        const regularChatPrompt = `You are Zest, Flavr's friendly AI cooking assistant. Maintain natural conversation flow!
 
-${chatHistory.length > 0 ? `Our conversation so far:\n${chatHistory.slice(-2).map(msg => `User: ${msg.message}\nYou: ${msg.response}`).join('\n')}\n` : ''}
+${chatHistory.length > 0 ? `Recent conversation:\n${chatHistory.slice(-3).map(msg => `User: ${msg.message}\nYou: ${msg.response}`).join('\n')}\n` : ''}
 
-Be conversational, helpful, and enthusiastic about cooking. Answer questions naturally, give cooking tips, or just chat about food. Keep responses friendly and natural.`;
+${currentRecipe ? `Current recipe context: "${currentRecipe.title}" (serves ${currentRecipe.servings})\n` : ''}
+
+Be conversational like ChatGPT. Reference what you've discussed before. Answer cooking questions, give tips, or chat naturally about food. Keep responses friendly and maintain conversation flow.`;
 
         const response = await openai.chat.completions.create({
           model: "gpt-3.5-turbo", // Using GPT-3.5 Turbo for cost efficiency
