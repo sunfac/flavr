@@ -23,41 +23,63 @@ export function useScaledIngredients(
 }
 
 function scaleIngredientText(ingredient: string, scalingFactor: number): string {
-  // Handle common fraction patterns
-  const fractionPatterns = [
-    /(\d+)\/(\d+)/g, // 1/2, 3/4, etc.
-    /(\d+)\s+(\d+)\/(\d+)/g, // 1 1/2, 2 3/4, etc.
-  ];
-
-  // Handle decimal numbers
-  const decimalPattern = /(\d+\.?\d*)/g;
-  
   let scaledText = ingredient;
+  const processedIndices = new Set<number>();
 
-  // Scale fractions first
-  scaledText = scaledText.replace(/(\d+)\s+(\d+)\/(\d+)/g, (match, whole, num, den) => {
+  // Scale mixed fractions (e.g., "1 1/2", "2 3/4")
+  scaledText = scaledText.replace(/(\d+)\s+(\d+)\/(\d+)/g, (match, whole, num, den, offset) => {
     const wholeNum = parseInt(whole);
     const numerator = parseInt(num);
     const denominator = parseInt(den);
     const totalValue = wholeNum + (numerator / denominator);
     const scaledValue = totalValue * scalingFactor;
+    
+    // Mark these character positions as processed
+    for (let i = offset; i < offset + match.length; i++) {
+      processedIndices.add(i);
+    }
+    
     return formatScaledNumber(scaledValue);
   });
 
-  scaledText = scaledText.replace(/(\d+)\/(\d+)/g, (match, num, den) => {
+  // Scale simple fractions (e.g., "1/2", "3/4")
+  scaledText = scaledText.replace(/(\d+)\/(\d+)/g, (match, num, den, offset) => {
+    // Check if any part of this match was already processed
+    let alreadyProcessed = false;
+    for (let i = offset; i < offset + match.length; i++) {
+      if (processedIndices.has(i)) {
+        alreadyProcessed = true;
+        break;
+      }
+    }
+    
+    if (alreadyProcessed) return match;
+    
     const numerator = parseInt(num);
     const denominator = parseInt(den);
     const value = numerator / denominator;
     const scaledValue = value * scalingFactor;
+    
+    // Mark these positions as processed
+    for (let i = offset; i < offset + match.length; i++) {
+      processedIndices.add(i);
+    }
+    
     return formatScaledNumber(scaledValue);
   });
 
-  // Scale remaining decimal numbers
-  scaledText = scaledText.replace(/\b(\d+\.?\d*)\b/g, (match, num) => {
-    // Skip if this number was already processed as part of a fraction
-    if (scaledText.indexOf(match) !== scaledText.lastIndexOf(match)) {
-      return match; // Keep original if multiple occurrences
+  // Scale decimal and whole numbers (more comprehensive pattern)
+  scaledText = scaledText.replace(/\b(\d+(?:\.\d+)?)\b/g, (match, num, offset) => {
+    // Check if this number was already processed as part of a fraction
+    let alreadyProcessed = false;
+    for (let i = offset; i < offset + match.length; i++) {
+      if (processedIndices.has(i)) {
+        alreadyProcessed = true;
+        break;
+      }
     }
+    
+    if (alreadyProcessed) return match;
     
     const value = parseFloat(num);
     if (isNaN(value)) return match;
