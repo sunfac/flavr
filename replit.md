@@ -133,6 +133,8 @@ Changelog:
 - June 20, 2025. Enhanced RecipeCard refactor complete - structured sections with responsive CSS Grid layout
 - June 20, 2025. Chatbot upgrade complete - OpenAI function calling for live recipe updates without page refreshes
 - June 23, 2025. Chatbot intelligence upgrade complete - natural language recipe modification with real-time execution
+- June 23, 2025. Chatbot intelligence enhanced - comprehensive modification detection, OpenAI function calling with GPT-4o, precise ingredient scaling, conversation context retention, and live recipe card updates
+- June 23, 2025. Quiz slider flickering issue resolved - stabilized value handling with React.useMemo and debounced updates
 ```
 
 ## User Preferences

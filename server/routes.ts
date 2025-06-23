@@ -1378,57 +1378,74 @@ CRITICAL INSTRUCTIONS:
           
           if (functionCall.name === "updateRecipe") {
             try {
+              console.log('Function call arguments received:', functionCall.arguments);
               const functionArgs = JSON.parse(functionCall.arguments);
               
-              // Update the recipe with new data
-              updatedRecipe = {
-                ...currentRecipe,
-                title: functionArgs.title || currentRecipe.title,
-                servings: functionArgs.servings || currentRecipe.servings,
-                cookTime: functionArgs.cookTime || currentRecipe.cookTime,
-                difficulty: functionArgs.difficulty || currentRecipe.difficulty,
-                ingredients: functionArgs.ingredients || currentRecipe.ingredients,
-                instructions: functionArgs.instructions || currentRecipe.instructions,
-                spiceLevel: functionArgs.spiceLevel || currentRecipe.spiceLevel
-              };
+              // Validate function arguments have actual data, not placeholders
+              const hasValidIngredients = functionArgs.ingredients && 
+                Array.isArray(functionArgs.ingredients) && 
+                functionArgs.ingredients.length > 0 &&
+                !functionArgs.ingredients.some((ing: string) => ing.includes('array') || ing.includes('placeholder'));
               
-              // Save updated recipe to database
-              await storage.updateRecipe(currentRecipe.id, updatedRecipe);
+              const hasValidInstructions = functionArgs.instructions && 
+                Array.isArray(functionArgs.instructions) && 
+                functionArgs.instructions.length > 0 &&
+                !functionArgs.instructions.some((inst: string) => inst.includes('array') || inst.includes('placeholder'));
               
-              // Create function call for frontend live update
-              functionCalls = [{
-                name: 'updateRecipe',
-                arguments: {
-                  mode: 'patch',
-                  data: {
-                    id: currentRecipe.id,
-                    servings: updatedRecipe.servings,
-                    meta: {
-                      title: updatedRecipe.title,
-                      description: updatedRecipe.description || currentRecipe.description,
-                      cookTime: updatedRecipe.cookTime,
-                      difficulty: updatedRecipe.difficulty,
-                      cuisine: updatedRecipe.cuisine || currentRecipe.cuisine,
-                      spiceLevel: updatedRecipe.spiceLevel
-                    },
-                    ingredients: updatedRecipe.ingredients.map((ing: string, index: number) => ({
-                      id: `ingredient-${index}`,
-                      text: ing,
-                      checked: false
-                    })),
-                    steps: updatedRecipe.instructions.map((instruction: string, index: number) => ({
-                      id: `step-${index}`,
-                      title: `Step ${index + 1}`,
-                      description: instruction,
-                      duration: 0
-                    }))
+              if (!hasValidIngredients || !hasValidInstructions) {
+                console.log('Function call contains placeholder data, rejecting update');
+                botResponse = "I understand you want to modify the recipe, but I need to properly calculate the scaled quantities. Let me try a different approach.";
+              } else {
+                // Update the recipe with new data
+                updatedRecipe = {
+                  ...currentRecipe,
+                  title: functionArgs.title || currentRecipe.title,
+                  servings: functionArgs.servings || currentRecipe.servings,
+                  cookTime: functionArgs.cookTime || currentRecipe.cookTime,
+                  difficulty: functionArgs.difficulty || currentRecipe.difficulty,
+                  ingredients: functionArgs.ingredients,
+                  instructions: functionArgs.instructions,
+                  spiceLevel: functionArgs.spiceLevel || currentRecipe.spiceLevel
+                };
+                
+                // Save updated recipe to database
+                await storage.updateRecipe(currentRecipe.id, updatedRecipe);
+                
+                // Create function call for frontend live update
+                functionCalls = [{
+                  name: 'updateRecipe',
+                  arguments: {
+                    mode: 'patch',
+                    data: {
+                      id: currentRecipe.id,
+                      servings: updatedRecipe.servings,
+                      meta: {
+                        title: updatedRecipe.title,
+                        description: updatedRecipe.description || currentRecipe.description,
+                        cookTime: updatedRecipe.cookTime,
+                        difficulty: updatedRecipe.difficulty,
+                        cuisine: updatedRecipe.cuisine || currentRecipe.cuisine,
+                        spiceLevel: updatedRecipe.spiceLevel
+                      },
+                      ingredients: updatedRecipe.ingredients.map((ing: string, index: number) => ({
+                        id: `ingredient-${index}`,
+                        text: ing,
+                        checked: false
+                      })),
+                      steps: updatedRecipe.instructions.map((instruction: string, index: number) => ({
+                        id: `step-${index}`,
+                        title: `Step ${index + 1}`,
+                        description: instruction,
+                        duration: 0
+                      }))
+                    }
                   }
+                }];
+                
+                // If we successfully updated the recipe, provide a confirmation message
+                if (!botResponse) {
+                  botResponse = "Perfect! I've updated the recipe for you.";
                 }
-              }];
-              
-              // If we successfully updated the recipe, provide a confirmation message
-              if (!botResponse) {
-                botResponse = "Perfect! I've updated the recipe for you.";
               }
               
             } catch (error) {
