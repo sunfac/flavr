@@ -146,6 +146,27 @@ export default function SlideQuizShell({
 
   const currentAnswer = answers[currentQ.id];
 
+  // Stabilize slider value to prevent flickering (moved after variable declarations)
+  const sliderValue = useMemo(() => {
+    if (currentQ.type === 'slider' && currentAnswer !== undefined && currentAnswer !== null) {
+      return Number(currentAnswer);
+    }
+    return currentQ.min || 1;
+  }, [currentAnswer, currentQ.min, currentQ.type]);
+
+  // Debounced update function for slider (moved after variable declarations)
+  const handleSliderChange = React.useCallback(
+    (values: number[]) => {
+      if (currentQ.type === 'slider') {
+        const newValue = values[0];
+        if (newValue !== sliderValue) {
+          updateAnswer(currentQ.id, newValue);
+        }
+      }
+    },
+    [currentQ.id, currentQ.type, sliderValue, updateAnswer]
+  );
+
   const renderIcon = (iconName: string) => {
     const iconLookup: Record<string, keyof typeof iconMap> = {
       'Home': 'home',
@@ -674,14 +695,6 @@ export default function SlideQuizShell({
         );
 
       case 'slider':
-        // Stabilize slider value to prevent flickering
-        const sliderValue = React.useMemo(() => {
-          if (currentAnswer !== undefined && currentAnswer !== null) {
-            return Number(currentAnswer);
-          }
-          return currentQ.min || 1;
-        }, [currentAnswer, currentQ.min]);
-
         const getSliderOptions = () => {
           if (currentQ.id === 'ambition') {
             return [
@@ -705,18 +718,11 @@ export default function SlideQuizShell({
         };
 
         const sliderOptions = getSliderOptions();
-        
-        // Debounced update function to prevent rapid changes
-        const handleSliderChange = React.useCallback(
-          (values: number[]) => {
-            const newValue = values[0];
-            if (newValue !== sliderValue) {
-              updateAnswer(currentQ.id, newValue);
-            }
-          },
-          [currentQ.id, sliderValue, updateAnswer]
-        );
 
+        // Use component-level values directly
+        const currentSliderValue = sliderValue;
+        const currentSliderHandler = handleSliderChange;
+        
         return (
           <div className="space-y-6">
             {/* Scale at the top for time slider */}
@@ -739,7 +745,7 @@ export default function SlideQuizShell({
 
             <div className="text-center">
               <div className="text-3xl font-bold text-orange-400 mb-2">
-                {renderSliderWithLabel(sliderValue)}
+                {renderSliderWithLabel(currentSliderValue)}
               </div>
             </div>
 
@@ -750,28 +756,28 @@ export default function SlideQuizShell({
                   <div
                     key={option.value}
                     className={`flex items-center justify-between p-2 rounded-lg transition-all duration-300 cursor-pointer ${
-                      sliderValue === option.value
+                      currentSliderValue === option.value
                         ? 'bg-orange-500/20 border-2 border-orange-400'
                         : 'bg-slate-800/30 border-2 border-slate-600 hover:border-orange-400/50'
                     }`}
                     onClick={() => updateAnswer(currentQ.id, option.value)}
                   >
                     <div className="flex items-center space-x-2">
-                      <div className={`${sliderValue === option.value ? 'text-orange-400' : 'text-slate-400'}`}>
+                      <div className={`${currentSliderValue === option.value ? 'text-orange-400' : 'text-slate-400'}`}>
                         {option.icon}
                       </div>
-                      <span className={`font-medium text-sm ${sliderValue === option.value ? 'text-white' : 'text-slate-300'}`}>
+                      <span className={`font-medium text-sm ${currentSliderValue === option.value ? 'text-white' : 'text-slate-300'}`}>
                         {option.label}
                       </span>
                     </div>
                     <div
                       className={`w-5 h-5 rounded-full border-2 transition-all duration-300 flex items-center justify-center ${
-                        sliderValue === option.value
+                        currentSliderValue === option.value
                           ? 'bg-orange-400 border-orange-400'
                           : 'border-slate-400'
                       }`}
                     >
-                      {sliderValue === option.value && (
+                      {currentSliderValue === option.value && (
                         <div className="w-2 h-2 bg-white rounded-full" />
                       )}
                     </div>
@@ -782,8 +788,8 @@ export default function SlideQuizShell({
 
             <div className="px-4">
               <Slider
-                value={[sliderValue]}
-                onValueChange={handleSliderChange}
+                value={[currentSliderValue]}
+                onValueChange={currentSliderHandler}
                 min={currentQ.min || 1}
                 max={currentQ.max || 5}
                 step={currentQ.step || 1}
