@@ -86,7 +86,7 @@ function EnhancedRecipeCard({
   onShare,
   className = '' 
 }: EnhancedRecipeCardProps) {
-  const [currentServings, setCurrentServings] = useState(recipe.servings);
+
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [ingredientStates, setIngredientStates] = useState<Record<string, boolean>>({});
@@ -95,19 +95,11 @@ function EnhancedRecipeCard({
   
   const recipeStore = useRecipeStore();
 
-  // Force re-render when recipe store updates from chatbot
-  useEffect(() => {
-    if (recipeStore.lastUpdated && recipeStore.id === recipe.id && recipeStore.servings !== currentServings) {
-      console.log('🔄 Recipe store changed, syncing servings:', {
-        storeServings: recipeStore.servings,
-        currentServings,
-        lastUpdated: recipeStore.lastUpdated
-      });
-      
-      // Only update servings if they actually changed
-      setCurrentServings(recipeStore.servings);
-    }
-  }, [recipeStore.lastUpdated, recipeStore.servings, currentServings, recipeStore.id, recipe.id]);
+  // Sync servings from store without causing infinite loops
+  const activeServings = useMemo(() => {
+    const isStoreActive = recipeStore.id === recipe.id && recipeStore.servings > 0;
+    return isStoreActive ? recipeStore.servings : recipe.servings;
+  }, [recipeStore.id, recipe.id, recipeStore.servings, recipe.servings]);
 
   // Use updated data from store if available, otherwise fall back to original
   const activeIngredients = useMemo(() => {
@@ -141,15 +133,13 @@ function EnhancedRecipeCard({
     return isStoreActive ? recipeStore.meta.difficulty : recipe.difficulty;
   }, [recipeStore.id, recipe.id, recipeStore.meta.difficulty, recipe.difficulty]);
 
-  const activeServings = recipeStore.id === recipe.id 
-    ? recipeStore.servings 
-    : recipe.servings;
+
 
   // Scale ingredients based on serving adjustments
   const scaledIngredients = useScaledIngredients(
     activeIngredients, 
     activeServings, 
-    currentServings
+    activeServings
   );
 
   // Transform instructions to steps format for StepStack
@@ -165,7 +155,7 @@ function EnhancedRecipeCard({
     // Transform recipe data to Zustand format
     const zustandRecipe = {
       id: recipe.id,
-      servings: currentServings,
+      servings: activeServings,
       ingredients: recipe.ingredients.map((ingredient, index) => ({
         id: `ingredient-${index}`,
         text: ingredient,
@@ -194,7 +184,7 @@ function EnhancedRecipeCard({
 
     // Update Zustand store
     recipeActions.replaceRecipe(zustandRecipe);
-  }, [recipe, currentServings, currentStep, completedSteps, ingredientStates]);
+  }, [recipe, activeServings, currentStep, completedSteps, ingredientStates]);
 
   // Listen for voice command changes from Zustand store
   useEffect(() => {
