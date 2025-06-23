@@ -311,31 +311,7 @@ function EnhancedRecipeCard({
         />
       </motion.div>
 
-      {/* Voice Control Panel */}
-      <AnimatePresence>
-        {showVoiceControl && (
-          <motion.div
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 100 }}
-            transition={{ duration: 0.3 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-slate-800/95 backdrop-blur-md border-t border-slate-600 p-4"
-          >
-            <div className="max-w-7xl mx-auto">
-              <VoiceAssistant 
-                onChatMessage={(message: string) => {
-                  // Handle voice messages sent to chatbot
-                  toast({
-                    title: "Voice Command",
-                    description: `Sent to Zest: "${message}"`,
-                  });
-                }}
-                className="max-w-lg mx-auto"
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
     </div>
   );
 }

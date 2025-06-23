@@ -542,7 +542,7 @@ export default function ChatBot({
             }}
             recipeContext={currentRecipe ? {
               title: currentRecipe.title,
-              currentStep: recipeStore.currentStep,
+              currentStep: 0,
               totalSteps: currentRecipe.instructions?.length || 0,
               ingredients: currentRecipe.ingredients || [],
               instructions: currentRecipe.instructions || []
