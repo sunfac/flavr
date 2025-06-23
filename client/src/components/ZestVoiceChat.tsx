@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface ZestVoiceChatProps {
   onChatMessage?: (message: string) => void;
+  onAIResponse?: (response: string) => void;
   className?: string;
   recipeContext?: {
     title: string;
@@ -17,12 +18,14 @@ interface ZestVoiceChatProps {
 
 export default function ZestVoiceChat({ 
   onChatMessage, 
+  onAIResponse,
   className = "",
   recipeContext 
 }: ZestVoiceChatProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState('');
+  const [lastResponse, setLastResponse] = useState('');
   const recognitionRef = useRef<any>(null);
   const { toast } = useToast();
 
@@ -120,24 +123,25 @@ export default function ZestVoiceChat({
     setIsRecording(false);
   };
 
-  // Get AI response and speak it
+  // Get AI response with full context and natural voice
   const getVoiceResponse = async (transcript: string) => {
     try {
-      const contextPrompt = recipeContext ? `
-You are Zest, helping with: ${recipeContext.title}
-Current step: ${recipeContext.currentStep + 1} of ${recipeContext.totalSteps}
-Current instruction: ${recipeContext.instructions[recipeContext.currentStep] || 'Recipe complete'}
-Available ingredients: ${recipeContext.ingredients.join(', ')}
-
-Respond naturally and helpfully in a conversational tone.
-` : 'You are Zest, a helpful cooking assistant. Respond conversationally.';
-
-      const response = await fetch('/api/chat/voice', {
+      // Use the same chat endpoint that maintains context and can modify recipes
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: transcript,
-          context: contextPrompt
+          currentRecipe: recipeContext ? {
+            id: 'voice-recipe',
+            title: recipeContext.title,
+            ingredients: recipeContext.ingredients,
+            instructions: recipeContext.instructions,
+            servings: 2,
+            cookTime: 30,
+            difficulty: 'Medium'
+          } : null,
+          mode: 'voice'
         })
       });
 
@@ -145,13 +149,22 @@ Respond naturally and helpfully in a conversational tone.
       
       const data = await response.json();
       
-      // Speak the response
-      if ('speechSynthesis' in window && data.response) {
-        const utterance = new SpeechSynthesisUtterance(data.response);
-        utterance.rate = 0.9;
-        utterance.pitch = 1.0;
-        utterance.volume = 0.8;
-        speechSynthesis.speak(utterance);
+      // Generate natural voice audio using OpenAI TTS
+      if (data.response) {
+        setLastResponse(data.response);
+        
+        // Add AI response to chat history
+        if (onAIResponse) {
+          onAIResponse(data.response);
+        }
+        
+        await generateNaturalVoice(data.response);
+      }
+      
+      // Handle any recipe updates from function calls
+      if (data.functionCalls && data.functionCalls.length > 0) {
+        // Recipe was updated via voice command
+        console.log('Recipe updated via voice:', data.functionCalls);
       }
       
     } catch (error) {
@@ -161,6 +174,40 @@ Respond naturally and helpfully in a conversational tone.
         description: "Could not get response from Zest",
         variant: "destructive"
       });
+    }
+  };
+
+  // Generate natural voice using OpenAI TTS API
+  const generateNaturalVoice = async (text: string) => {
+    try {
+      const response = await fetch('/api/chat/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: text,
+          voice: 'nova' // Natural female voice
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to generate voice');
+      
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      
+      audio.onended = () => URL.revokeObjectURL(audioUrl);
+      await audio.play();
+      
+    } catch (error) {
+      console.error('Error generating natural voice:', error);
+      // Fallback to browser TTS
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+        utterance.volume = 0.8;
+        speechSynthesis.speak(utterance);
+      }
     }
   };
 

@@ -1616,41 +1616,34 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
     }
   });
 
-  // Voice chat endpoint for ZestVoiceChat component
-  app.post("/api/chat/voice", async (req, res) => {
+  // OpenAI Text-to-Speech endpoint for natural voice
+  app.post("/api/chat/tts", async (req, res) => {
     try {
-      const { message, context } = req.body;
+      const { text, voice = 'nova' } = req.body;
       
-      if (!message) {
-        return res.status(400).json({ message: "Message is required" });
+      if (!text) {
+        return res.status(400).json({ message: "Text is required" });
       }
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-        messages: [
-          {
-            role: "system",
-            content: context || "You are Zest, a helpful cooking assistant. Respond conversationally and concisely."
-          },
-          {
-            role: "user", 
-            content: message
-          }
-        ],
-        max_tokens: 150,
-        temperature: 0.8
+      const response = await openai.audio.speech.create({
+        model: "tts-1",
+        voice: voice,
+        input: text,
+        response_format: "mp3"
       });
 
-      const botResponse = response.choices[0].message.content;
+      const buffer = Buffer.from(await response.arrayBuffer());
       
-      res.json({ 
-        response: botResponse,
-        message: message
+      res.set({
+        'Content-Type': 'audio/mpeg',
+        'Content-Length': buffer.length
       });
       
+      res.send(buffer);
+      
     } catch (error: any) {
-      console.error("Voice chat error:", error);
-      res.status(500).json({ message: "Failed to process voice chat: " + error.message });
+      console.error("TTS error:", error);
+      res.status(500).json({ message: "Failed to generate speech: " + error.message });
     }
   });
 

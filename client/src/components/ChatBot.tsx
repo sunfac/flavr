@@ -536,9 +536,19 @@ export default function ChatBot({
         <div className="px-3 sm:px-4 py-2 border-t border-white/10 flex-shrink-0">
           <ZestVoiceChat
             onChatMessage={(voiceMessage) => {
-              setMessage(voiceMessage);
-              // Auto-send voice messages
-              setTimeout(() => handleSend(), 100);
+              // Add voice message to chat history visually
+              const newMessage: ChatMessage = {
+                id: Date.now(),
+                message: voiceMessage,
+                response: '',
+                isUser: true,
+                text: voiceMessage,
+                timestamp: new Date()
+              };
+              setLocalMessages(prev => [...prev, newMessage]);
+              
+              // Voice chat handles its own AI response with context
+              // No need to auto-send through text chat
             }}
             recipeContext={currentRecipe ? {
               title: currentRecipe.title,
