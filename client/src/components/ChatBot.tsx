@@ -286,10 +286,12 @@ export default function ChatBot({
     }
   }, [isOpen, hasInitialized, currentRecipe]);
 
-  // Scroll to bottom when messages change
+  // Auto-scroll to latest message
   useEffect(() => {
     if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+      setTimeout(() => {
+        scrollAreaRef.current!.scrollTop = scrollAreaRef.current!.scrollHeight;
+      }, 100);
     }
   }, [localMessages]);
 
