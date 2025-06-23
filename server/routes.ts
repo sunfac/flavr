@@ -1533,10 +1533,10 @@ Keep it super short and casual!`;
                   cookTime: data.meta?.cookTime || currentRecipe.cookTime,
                   difficulty: data.meta?.difficulty || currentRecipe.difficulty,
                   cuisine: data.meta?.cuisine || currentRecipe.cuisine,
-                  servings: data.meta?.servings || currentRecipe.servings,
+                  servings: data.servings || data.meta?.servings || currentRecipe.servings,
                   ingredients: data.ingredients?.map((ing: any) => ing.text || ing) || currentRecipe.ingredients,
                   instructions: data.steps?.map((step: any, index: number) => 
-                    `Step ${index + 1}: ${step.description || step.title || step}`
+                    step.description || step.title || step
                   ) || currentRecipe.instructions
                 };
                 
@@ -1544,7 +1544,30 @@ Keep it super short and casual!`;
                 updatedRecipe = await storage.updateRecipe(currentRecipe.id, updatedRecipeData);
                 console.log('✅ Recipe updated successfully:', updatedRecipe.title);
                 
-                // Ensure function calls are included in response for frontend sync
+                // Transform function call data to match frontend store structure
+                call.arguments.data = {
+                  ...call.arguments.data,
+                  id: currentRecipe.id,
+                  servings: updatedRecipeData.servings,
+                  meta: {
+                    title: updatedRecipeData.title,
+                    description: updatedRecipeData.description,
+                    cookTime: updatedRecipeData.cookTime,
+                    difficulty: updatedRecipeData.difficulty,
+                    cuisine: updatedRecipeData.cuisine
+                  },
+                  ingredients: updatedRecipeData.ingredients.map((ing: string, index: number) => ({
+                    id: `ingredient-${index}`,
+                    text: ing,
+                    checked: false
+                  })),
+                  steps: updatedRecipeData.instructions.map((instruction: string, index: number) => ({
+                    id: `step-${index}`,
+                    title: `Step ${index + 1}`,
+                    description: instruction,
+                    duration: 0
+                  }))
+                };
                 
               } catch (error) {
                 console.error('❌ Failed to execute updateRecipe function:', error);
@@ -1703,8 +1726,10 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
       console.log(`🚀 CHAT RESPONSE SENDING:`, {
         hasUpdatedRecipe: !!updatedRecipe,
         hasFunctionCalls: functionCalls.length > 0,
+        functionCallsData: functionCalls,
         responseLength: botResponse.length,
-        updatedRecipeTitle: updatedRecipe?.title || 'none'
+        updatedRecipeTitle: updatedRecipe?.title || 'none',
+        enableFunctionCalling
       });
 
       res.json({ 

@@ -141,16 +141,26 @@ export default function ChatBot({
       setMessage("");
 
       // Handle OpenAI function calls for live recipe updates
+      console.log('🔍 CHATBOT RESPONSE:', {
+        hasFunctionCalls: !!result.functionCalls,
+        functionCallsLength: result.functionCalls?.length || 0,
+        hasUpdatedRecipe: !!result.updatedRecipe,
+        functionCalls: result.functionCalls
+      });
+
       if (result.functionCalls && Array.isArray(result.functionCalls)) {
+        console.log('🎯 Processing function calls:', result.functionCalls);
         result.functionCalls.forEach((functionCall: any) => {
           if (functionCall.name === 'updateRecipe') {
             try {
               const { mode, data } = functionCall.arguments;
-              console.log(`🔧 Function Call: ${mode} recipe update`, data);
+              console.log(`🔧 EXECUTING Function Call: ${mode} recipe update`, data);
               
               if (mode === 'replace') {
+                console.log('🔄 REPLACING entire recipe in store');
                 recipeActions.replaceRecipe(data);
               } else if (mode === 'patch') {
+                console.log('🩹 PATCHING recipe in store with data:', data);
                 recipeActions.patchRecipe(data);
                 
                 // Handle timer rescaling if step durations changed
@@ -162,6 +172,8 @@ export default function ChatBot({
                   });
                 }
               }
+              
+              console.log('✅ Recipe store updated successfully');
               
               // Add success notification
               const updateMessage: ChatMessage = {
