@@ -14,6 +14,7 @@ import { generateFridgePrompt2 } from "@/prompts/fridgePrompt2";
 import { motion, AnimatePresence } from "framer-motion";
 import { iconMap } from "@/lib/iconMap";
 import EnhancedRecipeCard from "./recipe/EnhancedRecipeCard";
+import { useRecipeStore } from "@/stores/recipeStore";
 
 interface RecipeCardProps {
   recipe: any;
@@ -43,6 +44,7 @@ export default function RecipeCard({
   const [chatbotMessage, setChatbotMessage] = useState("");
   const [showVoiceControl, setShowVoiceControl] = useState(false);
   const { toast } = useToast();
+  const recipeStore = useRecipeStore();
 
   // Handle recipe updates from chatbot
   const handleRecipeUpdate = (updatedRecipe: any) => {
@@ -283,6 +285,7 @@ export default function RecipeCard({
   return (
     <div className="min-h-screen bg-slate-900">
       <EnhancedRecipeCard
+        key={`recipe-${enhancedRecipe.id}-${recipeStore.lastUpdated || Date.now()}`}
         recipe={enhancedRecipe}
         onBack={onBack}
         onShare={handleShare}

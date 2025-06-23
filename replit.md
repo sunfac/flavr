@@ -138,6 +138,7 @@ Changelog:
 - June 23, 2025. Universal recipe modification system complete - chatbot now detects and implements ANY recipe change (side dishes, cooking methods, dietary modifications, ingredient substitutions) with complete implementation rather than suggestions
 - June 23, 2025. Chatbot UI improvements complete - right-side panel design, two-column ingredient layout, chat history preservation during recipe updates
 - June 23, 2025. Critical chatbot fixes complete - chip clicks post messages, auto-scroll to latest, prevented double confirmations, stabilized servings slider, enhanced recipe store sync with memoized active data detection, comprehensive logging for function call debugging
+- June 23, 2025. Recipe card preview update issue resolved - added dynamic key to EnhancedRecipeCard component to force React re-renders when recipe store updates, ensuring recipe modifications are visible in both preview and pop-out modes
 ```
 
 ## User Preferences
