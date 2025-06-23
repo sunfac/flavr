@@ -20,6 +20,7 @@ import MyRecipes from "@/pages/MyRecipes";
 import RecipeView from "@/pages/RecipeView";
 import RecipeCardTest from "@/pages/RecipeCardTest";
 import DeveloperLogs from "@/pages/DeveloperLogs";
+import DiagnosticPage from "@/pages/DiagnosticPage";
 import NotFound from "@/pages/not-found";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 
@@ -45,6 +46,7 @@ function Router() {
       <Route path="/settings" component={SettingsPage} />
       <Route path="/subscribe" component={Subscribe} />
       <Route path="/developer-logs" component={DeveloperLogs} />
+      <Route path="/diagnostic" component={DiagnosticPage} />
       <Route component={NotFound} />
     </Switch>
   );
