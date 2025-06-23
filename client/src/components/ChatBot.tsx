@@ -162,17 +162,33 @@ export default function ChatBot({
               } else if (mode === 'patch') {
                 console.log('🩹 PATCHING recipe in store with data:', data);
                 
-                // Force complete update to ensure UI refresh
+                // Force complete recipe store replacement to trigger UI refresh
+                console.log('🔄 Forcing complete recipe store update with:', data);
                 recipeActions.replaceRecipe({
                   id: data.id,
-                  servings: data.servings || recipeStore.servings,
-                  meta: data.meta || recipeStore.meta,
-                  ingredients: data.ingredients || recipeStore.ingredients,
-                  steps: data.steps || recipeStore.steps,
-                  currentStep: recipeStore.currentStep,
-                  completedSteps: recipeStore.completedSteps,
+                  servings: data.servings,
+                  meta: data.meta,
+                  ingredients: data.ingredients,
+                  steps: data.steps,
+                  currentStep: 0,
+                  completedSteps: [],
                   lastUpdated: Date.now()
                 });
+                
+                // Trigger recipe update callback if available
+                if (onRecipeUpdate) {
+                  onRecipeUpdate({
+                    id: data.id,
+                    title: data.meta.title,
+                    description: data.meta.description,
+                    cookTime: data.meta.cookTime,
+                    servings: data.servings,
+                    difficulty: data.meta.difficulty,
+                    cuisine: data.meta.cuisine,
+                    ingredients: data.ingredients.map((ing: any) => ing.text),
+                    instructions: data.steps.map((step: any) => step.description)
+                  });
+                }
                 
                 // Handle timer rescaling if step durations changed
                 if (data.steps) {
