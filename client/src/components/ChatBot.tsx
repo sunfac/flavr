@@ -366,8 +366,8 @@ export default function ChatBot({
     }
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
-    return () => handleSend(suggestion);
+  const handleSuggestionClick = (suggestion: string) => () => {
+    handleSend(suggestion);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
