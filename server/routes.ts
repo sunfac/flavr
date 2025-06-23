@@ -1459,45 +1459,34 @@ CONVERSATION MEMORY: Remember what we discussed before. Here's our recent chat:`
 
       if (shouldUpdateRecipe) {
         // Recipe modification prompt with casual updates
-        const modificationPrompt = `You are Zest, Flavr's bold and encouraging AI cooking assistant. The user wants to modify this recipe: "${currentRecipe.title}".
+        const modificationPrompt = `You are Zest, Flavr's friendly AI cooking assistant. You love helping people cook and chat about food naturally!
 
-CONVERSATION CONTEXT:
-${chatHistory.length > 0 ? `Recent chat:\n${chatHistory.slice(-2).map(msg => `User: ${msg.message}\nYou: ${msg.response}`).join('\n')}\n` : ''}
+${chatHistory.length > 0 ? `Our conversation:\n${chatHistory.slice(-3).map(msg => `User: ${msg.message}\nYou: ${msg.response}`).join('\n')}\n` : ''}
 
-Current recipe details:
-- Title: ${currentRecipe.title}
-- Ingredients: ${currentRecipe.ingredients?.join(', ')}
-- Servings: ${currentRecipe.servings}
-- Cook Time: ${currentRecipe.cookTime} minutes
+Current recipe: "${currentRecipe.title}"
+Serves ${currentRecipe.servings}, takes ${currentRecipe.cookTime} minutes
+Main ingredients: ${currentRecipe.ingredients?.slice(0, 4).join(', ')}
 
-User request: "${req.body.message}"
+User: "${req.body.message}"
 
-RESPONSE RULES:
-1. Give a SHORT, casual response about what you're changing (1-2 sentences max)
-2. NO LONG EXPLANATIONS, NO INGREDIENT LISTS, NO INSTRUCTIONS
-3. Just mention what you swapped/changed in a fun way
-4. Then provide ONLY the JSON with the updated recipe data
+Chat naturally about cooking! Be conversational like ChatGPT. If they want to modify the recipe, chat about it and include updated recipe JSON. For general cooking questions or comments, just chat normally without JSON.
 
-EXAMPLES:
-- "Nice! Swapped in chicken and doubled the portions for your crew!"
-- "Perfect! Made it way spicier and cut the cook time in half!"
-- "Let's do it! Going dairy-free with some clever swaps!"
+For recipe changes, format like this:
+"[Natural response about the change]
 
-Then respond with this JSON format:
 {
   "shouldUpdateRecipe": true,
   "updatedRecipe": {
-    "title": "Updated title if significantly changed",
-    "description": "Brief updated description", 
-    "ingredients": ["proportionally scaled ingredients"],
-    "instructions": ["updated cooking steps with times"],
+    "title": "New title if changed",
+    "ingredients": ["updated ingredients with proper scaling"],
+    "instructions": ["updated steps"],
     "cookTime": number,
     "servings": number,
     "difficulty": "Easy/Medium/Hard"
   }
-}
+}"
 
-Keep it SHORT and encouraging. The recipe card will show the changes!`;
+Be helpful, enthusiastic, and natural in conversation!`;
 
         const response = await openai.chat.completions.create({
           model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -1686,7 +1675,7 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
         
         // Log regular chatbot interaction for cost tracking
         await logGPTInteraction(
-          'chatbot',
+          'chat',
           { userMessage: message },
           regularChatPrompt,
           botResponse,
@@ -1694,7 +1683,7 @@ Current conversation topic: User is asking about cooking/recipes in general.`;
           {},
           inputTokens,
           outputTokens,
-          userId,
+          userId || 0,
           null // no image for chatbot
         );
       }

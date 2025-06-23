@@ -277,7 +277,11 @@ function EnhancedRecipeCard({
         <HeaderSection
           recipe={recipe}
           currentServings={currentServings}
-          onServingsChange={setCurrentServings}
+          onServingsChange={(newServings) => {
+            setCurrentServings(newServings);
+            // Also update the recipe store to keep everything in sync
+            recipeActions.updateServings(newServings);
+          }}
         />
 
         {/* Main Grid - Responsive Layout */}
