@@ -1561,6 +1561,11 @@ Be conversational, helpful, and maintain context from our conversation history. 
         { role: "user", content: message }
       ];
 
+      console.log('🤖 OpenAI Messages being sent:');
+      console.log('System prompt length:', systemPrompt.length);
+      console.log('Conversation history messages:', conversationMessages.length);
+      console.log('Full message array:', JSON.stringify(messages, null, 2));
+
       // Create streaming completion with function calling
       const stream = await openai.chat.completions.create({
         model: "gpt-4o",

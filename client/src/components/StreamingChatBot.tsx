@@ -33,11 +33,10 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
   
   const { updateActiveRecipe } = useRecipeStore();
 
-  // Initialize speech synthesis
+  // Text-to-speech DISABLED per user request
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      speechSynthRef.current = window.speechSynthesis;
-    }
+    // TTS completely disabled - too robotic per user feedback
+    speechSynthRef.current = null;
   }, []);
 
   // Initialize speech recognition with proper error handling
@@ -189,10 +188,7 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                       : msg
                   ));
                   
-                  // Auto-speak response if enabled
-                  if (fullResponse && speechSynthRef.current) {
-                    speakText(fullResponse);
-                  }
+                  // TTS disabled - no auto-speak
                 } else if (data.type === 'error') {
                   throw new Error(data.message);
                 }
@@ -233,38 +229,7 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
     }
   };
 
-  const speakText = (text: string) => {
-    if (!speechSynthRef.current) return;
-
-    // Stop current speech
-    speechSynthRef.current.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    utterance.volume = 0.8;
-
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      currentUtteranceRef.current = null;
-    };
-    utterance.onerror = () => {
-      setIsSpeaking(false);
-      currentUtteranceRef.current = null;
-    };
-
-    currentUtteranceRef.current = utterance;
-    speechSynthRef.current.speak(utterance);
-  };
-
-  const stopSpeaking = () => {
-    if (speechSynthRef.current) {
-      speechSynthRef.current.cancel();
-      setIsSpeaking(false);
-      currentUtteranceRef.current = null;
-    }
-  };
+  // Text-to-speech functionality completely removed per user request
 
   const suggestedQuestions = [
     "Make this recipe spicier",
@@ -288,19 +253,7 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
             </p>
           </div>
         </div>
-        <div className="flex gap-1">
-          {speechSynthRef.current && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={isSpeaking ? stopSpeaking : undefined}
-              disabled={!isSpeaking}
-              className="w-6 h-6 p-0"
-            >
-              {isSpeaking ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
-            </Button>
-          )}
-        </div>
+        {/* TTS controls removed per user request */}
       </div>
 
       {/* Messages Area - Optimized for visibility */}

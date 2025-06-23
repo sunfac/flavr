@@ -129,21 +129,21 @@ export default function StepStack({
         </div>
       </div>
 
-      {/* Mobile Cook Mode Button */}
-      <div className="md:hidden fixed bottom-6 right-6 z-50">
+      {/* Mobile Cook Mode Button - Fixed positioning */}
+      <div className="md:hidden fixed bottom-20 right-4 z-40">
         <Button
           onClick={() => setShowCookMode(true)}
-          size="lg"
-          className="rounded-full bg-orange-500 hover:bg-orange-600 text-white shadow-lg"
+          size="sm"
+          className="rounded-full bg-orange-500 hover:bg-orange-600 text-white shadow-lg px-4 py-2"
         >
-          <TimerIcon className="w-5 h-5 mr-2" />
+          <TimerIcon className="w-4 h-4 mr-1" />
           Cook Mode
         </Button>
       </div>
 
-      {/* Cook Mode Modal */}
+      {/* Cook Mode Modal - Fixed sizing */}
       <Dialog open={showCookMode} onOpenChange={setShowCookMode}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-sm h-[80vh] overflow-hidden">
+        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-md w-[90vw] h-[85vh] max-h-[600px] overflow-hidden">
           <DialogHeader>
             <DialogTitle className="text-xl text-orange-400">Cook Mode</DialogTitle>
           </DialogHeader>
