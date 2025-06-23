@@ -320,7 +320,10 @@ export default function ChatBot({
         });
       });
 
-      setLocalMessages(messages);
+      // Only set messages if we don't have any existing messages to preserve chat history
+      if (localMessages.length === 0) {
+        setLocalMessages(messages);
+      }
     }
   }, [isOpen, chatHistory, currentRecipe, hasShownWelcome]);
 

@@ -1264,6 +1264,10 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
         message.toLowerCase().includes('less salty') ||
         message.toLowerCase().includes('sweeter') ||
         message.toLowerCase().includes('more herbs') ||
+        message.toLowerCase().includes('make it spicy') ||
+        message.toLowerCase().includes('spice it up') ||
+        /make.*spic/i.test(message) ||
+        /spice.*up/i.test(message) ||
         
         // Portion/serving changes
         /for\s+\d+\s+people/i.test(message) ||
@@ -1384,6 +1388,8 @@ CRITICAL RULES:
 - When user asks for side dishes, ADD complete side dish ingredients and cooking steps
 - When user wants cooking method changes, REPLACE the cooking technique entirely
 - When user requests additions, INCLUDE them in the updated recipe
+- When user asks to "substitute ingredients" without specifying which ones, ask for clarification FIRST
+- For vague requests like "make it spicier", ADD specific spices and increase quantities appropriately
 - Provide complete, realistic ingredients and instructions - NO placeholders
 - Think creatively about user intent and implement comprehensive solutions immediately
 - Adjust cooking times, temperatures, and techniques based on changes made
@@ -1480,12 +1486,16 @@ CRITICAL RULES:
               const hasValidIngredients = functionArgs.ingredients && 
                 Array.isArray(functionArgs.ingredients) && 
                 functionArgs.ingredients.length > 0 &&
-                !functionArgs.ingredients.some((ing: string) => ing.includes('array') || ing.includes('placeholder'));
+                !functionArgs.ingredients.some((ing: string) => ing.includes('array') || ing.includes('placeholder') || ing.includes('[') || ing.includes(']'));
               
               const hasValidInstructions = functionArgs.instructions && 
                 Array.isArray(functionArgs.instructions) && 
                 functionArgs.instructions.length > 0 &&
-                !functionArgs.instructions.some((inst: string) => inst.includes('array') || inst.includes('placeholder'));
+                !functionArgs.instructions.some((inst: string) => inst.includes('array') || inst.includes('placeholder') || inst.includes('[') || inst.includes(']'));
+              
+              console.log('Validation results:', { hasValidIngredients, hasValidInstructions });
+              console.log('Ingredients sample:', functionArgs.ingredients?.slice(0, 2));
+              console.log('Instructions sample:', functionArgs.instructions?.slice(0, 2));
               
               if (!hasValidIngredients || !hasValidInstructions) {
                 console.log('Function call contains placeholder data, rejecting update');
