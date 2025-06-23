@@ -1288,13 +1288,21 @@ Current recipe details:
 - Serves: ${currentRecipe.servings} people
 - Cook Time: ${currentRecipe.cookTime} minutes
 - Difficulty: ${currentRecipe.difficulty}
-- Current ingredients: ${currentRecipe.ingredients?.join(', ') || 'N/A'}
+- Current ingredients: ${JSON.stringify(currentRecipe.ingredients)}
+- Current instructions: ${JSON.stringify(currentRecipe.instructions)}
 
-Instructions:
-1. Analyze the user's request and determine what changes are needed
-2. If the request requires recipe updates, call the updateRecipe function with the modified recipe
-3. Provide a friendly, casual response about what you changed
-4. Keep responses conversational and brief (1-2 sentences)`
+CRITICAL INSTRUCTIONS:
+1. When scaling recipes, calculate EXACT proportions. For example:
+   - Original: "1.6 kg Secreto Iberico" for 8 people → "0.8 kg Secreto Iberico" for 4 people
+   - Original: "200ml Sherry" for 8 people → "100ml Sherry" for 4 people
+   - Original: "2 tbsp Olive oil" for 8 people → "1 tbsp Olive oil" for 4 people
+
+2. NEVER use placeholder text like "scaled ingredients array" or "updated steps array"
+3. Always provide complete, realistic ingredient lists and cooking instructions
+4. Scale ALL quantities proportionally based on the serving change
+5. Maintain cooking times and techniques unless specifically requested to change them
+6. Call updateRecipe function with the complete, scaled recipe data
+7. Keep your response message brief and casual`
           },
           {
             role: "user" as const,
@@ -1304,7 +1312,7 @@ Instructions:
 
         // Add chat history for context
         const conversationHistory = chatHistory.slice(-3).map(msg => ({
-          role: msg.isUser ? "user" as const : "assistant" as const,
+          role: msg.userId ? "user" as const : "assistant" as const,
           content: msg.message
         }));
 
@@ -1340,12 +1348,12 @@ Instructions:
                   ingredients: {
                     type: "array",
                     items: { type: "string" },
-                    description: "Complete updated ingredients list with quantities"
+                    description: "Complete updated ingredients list with properly scaled quantities. For example: if original was '1.6 kg Secreto Iberico' for 8 people, scale to '0.8 kg Secreto Iberico' for 4 people. Include actual measurements, not placeholders."
                   },
                   instructions: {
                     type: "array",
                     items: { type: "string" },
-                    description: "Complete updated cooking instructions/steps"
+                    description: "Complete updated cooking instructions with any timing or quantity adjustments needed for the new serving size. Use actual step descriptions, not placeholders."
                   },
                   spiceLevel: {
                     type: "string",
@@ -1418,23 +1426,21 @@ Instructions:
                 }
               }];
               
-              // Extract casual message before JSON
-              const jsonStart = fullResponse.indexOf('{');
-              if (jsonStart > 0) {
-                let casualResponse = fullResponse.substring(0, jsonStart).trim();
-                const sentences = casualResponse.split(/[.!?]+/).filter((s: string) => s.trim().length > 0);
-                botResponse = sentences.slice(0, 2).join('. ').trim() + (sentences.length > 2 ? '.' : '');
-              } else {
-                botResponse = "Perfect! Updated the recipe for you!";
+              // If we successfully updated the recipe, provide a confirmation message
+              if (!botResponse) {
+                botResponse = "Perfect! I've updated the recipe for you.";
               }
-            } else {
-              botResponse = fullResponse;
+              
+            } catch (error) {
+              console.error('Error processing function call:', error);
+              botResponse = "I understand what you want to change, but had trouble updating the recipe. Could you try rephrasing your request?";
             }
-          } else {
-            botResponse = fullResponse;
           }
-        } catch (e) {
-          botResponse = fullResponse;
+        } else {
+          // No function call was made, use the response content
+          if (!botResponse) {
+            botResponse = "I understand your request, but I'm not sure how to modify the recipe. Could you be more specific about what you'd like to change?";
+          }
         }
       } else {
         // Regular chat response
