@@ -105,10 +105,26 @@ function EnhancedRecipeCard({
     }
   }, [recipeStore.servings, recipeStore.lastUpdated, recipeStore.id, recipe.id, currentServings]);
 
-  // Use updated ingredients from store if available, otherwise fall back to original
+  // Use updated data from store if available, otherwise fall back to original
   const activeIngredients = recipeStore.id === recipe.id && recipeStore.ingredients.length > 0 
     ? recipeStore.ingredients.map(ing => ing.text)
     : recipe.ingredients;
+
+  const activeInstructions = recipeStore.id === recipe.id && recipeStore.steps.length > 0
+    ? recipeStore.steps.map(step => step.description)
+    : recipe.instructions;
+
+  const activeTitle = recipeStore.id === recipe.id && recipeStore.meta.title
+    ? recipeStore.meta.title
+    : recipe.title;
+
+  const activeCookTime = recipeStore.id === recipe.id && recipeStore.meta.cookTime
+    ? recipeStore.meta.cookTime
+    : recipe.cookTime;
+
+  const activeDifficulty = recipeStore.id === recipe.id && recipeStore.meta.difficulty
+    ? recipeStore.meta.difficulty
+    : recipe.difficulty;
 
   const activeServings = recipeStore.id === recipe.id 
     ? recipeStore.servings 
@@ -120,6 +136,14 @@ function EnhancedRecipeCard({
     activeServings, 
     currentServings
   );
+
+  // Transform instructions to steps format for StepStack
+  const steps = activeInstructions.map((instruction, index) => ({
+    id: `step-${index}`,
+    title: `Step ${index + 1}`,
+    description: instruction,
+    duration: extractDuration(instruction)
+  }));
 
   // Sync with Zustand store for voice commands
   useEffect(() => {
@@ -170,13 +194,7 @@ function EnhancedRecipeCard({
     }
   }, [recipeStore.currentStep, recipeStore.servings, recipeStore.completedSteps]);
 
-  // Convert instructions to steps
-  const steps = recipe.instructions.map((instruction, index) => ({
-    id: `step-${index}`,
-    title: `Step ${index + 1}`,
-    description: instruction,
-    duration: extractDuration(instruction) // Extract timing from instruction text
-  }));
+
 
   const handleStepComplete = (stepId: string) => {
     const stepIndex = steps.findIndex(step => step.id === stepId);
@@ -275,7 +293,13 @@ function EnhancedRecipeCard({
       >
         {/* Header Section */}
         <HeaderSection
-          recipe={recipe}
+          recipe={{
+            ...recipe,
+            title: activeTitle,
+            cookTime: activeCookTime,
+            difficulty: activeDifficulty,
+            servings: activeServings
+          }}
           currentServings={currentServings}
           onServingsChange={(newServings) => {
             setCurrentServings(newServings);
