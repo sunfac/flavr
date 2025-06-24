@@ -151,6 +151,7 @@ Changelog:
 - June 24, 2025. Google Live Audio API integration complete - implemented real-time two-way voice conversations using Google's live audio streaming API, replacing previous voice functionality with natural speech-to-speech dialogue, WebSocket-based architecture for low-latency audio processing
 - June 24, 2025. Mobile UI fixes applied - resolved Cook Mode button overlap by adjusting z-index and positioning, fixed cut-off recipe suggestion chips with proper scrolling and responsive sizing, enhanced Google Live Audio chat visibility and mobile-friendly button layouts
 - June 24, 2025. Recipe title text overflow fixed - implemented responsive text sizing, word wrapping, and proper mobile layout for long recipe titles, added CSS utilities for text-wrap-balance and break-words to prevent cut-off on mobile devices
+- June 24, 2025. Chatbot switched to Google Gemini - primary chat endpoint now uses Google Gemini Live API for all conversations with OpenAI context handover, suggestion chips redesigned to stack in two rows for better mobile display
 ```
 
 ## User Preferences

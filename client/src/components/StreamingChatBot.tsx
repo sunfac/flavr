@@ -279,12 +279,12 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
             {currentRecipe && (
               <p className="text-xs mb-3">I can help modify "{currentRecipe.title}" or answer cooking questions!</p>
             )}
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-600">
+            <div className="flex flex-wrap gap-2 justify-center max-h-16 overflow-y-auto">
               {suggestedQuestions.map((question, index) => (
                 <Badge 
                   key={index}
                   variant="secondary"
-                  className="cursor-pointer hover:bg-orange-500 hover:text-white transition-colors text-xs px-2 py-1 whitespace-nowrap shrink-0"
+                  className="cursor-pointer hover:bg-orange-500 hover:text-white transition-colors text-xs px-2 py-1 whitespace-nowrap"
                   onClick={() => setInputValue(question)}
                 >
                   {question}
