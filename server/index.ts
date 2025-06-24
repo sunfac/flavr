@@ -154,22 +154,18 @@ app.use((req, res, next) => {
 
 
 
-  // Initialize Voice Chat WebSocket endpoint before starting server
+  // Initialize Simple Voice Chat WebSocket endpoint
   try {
-    const voiceWss = setupVoiceChat(server);
-    console.log('🎤 Voice chat WebSocket initialized on /ws/voice endpoint');
+    const { setupSimpleVoiceChat } = await import('./simpleVoiceChat');
+    const simpleVoiceWss = setupSimpleVoiceChat(server);
+    console.log('🎤 Simple voice chat WebSocket initialized on /ws/simple-voice endpoint');
     
-    // Add error handling for WebSocket server
-    voiceWss.on('error', (error) => {
-      console.error('❌ Voice WebSocket server error:', error);
-    });
-    
-    voiceWss.on('listening', () => {
-      console.log('✅ Voice WebSocket server is listening');
+    simpleVoiceWss.on('error', (error) => {
+      console.error('❌ Simple voice WebSocket server error:', error);
     });
     
   } catch (error) {
-    console.error('❌ Failed to initialize voice chat:', error);
+    console.error('❌ Failed to initialize simple voice chat:', error);
   }
 
   // ALWAYS serve the app on port 5000

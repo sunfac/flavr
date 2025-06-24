@@ -19,7 +19,9 @@ export function setupGoogleLiveAudioWebSocket(server: any) {
     server,
     path: '/api/google-live-audio',
     perMessageDeflate: false,
-    maxPayload: 1024 * 1024
+    maxPayload: 1024 * 1024,
+    handleProtocols: () => false, // Disable subprotocol handling
+    skipUTF8Validation: false
   });
 
   console.log('🎤 Google Live Audio WebSocket server initialized on /api/google-live-audio');
