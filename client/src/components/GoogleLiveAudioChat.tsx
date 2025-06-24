@@ -127,14 +127,65 @@ export function GoogleLiveAudioChat({ currentRecipe, onRecipeUpdate }: GoogleLiv
     }
   };
 
+  // Start audio streaming to Gemini Live API
+  const startAudioStreaming = useCallback(() => {
+    if (!streamRef.current || !audioContextRef.current || !websocketRef.current) return;
+    
+    console.log('Starting audio streaming to Gemini Live API');
+    
+    try {
+      const source = audioContextRef.current.createMediaStreamSource(streamRef.current);
+      const processor = audioContextRef.current.createScriptProcessor(4096, 1, 1);
+      
+      processor.onaudioprocess = (event) => {
+        if (websocketRef.current?.readyState === WebSocket.OPEN) {
+          const inputBuffer = event.inputBuffer.getChannelData(0);
+          
+          // Convert to 16-bit PCM at 24kHz for Gemini Live
+          const pcmData = new Int16Array(inputBuffer.length);
+          for (let i = 0; i < inputBuffer.length; i++) {
+            pcmData[i] = Math.max(-32768, Math.min(32767, inputBuffer[i] * 32768));
+          }
+          
+          // Send proper Gemini Live client content message
+          const audioMessage = {
+            client_content: {
+              turns: [{
+                role: "user",
+                parts: [{
+                  inline_data: {
+                    mime_type: "audio/pcm",
+                    data: btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer)))
+                  }
+                }]
+              }],
+              turn_complete: false
+            }
+          };
+          
+          websocketRef.current.send(JSON.stringify(audioMessage));
+        }
+      };
+      
+      source.connect(processor);
+      processor.connect(audioContextRef.current.destination);
+      
+      audioProcessorRef.current = processor;
+      console.log('Audio streaming pipeline established');
+    } catch (error) {
+      console.error('Error starting audio streaming:', error);
+    }
+  }, []);
+
   const disconnect = () => {
+    if (audioProcessorRef.current) {
+      audioProcessorRef.current.disconnect();
+      audioProcessorRef.current = null;
+    }
+    
     if (websocketRef.current) {
       websocketRef.current.close();
       websocketRef.current = null;
-    }
-    
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
     }
     
     if (streamRef.current) {
@@ -152,73 +203,32 @@ export function GoogleLiveAudioChat({ currentRecipe, onRecipeUpdate }: GoogleLiv
     setConnectionStatus('disconnected');
   };
 
-  const startAudioCapture = (stream: MediaStream, websocket: WebSocket) => {
-    const mediaRecorder = new MediaRecorder(stream, {
-      mimeType: 'audio/webm;codecs=opus'
-    });
-    
-    mediaRecorderRef.current = mediaRecorder;
-    
-    mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0 && websocket.readyState === WebSocket.OPEN) {
-        // Send audio data to Google Live API
-        websocket.send(JSON.stringify({
-          type: 'audio_input',
-          audio: event.data
-        }));
-      }
-    };
-    
-    mediaRecorder.start(100); // Send chunks every 100ms
-    setIsListening(true);
-  };
-
-  const handleWebSocketMessage = (data: any) => {
-    switch (data.type) {
-      case 'audio_response':
-        // Handle incoming audio from Google
-        if (data.audio && !isMuted) {
-          playAudioResponse(data.audio);
-        }
-        break;
-        
-      case 'transcript':
-        console.log('🎤 User said:', data.text);
-        break;
-        
-      case 'response_transcript':
-        console.log('🤖 Zest said:', data.text);
-        break;
-        
-      case 'recipe_update':
-        console.log('📝 Recipe updated:', data.recipe);
-        if (onRecipeUpdate) {
-          onRecipeUpdate(data.recipe);
-        }
-        break;
-        
-      case 'error':
-        console.error('Google Live Audio error:', data.message);
-        setConnectionStatus('error');
-        break;
-    }
-  };
-
-  const playAudioResponse = async (audioData: any) => {
+  const handleAudioResponse = async (audioData: any) => {
     try {
-      if (audioElementRef.current && !isMuted) {
-        // Convert base64 or blob to playable URL
-        let audioUrl;
+      if (!isMuted) {
+        let audioBuffer;
+        
         if (typeof audioData === 'string') {
-          // Base64 encoded audio
-          audioUrl = `data:audio/mp3;base64,${audioData}`;
+          // Base64 encoded audio from Gemini Live
+          const binaryString = atob(audioData);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          audioBuffer = bytes.buffer;
         } else {
-          // Blob audio data
-          audioUrl = URL.createObjectURL(audioData);
+          // Direct ArrayBuffer
+          audioBuffer = audioData;
         }
         
-        audioElementRef.current.src = audioUrl;
-        await audioElementRef.current.play();
+        if (audioContextRef.current) {
+          const decodedAudio = await audioContextRef.current.decodeAudioData(audioBuffer);
+          const source = audioContextRef.current.createBufferSource();
+          source.buffer = decodedAudio;
+          source.connect(audioContextRef.current.destination);
+          source.start();
+          console.log('Playing AI audio response');
+        }
       }
     } catch (error) {
       console.error('Error playing audio response:', error);
@@ -243,7 +253,8 @@ export function GoogleLiveAudioChat({ currentRecipe, onRecipeUpdate }: GoogleLiv
 
   const getStatusText = () => {
     switch (connectionStatus) {
-      case 'connected': return 'Live conversation active';
+      case 'connected': return 'Setting up conversation...';
+      case 'ready': return 'Ready - speak naturally!';
       case 'connecting': return 'Connecting...';
       case 'error': return 'Connection error';
       default: return 'Click to start voice conversation';
