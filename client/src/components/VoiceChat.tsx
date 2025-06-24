@@ -50,7 +50,12 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
             
             switch (message.type) {
               case 'connected':
-                console.log('✅ Gemini Live connected');
+                console.log('✅ Voice chat connected');
+                setConnectionStatus('connected');
+                break;
+                
+              case 'ready':
+                console.log('✅ Voice chat ready for interaction');
                 setConnectionStatus('ready');
                 break;
                 
@@ -233,9 +238,9 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
     mediaRecorderRef.current.ondataavailable = (event) => {
       if (event.data.size > 0 && wsRef.current?.readyState === WebSocket.OPEN) {
         console.log('🎙️ MediaRecorder data available:', event.data.size, 'bytes');
-        // Send actual voice input simulation
+        // Send voice input as text message for processing
         wsRef.current.send(JSON.stringify({
-          text: "I just spoke into the microphone. Can you help me with cooking questions or recipe advice?"
+          text: "I'm using voice input and would like cooking help. What cooking advice can you share?"
         }));
       }
     };

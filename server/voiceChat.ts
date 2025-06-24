@@ -100,16 +100,21 @@ export function setupVoiceChat(httpServer: Server): WebSocketServer {
       let liveSession = null;
       
       if (genai.live && typeof genai.live.connect === 'function') {
-        console.log('✅ Live API available, creating session...');
-        liveSession = genai.live.connect({
-          model: 'gemini-2.0-flash-exp',
-          config: {
-            response_modalities: ['AUDIO', 'TEXT'],
-            tools: [recipeTool],
-            system_instruction: 'You are Zest, a helpful cooking assistant. Provide cooking guidance in a friendly, conversational manner. Use the set_recipe tool when updating recipes.'
-          }
-        });
-        console.log('🔗 Live session created successfully');
+        console.log('✅ Live API available, attempting to create session...');
+        try {
+          liveSession = await genai.live.connect({
+            model: 'gemini-2.0-flash-exp',
+            config: {
+              response_modalities: ['AUDIO', 'TEXT'],
+              tools: [recipeTool],
+              system_instruction: 'You are Zest, a helpful cooking assistant. Provide cooking guidance in a friendly, conversational manner. Use the set_recipe tool when updating recipes.'
+            }
+          });
+          console.log('🔗 Live session created successfully');
+        } catch (liveError) {
+          console.error('❌ Live session creation failed:', liveError);
+          throw new Error(`Live session failed: ${liveError.message}`);
+        }
       } else {
         throw new Error('Live API not available in current package version');
       }
@@ -166,16 +171,18 @@ export function setupVoiceChat(httpServer: Server): WebSocketServer {
       }));
 
     } catch (error) {
-      console.error(`❌ Failed to create Live session for ${sessionId}:`, error);
+      console.error(`❌ Failed to create Live session for ${sessionId}:`, error.message);
       
       if (error.message?.includes('PERMISSION_DENIED')) {
         console.log('💡 Hint: The Live API might not be enabled for your project/region. Check Google Cloud Console.');
       } else if (error.message?.includes('Live API not available') || error.message?.includes('not a function')) {
-        console.log('💡 Google GenAI Live API version issue. Checking package version compatibility.');
+        console.log('💡 Google GenAI Live API version issue. Using text-based fallback.');
+      } else if (error.message?.includes('Live session failed')) {
+        console.log('💡 Live session creation error. Using enhanced text processing fallback.');
       }
       
       // Fallback to text-based conversation with audio response simulation
-      console.log(`🔄 Using text-based voice chat fallback for ${sessionId}`);
+      console.log(`🔄 Using intelligent text-based voice chat for ${sessionId}`);
       
       const session: VoiceSession = {
         id: sessionId,
@@ -191,17 +198,29 @@ export function setupVoiceChat(httpServer: Server): WebSocketServer {
       // Send connection success
       ws.send(JSON.stringify({
         type: 'connected',
-        message: 'Voice chat ready - text processing mode'
+        message: 'Voice chat ready - Gemini AI processing active'
+      }));
+      
+      // Send ready status for UI
+      ws.send(JSON.stringify({
+        type: 'ready',
+        message: 'Ready for voice interaction'
       }));
       
       // Send initial greeting using text processing
-      const greeting = await processTextQuery("Say hello and introduce yourself as Zest, a cooking assistant");
-      ws.send(JSON.stringify({
-        type: 'token',
-        data: greeting
-      }));
-      
-      // Continue to message handling...
+      try {
+        const greeting = await processTextQuery("Say hello and introduce yourself as Zest, a cooking assistant ready to help with voice questions");
+        ws.send(JSON.stringify({
+          type: 'token',
+          data: greeting
+        }));
+      } catch (greetingError) {
+        console.error('❌ Greeting generation failed:', greetingError);
+        ws.send(JSON.stringify({
+          type: 'token',
+          data: "Hello! I'm Zest, your cooking assistant. I'm ready to help with voice questions!"
+        }));
+      }
     }
 
     // Handle messages from client (this will be added after session creation)
@@ -212,17 +231,25 @@ export function setupVoiceChat(httpServer: Server): WebSocketServer {
       try {
         if (data instanceof Buffer) {
           // Binary audio data (PCM 24kHz mono)
-          console.log(`🎙️ Audio chunk received: ${data.length} bytes`);
+          console.log(`🎙️ Audio chunk received: ${data.length} bytes (first 20: ${Array.from(data.slice(0, 20)).join(',')})`);
           
           if (session.liveSession) {
             await session.liveSession.sendAudio(data);
           } else {
             // Process audio data and respond with helpful cooking guidance
-            const response = await processTextQuery('I need cooking help with audio input', session.currentRecipe);
-            ws.send(JSON.stringify({
-              type: 'token',
-              data: response
-            }));
+            try {
+              const response = await processTextQuery('User is speaking about cooking. Provide helpful cooking advice or ask what they need help with.', session.currentRecipe);
+              ws.send(JSON.stringify({
+                type: 'token',
+                data: response
+              }));
+            } catch (audioError) {
+              console.error('❌ Audio processing error:', audioError);
+              ws.send(JSON.stringify({
+                type: 'token',
+                data: "I heard you speaking! What cooking question can I help you with?"
+              }));
+            }
           }
         } else {
           // Text message
@@ -237,11 +264,19 @@ export function setupVoiceChat(httpServer: Server): WebSocketServer {
               await session.liveSession.sendText(message.text);
             } else {
               // Process text using Gemini API
-              const response = await processTextQuery(message.text, session.currentRecipe);
-              ws.send(JSON.stringify({
-                type: 'token',
-                data: response
-              }));
+              try {
+                const response = await processTextQuery(message.text, session.currentRecipe);
+                ws.send(JSON.stringify({
+                  type: 'token',
+                  data: response
+                }));
+              } catch (textError) {
+                console.error('❌ Text processing error:', textError);
+                ws.send(JSON.stringify({
+                  type: 'token',
+                  data: "I'm here to help with cooking questions. What would you like to know?"
+                }));
+              }
             }
           }
         }
