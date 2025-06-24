@@ -124,12 +124,12 @@ ${openAIContext?.quizData ? `User Quiz Preferences:
 ${openAIContext?.originalPrompt ? `Original Generation Prompt: ${openAIContext.originalPrompt}` : ''}
 
 CRITICAL FUNCTION CALLING INSTRUCTIONS:
-1. ALWAYS call updateRecipe when users request ANY recipe modifications
-2. Common modification triggers: "make it spicier", "add more garlic", "double the recipe", "make it vegetarian", "change cooking method"
-3. When calling updateRecipe, provide ALL required fields with complete data
-4. Never ask "would you like me to update the recipe" - just do it immediately when requested
-5. Be proactive and decisive - call functions automatically when users want changes
-6. Examples: "make it spicier" → call updateRecipe with added spices, "double it" → call updateRecipe with doubled quantities
+1. When users request recipe modifications, FIRST describe what you would change
+2. Then ask "Would you like me to update the recipe card with these changes?"
+3. ONLY call updateRecipe function when user confirms (says "yes", "do it", "update it", etc.)
+4. Common modification triggers: "make it spicier", "add more garlic", "double the recipe", "make it vegetarian"
+5. Always explain your proposed changes before calling functions
+6. Example flow: User: "make it spicier" → You: "I'll add cayenne pepper and jalapeños. Would you like me to update the recipe card?" → User: "yes" → Call updateRecipe
 
 CONVERSATION MEMORY INSTRUCTIONS:
 1. Reference previous conversation turns naturally
@@ -138,12 +138,13 @@ CONVERSATION MEMORY INSTRUCTIONS:
 4. Show conversational continuity
 
 BEHAVIOR:
-- Be decisive about recipe modifications - when asked, make the change
-- Call updateRecipe function immediately when users request modifications
+- Propose recipe modifications clearly before making changes
+- Ask for confirmation before calling updateRecipe function
 - Provide cooking guidance and explanations naturally
 - Use quiz preferences to inform suggestions
+- Be conversational and helpful while respecting user control
 
-I'm ready to take action on recipe modifications and maintain conversation context!`;
+I'm ready to suggest recipe modifications and update recipes when confirmed!`;
   }
 
   private convertConversationHistory(history: Array<{role: string, content: string}>) {

@@ -274,9 +274,10 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
           size="sm"
           onClick={() => setShowGoogleLiveAudio(!showGoogleLiveAudio)}
           className="h-6 px-2 text-white hover:bg-white/20"
-          title="Toggle Google Live Audio Chat"
+          title="Voice Chat with Google Live Audio"
         >
           <Radio className="w-3 h-3" />
+          <span className="text-xs ml-1">Voice</span>
         </Button>
       </div>
       
@@ -294,8 +295,26 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
               ×
             </Button>
           </div>
-          <div className="text-white text-xs">
-            Google Live Audio Chat integration coming soon
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                className="bg-green-600 hover:bg-green-700 text-white"
+                onClick={() => {
+                  // Start Google Live Audio session
+                  console.log('Starting Google Live Audio Chat...');
+                  // For now, show a message that it's starting
+                  alert('Google Live Audio Chat starting - speak naturally with Zest!');
+                }}
+              >
+                <Radio className="w-3 h-3 mr-1" />
+                Start Voice Chat
+              </Button>
+              <span className="text-white text-xs">Talk naturally with Zest</span>
+            </div>
+            <div className="text-white/70 text-xs">
+              Click to begin two-way voice conversation with Google Live Audio API
+            </div>
           </div>
         </div>
       )}

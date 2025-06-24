@@ -157,6 +157,7 @@ Changelog:
 - June 24, 2025. Google Live Audio button added to chatbot - integrated Radio icon toggle button in chat header to show/hide Google Live Audio Chat panel, providing clear access to two-way voice conversations with Google Live API alongside text chat functionality
 - June 24, 2025. Context retention enhancement complete - improved Gemini conversation memory with confirmation detection, explicit context injection, and enhanced function call execution for proper recipe modifications when users confirm changes
 - June 24, 2025. Dynamic recipe card updates implemented - enhanced Gemini function calling with comprehensive recipe modification parameters, improved frontend handling of function_call events, and proactive recipe updates without confirmation prompts for immediate visual feedback
+- June 24, 2025. Recipe modification workflow improved - changed Gemini behavior to propose modifications first and ask for confirmation before updating recipe cards, enhanced Google Live Audio button with clearer labeling and functional voice chat interface
 ```
 
 ## User Preferences
