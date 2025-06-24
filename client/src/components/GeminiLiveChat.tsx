@@ -360,21 +360,27 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
           console.log(`🎤 Audio level: ${average.toFixed(6)} (threshold: 0.001) - chunk ${chunkCount}`);
         }
         
-        if (average > 0.01) { // Higher threshold for better voice detection
+        if (average > 0.005) { // Balanced threshold for voice detection
           // Convert to 16-bit PCM for Gemini Live
           const pcmData = new Int16Array(inputBuffer.length);
           for (let i = 0; i < inputBuffer.length; i++) {
             pcmData[i] = Math.max(-32768, Math.min(32767, inputBuffer[i] * 32768));
           }
           
-          // Send audio using Live API format
+          // Send audio using proper Live API format with protobuf structure
           try {
             const audioMessage = {
-              realtime_input: {
-                media_chunks: [{
-                  mime_type: "audio/pcm",
-                  data: btoa(String.fromCharCode.apply(null, new Uint8Array(pcmData.buffer)))
-                }]
+              client_content: {
+                turns: [{
+                  role: "user",
+                  parts: [{
+                    inline_data: {
+                      mime_type: "audio/pcm",
+                      data: btoa(String.fromCharCode.apply(null, new Uint8Array(pcmData.buffer)))
+                    }
+                  }]
+                }],
+                turn_complete: false // Keep turn open for continuous audio
               }
             };
             
@@ -405,23 +411,124 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
     console.log('Audio streaming active');
   }, [isListening]);
 
-  // Skip Protobuf for now - use raw audio processing which was working
+  // Initialize proper Protobuf schema for Gemini Live API
   useEffect(() => {
-    console.log('Using raw audio processing - Protobuf schema too complex for current implementation');
-    setProtobufRoot(null);
+    const initProtobuf = async () => {
+      try {
+        // Create comprehensive protobuf schema for Gemini Live API
+        const root = new protobuf.Root();
+        
+        // Define the actual Gemini Live API message structure
+        const setupCompleteType = new protobuf.Type("BidiGenerateContentSetupComplete");
+        
+        const serverContentType = new protobuf.Type("BidiGenerateContentServerContent")
+          .add(new protobuf.Field("modelTurn", 1, "ModelTurn", "optional"))
+          .add(new protobuf.Field("turnComplete", 2, "bool", "optional"));
+          
+        const modelTurnType = new protobuf.Type("ModelTurn")
+          .add(new protobuf.Field("parts", 1, "Part", "repeated"));
+          
+        const partType = new protobuf.Type("Part")
+          .add(new protobuf.Field("text", 1, "string", "optional"))
+          .add(new protobuf.Field("inlineData", 2, "Blob", "optional"));
+          
+        const blobType = new protobuf.Type("Blob")
+          .add(new protobuf.Field("mimeType", 1, "string"))
+          .add(new protobuf.Field("data", 2, "bytes"));
+          
+        const responseType = new protobuf.Type("BidiGenerateContentResponse")
+          .add(new protobuf.Field("setupComplete", 1, "BidiGenerateContentSetupComplete", "optional"))
+          .add(new protobuf.Field("serverContent", 2, "BidiGenerateContentServerContent", "optional"));
+          
+        root.define("google.ai.generativelanguage.v1alpha")
+          .add(setupCompleteType)
+          .add(serverContentType) 
+          .add(modelTurnType)
+          .add(partType)
+          .add(blobType)
+          .add(responseType);
+        
+        setProtobufRoot(root);
+        console.log('Comprehensive Protobuf schema initialized for Gemini Live');
+      } catch (error) {
+        console.error('Failed to initialize Protobuf:', error);
+        setProtobufRoot(null);
+      }
+    };
+    
+    initProtobuf();
   }, []);
 
-  // Process audio messages - simplified approach
+  // Process incoming Protobuf messages with proper framing
   const processProtobufMessage = (arrayBuffer: ArrayBuffer) => {
-    // Skip small control messages (likely metadata)
-    if (arrayBuffer.byteLength < 100) {
-      console.log('Skipping small control message, length:', arrayBuffer.byteLength);
-      return;
+    try {
+      if (!protobufRoot) {
+        console.log('Protobuf not available, skipping message');
+        return;
+      }
+
+      // Handle WebSocket frame properly - extract the actual protobuf message
+      const dataView = new DataView(arrayBuffer);
+      let offset = 0;
+      
+      // Check if this looks like a length-prefixed message
+      if (arrayBuffer.byteLength >= 4) {
+        // Try reading potential length prefix (varint encoding)
+        const firstByte = dataView.getUint8(0);
+        
+        // For small messages, the length might be in the first byte
+        if (firstByte < 128 && firstByte > 0 && firstByte < arrayBuffer.byteLength) {
+          offset = 1; // Skip length prefix
+        }
+      }
+      
+      // Extract protobuf message bytes
+      const messageBytes = new Uint8Array(arrayBuffer, offset);
+      
+      const responseType = protobufRoot.lookupType("google.ai.generativelanguage.v1alpha.BidiGenerateContentResponse");
+      const message = responseType.decode(messageBytes);
+      
+      console.log('Decoded Gemini Live message:', message);
+      
+      // Handle setup completion
+      if (message.setupComplete) {
+        console.log('Gemini Live setup completed');
+        setConnectionStatus('ready');
+      }
+      
+      // Handle server content with audio
+      if (message.serverContent && message.serverContent.modelTurn) {
+        const parts = message.serverContent.modelTurn.parts || [];
+        
+        for (const part of parts) {
+          // Extract text transcription
+          if (part.text) {
+            console.log('Received text from Gemini:', part.text);
+          }
+          
+          // Extract and play audio data
+          if (part.inlineData && part.inlineData.mimeType === 'audio/pcm' && part.inlineData.data) {
+            console.log('Extracted audio data from Protobuf, length:', part.inlineData.data.length);
+            playRawAudio(part.inlineData.data.buffer || part.inlineData.data);
+          }
+        }
+        
+        // Check if turn is complete
+        if (message.serverContent.turnComplete) {
+          console.log('Gemini turn completed');
+        }
+      }
+    } catch (error) {
+      console.log('Protobuf decode failed, attempting fallback processing:', error);
+      
+      // If protobuf fails, try to extract audio from common patterns
+      if (arrayBuffer.byteLength > 1000) {
+        // For larger buffers, try treating as audio after skipping header
+        const skipBytes = Math.min(256, Math.floor(arrayBuffer.byteLength * 0.1));
+        const audioBuffer = arrayBuffer.slice(skipBytes);
+        playRawAudio(audioBuffer);
+      }
     }
-    
-    // Process as raw audio for larger messages
-    console.log('Processing as raw audio, length:', arrayBuffer.byteLength);
-    playRawAudio(arrayBuffer);
   };
 
   // Buffer management for continuous audio playback
