@@ -67,18 +67,20 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
           setup: {
             model: "models/gemini-2.0-flash-exp",
             generation_config: {
-              response_modalities: ["AUDIO", "TEXT"],
+              response_modalities: ["AUDIO"],
               speech_config: {
                 voice_config: {
                   prebuilt_voice_config: {
-                    voice_name: "Aoede"
+                    voice_name: "Puck"
                   }
                 }
-              }
+              },
+              temperature: 0.8,
+              max_output_tokens: 200
             },
             system_instruction: {
               parts: [{
-                text: `You are Zest, a bold cooking assistant. Provide helpful, concise cooking guidance. ${currentRecipe ? `Current recipe: ${currentRecipe.title}` : ''}`
+                text: `You are Zest, Flavr's cooking assistant. Give short, helpful cooking advice. Keep all responses under 30 seconds. Be encouraging and personable. ${currentRecipe ? `Current recipe: ${currentRecipe.title}` : ''}`
               }]
             }
           }
@@ -129,7 +131,7 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
                     playAudio(part.inlineData.data);
                   });
                 } else {
-                  console.log('❌ No audio parts found in response');
+                  console.log('⚠️ No audio parts found in response, all parts:', parts);
                 }
               }
             } else {
@@ -182,7 +184,12 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         const sum = inputBuffer.reduce((acc, val) => acc + Math.abs(val), 0);
         const average = sum / inputBuffer.length;
         
-        if (average > 0.01) { // Only send if there's significant audio
+        // Log audio levels for debugging (every 100 samples)
+        if (chunkCount % 100 === 0) {
+          console.log(`🎤 Audio level: ${average.toFixed(6)} (threshold: 0.001)`);
+        }
+        
+        if (average > 0.001) { // Lower threshold for voice detection
           chunkCount++;
           
           // Convert to 16-bit PCM
@@ -207,11 +214,19 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
             }
           };
           
-          if (chunkCount % 50 === 0) { // Log every 50th chunk to avoid spam
+          console.log(`📤 Sending audio message (${pcmData.length} samples, level: ${average.toFixed(4)})`);
+          console.log('Audio data size:', btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer))).length);
+          
+          if (chunkCount % 10 === 0) { // Log every 10th chunk for better debugging
             console.log(`🎤 Sending audio chunk ${chunkCount} (level: ${average.toFixed(4)})`);
           }
           
           websocketRef.current.send(JSON.stringify(audioMessage));
+        } else {
+          // Log silence detection for debugging
+          if (chunkCount % 500 === 0) {
+            console.log(`🔇 Silence detected (level: ${average.toFixed(6)})`);
+          }
         }
       }
     };
