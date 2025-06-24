@@ -87,6 +87,7 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         };
         
         console.log('Sending setup message to Gemini Live');
+        console.log('Setup message content:', JSON.stringify(setupMessage, null, 2));
         ws.send(JSON.stringify(setupMessage));
       };
       
@@ -101,6 +102,24 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
             // Handle setup complete
             if (message.setupComplete) {
               console.log('✅ Setup complete - ready for conversation');
+              setConnectionStatus('ready');
+              setIsListening(true);
+              startAudioStreaming();
+              return;
+            }
+            
+            // Also check for setup.done or similar
+            if (message.setup?.done || message.setup?.status === 'complete') {
+              console.log('✅ Setup done - ready for conversation');
+              setConnectionStatus('ready');
+              setIsListening(true);
+              startAudioStreaming();
+              return;
+            }
+            
+            // Force ready state if we get any setup response
+            if (message.setup || message.setupResponse) {
+              console.log('🔧 Setup response received - forcing ready state');
               setConnectionStatus('ready');
               setIsListening(true);
               startAudioStreaming();
