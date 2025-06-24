@@ -1,0 +1,35 @@
+Please finish wiring up conversational audio chat with Google Gemini Live.
+
+1 Environment & auth
+• Load .env on startup (dotenv.config()), expecting
+GCP_PROJECT, GCP_LOCATION (default us-central1), and GOOGLE_APPLICATION_CREDENTIALS (absolute path to a service-account JSON that has Vertex AI permissions).
+• Throw a clear error and log which variable is missing if any of them aren’t set.
+• Use the same credentials for both REST and Live WebSocket calls; no extra OAuth dance.
+
+2 Backend voice bridge
+• Add (or extend) a WebSocket endpoint /voice.
+• When a client connects:
+– Create one Live-API session with @google/genai → live.connect({ model:'gemini-2.0-flash-live-preview', config:{ response_modalities:['AUDIO','TEXT'] } }).
+– For every binary message from the browser (raw PCM 24 kHz mono) call session.sendAudio(chunk).
+– For every text message call session.sendText(text).
+• Stream server messages back to the browser:
+– msg.text ⇒ ws.send(JSON.stringify({ type:'token', data:msg.text }))
+– msg.audio (built-in helper returns PCM buffer) ⇒ ws.send(msg.audio)
+– If msg.toolCall.name === 'set_recipe' ⇒ ws.send(JSON.stringify({ type:'recipe', data:JSON.parse(msg.toolCall.args) }))
+• Close the Vertex session when the socket closes and save session.history() to whatever store you already use so the next connection has context.
+
+3 Client microphone & playback
+• On the browser side, start getUserMedia({ audio:true }), down-sample/encode to 24 kHz PCM little-endian, and send each chunk to /voice.
+• Play inbound binary frames through AudioContext (one continuous AudioBufferSourceNode).
+• Update the chat window live on each token event and redraw the recipe card on each recipe event.
+• Expose a simple “push-to-talk” button that starts/stops the mic; when silence > 1 s send a tiny JSON { audioStreamEnd:true }.
+
+4 Tool schema
+Keep using your existing set_recipe JSON function (title, servings?, ingredients[], steps[]). Register it once in the Live config (tools:[recipeTool]) so Gemini can call it mid-conversation.
+
+5 Debug & quality of life
+• Log WebSocket connect/close, session ID, and first 20 bytes of each audio chunk to help trace issues.
+• If Gemini throws a 403 PERMISSION_DENIED, print a hint that the Live API might not be enabled for the project/region.
+• Make the sample rate (sampleRateHertz) a constant so we can tweak it later.
+
+6 Do not touch any of my existing text-chat routes, UI styling, or deployment config—just add what’s needed for voice, using our current stack
