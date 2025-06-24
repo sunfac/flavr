@@ -1,0 +1,91 @@
+GET https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/attached_assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png 503 (Service Unavailable)
+Image
+commitMount @ chunk-UPELNCPK.js?v=8d102078:8412
+commitLayoutEffectOnFiber @ chunk-UPELNCPK.js?v=8d102078:17102
+commitLayoutMountEffects_complete @ chunk-UPELNCPK.js?v=8d102078:17980
+commitLayoutEffects_begin @ chunk-UPELNCPK.js?v=8d102078:17969
+commitLayoutEffects @ chunk-UPELNCPK.js?v=8d102078:17920
+commitRootImpl @ chunk-UPELNCPK.js?v=8d102078:19353
+commitRoot @ chunk-UPELNCPK.js?v=8d102078:19277
+finishConcurrentRender @ chunk-UPELNCPK.js?v=8d102078:18805
+performConcurrentWorkOnRoot @ chunk-UPELNCPK.js?v=8d102078:18718
+workLoop @ chunk-UPELNCPK.js?v=8d102078:197
+flushWork @ chunk-UPELNCPK.js?v=8d102078:176
+performWorkUntilDeadline @ chunk-UPELNCPK.js?v=8d102078:384Understand this error
+queryClient.ts:32 
+            
+            
+           GET https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/api/chat/history 503 (Service Unavailable)
+window.fetch @ Network.js:219
+(anonymous) @ queryClient.ts:32
+fetchFn @ @tanstack_react-query.js?v=8d102078:876
+run @ @tanstack_react-query.js?v=8d102078:512
+start @ @tanstack_react-query.js?v=8d102078:554
+fetch @ @tanstack_react-query.js?v=8d102078:963
+executeFetch_fn @ @tanstack_react-query.js?v=8d102078:2270
+setOptions @ @tanstack_react-query.js?v=8d102078:2031
+(anonymous) @ @tanstack_react-query.js?v=8d102078:3146
+commitHookEffectListMount @ chunk-UPELNCPK.js?v=8d102078:16915
+commitPassiveMountOnFiber @ chunk-UPELNCPK.js?v=8d102078:18156
+commitPassiveMountEffects_complete @ chunk-UPELNCPK.js?v=8d102078:18129
+commitPassiveMountEffects_begin @ chunk-UPELNCPK.js?v=8d102078:18119
+commitPassiveMountEffects @ chunk-UPELNCPK.js?v=8d102078:18109
+flushPassiveEffectsImpl @ chunk-UPELNCPK.js?v=8d102078:19490
+flushPassiveEffects @ chunk-UPELNCPK.js?v=8d102078:19447
+commitRootImpl @ chunk-UPELNCPK.js?v=8d102078:19416
+commitRoot @ chunk-UPELNCPK.js?v=8d102078:19277
+performSyncWorkOnRoot @ chunk-UPELNCPK.js?v=8d102078:18895
+flushSyncCallbacks @ chunk-UPELNCPK.js?v=8d102078:9119
+(anonymous) @ chunk-UPELNCPK.js?v=8d102078:18627Understand this error
+Console.js:61 ❌ Failed to initialize Protobuf: ReferenceError: protobuf is not defined
+    at initProtobuf (GeminiLiveChat.tsx:405:22)
+    at GeminiLiveChat.tsx:424:5
+    at commitHookEffectListMount (chunk-UPELNCPK.js?v=8d102078:16915:34)
+    at commitPassiveMountOnFiber (chunk-UPELNCPK.js?v=8d102078:18156:19)
+    at commitPassiveMountEffects_complete (chunk-UPELNCPK.js?v=8d102078:18129:17)
+    at commitPassiveMountEffects_begin (chunk-UPELNCPK.js?v=8d102078:18119:15)
+    at commitPassiveMountEffects (chunk-UPELNCPK.js?v=8d102078:18109:11)
+    at flushPassiveEffectsImpl (chunk-UPELNCPK.js?v=8d102078:19490:11)
+    at flushPassiveEffects (chunk-UPELNCPK.js?v=8d102078:19447:22)
+    at commitRootImpl (chunk-UPELNCPK.js?v=8d102078:19416:13)
+Mt.forEach.n.<computed> @ Console.js:61
+console.error @ refresh-suppress.js:48
+initProtobuf @ GeminiLiveChat.tsx:420
+(anonymous) @ GeminiLiveChat.tsx:424
+commitHookEffectListMount @ chunk-UPELNCPK.js?v=8d102078:16915
+commitPassiveMountOnFiber @ chunk-UPELNCPK.js?v=8d102078:18156
+commitPassiveMountEffects_complete @ chunk-UPELNCPK.js?v=8d102078:18129
+commitPassiveMountEffects_begin @ chunk-UPELNCPK.js?v=8d102078:18119
+commitPassiveMountEffects @ chunk-UPELNCPK.js?v=8d102078:18109
+flushPassiveEffectsImpl @ chunk-UPELNCPK.js?v=8d102078:19490
+flushPassiveEffects @ chunk-UPELNCPK.js?v=8d102078:19447
+commitRootImpl @ chunk-UPELNCPK.js?v=8d102078:19416
+commitRoot @ chunk-UPELNCPK.js?v=8d102078:19277
+performSyncWorkOnRoot @ chunk-UPELNCPK.js?v=8d102078:18895
+flushSyncCallbacks @ chunk-UPELNCPK.js?v=8d102078:9119
+(anonymous) @ chunk-UPELNCPK.js?v=8d102078:18627Understand this error
+Console.js:61 Starting Gemini Live Audio connection...
+GeminiLiveChat.tsx:45 
+            
+            
+           GET https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/api/gemini-key 503 (Service Unavailable)
+window.fetch @ Network.js:219
+connect @ GeminiLiveChat.tsx:45
+await in connect
+callCallback2 @ chunk-UPELNCPK.js?v=8d102078:3674
+invokeGuardedCallbackDev @ chunk-UPELNCPK.js?v=8d102078:3699
+invokeGuardedCallback @ chunk-UPELNCPK.js?v=8d102078:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-UPELNCPK.js?v=8d102078:3736
+executeDispatch @ chunk-UPELNCPK.js?v=8d102078:7014
+processDispatchQueueItemsInOrder @ chunk-UPELNCPK.js?v=8d102078:7034
+processDispatchQueue @ chunk-UPELNCPK.js?v=8d102078:7043
+dispatchEventsForPlugins @ chunk-UPELNCPK.js?v=8d102078:7051
+(anonymous) @ chunk-UPELNCPK.js?v=8d102078:7174
+batchedUpdates$1 @ chunk-UPELNCPK.js?v=8d102078:18913
+batchedUpdates @ chunk-UPELNCPK.js?v=8d102078:3579
+dispatchEventForPluginEventSystem @ chunk-UPELNCPK.js?v=8d102078:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-UPELNCPK.js?v=8d102078:5478
+dispatchEvent @ chunk-UPELNCPK.js?v=8d102078:5472
+dispatchDiscreteEvent @ chunk-UPELNCPK.js?v=8d102078:5449Understand this error
+Console.js:61 Failed to connect: Error: No Gemini API key available
+    at connect (GeminiLiveChat.tsx:53:15)

@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, MicOff, Volume2, VolumeX, Send, Square } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
+import * as protobuf from 'protobufjs';
 
 interface GeminiLiveChatProps {
   currentRecipe?: any;
@@ -13,6 +14,7 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
   const [isListening, setIsListening] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected' | 'ready' | 'error'>('disconnected');
+  const [protobufRoot, setProtobufRoot] = useState<protobuf.Root | null>(null);
   
   const websocketRef = useRef<WebSocket | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -39,18 +41,24 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
       // Create audio context matching Gemini Live format
       audioContextRef.current = new AudioContext({ sampleRate: 24000 });
       
-      // Get API key
+      // Get API key with better error handling
       let apiKey = import.meta.env.VITE_GEMINI_API_KEY;
       if (!apiKey) {
-        const response = await fetch('/api/gemini-key');
-        if (response.ok) {
-          const data = await response.json();
-          apiKey = data.key;
+        try {
+          const response = await fetch('/api/gemini-key');
+          if (response.ok) {
+            const data = await response.json();
+            apiKey = data.key;
+          } else {
+            console.warn('API key endpoint returned:', response.status);
+          }
+        } catch (error) {
+          console.warn('Failed to fetch API key from server:', error);
         }
       }
       
       if (!apiKey) {
-        throw new Error('No Gemini API key available');
+        throw new Error('No Gemini API key available - please check environment variables');
       }
       
       // Use the verified Google Live API endpoint format
@@ -415,9 +423,11 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         root.define("gemini").add(serverContentType).add(responseType);
         
         setProtobufRoot(root);
-        console.log('✅ Protobuf schema initialized for Gemini Live');
+        console.log('Protobuf schema initialized for Gemini Live');
       } catch (error) {
-        console.error('❌ Failed to initialize Protobuf:', error);
+        console.error('Failed to initialize Protobuf:', error);
+        // Continue without protobuf - fallback to raw audio processing
+        setProtobufRoot(null);
       }
     };
     
@@ -428,7 +438,7 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
   const processProtobufMessage = (arrayBuffer: ArrayBuffer) => {
     try {
       if (!protobufRoot) {
-        console.log('⚠️ Protobuf not initialized, treating as raw audio');
+        console.log('Protobuf not initialized, using raw audio processing');
         playRawAudio(arrayBuffer);
         return;
       }
@@ -436,19 +446,19 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
       const responseType = protobufRoot.lookupType("gemini.BidiGenerateContentResponse");
       const message = responseType.decode(new Uint8Array(arrayBuffer));
       
-      console.log('📋 Decoded Protobuf message:', message);
+      console.log('Decoded Protobuf message:', message);
       
       if (message.serverContent && message.serverContent.data) {
         const audioData = message.serverContent.data;
-        console.log('🎵 Extracted audio data from Protobuf, length:', audioData.length);
+        console.log('Extracted audio data from Protobuf, length:', audioData.length);
         playRawAudio(audioData.buffer || audioData);
       }
       
       if (message.serverContent && message.serverContent.outputTranscription) {
-        console.log('📝 Received transcription:', message.serverContent.outputTranscription);
+        console.log('Received transcription:', message.serverContent.outputTranscription);
       }
     } catch (error) {
-      console.log('⚠️ Protobuf decode failed, treating as raw audio:', error);
+      console.log('Protobuf decode failed, using raw audio processing:', error);
       playRawAudio(arrayBuffer);
     }
   };
@@ -482,10 +492,16 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
       while (audioBufferQueue.current.length > 0) {
         const audioBuffer = audioBufferQueue.current.shift()!;
         
-        // No padding needed - Protobuf extraction should provide clean PCM data
+        // Check for clean PCM data after Protobuf extraction
         if (audioBuffer.byteLength % 2 !== 0) {
-          console.warn('⚠️ Audio data has odd byte length after Protobuf extraction:', audioBuffer.byteLength);
-          return; // Skip corrupted audio data
+          console.warn('Audio data has odd byte length, padding for compatibility:', audioBuffer.byteLength);
+          // Pad to even length for Int16Array compatibility
+          const paddedBuffer = new ArrayBuffer(audioBuffer.byteLength + 1);
+          const paddedView = new Uint8Array(paddedBuffer);
+          const originalView = new Uint8Array(audioBuffer);
+          paddedView.set(originalView);
+          paddedView[audioBuffer.byteLength] = 0;
+          audioBuffer = paddedBuffer;
         }
         
         // Process extracted PCM data from Protobuf  
@@ -523,7 +539,7 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
       
       console.log('✅ Audio queue processed completely');
     } catch (error) {
-      console.error('❌ Error processing audio queue:', error);
+      console.error('Error processing audio queue:', error);
     } finally {
       isPlaying.current = false;
     }
