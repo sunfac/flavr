@@ -179,6 +179,7 @@ Changelog:
 - June 24, 2025. WebSocket stability improvements implemented - enhanced message handling for Buffer and string data, added robust error handling without session termination, improved WebSocket server configuration with disabled subprotocol handling, added detailed connection logging for debugging frame errors
 - June 24, 2025. Simple voice chat implementation deployed - created dedicated simpleVoiceChat.ts module to avoid WebSocket frame corruption, implemented clean WebSocket connection at /ws/simple-voice, integrated with GoogleGenAI for cooking assistance, voice chat now maintains stable connections without frame errors
 - June 24, 2025. Gemini Live WebSocket communication fixed - implemented proper binary frame handling with arraybuffer support, added genai.live.connect() session management, integrated sendAudio() and markAudioEnd() for proper turn handling, enhanced client-side audio processing with MediaRecorder ArrayBuffer conversion, voice chat now maintains stable Gemini Live sessions
+- June 24, 2025. Direct Gemini Live API WebSocket integration complete - implemented client-side connection to Google's native WebSocket endpoint, added proper newline-delimited JSON message formatting, integrated 24kHz PCM audio processing, implemented setup/clientContent/turnComplete message structure, enhanced audio playback for Gemini Live responses
 ```
 
 ## User Preferences

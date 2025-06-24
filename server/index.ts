@@ -154,19 +154,7 @@ app.use((req, res, next) => {
 
 
 
-  // Initialize Simple Voice Chat WebSocket endpoint
-  try {
-    const { setupSimpleVoiceChat } = await import('./simpleVoiceChat');
-    const simpleVoiceWss = setupSimpleVoiceChat(server);
-    console.log('🎤 Simple voice chat WebSocket initialized on /ws/simple-voice endpoint');
-    
-    simpleVoiceWss.on('error', (error) => {
-      console.error('❌ Simple voice WebSocket server error:', error);
-    });
-    
-  } catch (error) {
-    console.error('❌ Failed to initialize simple voice chat:', error);
-  }
+  // Note: Simple voice chat removed, using Google Live Audio endpoint
 
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.

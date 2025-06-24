@@ -256,16 +256,29 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
         console.log('🎙️ MediaRecorder data available:', event.data.size, 'bytes');
         
         try {
-          // Convert Blob to ArrayBuffer for binary transmission
-          const arrayBuffer = await event.data.arrayBuffer();
-          wsRef.current.send(arrayBuffer);
+          // Convert audio blob to PCM format for Gemini Live
+          const pcmData = await convertToPCM(event.data);
+          const base64Audio = btoa(String.fromCharCode(...new Uint8Array(pcmData)));
+          
+          const audioMessage = {
+            clientContent: {
+              turns: [{
+                role: "user",
+                parts: [{
+                  inlineData: {
+                    mimeType: "audio/pcm",
+                    data: base64Audio
+                  }
+                }]
+              }],
+              turnComplete: false
+            }
+          };
+          
+          console.log('📤 Sending audio message:', 'audio chunk');
+          wsRef.current.send(JSON.stringify(audioMessage) + '\n');
         } catch (error) {
-          console.error('Error converting audio data:', error);
-          // Fallback to text message
-          wsRef.current.send(JSON.stringify({
-            type: 'text',
-            text: "I'm using voice input and would like cooking help."
-          }));
+          console.error('❌ Error converting audio data:', error);
         }
       }
     };
@@ -273,20 +286,34 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
     mediaRecorderRef.current.start(100); // 100ms chunks
   };
 
-  // Convert audio blob to PCM
+  // Convert audio blob to PCM format for Gemini Live (24 kHz, 16-bit, mono)
   const convertToPCM = async (blob: Blob): Promise<ArrayBuffer> => {
     const arrayBuffer = await blob.arrayBuffer();
-    const audioContext = new AudioContext({ sampleRate: SAMPLE_RATE });
+    const audioContext = new AudioContext({ sampleRate: 24000 });
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
     
-    // Convert to 16-bit PCM
-    const pcmData = new Int16Array(audioBuffer.length);
-    const channelData = audioBuffer.getChannelData(0);
+    // Resample to 24 kHz and convert to mono if needed
+    const targetSampleRate = 24000;
+    const resampledLength = Math.round(audioBuffer.length * targetSampleRate / audioBuffer.sampleRate);
+    const resampledBuffer = audioContext.createBuffer(1, resampledLength, targetSampleRate);
+    const resampledData = resampledBuffer.getChannelData(0);
     
-    for (let i = 0; i < channelData.length; i++) {
-      pcmData[i] = Math.max(-32768, Math.min(32767, channelData[i] * 32768));
+    // Simple resampling - take mono channel (mix down if stereo)
+    const sourceData = audioBuffer.numberOfChannels > 1 ? 
+      audioBuffer.getChannelData(0) : audioBuffer.getChannelData(0);
+    
+    for (let i = 0; i < resampledLength; i++) {
+      const sourceIndex = Math.floor(i * audioBuffer.length / resampledLength);
+      resampledData[i] = sourceData[sourceIndex] || 0;
     }
     
+    // Convert to 16-bit PCM
+    const pcmData = new Int16Array(resampledLength);
+    for (let i = 0; i < resampledLength; i++) {
+      pcmData[i] = Math.max(-32768, Math.min(32767, resampledData[i] * 32768));
+    }
+    
+    console.log('🎙️ Converted audio:', resampledLength, 'samples at 24kHz');
     return pcmData.buffer;
   };
 
