@@ -315,11 +315,27 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                     ws.onopen = () => {
                       console.log('Connected to Google Live Audio');
                       alert('Voice chat active! Start speaking with Zest');
+                      
+                      // Send start conversation message
+                      ws.send(JSON.stringify({
+                        type: 'start_conversation'
+                      }));
+                    };
+                    
+                    ws.onmessage = (event) => {
+                      const data = JSON.parse(event.data);
+                      console.log('Received from voice chat:', data);
+                      
+                      if (data.type === 'error') {
+                        alert(`Voice chat error: ${data.message}`);
+                      } else if (data.type === 'audio_response') {
+                        console.log('Received audio response from Zest');
+                      }
                     };
                     
                     ws.onerror = (error) => {
                       console.error('WebSocket error:', error);
-                      alert('Voice chat connection failed. Please try again.');
+                      alert('Voice chat connection failed. Text chat is still available.');
                     };
                     
                   } catch (error) {

@@ -18,8 +18,8 @@ export class GoogleLiveApiClient {
   async connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        // Google's Live API WebSocket endpoint (replace with actual endpoint when available)
-        const wsUrl = `wss://generativelanguage.googleapis.com/ws/v1beta/models/${this.config.model}:streamGenerateContent?key=${this.config.apiKey}`;
+        // Google Gemini Live API WebSocket endpoint - correct format from documentation
+        const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService/BidiGenerateContent?key=${this.config.apiKey}`;
         
         this.websocket = new WebSocket(wsUrl);
 
