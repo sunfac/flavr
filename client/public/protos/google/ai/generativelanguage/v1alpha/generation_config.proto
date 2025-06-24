@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package google.ai.generativelanguage.v1alpha;
+
+// Configuration for content generation
+message GenerationConfig {
+  repeated string response_modalities = 1;
+  int32 candidate_count = 2;
+  int32 max_output_tokens = 3;
+  float temperature = 4;
+  float top_p = 5;
+  int32 top_k = 6;
+}
