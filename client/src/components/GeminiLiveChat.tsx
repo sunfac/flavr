@@ -62,28 +62,10 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         setConnectionStatus('connected');
         setIsConnected(true);
         
-        // Send setup message according to Gemini Live API spec
+        // Test with the official Gemini 1.5 Flash model for Live API
         const setupMessage = {
           setup: {
-            model: "models/gemini-2.0-flash-exp",
-            generation_config: {
-              response_modalities: ["AUDIO", "TEXT"],
-              speech_config: {
-                voice_config: {
-                  prebuilt_voice_config: {
-                    voice_name: "Puck"
-                  }
-                }
-              },
-              temperature: 0.8,
-              max_output_tokens: 200
-            },
-            system_instruction: {
-              parts: [{
-                text: `You are Zest, Flavr's cooking assistant. Give short, helpful cooking advice. Keep all responses under 30 seconds. Be encouraging and personable. ${currentRecipe ? `Current recipe: ${currentRecipe.title}` : ''}`
-              }]
-            },
-            tools: []
+            model: "models/gemini-1.5-flash"
           }
         };
         
@@ -249,8 +231,27 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         setConnectionStatus('error');
       };
       
-      ws.onclose = () => {
+      ws.onclose = (event) => {
         console.log('Disconnected from Gemini Live');
+        console.log('Close event code:', event.code);
+        console.log('Close event reason:', event.reason);
+        console.log('Close event wasClean:', event.wasClean);
+        
+        // Log specific error codes for debugging
+        if (event.code === 1002) {
+          console.error('❌ Protocol error - invalid message format');
+        } else if (event.code === 1003) {
+          console.error('❌ Unsupported data - check message content');
+        } else if (event.code === 1008) {
+          console.error('❌ Policy violation - check API key or permissions');
+        } else if (event.code === 1011) {
+          console.error('❌ Server error - unexpected condition');
+        } else if (event.code === 1006) {
+          console.error('❌ Abnormal closure - connection lost');
+        }
+        
+        setIsConnected(false);
+        setConnectionStatus('disconnected');
         cleanup();
       };
       
