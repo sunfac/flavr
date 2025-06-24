@@ -1,0 +1,53 @@
+This is excellent! The error message you're receiving is extremely helpful and directly tells you the problem:
+
+Close event reason: models/gemini-live-2.5-flash-preview-native-audio is not found for API version v1alpha, or is not supported for bidiGenerat
+Close event wasClean: true
+❌ Policy violation - check API key or permissions.
+The key part is: "models/gemini-live-2.5-flash-preview-native-audio is not found for API version v1alpha, or is not supported for bidiGenerat"
+
+This means one of two things:
+
+The model name is slightly off for the v1alpha API version. Even a subtle difference in the model ID can cause this.
+The model gemini-live-2.5-flash-preview-native-audio is not yet available or fully supported on the v1alpha endpoint you're using for BidiGenerateContent. This is a very common scenario with preview/experimental APIs, where specific models might be rolled out to different API versions or endpoints at different times.
+The "Policy violation - check API key or permissions" might be a generic fallback error when the primary issue (model not found/supported) occurs, or it could indicate that even if the model was found, your API key doesn't have the necessary access for that specific model on that specific API version.
+
+Here's how to troubleshoot and resolve this:
+
+Verify the Exact Model Name for v1alpha:
+
+Check the most up-to-date Gemini Live API documentation for v1alpha. Sometimes, the model names for preview features or live streaming can be very specific.
+Look for models explicitly listed as supporting "Live API" and "native audio."
+Based on recent documentation updates, here are some likely candidates to try:
+models/gemini-2.5-flash-preview-native-audio-dialog (This is frequently mentioned for native audio)
+models/gemini-2.5-flash-exp-native-audio-thinking-dialog (If you want the "thinking" capabilities)
+models/gemini-live-2.5-flash-preview (This is a "half-cascade" model, which means native audio input but text-to-speech output. It's often more stable for initial tests if the full native audio model is problematic, but might not give you the desired pure audio-in/audio-out experience.)
+models/gemini-2.0-flash-live-001 (This is another "live" model that might be supported on v1alpha).
+Try a Different Model (Prioritize Native Audio Models):
+If the exact model name isn't immediately obvious, try the other "native audio" models mentioned in the documentation. Start with models/gemini-2.5-flash-preview-native-audio-dialog first, as it's often the recommended one for this use case.
+
+Your setup message would then become:
+
+JSON
+
+{
+  "setup": {
+    "model": "models/gemini-2.5-flash-preview-native-audio-dialog", // <--- Changed model name
+    "generationConfig": {
+      "responseModalities": [
+        "AUDIO"
+      ]
+    },
+    "inputAudioTranscription": {},
+    "outputAudioTranscription": {}
+  }
+}
+Confirm API Key Permissions for Live API:
+While the error directly points to the model, it's always good to ensure your API key has the necessary permissions enabled for all Generative Language API features, especially the Live API. Sometimes, new features or models might require specific enablement in your Google Cloud Project or AI Studio settings.
+
+Summary of Action Plan:
+
+The problem is almost certainly the specific model name you're providing, or that the model isn't yet fully available on the v1alpha endpoint you're hitting.
+
+Your next step is to update the model field in your setup message to one of the officially supported Live API native audio models for the v1alpha endpoint.
+
+I recommend starting with: models/gemini-2.5-flash-preview-native-audio-dialog and testing again.

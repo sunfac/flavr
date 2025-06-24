@@ -66,11 +66,12 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         setConnectionStatus('connected');
         setIsConnected(true);
         
-        // Test multiple valid models for Live API compatibility
+        // Test Live API specific models in order of preference
         const testModels = [
-          "models/gemini-2.0-flash-exp",
-          "models/gemini-2.0-flash",
-          "models/gemini-1.5-flash"
+          "models/gemini-2.5-flash-preview-native-audio-dialog",
+          "models/gemini-2.5-flash-exp-native-audio-thinking-dialog", 
+          "models/gemini-live-2.5-flash-preview",
+          "models/gemini-2.0-flash-live-001"
         ];
         
         const setupMessage = {
@@ -276,17 +277,45 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         setIsConnected(false);
         setConnectionStatus('disconnected');
         
-        // Attempt fallback with next model if available
+        // Attempt fallback with next Live API model if available
         if (event.code === 1008 && ws.userData?.testModels && ws.userData.currentModelIndex < ws.userData.testModels.length - 1) {
-          console.log('🔄 Trying fallback model...');
+          console.log('🔄 Model not supported, trying next Live API model...');
+          const nextIndex = ws.userData.currentModelIndex + 1;
+          const nextModel = ws.userData.testModels[nextIndex];
+          console.log(`Testing Live API model: ${nextModel}`);
+          
+          // Update model index and retry
           setTimeout(() => {
-            const nextIndex = ws.userData.currentModelIndex + 1;
-            const nextModel = ws.userData.testModels[nextIndex];
-            console.log(`Testing model: ${nextModel}`);
-            
-            // Retry connection with next model
             setConnectionStatus('connecting');
-            connect();
+            const newWs = new WebSocket(`wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`);
+            websocketRef.current = newWs;
+            newWs.binaryType = 'arraybuffer';
+            
+            newWs.onopen = () => {
+              console.log(`🌐 Connected with model: ${nextModel}`);
+              setConnectionStatus('connected');
+              setIsConnected(true);
+              
+              const setupMessage = {
+                "setup": {
+                  "model": nextModel,
+                  "generationConfig": {
+                    "responseModalities": ["AUDIO"]
+                  },
+                  "inputAudioTranscription": {},
+                  "outputAudioTranscription": {}
+                }
+              };
+              
+              console.log('Sending setup with fallback model:', JSON.stringify(setupMessage, null, 2));
+              newWs.send(JSON.stringify(setupMessage));
+              newWs.userData = { testModels: ws.userData.testModels, currentModelIndex: nextIndex };
+            };
+            
+            // Reattach event handlers
+            newWs.onmessage = ws.onmessage;
+            newWs.onerror = ws.onerror;
+            newWs.onclose = ws.onclose;
           }, 1000);
         } else {
           cleanup();
