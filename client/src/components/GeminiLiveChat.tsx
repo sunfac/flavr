@@ -342,7 +342,7 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
     console.log('Starting continuous audio streaming to Gemini Live');
     
     const source = audioContextRef.current.createMediaStreamSource(streamRef.current);
-    const processor = audioContextRef.current.createScriptProcessorNode(4096, 1, 1);
+    const processor = audioContextRef.current.createScriptProcessor(4096, 1, 1);
     processorRef.current = processor;
     
     let chunkCount = 0;
@@ -360,14 +360,14 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
           console.log(`🎤 Audio level: ${average.toFixed(6)} (threshold: 0.001) - chunk ${chunkCount}`);
         }
         
-        if (average > 0.001) { // Voice activity detected
+        if (average > 0.01) { // Higher threshold for better voice detection
           // Convert to 16-bit PCM for Gemini Live
           const pcmData = new Int16Array(inputBuffer.length);
           for (let i = 0; i < inputBuffer.length; i++) {
             pcmData[i] = Math.max(-32768, Math.min(32767, inputBuffer[i] * 32768));
           }
           
-          // Send audio using proper Protobuf format for Live API
+          // Send audio using Live API format
           try {
             const audioMessage = {
               realtime_input: {
@@ -378,10 +378,10 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
               }
             };
             
-            console.log(`📤 Sending audio chunk ${chunkCount} (${pcmData.length} samples, level: ${average.toFixed(4)})`);
+            console.log(`Sending audio chunk ${chunkCount} (${pcmData.length} samples, level: ${average.toFixed(4)})`);
             websocketRef.current.send(JSON.stringify(audioMessage));
           } catch (error) {
-            console.error('❌ Failed to send audio:', error);
+            console.error('Failed to send audio:', error);
           }
           
           try {
@@ -405,62 +405,23 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
     console.log('Audio streaming active');
   }, [isListening]);
 
-  // Initialize Protobuf schema for Gemini Live API
+  // Skip Protobuf for now - use raw audio processing which was working
   useEffect(() => {
-    const initProtobuf = async () => {
-      try {
-        // Create a minimal protobuf schema for Gemini Live API
-        const root = new protobuf.Root();
-        
-        // Define basic message structure based on Gemini Live API
-        const serverContentType = new protobuf.Type("ServerContent")
-          .add(new protobuf.Field("data", 1, "bytes"))
-          .add(new protobuf.Field("outputTranscription", 2, "string"));
-          
-        const responseType = new protobuf.Type("BidiGenerateContentResponse")
-          .add(new protobuf.Field("serverContent", 1, "ServerContent"));
-          
-        root.define("gemini").add(serverContentType).add(responseType);
-        
-        setProtobufRoot(root);
-        console.log('Protobuf schema initialized for Gemini Live');
-      } catch (error) {
-        console.error('Failed to initialize Protobuf:', error);
-        // Continue without protobuf - fallback to raw audio processing
-        setProtobufRoot(null);
-      }
-    };
-    
-    initProtobuf();
+    console.log('Using raw audio processing - Protobuf schema too complex for current implementation');
+    setProtobufRoot(null);
   }, []);
 
-  // Process incoming Protobuf messages
+  // Process audio messages - simplified approach
   const processProtobufMessage = (arrayBuffer: ArrayBuffer) => {
-    try {
-      if (!protobufRoot) {
-        console.log('Protobuf not initialized, using raw audio processing');
-        playRawAudio(arrayBuffer);
-        return;
-      }
-
-      const responseType = protobufRoot.lookupType("gemini.BidiGenerateContentResponse");
-      const message = responseType.decode(new Uint8Array(arrayBuffer));
-      
-      console.log('Decoded Protobuf message:', message);
-      
-      if (message.serverContent && message.serverContent.data) {
-        const audioData = message.serverContent.data;
-        console.log('Extracted audio data from Protobuf, length:', audioData.length);
-        playRawAudio(audioData.buffer || audioData);
-      }
-      
-      if (message.serverContent && message.serverContent.outputTranscription) {
-        console.log('Received transcription:', message.serverContent.outputTranscription);
-      }
-    } catch (error) {
-      console.log('Protobuf decode failed, using raw audio processing:', error);
-      playRawAudio(arrayBuffer);
+    // Skip small control messages (likely metadata)
+    if (arrayBuffer.byteLength < 100) {
+      console.log('Skipping small control message, length:', arrayBuffer.byteLength);
+      return;
     }
+    
+    // Process as raw audio for larger messages
+    console.log('Processing as raw audio, length:', arrayBuffer.byteLength);
+    playRawAudio(arrayBuffer);
   };
 
   // Buffer management for continuous audio playback
@@ -492,7 +453,8 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
       while (audioBufferQueue.current.length > 0) {
         const audioBuffer = audioBufferQueue.current.shift()!;
         
-        // Check for clean PCM data after Protobuf extraction
+        // Handle odd byte lengths properly
+        let processedBuffer = audioBuffer;
         if (audioBuffer.byteLength % 2 !== 0) {
           console.warn('Audio data has odd byte length, padding for compatibility:', audioBuffer.byteLength);
           // Pad to even length for Int16Array compatibility
@@ -501,11 +463,11 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
           const originalView = new Uint8Array(audioBuffer);
           paddedView.set(originalView);
           paddedView[audioBuffer.byteLength] = 0;
-          audioBuffer = paddedBuffer;
+          processedBuffer = paddedBuffer;
         }
         
-        // Process extracted PCM data from Protobuf  
-        const pcmData = new Int16Array(audioBuffer);
+        // Process PCM data  
+        const pcmData = new Int16Array(processedBuffer);
         
         if (pcmData.length === 0) continue;
         
