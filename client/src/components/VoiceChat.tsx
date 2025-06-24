@@ -39,15 +39,26 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
         setIsConnected(true);
         setConnectionStatus('connected');
         
-        // Send minimal setup message to establish connection
+        // Send proper setup message for Gemini Live API
         const setupMessage = {
           setup: {
-            model: "models/gemini-2.0-flash-exp"
+            model: "models/gemini-2.0-flash-exp",
+            generation_config: {
+              response_modalities: ["TEXT"],
+              temperature: 0.7
+            },
+            system_instruction: {
+              parts: [
+                {
+                  text: "You are Zest, a friendly voice assistant that responds conversationally and helps the user with cooking tasks. Provide concise, helpful cooking guidance."
+                }
+              ]
+            }
           }
         };
         
-        console.log('📤 Sending setup message:', 'setup');
-        wsRef.current?.send(JSON.stringify(setupMessage) + '\n');
+        console.log('📤 Sending setup message:', JSON.stringify(setupMessage, null, 2));
+        wsRef.current?.send(JSON.stringify(setupMessage));
       };
       
       wsRef.current.onmessage = async (event) => {
@@ -71,19 +82,19 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
                 setConnectionStatus('ready');
               }
               
-              if (message.serverContent) {
-                const content = message.serverContent;
+              if (message.server_content) {
+                const content = message.server_content;
                 
-                if (content.modelTurn && content.modelTurn.parts) {
-                  for (const part of content.modelTurn.parts) {
+                if (content.model_turn && content.model_turn.parts) {
+                  for (const part of content.model_turn.parts) {
                     if (part.text) {
                       console.log('📝 Text response:', part.text);
                       onTokenReceived?.(part.text);
                     }
                     
-                    if (part.inlineData && part.inlineData.mimeType === 'audio/pcm') {
-                      console.log('🎵 Inline audio received');
-                      const audioData = atob(part.inlineData.data);
+                    if (part.inline_data && part.inline_data.mime_type === 'audio/pcm') {
+                      console.log('🔊 Audio response received');
+                      const audioData = atob(part.inline_data.data);
                       const audioBuffer = new ArrayBuffer(audioData.length);
                       const view = new Uint8Array(audioBuffer);
                       for (let i = 0; i < audioData.length; i++) {
@@ -94,7 +105,7 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
                   }
                 }
                 
-                if (content.turnComplete) {
+                if (content.turn_complete) {
                   console.log('✅ Turn complete');
                   setConnectionStatus('ready');
                 }
@@ -275,22 +286,39 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
         console.log('🎙️ MediaRecorder data available:', event.data.size, 'bytes');
         
         try {
-          // For now, send text message instead of audio due to connection issues
-          wsRef.current.send(JSON.stringify({
-            clientContent: {
+          // Send text message for now until audio format is confirmed
+          const clientMessage = {
+            client_content: {
               turns: [{
                 role: "user",
                 parts: [{
-                  text: "I'm speaking but sending text: How do I make perfect risotto?"
+                  text: "How do I make perfect risotto? Give me a quick cooking tip."
                 }]
               }],
-              turnComplete: false
+              turn_complete: false
             }
-          }) + '\n');
+          };
           
-          console.log('📤 Sending text message (audio fallback)');
+          console.log('📤 Sending client message:', JSON.stringify(clientMessage));
+          wsRef.current.send(JSON.stringify(clientMessage));
         } catch (error) {
-          console.error('❌ Error sending message:', error);
+          console.error('❌ Error converting/sending audio:', error);
+          
+          // Fallback to text message
+          const fallbackMessage = {
+            client_content: {
+              turns: [{
+                role: "user", 
+                parts: [{
+                  text: "How do I make perfect risotto?"
+                }]
+              }],
+              turn_complete: true
+            }
+          };
+          
+          console.log('📤 Sending fallback text message:', JSON.stringify(fallbackMessage));
+          wsRef.current.send(JSON.stringify(fallbackMessage));
         }
       }
     };
