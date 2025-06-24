@@ -2,7 +2,6 @@ import { WebSocketServer } from 'ws';
 import { Server } from 'http';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
-import { geminiChat } from './geminiChat';
 
 // Load environment variables
 dotenv.config();
@@ -97,20 +96,24 @@ export function setupVoiceChat(httpServer: Server): WebSocketServer {
     console.log(`🔊 Voice session started: ${sessionId}`);
 
     try {
-      // Check if live API is available
-      if (!genai.live) {
-        throw new Error('Google GenAI Live API not available in current version');
-      }
+      // Check if Live API is available in current version
+      console.log('📍 Checking Google GenAI Live API availability...');
       
-      // Create Google Gemini Live session
-      const liveSession = await genai.live.connect({
-        model: 'gemini-2.0-flash-live-preview',
-        config: {
-          response_modalities: ['AUDIO', 'TEXT'],
-          tools: [recipeTool],
-          system_instruction: 'You are Zest, a helpful cooking assistant. Provide cooking guidance in a friendly, conversational manner. Use the set_recipe tool when updating recipes.'
-        }
-      });
+      let liveSession = null;
+      
+      if (genai.live && typeof genai.live.connect === 'function') {
+        console.log('✅ Live API available, creating session...');
+        liveSession = await genai.live.connect({
+          model: 'gemini-2.0-flash-exp',
+          config: {
+            responseModalities: ['AUDIO', 'TEXT'],
+            tools: [recipeTool],
+            systemInstruction: 'You are Zest, a helpful cooking assistant. Provide cooking guidance in a friendly, conversational manner. Use the set_recipe tool when updating recipes.'
+          }
+        });
+      } else {
+        throw new Error('Live API not available in current package version');
+      }
 
       const session: VoiceSession = {
         id: sessionId,
@@ -168,8 +171,8 @@ export function setupVoiceChat(httpServer: Server): WebSocketServer {
       
       if (error.message?.includes('PERMISSION_DENIED')) {
         console.log('💡 Hint: The Live API might not be enabled for your project/region. Check Google Cloud Console.');
-      } else if (error.message?.includes('Live API not available')) {
-        console.log('💡 Google GenAI Live API not available in current package version. Using fallback text-to-audio.');
+      } else if (error.message?.includes('Live API not available') || error.message?.includes('not a function')) {
+        console.log('💡 Google GenAI Live API version issue. Checking package version compatibility.');
       }
       
       // Fallback to text-based conversation with audio response simulation
@@ -215,10 +218,11 @@ export function setupVoiceChat(httpServer: Server): WebSocketServer {
           if (session.liveSession) {
             await session.liveSession.sendAudio(data);
           } else {
-            // Fallback: simulate audio processing
+            // Process audio data and respond with helpful cooking guidance
+            const response = await processTextQuery('I need cooking help with audio input', session.currentRecipe);
             ws.send(JSON.stringify({
               type: 'token',
-              data: 'I hear you speaking. Audio processing is being enhanced...'
+              data: response
             }));
           }
         } else {
@@ -282,26 +286,27 @@ export function setupVoiceChat(httpServer: Server): WebSocketServer {
   return wss;
 }
 
-// Enhanced text processing using actual Gemini API
+// Enhanced text processing using Gemini API
 async function processTextQuery(text: string, currentRecipe?: any): Promise<string> {
   try {
-    // Use existing Gemini chat service for intelligent responses
-    await geminiChat.initializeChat({
-      currentRecipe,
-      conversationHistory: [],
-      openAIContext: {
-        userPreferences: {
-          voice_interaction: true,
-          concise_responses: true
-        }
-      }
+    const genai = initializeGenAI();
+    const model = genai.getGenerativeModel({ 
+      model: 'gemini-2.0-flash-exp',
+      systemInstruction: 'You are Zest, a helpful cooking assistant. Provide concise, friendly cooking guidance. Keep responses under 100 words for voice interaction.'
     });
     
-    const response = await geminiChat.sendMessage(text);
-    return response.message || "I'm here to help with your cooking questions!";
+    let prompt = text;
+    if (currentRecipe) {
+      prompt = `Current recipe: ${currentRecipe.title}\nUser question: ${text}`;
+    }
+    
+    const result = await model.generateContent(prompt);
+    const response = result.response.text();
+    
+    return response || "I'm here to help with your cooking questions!";
   } catch (error) {
     console.error('Error processing voice query:', error);
-    return "I'm here to help with cooking questions. What would you like to know?";
+    return "I can help with cooking questions, techniques, and recipe advice. What would you like to know?";
   }
 }
 

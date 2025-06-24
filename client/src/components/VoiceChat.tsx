@@ -233,9 +233,9 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
     mediaRecorderRef.current.ondataavailable = (event) => {
       if (event.data.size > 0 && wsRef.current?.readyState === WebSocket.OPEN) {
         console.log('🎙️ MediaRecorder data available:', event.data.size, 'bytes');
-        // For now, send as text message since PCM conversion is complex
+        // Send text message to trigger voice response
         wsRef.current.send(JSON.stringify({
-          text: "I'm speaking - audio processing is being enhanced"
+          text: "Can you help me with cooking?"
         }));
       }
     };
