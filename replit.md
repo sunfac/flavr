@@ -149,6 +149,7 @@ Changelog:
 - June 23, 2025. Enhanced conversational memory system implemented - chatbot now receives full conversation context with every message, maintains conversation flow across interactions, and implements live recipe card updates via streaming function calls. Text-to-speech disabled per user feedback due to robotic voice quality.
 - June 24, 2025. Hybrid OpenAI + Google Gemini conversational AI implemented - OpenAI handles initial recipe generation preserving quiz context, Gemini provides fluid conversational flow with complete context handover including quiz data, original prompts, and user preferences for seamless dialogue continuity
 - June 24, 2025. Google Live Audio API integration complete - implemented real-time two-way voice conversations using Google's live audio streaming API, replacing previous voice functionality with natural speech-to-speech dialogue, WebSocket-based architecture for low-latency audio processing
+- June 24, 2025. Mobile UI fixes applied - resolved Cook Mode button overlap by adjusting z-index and positioning, fixed cut-off recipe suggestion chips with proper scrolling and responsive sizing, enhanced Google Live Audio chat visibility and mobile-friendly button layouts
 ```
 
 ## User Preferences

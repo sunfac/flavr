@@ -224,7 +224,7 @@ export function GoogleLiveAudioChat({ currentRecipe, onRecipeUpdate }: GoogleLiv
   };
 
   return (
-    <div className="flex flex-col items-center space-y-4 p-4 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950 dark:to-red-950 rounded-lg border border-orange-200 dark:border-orange-800">
+    <div className="flex flex-col space-y-4 p-4 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950 dark:to-red-950 rounded-lg border border-orange-200 dark:border-orange-800 w-full">
       <div className="text-center">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
           Live Voice Chat with Zest
@@ -234,22 +234,22 @@ export function GoogleLiveAudioChat({ currentRecipe, onRecipeUpdate }: GoogleLiv
         </p>
       </div>
 
-      <div className="flex items-center space-x-4">
+      <div className="flex flex-col sm:flex-row items-center gap-3 sm:space-x-4">
         {!isConnected ? (
           <Button
             onClick={connect}
             disabled={connectionStatus === 'connecting'}
-            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-full transition-all duration-200 transform hover:scale-105"
+            className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-full transition-all duration-200 transform hover:scale-105"
           >
             <Mic className="w-5 h-5 mr-2" />
             Start Voice Chat
           </Button>
         ) : (
-          <>
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2 sm:gap-4">
             <Button
               onClick={disconnect}
               variant="destructive"
-              className="px-6 py-3 rounded-full transition-all duration-200 transform hover:scale-105"
+              className="flex-1 sm:flex-none px-6 py-3 rounded-full transition-all duration-200 transform hover:scale-105"
             >
               <MicOff className="w-5 h-5 mr-2" />
               End Chat
@@ -266,7 +266,7 @@ export function GoogleLiveAudioChat({ currentRecipe, onRecipeUpdate }: GoogleLiv
                 <Volume2 className="w-5 h-5" />
               )}
             </Button>
-          </>
+          </div>
         )}
       </div>
 
@@ -277,7 +277,7 @@ export function GoogleLiveAudioChat({ currentRecipe, onRecipeUpdate }: GoogleLiv
         </div>
       )}
 
-      <div className="text-xs text-gray-500 dark:text-gray-400 text-center max-w-sm">
+      <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
         Powered by Google's real-time audio API for natural conversation flow
       </div>
     </div>
