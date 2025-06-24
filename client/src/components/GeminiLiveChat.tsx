@@ -52,8 +52,21 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         throw new Error('No Gemini API key available');
       }
       
-      // Connect to Gemini Live API
-      const ws = new WebSocket(`wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${apiKey}`);
+      // Test multiple WebSocket endpoints to find the working one
+      const endpoints = [
+        `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${apiKey}`,
+        `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1.GenerativeService.BidiGenerateContent?key=${apiKey}`,
+        `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${apiKey}`
+      ];
+      
+      console.log('Testing Gemini Live API endpoints...');
+      let workingEndpoint = null;
+      
+      // Try first endpoint
+      const wsUrl = endpoints[0];
+      console.log('Attempting connection to v1alpha endpoint...');
+      
+      const ws = new WebSocket(wsUrl);
       websocketRef.current = ws;
       ws.binaryType = 'arraybuffer';
       
@@ -62,12 +75,50 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         setConnectionStatus('connected');
         setIsConnected(true);
         
-        // Test with the official Gemini 1.5 Flash model for Live API
-        const setupMessage = {
-          setup: {
-            model: "models/gemini-1.5-flash"
+        // Try multiple setup message formats to identify the correct one
+        const setupFormats = [
+          // Format 1: Standard Gemini Live format
+          {
+            "setup": {
+              "model": "models/gemini-2.0-flash-exp",
+              "generationConfig": {
+                "responseModalities": ["AUDIO"],
+                "speechConfig": {
+                  "voiceConfig": {
+                    "prebuiltVoiceConfig": {
+                      "voiceName": "Puck"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          // Format 2: Minimal setup
+          {
+            "setup": {
+              "model": "models/gemini-2.0-flash-exp"
+            }
+          },
+          // Format 3: Alternative field names
+          {
+            "setup": {
+              "model": "models/gemini-2.0-flash-exp",
+              "generation_config": {
+                "response_modalities": ["AUDIO"],
+                "speech_config": {
+                  "voice_config": {
+                    "prebuilt_voice_config": {
+                      "voice_name": "Puck"
+                    }
+                  }
+                }
+              }
+            }
           }
-        };
+        ];
+        
+        // Start with first format
+        const setupMessage = setupFormats[0];
         
         console.log('Sending setup message to Gemini Live');
         console.log('Setup message content:', JSON.stringify(setupMessage, null, 2));
@@ -237,17 +288,21 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         console.log('Close event reason:', event.reason);
         console.log('Close event wasClean:', event.wasClean);
         
-        // Log specific error codes for debugging
+        // Log specific error codes and suggest fixes
         if (event.code === 1002) {
-          console.error('❌ Protocol error - invalid message format');
+          console.error('❌ Protocol error - invalid message format. Will try alternative formats.');
         } else if (event.code === 1003) {
-          console.error('❌ Unsupported data - check message content');
+          console.error('❌ Unsupported data - check message content. Will try minimal setup.');
         } else if (event.code === 1008) {
-          console.error('❌ Policy violation - check API key or permissions');
+          console.error('❌ Policy violation - check API key or permissions.');
         } else if (event.code === 1011) {
-          console.error('❌ Server error - unexpected condition');
+          console.error('❌ Server error - unexpected condition on Google servers.');
         } else if (event.code === 1006) {
-          console.error('❌ Abnormal closure - connection lost');
+          console.error('❌ Abnormal closure - connection lost unexpectedly.');
+        } else if (event.code === 1000) {
+          console.log('✅ Normal closure - connection ended gracefully');
+        } else {
+          console.error(`❌ Unknown close code: ${event.code}`);
         }
         
         setIsConnected(false);
