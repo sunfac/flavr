@@ -36,8 +36,8 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
       
       streamRef.current = stream;
       
-      // Create audio context
-      audioContextRef.current = new AudioContext({ sampleRate: 16000 });
+      // Create audio context matching Gemini Live format
+      audioContextRef.current = new AudioContext({ sampleRate: 24000 });
       
       // Get API key
       let apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -235,9 +235,9 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
           }
         } else if (event.data instanceof ArrayBuffer) {
           console.log('📦 Received binary ArrayBuffer, length:', event.data.byteLength);
-          // Try to decode as audio
+          // Play Gemini Live PCM audio data
           if (event.data.byteLength > 0) {
-            playAudio(btoa(String.fromCharCode(...new Uint8Array(event.data))));
+            playAudio(event.data);
           }
         } else {
           console.log('📦 Received data of type:', typeof event.data, 'data:', event.data);
@@ -399,41 +399,47 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
     console.log('Audio streaming active');
   }, [isListening]);
 
-  const playAudio = async (base64Audio: string) => {
+  const playAudio = async (audioBuffer: ArrayBuffer) => {
     try {
       if (!isMuted && audioContextRef.current) {
-        console.log('🎵 Attempting to play audio response...');
+        console.log('🎵 Processing Gemini Live PCM audio...');
         
-        const binaryString = atob(base64Audio);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
+        // Gemini Live sends raw 16-bit PCM at 24kHz mono
+        const pcmData = new Int16Array(audioBuffer);
+        console.log('🔊 Raw PCM samples:', pcmData.length);
+        
+        if (pcmData.length === 0) {
+          console.log('⚠️ Empty audio buffer received');
+          return;
         }
         
-        console.log('🔊 Decoded audio data, length:', bytes.length);
+        // Create AudioBuffer for Web Audio API
+        const audioBufferDecoded = audioContextRef.current.createBuffer(1, pcmData.length, 24000);
+        const channelData = audioBufferDecoded.getChannelData(0);
         
-        const audioBuffer = await audioContextRef.current.decodeAudioData(bytes.buffer);
+        // Convert 16-bit PCM to float32 (-1 to 1 range)
+        for (let i = 0; i < pcmData.length; i++) {
+          channelData[i] = pcmData[i] / 32768.0;
+        }
+        
+        // Play using Web Audio API
         const source = audioContextRef.current.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(audioContextRef.current.destination);
-        source.start();
+        source.buffer = audioBufferDecoded;
         
-        console.log('✅ Playing AI audio response, duration:', audioBuffer.duration);
+        const gainNode = audioContextRef.current.createGain();
+        gainNode.gain.value = 0.7; // Comfortable volume
+        
+        source.connect(gainNode);
+        gainNode.connect(audioContextRef.current.destination);
+        
+        source.start();
+        console.log('✅ Gemini audio played successfully, duration:', audioBufferDecoded.duration.toFixed(2), 'seconds');
+        
       } else {
         console.log('⚠️ Audio playback skipped - muted or no audio context');
       }
     } catch (error) {
-      console.error('❌ Error playing audio:', error);
-      
-      // Try alternative playback method
-      try {
-        const audioUrl = `data:audio/wav;base64,${base64Audio}`;
-        const audio = new Audio(audioUrl);
-        await audio.play();
-        console.log('✅ Fallback audio playback successful');
-      } catch (fallbackError) {
-        console.error('❌ Fallback audio playback failed:', fallbackError);
-      }
+      console.error('❌ Error playing Gemini audio:', error);
     }
   };
 
