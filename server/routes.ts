@@ -1495,42 +1495,62 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
       console.log('🍳 Current Recipe Context:', currentRecipe ? currentRecipe.title : 'None');
       console.log('💬 User Message:', message);
       
+      let fullResponse = '';
+      
       await geminiChat.sendMessageStream(message, (chunk) => {
         if (chunk.type === 'content') {
+          fullResponse += chunk.content;
           res.write(`data: ${JSON.stringify({ type: 'content', content: chunk.content })}\n\n`);
         } else if (chunk.type === 'function_call') {
           try {
             const { name, args } = chunk.functionCall;
-            console.log('🔧 Gemini function call:', name, args);
+            console.log('🔧 Gemini function call executed:', name, JSON.stringify(args, null, 2));
             
-            // Send recipe update event for live refresh
+            // Build comprehensive updated recipe
             const updatedRecipe = {
               id: currentRecipe?.id || Date.now(),
-              title: args.title,
+              title: args.title || currentRecipe?.title || 'Updated Recipe',
               servings: args.servings || currentRecipe?.servings || 4,
               cookTime: args.cookTime || currentRecipe?.cookTime || 30,
               difficulty: args.difficulty || currentRecipe?.difficulty || "Medium",
-              ingredients: args.ingredients,
-              instructions: args.instructions,
-              description: currentRecipe?.description || args.title
+              ingredients: args.ingredients || currentRecipe?.ingredients || [],
+              instructions: args.instructions || currentRecipe?.instructions || [],
+              description: args.description || currentRecipe?.description || args.title,
+              cuisine: args.cuisine || currentRecipe?.cuisine || 'Updated',
+              tips: args.tips || currentRecipe?.tips || ''
             };
             
-            console.log('📤 Sending recipe update from Gemini:', updatedRecipe);
+            console.log('📤 Sending comprehensive recipe update from Gemini:', updatedRecipe.title);
             res.write(`data: ${JSON.stringify({ 
-              type: 'recipeUpdate', 
-              recipe: updatedRecipe
+              type: 'function_call', 
+              updatedRecipe,
+              functionCall: { name, args }
+            })}\n\n`);
+            
+            // Confirm the action was taken
+            fullResponse += ` ✅ Recipe updated successfully!`;
+            res.write(`data: ${JSON.stringify({ 
+              type: 'content', 
+              content: ' ✅ Recipe updated successfully!'
             })}\n\n`);
             
           } catch (error) {
             console.error('Error processing Gemini function call:', error);
           }
         } else if (chunk.type === 'done') {
-          // Save to database if user authenticated
-          if (userId) {
-            storage.saveChatMessage(userId, message, "Gemini response", null).catch(console.error);
-          }
-          
           res.write(`data: ${JSON.stringify({ type: 'done' })}\n\n`);
+          res.end();
+          
+          // Save to database if user authenticated and we have a response
+          if (userId && fullResponse.trim()) {
+            storage.createChatMessage({
+              userId,
+              message,
+              response: fullResponse,
+            }).catch(console.error);
+          }
+        } else if (chunk.type === 'error') {
+          res.write(`data: ${JSON.stringify({ type: 'error', message: chunk.message })}\n\n`);
           res.end();
         }
       });

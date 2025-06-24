@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Mic, MicOff, Send, Volume2, VolumeX, Radio } from 'lucide-react';
 import { useRecipeStore } from '@/stores/recipeStore';
-import GoogleLiveAudioChat from './GoogleLiveAudioChat';
 
 interface Message {
   id: string;
@@ -295,10 +294,9 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
               ×
             </Button>
           </div>
-          <GoogleLiveAudioChat 
-            currentRecipe={currentRecipe}
-            onRecipeUpdate={updateActiveRecipe}
-          />
+          <div className="text-white text-xs">
+            Google Live Audio Chat integration coming soon
+          </div>
         </div>
       )}
 

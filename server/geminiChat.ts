@@ -187,16 +187,35 @@ I'm ready to continue our cooking conversation with full context and memory main
       throw new Error("Chat session not initialized. Call initializeChat first.");
     }
 
-    // Add user message to memory
+    console.log('📥 Gemini receiving message:', message);
+    console.log('🧠 Current conversation memory length:', this.conversationMemory.length);
+    
+    // Add user message to conversation memory BEFORE processing
     this.conversationMemory.push({ role: 'user', content: message });
 
-    console.log('🚀 Gemini Streaming Message:', message);
-    console.log('🧠 Current Memory Length:', this.conversationMemory.length);
+    // Check if message indicates user confirmation
+    const confirmationWords = ['yes', 'do it', 'go ahead', 'please', 'ok', 'okay', 'sure', 'absolutely', 'definitely'];
+    const isConfirmation = confirmationWords.some(word => 
+      message.toLowerCase().includes(word) && message.length < 50
+    );
+
+    if (isConfirmation) {
+      console.log('🎯 CONFIRMATION DETECTED - User said:', message);
+      console.log('📚 Recent conversation context:', this.conversationMemory.slice(-3));
+    }
 
     let fullResponse = "";
 
     try {
-      const result = await this.chatSession.sendMessageStream(message);
+      // Inject context into the message for better continuity
+      const contextualMessage = isConfirmation ? 
+        `Previous context: ${this.conversationMemory.slice(-3).map(m => `${m.role}: ${m.content}`).join(' | ')}
+
+Current message: ${message}
+
+IMPORTANT: The user is confirming a previous request. Take the specific action they confirmed rather than asking again.` : message;
+
+      const result = await this.chatSession.sendMessageStream(contextualMessage);
       
       for await (const chunk of result.stream) {
         const chunkText = chunk.text();
@@ -208,6 +227,7 @@ I'm ready to continue our cooking conversation with full context and memory main
         }
         
         if (functionCalls && functionCalls.length > 0) {
+          console.log('🔧 Gemini function call triggered:', functionCalls[0].name, functionCalls[0].args);
           onChunk({ 
             type: 'function_call', 
             functionCall: {
@@ -218,11 +238,11 @@ I'm ready to continue our cooking conversation with full context and memory main
         }
       }
       
-      // Add assistant response to memory
-      this.conversationMemory.push({ role: 'assistant', content: fullResponse });
-      
-      console.log('✅ Gemini Stream Complete. Response:', fullResponse.substring(0, 100) + '...');
-      console.log('🧠 Updated Memory Length:', this.conversationMemory.length);
+      // Add assistant response to conversation memory
+      if (fullResponse.trim()) {
+        this.conversationMemory.push({ role: 'assistant', content: fullResponse });
+        console.log('💾 Added response to memory. Total messages:', this.conversationMemory.length);
+      }
       
       onChunk({ type: 'done' });
     } catch (error) {

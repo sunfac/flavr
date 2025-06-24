@@ -155,6 +155,7 @@ Changelog:
 - June 24, 2025. Voice chat fully integrated with Google Live Audio API - ZestVoiceChat component now directly uses GoogleLiveAudioChat for two-way voice conversations, microphone button functionality replaced with Google Live Audio streaming for natural speech-to-speech dialogue
 - June 24, 2025. Chatbot context retention fixed - restored microphone button in text chat interface, enhanced Gemini context prompts to maintain conversation memory and execute recipe modifications when users confirm changes, added detailed logging for debugging context loss
 - June 24, 2025. Google Live Audio button added to chatbot - integrated Radio icon toggle button in chat header to show/hide Google Live Audio Chat panel, providing clear access to two-way voice conversations with Google Live API alongside text chat functionality
+- June 24, 2025. Context retention enhancement complete - improved Gemini conversation memory with confirmation detection, explicit context injection, and enhanced function call execution for proper recipe modifications when users confirm changes
 ```
 
 ## User Preferences
