@@ -404,8 +404,20 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
       if (!isMuted && audioContextRef.current) {
         console.log('🎵 Processing Gemini Live PCM audio...');
         
+        // Handle odd byte lengths by padding to even number
+        let processedBuffer = audioBuffer;
+        if (audioBuffer.byteLength % 2 !== 0) {
+          console.log('⚠️ Odd buffer length detected, padding:', audioBuffer.byteLength);
+          const paddedBuffer = new ArrayBuffer(audioBuffer.byteLength + 1);
+          const paddedView = new Uint8Array(paddedBuffer);
+          const originalView = new Uint8Array(audioBuffer);
+          paddedView.set(originalView);
+          paddedView[audioBuffer.byteLength] = 0; // Pad with zero
+          processedBuffer = paddedBuffer;
+        }
+        
         // Gemini Live sends raw 16-bit PCM at 24kHz mono
-        const pcmData = new Int16Array(audioBuffer);
+        const pcmData = new Int16Array(processedBuffer);
         console.log('🔊 Raw PCM samples:', pcmData.length);
         
         if (pcmData.length === 0) {
@@ -475,7 +487,7 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
 
   const sendTestMessage = () => {
     if (websocketRef.current?.readyState === WebSocket.OPEN) {
-      console.log('🧪 Sending test text message to verify connection');
+      console.log('🧪 Sending test text message via Live API');
       const testMessage = {
         client_content: {
           turns: [{
@@ -489,44 +501,6 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
       };
       console.log('📤 Test message content:', JSON.stringify(testMessage, null, 2));
       websocketRef.current.send(JSON.stringify(testMessage));
-      
-      // Try alternative message formats
-      setTimeout(() => {
-        if (websocketRef.current?.readyState === WebSocket.OPEN) {
-          console.log('📤 Trying alternative message format...');
-          
-          // Format 1: Basic generateContent format
-          const altMessage1 = {
-            contents: [{
-              parts: [{
-                text: "Hello Zest, please respond with a greeting to test the connection."
-              }]
-            }]
-          };
-          
-          console.log('📤 Sending generateContent format:', JSON.stringify(altMessage1, null, 2));
-          websocketRef.current.send(JSON.stringify(altMessage1));
-          
-          // Format 2: Streaming format
-          setTimeout(() => {
-            if (websocketRef.current?.readyState === WebSocket.OPEN) {
-              const altMessage2 = {
-                generateContentRequest: {
-                  model: "models/gemini-2.0-flash-exp",
-                  contents: [{
-                    parts: [{
-                      text: "Test message - please respond"
-                    }]
-                  }]
-                }
-              };
-              
-              console.log('📤 Sending generateContentRequest format:', JSON.stringify(altMessage2, null, 2));
-              websocketRef.current.send(JSON.stringify(altMessage2));
-            }
-          }, 1000);
-        }
-      }, 1000);
     } else {
       console.log('❌ WebSocket not ready for test message');
     }
