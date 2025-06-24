@@ -1,8 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Volume2, MessageSquare } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { GoogleLiveAudioChat } from './GoogleLiveAudioChat';
+import React from 'react';
+import GoogleLiveAudioChat from './GoogleLiveAudioChat';
 
 interface ZestVoiceChatProps {
   onChatMessage?: (message: string) => void;
@@ -23,31 +20,30 @@ export default function ZestVoiceChat({
   className = "",
   recipeContext 
 }: ZestVoiceChatProps) {
-  const [isConnected, setIsConnected] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected');
-  const [lastUserMessage, setLastUserMessage] = useState('');
-  const [lastAIResponse, setLastAIResponse] = useState('');
   
-  const wsRef = useRef<WebSocket | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const processorRef = useRef<ScriptProcessorNode | null>(null);
-  const { toast } = useToast();
+  // Convert recipe context to match GoogleLiveAudioChat expected format
+  const currentRecipe = recipeContext ? {
+    title: recipeContext.title,
+    ingredients: recipeContext.ingredients,
+    instructions: recipeContext.instructions,
+    currentStep: recipeContext.currentStep,
+    totalSteps: recipeContext.totalSteps
+  } : undefined;
 
-  // Connect to OpenAI Realtime API via server proxy
-  const connectToRealtimeAPI = async () => {
-    if (connectionStatus === 'connecting' || connectionStatus === 'connected') return;
-    
-    setConnectionStatus('connecting');
-    
-    try {
-      // Request microphone permission first
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      
-      // Connect to our server proxy for OpenAI Realtime API
-      const ws = new WebSocket(`ws://${window.location.host}/api/voice/realtime`);
+  const handleRecipeUpdate = (updatedRecipe: any) => {
+    console.log('Recipe updated via Google Live Audio:', updatedRecipe);
+    // Handle recipe updates if needed
+  };
+
+  return (
+    <div className={`flex flex-col space-y-3 ${className}`}>
+      {/* Google Live Audio Chat - Now the primary voice interface */}
+      <GoogleLiveAudioChat 
+        currentRecipe={currentRecipe}
+        onRecipeUpdate={handleRecipeUpdate}
+      />
+    </div>
+  );
       
       ws.onopen = () => {
         console.log('Connected to voice chat');
