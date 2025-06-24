@@ -549,12 +549,43 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
       console.log(enhancedPrompt);
       console.log("=".repeat(80));
       
-      // Using GPT-3.5 Turbo for cost efficiency
-      const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: enhancedPrompt }],
-        response_format: { type: "json_object" },
-      });
+      // Try OpenAI first, fallback to Gemini if OpenAI is down
+      let response;
+      try {
+        response = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [{ role: "user", content: enhancedPrompt }],
+          response_format: { type: "json_object" },
+        });
+      } catch (openaiError) {
+        console.log("OpenAI API failed, using Gemini fallback:", openaiError.message);
+        
+        // Import Gemini for fallback
+        const { GoogleGenAI } = await import("@google/generative-ai");
+        const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY!);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        
+        const geminiResponse = await model.generateContent({
+          contents: [{
+            role: "user",
+            parts: [{ text: enhancedPrompt }]
+          }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.7,
+            maxOutputTokens: 1500
+          }
+        });
+        
+        // Format to match OpenAI response structure
+        response = {
+          choices: [{
+            message: {
+              content: geminiResponse.response.text()
+            }
+          }]
+        };
+      }
 
       console.log("OpenAI API response received successfully");
       const result = JSON.parse(response.choices[0].message.content!);
@@ -891,14 +922,45 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
       console.log(enhancedPrompt);
       console.log("=".repeat(80));
       
-      // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [{ role: "user", content: enhancedPrompt }],
-        response_format: { type: "json_object" },
-        max_tokens: 1500,
-        temperature: 0.7
-      });
+      // Try OpenAI first, fallback to Gemini if OpenAI is down
+      let response;
+      try {
+        response = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [{ role: "user", content: enhancedPrompt }],
+          response_format: { type: "json_object" },
+          max_tokens: 1500,
+          temperature: 0.7
+        });
+      } catch (openaiError) {
+        console.log("OpenAI API failed, using Gemini fallback:", openaiError.message);
+        
+        // Import Gemini for fallback
+        const { GoogleGenAI } = await import("@google/generative-ai");
+        const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY!);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        
+        const geminiResponse = await model.generateContent({
+          contents: [{
+            role: "user",
+            parts: [{ text: enhancedPrompt }]
+          }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.7,
+            maxOutputTokens: 1500
+          }
+        });
+        
+        // Format to match OpenAI response structure
+        response = {
+          choices: [{
+            message: {
+              content: geminiResponse.response.text()
+            }
+          }]
+        };
+      }
 
       console.log("OpenAI API response received for full recipe");
       console.log("Response content:", response.choices[0].message.content);
