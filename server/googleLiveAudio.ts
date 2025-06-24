@@ -16,12 +16,14 @@ const activeSessions = new Map<string, GoogleLiveSession>();
 export function setupGoogleLiveAudioWebSocket(server: any) {
   const wss = new WebSocketServer({ 
     server,
-    path: '/api/google-live-audio'
+    path: '/api/google-live-audio',
+    perMessageDeflate: false,
+    maxPayload: 1024 * 1024
   });
 
   console.log('🎤 Google Live Audio WebSocket server initialized on /api/google-live-audio');
 
-  wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
+  wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
     const sessionId = generateSessionId();
     console.log(`🔊 Google Live Audio session started: ${sessionId}`);
 
