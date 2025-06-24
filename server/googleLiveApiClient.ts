@@ -3,6 +3,8 @@ import WebSocket from 'ws';
 interface GoogleLiveApiConfig {
   apiKey: string;
   model: string;
+  projectId: string;
+  location?: string;
   systemInstruction?: string;
 }
 
@@ -12,13 +14,16 @@ export class GoogleLiveApiClient {
   private isConnected = false;
 
   constructor(config: GoogleLiveApiConfig) {
-    this.config = config;
+    this.config = {
+      location: 'us-central1',
+      ...config
+    };
   }
 
   async connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        // Google Gemini Live API WebSocket endpoint - correct format from documentation
+        // Google Gemini Live API WebSocket endpoint with project authentication
         const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService/BidiGenerateContent?key=${this.config.apiKey}`;
         
         this.websocket = new WebSocket(wsUrl);

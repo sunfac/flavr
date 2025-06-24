@@ -32,25 +32,36 @@ export function setupGoogleLiveAudioWebSocket(server: any) {
       conversationContext: 'You are Zest, a helpful cooking assistant. Provide cooking guidance in a friendly, conversational manner.'
     };
 
-    // For now, provide a fallback voice chat experience using text-to-speech
-    // The Google Live API endpoint appears to be unavailable (404 error)
-    if (process.env.GEMINI_API_KEY) {
-      console.log(`🔄 Setting up fallback voice chat for session ${sessionId}`);
+    // Initialize Google Live API with proper credentials
+    if (process.env.GEMINI_API_KEY && process.env.GOOGLE_CLOUD_PROJECT_ID) {
+      session.googleApiClient = new GoogleLiveApiClient({
+        apiKey: process.env.GEMINI_API_KEY,
+        model: 'gemini-2.0-flash-exp',
+        projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
+        systemInstruction: session.conversationContext
+      });
       
-      // Send immediate success message to client
-      ws.send(JSON.stringify({
-        type: 'connected',
-        message: 'Voice chat ready - Google Live API fallback mode active'
-      }));
-      
-      // TODO: Implement Google Live API when endpoint is available
-      // For now, we'll use text chat with audio feedback
-      console.log(`📝 Using text-based voice chat fallback for session ${sessionId}`);
+      // Connect to Google Live API
+      session.googleApiClient.connect().then(() => {
+        console.log(`✅ Google Live API connected for session ${sessionId}`);
+        
+        // Send welcome message to client
+        ws.send(JSON.stringify({
+          type: 'connected',
+          message: 'Google Live Audio ready - start speaking!'
+        }));
+      }).catch(error => {
+        console.error(`❌ Failed to connect to Google Live API for session ${sessionId}:`, error);
+        ws.send(JSON.stringify({
+          type: 'error',
+          message: 'Google Live Audio connection failed'
+        }));
+      });
     } else {
-      console.error('❌ GEMINI_API_KEY not found - Google Live Audio unavailable');
+      console.error('❌ Missing required credentials - Google Live Audio unavailable');
       ws.send(JSON.stringify({
         type: 'error',
-        message: 'Google Live Audio API key not configured'
+        message: 'Google Live Audio credentials not configured'
       }));
     }
 
@@ -84,23 +95,46 @@ export function setupGoogleLiveAudioWebSocket(server: any) {
 }
 
 async function handleLiveAudioMessage(session: GoogleLiveSession, message: any) {
-  const { type, ...data } = message;
-
-  switch (type) {
-    case 'session_setup':
-      await setupSession(session, data);
-      break;
-      
-    case 'audio_input':
-      await processAudioInput(session, data.audio);
-      break;
-      
-    case 'text_input':
-      await processTextInput(session, data.text);
-      break;
-      
-    default:
-      console.warn(`Unknown message type: ${type}`);
+  console.log(`📥 Processing live audio message for session ${session.id}:`, message.type);
+  
+  try {
+    if (message.type === 'start_conversation') {
+      // Start the Google Live Audio conversation
+      if (session.googleApiClient && session.googleApiClient.isConnectionActive()) {
+        session.googleApiClient.sendText('Hello! I\'m Zest, your cooking assistant. How can I help you today?');
+      } else {
+        session.websocket.send(JSON.stringify({
+          type: 'audio_response',
+          message: 'Hello! I\'m Zest, your cooking assistant. How can I help you today?'
+        }));
+      }
+    } else if (message.type === 'audio_data' && message.data) {
+      // Forward audio data to Google Live API
+      if (session.googleApiClient && session.googleApiClient.isConnectionActive()) {
+        session.googleApiClient.sendAudio(Buffer.from(message.data, 'base64'));
+      } else {
+        session.websocket.send(JSON.stringify({
+          type: 'error',
+          message: 'Google Live API not connected'
+        }));
+      }
+    } else if (message.type === 'text_message' && message.text) {
+      // Forward text message to Google Live API
+      if (session.googleApiClient && session.googleApiClient.isConnectionActive()) {
+        session.googleApiClient.sendText(message.text);
+      } else {
+        session.websocket.send(JSON.stringify({
+          type: 'error',
+          message: 'Google Live API not connected'
+        }));
+      }
+    }
+  } catch (error) {
+    console.error(`❌ Error handling live audio message for session ${session.id}:`, error);
+    session.websocket.send(JSON.stringify({
+      type: 'error',
+      message: 'Failed to process audio message'
+    }));
   }
 }
 
