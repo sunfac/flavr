@@ -89,38 +89,63 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
       };
       
       ws.onmessage = (event) => {
+        console.log('Raw message received:', event.data);
+        
         if (typeof event.data === 'string') {
           try {
             const message = JSON.parse(event.data);
-            console.log('Gemini Live message:', message);
+            console.log('Parsed Gemini Live message:', JSON.stringify(message, null, 2));
             
+            // Handle setup complete
             if (message.setupComplete) {
-              console.log('Setup complete - starting audio streaming');
+              console.log('✅ Setup complete - ready for conversation');
               setConnectionStatus('ready');
               setIsListening(true);
               startAudioStreaming();
+              return;
             }
             
-            if (message.serverContent?.modelTurn?.parts) {
-              const parts = message.serverContent.modelTurn.parts;
+            // Handle server content with detailed logging
+            if (message.serverContent) {
+              console.log('📥 Server content received:', message.serverContent);
               
-              // Handle text responses
-              const textParts = parts.filter((part: any) => part.text);
-              if (textParts.length > 0) {
-                const text = textParts.map((part: any) => part.text).join(' ');
-                console.log('AI response:', text);
+              if (message.serverContent.modelTurn?.parts) {
+                const parts = message.serverContent.modelTurn.parts;
+                console.log('🔍 Processing parts:', parts);
+                
+                // Handle text responses
+                const textParts = parts.filter((part: any) => part.text);
+                if (textParts.length > 0) {
+                  const text = textParts.map((part: any) => part.text).join(' ');
+                  console.log('💬 AI text response:', text);
+                }
+                
+                // Handle audio responses
+                const audioParts = parts.filter((part: any) => part.inlineData?.mimeType?.includes('audio'));
+                if (audioParts.length > 0) {
+                  console.log('🔊 Found audio parts:', audioParts.length);
+                  audioParts.forEach((part: any, index: number) => {
+                    console.log(`🎵 Processing audio part ${index + 1}:`, part.inlineData.mimeType);
+                    playAudio(part.inlineData.data);
+                  });
+                } else {
+                  console.log('❌ No audio parts found in response');
+                }
               }
-              
-              // Handle audio responses
-              const audioParts = parts.filter((part: any) => part.inlineData?.mimeType?.includes('audio'));
-              audioParts.forEach((part: any) => {
-                console.log('Playing AI audio response');
-                playAudio(part.inlineData.data);
-              });
+            } else {
+              console.log('⚠️ No serverContent in message');
             }
+            
+            // Log any other message types
+            if (!message.setupComplete && !message.serverContent) {
+              console.log('🔍 Unknown message type:', Object.keys(message));
+            }
+            
           } catch (error) {
-            console.error('Error parsing message:', error);
+            console.error('❌ Error parsing JSON message:', error);
           }
+        } else {
+          console.log('📦 Received binary data:', event.data);
         }
       };
       
@@ -148,33 +173,46 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
     const source = audioContextRef.current.createMediaStreamSource(streamRef.current);
     const processor = audioContextRef.current.createScriptProcessor(4096, 1, 1);
     
+    let chunkCount = 0;
     processor.onaudioprocess = (event) => {
       if (websocketRef.current?.readyState === WebSocket.OPEN && isListening) {
         const inputBuffer = event.inputBuffer.getChannelData(0);
         
-        // Convert to 16-bit PCM
-        const pcmData = new Int16Array(inputBuffer.length);
-        for (let i = 0; i < inputBuffer.length; i++) {
-          pcmData[i] = Math.max(-32768, Math.min(32767, inputBuffer[i] * 32768));
-        }
+        // Check for audio activity (basic voice detection)
+        const sum = inputBuffer.reduce((acc, val) => acc + Math.abs(val), 0);
+        const average = sum / inputBuffer.length;
         
-        // Send to Gemini Live with proper format
-        const audioMessage = {
-          client_content: {
-            turns: [{
-              role: "user",
-              parts: [{
-                inline_data: {
-                  mime_type: "audio/pcm",
-                  data: btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer)))
-                }
-              }]
-            }],
-            turn_complete: false
+        if (average > 0.01) { // Only send if there's significant audio
+          chunkCount++;
+          
+          // Convert to 16-bit PCM
+          const pcmData = new Int16Array(inputBuffer.length);
+          for (let i = 0; i < inputBuffer.length; i++) {
+            pcmData[i] = Math.max(-32768, Math.min(32767, inputBuffer[i] * 32768));
           }
-        };
-        
-        websocketRef.current.send(JSON.stringify(audioMessage));
+          
+          // Send to Gemini Live with proper format
+          const audioMessage = {
+            client_content: {
+              turns: [{
+                role: "user", 
+                parts: [{
+                  inline_data: {
+                    mime_type: "audio/pcm",
+                    data: btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer)))
+                  }
+                }]
+              }],
+              turn_complete: false
+            }
+          };
+          
+          if (chunkCount % 50 === 0) { // Log every 50th chunk to avoid spam
+            console.log(`🎤 Sending audio chunk ${chunkCount} (level: ${average.toFixed(4)})`);
+          }
+          
+          websocketRef.current.send(JSON.stringify(audioMessage));
+        }
       }
     };
     
@@ -188,11 +226,15 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
   const playAudio = async (base64Audio: string) => {
     try {
       if (!isMuted && audioContextRef.current) {
+        console.log('🎵 Attempting to play audio response...');
+        
         const binaryString = atob(base64Audio);
         const bytes = new Uint8Array(binaryString.length);
         for (let i = 0; i < binaryString.length; i++) {
           bytes[i] = binaryString.charCodeAt(i);
         }
+        
+        console.log('🔊 Decoded audio data, length:', bytes.length);
         
         const audioBuffer = await audioContextRef.current.decodeAudioData(bytes.buffer);
         const source = audioContextRef.current.createBufferSource();
@@ -200,10 +242,22 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         source.connect(audioContextRef.current.destination);
         source.start();
         
-        console.log('Playing AI audio response');
+        console.log('✅ Playing AI audio response, duration:', audioBuffer.duration);
+      } else {
+        console.log('⚠️ Audio playback skipped - muted or no audio context');
       }
     } catch (error) {
-      console.error('Error playing audio:', error);
+      console.error('❌ Error playing audio:', error);
+      
+      // Try alternative playback method
+      try {
+        const audioUrl = `data:audio/wav;base64,${base64Audio}`;
+        const audio = new Audio(audioUrl);
+        await audio.play();
+        console.log('✅ Fallback audio playback successful');
+      } catch (fallbackError) {
+        console.error('❌ Fallback audio playback failed:', fallbackError);
+      }
     }
   };
 
