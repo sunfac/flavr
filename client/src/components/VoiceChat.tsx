@@ -24,20 +24,45 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
   const audioWorkletRef = useRef<AudioWorkletNode | null>(null);
   const speechSynthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  // Initialize WebSocket connection
+  // Initialize WebSocket connection to Gemini Live API
   const connectWebSocket = useCallback(() => {
     try {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/api/google-live-audio`;
+      // Connect directly to Google Gemini Live WebSocket
+      const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`;
       
-      console.log('🔗 Connecting to voice WebSocket:', wsUrl);
+      console.log('🔗 Connecting to Gemini Live API WebSocket');
       wsRef.current = new WebSocket(wsUrl);
       wsRef.current.binaryType = 'arraybuffer'; // Set binary type for audio data
       
       wsRef.current.onopen = () => {
-        console.log('🔊 Connected to voice chat');
+        console.log('✅ Connected to Gemini Live API');
         setIsConnected(true);
         setConnectionStatus('connected');
+        
+        // Send initial setup message
+        const setupMessage = {
+          setup: {
+            model: "models/gemini-2.0-flash-exp",
+            generation_config: {
+              response_modalities: ["AUDIO", "TEXT"],
+              speech_config: {
+                voice_config: {
+                  prebuilt_voice_config: {
+                    voice_name: "Aoede"
+                  }
+                }
+              }
+            },
+            system_instruction: {
+              parts: [{
+                text: "You are Zest, a helpful cooking assistant. Provide concise, friendly cooking guidance for voice interaction. Keep responses under 100 words."
+              }]
+            }
+          }
+        };
+        
+        console.log('📤 Sending setup message:', 'setup');
+        wsRef.current?.send(JSON.stringify(setupMessage) + '\n');
       };
       
       wsRef.current.onmessage = async (event) => {
