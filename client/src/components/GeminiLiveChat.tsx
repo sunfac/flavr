@@ -66,10 +66,16 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         setConnectionStatus('connected');
         setIsConnected(true);
         
-        // Use the correct setup message format from Gemini's response
+        // Test multiple valid models for Live API compatibility
+        const testModels = [
+          "models/gemini-2.0-flash-exp",
+          "models/gemini-2.0-flash",
+          "models/gemini-1.5-flash"
+        ];
+        
         const setupMessage = {
           "setup": {
-            "model": "models/gemini-live-2.5-flash-preview-native-audio",
+            "model": testModels[0], // Start with experimental model
             "generationConfig": {
               "responseModalities": ["AUDIO"]
             },
@@ -81,6 +87,9 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         console.log('Sending setup message to Gemini Live');
         console.log('Setup message content:', JSON.stringify(setupMessage, null, 2));
         ws.send(JSON.stringify(setupMessage));
+        
+        // Store model list for fallback attempts
+        ws.userData = { testModels, currentModelIndex: 0 };
         
         // Set a timeout to force ready state if no setup response received
         setTimeout(() => {
@@ -266,7 +275,22 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         
         setIsConnected(false);
         setConnectionStatus('disconnected');
-        cleanup();
+        
+        // Attempt fallback with next model if available
+        if (event.code === 1008 && ws.userData?.testModels && ws.userData.currentModelIndex < ws.userData.testModels.length - 1) {
+          console.log('🔄 Trying fallback model...');
+          setTimeout(() => {
+            const nextIndex = ws.userData.currentModelIndex + 1;
+            const nextModel = ws.userData.testModels[nextIndex];
+            console.log(`Testing model: ${nextModel}`);
+            
+            // Retry connection with next model
+            setConnectionStatus('connecting');
+            connect();
+          }, 1000);
+        } else {
+          cleanup();
+        }
       };
       
     } catch (error) {
