@@ -235,9 +235,9 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
           }
         } else if (event.data instanceof ArrayBuffer) {
           console.log('📦 Received binary ArrayBuffer, length:', event.data.byteLength);
-          // Play Gemini Live PCM audio data
+          // Process Protobuf message instead of raw audio
           if (event.data.byteLength > 0) {
-            playAudio(event.data);
+            processProtobufMessage(event.data);
           }
         } else {
           console.log('📦 Received data of type:', typeof event.data, 'data:', event.data);
@@ -353,24 +353,28 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         }
         
         if (average > 0.001) { // Voice activity detected
-          // Convert to 16-bit PCM
+          // Convert to 16-bit PCM for Gemini Live
           const pcmData = new Int16Array(inputBuffer.length);
           for (let i = 0; i < inputBuffer.length; i++) {
             pcmData[i] = Math.max(-32768, Math.min(32767, inputBuffer[i] * 32768));
           }
           
-          // Send audio data using Gemini Live format
-          const audioMessage = {
-            realtime_input: {
-              media_chunks: [{
-                mime_type: "audio/pcm",
-                data: btoa(String.fromCharCode.apply(null, new Uint8Array(pcmData.buffer)))
-              }]
-            }
-          };
-          
-          console.log(`📤 Sending audio chunk ${chunkCount} (${pcmData.length} samples, level: ${average.toFixed(4)})`);
-          websocketRef.current.send(JSON.stringify(audioMessage));
+          // Send audio using proper Protobuf format for Live API
+          try {
+            const audioMessage = {
+              realtime_input: {
+                media_chunks: [{
+                  mime_type: "audio/pcm",
+                  data: btoa(String.fromCharCode.apply(null, new Uint8Array(pcmData.buffer)))
+                }]
+              }
+            };
+            
+            console.log(`📤 Sending audio chunk ${chunkCount} (${pcmData.length} samples, level: ${average.toFixed(4)})`);
+            websocketRef.current.send(JSON.stringify(audioMessage));
+          } catch (error) {
+            console.error('❌ Failed to send audio:', error);
+          }
           
           try {
             websocketRef.current.send(JSON.stringify(audioMessage));
@@ -393,11 +397,67 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
     console.log('Audio streaming active');
   }, [isListening]);
 
+  // Initialize Protobuf schema for Gemini Live API
+  useEffect(() => {
+    const initProtobuf = async () => {
+      try {
+        // Create a minimal protobuf schema for Gemini Live API
+        const root = new protobuf.Root();
+        
+        // Define basic message structure based on Gemini Live API
+        const serverContentType = new protobuf.Type("ServerContent")
+          .add(new protobuf.Field("data", 1, "bytes"))
+          .add(new protobuf.Field("outputTranscription", 2, "string"));
+          
+        const responseType = new protobuf.Type("BidiGenerateContentResponse")
+          .add(new protobuf.Field("serverContent", 1, "ServerContent"));
+          
+        root.define("gemini").add(serverContentType).add(responseType);
+        
+        setProtobufRoot(root);
+        console.log('✅ Protobuf schema initialized for Gemini Live');
+      } catch (error) {
+        console.error('❌ Failed to initialize Protobuf:', error);
+      }
+    };
+    
+    initProtobuf();
+  }, []);
+
+  // Process incoming Protobuf messages
+  const processProtobufMessage = (arrayBuffer: ArrayBuffer) => {
+    try {
+      if (!protobufRoot) {
+        console.log('⚠️ Protobuf not initialized, treating as raw audio');
+        playRawAudio(arrayBuffer);
+        return;
+      }
+
+      const responseType = protobufRoot.lookupType("gemini.BidiGenerateContentResponse");
+      const message = responseType.decode(new Uint8Array(arrayBuffer));
+      
+      console.log('📋 Decoded Protobuf message:', message);
+      
+      if (message.serverContent && message.serverContent.data) {
+        const audioData = message.serverContent.data;
+        console.log('🎵 Extracted audio data from Protobuf, length:', audioData.length);
+        playRawAudio(audioData.buffer || audioData);
+      }
+      
+      if (message.serverContent && message.serverContent.outputTranscription) {
+        console.log('📝 Received transcription:', message.serverContent.outputTranscription);
+      }
+    } catch (error) {
+      console.log('⚠️ Protobuf decode failed, treating as raw audio:', error);
+      playRawAudio(arrayBuffer);
+    }
+  };
+
   // Buffer management for continuous audio playback
   const audioBufferQueue = useRef<ArrayBuffer[]>([]);
   const isPlaying = useRef(false);
 
-  const playAudio = async (audioBuffer: ArrayBuffer) => {
+  const playRawAudio = async (audioBuffer: ArrayBuffer) => {
     try {
       if (!isMuted && audioContextRef.current) {
         // Add to queue for continuous playback
@@ -422,19 +482,14 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
       while (audioBufferQueue.current.length > 0) {
         const audioBuffer = audioBufferQueue.current.shift()!;
         
-        // Handle odd byte lengths by padding to even number
-        let processedBuffer = audioBuffer;
+        // No padding needed - Protobuf extraction should provide clean PCM data
         if (audioBuffer.byteLength % 2 !== 0) {
-          const paddedBuffer = new ArrayBuffer(audioBuffer.byteLength + 1);
-          const paddedView = new Uint8Array(paddedBuffer);
-          const originalView = new Uint8Array(audioBuffer);
-          paddedView.set(originalView);
-          paddedView[audioBuffer.byteLength] = 0;
-          processedBuffer = paddedBuffer;
+          console.warn('⚠️ Audio data has odd byte length after Protobuf extraction:', audioBuffer.byteLength);
+          return; // Skip corrupted audio data
         }
         
-        // Gemini Live sends raw 16-bit PCM at 24kHz mono
-        const pcmData = new Int16Array(processedBuffer);
+        // Process extracted PCM data from Protobuf  
+        const pcmData = new Int16Array(audioBuffer);
         
         if (pcmData.length === 0) continue;
         
