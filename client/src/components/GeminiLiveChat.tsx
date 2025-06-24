@@ -185,13 +185,12 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         const average = sum / inputBuffer.length;
         
         // Log audio levels for debugging (every 100 samples)
+        chunkCount++;
         if (chunkCount % 100 === 0) {
           console.log(`🎤 Audio level: ${average.toFixed(6)} (threshold: 0.001)`);
         }
         
         if (average > 0.001) { // Lower threshold for voice detection
-          chunkCount++;
-          
           // Convert to 16-bit PCM
           const pcmData = new Int16Array(inputBuffer.length);
           for (let i = 0; i < inputBuffer.length; i++) {
@@ -216,10 +215,6 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
           
           console.log(`📤 Sending audio message (${pcmData.length} samples, level: ${average.toFixed(4)})`);
           console.log('Audio data size:', btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer))).length);
-          
-          if (chunkCount % 10 === 0) { // Log every 10th chunk for better debugging
-            console.log(`🎤 Sending audio chunk ${chunkCount} (level: ${average.toFixed(4)})`);
-          }
           
           websocketRef.current.send(JSON.stringify(audioMessage));
         } else {
