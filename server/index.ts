@@ -4,6 +4,7 @@ import fs from "fs";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { ensureDeploymentReady, createMinimalBuild } from "./deploymentHelper";
+import { setupVoiceChat } from "./voiceChat";
 
 const app = express();
 app.use(express.json());

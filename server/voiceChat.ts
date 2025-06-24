@@ -11,13 +11,21 @@ const SAMPLE_RATE_HZ = 24000;
 
 // Validate required environment variables
 function validateEnvironment() {
-  const required = ['GCP_PROJECT', 'GOOGLE_APPLICATION_CREDENTIALS', 'GEMINI_API_KEY'];
+  const required = ['GEMINI_API_KEY'];
+  const optional = ['GOOGLE_CLOUD_PROJECT_ID', 'GOOGLE_CLOUD_CREDENTIALS'];
+  
   const missing = required.filter(key => !process.env[key]);
   
   if (missing.length > 0) {
     const error = `Missing required environment variables: ${missing.join(', ')}`;
     console.error('❌ Voice Chat Setup Error:', error);
     throw new Error(error);
+  }
+  
+  // Check for optional Google Cloud credentials
+  const hasGoogleCloud = optional.every(key => process.env[key]);
+  if (!hasGoogleCloud) {
+    console.warn('⚠️ Google Cloud credentials not fully configured, using fallback authentication');
   }
   
   console.log('✅ Environment variables validated for Google Gemini Live');
@@ -27,9 +35,7 @@ function validateEnvironment() {
 function initializeGenAI() {
   try {
     return new GoogleGenAI({ 
-      apiKey: process.env.GEMINI_API_KEY!,
-      project: process.env.GCP_PROJECT!,
-      location: process.env.GCP_LOCATION || 'us-central1'
+      apiKey: process.env.GEMINI_API_KEY!
     });
   } catch (error) {
     console.error('❌ Failed to initialize Google GenAI:', error);

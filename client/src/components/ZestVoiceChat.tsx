@@ -1,5 +1,5 @@
 import React from 'react';
-import GoogleLiveAudioChat from './GoogleLiveAudioChat';
+import { VoiceChat } from './VoiceChat';
 
 interface ZestVoiceChatProps {
   onChatMessage?: (message: string) => void;
