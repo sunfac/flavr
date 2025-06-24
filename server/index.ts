@@ -152,6 +152,14 @@ app.use((req, res, next) => {
     }
   }
 
+  // Initialize Voice Chat with Google Gemini Live
+  try {
+    setupVoiceChat(server);
+    console.log('🎤 Google Gemini Live voice chat initialized');
+  } catch (error) {
+    console.error('❌ Failed to initialize voice chat:', error);
+  }
+
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
   // It is the only port that is not firewalled.

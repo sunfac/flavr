@@ -22,6 +22,7 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
   const streamRef = useRef<MediaStream | null>(null);
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const audioWorkletRef = useRef<AudioWorkletNode | null>(null);
+  const speechSynthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   // Initialize WebSocket connection
   const connectWebSocket = useCallback(() => {
@@ -55,6 +56,8 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
               case 'token':
                 console.log('📝 Received token:', message.data);
                 onTokenReceived?.(message.data);
+                // Speak the response using text-to-speech
+                speakText(message.data);
                 break;
                 
               case 'recipe':
@@ -89,6 +92,35 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
       setConnectionStatus('error');
     }
   }, [onRecipeUpdate, onTokenReceived]);
+
+  // Text-to-speech for AI responses
+  const speakText = (text: string) => {
+    if ('speechSynthesis' in window) {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;
+      utterance.pitch = 1.0;
+      utterance.volume = 0.8;
+      
+      // Use a more natural voice if available
+      const voices = window.speechSynthesis.getVoices();
+      const preferredVoice = voices.find(voice => 
+        voice.name.includes('Google') || 
+        voice.name.includes('Samantha') || 
+        voice.name.includes('Alex')
+      );
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+      }
+      
+      speechSynthesisRef.current = utterance;
+      window.speechSynthesis.speak(utterance);
+      
+      console.log('🔊 Speaking response:', text.substring(0, 50) + '...');
+    }
+  };
 
   // Play audio buffer through AudioContext
   const playAudioBuffer = async (arrayBuffer: ArrayBuffer) => {
@@ -237,8 +269,16 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
     return sum / samples.length / 32768;
   };
 
+  // Stop speech synthesis
+  const stopSpeaking = () => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+  };
+
   // Stop recording
   const stopRecording = () => {
+    stopSpeaking(); // Stop any ongoing speech when recording starts
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
@@ -268,6 +308,7 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
     if (isRecording) {
       stopRecording();
     } else {
+      stopSpeaking(); // Stop any ongoing speech before recording
       startRecording();
     }
   };
@@ -278,6 +319,7 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
     
     return () => {
       stopRecording();
+      stopSpeaking();
       wsRef.current?.close();
     };
   }, [connectWebSocket]);
