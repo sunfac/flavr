@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Mic, MicOff, Send, Volume2, VolumeX, Radio } from 'lucide-react';
 import { useRecipeStore } from '@/stores/recipeStore';
+import { GeminiLiveChat } from '@/components/GeminiLiveChat';
 
 interface Message {
   id: string;
@@ -285,7 +286,7 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
       {showGoogleLiveAudio && (
         <div className="p-2 bg-black/20 border-b border-white/10">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-white text-xs font-medium">Google Live Audio Chat</span>
+            <span className="text-white text-xs font-medium">Voice Chat with Zest</span>
             <Button
               variant="ghost"
               size="sm"
@@ -295,89 +296,10 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
               ×
             </Button>
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                className="bg-green-600 hover:bg-green-700 text-white"
-                onClick={async () => {
-                  try {
-                    console.log('Starting Google Live Audio Chat...');
-                    
-                    // Request microphone permission
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    console.log('Microphone access granted');
-                    
-                    // Connect to Google Live Audio WebSocket 
-                    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-                    // Get API key from environment or server endpoint
-                    let apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-                    
-                    if (!apiKey) {
-                      console.log('🔄 Fetching API key from server fallback...');
-                      try {
-                        const response = await fetch('/api/gemini-key');
-                        if (response.ok) {
-                          const data = await response.json();
-                          apiKey = data.key;
-                          console.log('✅ API key fetched from server successfully');
-                        } else {
-                          console.error('❌ Server responded with error:', response.status);
-                        }
-                      } catch (error) {
-                        console.error('❌ Network error fetching API key:', error);
-                      }
-                    } else {
-                      console.log('✅ API key available from environment');
-                    }
-                    
-                    if (!apiKey) {
-                      alert('Voice chat requires API key configuration - please check console for details');
-                      return;
-                    }
-                    const ws = new WebSocket(`wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${apiKey}`);
-                    
-                    ws.onopen = () => {
-                      console.log('Connected to Google Live Audio');
-                      alert('Voice chat active! Start speaking with Zest');
-                      
-                      // Send start conversation message
-                      ws.send(JSON.stringify({
-                        type: 'start_conversation'
-                      }));
-                    };
-                    
-                    ws.onmessage = (event) => {
-                      const data = JSON.parse(event.data);
-                      console.log('Received from voice chat:', data);
-                      
-                      if (data.type === 'error') {
-                        alert(`Voice chat error: ${data.message}`);
-                      } else if (data.type === 'audio_response') {
-                        console.log('Received audio response from Zest');
-                      }
-                    };
-                    
-                    ws.onerror = (error) => {
-                      console.error('WebSocket error:', error);
-                      alert('Voice chat connection failed. Text chat is still available.');
-                    };
-                    
-                  } catch (error) {
-                    console.error('Failed to start voice chat:', error);
-                    alert('Microphone access required for voice chat');
-                  }
-                }}
-              >
-                <Radio className="w-3 h-3 mr-1" />
-                Start Voice Chat
-              </Button>
-              <span className="text-white text-xs">Talk naturally with Zest</span>
-            </div>
-            <div className="text-white/70 text-xs">
-              Click to begin two-way voice conversation with Google Live Audio API
-            </div>
-          </div>
+          <GeminiLiveChat 
+            currentRecipe={currentRecipe}
+            onRecipeUpdate={onRecipeUpdate}
+          />
         </div>
       )}
 
