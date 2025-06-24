@@ -66,50 +66,17 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         setConnectionStatus('connected');
         setIsConnected(true);
         
-        // Try multiple setup message formats to identify the correct one
-        const setupFormats = [
-          // Format 1: Standard Gemini Live format
-          {
-            "setup": {
-              "model": "models/gemini-2.0-flash-exp",
-              "generationConfig": {
-                "responseModalities": ["AUDIO"],
-                "speechConfig": {
-                  "voiceConfig": {
-                    "prebuiltVoiceConfig": {
-                      "voiceName": "Puck"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          // Format 2: Minimal setup
-          {
-            "setup": {
-              "model": "models/gemini-2.0-flash-exp"
-            }
-          },
-          // Format 3: Alternative field names
-          {
-            "setup": {
-              "model": "models/gemini-2.0-flash-exp",
-              "generation_config": {
-                "response_modalities": ["AUDIO"],
-                "speech_config": {
-                  "voice_config": {
-                    "prebuilt_voice_config": {
-                      "voice_name": "Puck"
-                    }
-                  }
-                }
-              }
-            }
+        // Use the correct setup message format from Gemini's response
+        const setupMessage = {
+          "setup": {
+            "model": "models/gemini-live-2.5-flash-preview-native-audio",
+            "generationConfig": {
+              "responseModalities": ["AUDIO"]
+            },
+            "inputAudioTranscription": {},
+            "outputAudioTranscription": {}
           }
-        ];
-        
-        // Start with minimal format to test basic connectivity
-        const setupMessage = setupFormats[1]; // Minimal setup first
+        };
         
         console.log('Sending setup message to Gemini Live');
         console.log('Setup message content:', JSON.stringify(setupMessage, null, 2));
@@ -234,16 +201,17 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
               }
             }
             
-            // Check for setupComplete or error responses
-            if (message.error) {
-              console.log('❌ API Error received:', message.error);
-            }
-            
+            // Check for setup completion confirmation
             if (message.setupComplete || message.type === 'setupComplete') {
-              console.log('✅ Setup confirmed by API');
+              console.log('✅ Setup confirmed by Live API - connection ready');
               setConnectionStatus('ready');
               setIsListening(true);
               startAudioStreaming();
+            }
+            
+            // Check for API errors
+            if (message.error) {
+              console.log('❌ Live API Error received:', message.error);
             }
             
             // Log any other message types

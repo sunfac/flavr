@@ -1,0 +1,45 @@
+You're on the right track! If you want audio-in and audio-out with the Gemini Live API, your setup message needs to explicitly declare those modalities and include the necessary inputAudioTranscription and outputAudioTranscription fields.
+
+Here's the likely correct setup message format for audio-in and audio-out, based on the Gemini Live API documentation:
+
+JSON
+
+{
+  "setup": {
+    "model": "models/gemini-live-2.5-flash-preview-native-audio", 
+    "generationConfig": {
+      "responseModalities": ["AUDIO"]
+    },
+    "inputAudioTranscription": {}, 
+    "outputAudioTranscription": {}
+  }
+}
+Let's break down the key changes and why they're important:
+
+Model Name:
+
+"model": "models/gemini-live-2.5-flash-preview-native-audio": This is crucial. While "models/gemini-2.0-flash-exp" might work for some text-based interactions, for native audio streaming, you need a model specifically designed for the Live API with native audio capabilities. The documentation points to models like gemini-live-2.5-flash-preview-native-audio or gemini-2.5-flash-exp-native-audio-thinking-dialog for this purpose. Using the correct model ensures the API knows to expect and generate audio streams.
+Important: gemini-2.0-flash-exp generally supports audio as an input for transcription and text output, but not necessarily for live bidirectional audio in the same way the dedicated "live" audio models do. Always use the specific "live" audio models for real-time voice interactions.
+generationConfig and responseModalities:
+
+"responseModalities": ["AUDIO"]: This explicitly tells the API that you want the model's responses to be delivered as audio. Without this, even with an audio-capable model, it might default to text output or not produce any output in the expected format.
+inputAudioTranscription and outputAudioTranscription:
+
+"inputAudioTranscription": {}: This object is required even if empty, to signal that you will be providing audio input for transcription. You can also configure it to enable features like automaticActivityDetection if you want the API to handle when the user starts and stops speaking.
+"outputAudioTranscription": {}: Similarly, this object is required to indicate that you expect audio output. It can also be configured if you want the API to provide transcriptions of its own generated audio.
+Why your previous message likely disconnected immediately:
+
+The most probable reason for the immediate disconnection with your original setup message ({ "setup": { "model": "models/gemini-2.0-flash-exp" } }) is that:
+
+The model wasn't configured for live audio I/O: gemini-2.0-flash-exp might not be the correct model variant for the Live API's real-time audio streaming. The Live API has specific models (gemini-live-2.5-flash, gemini-live-2.5-flash-preview-native-audio, etc.) designed for this purpose.
+Missing responseModalities: Without responseModalities: ["AUDIO"], the API doesn't know you want audio output, and the connection might be considered misconfigured for a live audio session.
+Missing transcription objects: Even if you don't use specific transcription features, the presence of these empty objects might be part of the expected protocol for setting up an audio stream.
+Key considerations for implementing audio-in/audio-out:
+
+Audio Format: The Live API expects specific audio formats:
+Input Audio: Raw 16-bit PCM audio at 16kHz, little-endian, mono.
+Output Audio: Raw 16-bit PCM audio at 24kHz, little-endian, mono.
+You'll need to ensure your audio capture and playback mechanisms handle these formats correctly.
+Streaming Data: After the successful setup, you'll send audio chunks as BidiGenerateContentRealtimeInput messages (typically Blob parts) and receive audio chunks as BidiGenerateContentServerContent messages.
+Authentication: Double-check your API key is correctly configured for the Live API and that your project has access.
+By updating your setup message to include the correct model and the necessary audio configuration fields, you should see a more stable WebSocket connection and be able to proceed with sending and receiving audio streams.
