@@ -458,4 +458,31 @@
   .container-query {
     container-type: inline-size;
   }
+  
+  /* Text overflow utilities for long titles */
+  .text-wrap-balance {
+    text-wrap: balance;
+  }
+  
+  .break-words {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .hyphens-auto {
+    hyphens: auto;
+  }
+  
+  /* Mobile-specific text sizing */
+  @media (max-width: 768px) {
+    .recipe-title {
+      font-size: 1.125rem !important; /* 18px */
+      line-height: 1.375 !important;
+    }
+    
+    .recipe-description {
+      font-size: 0.875rem !important; /* 14px */
+      line-height: 1.5 !important;
+    }
+  }
 }
