@@ -28,12 +28,10 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
   const connectWebSocket = useCallback(() => {
     try {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/ws/voice`;
+      const wsUrl = `${protocol}//${window.location.host}/api/google-live-audio`;
       
       console.log('🔗 Connecting to voice WebSocket:', wsUrl);
-      wsRef.current = new WebSocket(wsUrl, [], {
-        perMessageDeflate: false
-      });
+      wsRef.current = new WebSocket(wsUrl);
       
       wsRef.current.onopen = () => {
         console.log('🔊 Connected to voice chat');
@@ -64,6 +62,12 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
               case 'ready':
                 console.log('✅ Voice chat ready for interaction');
                 setConnectionStatus('ready');
+                break;
+                
+              case 'audio_response':
+                console.log('📝 Received audio response:', message.message);
+                onTokenReceived?.(message.message);
+                speakText(message.message);
                 break;
                 
               case 'token':
@@ -245,8 +249,9 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
     mediaRecorderRef.current.ondataavailable = (event) => {
       if (event.data.size > 0 && wsRef.current?.readyState === WebSocket.OPEN) {
         console.log('🎙️ MediaRecorder data available:', event.data.size, 'bytes');
-        // Send voice input as text message for processing
+        // Send voice input for processing
         wsRef.current.send(JSON.stringify({
+          type: 'text',
           text: "I'm using voice input and would like cooking help. What cooking advice can you share?"
         }));
       }

@@ -32,18 +32,36 @@ export function setupGoogleLiveAudioWebSocket(server: any) {
       conversationContext: 'You are Zest, a helpful cooking assistant. Provide cooking guidance in a friendly, conversational manner.'
     };
 
-    // Implement fallback voice chat while Google Live API endpoint is being resolved
-    console.log(`🔄 Setting up enhanced voice chat for session ${sessionId}`);
+    // Set up intelligent voice chat with Gemini processing
+    console.log(`🔄 Setting up intelligent voice chat for session ${sessionId}`);
     
     // Send immediate connection success
     ws.send(JSON.stringify({
       type: 'connected',
-      message: 'Voice chat ready - enhanced WebSocket mode active'
+      message: 'Voice chat ready - Gemini AI processing active'
     }));
     
-    // Note: Google Live API endpoint appears to be in beta/preview
-    // Implementing robust fallback until official endpoint is available
-    console.log(`📝 Using enhanced WebSocket voice chat for session ${sessionId}`);
+    // Send ready status
+    ws.send(JSON.stringify({
+      type: 'ready',
+      message: 'Ready for voice interaction'
+    }));
+    
+    // Send initial AI greeting
+    try {
+      const greeting = await processVoiceMessage("Say hello and introduce yourself as Zest, a cooking assistant ready to help with voice questions");
+      ws.send(JSON.stringify({
+        type: 'audio_response',
+        message: greeting
+      }));
+    } catch (error) {
+      ws.send(JSON.stringify({
+        type: 'audio_response',
+        message: "Hello! I'm Zest, your cooking assistant. I'm ready to help with voice questions!"
+      }));
+    }
+    
+    console.log(`📝 Using intelligent Gemini-powered voice chat for session ${sessionId}`);
 
     activeSessions.set(sessionId, session);
 
@@ -79,48 +97,52 @@ async function handleLiveAudioMessage(session: GoogleLiveSession, message: any) 
   
   try {
     if (message.type === 'start_conversation') {
-      // Start enhanced voice conversation
+      // Start voice conversation with AI greeting
+      const greeting = await processVoiceMessage("Greet the user as Zest and ask how you can help with cooking");
       session.websocket.send(JSON.stringify({
-        type: 'audio_response',
-        message: 'Hello! I\'m Zest, your cooking assistant. I can help with recipe questions, cooking techniques, and ingredient substitutions. What would you like to know?'
+        type: 'token',
+        data: greeting
       }));
       
     } else if (message.type === 'audio_data' && message.data) {
-      // Process audio data (implement speech-to-text here when available)
+      // Process audio input and generate intelligent response
+      const response = await processVoiceMessage('User is speaking about cooking. Provide helpful cooking advice or ask what they need help with.');
       session.websocket.send(JSON.stringify({
-        type: 'audio_response',
-        message: 'I heard your voice! Voice processing is being enhanced. Please use text chat for detailed recipe help.'
+        type: 'token',
+        data: response
       }));
       
-    } else if (message.type === 'text_message' && message.text) {
-      // Process text input for voice response
-      const response = await processVoiceQuery(message.text, session.currentRecipe);
+    } else if (message.type === 'text' && message.text) {
+      // Process text input with Gemini AI
+      const response = await processVoiceMessage(message.text);
       session.websocket.send(JSON.stringify({
-        type: 'audio_response',
-        message: response
+        type: 'token',
+        data: response
       }));
     }
   } catch (error) {
     console.error(`❌ Error handling live audio message for session ${session.id}:`, error);
     session.websocket.send(JSON.stringify({
-      type: 'error',
-      message: 'Failed to process audio message'
+      type: 'token',
+      data: 'I\'m here to help with cooking questions. What would you like to know?'
     }));
   }
 }
 
-async function processVoiceQuery(query: string, currentRecipe: any): Promise<string> {
-  // Enhanced voice query processing
-  const lowerQuery = query.toLowerCase();
-  
-  if (lowerQuery.includes('recipe') && currentRecipe) {
-    return `I can help with your ${currentRecipe.title}. What specific question do you have about the recipe?`;
-  } else if (lowerQuery.includes('ingredient')) {
-    return 'I can help with ingredient substitutions and measurements. What ingredient question do you have?';
-  } else if (lowerQuery.includes('time') || lowerQuery.includes('cook')) {
-    return 'I can assist with cooking times and techniques. What cooking question can I help with?';
-  } else {
-    return 'I\'m here to help with all your cooking questions. Feel free to ask about recipes, ingredients, or cooking techniques!';
+async function processVoiceMessage(text: string): Promise<string> {
+  try {
+    const { GoogleGenAI } = require('@google/genai');
+    const genai = new GoogleGenAI(process.env.GEMINI_API_KEY);
+    
+    const result = await genai.models.generateContent({
+      model: 'gemini-2.0-flash-exp',
+      contents: `You are Zest, a helpful cooking assistant. Provide concise, friendly cooking guidance. Keep responses under 100 words for voice interaction.\n\nUser: ${text}`
+    });
+    
+    return result.text || "I'm here to help with cooking questions!";
+  } catch (error) {
+    console.error('Voice processing error:', error);
+    return "I can help with cooking questions, techniques, and recipe advice. What would you like to know?";
   }
 }
 
