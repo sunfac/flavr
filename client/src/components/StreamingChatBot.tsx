@@ -119,7 +119,12 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
         body: JSON.stringify({
           message: inputValue,
           currentRecipe,
-          conversationHistory
+          conversationHistory,
+          openAIContext: {
+            quizData: currentRecipe?.quizData,
+            originalPrompt: currentRecipe?.originalPrompt,
+            userPreferences: currentRecipe?.userPreferences
+          }
         }),
       });
 

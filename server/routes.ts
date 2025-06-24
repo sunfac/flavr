@@ -1458,8 +1458,87 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
     }
   });
 
-  // Enhanced Streaming Chat with Conversational Memory
+  // Hybrid OpenAI + Gemini Streaming Chat with Context Handover
   app.post("/api/chat/stream", async (req, res) => {
+    try {
+      const { message, currentRecipe, conversationHistory = [], openAIContext } = req.body;
+      const userId = req.session?.userId;
+
+      // Set up Server-Sent Events for streaming
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Cache-Control'
+      });
+
+      // Import Gemini chat service
+      const { geminiChat } = await import('./geminiChat');
+
+      // Initialize Gemini chat with OpenAI context handover
+      await geminiChat.initializeChat({
+        currentRecipe,
+        conversationHistory,
+        openAIContext: openAIContext || {
+          quizData: currentRecipe?.quizData,
+          originalPrompt: currentRecipe?.originalPrompt,
+          userPreferences: currentRecipe?.userPreferences
+        }
+      });
+      
+      // Use Gemini for fluid conversation with OpenAI context handover
+      console.log('🤖 Using Gemini for conversational AI with OpenAI context');
+      
+      await geminiChat.sendMessageStream(message, (chunk) => {
+        if (chunk.type === 'content') {
+          res.write(`data: ${JSON.stringify({ type: 'content', content: chunk.content })}\n\n`);
+        } else if (chunk.type === 'function_call') {
+          try {
+            const { name, args } = chunk.functionCall;
+            console.log('🔧 Gemini function call:', name, args);
+            
+            // Send recipe update event for live refresh
+            const updatedRecipe = {
+              id: currentRecipe?.id || Date.now(),
+              title: args.title,
+              servings: args.servings || currentRecipe?.servings || 4,
+              cookTime: args.cookTime || currentRecipe?.cookTime || 30,
+              difficulty: args.difficulty || currentRecipe?.difficulty || "Medium",
+              ingredients: args.ingredients,
+              instructions: args.instructions,
+              description: currentRecipe?.description || args.title
+            };
+            
+            console.log('📤 Sending recipe update from Gemini:', updatedRecipe);
+            res.write(`data: ${JSON.stringify({ 
+              type: 'recipeUpdate', 
+              recipe: updatedRecipe
+            })}\n\n`);
+            
+          } catch (error) {
+            console.error('Error processing Gemini function call:', error);
+          }
+        } else if (chunk.type === 'done') {
+          // Save to database if user authenticated
+          if (userId) {
+            storage.saveChatMessage(userId, message, "Gemini response", null).catch(console.error);
+          }
+          
+          res.write(`data: ${JSON.stringify({ type: 'done' })}\n\n`);
+          res.end();
+        }
+      });
+
+    } catch (error: any) {
+      console.error('Hybrid chat error:', error);
+      res.write(`data: ${JSON.stringify({ type: 'error', message: error.message })}\n\n`);
+      res.end();
+    }
+  });
+
+  // Keep the legacy OpenAI endpoint for fallback
+  app.post("/api/chat/stream-openai", async (req, res) => {
     try {
       const { message, currentRecipe, conversationHistory = [] } = req.body;
       const userId = req.session?.userId;
@@ -1473,9 +1552,6 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
         'Access-Control-Allow-Headers': 'Cache-Control'
       });
 
-      // Get full chat history for enhanced conversational memory
-      const fullChatHistory = await storage.getChatHistory(userId, 50);
-      
       // Helper function to estimate token count (rough approximation)
       const estimateTokens = (text: string): number => {
         return Math.ceil(text.length / 4);
