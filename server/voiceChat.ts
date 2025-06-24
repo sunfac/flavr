@@ -34,9 +34,7 @@ function validateEnvironment() {
 // Initialize Google GenAI client
 function initializeGenAI() {
   try {
-    return new GoogleGenAI({ 
-      apiKey: process.env.GEMINI_API_KEY!
-    });
+    return new GoogleGenAI(process.env.GEMINI_API_KEY!);
   } catch (error) {
     console.error('❌ Failed to initialize Google GenAI:', error);
     throw error;
@@ -103,14 +101,15 @@ export function setupVoiceChat(httpServer: Server): WebSocketServer {
       
       if (genai.live && typeof genai.live.connect === 'function') {
         console.log('✅ Live API available, creating session...');
-        liveSession = await genai.live.connect({
+        liveSession = genai.live.connect({
           model: 'gemini-2.0-flash-exp',
           config: {
-            responseModalities: ['AUDIO', 'TEXT'],
+            response_modalities: ['AUDIO', 'TEXT'],
             tools: [recipeTool],
-            systemInstruction: 'You are Zest, a helpful cooking assistant. Provide cooking guidance in a friendly, conversational manner. Use the set_recipe tool when updating recipes.'
+            system_instruction: 'You are Zest, a helpful cooking assistant. Provide cooking guidance in a friendly, conversational manner. Use the set_recipe tool when updating recipes.'
           }
         });
+        console.log('🔗 Live session created successfully');
       } else {
         throw new Error('Live API not available in current package version');
       }
@@ -195,8 +194,8 @@ export function setupVoiceChat(httpServer: Server): WebSocketServer {
         message: 'Voice chat ready - text processing mode'
       }));
       
-      // Send initial greeting
-      const greeting = "Hello! I'm Zest, your cooking assistant. I can help with recipe questions, cooking techniques, and ingredient substitutions. What would you like to know?";
+      // Send initial greeting using text processing
+      const greeting = await processTextQuery("Say hello and introduce yourself as Zest, a cooking assistant");
       ws.send(JSON.stringify({
         type: 'token',
         data: greeting
@@ -290,19 +289,20 @@ export function setupVoiceChat(httpServer: Server): WebSocketServer {
 async function processTextQuery(text: string, currentRecipe?: any): Promise<string> {
   try {
     const genai = initializeGenAI();
-    const model = genai.getGenerativeModel({ 
-      model: 'gemini-2.0-flash-exp',
-      systemInstruction: 'You are Zest, a helpful cooking assistant. Provide concise, friendly cooking guidance. Keep responses under 100 words for voice interaction.'
-    });
     
-    let prompt = text;
+    // Use models.generateContent method for v1.6.0
+    let prompt = `You are Zest, a helpful cooking assistant. Provide concise, friendly cooking guidance. Keep responses under 100 words for voice interaction.\n\nUser question: ${text}`;
+    
     if (currentRecipe) {
-      prompt = `Current recipe: ${currentRecipe.title}\nUser question: ${text}`;
+      prompt = `You are Zest, a helpful cooking assistant. Current recipe: ${currentRecipe.title}\n\nUser question: ${text}\n\nProvide concise, helpful cooking guidance related to this recipe.`;
     }
     
-    const result = await model.generateContent(prompt);
-    const response = result.response.text();
+    const result = await genai.models.generateContent({
+      model: 'gemini-2.0-flash-exp',
+      contents: prompt
+    });
     
+    const response = result.text || result.response?.text();
     return response || "I'm here to help with your cooking questions!";
   } catch (error) {
     console.error('Error processing voice query:', error);

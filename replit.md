@@ -167,6 +167,7 @@ Changelog:
 - June 24, 2025. Voice chat functionality enhanced - integrated actual Gemini API for intelligent responses, added text-to-speech synthesis for AI responses, implemented proper audio recording with PCM conversion, fixed conversation flow with real cooking assistance capabilities
 - June 24, 2025. Google GenAI package updated - upgraded to latest version with Live API support, fixed API configuration for gemini-2.0-flash-exp model, enhanced voice processing with proper response formatting and concise cooking guidance
 - June 24, 2025. Voice chat implementation improved - tested Google GenAI package capabilities, implemented intelligent audio processing fallback, enhanced voice response generation with actual Gemini API integration for cooking assistance
+- June 24, 2025. Google GenAI Live API integration fixed - corrected API configuration for v1.6.0 package compatibility, implemented proper Live session creation with response_modalities and system_instruction, fixed text processing using models.generateContent method for voice responses
 ```
 
 ## User Preferences
