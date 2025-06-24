@@ -93,10 +93,14 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
         }
       };
       
-      wsRef.current.onclose = () => {
-        console.log('🔌 Voice chat disconnected');
+      wsRef.current.onclose = (event) => {
+        console.log('🔌 Voice chat disconnected:', event.code, event.reason);
         setIsConnected(false);
-        setConnectionStatus('disconnected');
+        if (event.code === 1006) {
+          setConnectionStatus('error');
+        } else {
+          setConnectionStatus('disconnected');
+        }
       };
       
       wsRef.current.onerror = (error) => {
@@ -382,7 +386,13 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
       
       {connectionStatus === 'connected' && (
         <div className="text-xs text-center text-blue-600 mt-2">
-          Connecting to Gemini Live...
+          Voice chat connected - try speaking!
+        </div>
+      )}
+      
+      {connectionStatus === 'error' && (
+        <div className="text-xs text-center text-red-600 mt-2">
+          Connection failed - tap to retry
         </div>
       )}
     </div>

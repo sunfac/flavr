@@ -174,6 +174,7 @@ Changelog:
 - June 24, 2025. Voice chat implementation switched to Google Live Audio WebSocket - integrated voice functionality with existing working WebSocket at /api/google-live-audio, implemented Gemini AI processing for voice messages, added text-to-speech response system with intelligent cooking assistance
 - June 24, 2025. Voice chat ES module import error fixed - resolved 'require is not defined' error by switching to proper ES module imports for GoogleGenAI, fixed processVoiceMessage function to use static imports instead of dynamic require, voice chat now connects successfully and processes cooking questions with Gemini AI
 - June 24, 2025. GoogleGenAI import issue resolved - added proper import statement for GoogleGenAI at top of googleLiveAudio.ts file, fixed 'GoogleGenAI is not defined' error, voice chat now successfully processes cooking questions with Gemini AI responses for intelligent cooking assistance
+- June 24, 2025. WebSocket frame error diagnosed and fixed - identified "Invalid WebSocket frame: RSV1 must be clear" error causing connection drops, simplified initial greeting to avoid frame corruption, added robust error handling for text processing, voice chat now maintains stable connection for cooking assistance
 ```
 
 ## User Preferences

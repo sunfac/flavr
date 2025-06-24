@@ -50,19 +50,11 @@ export function setupGoogleLiveAudioWebSocket(server: any) {
       message: 'Ready for voice interaction'
     }));
     
-    // Send initial AI greeting
-    try {
-      const greeting = await processVoiceMessage("Say hello and introduce yourself as Zest, a cooking assistant ready to help with voice questions");
-      ws.send(JSON.stringify({
-        type: 'audio_response',
-        message: greeting
-      }));
-    } catch (error) {
-      ws.send(JSON.stringify({
-        type: 'audio_response',
-        message: "Hello! I'm Zest, your cooking assistant. I'm ready to help with voice questions!"
-      }));
-    }
+    // Send initial greeting without AI processing to avoid frame errors
+    ws.send(JSON.stringify({
+      type: 'audio_response',
+      message: "Hello! I'm Zest, your cooking assistant. I'm ready to help with voice questions!"
+    }));
     
     console.log(`📝 Using intelligent Gemini-powered voice chat for session ${sessionId}`);
 
@@ -117,11 +109,19 @@ async function handleLiveAudioMessage(session: GoogleLiveSession, message: any) 
       
     } else if (message.type === 'text' && message.text) {
       // Process text input with Gemini AI
-      const response = await processVoiceMessage(message.text);
-      session.websocket.send(JSON.stringify({
-        type: 'token',
-        data: response
-      }));
+      try {
+        const response = await processVoiceMessage(message.text);
+        session.websocket.send(JSON.stringify({
+          type: 'token',
+          data: response
+        }));
+      } catch (error) {
+        console.error('Error processing text message:', error);
+        session.websocket.send(JSON.stringify({
+          type: 'token',
+          data: "I can help with cooking questions. What would you like to know about cooking?"
+        }));
+      }
     }
   } catch (error) {
     console.error(`❌ Error handling live audio message for session ${session.id}:`, error);
