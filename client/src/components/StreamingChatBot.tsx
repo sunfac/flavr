@@ -308,8 +308,10 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     console.log('Microphone access granted');
                     
-                    // Connect to Google Live Audio WebSocket
-                    const ws = new WebSocket(`ws://${window.location.host}/api/google-live-audio`);
+                    // Connect to Google Live Audio WebSocket on port 8081
+                    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                    const host = window.location.hostname;
+                    const ws = new WebSocket(`${protocol}//${host}:8081/api/google-live-audio`);
                     
                     ws.onopen = () => {
                       console.log('Connected to Google Live Audio');

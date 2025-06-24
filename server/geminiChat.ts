@@ -199,27 +199,34 @@ I'm ready to suggest recipe modifications and update recipes when confirmed!`;
     // Add user message to conversation memory BEFORE processing
     this.conversationMemory.push({ role: 'user', content: message });
 
-    // Check if message indicates user confirmation
-    const confirmationWords = ['yes', 'do it', 'go ahead', 'please', 'ok', 'okay', 'sure', 'absolutely', 'definitely'];
+    // Enhanced confirmation detection
+    const confirmationWords = ['yes', 'do it', 'go ahead', 'please', 'ok', 'okay', 'sure', 'absolutely', 'definitely', 'update', 'change'];
     const isConfirmation = confirmationWords.some(word => 
-      message.toLowerCase().includes(word) && message.length < 50
-    );
+      message.toLowerCase().trim() === word || message.toLowerCase().includes(word)
+    ) && message.length < 50;
 
-    if (isConfirmation) {
-      console.log('🎯 CONFIRMATION DETECTED - User said:', message);
-      console.log('📚 Recent conversation context:', this.conversationMemory.slice(-3));
+    // Check if previous message asked about updating recipe
+    const previousMessage = this.conversationMemory.slice(-2).find(m => m.role === 'model');
+    const askedAboutUpdate = previousMessage?.content.toLowerCase().includes('update the recipe card');
+
+    if (isConfirmation && askedAboutUpdate) {
+      console.log('🎯 RECIPE UPDATE CONFIRMATION DETECTED - User said:', message);
+      console.log('📚 Previous bot message asked about update:', askedAboutUpdate);
+      console.log('📝 Forcing function call execution');
     }
 
     let fullResponse = "";
 
     try {
-      // Inject context into the message for better continuity
-      const contextualMessage = isConfirmation ? 
-        `Previous context: ${this.conversationMemory.slice(-3).map(m => `${m.role}: ${m.content}`).join(' | ')}
+      // Force function calling for confirmations
+      const contextualMessage = (isConfirmation && askedAboutUpdate) ? 
+        `CRITICAL: User confirmed recipe update. You MUST call updateRecipe function immediately with the previously discussed modifications. 
 
-Current message: ${message}
+Previous context: ${this.conversationMemory.slice(-3).map(m => `${m.role}: ${m.content}`).join(' | ')}
 
-IMPORTANT: The user is confirming a previous request. Take the specific action they confirmed rather than asking again.` : message;
+User confirmation: ${message}
+
+EXECUTE updateRecipe function now with the recipe changes we discussed.` : message;
 
       const result = await this.chatSession.sendMessageStream(contextualMessage);
       
