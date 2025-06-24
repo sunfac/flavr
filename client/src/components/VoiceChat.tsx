@@ -28,7 +28,14 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
   const connectWebSocket = useCallback(() => {
     try {
       // Connect directly to Google Gemini Live WebSocket
-      const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`;
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (!apiKey) {
+        console.error('❌ VITE_GEMINI_API_KEY environment variable not found');
+        setConnectionStatus('error');
+        return;
+      }
+      
+      const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${apiKey}`;
       
       console.log('🔗 Connecting to Gemini Live API WebSocket');
       wsRef.current = new WebSocket(wsUrl);
@@ -136,6 +143,11 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
         console.log('🔌 Gemini Live WebSocket closed:', event.code, event.reason);
         setConnectionStatus('disconnected');
         setIsConnected(false);
+        
+        // If connection failed, provide helpful error message
+        if (event.code === 1006 || event.code === 1007) {
+          console.error('❌ WebSocket connection failed - check API key and network');
+        }
       };
       
     } catch (error) {
