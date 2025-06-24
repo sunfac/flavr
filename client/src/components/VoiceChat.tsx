@@ -28,10 +28,11 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
   const connectWebSocket = useCallback(() => {
     try {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/ws/simple-voice`;
+      const wsUrl = `${protocol}//${window.location.host}/api/google-live-audio`;
       
       console.log('🔗 Connecting to voice WebSocket:', wsUrl);
       wsRef.current = new WebSocket(wsUrl);
+      wsRef.current.binaryType = 'arraybuffer'; // Set binary type for audio data
       
       wsRef.current.onopen = () => {
         console.log('🔊 Connected to voice chat');
