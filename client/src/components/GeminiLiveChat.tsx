@@ -62,12 +62,12 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         setConnectionStatus('connected');
         setIsConnected(true);
         
-        // Send setup message
+        // Send setup message according to Gemini Live API spec
         const setupMessage = {
           setup: {
             model: "models/gemini-2.0-flash-exp",
             generation_config: {
-              response_modalities: ["AUDIO"],
+              response_modalities: ["AUDIO", "TEXT"],
               speech_config: {
                 voice_config: {
                   prebuilt_voice_config: {
@@ -82,7 +82,8 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
               parts: [{
                 text: `You are Zest, Flavr's cooking assistant. Give short, helpful cooking advice. Keep all responses under 30 seconds. Be encouraging and personable. ${currentRecipe ? `Current recipe: ${currentRecipe.title}` : ''}`
               }]
-            }
+            },
+            tools: []
           }
         };
         
@@ -105,6 +106,12 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         console.log('🔄 Raw message received from Gemini Live:', event.data);
         
         if (typeof event.data === 'string') {
+          // Check if it's an empty string or just whitespace
+          if (!event.data.trim()) {
+            console.log('⚠️ Received empty string from API');
+            return;
+          }
+          
           try {
             const message = JSON.parse(event.data);
             console.log('📋 Parsed Gemini Live message:', JSON.stringify(message, null, 2));
@@ -167,6 +174,54 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
               console.log('⚠️ No serverContent in message');
             }
             
+            // Check for different response formats that Gemini Live might send
+            if (message.candidates && message.candidates.length > 0) {
+              console.log('📥 Found candidates in response');
+              const candidate = message.candidates[0];
+              if (candidate.content && candidate.content.parts) {
+                candidate.content.parts.forEach((part: any, index: number) => {
+                  console.log(`🔍 Candidate part ${index}:`, part);
+                  if (part.text) {
+                    console.log('💬 Text response from candidate:', part.text);
+                  }
+                  if (part.inlineData) {
+                    console.log('🎵 Audio response in candidate');
+                    playAudio(part.inlineData.data);
+                  }
+                });
+              }
+            }
+            
+            // Check for server content format
+            if (message.serverContent?.modelTurn) {
+              console.log('📥 Found modelTurn in serverContent');
+              const modelTurn = message.serverContent.modelTurn;
+              if (modelTurn.parts) {
+                modelTurn.parts.forEach((part: any, index: number) => {
+                  console.log(`🔍 ModelTurn part ${index}:`, part);
+                  if (part.text) {
+                    console.log('💬 Text response from modelTurn:', part.text);
+                  }
+                  if (part.inlineData) {
+                    console.log('🎵 Audio response in modelTurn');
+                    playAudio(part.inlineData.data);
+                  }
+                });
+              }
+            }
+            
+            // Check for setupComplete or error responses
+            if (message.error) {
+              console.log('❌ API Error received:', message.error);
+            }
+            
+            if (message.setupComplete || message.type === 'setupComplete') {
+              console.log('✅ Setup confirmed by API');
+              setConnectionStatus('ready');
+              setIsListening(true);
+              startAudioStreaming();
+            }
+            
             // Log any other message types
             if (!message.setupComplete && !message.serverContent && !message.setup && !message.setupResponse) {
               console.log('🔍 Unknown message type with keys:', Object.keys(message));
@@ -176,13 +231,21 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
           } catch (error) {
             console.error('❌ Error parsing JSON message:', error);
           }
+        } else if (event.data instanceof ArrayBuffer) {
+          console.log('📦 Received binary ArrayBuffer, length:', event.data.byteLength);
+          // Try to decode as audio
+          if (event.data.byteLength > 0) {
+            playAudio(btoa(String.fromCharCode(...new Uint8Array(event.data))));
+          }
         } else {
-          console.log('📦 Received binary data of type:', typeof event.data, 'length:', event.data.length || 'unknown');
+          console.log('📦 Received data of type:', typeof event.data, 'data:', event.data);
         }
       };
       
       ws.onerror = (error) => {
         console.error('WebSocket error:', error);
+        console.error('WebSocket readyState:', ws.readyState);
+        console.error('WebSocket URL:', ws.url);
         setConnectionStatus('error');
       };
       
@@ -344,13 +407,52 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
           turns: [{
             role: "user",
             parts: [{
-              text: "Hello Zest, can you hear me? Please respond with a short greeting."
+              text: "Hello Zest, please respond with a short greeting to test our connection."
             }]
           }],
           turn_complete: true
         }
       };
+      console.log('📤 Test message content:', JSON.stringify(testMessage, null, 2));
       websocketRef.current.send(JSON.stringify(testMessage));
+      
+      // Try alternative message formats
+      setTimeout(() => {
+        if (websocketRef.current?.readyState === WebSocket.OPEN) {
+          console.log('📤 Trying alternative message format...');
+          
+          // Format 1: Basic generateContent format
+          const altMessage1 = {
+            contents: [{
+              parts: [{
+                text: "Hello Zest, please respond with a greeting to test the connection."
+              }]
+            }]
+          };
+          
+          console.log('📤 Sending generateContent format:', JSON.stringify(altMessage1, null, 2));
+          websocketRef.current.send(JSON.stringify(altMessage1));
+          
+          // Format 2: Streaming format
+          setTimeout(() => {
+            if (websocketRef.current?.readyState === WebSocket.OPEN) {
+              const altMessage2 = {
+                generateContentRequest: {
+                  model: "models/gemini-2.0-flash-exp",
+                  contents: [{
+                    parts: [{
+                      text: "Test message - please respond"
+                    }]
+                  }]
+                }
+              };
+              
+              console.log('📤 Sending generateContentRequest format:', JSON.stringify(altMessage2, null, 2));
+              websocketRef.current.send(JSON.stringify(altMessage2));
+            }
+          }, 1000);
+        }
+      }, 1000);
     } else {
       console.log('❌ WebSocket not ready for test message');
     }
