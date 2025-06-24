@@ -1,4 +1,4 @@
-import WebSocket from 'ws';
+import WebSocket, { WebSocketServer } from 'ws';
 import { IncomingMessage } from 'http';
 import { GoogleLiveApiClient } from './googleLiveApiClient';
 
@@ -14,7 +14,7 @@ interface GoogleLiveSession {
 const activeSessions = new Map<string, GoogleLiveSession>();
 
 export function setupGoogleLiveAudioWebSocket(server: any) {
-  const wss = new WebSocket.Server({ 
+  const wss = new WebSocketServer({ 
     server,
     path: '/api/google-live-audio'
   });

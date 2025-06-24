@@ -48,7 +48,8 @@ export function GoogleLiveAudioChat({ currentRecipe, onRecipeUpdate }: GoogleLiv
       audioContextRef.current = new AudioContext({ sampleRate: 24000 });
       
       // Connect to Google Live API WebSocket
-      const websocket = new WebSocket(`ws://localhost:5000/api/google-live-audio`);
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const websocket = new WebSocket(`${protocol}//${window.location.host}/api/google-live-audio`);
       websocketRef.current = websocket;
       
       websocket.onopen = () => {
