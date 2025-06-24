@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX, Send, Square } from 'lucide-react';
 
 interface GeminiLiveChatProps {
   currentRecipe?: any;
@@ -216,7 +216,11 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
           console.log(`📤 Sending audio message (${pcmData.length} samples, level: ${average.toFixed(4)})`);
           console.log('Audio data size:', btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer))).length);
           
-          websocketRef.current.send(JSON.stringify(audioMessage));
+          try {
+            websocketRef.current.send(JSON.stringify(audioMessage));
+          } catch (error) {
+            console.error('❌ Failed to send audio message:', error);
+          }
         } else {
           // Log silence detection for debugging
           if (chunkCount % 500 === 0) {
@@ -301,6 +305,38 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
     setIsMuted(!isMuted);
   };
 
+  const sendTestMessage = () => {
+    if (websocketRef.current?.readyState === WebSocket.OPEN) {
+      console.log('🧪 Sending test text message to verify connection');
+      const testMessage = {
+        client_content: {
+          turns: [{
+            role: "user",
+            parts: [{
+              text: "Hello Zest, can you hear me? Please respond with a short greeting."
+            }]
+          }],
+          turn_complete: true
+        }
+      };
+      websocketRef.current.send(JSON.stringify(testMessage));
+    } else {
+      console.log('❌ WebSocket not ready for test message');
+    }
+  };
+
+  const endCurrentTurn = () => {
+    if (websocketRef.current?.readyState === WebSocket.OPEN) {
+      console.log('🔚 Ending current turn to trigger response');
+      const turnCompleteMessage = {
+        client_content: {
+          turn_complete: true
+        }
+      };
+      websocketRef.current.send(JSON.stringify(turnCompleteMessage));
+    }
+  };
+
   const getStatusColor = () => {
     switch (connectionStatus) {
       case 'ready': return 'text-green-500';
@@ -362,9 +398,32 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
       </div>
 
       {connectionStatus === 'ready' && (
-        <div className="flex items-center justify-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
-          <div className={`w-2 h-2 rounded-full ${isListening ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}`} />
-          <span>Two-way conversation active</span>
+        <div className="space-y-2">
+          <div className="flex items-center justify-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+            <div className={`w-2 h-2 rounded-full ${isListening ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}`} />
+            <span>Two-way conversation active</span>
+          </div>
+          
+          <div className="flex gap-2 justify-center">
+            <Button
+              onClick={sendTestMessage}
+              variant="outline"
+              size="sm"
+              className="text-xs"
+            >
+              <Send className="w-3 h-3 mr-1" />
+              Test Text
+            </Button>
+            <Button
+              onClick={endCurrentTurn}
+              variant="outline"
+              size="sm"
+              className="text-xs"
+            >
+              <Square className="w-3 h-3 mr-1" />
+              End Turn
+            </Button>
+          </div>
         </div>
       )}
     </div>
