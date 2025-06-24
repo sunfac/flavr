@@ -1,0 +1,493 @@
+Using simplified message processing for Gemini Live
+Console.js:61 Starting Gemini Live Audio connection...
+Console.js:61 Connecting to Google Live API via verified v1alpha endpoint...
+Console.js:61 🌐 Connected to Gemini Live API WebSocket
+Console.js:61 Sending setup message to Gemini Live
+Console.js:61 Setup message content: {
+  "setup": {
+    "model": "models/gemini-2.5-flash-preview-native-audio-dialog",
+    "generationConfig": {
+      "responseModalities": [
+        "AUDIO"
+      ]
+    },
+    "inputAudioTranscription": {},
+    "outputAudioTranscription": {}
+  }
+}
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(26)
+Console.js:61 📦 Received binary ArrayBuffer, length: 26
+Console.js:61 Processing message, length: 26
+Console.js:61 Skipping small control message
+Console.js:61 ⏰ Timeout reached - forcing ready state for testing
+Console.js:61 Starting continuous audio streaming to Gemini Live
+GeminiLiveChat.tsx:345 [Deprecation] The ScriptProcessorNode is deprecated. Use AudioWorkletNode instead. (https://bit.ly/audio-worklet)
+(anonymous) @ GeminiLiveChat.tsx:345
+(anonymous) @ GeminiLiveChat.tsx:109
+setTimeout
+ws.onopen @ GeminiLiveChat.tsx:104Understand this warning
+Console.js:61 Audio streaming active
+Console.js:61 🧪 Sending test text message via Live API
+Console.js:61 📤 Test message content: {
+  "client_content": {
+    "turns": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Hello Zest, please respond with a short greeting to test our connection."
+          }
+        ]
+      }
+    ],
+    "turn_complete": true
+  }
+}
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(89)
+Console.js:61 📦 Received binary ArrayBuffer, length: 89
+Console.js:61 Processing message, length: 89
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(5328)
+Console.js:61 📦 Received binary ArrayBuffer, length: 5328
+Console.js:61 Processing message, length: 5328
+Console.js:61 Processing large message as audio data
+Console.js:61 🎵 Processing audio queue, chunks: 1
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(89)
+Console.js:61 📦 Received binary ArrayBuffer, length: 89
+Console.js:61 Processing message, length: 89
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(91)
+Console.js:61 📦 Received binary ArrayBuffer, length: 91
+Console.js:61 Processing message, length: 91
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(91)
+Console.js:61 📦 Received binary ArrayBuffer, length: 91
+Console.js:61 Processing message, length: 91
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(86)
+Console.js:61 📦 Received binary ArrayBuffer, length: 86
+Console.js:61 Processing message, length: 86
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(89)
+Console.js:61 📦 Received binary ArrayBuffer, length: 89
+Console.js:61 Processing message, length: 89
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(88)
+Console.js:61 📦 Received binary ArrayBuffer, length: 88
+Console.js:61 Processing message, length: 88
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(92)
+Console.js:61 📦 Received binary ArrayBuffer, length: 92
+Console.js:61 Processing message, length: 92
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 Processing message, length: 2768
+Console.js:61 Processing large message as audio data
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(60)
+Console.js:61 📦 Received binary ArrayBuffer, length: 60
+Console.js:61 Processing message, length: 60
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(385)
+Console.js:61 📦 Received binary ArrayBuffer, length: 385
+Console.js:61 Processing message, length: 385
+Console.js:61 ✅ Audio queue processed completely
