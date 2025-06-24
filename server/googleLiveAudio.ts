@@ -19,6 +19,8 @@ export function setupGoogleLiveAudioWebSocket(server: any) {
     path: '/api/google-live-audio'
   });
 
+  console.log('🎤 Google Live Audio WebSocket server initialized on /api/google-live-audio');
+
   wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
     const sessionId = generateSessionId();
     console.log(`🔊 Google Live Audio session started: ${sessionId}`);
@@ -27,8 +29,40 @@ export function setupGoogleLiveAudioWebSocket(server: any) {
       id: sessionId,
       websocket: ws,
       isActive: true,
-      conversationContext: ''
+      conversationContext: 'You are Zest, a helpful cooking assistant. Provide cooking guidance in a friendly, conversational manner.'
     };
+
+    // Initialize Google Live API client for this session
+    if (process.env.GEMINI_API_KEY) {
+      session.googleApiClient = new GoogleLiveApiClient({
+        apiKey: process.env.GEMINI_API_KEY,
+        model: 'gemini-2.0-flash-exp',
+        systemInstruction: session.conversationContext
+      });
+      
+      // Connect to Google Live API
+      session.googleApiClient.connect().then(() => {
+        console.log(`✅ Google Live API connected for session ${sessionId}`);
+        
+        // Send welcome message to client
+        ws.send(JSON.stringify({
+          type: 'connected',
+          message: 'Google Live Audio ready - start speaking!'
+        }));
+      }).catch(error => {
+        console.error(`❌ Failed to connect to Google Live API for session ${sessionId}:`, error);
+        ws.send(JSON.stringify({
+          type: 'error',
+          message: 'Failed to connect to Google Live Audio'
+        }));
+      });
+    } else {
+      console.error('❌ GEMINI_API_KEY not found - Google Live Audio unavailable');
+      ws.send(JSON.stringify({
+        type: 'error',
+        message: 'Google Live Audio API key not configured'
+      }));
+    }
 
     activeSessions.set(sessionId, session);
 

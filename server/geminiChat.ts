@@ -128,9 +128,10 @@ ${openAIContext?.originalPrompt ? `Original Generation Prompt: ${openAIContext.o
 CRITICAL FUNCTION CALLING INSTRUCTIONS:
 1. When users request recipe modifications, give a brief suggestion (1-2 sentences)
 2. Then ask "Update the recipe card?" 
-3. ONLY call updateRecipe function when user confirms (says "yes", "update", "do it", etc.)
+3. ONLY call updateRecipe function when user confirms (says "yes", "update", "do it", "sure", "okay", etc.)
 4. Keep modification suggestions concise - don't show full ingredient lists
-5. Example flow: User: "make it spicier" → You: "I'd add jalapeños and extra cayenne. Update the recipe card?" → User: "yes" → Call updateRecipe
+5. When user confirms, immediately call updateRecipe with complete recipe data
+6. Example flow: User: "make it spicier" → You: "I'd add jalapeños and extra cayenne. Update the recipe card?" → User: "yes" → Call updateRecipe immediately
 
 CONVERSATION MEMORY INSTRUCTIONS:
 1. Reference previous conversation turns naturally
