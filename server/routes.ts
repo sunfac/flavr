@@ -1821,6 +1821,17 @@ Be conversational, helpful, and maintain context from our conversation history. 
     }
   });
 
+  // Provide Gemini API key for voice chat (fallback endpoint)
+  app.get("/api/gemini-key", (req, res) => {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      console.error("❌ GEMINI_API_KEY environment variable not found on server");
+      return res.status(500).json({ error: "Gemini API key not configured" });
+    }
+    console.log("✅ Providing Gemini API key to client");
+    res.json({ key: apiKey });
+  });
+
   const httpServer = createServer(app);
   
   // Setup Google Live Audio WebSocket

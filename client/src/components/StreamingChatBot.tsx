@@ -314,19 +314,25 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                     let apiKey = import.meta.env.VITE_GEMINI_API_KEY;
                     
                     if (!apiKey) {
+                      console.log('🔄 Fetching API key from server fallback...');
                       try {
                         const response = await fetch('/api/gemini-key');
                         if (response.ok) {
                           const data = await response.json();
                           apiKey = data.key;
+                          console.log('✅ API key fetched from server successfully');
+                        } else {
+                          console.error('❌ Server responded with error:', response.status);
                         }
                       } catch (error) {
-                        console.error('Failed to fetch API key:', error);
+                        console.error('❌ Network error fetching API key:', error);
                       }
+                    } else {
+                      console.log('✅ API key available from environment');
                     }
                     
                     if (!apiKey) {
-                      alert('Voice chat requires API key configuration');
+                      alert('Voice chat requires API key configuration - please check console for details');
                       return;
                     }
                     const ws = new WebSocket(`wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${apiKey}`);

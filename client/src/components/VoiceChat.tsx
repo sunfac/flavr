@@ -31,20 +31,25 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
       let apiKey = import.meta.env.VITE_GEMINI_API_KEY;
       
       if (!apiKey) {
-        console.log('Fetching API key from server...');
+        console.log('🔄 Fetching API key from server fallback...');
         try {
           const response = await fetch('/api/gemini-key');
           if (response.ok) {
             const data = await response.json();
             apiKey = data.key;
+            console.log('✅ API key fetched from server successfully');
+          } else {
+            console.error('❌ Server responded with error:', response.status);
           }
         } catch (error) {
-          console.error('Failed to fetch API key:', error);
+          console.error('❌ Network error fetching API key:', error);
         }
+      } else {
+        console.log('✅ API key available from environment');
       }
       
       if (!apiKey) {
-        console.error('❌ No Gemini API key available');
+        console.error('❌ No Gemini API key available from any source');
         setConnectionStatus('error');
         return;
       }
