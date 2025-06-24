@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 if (!process.env.GEMINI_API_KEY) {
   throw new Error("GEMINI_API_KEY is required for Gemini chat functionality");
@@ -45,10 +45,11 @@ export interface GeminiChatOptions {
 export class GeminiChatService {
   private model: any;
   private chatSession: any;
+  private conversationMemory: Array<{role: string, content: string}> = [];
 
   constructor() {
     this.model = genAI.getGenerativeModel({ 
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-1.5-pro",
       tools: [{
         functionDeclarations: [recipeModificationFunction]
       }]
@@ -58,11 +59,19 @@ export class GeminiChatService {
   async initializeChat(options: GeminiChatOptions) {
     const { currentRecipe, conversationHistory = [], openAIContext } = options;
 
+    // Store conversation memory for continuity
+    this.conversationMemory = [...conversationHistory];
+
     // Build comprehensive context prompt from OpenAI data
     const contextPrompt = this.buildContextPrompt(currentRecipe, openAIContext);
     
     // Convert conversation history to Gemini format
     const geminiHistory = this.convertConversationHistory(conversationHistory);
+
+    console.log('🔧 Gemini Chat Initialization:');
+    console.log('- Current Recipe:', currentRecipe?.title || 'None');
+    console.log('- Conversation History Length:', conversationHistory.length);
+    console.log('- OpenAI Context:', !!openAIContext);
 
     // Initialize chat session with context
     this.chatSession = this.model.startChat({
@@ -140,14 +149,26 @@ Ready to continue our cooking conversation with full context maintained!`;
       throw new Error("Chat session not initialized. Call initializeChat first.");
     }
 
+    // Add user message to memory
+    this.conversationMemory.push({ role: 'user', content: message });
+
+    console.log('🤖 Gemini Processing Message:', message);
+    console.log('🧠 Current Memory Length:', this.conversationMemory.length);
+
     const result = await this.chatSession.sendMessage(message);
     const response = result.response;
     
     // Check for function calls
     const functionCall = response.functionCalls()?.[0];
+    const responseText = response.text() || "";
+
+    // Add assistant response to memory
+    this.conversationMemory.push({ role: 'assistant', content: responseText });
+    
+    console.log('✅ Gemini Response Generated:', responseText.substring(0, 100) + '...');
     
     return {
-      response: response.text() || "",
+      response: responseText,
       functionCall: functionCall ? {
         name: functionCall.name,
         args: functionCall.args
@@ -160,28 +181,56 @@ Ready to continue our cooking conversation with full context maintained!`;
       throw new Error("Chat session not initialized. Call initializeChat first.");
     }
 
-    const result = await this.chatSession.sendMessageStream(message);
-    
-    for await (const chunk of result.stream) {
-      const chunkText = chunk.text();
-      const functionCalls = chunk.functionCalls();
+    // Add user message to memory
+    this.conversationMemory.push({ role: 'user', content: message });
+
+    console.log('🚀 Gemini Streaming Message:', message);
+    console.log('🧠 Current Memory Length:', this.conversationMemory.length);
+
+    let fullResponse = "";
+
+    try {
+      const result = await this.chatSession.sendMessageStream(message);
       
-      if (chunkText) {
-        onChunk({ type: 'content', content: chunkText });
+      for await (const chunk of result.stream) {
+        const chunkText = chunk.text();
+        const functionCalls = chunk.functionCalls();
+        
+        if (chunkText) {
+          fullResponse += chunkText;
+          onChunk({ type: 'content', content: chunkText });
+        }
+        
+        if (functionCalls && functionCalls.length > 0) {
+          onChunk({ 
+            type: 'function_call', 
+            functionCall: {
+              name: functionCalls[0].name,
+              args: functionCalls[0].args
+            }
+          });
+        }
       }
       
-      if (functionCalls && functionCalls.length > 0) {
-        onChunk({ 
-          type: 'function_call', 
-          functionCall: {
-            name: functionCalls[0].name,
-            args: functionCalls[0].args
-          }
-        });
-      }
+      // Add assistant response to memory
+      this.conversationMemory.push({ role: 'assistant', content: fullResponse });
+      
+      console.log('✅ Gemini Stream Complete. Response:', fullResponse.substring(0, 100) + '...');
+      console.log('🧠 Updated Memory Length:', this.conversationMemory.length);
+      
+      onChunk({ type: 'done' });
+    } catch (error) {
+      console.error('❌ Gemini Streaming Error:', error);
+      onChunk({ type: 'error', message: error.message });
     }
-    
-    onChunk({ type: 'done' });
+  }
+
+  getConversationMemory(): Array<{role: string, content: string}> {
+    return [...this.conversationMemory];
+  }
+
+  clearMemory(): void {
+    this.conversationMemory = [];
   }
 }
 
