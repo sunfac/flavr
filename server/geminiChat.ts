@@ -123,21 +123,27 @@ ${openAIContext?.quizData ? `User Quiz Preferences:
 
 ${openAIContext?.originalPrompt ? `Original Generation Prompt: ${openAIContext.originalPrompt}` : ''}
 
-CRITICAL CONVERSATION MEMORY INSTRUCTIONS:
-1. ALWAYS reference and acknowledge previous conversation turns naturally
-2. Remember what the user said in earlier messages and build upon it
-3. When users request recipe modifications, ALWAYS call the update_recipe function with complete updated data
-4. Maintain conversational flow by referencing earlier topics, questions, or concerns
-5. If user mentions something from a previous message, explicitly acknowledge it
-6. Keep responses conversational and show you remember the dialogue
+CRITICAL FUNCTION CALLING INSTRUCTIONS:
+1. ALWAYS call updateRecipe when users request ANY recipe modifications
+2. Common modification triggers: "make it spicier", "add more garlic", "double the recipe", "make it vegetarian", "change cooking method"
+3. When calling updateRecipe, provide ALL required fields with complete data
+4. Never ask "would you like me to update the recipe" - just do it immediately when requested
+5. Be proactive and decisive - call functions automatically when users want changes
+6. Examples: "make it spicier" → call updateRecipe with added spices, "double it" → call updateRecipe with doubled quantities
+
+CONVERSATION MEMORY INSTRUCTIONS:
+1. Reference previous conversation turns naturally
+2. Build upon what users said in earlier messages
+3. Acknowledge context from previous exchanges
+4. Show conversational continuity
 
 BEHAVIOR:
-- Be helpful, friendly, and demonstrate clear memory of our ongoing conversation
-- Provide cooking guidance, substitution suggestions, and technique explanations
-- Keep responses concise but informative while showing conversational continuity
-- Use the user's quiz preferences to inform suggestions
+- Be decisive about recipe modifications - when asked, make the change
+- Call updateRecipe function immediately when users request modifications
+- Provide cooking guidance and explanations naturally
+- Use quiz preferences to inform suggestions
 
-I'm ready to continue our cooking conversation with full context and memory maintained!`;
+I'm ready to take action on recipe modifications and maintain conversation context!`;
   }
 
   private convertConversationHistory(history: Array<{role: string, content: string}>) {
