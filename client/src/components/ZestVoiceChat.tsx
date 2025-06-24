@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Volume2 } from 'lucide-react';
+import { Mic, MicOff, Volume2, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { GoogleLiveAudioChat } from './GoogleLiveAudioChat';
 
 interface ZestVoiceChatProps {
   onChatMessage?: (message: string) => void;

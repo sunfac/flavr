@@ -6,6 +6,7 @@ import OpenAI from "openai";
 import Replicate from "replicate";
 import Stripe from "stripe";
 import { storage } from "./storage";
+import { setupGoogleLiveAudioWebSocket } from "./googleLiveAudio";
 import { insertRecipeSchema, insertChatMessageSchema } from "@shared/schema";
 import { logGPTInteraction } from "./developerLogger";
 import { processFridgeImage, uploadMiddleware } from "./vision";
@@ -1797,5 +1798,10 @@ Be conversational, helpful, and maintain context from our conversation history. 
   });
 
   const httpServer = createServer(app);
+  
+  // Setup Google Live Audio WebSocket
+  setupGoogleLiveAudioWebSocket(httpServer);
+  console.log('🔊 Google Live Audio WebSocket server initialized');
+  
   return httpServer;
 }
