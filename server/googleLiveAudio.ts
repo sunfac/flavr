@@ -19,9 +19,7 @@ export function setupGoogleLiveAudioWebSocket(server: any) {
     server,
     path: '/api/google-live-audio',
     perMessageDeflate: false,
-    maxPayload: 1024 * 1024,
-    handleProtocols: () => false, // Disable subprotocol handling
-    skipUTF8Validation: false
+    maxPayload: 1024 * 1024
   });
 
   console.log('🎤 Google Live Audio WebSocket server initialized on /api/google-live-audio');
@@ -30,35 +28,70 @@ export function setupGoogleLiveAudioWebSocket(server: any) {
     const sessionId = generateSessionId();
     console.log(`🔊 Google Live Audio session started: ${sessionId}`);
 
+    let geminiSession: any = null;
+    
     const session: GoogleLiveSession = {
       id: sessionId,
       websocket: ws,
+      googleApiClient: null,
+      currentRecipe: null,
       isActive: true,
       conversationContext: 'You are Zest, a helpful cooking assistant. Provide cooking guidance in a friendly, conversational manner.'
     };
 
-    // Set up intelligent voice chat with Gemini processing
-    console.log(`🔄 Setting up intelligent voice chat for session ${sessionId}`);
-    
-    // Send immediate connection success
-    ws.send(JSON.stringify({
-      type: 'connected',
-      message: 'Voice chat ready - Gemini AI processing active'
-    }));
-    
-    // Send ready status
-    ws.send(JSON.stringify({
-      type: 'ready',
-      message: 'Ready for voice interaction'
-    }));
-    
-    // Send initial greeting without AI processing to avoid frame errors
-    ws.send(JSON.stringify({
-      type: 'audio_response',
-      message: "Hello! I'm Zest, your cooking assistant. I'm ready to help with voice questions!"
-    }));
-    
-    console.log(`📝 Using intelligent Gemini-powered voice chat for session ${sessionId}`);
+    // Initialize Gemini Live session
+    try {
+      const genai = new GoogleGenAI({
+        vertexAi: {
+          project: process.env.GOOGLE_CLOUD_PROJECT_ID,
+          location: process.env.GCP_LOCATION || "us-central1"
+        }
+      });
+      
+      console.log(`🔄 Creating Gemini Live session for ${sessionId}`);
+      
+      geminiSession = genai.live.connect({
+        model: 'gemini-2.0-flash-exp',
+        config: {
+          response_modalities: ['AUDIO', 'TEXT'],
+          system_instruction: 'You are Zest, a helpful cooking assistant. Provide concise, friendly cooking guidance for voice interaction.'
+        }
+      });
+      
+      // Handle Gemini session events
+      geminiSession.on('message', (data: any) => {
+        console.log(`📥 Gemini message type: ${data.type}, audio: ${!!data.audio}, text: ${!!data.text}`);
+        
+        if (data.audio) {
+          ws.send(data.audio);
+        }
+        
+        if (data.text) {
+          ws.send(JSON.stringify({
+            type: 'token',
+            data: data.text
+          }));
+        }
+        
+        if (data.toolCalls) {
+          console.log(`🔧 Tool calls received: ${data.toolCalls.length}`);
+        }
+      });
+      
+      console.log(`✅ Gemini Live session created for ${sessionId}`);
+      
+      ws.send(JSON.stringify({
+        type: 'connected',
+        message: 'Gemini Live connected'
+      }));
+      
+    } catch (error) {
+      console.error(`❌ Failed to create Gemini Live session: ${error}`);
+      ws.send(JSON.stringify({
+        type: 'connected',
+        message: 'Voice chat ready - fallback mode'
+      }));
+    }
 
     activeSessions.set(sessionId, session);
 

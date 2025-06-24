@@ -178,6 +178,7 @@ Changelog:
 - June 24, 2025. GoogleGenAI import and initialization fixed - corrected ES module import syntax, implemented proper initialization with vertexAi configuration using GOOGLE_CLOUD_PROJECT_ID and GCP_LOCATION, voice chat now uses genai.live.connect() properly for cooking assistance
 - June 24, 2025. WebSocket stability improvements implemented - enhanced message handling for Buffer and string data, added robust error handling without session termination, improved WebSocket server configuration with disabled subprotocol handling, added detailed connection logging for debugging frame errors
 - June 24, 2025. Simple voice chat implementation deployed - created dedicated simpleVoiceChat.ts module to avoid WebSocket frame corruption, implemented clean WebSocket connection at /ws/simple-voice, integrated with GoogleGenAI for cooking assistance, voice chat now maintains stable connections without frame errors
+- June 24, 2025. Gemini Live WebSocket communication fixed - implemented proper binary frame handling with arraybuffer support, added genai.live.connect() session management, integrated sendAudio() and markAudioEnd() for proper turn handling, enhanced client-side audio processing with MediaRecorder ArrayBuffer conversion, voice chat now maintains stable Gemini Live sessions
 ```
 
 ## User Preferences

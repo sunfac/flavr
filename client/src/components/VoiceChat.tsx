@@ -250,14 +250,22 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
       mimeType: 'audio/webm'
     });
     
-    mediaRecorderRef.current.ondataavailable = (event) => {
+    mediaRecorderRef.current.ondataavailable = async (event) => {
       if (event.data.size > 0 && wsRef.current?.readyState === WebSocket.OPEN) {
         console.log('🎙️ MediaRecorder data available:', event.data.size, 'bytes');
-        // Send voice input for processing
-        wsRef.current.send(JSON.stringify({
-          type: 'text',
-          text: "I'm using voice input and would like cooking help. What cooking advice can you share?"
-        }));
+        
+        try {
+          // Convert Blob to ArrayBuffer for binary transmission
+          const arrayBuffer = await event.data.arrayBuffer();
+          wsRef.current.send(arrayBuffer);
+        } catch (error) {
+          console.error('Error converting audio data:', error);
+          // Fallback to text message
+          wsRef.current.send(JSON.stringify({
+            type: 'text',
+            text: "I'm using voice input and would like cooking help."
+          }));
+        }
       }
     };
     
