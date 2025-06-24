@@ -29,8 +29,11 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
     try {
       // Connect directly to Google Gemini Live WebSocket
       const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      console.log('🔑 API Key check:', apiKey ? 'Available' : 'Missing');
+      
       if (!apiKey) {
         console.error('❌ VITE_GEMINI_API_KEY environment variable not found');
+        console.log('Available env vars:', Object.keys(import.meta.env));
         setConnectionStatus('error');
         return;
       }
