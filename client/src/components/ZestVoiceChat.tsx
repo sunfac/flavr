@@ -37,8 +37,8 @@ export default function ZestVoiceChat({
 
   return (
     <div className={`flex flex-col space-y-3 ${className}`}>
-      {/* Google Live Audio Chat - Now the primary voice interface */}
-      <GoogleLiveAudioChat 
+      {/* Gemini Live Chat - Direct API implementation */}
+      <GeminiLiveChat 
         currentRecipe={currentRecipe}
         onRecipeUpdate={handleRecipeUpdate}
       />
