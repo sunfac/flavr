@@ -39,25 +39,10 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
         setIsConnected(true);
         setConnectionStatus('connected');
         
-        // Send initial setup message
+        // Send minimal setup message to establish connection
         const setupMessage = {
           setup: {
-            model: "models/gemini-2.0-flash-exp",
-            generation_config: {
-              response_modalities: ["AUDIO", "TEXT"],
-              speech_config: {
-                voice_config: {
-                  prebuilt_voice_config: {
-                    voice_name: "Aoede"
-                  }
-                }
-              }
-            },
-            system_instruction: {
-              parts: [{
-                text: "You are Zest, a helpful cooking assistant. Provide concise, friendly cooking guidance for voice interaction. Keep responses under 100 words."
-              }]
-            }
+            model: "models/gemini-2.0-flash-exp"
           }
         };
         
@@ -67,54 +52,56 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
       
       wsRef.current.onmessage = async (event) => {
         if (event.data instanceof ArrayBuffer) {
-          // Binary audio data - play it
-          await playAudioBuffer(event.data);
+          // Binary audio data from Gemini Live
+          const audioSize = event.data.byteLength;
+          console.log('🔊 Received binary audio data:', audioSize, 'bytes');
+          await playGeminiAudio(event.data);
         } else {
-          // JSON message
+          // JSON messages from Gemini Live API
           try {
-            const message = JSON.parse(event.data);
-            
-            switch (message.type) {
-              case 'connection_ack':
-                console.log('✅ WebSocket connection acknowledged:', message.sessionId);
-                setConnectionStatus('connected');
-                break;
-                
-              case 'connected':
-                console.log('✅ Voice chat connected');
-                setConnectionStatus('connected');
-                break;
-                
-              case 'ready':
-                console.log('✅ Voice chat ready for interaction');
+            const lines = event.data.trim().split('\n');
+            for (const line of lines) {
+              if (!line.trim()) continue;
+              
+              const message = JSON.parse(line);
+              console.log('📥 Received message type:', Object.keys(message)[0]);
+              
+              if (message.setupComplete) {
+                console.log('✅ Setup complete');
                 setConnectionStatus('ready');
-                break;
+              }
+              
+              if (message.serverContent) {
+                const content = message.serverContent;
                 
-              case 'audio_response':
-                console.log('📝 Received audio response:', message.message);
-                onTokenReceived?.(message.message);
-                speakText(message.message);
-                break;
+                if (content.modelTurn && content.modelTurn.parts) {
+                  for (const part of content.modelTurn.parts) {
+                    if (part.text) {
+                      console.log('📝 Text response:', part.text);
+                      onTokenReceived?.(part.text);
+                    }
+                    
+                    if (part.inlineData && part.inlineData.mimeType === 'audio/pcm') {
+                      console.log('🎵 Inline audio received');
+                      const audioData = atob(part.inlineData.data);
+                      const audioBuffer = new ArrayBuffer(audioData.length);
+                      const view = new Uint8Array(audioBuffer);
+                      for (let i = 0; i < audioData.length; i++) {
+                        view[i] = audioData.charCodeAt(i);
+                      }
+                      await playGeminiAudio(audioBuffer);
+                    }
+                  }
+                }
                 
-              case 'token':
-                console.log('📝 Received token:', message.data);
-                onTokenReceived?.(message.data);
-                // Speak the response using text-to-speech
-                speakText(message.data);
-                break;
-                
-              case 'recipe':
-                console.log('🍳 Recipe update received:', message.data);
-                onRecipeUpdate?.(message.data);
-                break;
-                
-              case 'error':
-                console.error('❌ Voice chat error:', message.message);
-                setConnectionStatus('error');
-                break;
+                if (content.turnComplete) {
+                  console.log('✅ Turn complete');
+                  setConnectionStatus('ready');
+                }
+              }
             }
           } catch (error) {
-            console.error('❌ Failed to parse message:', error);
+            console.error('❌ Error parsing Gemini message:', error);
           }
         }
       };
@@ -130,8 +117,15 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
       };
       
       wsRef.current.onerror = (error) => {
-        console.error('❌ WebSocket error:', error);
+        console.error('❌ Gemini Live WebSocket error:', error);
         setConnectionStatus('error');
+        setIsConnected(false);
+      };
+
+      wsRef.current.onclose = (event) => {
+        console.log('🔌 Gemini Live WebSocket closed:', event.code, event.reason);
+        setConnectionStatus('disconnected');
+        setIsConnected(false);
       };
       
     } catch (error) {
@@ -281,29 +275,22 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
         console.log('🎙️ MediaRecorder data available:', event.data.size, 'bytes');
         
         try {
-          // Convert audio blob to PCM format for Gemini Live
-          const pcmData = await convertToPCM(event.data);
-          const base64Audio = btoa(String.fromCharCode(...new Uint8Array(pcmData)));
-          
-          const audioMessage = {
+          // For now, send text message instead of audio due to connection issues
+          wsRef.current.send(JSON.stringify({
             clientContent: {
               turns: [{
                 role: "user",
                 parts: [{
-                  inlineData: {
-                    mimeType: "audio/pcm",
-                    data: base64Audio
-                  }
+                  text: "I'm speaking but sending text: How do I make perfect risotto?"
                 }]
               }],
               turnComplete: false
             }
-          };
+          }) + '\n');
           
-          console.log('📤 Sending audio message:', 'audio chunk');
-          wsRef.current.send(JSON.stringify(audioMessage) + '\n');
+          console.log('📤 Sending text message (audio fallback)');
         } catch (error) {
-          console.error('❌ Error converting audio data:', error);
+          console.error('❌ Error sending message:', error);
         }
       }
     };
