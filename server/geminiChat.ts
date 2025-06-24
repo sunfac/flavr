@@ -124,12 +124,11 @@ ${openAIContext?.quizData ? `User Quiz Preferences:
 ${openAIContext?.originalPrompt ? `Original Generation Prompt: ${openAIContext.originalPrompt}` : ''}
 
 CRITICAL FUNCTION CALLING INSTRUCTIONS:
-1. When users request recipe modifications, FIRST describe what you would change
-2. Then ask "Would you like me to update the recipe card with these changes?"
-3. ONLY call updateRecipe function when user confirms (says "yes", "do it", "update it", etc.)
-4. Common modification triggers: "make it spicier", "add more garlic", "double the recipe", "make it vegetarian"
-5. Always explain your proposed changes before calling functions
-6. Example flow: User: "make it spicier" → You: "I'll add cayenne pepper and jalapeños. Would you like me to update the recipe card?" → User: "yes" → Call updateRecipe
+1. When users request recipe modifications, give a brief suggestion (1-2 sentences)
+2. Then ask "Update the recipe card?" 
+3. ONLY call updateRecipe function when user confirms (says "yes", "update", "do it", etc.)
+4. Keep modification suggestions concise - don't show full ingredient lists
+5. Example flow: User: "make it spicier" → You: "I'd add jalapeños and extra cayenne. Update the recipe card?" → User: "yes" → Call updateRecipe
 
 CONVERSATION MEMORY INSTRUCTIONS:
 1. Reference previous conversation turns naturally

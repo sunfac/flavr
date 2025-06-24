@@ -300,11 +300,31 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
               <Button
                 size="sm"
                 className="bg-green-600 hover:bg-green-700 text-white"
-                onClick={() => {
-                  // Start Google Live Audio session
-                  console.log('Starting Google Live Audio Chat...');
-                  // For now, show a message that it's starting
-                  alert('Google Live Audio Chat starting - speak naturally with Zest!');
+                onClick={async () => {
+                  try {
+                    console.log('Starting Google Live Audio Chat...');
+                    
+                    // Request microphone permission
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    console.log('Microphone access granted');
+                    
+                    // Connect to Google Live Audio WebSocket
+                    const ws = new WebSocket(`ws://${window.location.host}/api/google-live-audio`);
+                    
+                    ws.onopen = () => {
+                      console.log('Connected to Google Live Audio');
+                      alert('Voice chat active! Start speaking with Zest');
+                    };
+                    
+                    ws.onerror = (error) => {
+                      console.error('WebSocket error:', error);
+                      alert('Voice chat connection failed. Please try again.');
+                    };
+                    
+                  } catch (error) {
+                    console.error('Failed to start voice chat:', error);
+                    alert('Microphone access required for voice chat');
+                  }
                 }}
               >
                 <Radio className="w-3 h-3 mr-1" />
