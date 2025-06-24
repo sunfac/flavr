@@ -1,0 +1,390 @@
+tarting Gemini Live Audio connection...
+Console.js:61 Connecting to Google Live API via verified v1alpha endpoint...
+Console.js:61 🌐 Connected to Gemini Live API WebSocket
+Console.js:61 Sending setup message to Gemini Live
+Console.js:61 Setup message content: {
+  "setup": {
+    "model": "models/gemini-2.5-flash-preview-native-audio-dialog",
+    "generationConfig": {
+      "responseModalities": [
+        "AUDIO"
+      ]
+    },
+    "inputAudioTranscription": {},
+    "outputAudioTranscription": {}
+  }
+}
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(26)
+Console.js:61 📦 Received binary ArrayBuffer, length: 26
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 13
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.00 seconds
+Console.js:61 ⏰ Timeout reached - forcing ready state for testing
+Console.js:61 Starting continuous audio streaming
+GeminiLiveChat.tsx:337 [Deprecation] The ScriptProcessorNode is deprecated. Use AudioWorkletNode instead. (https://bit.ly/audio-worklet)
+(anonymous) @ GeminiLiveChat.tsx:337
+(anonymous) @ GeminiLiveChat.tsx:101
+setTimeout
+ws.onopen @ GeminiLiveChat.tsx:96Understand this warning
+Console.js:61 Audio streaming active
+Console.js:61 🧪 Sending test text message via Live API
+Console.js:61 📤 Test message content: {
+  "client_content": {
+    "turns": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Hello Zest, please respond with a short greeting to test our connection."
+          }
+        ]
+      }
+    ],
+    "turn_complete": true
+  }
+}
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(89)
+Console.js:61 📦 Received binary ArrayBuffer, length: 89
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 ⚠️ Odd buffer length detected, padding: 89
+Console.js:61 🔊 Raw PCM samples: 45
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.00 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(5328)
+Console.js:61 📦 Received binary ArrayBuffer, length: 5328
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 2664
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.11 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(89)
+Console.js:61 📦 Received binary ArrayBuffer, length: 89
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 ⚠️ Odd buffer length detected, padding: 89
+Console.js:61 🔊 Raw PCM samples: 45
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.00 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(91)
+Console.js:61 📦 Received binary ArrayBuffer, length: 91
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 ⚠️ Odd buffer length detected, padding: 91
+Console.js:61 🔊 Raw PCM samples: 46
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.00 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(91)
+Console.js:61 📦 Received binary ArrayBuffer, length: 91
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 ⚠️ Odd buffer length detected, padding: 91
+Console.js:61 🔊 Raw PCM samples: 46
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.00 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(86)
+Console.js:61 📦 Received binary ArrayBuffer, length: 86
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 43
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.00 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(2768)
+Console.js:61 📦 Received binary ArrayBuffer, length: 2768
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 1384
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.06 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(60)
+Console.js:61 📦 Received binary ArrayBuffer, length: 60
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 🔊 Raw PCM samples: 30
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.00 seconds
+Console.js:61 🔄 Raw message received from Gemini Live: ArrayBuffer(383)
+Console.js:61 📦 Received binary ArrayBuffer, length: 383
+Console.js:61 🎵 Processing Gemini Live PCM audio...
+Console.js:61 ⚠️ Odd buffer length detected, padding: 383
+Console.js:61 🔊 Raw PCM samples: 192
+Console.js:61 ✅ Gemini audio played successfully, duration: 0.01 seconds

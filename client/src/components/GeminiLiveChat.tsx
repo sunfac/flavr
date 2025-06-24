@@ -331,10 +331,11 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
   const startAudioStreaming = useCallback(() => {
     if (!streamRef.current || !audioContextRef.current || !websocketRef.current) return;
     
-    console.log('Starting continuous audio streaming');
+    console.log('Starting continuous audio streaming to Gemini Live');
     
     const source = audioContextRef.current.createMediaStreamSource(streamRef.current);
-    const processor = audioContextRef.current.createScriptProcessor(4096, 1, 1);
+    const processor = audioContextRef.current.createScriptProcessorNode(4096, 1, 1);
+    processorRef.current = processor;
     
     let chunkCount = 0;
     processor.onaudioprocess = (event) => {
@@ -345,38 +346,31 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         const sum = inputBuffer.reduce((acc, val) => acc + Math.abs(val), 0);
         const average = sum / inputBuffer.length;
         
-        // Log audio levels for debugging (every 100 samples)
+        // Log audio levels for debugging (every 50 chunks)
         chunkCount++;
         if (chunkCount % 50 === 0) {
           console.log(`🎤 Audio level: ${average.toFixed(6)} (threshold: 0.001) - chunk ${chunkCount}`);
         }
         
-        if (average > 0.001) { // Lower threshold for voice detection
+        if (average > 0.001) { // Voice activity detected
           // Convert to 16-bit PCM
           const pcmData = new Int16Array(inputBuffer.length);
           for (let i = 0; i < inputBuffer.length; i++) {
             pcmData[i] = Math.max(-32768, Math.min(32767, inputBuffer[i] * 32768));
           }
           
-          // Send to Gemini Live with proper format
+          // Send audio data using Gemini Live format
           const audioMessage = {
-            client_content: {
-              turns: [{
-                role: "user", 
-                parts: [{
-                  inline_data: {
-                    mime_type: "audio/pcm",
-                    data: btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer)))
-                  }
-                }]
-              }],
-              turn_complete: false
+            realtime_input: {
+              media_chunks: [{
+                mime_type: "audio/pcm",
+                data: btoa(String.fromCharCode.apply(null, new Uint8Array(pcmData.buffer)))
+              }]
             }
           };
           
-          if (chunkCount % 20 === 0) {
-            console.log(`📤 Sending audio chunk ${chunkCount} (${pcmData.length} samples, level: ${average.toFixed(4)})`);
-          }
+          console.log(`📤 Sending audio chunk ${chunkCount} (${pcmData.length} samples, level: ${average.toFixed(4)})`);
+          websocketRef.current.send(JSON.stringify(audioMessage));
           
           try {
             websocketRef.current.send(JSON.stringify(audioMessage));
@@ -399,34 +393,53 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
     console.log('Audio streaming active');
   }, [isListening]);
 
+  // Buffer management for continuous audio playback
+  const audioBufferQueue = useRef<ArrayBuffer[]>([]);
+  const isPlaying = useRef(false);
+
   const playAudio = async (audioBuffer: ArrayBuffer) => {
     try {
       if (!isMuted && audioContextRef.current) {
-        console.log('🎵 Processing Gemini Live PCM audio...');
+        // Add to queue for continuous playback
+        audioBufferQueue.current.push(audioBuffer);
+        
+        if (!isPlaying.current) {
+          processAudioQueue();
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error queuing Gemini audio:', error);
+    }
+  };
+
+  const processAudioQueue = async () => {
+    if (isPlaying.current || audioBufferQueue.current.length === 0) return;
+    
+    isPlaying.current = true;
+    console.log('🎵 Processing audio queue, chunks:', audioBufferQueue.current.length);
+    
+    try {
+      while (audioBufferQueue.current.length > 0) {
+        const audioBuffer = audioBufferQueue.current.shift()!;
         
         // Handle odd byte lengths by padding to even number
         let processedBuffer = audioBuffer;
         if (audioBuffer.byteLength % 2 !== 0) {
-          console.log('⚠️ Odd buffer length detected, padding:', audioBuffer.byteLength);
           const paddedBuffer = new ArrayBuffer(audioBuffer.byteLength + 1);
           const paddedView = new Uint8Array(paddedBuffer);
           const originalView = new Uint8Array(audioBuffer);
           paddedView.set(originalView);
-          paddedView[audioBuffer.byteLength] = 0; // Pad with zero
+          paddedView[audioBuffer.byteLength] = 0;
           processedBuffer = paddedBuffer;
         }
         
         // Gemini Live sends raw 16-bit PCM at 24kHz mono
         const pcmData = new Int16Array(processedBuffer);
-        console.log('🔊 Raw PCM samples:', pcmData.length);
         
-        if (pcmData.length === 0) {
-          console.log('⚠️ Empty audio buffer received');
-          return;
-        }
+        if (pcmData.length === 0) continue;
         
         // Create AudioBuffer for Web Audio API
-        const audioBufferDecoded = audioContextRef.current.createBuffer(1, pcmData.length, 24000);
+        const audioBufferDecoded = audioContextRef.current!.createBuffer(1, pcmData.length, 24000);
         const channelData = audioBufferDecoded.getChannelData(0);
         
         // Convert 16-bit PCM to float32 (-1 to 1 range)
@@ -435,23 +448,29 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         }
         
         // Play using Web Audio API
-        const source = audioContextRef.current.createBufferSource();
+        const source = audioContextRef.current!.createBufferSource();
         source.buffer = audioBufferDecoded;
         
-        const gainNode = audioContextRef.current.createGain();
-        gainNode.gain.value = 0.7; // Comfortable volume
+        const gainNode = audioContextRef.current!.createGain();
+        gainNode.gain.value = 0.8; // Comfortable volume
         
         source.connect(gainNode);
-        gainNode.connect(audioContextRef.current.destination);
+        gainNode.connect(audioContextRef.current!.destination);
         
         source.start();
-        console.log('✅ Gemini audio played successfully, duration:', audioBufferDecoded.duration.toFixed(2), 'seconds');
         
-      } else {
-        console.log('⚠️ Audio playback skipped - muted or no audio context');
+        // Wait for this chunk to finish before playing next
+        await new Promise(resolve => {
+          source.onended = resolve;
+          setTimeout(resolve, audioBufferDecoded.duration * 1000 + 10); // Backup timeout
+        });
       }
+      
+      console.log('✅ Audio queue processed completely');
     } catch (error) {
-      console.error('❌ Error playing Gemini audio:', error);
+      console.error('❌ Error processing audio queue:', error);
+    } finally {
+      isPlaying.current = false;
     }
   };
 
