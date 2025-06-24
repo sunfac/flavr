@@ -23,13 +23,19 @@ export class GoogleLiveApiClient {
   async connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        // Google Gemini Live API WebSocket endpoint with project authentication
-        const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService/BidiGenerateContent?key=${this.config.apiKey}`;
+        // Google Vertex AI endpoint for Gemini Live API based on documentation
+        const wsUrl = `wss://${this.config.location}-aiplatform.googleapis.com/ws/google.cloud.aiplatform.v1beta1.PredictionService/StreamingPredict`;
         
-        this.websocket = new WebSocket(wsUrl);
+        // Add proper headers for Google Cloud authentication
+        const headers = {
+          'Authorization': `Bearer ${this.getAccessToken()}`,
+          'Content-Type': 'application/json'
+        };
+
+        this.websocket = new WebSocket(wsUrl, { headers });
 
         this.websocket.on('open', () => {
-          console.log('Connected to Google Live API');
+          console.log('🔗 Connected to Google Vertex AI Live API');
           this.isConnected = true;
           
           // Send initial setup message
@@ -137,5 +143,11 @@ export class GoogleLiveApiClient {
 
   isConnectionActive(): boolean {
     return this.isConnected && this.websocket?.readyState === WebSocket.OPEN;
+  }
+
+  private getAccessToken(): string {
+    // For now, use API key authentication as fallback
+    // TODO: Implement proper OAuth2 token generation from service account
+    return this.config.apiKey;
   }
 }
