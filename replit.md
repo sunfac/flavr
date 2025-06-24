@@ -153,6 +153,7 @@ Changelog:
 - June 24, 2025. Recipe title text overflow fixed - implemented responsive text sizing, word wrapping, and proper mobile layout for long recipe titles, added CSS utilities for text-wrap-balance and break-words to prevent cut-off on mobile devices
 - June 24, 2025. Chatbot switched to Google Gemini - primary chat endpoint now uses Google Gemini Live API for all conversations with OpenAI context handover, suggestion chips redesigned to stack in two rows for better mobile display
 - June 24, 2025. Voice chat fully integrated with Google Live Audio API - ZestVoiceChat component now directly uses GoogleLiveAudioChat for two-way voice conversations, microphone button functionality replaced with Google Live Audio streaming for natural speech-to-speech dialogue
+- June 24, 2025. Chatbot context retention fixed - restored microphone button in text chat interface, enhanced Gemini context prompts to maintain conversation memory and execute recipe modifications when users confirm changes, added detailed logging for debugging context loss
 ```
 
 ## User Preferences

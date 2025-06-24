@@ -332,7 +332,19 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
               disabled={isStreaming || isListening}
               className="h-8 text-sm bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 pr-10"
             />
-            {/* Note: Microphone functionality now handled by Google Live Audio Chat above */}
+            {recognitionRef.current && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleListening}
+                disabled={isStreaming}
+                className={`absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 p-0 ${
+                  isListening ? 'text-red-400 bg-red-500/20' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isListening ? <MicOff className="w-3 h-3" /> : <Mic className="w-3 h-3" />}
+              </Button>
+            )}
           </div>
           <Button 
             onClick={handleSendMessage} 

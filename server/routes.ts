@@ -1492,6 +1492,8 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
       console.log('🔥 USING GOOGLE GEMINI FOR CONVERSATION');
       console.log('📊 Conversation History Length:', conversationHistory.length);
       console.log('🎯 OpenAI Context Available:', !!openAIContext);
+      console.log('🍳 Current Recipe Context:', currentRecipe ? currentRecipe.title : 'None');
+      console.log('💬 User Message:', message);
       
       await geminiChat.sendMessageStream(message, (chunk) => {
         if (chunk.type === 'content') {
