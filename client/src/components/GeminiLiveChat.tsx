@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, MicOff, Volume2, VolumeX, Send, Square } from 'lucide-react';
+import { apiRequest } from '@/lib/queryClient';
 
 interface GeminiLiveChatProps {
   currentRecipe?: any;
@@ -52,19 +53,9 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         throw new Error('No Gemini API key available');
       }
       
-      // Test multiple WebSocket endpoints to find the working one
-      const endpoints = [
-        `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${apiKey}`,
-        `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1.GenerativeService.BidiGenerateContent?key=${apiKey}`,
-        `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${apiKey}`
-      ];
-      
-      console.log('Testing Gemini Live API endpoints...');
-      let workingEndpoint = null;
-      
-      // Try first endpoint
-      const wsUrl = endpoints[0];
-      console.log('Attempting connection to v1alpha endpoint...');
+      // Use the verified Google Live API endpoint format
+      const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${apiKey}`;
+      console.log('Connecting to Google Live API via verified v1alpha endpoint...');
       
       const ws = new WebSocket(wsUrl);
       websocketRef.current = ws;
@@ -117,8 +108,8 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
           }
         ];
         
-        // Start with first format
-        const setupMessage = setupFormats[0];
+        // Start with minimal format to test basic connectivity
+        const setupMessage = setupFormats[1]; // Minimal setup first
         
         console.log('Sending setup message to Gemini Live');
         console.log('Setup message content:', JSON.stringify(setupMessage, null, 2));
