@@ -8,8 +8,8 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Recipe modification function schema for Gemini
 const recipeModificationFunction = {
-  name: "update_recipe",
-  description: "Update the current recipe with modifications requested by the user",
+  name: "updateRecipe",
+  description: "Update the current recipe with user's requested modifications. Use this when user confirms changes.",
   parameters: {
     type: "object",
     properties: {
@@ -17,18 +17,20 @@ const recipeModificationFunction = {
       servings: { type: "number", description: "Number of servings" },
       cookTime: { type: "number", description: "Cooking time in minutes" },
       difficulty: { type: "string", enum: ["Easy", "Medium", "Hard"] },
+      cuisine: { type: "string", description: "Type of cuisine" },
       ingredients: { 
         type: "array", 
         items: { type: "string" },
-        description: "Complete list of ingredients with updated substitutions"
+        description: "Complete updated ingredients list with quantities"
       },
       instructions: { 
         type: "array", 
         items: { type: "string" },
-        description: "Complete cooking instructions with modifications"
-      }
+        description: "Complete updated cooking instructions"
+      },
+      tips: { type: "string", description: "Updated cooking tips" }
     },
-    required: ["title", "ingredients", "instructions"]
+    required: ["title", "ingredients", "instructions", "servings", "cookTime"]
   }
 };
 
