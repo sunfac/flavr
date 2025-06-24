@@ -110,7 +110,6 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
                   setConnectionStatus('ready');
                 }
               }
-            }
           } catch (error) {
             console.error('❌ Error parsing Gemini message:', error);
           }
