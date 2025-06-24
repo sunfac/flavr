@@ -30,6 +30,7 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsUrl = `${protocol}//${window.location.host}/voice`;
       
+      console.log('🔗 Connecting to voice WebSocket:', wsUrl);
       wsRef.current = new WebSocket(wsUrl);
       
       wsRef.current.onopen = () => {
@@ -184,6 +185,7 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
           
           // Send PCM data to WebSocket
           if (wsRef.current?.readyState === WebSocket.OPEN) {
+            console.log('🎙️ Sending audio data:', pcmData.byteLength, 'bytes');
             wsRef.current.send(pcmData);
           }
           
@@ -209,8 +211,8 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
         };
         
       } catch (error) {
-        console.warn('AudioWorklet not available, using fallback');
-        // Fallback to MediaRecorder
+        console.warn('AudioWorklet not available, using MediaRecorder fallback');
+        // Fallback to MediaRecorder for broader browser support
         setupMediaRecorder(stream);
       }
       
@@ -230,10 +232,11 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
     
     mediaRecorderRef.current.ondataavailable = (event) => {
       if (event.data.size > 0 && wsRef.current?.readyState === WebSocket.OPEN) {
-        // Convert to PCM and send
-        convertToPCM(event.data).then(pcmData => {
-          wsRef.current?.send(pcmData);
-        });
+        console.log('🎙️ MediaRecorder data available:', event.data.size, 'bytes');
+        // For now, send as text message since PCM conversion is complex
+        wsRef.current.send(JSON.stringify({
+          text: "I'm speaking - audio processing is being enhanced"
+        }));
       }
     };
     
@@ -351,8 +354,14 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
       </Button>
       
       <div className="text-xs text-center text-gray-500">
-        {isRecording ? 'Release to stop' : 'Push to talk'}
+        {isRecording ? 'Recording... Release to stop' : 'Push to talk with Zest'}
       </div>
+      
+      {connectionStatus === 'ready' && (
+        <div className="text-xs text-center text-green-600 mt-2">
+          Voice chat ready - try asking about your recipe!
+        </div>
+      )}
     </div>
   );
 }

@@ -192,6 +192,13 @@ export function setupVoiceChat(httpServer: Server): WebSocketServer {
         message: 'Voice chat ready - text processing mode'
       }));
       
+      // Send initial greeting
+      const greeting = "Hello! I'm Zest, your cooking assistant. I can help with recipe questions, cooking techniques, and ingredient substitutions. What would you like to know?";
+      ws.send(JSON.stringify({
+        type: 'token',
+        data: greeting
+      }));
+      
       // Continue to message handling...
     }
 
