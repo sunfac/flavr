@@ -25,15 +25,26 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
   const speechSynthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   // Initialize WebSocket connection to Gemini Live API
-  const connectWebSocket = useCallback(() => {
+  const connectWebSocket = useCallback(async () => {
     try {
-      // Connect directly to Google Gemini Live WebSocket
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-      console.log('🔑 API Key check:', apiKey ? 'Available' : 'Missing');
+      // Get API key from environment or server endpoint
+      let apiKey = import.meta.env.VITE_GEMINI_API_KEY;
       
       if (!apiKey) {
-        console.error('❌ VITE_GEMINI_API_KEY environment variable not found');
-        console.log('Available env vars:', Object.keys(import.meta.env));
+        console.log('Fetching API key from server...');
+        try {
+          const response = await fetch('/api/gemini-key');
+          if (response.ok) {
+            const data = await response.json();
+            apiKey = data.key;
+          }
+        } catch (error) {
+          console.error('Failed to fetch API key:', error);
+        }
+      }
+      
+      if (!apiKey) {
+        console.error('❌ No Gemini API key available');
         setConnectionStatus('error');
         return;
       }

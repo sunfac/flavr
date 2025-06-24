@@ -49,10 +49,24 @@ export function GoogleLiveAudioChat({ currentRecipe, onRecipeUpdate }: GoogleLiv
       
       // Connect to Google Live API WebSocket
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      // Connect directly to Google Gemini Live API
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      // Get API key from environment or server endpoint
+      let apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      
       if (!apiKey) {
-        console.error('VITE_GEMINI_API_KEY not found');
+        try {
+          const response = await fetch('/api/gemini-key');
+          if (response.ok) {
+            const data = await response.json();
+            apiKey = data.key;
+          }
+        } catch (error) {
+          console.error('Failed to fetch API key:', error);
+          return;
+        }
+      }
+      
+      if (!apiKey) {
+        console.error('No Gemini API key available');
         return;
       }
       const websocket = new WebSocket(`wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${apiKey}`);

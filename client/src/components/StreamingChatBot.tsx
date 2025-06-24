@@ -310,8 +310,21 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                     
                     // Connect to Google Live Audio WebSocket 
                     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-                    // Connect directly to Google Gemini Live API
-                    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+                    // Get API key from environment or server endpoint
+                    let apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+                    
+                    if (!apiKey) {
+                      try {
+                        const response = await fetch('/api/gemini-key');
+                        if (response.ok) {
+                          const data = await response.json();
+                          apiKey = data.key;
+                        }
+                      } catch (error) {
+                        console.error('Failed to fetch API key:', error);
+                      }
+                    }
+                    
                     if (!apiKey) {
                       alert('Voice chat requires API key configuration');
                       return;
