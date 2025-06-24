@@ -133,8 +133,7 @@ async function handleLiveAudioMessage(session: GoogleLiveSession, message: any) 
 
 async function processVoiceMessage(text: string): Promise<string> {
   try {
-    const { GoogleGenAI } = require('@google/genai');
-    const genai = new GoogleGenAI(process.env.GEMINI_API_KEY);
+    const genai = new GoogleGenAI(process.env.GEMINI_API_KEY!);
     
     const result = await genai.models.generateContent({
       model: 'gemini-2.0-flash-exp',

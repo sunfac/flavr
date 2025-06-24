@@ -172,6 +172,7 @@ Changelog:
 - June 24, 2025. Voice chat WebSocket connection fixed - corrected server initialization order for voice endpoint, moved WebSocket setup before server listen call, enhanced connection debugging and error logging, resolved 400 error in voice chat WebSocket handshake
 - June 24, 2025. WebSocket path conflict resolved - moved voice WebSocket from /voice to /ws/voice to avoid conflict with existing /api/voice/realtime route, fixed 400 Bad Request errors, implemented proper WebSocket server configuration with enhanced debugging and error handling
 - June 24, 2025. Voice chat implementation switched to Google Live Audio WebSocket - integrated voice functionality with existing working WebSocket at /api/google-live-audio, implemented Gemini AI processing for voice messages, added text-to-speech response system with intelligent cooking assistance
+- June 24, 2025. Voice chat ES module import error fixed - resolved 'require is not defined' error by switching to proper ES module imports for GoogleGenAI, fixed processVoiceMessage function to use static imports instead of dynamic require, voice chat now connects successfully and processes cooking questions with Gemini AI
 ```
 
 ## User Preferences
