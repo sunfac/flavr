@@ -69,6 +69,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Add route debugging
+  console.log('🔧 Registering Express routes...');
   
   // Setup session middleware
   app.use(session({

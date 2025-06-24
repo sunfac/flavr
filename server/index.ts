@@ -156,8 +156,18 @@ app.use((req, res, next) => {
 
   // Initialize Voice Chat WebSocket endpoint before starting server
   try {
-    setupVoiceChat(server);
-    console.log('🎤 Voice chat WebSocket initialized on /voice endpoint');
+    const voiceWss = setupVoiceChat(server);
+    console.log('🎤 Voice chat WebSocket initialized on /ws/voice endpoint');
+    
+    // Add error handling for WebSocket server
+    voiceWss.on('error', (error) => {
+      console.error('❌ Voice WebSocket server error:', error);
+    });
+    
+    voiceWss.on('listening', () => {
+      console.log('✅ Voice WebSocket server is listening');
+    });
+    
   } catch (error) {
     console.error('❌ Failed to initialize voice chat:', error);
   }

@@ -82,14 +82,30 @@ export function setupVoiceChat(httpServer: Server): WebSocketServer {
   
   const genai = initializeGenAI();
   
+  console.log('🔧 Setting up WebSocket server on /ws/voice path...');
+  
   const wss = new WebSocketServer({ 
     server: httpServer, 
-    path: '/voice',
+    path: '/ws/voice',
     perMessageDeflate: false,
-    maxPayload: 1024 * 1024 // 1MB max payload
+    maxPayload: 1024 * 1024, // 1MB max payload
+    clientTracking: true
   });
 
-  console.log('🎤 Voice chat WebSocket server initialized on /voice');
+  console.log('🎤 Voice chat WebSocket server initialized on /ws/voice');
+  
+  // Add WebSocket server event handlers
+  wss.on('error', (error) => {
+    console.error('❌ WebSocket server error:', error);
+  });
+  
+  wss.on('listening', () => {
+    console.log('✅ WebSocket server is listening on /ws/voice');
+  });
+  
+  wss.on('headers', (headers, request) => {
+    console.log('📋 WebSocket headers:', headers);
+  });
 
   wss.on('connection', async (ws, req) => {
     const sessionId = `voice_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;

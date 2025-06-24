@@ -170,6 +170,7 @@ Changelog:
 - June 24, 2025. Google GenAI Live API integration fixed - corrected API configuration for v1.6.0 package compatibility, implemented proper Live session creation with response_modalities and system_instruction, fixed text processing using models.generateContent method for voice responses
 - June 24, 2025. Voice chat error handling enhanced - added comprehensive error handling for Live session creation failures, implemented robust fallback to intelligent text processing, improved connection status feedback with ready state detection, enhanced audio processing error recovery
 - June 24, 2025. Voice chat WebSocket connection fixed - corrected server initialization order for voice endpoint, moved WebSocket setup before server listen call, enhanced connection debugging and error logging, resolved 400 error in voice chat WebSocket handshake
+- June 24, 2025. WebSocket path conflict resolved - moved voice WebSocket from /voice to /ws/voice to avoid conflict with existing /api/voice/realtime route, fixed 400 Bad Request errors, implemented proper WebSocket server configuration with enhanced debugging and error handling
 ```
 
 ## User Preferences

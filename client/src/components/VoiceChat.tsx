@@ -28,7 +28,7 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
   const connectWebSocket = useCallback(() => {
     try {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/voice`;
+      const wsUrl = `${protocol}//${window.location.host}/ws/voice`;
       
       console.log('🔗 Connecting to voice WebSocket:', wsUrl);
       wsRef.current = new WebSocket(wsUrl, [], {
