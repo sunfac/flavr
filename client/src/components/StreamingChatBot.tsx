@@ -87,12 +87,22 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isStreaming) return;
 
+    const currentMessage = inputValue;
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: inputValue,
+      text: currentMessage,
       sender: 'user',
       timestamp: new Date()
     };
+
+    // Build conversation history INCLUDING the current user message for context
+    const updatedHistory = [...messages, userMessage].map(msg => ({
+      role: msg.sender === 'user' ? 'user' : 'assistant',
+      content: msg.text
+    }));
+
+    console.log('🧠 Frontend: Sending conversation history with', updatedHistory.length, 'messages');
+    console.log('🤖 Frontend: Using Gemini hybrid system');
 
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
@@ -117,9 +127,9 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: inputValue,
+          message: currentMessage,
           currentRecipe,
-          conversationHistory,
+          conversationHistory: updatedHistory,
           openAIContext: {
             quizData: currentRecipe?.quizData,
             originalPrompt: currentRecipe?.originalPrompt,

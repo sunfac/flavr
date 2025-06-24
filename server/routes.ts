@@ -1488,7 +1488,9 @@ Be conversational like ChatGPT. Reference what you've discussed before. Answer c
       });
       
       // Use Gemini for fluid conversation with OpenAI context handover
-      console.log('🤖 Using Gemini for conversational AI with OpenAI context');
+      console.log('🔥 USING GOOGLE GEMINI FOR CONVERSATION');
+      console.log('📊 Conversation History Length:', conversationHistory.length);
+      console.log('🎯 OpenAI Context Available:', !!openAIContext);
       
       await geminiChat.sendMessageStream(message, (chunk) => {
         if (chunk.type === 'content') {
