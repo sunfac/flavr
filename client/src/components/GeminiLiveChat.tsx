@@ -58,7 +58,7 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
       ws.binaryType = 'arraybuffer';
       
       ws.onopen = () => {
-        console.log('Connected to Gemini Live API');
+        console.log('🌐 Connected to Gemini Live API WebSocket');
         setConnectionStatus('connected');
         setIsConnected(true);
         
@@ -89,15 +89,25 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         console.log('Sending setup message to Gemini Live');
         console.log('Setup message content:', JSON.stringify(setupMessage, null, 2));
         ws.send(JSON.stringify(setupMessage));
+        
+        // Set a timeout to force ready state if no setup response received
+        setTimeout(() => {
+          if (websocketRef.current?.readyState === WebSocket.OPEN) {
+            console.log('⏰ Timeout reached - forcing ready state for testing');
+            setConnectionStatus('ready');
+            setIsListening(true);
+            startAudioStreaming();
+          }
+        }, 2000);
       };
       
       ws.onmessage = (event) => {
-        console.log('Raw message received:', event.data);
+        console.log('🔄 Raw message received from Gemini Live:', event.data);
         
         if (typeof event.data === 'string') {
           try {
             const message = JSON.parse(event.data);
-            console.log('Parsed Gemini Live message:', JSON.stringify(message, null, 2));
+            console.log('📋 Parsed Gemini Live message:', JSON.stringify(message, null, 2));
             
             // Handle setup complete
             if (message.setupComplete) {
@@ -158,15 +168,16 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
             }
             
             // Log any other message types
-            if (!message.setupComplete && !message.serverContent) {
-              console.log('🔍 Unknown message type:', Object.keys(message));
+            if (!message.setupComplete && !message.serverContent && !message.setup && !message.setupResponse) {
+              console.log('🔍 Unknown message type with keys:', Object.keys(message));
+              console.log('🔍 Full unknown message:', message);
             }
             
           } catch (error) {
             console.error('❌ Error parsing JSON message:', error);
           }
         } else {
-          console.log('📦 Received binary data:', event.data);
+          console.log('📦 Received binary data of type:', typeof event.data, 'length:', event.data.length || 'unknown');
         }
       };
       
@@ -205,8 +216,8 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         
         // Log audio levels for debugging (every 100 samples)
         chunkCount++;
-        if (chunkCount % 100 === 0) {
-          console.log(`🎤 Audio level: ${average.toFixed(6)} (threshold: 0.001)`);
+        if (chunkCount % 50 === 0) {
+          console.log(`🎤 Audio level: ${average.toFixed(6)} (threshold: 0.001) - chunk ${chunkCount}`);
         }
         
         if (average > 0.001) { // Lower threshold for voice detection
@@ -232,8 +243,9 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
             }
           };
           
-          console.log(`📤 Sending audio message (${pcmData.length} samples, level: ${average.toFixed(4)})`);
-          console.log('Audio data size:', btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer))).length);
+          if (chunkCount % 20 === 0) {
+            console.log(`📤 Sending audio chunk ${chunkCount} (${pcmData.length} samples, level: ${average.toFixed(4)})`);
+          }
           
           try {
             websocketRef.current.send(JSON.stringify(audioMessage));
@@ -241,9 +253,9 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
             console.error('❌ Failed to send audio message:', error);
           }
         } else {
-          // Log silence detection for debugging
-          if (chunkCount % 500 === 0) {
-            console.log(`🔇 Silence detected (level: ${average.toFixed(6)})`);
+          // Log silence detection for debugging  
+          if (chunkCount % 200 === 0) {
+            console.log(`🔇 Silence detected (level: ${average.toFixed(6)}) - chunk ${chunkCount}`);
           }
         }
       }
@@ -420,7 +432,7 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
         <div className="space-y-2">
           <div className="flex items-center justify-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
             <div className={`w-2 h-2 rounded-full ${isListening ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}`} />
-            <span>Two-way conversation active</span>
+            <span>Audio streaming active</span>
           </div>
           
           <div className="flex gap-2 justify-center">
@@ -428,7 +440,7 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
               onClick={sendTestMessage}
               variant="outline"
               size="sm"
-              className="text-xs"
+              className="text-xs bg-blue-50 hover:bg-blue-100 border-blue-200"
             >
               <Send className="w-3 h-3 mr-1" />
               Test Text
@@ -437,14 +449,23 @@ export function GeminiLiveChat({ currentRecipe, onRecipeUpdate }: GeminiLiveChat
               onClick={endCurrentTurn}
               variant="outline"
               size="sm"
-              className="text-xs"
+              className="text-xs bg-orange-50 hover:bg-orange-100 border-orange-200"
             >
               <Square className="w-3 h-3 mr-1" />
               End Turn
             </Button>
           </div>
+          
+          <div className="text-xs text-center text-gray-500">
+            Speak naturally - audio levels are being monitored
+          </div>
         </div>
       )}
+      
+      {/* Debug info always visible */}
+      <div className="text-xs text-center text-gray-400 mt-2">
+        Status: {connectionStatus} | Listening: {isListening ? 'Yes' : 'No'} | Connected: {isConnected ? 'Yes' : 'No'}
+      </div>
     </div>
   );
 }
