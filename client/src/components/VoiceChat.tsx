@@ -31,7 +31,9 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
       const wsUrl = `${protocol}//${window.location.host}/voice`;
       
       console.log('🔗 Connecting to voice WebSocket:', wsUrl);
-      wsRef.current = new WebSocket(wsUrl);
+      wsRef.current = new WebSocket(wsUrl, [], {
+        perMessageDeflate: false
+      });
       
       wsRef.current.onopen = () => {
         console.log('🔊 Connected to voice chat');
@@ -49,6 +51,11 @@ export function VoiceChat({ onRecipeUpdate, onTokenReceived }: VoiceChatProps) {
             const message = JSON.parse(event.data);
             
             switch (message.type) {
+              case 'connection_ack':
+                console.log('✅ WebSocket connection acknowledged:', message.sessionId);
+                setConnectionStatus('connected');
+                break;
+                
               case 'connected':
                 console.log('✅ Voice chat connected');
                 setConnectionStatus('connected');

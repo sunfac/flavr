@@ -84,14 +84,23 @@ export function setupVoiceChat(httpServer: Server): WebSocketServer {
   
   const wss = new WebSocketServer({ 
     server: httpServer, 
-    path: '/voice'
+    path: '/voice',
+    perMessageDeflate: false,
+    maxPayload: 1024 * 1024 // 1MB max payload
   });
 
   console.log('🎤 Voice chat WebSocket server initialized on /voice');
 
   wss.on('connection', async (ws, req) => {
     const sessionId = `voice_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    console.log(`🔊 Voice session started: ${sessionId}`);
+    console.log(`🔊 Voice session started: ${sessionId} from ${req.socket.remoteAddress}`);
+    
+    // Send immediate connection acknowledgment
+    ws.send(JSON.stringify({
+      type: 'connection_ack',
+      sessionId: sessionId,
+      message: 'Connected to voice chat server'
+    }));
 
     try {
       // Check if Live API is available in current version
