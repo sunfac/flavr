@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Mic, MicOff, Send, Volume2, VolumeX } from 'lucide-react';
+import { Mic, MicOff, Send, Volume2, VolumeX, Radio } from 'lucide-react';
 import { useRecipeStore } from '@/stores/recipeStore';
+import GoogleLiveAudioChat from './GoogleLiveAudioChat';
 
 interface Message {
   id: string;
@@ -25,6 +26,7 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
   const [isStreaming, setIsStreaming] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [showGoogleLiveAudio, setShowGoogleLiveAudio] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -268,8 +270,37 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
             </p>
           </div>
         </div>
-        {/* TTS controls removed per user request */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowGoogleLiveAudio(!showGoogleLiveAudio)}
+          className="h-6 px-2 text-white hover:bg-white/20"
+          title="Toggle Google Live Audio Chat"
+        >
+          <Radio className="w-3 h-3" />
+        </Button>
       </div>
+      
+      {/* Google Live Audio Chat Panel */}
+      {showGoogleLiveAudio && (
+        <div className="p-2 bg-black/20 border-b border-white/10">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-white text-xs font-medium">Google Live Audio Chat</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowGoogleLiveAudio(false)}
+              className="h-4 w-4 p-0 text-white/60 hover:text-white"
+            >
+              ×
+            </Button>
+          </div>
+          <GoogleLiveAudioChat 
+            currentRecipe={currentRecipe}
+            onRecipeUpdate={updateActiveRecipe}
+          />
+        </div>
+      )}
 
       {/* Messages Area - Optimized for visibility */}
       <div className="flex-1 overflow-y-auto p-2 space-y-2 min-h-0">
@@ -341,6 +372,7 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                 className={`absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 p-0 ${
                   isListening ? 'text-red-400 bg-red-500/20' : 'text-slate-400 hover:text-white'
                 }`}
+                title="Speech to Text (Browser)"
               >
                 {isListening ? <MicOff className="w-3 h-3" /> : <Mic className="w-3 h-3" />}
               </Button>
