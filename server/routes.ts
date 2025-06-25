@@ -249,6 +249,8 @@ ${getStrictDietaryInstruction(quizData.dietary)}
 
 ${budgetText}
 
+${supermarketText}
+
 ${timeText}
 
 ${equipmentText}
@@ -614,6 +616,7 @@ Make each recipe unique and appealing. Focus on variety in cooking styles, flavo
         const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : "";
+        const supermarketText = quizData.supermarket ? getSupermarketPromptText(quizData.supermarket) : '';
         
         // Use centralized mapping utilities for specific elements only
         const difficulty = getDifficulty(quizData.ambition);
