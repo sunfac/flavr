@@ -343,3 +343,22 @@ export function getStrictDietaryInstruction(dietKeys: string[]): string {
 DIETARY OVERRIDE: If any creative direction conflicts with the user's dietary requirements, the dietary rules take absolute priority.`;
 }
 
+export function getSupermarketPromptText(supermarket: string): string {
+  if (!supermarket) return '';
+  
+  const supermarketMap: Record<string, string> = {
+    'tesco': `Shopping at Tesco: Consider their wide range of value, standard, and premium options. Tesco offers good variety in international ingredients and their Finest range for premium items.`,
+    'sainsburys': `Shopping at Sainsbury's: Take advantage of their Taste the Difference range for quality ingredients and their good selection of organic and specialty items.`,
+    'asda': `Shopping at ASDA: Focus on their Smart Price range for budget ingredients and their Extra Special line for premium touches. Great for bulk buying and family portions.`,
+    'morrisons': `Shopping at Morrisons: Utilize their fresh markets and butcher counters for quality meat and fish. Their Signature range offers premium ingredients at competitive prices.`,
+    'waitrose': `Shopping at Waitrose: Take advantage of their premium quality ingredients, extensive organic range, and unique specialty items. Their own-brand products are consistently high quality.`,
+    'aldi': `Shopping at Aldi: Focus on their excellent value basics and rotating special buys. Their Simply Nature range offers good organic options at budget-friendly prices.`,
+    'lidl': `Shopping at Lidl: Make use of their great value ingredients and special weekly offers. Their Deluxe range provides premium options without the premium price.`,
+    'marks': `Shopping at M&S: Leverage their premium prepared ingredients and exceptional quality own-brand products. Perfect for special occasion ingredients and time-saving options.`,
+    'iceland': `Shopping at Iceland: Great for frozen ingredients that maintain quality. Their premium frozen ranges can provide restaurant-quality ingredients at home.`,
+    'coop': `Shopping at Co-op: Focus on their ethical and local sourcing. Good for last-minute shopping and their Irresistible range offers quality specialty ingredients.`
+  };
+  
+  return supermarketMap[supermarket.toLowerCase()] || `Shopping at ${supermarket}: Choose ingredients that match your selected supermarket's strengths and available product ranges.`;
+}
+

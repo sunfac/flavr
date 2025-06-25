@@ -222,6 +222,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const budgetText = quizData.budget ? getBudgetPromptText(quizData.budget) : '';
         const timeText = quizData.time ? getTimePromptText(quizData.time) : '';
         const equipmentText = quizData.equipment ? getEquipmentPromptText(quizData.equipment) : '';
+        const supermarketText = quizData.supermarket ? getSupermarketPromptText(quizData.supermarket) : '';
         
         // Use centralized difficulty mapping
         const difficulty = getDifficulty(quizData.ambition);
@@ -644,6 +645,8 @@ ${getStrictDietaryInstruction(quizData.dietary)}
 
 ${budgetText}
 
+${supermarketText}
+
 The total cooking time must NOT exceed ${cookTime} minutes. This is the user's hard time limit.
 
 AVAILABLE EQUIPMENT: ${equipmentText}
@@ -953,45 +956,36 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
       
       console.log(`CORRECTED VALUES - Final servings: ${fullRecipe.servings}, cookTime: ${fullRecipe.cookTime}`);
 
-      // Generate sophisticated recipe image
+      // Generate sophisticated recipe image using Imagen 3
       let imageUrl = null;
       let imagePrompt = null;
       let imageGenerated = false;
       let imageCost = null;
       if (true) {
         try {
-          // Create enhanced image prompt based on recipe details
-          const generateImagePrompt = (recipeTitle: string, ingredients: string[], mood: string, platingNotes?: string) => {
-            // Extract main ingredients (first 3-4 key ingredients)
-            const mainIngredients = ingredients.slice(0, 4).map(ing => 
-              ing.replace(/^\d+.*?\s/, '').replace(/,.*$/, '').trim()
-            );
-            
-            return `High-resolution photo of a plated dish titled "${recipeTitle}". 
-Prepared with ingredients like: ${mainIngredients.join(", ")}.
-Styled to match the mood: ${mood || "elevated home comfort"}.
-Plated on a neutral background, natural lighting, with light shadows.
-No labels, no text, no hands, no brand packaging.
-Styled like an editorial cookbook photo or a Waitrose magazine.
-${platingNotes ? `Plating style: ${platingNotes}.` : ""}
-Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows or artificial textures.`;
-          };
-
-          const sophisticatedPrompt = generateImagePrompt(
+          const { generateRecipeImageWithImagen3, createRecipeImagePrompt } = await import('./imageGeneration');
+          
+          const sophisticatedPrompt = createRecipeImagePrompt(
             fullRecipe.title,
             fullRecipe.ingredients || [],
             quizData.mood || quizData.vibe || "elevated home comfort",
-            fullRecipe.tips
+            "Elegant plating with thoughtful garnish placement"
           );
 
-          const imageResponse = await openai.images.generate({
-            model: "dall-e-3",
-            prompt: sophisticatedPrompt,
-            n: 1,
-            size: "1024x1024",
-            quality: "standard",
-          });
-          imageUrl = imageResponse.data?.[0]?.url;
+          imagePrompt = sophisticatedPrompt;
+
+          console.log('🎨 Generating recipe image with Imagen 3...');
+          console.log('Image prompt:', sophisticatedPrompt);
+          
+          imageUrl = await generateRecipeImageWithImagen3(sophisticatedPrompt);
+
+          if (imageUrl) {
+            imageGenerated = true;
+            imageCost = "$0.020"; // Imagen 3 cost per image
+            console.log('✅ Recipe image generated successfully with Imagen 3');
+          } else {
+            console.log('⚠️ No image output received from Imagen 3');
+          }
         } catch (imageError) {
           console.error("Failed to generate image:", imageError);
         }
@@ -1030,9 +1024,8 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
         
         // Track image generation details
         if (imageUrl) {
-          imagePrompt = `A stunning food photograph of ${fullRecipe.title}, featuring ${fullRecipe.cuisine} cuisine, professional food styling, natural lighting, appetizing presentation`;
           imageGenerated = true;
-          imageCost = "$0.020"; // Standard Stable Diffusion cost
+          imageCost = "$0.020"; // Imagen 3 cost per image
         }
 
         await logGPTInteraction(
