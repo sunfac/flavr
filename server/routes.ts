@@ -956,31 +956,16 @@ FINAL WARNING: You must use servings: ${quizData.servings || 4} exactly as shown
       
       console.log(`CORRECTED VALUES - Final servings: ${fullRecipe.servings}, cookTime: ${fullRecipe.cookTime}`);
 
-      // Generate sophisticated recipe image
+      // Generate sophisticated recipe image using Imagen 3
       let imageUrl = null;
       let imagePrompt = null;
       let imageGenerated = false;
       let imageCost = null;
       if (true) {
         try {
-          // Create enhanced image prompt based on recipe details
-          const generateImagePrompt = (recipeTitle: string, ingredients: string[], mood: string, platingNotes?: string) => {
-            // Extract main ingredients (first 3-4 key ingredients)
-            const mainIngredients = ingredients.slice(0, 4).map(ing => 
-              ing.replace(/^\d+.*?\s/, '').replace(/,.*$/, '').trim()
-            );
-            
-            return `High-resolution photo of a plated dish titled "${recipeTitle}". 
-Prepared with ingredients like: ${mainIngredients.join(", ")}.
-Styled to match the mood: ${mood || "elevated home comfort"}.
-Plated on a neutral background, natural lighting, with light shadows.
-No labels, no text, no hands, no brand packaging.
-Styled like an editorial cookbook photo or a Waitrose magazine.
-${platingNotes ? `Plating style: ${platingNotes}.` : ""}
-Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows or artificial textures.`;
-          };
-
-          const sophisticatedPrompt = generateImagePrompt(
+          const { generateRecipeImageWithImagen3, createRecipeImagePrompt } = await import('./imageGeneration');
+          
+          const sophisticatedPrompt = createRecipeImagePrompt(
             fullRecipe.title,
             fullRecipe.ingredients || [],
             quizData.mood || quizData.vibe || "elevated home comfort",
@@ -989,27 +974,62 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
 
           imagePrompt = sophisticatedPrompt;
 
-          console.log('🎨 Generating recipe image with DALL-E...');
-          console.log('Image prompt:', sophisticatedPrompt);
+          console.log('🎨 Attempting Imagen 3 generation...');
+          
+          imageUrl = await generateRecipeImageWithImagen3(sophisticatedPrompt);
 
-          const imageResponse = await openai.images.generate({
-            model: "dall-e-3",
-            prompt: sophisticatedPrompt,
-            n: 1,
-            size: "1024x1024",
-            quality: "standard",
-          });
-
-          if (imageResponse.data?.[0]?.url) {
-            imageUrl = imageResponse.data[0].url;
+          if (imageUrl) {
             imageGenerated = true;
-            imageCost = "$0.040"; // DALL-E 3 cost per image
-            console.log('✅ Recipe image generated successfully with DALL-E');
+            imageCost = "$0.020"; // Imagen 3 cost per image
+            console.log('✅ Recipe image generated successfully with Imagen 3');
           } else {
-            console.log('⚠️ No image output received from DALL-E');
+            console.log('⚠️ Imagen 3 failed, falling back to DALL-E...');
+            
+            // Fallback to DALL-E if Imagen 3 fails
+            const imageResponse = await openai.images.generate({
+              model: "dall-e-3",
+              prompt: sophisticatedPrompt,
+              n: 1,
+              size: "1024x1024",
+              quality: "standard",
+            });
+
+            if (imageResponse.data?.[0]?.url) {
+              imageUrl = imageResponse.data[0].url;
+              imageGenerated = true;
+              imageCost = "$0.040"; // DALL-E 3 cost per image
+              console.log('✅ Recipe image generated successfully with DALL-E fallback');
+            }
           }
         } catch (imageError) {
-          console.error("Failed to generate image:", imageError);
+          console.error("Image generation failed:", imageError);
+          
+          // Final fallback to DALL-E if everything else fails
+          try {
+            const fallbackPrompt = createRecipeImagePrompt(
+              fullRecipe.title,
+              fullRecipe.ingredients || [],
+              quizData.mood || quizData.vibe || "elevated home comfort",
+              "Elegant plating with thoughtful garnish placement"
+            );
+
+            const imageResponse = await openai.images.generate({
+              model: "dall-e-3",
+              prompt: fallbackPrompt,
+              n: 1,
+              size: "1024x1024",
+              quality: "standard",
+            });
+
+            if (imageResponse.data?.[0]?.url) {
+              imageUrl = imageResponse.data[0].url;
+              imageGenerated = true;
+              imageCost = "$0.040";
+              console.log('✅ Recipe image generated with DALL-E final fallback');
+            }
+          } catch (fallbackError) {
+            console.error("All image generation methods failed:", fallbackError);
+          }
         }
       }
 
@@ -1044,11 +1064,7 @@ Use subtle depth of field. Slight steam if dish is hot. Avoid unrealistic glows 
           title: fullRecipe.title
         };
         
-        // Track image generation details
-        if (imageUrl) {
-          imageGenerated = true;
-          imageCost = "$0.040"; // DALL-E 3 cost per image
-        }
+        // Track image generation details (cost already set above based on method used)
 
         await logGPTInteraction(
           req.session.userId,
