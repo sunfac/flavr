@@ -30,6 +30,9 @@ import {
   // Additional Icons
   BookmarkPlus, Signal, Cookie, Shuffle,
   
+  // Media & Input
+  Mic, Camera, Image,
+  
   // Misc
   Circle, CircleDot, Hand, CheckCircle2, XCircle, Eye, EyeOff
 } from "lucide-react";
@@ -134,6 +137,11 @@ export const iconMap = {
   signal: Signal,
   cookie: Cookie,
   shuffle: Shuffle,
+  
+  // Media & Input
+  mic: Mic,
+  camera: Camera,
+  image: Image,
   
   // Misc
   circle: Circle,
