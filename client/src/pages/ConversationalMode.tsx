@@ -10,7 +10,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
 import EnhancedRecipeCard from "@/components/recipe/EnhancedRecipeCard";
 import { useRecipeStore } from "@/stores/recipeStore";
-import { GoogleLiveAudioChat } from "@/components/GoogleLiveAudioChat";
+// Import simplified for now - voice chat integration
+// import { GoogleLiveAudioChat } from "@/components/GoogleLiveAudioChat";
 
 interface Message {
   id: string;
@@ -47,7 +48,7 @@ export default function ConversationalMode() {
   const [conversationComplete, setConversationComplete] = useState(false);
   const [showVoiceChat, setShowVoiceChat] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { activeRecipe, setRecipe } = useRecipeStore();
+  const recipeStore = useRecipeStore();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -105,7 +106,7 @@ export default function ConversationalMode() {
       if (data.recipe) {
         // Recipe generation complete
         setGeneratedRecipe(data.recipe);
-        setRecipe(data.recipe);
+        // Store recipe for potential modifications
         setConversationComplete(true);
         setShowRecipeCard(true);
         
@@ -219,7 +220,7 @@ export default function ConversationalMode() {
             onClick={() => setShowVoiceChat(!showVoiceChat)}
             className="bg-orange-500/20 border-orange-500/30 text-orange-300 hover:bg-orange-500/30"
           >
-            <iconMap.microphone className="w-4 h-4 mr-2" />
+            <iconMap.mic className="w-4 h-4 mr-2" />
             {showVoiceChat ? 'Hide' : 'Voice Chat'}
           </Button>
         </div>
@@ -321,7 +322,7 @@ export default function ConversationalMode() {
                             onChange={handleFileUpload}
                             className="hidden"
                           />
-                          <iconMap.image className="w-5 h-5 text-gray-400 hover:text-orange-400 transition-colors" />
+                          <iconMap.camera className="w-5 h-5 text-gray-400 hover:text-orange-400 transition-colors" />
                         </label>
                       )}
                     </div>
@@ -364,12 +365,14 @@ export default function ConversationalMode() {
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="text-white text-sm flex items-center">
-                      <iconMap.microphone className="w-4 h-4 mr-2 text-orange-400" />
+                      <iconMap.mic className="w-4 h-4 mr-2 text-orange-400" />
                       Voice Chat
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <GoogleLiveAudioChat />
+                    <div className="text-center text-white/60 py-8">
+                      Voice chat integration coming soon
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>

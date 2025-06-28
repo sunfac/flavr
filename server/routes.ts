@@ -46,6 +46,15 @@ import {
 
 
 
+import { processConversationalInput, generateRecipeFromConversation, logUserInteractionData } from "./conversationalProcessor";
+import multer from 'multer';
+
+// Configure multer for file uploads
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
 // Initialize OpenAI
 if (!process.env.OPENAI_API_KEY) {
   throw new Error('Missing required OpenAI API key: OPENAI_API_KEY');
@@ -1864,6 +1873,117 @@ Be conversational, helpful, and maintain context from our conversation history. 
     }
     console.log("✅ Providing Gemini API key to client");
     res.json({ key: apiKey });
+  });
+
+  // Conversational Recipe Generation
+  app.post("/api/conversational-recipe", async (req, res) => {
+    try {
+      const { message, conversationHistory, currentData } = req.body;
+      
+      // Process conversation and extract user intent/data
+      const conversationResult = await processConversationalInput(
+        message,
+        conversationHistory,
+        currentData
+      );
+
+      if (conversationResult.shouldGenerateRecipe) {
+        // Generate recipe using collected data
+        const recipe = await generateRecipeFromConversation(conversationResult.data);
+        
+        // Log user interaction data for B2B insights
+        await logUserInteractionData(req.session?.userId, {
+          intent: conversationResult.data.intent,
+          cuisine: conversationResult.data.cuisine,
+          portions: conversationResult.data.portions,
+          timeAvailable: conversationResult.data.timeAvailable,
+          mood: conversationResult.data.mood,
+          ingredients: conversationResult.data.ingredients,
+          equipment: conversationResult.data.equipment,
+          dietaryRestrictions: conversationResult.data.dietaryRestrictions,
+          skillLevel: conversationResult.data.skillLevel,
+          occasion: conversationResult.data.occasion,
+          budget: conversationResult.data.budget,
+          timestamp: new Date()
+        });
+
+        res.json({
+          recipe,
+          response: conversationResult.response,
+          complete: true
+        });
+      } else {
+        res.json({
+          response: conversationResult.response,
+          suggestions: conversationResult.suggestions,
+          updatedData: conversationResult.data,
+          complete: false
+        });
+      }
+    } catch (error) {
+      console.error("Conversational recipe error:", error);
+      res.status(500).json({ 
+        message: "I'm having trouble understanding. Could you try rephrasing that?",
+        error: error.message 
+      });
+    }
+  });
+
+  // Fridge Photo Analysis
+  app.post("/api/analyze-fridge", upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No image provided" });
+      }
+
+      // Convert image to base64 for AI analysis
+      const base64Image = req.file.buffer.toString('base64');
+      
+      const analysisPrompt = `Analyze this fridge/pantry photo and identify the visible ingredients and food items. 
+      List them in a clear, organized way. Focus on items that could be used for cooking.
+      Also suggest what types of dishes could be made with these ingredients.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: analysisPrompt },
+              {
+                type: "image_url",
+                image_url: { url: `data:image/jpeg;base64,${base64Image}` }
+              }
+            ]
+          }
+        ],
+        max_tokens: 500
+      });
+
+      const analysis = response.choices[0].message.content;
+      
+      // Extract ingredients from analysis
+      const ingredientMatch = analysis.match(/ingredients?[:\-]?\s*([^.]+)/i);
+      const ingredients = ingredientMatch 
+        ? ingredientMatch[1].split(',').map(item => item.trim())
+        : [];
+
+      res.json({
+        ingredients,
+        analysis,
+        response: `Great! I can see you have some wonderful ingredients to work with. What type of dish are you in the mood for?`,
+        suggestions: [
+          "Something quick and easy",
+          "A comfort food dish", 
+          "Something healthy and fresh",
+          "Use everything I have"
+        ]
+      });
+
+    } catch (error) {
+      console.error("Fridge analysis error:", error);
+      res.status(500).json({ message: "Failed to analyze image" });
+    }
   });
 
   const httpServer = createServer(app);
