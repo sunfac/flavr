@@ -164,9 +164,24 @@ function buildConversationalPrompt(data: ConversationData): string {
   if (data.mood) prompt += `Dish mood/style: ${data.mood}\n`;
   if (data.occasion) prompt += `Occasion: ${data.occasion}\n`;
   if (data.skillLevel) prompt += `Skill level: ${data.skillLevel}\n`;
-  if (data.equipment && data.equipment.length > 0) prompt += `Equipment: ${data.equipment.join(', ')}\n`;
-  if (data.ingredients && data.ingredients.length > 0) prompt += `Available ingredients: ${data.ingredients.join(', ')}\n`;
-  if (data.dietaryRestrictions && data.dietaryRestrictions.length > 0) prompt += `Dietary restrictions: ${data.dietaryRestrictions.join(', ')}\n`;
+  if (data.equipment) {
+    const equipmentText = Array.isArray(data.equipment) 
+      ? data.equipment.join(', ')
+      : String(data.equipment);
+    prompt += `Equipment: ${equipmentText}\n`;
+  }
+  if (data.ingredients) {
+    const ingredientsText = Array.isArray(data.ingredients) 
+      ? data.ingredients.join(', ')
+      : String(data.ingredients);
+    prompt += `Available ingredients: ${ingredientsText}\n`;
+  }
+  if (data.dietaryRestrictions) {
+    const dietaryText = Array.isArray(data.dietaryRestrictions) 
+      ? data.dietaryRestrictions.join(', ')
+      : String(data.dietaryRestrictions);
+    prompt += `Dietary restrictions: ${dietaryText}\n`;
+  }
   if (data.budget) prompt += `Budget consideration: ${data.budget}\n`;
 
   prompt += "\nCreate a complete recipe that matches these conversational preferences.";

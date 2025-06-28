@@ -24,11 +24,11 @@ interface ConversationData {
   intent?: 'shopping' | 'ingredients' | 'idea' | 'general';
   cuisine?: string;
   portions?: number;
-  equipment?: string[];
+  equipment?: string[] | string;
   timeAvailable?: string;
   mood?: string;
-  ingredients?: string[];
-  dietaryRestrictions?: string[];
+  ingredients?: string[] | string;
+  dietaryRestrictions?: string[] | string;
   skillLevel?: string;
   occasion?: string;
   budget?: string;
@@ -41,9 +41,7 @@ export default function ConversationalMode() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [conversationData, setConversationData] = useState<ConversationData>({
-    ingredients: []
-  });
+  const [conversationData, setConversationData] = useState<ConversationData>({});
   const [generatedRecipe, setGeneratedRecipe] = useState(null);
   const [showRecipeCard, setShowRecipeCard] = useState(false);
   const [conversationComplete, setConversationComplete] = useState(false);
