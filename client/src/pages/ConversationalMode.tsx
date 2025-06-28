@@ -10,8 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
 import EnhancedRecipeCard from "@/components/recipe/EnhancedRecipeCard";
 import { useRecipeStore } from "@/stores/recipeStore";
-// Import simplified for now - voice chat integration
-// import { GoogleLiveAudioChat } from "@/components/GoogleLiveAudioChat";
+import { GoogleLiveAudioChat } from "@/components/GoogleLiveAudioChat";
 
 interface Message {
   id: string;
@@ -370,9 +369,7 @@ export default function ConversationalMode() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-center text-white/60 py-8">
-                      Voice chat integration coming soon
-                    </div>
+                    <GoogleLiveAudioChat />
                   </CardContent>
                 </Card>
               </motion.div>

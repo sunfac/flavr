@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import OpenAI from "openai";
 
 interface ConversationData {
   intent?: 'shopping' | 'ingredients' | 'idea' | 'general';
@@ -22,7 +22,7 @@ interface ConversationResult {
   suggestions?: string[];
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
 
 export async function processConversationalInput(
   message: string,
