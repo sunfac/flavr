@@ -229,7 +229,7 @@ export default function ConversationalMode() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Chat Interface */}
           <div className="lg:col-span-2">
-            <Card className="bg-white/5 border-white/10 backdrop-blur-sm h-[600px] flex flex-col">
+            <Card className="bg-white/5 border-white/10 backdrop-blur-sm h-[700px] flex flex-col">
               <CardHeader className="pb-4">
                 <CardTitle className="text-white flex items-center">
                   <iconMap.messageCircle className="w-5 h-5 mr-2 text-orange-400" />
@@ -242,9 +242,9 @@ export default function ConversationalMode() {
                 </CardTitle>
               </CardHeader>
               
-              <CardContent className="flex-1 flex flex-col p-0">
+              <CardContent className="flex-1 flex flex-col p-0 min-h-0">
                 {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 min-h-0">
                   <AnimatePresence>
                     {messages.map((message) => (
                       <motion.div
@@ -255,13 +255,30 @@ export default function ConversationalMode() {
                         className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
-                          className={`max-w-[85%] rounded-2xl p-4 break-words ${
+                          className={`max-w-[90%] rounded-2xl p-4 ${
                             message.type === 'user'
                               ? 'bg-orange-500 text-white'
                               : 'bg-white/10 text-white border border-white/20'
                           }`}
+                          style={{ 
+                            wordWrap: 'break-word', 
+                            wordBreak: 'break-word', 
+                            overflowWrap: 'anywhere',
+                            whiteSpace: 'pre-wrap' 
+                          }}
                         >
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
+                          <div 
+                            className="text-sm leading-relaxed"
+                            style={{ 
+                              wordWrap: 'break-word', 
+                              wordBreak: 'break-word', 
+                              overflowWrap: 'anywhere',
+                              whiteSpace: 'pre-wrap',
+                              maxWidth: '100%'
+                            }}
+                          >
+                            {message.content}
+                          </div>
                           
                           {message.suggestions && message.suggestions.length > 0 && (
                             <div className="mt-3 space-y-2">
@@ -272,6 +289,11 @@ export default function ConversationalMode() {
                                   size="sm"
                                   onClick={() => handleSuggestionClick(suggestion)}
                                   className="w-full justify-start text-left text-xs bg-white/10 hover:bg-white/20 text-white h-auto py-2 px-3"
+                                  style={{ 
+                                    whiteSpace: 'normal', 
+                                    wordWrap: 'break-word',
+                                    overflowWrap: 'anywhere'
+                                  }}
                                 >
                                   {suggestion}
                                 </Button>
