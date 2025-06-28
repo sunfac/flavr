@@ -41,7 +41,9 @@ export default function ConversationalMode() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [conversationData, setConversationData] = useState<ConversationData>({});
+  const [conversationData, setConversationData] = useState<ConversationData>({
+    ingredients: []
+  });
   const [generatedRecipe, setGeneratedRecipe] = useState(null);
   const [showRecipeCard, setShowRecipeCard] = useState(false);
   const [conversationComplete, setConversationComplete] = useState(false);
@@ -183,7 +185,7 @@ export default function ConversationalMode() {
       setMessages(prev => [...prev, fridgeMessage, assistantMessage]);
       setConversationData(prev => ({
         ...prev,
-        ingredients: data.ingredients,
+        ingredients: Array.isArray(data.ingredients) ? data.ingredients : [],
         fridgePhoto: data.imageUrl
       }));
     } catch (error) {
@@ -253,13 +255,13 @@ export default function ConversationalMode() {
                         className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
-                          className={`max-w-[80%] rounded-2xl p-4 ${
+                          className={`max-w-[85%] rounded-2xl p-4 break-words ${
                             message.type === 'user'
                               ? 'bg-orange-500 text-white'
                               : 'bg-white/10 text-white border border-white/20'
                           }`}
                         >
-                          <p className="text-sm">{message.content}</p>
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
                           
                           {message.suggestions && message.suggestions.length > 0 && (
                             <div className="mt-3 space-y-2">
