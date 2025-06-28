@@ -229,7 +229,7 @@ export default function ConversationalMode() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Chat Interface */}
           <div className="lg:col-span-2">
-            <Card className="bg-white/5 border-white/10 backdrop-blur-sm h-[700px] flex flex-col">
+            <Card className="bg-white/5 border-white/10 backdrop-blur-sm min-h-[600px] flex flex-col">
               <CardHeader className="pb-4">
                 <CardTitle className="text-white flex items-center">
                   <iconMap.messageCircle className="w-5 h-5 mr-2 text-orange-400" />
@@ -242,7 +242,7 @@ export default function ConversationalMode() {
                 </CardTitle>
               </CardHeader>
               
-              <CardContent className="flex-1 flex flex-col p-0 min-h-0">
+              <CardContent className="flex-1 flex flex-col p-0">
                 {/* Messages Area */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-4 min-h-0">
                   <AnimatePresence>
@@ -255,30 +255,15 @@ export default function ConversationalMode() {
                         className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
-                          className={`max-w-[90%] rounded-2xl p-4 ${
+                          className={`rounded-2xl p-4 ${
                             message.type === 'user'
-                              ? 'bg-orange-500 text-white'
-                              : 'bg-white/10 text-white border border-white/20'
+                              ? 'bg-orange-500 text-white max-w-[80%]'
+                              : 'bg-white/10 text-white border border-white/20 max-w-[90%]'
                           }`}
-                          style={{ 
-                            wordWrap: 'break-word', 
-                            wordBreak: 'break-word', 
-                            overflowWrap: 'anywhere',
-                            whiteSpace: 'pre-wrap' 
-                          }}
                         >
-                          <div 
-                            className="text-sm leading-relaxed"
-                            style={{ 
-                              wordWrap: 'break-word', 
-                              wordBreak: 'break-word', 
-                              overflowWrap: 'anywhere',
-                              whiteSpace: 'pre-wrap',
-                              maxWidth: '100%'
-                            }}
-                          >
+                          <p className="text-sm leading-relaxed break-all whitespace-pre-wrap">
                             {message.content}
-                          </div>
+                          </p>
                           
                           {message.suggestions && message.suggestions.length > 0 && (
                             <div className="mt-3 space-y-2">
