@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
 import EnhancedRecipeCard from "@/components/recipe/EnhancedRecipeCard";
 import { useRecipeStore } from "@/stores/recipeStore";
-import GoogleLiveAudioChat from "@/components/GoogleLiveAudioChat";
+import { GoogleLiveAudioChat } from "@/components/GoogleLiveAudioChat";
 
 interface Message {
   id: string;
@@ -47,7 +47,7 @@ export default function ConversationalMode() {
   const [conversationComplete, setConversationComplete] = useState(false);
   const [showVoiceChat, setShowVoiceChat] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { setActiveRecipe } = useRecipeStore();
+  const { activeRecipe, setRecipe } = useRecipeStore();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -105,7 +105,7 @@ export default function ConversationalMode() {
       if (data.recipe) {
         // Recipe generation complete
         setGeneratedRecipe(data.recipe);
-        setActiveRecipe(data.recipe);
+        setRecipe(data.recipe);
         setConversationComplete(true);
         setShowRecipeCard(true);
         
@@ -219,7 +219,7 @@ export default function ConversationalMode() {
             onClick={() => setShowVoiceChat(!showVoiceChat)}
             className="bg-orange-500/20 border-orange-500/30 text-orange-300 hover:bg-orange-500/30"
           >
-            <iconMap.mic className="w-4 h-4 mr-2" />
+            <iconMap.microphone className="w-4 h-4 mr-2" />
             {showVoiceChat ? 'Hide' : 'Voice Chat'}
           </Button>
         </div>
@@ -321,7 +321,7 @@ export default function ConversationalMode() {
                             onChange={handleFileUpload}
                             className="hidden"
                           />
-                          <iconMap.camera className="w-5 h-5 text-gray-400 hover:text-orange-400 transition-colors" />
+                          <iconMap.image className="w-5 h-5 text-gray-400 hover:text-orange-400 transition-colors" />
                         </label>
                       )}
                     </div>
@@ -350,7 +350,6 @@ export default function ConversationalMode() {
               >
                 <EnhancedRecipeCard 
                   recipe={generatedRecipe}
-                  onClose={() => setShowRecipeCard(false)}
                 />
               </motion.div>
             )}
@@ -365,7 +364,7 @@ export default function ConversationalMode() {
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="text-white text-sm flex items-center">
-                      <iconMap.mic className="w-4 h-4 mr-2 text-orange-400" />
+                      <iconMap.microphone className="w-4 h-4 mr-2 text-orange-400" />
                       Voice Chat
                     </CardTitle>
                   </CardHeader>
