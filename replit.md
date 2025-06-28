@@ -185,6 +185,7 @@ Changelog:
 - June 24, 2025. Gemini Live WebSocket communication fixed - implemented proper binary frame handling with arraybuffer support, added genai.live.connect() session management, integrated sendAudio() and markAudioEnd() for proper turn handling, enhanced client-side audio processing with MediaRecorder ArrayBuffer conversion, voice chat now maintains stable Gemini Live sessions
 - June 24, 2025. Direct Gemini Live API WebSocket integration complete - implemented client-side connection to Google's native WebSocket endpoint, added proper newline-delimited JSON message formatting, integrated 24kHz PCM audio processing, implemented setup/clientContent/turnComplete message structure, enhanced audio playback for Gemini Live responses
 - June 28, 2025. Conversational recipe mode implementation complete - switched conversational processor from Gemini to OpenAI due to quota limits, added Chat Mode card to mode selection with purple styling, integrated Google Live Audio Chat component for verbal recipe conversations, fixed API endpoints for natural conversation flow
+- June 28, 2025. Chat communication errors resolved - fixed array handling in conversational processor to support both string and array inputs for equipment, ingredients, and dietary restrictions, eliminated "join is not a function" errors, improved message text display with proper word wrapping
 ```
 
 ## User Preferences

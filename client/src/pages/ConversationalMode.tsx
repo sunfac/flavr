@@ -413,16 +413,16 @@ export default function ConversationalMode() {
                       <span className="text-white text-xs">{conversationData.mood}</span>
                     </div>
                   )}
-                  {conversationData.ingredients && conversationData.ingredients.length > 0 && (
+                  {conversationData.ingredients && (Array.isArray(conversationData.ingredients) ? conversationData.ingredients.length > 0 : conversationData.ingredients.trim().length > 0) && (
                     <div>
                       <span className="text-gray-400 text-xs block mb-1">Ingredients:</span>
                       <div className="flex flex-wrap gap-1">
-                        {conversationData.ingredients.slice(0, 4).map((ingredient, index) => (
+                        {(Array.isArray(conversationData.ingredients) ? conversationData.ingredients : [conversationData.ingredients]).slice(0, 4).map((ingredient: string, index: number) => (
                           <Badge key={index} variant="secondary" className="text-xs bg-orange-500/20 text-orange-300">
                             {ingredient}
                           </Badge>
                         ))}
-                        {conversationData.ingredients.length > 4 && (
+                        {Array.isArray(conversationData.ingredients) && conversationData.ingredients.length > 4 && (
                           <Badge variant="secondary" className="text-xs bg-gray-500/20 text-gray-300">
                             +{conversationData.ingredients.length - 4} more
                           </Badge>
