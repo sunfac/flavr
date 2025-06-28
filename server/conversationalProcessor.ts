@@ -87,15 +87,24 @@ Guidelines:
 - Make suggestions relevant to their current context`;
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-pro",
-      config: {
-        responseMimeType: "application/json"
-      },
-      contents: extractionPrompt
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: extractionPrompt
+        },
+        {
+          role: "user",
+          content: message
+        }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 500,
+      temperature: 0.7
     });
 
-    const result = JSON.parse(response.text || '{}');
+    const result = JSON.parse(response.choices[0]?.message?.content || '{}');
     
     // Merge with current data
     const updatedData = { ...currentData, ...result.data };
@@ -170,45 +179,40 @@ async function generateRecipeWithPrompt(prompt: string, mode: string, data: Conv
   // For now, return a structured recipe format
   
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-pro",
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: "object",
-          properties: {
-            title: { type: "string" },
-            description: { type: "string" },
-            cuisine: { type: "string" },
-            servings: { type: "number" },
-            cookTime: { type: "string" },
-            difficulty: { type: "string" },
-            ingredients: {
-              type: "array",
-              items: { type: "string" }
-            },
-            instructions: {
-              type: "array", 
-              items: { type: "string" }
-            },
-            tips: {
-              type: "array",
-              items: { type: "string" }
-            },
-            nutritionHighlights: {
-              type: "array",
-              items: { type: "string" }
-            }
-          },
-          required: ["title", "description", "ingredients", "instructions"]
-        }
-      },
-      contents: `${prompt}
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert chef. Generate detailed recipes in JSON format based on user requirements."
+        },
+        {
+          role: "user",
+          content: `${prompt}
 
-Create a detailed recipe following this exact JSON structure. Make sure all fields are properly filled out with practical, actionable content.`
+Create a detailed recipe following this exact JSON structure:
+{
+  "title": "string",
+  "description": "string", 
+  "cuisine": "string",
+  "servings": number,
+  "cookTime": "string",
+  "difficulty": "string",
+  "ingredients": ["array of strings"],
+  "instructions": ["array of strings"],
+  "tips": ["array of strings"],
+  "nutritionHighlights": ["array of strings"]
+}
+
+Make sure all fields are properly filled out with practical, actionable content.`
+        }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 2000,
+      temperature: 0.7
     });
 
-    const recipe = JSON.parse(response.text || '{}');
+    const recipe = JSON.parse(response.choices[0]?.message?.content || '{}');
     
     // Add metadata from conversation
     recipe.mode = mode;
