@@ -162,10 +162,7 @@ export default function LandingPage() {
 
       {/* Hero Section - Clean Apple Design */}
       <section id="hero" className="min-h-screen flex flex-col items-center justify-center text-center px-4 relative z-10 pt-20">
-        {/* Debug visibility indicator */}
-        <div style={{ position: 'fixed', top: '10px', left: '10px', background: 'red', color: 'white', padding: '5px', zIndex: 9999 }}>
-          LandingPage Rendered
-        </div>
+
 
         {/* Logo with Enhanced Glow */}
         <motion.div

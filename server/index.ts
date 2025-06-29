@@ -90,7 +90,8 @@ app.use((req, res, next) => {
   const distPublicDir = path.resolve(import.meta.dirname, "..", "dist", "public");
   const hasBuild = fs.existsSync(distPublicDir) && fs.existsSync(path.join(distPublicDir, "index.html"));
 
-  if (isProduction && hasBuild) {
+  // Force production mode for deployment - always serve from dist/public if it exists
+  if (hasBuild) {
     log("Production mode detected with valid build - serving static files");
     // Serve static files from production build
     app.use(express.static(distPublicDir, {
