@@ -115,18 +115,12 @@
     padding: 0;
     position: relative;
     font-optical-sizing: auto;
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    min-height: 100vh;
   }
 
   /* Mobile viewport optimization */
   #root {
     height: 100%;
     overflow-x: hidden;
-    background-color: #0f172a; /* Fallback background */
-    color: #f8fafc; /* Fallback text color */
-    min-height: 100vh;
   }
 
   /* Scrolling utilities for mobile */

@@ -50,7 +50,7 @@ export function createMinimalBuild(): void {
     // Directory might be empty, that's fine
   }
 
-  // Create a production HTML that mirrors the working development setup
+  // Create a lightweight production redirect that works with Vite dev server
   const productionHTML = `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -79,11 +79,18 @@ export function createMinimalBuild(): void {
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
+    
+    <!-- Redirect to main app in production deployments -->
+    <script>
+      // If we're in a deployed environment (not localhost), redirect to Vite dev server
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        window.location.href = '/';
+      }
+    </script>
   </head>
-  <body>
+  <body style="background: #0f172a; color: #f8fafc; font-family: system-ui;">
     <div id="root">
-      <!-- Fallback loading screen for production deployment -->
-      <div id="initial-loading" style="
+      <div style="
         position: fixed;
         inset: 0;
         background: linear-gradient(135deg, #1e293b, #0f172a);
@@ -104,37 +111,11 @@ export function createMinimalBuild(): void {
             animation: spin 1s linear infinite;
           "></div>
           <h1 style="font-size: 2rem; margin-bottom: 10px; color: #f97316;">Flavr</h1>
-          <p style="color: #94a3b8; font-size: 0.9rem;">Loading your culinary companion...</p>
+          <p style="color: #94a3b8; font-size: 0.9rem;">Starting your culinary companion...</p>
         </div>
       </div>
     </div>
 
-    <script>
-      // Hide loading screen after 3 seconds maximum to prevent infinite loading
-      setTimeout(() => {
-        const loader = document.getElementById('initial-loading');
-        if (loader) {
-          loader.style.opacity = '0';
-          loader.style.transition = 'opacity 0.5s ease';
-          setTimeout(() => loader.remove(), 500);
-        }
-      }, 3000);
-      
-      // Also hide when React app loads
-      document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-          const loader = document.getElementById('initial-loading');
-          if (loader) {
-            loader.style.opacity = '0';
-            loader.style.transition = 'opacity 0.5s ease';
-            setTimeout(() => loader.remove(), 500);
-          }
-        }, 500);
-      });
-    </script>
-
-    <script src="/refresh-suppress.js"></script>
-    <script type="module" src="/src/main.tsx"></script>
     <style>
       @keyframes spin {
         0% { transform: rotate(0deg); }
