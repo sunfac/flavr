@@ -86,7 +86,7 @@ app.use((req, res, next) => {
   createMinimalBuild();
 
   // Check if we're in production mode and have a build
-  const isProduction = process.env.NODE_ENV === "production" || app.get("env") === "production";
+  const isProduction = process.env.NODE_ENV === "production" || app.get("env") === "production" || process.env.REPLIT_DEPLOYMENT === "true";
   const distPublicDir = path.resolve(import.meta.dirname, "..", "dist", "public");
   const hasBuild = fs.existsSync(distPublicDir) && fs.existsSync(path.join(distPublicDir, "index.html"));
 
@@ -114,6 +114,73 @@ app.use((req, res, next) => {
       }));
     app.use("*", (_req, res) => {
       res.sendFile(path.resolve(distPublicDir, "index.html"));
+    });
+  } else if (isProduction) {
+    // Production fallback - serve development files directly with production optimizations
+    log("Production fallback mode - serving development files with optimizations");
+    
+    const clientDir = path.resolve(import.meta.dirname, "..", "client");
+    
+    // Create production-ready index.html handler
+    const serveProductionHTML = (req: any, res: any) => {
+      try {
+        const indexPath = path.join(clientDir, "index.html");
+        let html = fs.readFileSync(indexPath, "utf-8");
+        
+        // Inject production environment variables and optimizations
+        html = html.replace(
+          '<head>',
+          `<head>
+          <base href="/">
+          <meta name="robots" content="index,follow">
+          <script>
+            window.__FLAVR_ENV__ = 'production';
+            window.__PRODUCTION_FALLBACK__ = true;
+            
+            // Prevent refresh loops
+            if (window.location.search.includes('refresh')) {
+              window.history.replaceState({}, '', window.location.pathname);
+            }
+            
+            // Enhanced error handling for production
+            window.addEventListener('error', function(e) {
+              console.error('Production error:', e.error);
+            });
+          </script>`
+        );
+        
+        res.setHeader('Content-Type', 'text/html');
+        res.send(html);
+      } catch (error) {
+        log("Error serving production HTML:", error);
+        res.status(500).send("Application temporarily unavailable");
+      }
+    };
+    
+    // Serve root route
+    app.get("/", serveProductionHTML);
+    
+    // Serve static assets with proper headers
+    app.use(express.static(clientDir, {
+      maxAge: "1h",
+      index: false,
+      setHeaders: (res, filePath) => {
+        const ext = path.extname(filePath);
+        if (ext === '.js' || ext === '.jsx' || ext === '.ts' || ext === '.tsx') {
+          res.setHeader('Content-Type', 'application/javascript');
+        } else if (ext === '.css') {
+          res.setHeader('Content-Type', 'text/css');
+        }
+      }
+    }));
+    
+    // Handle SPA routes (non-API routes)
+    app.get("*", (req, res) => {
+      if (req.path.startsWith("/api/") || req.path.startsWith("/src/") || req.path.startsWith("/@")) {
+        res.status(404).json({ error: "Not found" });
+        return;
+      }
+      serveProductionHTML(req, res);
     });
   } else {
     log("Development mode or no build found - using Vite dev server");
