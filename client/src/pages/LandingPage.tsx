@@ -108,7 +108,7 @@ export default function LandingPage() {
   // Landing page always renders - authentication handled by app flow
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black relative overflow-hidden" style={{ backgroundColor: '#0f172a', minHeight: '100vh' }}>
       {/* Premium dark background matching logo's black elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Subtle orange glow that matches the chef hat's orange speech bubble */}
@@ -162,6 +162,11 @@ export default function LandingPage() {
 
       {/* Hero Section - Clean Apple Design */}
       <section id="hero" className="min-h-screen flex flex-col items-center justify-center text-center px-4 relative z-10 pt-20">
+        {/* Debug visibility indicator */}
+        <div style={{ position: 'fixed', top: '10px', left: '10px', background: 'red', color: 'white', padding: '5px', zIndex: 9999 }}>
+          LandingPage Rendered
+        </div>
+
         {/* Logo with Enhanced Glow */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
