@@ -120,8 +120,6 @@ app.use((req, res, next) => {
     await setupVite(app, server);
   }
 
-  // Note: Simple voice chat removed, using Google Live Audio endpoint
-
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
