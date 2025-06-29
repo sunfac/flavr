@@ -56,6 +56,16 @@ const renderApp = () => {
     const root = createRoot(rootElement);
     root.render(<App />);
     console.log("Flavr app rendered successfully");
+    
+    // Clear the initial loading screen once React app is mounted
+    setTimeout(() => {
+      const loader = document.getElementById('initial-loading');
+      if (loader) {
+        loader.style.opacity = '0';
+        loader.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => loader.remove(), 500);
+      }
+    }, 100);
   } catch (error) {
     console.error("Failed to render Flavr app:", error);
     rootElement.innerHTML = `
