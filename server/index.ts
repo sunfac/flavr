@@ -152,7 +152,7 @@ app.use((req, res, next) => {
         res.setHeader('Content-Type', 'text/html');
         res.send(html);
       } catch (error) {
-        log("Error serving production HTML:", error);
+        console.error("Error serving production HTML:", error);
         res.status(500).send("Application temporarily unavailable");
       }
     };
