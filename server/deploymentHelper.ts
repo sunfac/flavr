@@ -82,14 +82,57 @@ export function createMinimalBuild(): void {
   </head>
   <body>
     <div id="root">
-      <div style="padding: 20px; background: #1e293b; color: white; min-height: 100vh; font-family: sans-serif; text-align: center;">
-        <h1 style="margin-top: 50px;">Flavr</h1>
-        <p>Loading your AI-powered recipe assistant...</p>
-        <div style="margin-top: 20px;">
-          <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f97316; border-top: 4px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+      <!-- Fallback loading screen for production deployment -->
+      <div id="initial-loading" style="
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      ">
+        <div style="text-align: center; color: white;">
+          <div style="
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            border: 4px solid rgba(249, 115, 22, 0.3);
+            border-top: 4px solid #f97316;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          "></div>
+          <h1 style="font-size: 2rem; margin-bottom: 10px; color: #f97316;">Flavr</h1>
+          <p style="color: #94a3b8; font-size: 0.9rem;">Loading your culinary companion...</p>
         </div>
       </div>
     </div>
+
+    <script>
+      // Hide loading screen after 3 seconds maximum to prevent infinite loading
+      setTimeout(() => {
+        const loader = document.getElementById('initial-loading');
+        if (loader) {
+          loader.style.opacity = '0';
+          loader.style.transition = 'opacity 0.5s ease';
+          setTimeout(() => loader.remove(), 500);
+        }
+      }, 3000);
+      
+      // Also hide when React app loads
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+          const loader = document.getElementById('initial-loading');
+          if (loader) {
+            loader.style.opacity = '0';
+            loader.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => loader.remove(), 500);
+          }
+        }, 500);
+      });
+    </script>
+
     <script src="/refresh-suppress.js"></script>
     <script type="module" src="/src/main.tsx"></script>
     <style>
