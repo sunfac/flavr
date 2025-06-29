@@ -4,7 +4,7 @@ import fs from "fs";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { ensureDeploymentReady, createMinimalBuild } from "./deploymentHelper";
-import { setupVoiceChat } from "./voiceChat";
+// import { setupVoiceChat } from "./voiceChat";
 
 const app = express();
 app.use(express.json());
@@ -85,19 +85,15 @@ app.use((req, res, next) => {
   // Setup deployment configuration
   createMinimalBuild();
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    // Check for production build first in dist/public (standard Vite build)
-    const distPublicDir = path.resolve(import.meta.dirname, "..", "dist", "public");
-    const serverPublicDir = path.resolve(import.meta.dirname, "public");
+  // Check if we're in production mode and have a build
+  const isProduction = process.env.NODE_ENV === "production" || app.get("env") === "production";
+  const distPublicDir = path.resolve(import.meta.dirname, "..", "dist", "public");
+  const hasBuild = fs.existsSync(distPublicDir) && fs.existsSync(path.join(distPublicDir, "index.html"));
 
-    if (fs.existsSync(distPublicDir) && fs.existsSync(path.join(distPublicDir, "index.html"))) {
-      log("Using standard production build from dist/public");
-      app.use(express.static(distPublicDir, {
+  if (isProduction && hasBuild) {
+    log("Production mode detected with valid build - serving static files");
+    // Serve static files from production build
+    app.use(express.static(distPublicDir, {
         setHeaders: (res, filePath) => {
           // Set proper MIME types
           const ext = path.extname(filePath);
@@ -116,43 +112,28 @@ app.use((req, res, next) => {
           }
         }
       }));
-      app.use("*", (_req, res) => {
-        res.sendFile(path.resolve(distPublicDir, "index.html"));
-      });
-    } else if (fs.existsSync(serverPublicDir) && fs.existsSync(path.join(serverPublicDir, "index.html"))) {
-      log("Using fallback production build from server/public");
-      app.use(express.static(serverPublicDir, {
-        setHeaders: (res, filePath) => {
-          // Set proper MIME types
-          const ext = path.extname(filePath);
-          if (ext === '.js' || ext === '.mjs' || ext === '.jsx' || ext === '.tsx') {
-            res.setHeader('Content-Type', 'application/javascript');
-          } else if (ext === '.css') {
-            res.setHeader('Content-Type', 'text/css');
-          } else if (filePath.endsWith('manifest.json')) {
-            res.setHeader('Content-Type', 'application/manifest+json');
-          } else if (ext === '.json') {
-            res.setHeader('Content-Type', 'application/json');
-          } else if (filePath.endsWith('service-worker.js') || filePath.endsWith('.worker.js')) {
-            res.setHeader('Content-Type', 'application/javascript');
-          } else if (ext === '.html') {
-            res.setHeader('Content-Type', 'text/html');
-          }
-        }
-      }));
-      app.use("*", (_req, res) => {
-        res.sendFile(path.resolve(serverPublicDir, "index.html"));
-      });
-    } else {
-      log("No production build found, forcing development mode in production");
-      // Force development mode even in production when build is missing
-      process.env.NODE_ENV = "development";
-      app.set("env", "development");
-      await setupVite(app, server);
-    }
+    app.use("*", (_req, res) => {
+      res.sendFile(path.resolve(distPublicDir, "index.html"));
+    });
+  } else {
+    log("Development mode or no build found - using Vite dev server");
+    await setupVite(app, server);
   }
 
+  // Note: Simple voice chat removed, using Google Live Audio endpoint
 
+  // ALWAYS serve the app on port 5000
+  // this serves both the API and the client.
+  // It is the only port that is not firewalled.
+  const port = 5000;
+  server.listen({
+    port,
+    host: "0.0.0.0",
+    reusePort: true,
+  }, () => {
+    log(`serving on port ${port}`);
+  });
+})();
 
   // Note: Simple voice chat removed, using Google Live Audio endpoint
 
