@@ -13,6 +13,8 @@ interface ConversationData {
   occasion?: string;
   budget?: string;
   fridgePhoto?: string;
+  dishIdea?: string;
+  specificDish?: string;
 }
 
 interface ConversationResult {
@@ -47,7 +49,8 @@ ${JSON.stringify(currentData, null, 2)}
 
 Your task:
 1. Extract any new information from the user's message that helps define their recipe needs
-2. Determine if you have enough information to generate a recipe
+2. Pay special attention to specific dish names mentioned (like "paella", "carbonara", "risotto", etc.) and capture them in the "specificDish" field
+3. Determine if you have enough information to generate a recipe
 3. Provide an appropriate response to continue the conversation or generate the recipe
 
 Required information for recipe generation:
@@ -157,6 +160,15 @@ export async function generateRecipeFromConversation(data: ConversationData): Pr
 function buildConversationalPrompt(data: ConversationData): string {
   let prompt = "Based on our conversation, create a recipe with these requirements:\n\n";
   
+  // Prioritize specific dish requests
+  if (data.specificDish) {
+    prompt += `SPECIFIC DISH REQUESTED: ${data.specificDish}\n`;
+    prompt += `IMPORTANT: Create a recipe specifically for "${data.specificDish}". This is the exact dish the user wants.\n\n`;
+  }
+  if (data.dishIdea) {
+    prompt += `Dish idea: ${data.dishIdea}\n`;
+  }
+  
   if (data.intent) prompt += `Context: ${data.intent}\n`;
   if (data.cuisine) prompt += `Cuisine: ${data.cuisine}\n`;
   if (data.portions) prompt += `Servings: ${data.portions}\n`;
@@ -184,7 +196,11 @@ function buildConversationalPrompt(data: ConversationData): string {
   }
   if (data.budget) prompt += `Budget consideration: ${data.budget}\n`;
 
-  prompt += "\nCreate a complete recipe that matches these conversational preferences.";
+  if (data.specificDish) {
+    prompt += `\nCreate a complete, authentic recipe for "${data.specificDish}" that matches these conversational preferences.`;
+  } else {
+    prompt += "\nCreate a complete recipe that matches these conversational preferences.";
+  }
   
   return prompt;
 }

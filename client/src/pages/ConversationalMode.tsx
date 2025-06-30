@@ -24,6 +24,7 @@ interface Message {
   options?: string[];
   field?: string;
   answered?: boolean;
+  recipePreview?: any;
 }
 
 interface ConversationData {
@@ -299,10 +300,18 @@ export default function ConversationalMode() {
         setConversationComplete(true);
         setShowRecipeCard(true);
         
-        const completionMessage: Message = {
+        const recipePreviewMessage: Message = {
           id: (Date.now() + 1).toString(),
           type: 'assistant',
-          content: `Perfect! I've created "${result.recipe.title}" based on your preferences. Click the recipe card to see the full details and start cooking!`,
+          content: `Perfect! I've created "${result.recipe.title}" based on your preferences.`,
+          timestamp: new Date(),
+          recipePreview: result.recipe
+        };
+
+        const actionsMessage: Message = {
+          id: (Date.now() + 2).toString(),
+          type: 'assistant',
+          content: "Click the recipe above to view full details, or choose what you'd like to do next:",
           timestamp: new Date(),
           suggestions: [
             "Save to cookbook",
@@ -311,7 +320,8 @@ export default function ConversationalMode() {
             "Start cooking mode"
           ]
         };
-        setMessages(prev => [...prev, completionMessage]);
+        
+        setMessages(prev => [...prev, recipePreviewMessage, actionsMessage]);
       }
     } catch (error) {
       console.error("Recipe generation error:", error);
@@ -596,6 +606,33 @@ export default function ConversationalMode() {
                           <p className="text-sm leading-relaxed break-all whitespace-pre-wrap">
                             {message.content}
                           </p>
+
+                          {/* Recipe Preview */}
+                          {message.recipePreview && (
+                            <div className="mt-4 p-4 bg-white/10 rounded-lg border border-white/20 cursor-pointer hover:bg-white/15 transition-colors"
+                                 onClick={() => {
+                                   setGeneratedRecipe(message.recipePreview);
+                                   setShowRecipeCard(true);
+                                 }}>
+                              <h3 className="text-lg font-semibold text-white mb-2">{message.recipePreview.title}</h3>
+                              <p className="text-sm text-gray-300 mb-3">{message.recipePreview.description}</p>
+                              <div className="flex flex-wrap gap-2 mb-3">
+                                <span className="px-2 py-1 bg-purple-500/30 text-purple-200 text-xs rounded-full">
+                                  {message.recipePreview.cuisine}
+                                </span>
+                                <span className="px-2 py-1 bg-orange-500/30 text-orange-200 text-xs rounded-full">
+                                  {message.recipePreview.difficulty}
+                                </span>
+                                <span className="px-2 py-1 bg-blue-500/30 text-blue-200 text-xs rounded-full">
+                                  {message.recipePreview.cookTime} min
+                                </span>
+                                <span className="px-2 py-1 bg-green-500/30 text-green-200 text-xs rounded-full">
+                                  {message.recipePreview.servings} servings
+                                </span>
+                              </div>
+                              <p className="text-xs text-gray-400">Click to view full recipe</p>
+                            </div>
+                          )}
                           
                           {/* Radio Button Questions */}
                           {message.type === 'question' && message.questionType === 'radio' && !message.answered && message.options && (
