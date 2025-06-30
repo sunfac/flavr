@@ -1986,6 +1986,85 @@ Be conversational, helpful, and maintain context from our conversation history. 
     }
   });
 
+  // Digital Cookbook API endpoints
+  app.get("/api/recipes", async (req, res) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const recipes = await storage.getUserRecipeHistory(req.session.userId, 100);
+      res.json(recipes);
+    } catch (error) {
+      console.error("Failed to fetch user recipes:", error);
+      res.status(500).json({ message: "Failed to fetch recipes" });
+    }
+  });
+
+  app.delete("/api/recipes/:id", async (req, res) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const recipeId = parseInt(req.params.id);
+      if (isNaN(recipeId)) {
+        return res.status(400).json({ message: "Invalid recipe ID" });
+      }
+
+      await storage.deleteRecipe(recipeId);
+      res.json({ message: "Recipe deleted successfully" });
+    } catch (error) {
+      console.error("Failed to delete recipe:", error);
+      res.status(500).json({ message: "Failed to delete recipe" });
+    }
+  });
+
+  // Save recipe to cookbook endpoint
+  app.post("/api/save-recipe", async (req, res) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const recipeData = req.body;
+      
+      const savedRecipe = await storage.createRecipe({
+        userId: req.session.userId,
+        title: recipeData.title,
+        description: recipeData.description,
+        cookTime: recipeData.cookTime || 30,
+        servings: recipeData.servings || 4,
+        difficulty: recipeData.difficulty || 'Medium',
+        cuisine: recipeData.cuisine || 'International',
+        mood: recipeData.mood,
+        mode: recipeData.mode || 'conversational',
+        ingredients: recipeData.ingredients || [],
+        instructions: recipeData.instructions || [],
+        tips: recipeData.tips,
+        imageUrl: recipeData.imageUrl,
+        shoppingList: recipeData.shoppingList,
+        originalPrompt: recipeData.originalPrompt,
+        ambition: recipeData.ambition,
+        dietary: recipeData.dietary,
+        equipment: recipeData.equipment,
+        budget: recipeData.budget,
+        cookingTime: recipeData.cookingTime,
+        quizData: recipeData.quizData,
+        recipeText: recipeData.recipeText,
+        isShared: false
+      });
+
+      res.json({ 
+        message: "Recipe saved to cookbook",
+        recipe: savedRecipe
+      });
+    } catch (error) {
+      console.error("Failed to save recipe:", error);
+      res.status(500).json({ message: "Failed to save recipe" });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Setup Google Live Audio WebSocket

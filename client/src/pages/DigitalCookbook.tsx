@@ -374,7 +374,10 @@ export default function DigitalCookbook() {
               onClick={(e) => e.stopPropagation()}
             >
               <EnhancedRecipeCard 
-                recipe={selectedRecipe}
+                recipe={{
+                  ...selectedRecipe,
+                  id: selectedRecipe.id.toString()
+                }}
                 onClose={() => setShowRecipeModal(false)}
               />
             </motion.div>

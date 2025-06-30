@@ -305,8 +305,8 @@ export default function ConversationalMode() {
           content: `Perfect! I've created "${result.recipe.title}" based on your preferences. Click the recipe card to see the full details and start cooking!`,
           timestamp: new Date(),
           suggestions: [
-            "Save to my cookbook",
-            "Modify the recipe",
+            "Save to cookbook",
+            "Modify the recipe", 
             "Generate shopping list",
             "Start cooking mode"
           ]

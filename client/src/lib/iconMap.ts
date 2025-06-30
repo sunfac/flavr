@@ -28,7 +28,7 @@ import {
   Leaf, Apple, Fish, Beef, Blend, Waves,
   
   // Additional Icons
-  BookmarkPlus, Signal, Cookie, Shuffle,
+  BookmarkPlus, Signal, Cookie, Shuffle, Book, BookOpen,
   
   // Media & Input
   Mic, Camera, Image,
@@ -137,6 +137,9 @@ export const iconMap = {
   signal: Signal,
   cookie: Cookie,
   shuffle: Shuffle,
+  book: Book,
+  bookOpen: BookOpen,
+  chef: ChefHat,
   
   // Media & Input
   mic: Mic,
