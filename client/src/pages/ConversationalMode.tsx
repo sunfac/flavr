@@ -40,6 +40,8 @@ interface ConversationData {
   occasion?: string;
   budget?: string;
   fridgePhoto?: string;
+  dishIdea?: string;
+  specificDish?: string;
 }
 
 interface QuestionFlow {
@@ -566,9 +568,9 @@ export default function ConversationalMode() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="max-w-4xl mx-auto">
           {/* Chat Interface */}
-          <div className="lg:col-span-2">
+          <div>
             <Card className="bg-white/5 border-white/10 backdrop-blur-sm min-h-[600px] flex flex-col">
               <CardHeader className="pb-4">
                 <CardTitle className="text-white flex items-center">
@@ -777,94 +779,42 @@ export default function ConversationalMode() {
             </Card>
           </div>
 
-          {/* Recipe Card & Voice Chat */}
-          <div className="space-y-6">
-            {/* Recipe Card */}
-            {showRecipeCard && generatedRecipe && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="h-fit"
-              >
+          {/* Voice Chat Modal */}
+          {showVoiceChat && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-6"
+            >
+              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-white text-sm flex items-center">
+                    <iconMap.mic className="w-4 h-4 mr-2 text-orange-400" />
+                    Voice Chat
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <GoogleLiveAudioChat />
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Recipe Card Modal */}
+          {showRecipeCard && generatedRecipe && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setShowRecipeCard(false)}
+            >
+              <div className="max-w-4xl max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
                 <EnhancedRecipeCard 
                   recipe={generatedRecipe}
                 />
-              </motion.div>
-            )}
-
-            {/* Voice Chat */}
-            {showVoiceChat && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="h-fit"
-              >
-                <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
-                  <CardHeader>
-                    <CardTitle className="text-white text-sm flex items-center">
-                      <iconMap.mic className="w-4 h-4 mr-2 text-orange-400" />
-                      Voice Chat
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <GoogleLiveAudioChat />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-
-            {/* Conversation Context Display */}
-            {Object.keys(conversationData).length > 0 && (
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-white text-sm">Recipe Context</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {conversationData.cuisine && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-400 text-xs">Cuisine:</span>
-                      <span className="text-white text-xs">{conversationData.cuisine}</span>
-                    </div>
-                  )}
-                  {conversationData.portions && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-400 text-xs">Portions:</span>
-                      <span className="text-white text-xs">{conversationData.portions}</span>
-                    </div>
-                  )}
-                  {conversationData.timeAvailable && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-400 text-xs">Time:</span>
-                      <span className="text-white text-xs">{conversationData.timeAvailable}</span>
-                    </div>
-                  )}
-                  {conversationData.mood && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-400 text-xs">Mood:</span>
-                      <span className="text-white text-xs">{conversationData.mood}</span>
-                    </div>
-                  )}
-                  {conversationData.ingredients && (Array.isArray(conversationData.ingredients) ? conversationData.ingredients.length > 0 : conversationData.ingredients.trim().length > 0) && (
-                    <div>
-                      <span className="text-gray-400 text-xs block mb-1">Ingredients:</span>
-                      <div className="flex flex-wrap gap-1">
-                        {(Array.isArray(conversationData.ingredients) ? conversationData.ingredients : [conversationData.ingredients]).slice(0, 4).map((ingredient: string, index: number) => (
-                          <Badge key={index} variant="secondary" className="text-xs bg-orange-500/20 text-orange-300">
-                            {ingredient}
-                          </Badge>
-                        ))}
-                        {Array.isArray(conversationData.ingredients) && conversationData.ingredients.length > 4 && (
-                          <Badge variant="secondary" className="text-xs bg-gray-500/20 text-gray-300">
-                            +{conversationData.ingredients.length - 4} more
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </div>
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
     </div>
