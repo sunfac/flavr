@@ -11,13 +11,19 @@ import { apiRequest } from "@/lib/queryClient";
 import EnhancedRecipeCard from "@/components/recipe/EnhancedRecipeCard";
 import { useRecipeStore } from "@/stores/recipeStore";
 import { GoogleLiveAudioChat } from "@/components/GoogleLiveAudioChat";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 interface Message {
   id: string;
-  type: 'user' | 'assistant' | 'system';
+  type: 'user' | 'assistant' | 'system' | 'question';
   content: string;
   timestamp: Date;
   suggestions?: string[];
+  questionType?: 'radio' | 'text' | 'multi-select';
+  options?: string[];
+  field?: string;
+  answered?: boolean;
 }
 
 interface ConversationData {
@@ -35,6 +41,15 @@ interface ConversationData {
   fridgePhoto?: string;
 }
 
+interface QuestionFlow {
+  id: string;
+  question: string;
+  type: 'radio' | 'text' | 'multi-select';
+  options?: string[];
+  field: string;
+  required: boolean;
+}
+
 export default function ConversationalMode() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
@@ -46,8 +61,122 @@ export default function ConversationalMode() {
   const [showRecipeCard, setShowRecipeCard] = useState(false);
   const [conversationComplete, setConversationComplete] = useState(false);
   const [showVoiceChat, setShowVoiceChat] = useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [isStructuredFlow, setIsStructuredFlow] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recipeStore = useRecipeStore();
+
+  // Structured question flow based on user intent
+  const questionFlows: Record<string, QuestionFlow[]> = {
+    shopping: [
+      {
+        id: 'cuisine',
+        question: 'What type of cuisine are you in the mood for?',
+        type: 'radio',
+        options: ['Italian', 'Asian', 'Mexican', 'Mediterranean', 'American', 'Indian', 'French', 'Surprise me!'],
+        field: 'cuisine',
+        required: true
+      },
+      {
+        id: 'portions',
+        question: 'How many people are you cooking for?',
+        type: 'radio',
+        options: ['Just me (1)', 'Couple (2)', 'Small family (3-4)', 'Large group (5+)'],
+        field: 'portions',
+        required: true
+      },
+      {
+        id: 'time',
+        question: 'How much time do you have for cooking?',
+        type: 'radio',
+        options: ['Quick (15-20 min)', 'Moderate (30-45 min)', 'Relaxed (1+ hour)', 'All day project'],
+        field: 'timeAvailable',
+        required: true
+      },
+      {
+        id: 'mood',
+        question: 'What kind of meal are you envisioning?',
+        type: 'radio',
+        options: ['Comfort food', 'Healthy & fresh', 'Indulgent treat', 'Something new', 'Classic favorite'],
+        field: 'mood',
+        required: true
+      },
+      {
+        id: 'budget',
+        question: 'What\'s your budget preference?',
+        type: 'radio',
+        options: ['Budget-friendly', 'Moderate', 'Premium ingredients', 'No preference'],
+        field: 'budget',
+        required: false
+      }
+    ],
+    ingredients: [
+      {
+        id: 'ingredients',
+        question: 'What ingredients do you have available?',
+        type: 'text',
+        field: 'ingredients',
+        required: true
+      },
+      {
+        id: 'cuisine',
+        question: 'Any cuisine preference for these ingredients?',
+        type: 'radio',
+        options: ['Italian', 'Asian', 'Mexican', 'Mediterranean', 'American', 'Indian', 'French', 'Whatever works best'],
+        field: 'cuisine',
+        required: false
+      },
+      {
+        id: 'portions',
+        question: 'How many servings do you need?',
+        type: 'radio',
+        options: ['1 serving', '2 servings', '3-4 servings', '5+ servings'],
+        field: 'portions',
+        required: true
+      },
+      {
+        id: 'time',
+        question: 'How much cooking time do you have?',
+        type: 'radio',
+        options: ['Quick (15-20 min)', 'Moderate (30-45 min)', 'Relaxed (1+ hour)'],
+        field: 'timeAvailable',
+        required: true
+      }
+    ],
+    idea: [
+      {
+        id: 'dish',
+        question: 'What dish do you have in mind?',
+        type: 'text',
+        field: 'dishIdea',
+        required: true
+      },
+      {
+        id: 'portions',
+        question: 'How many people will this serve?',
+        type: 'radio',
+        options: ['Just me (1)', 'Couple (2)', 'Small family (3-4)', 'Large group (5+)'],
+        field: 'portions',
+        required: true
+      },
+      {
+        id: 'skill',
+        question: 'What\'s your cooking skill level?',
+        type: 'radio',
+        options: ['Beginner', 'Intermediate', 'Advanced', 'Professional'],
+        field: 'skillLevel',
+        required: true
+      },
+      {
+        id: 'occasion',
+        question: 'What\'s the occasion?',
+        type: 'radio',
+        options: ['Everyday meal', 'Special dinner', 'Party/gathering', 'Romantic date', 'Family celebration'],
+        field: 'occasion',
+        required: false
+      }
+    ]
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -56,6 +185,145 @@ export default function ConversationalMode() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Handle radio button answer selection
+  const handleRadioAnswer = (value: string, field: string) => {
+    const updatedData = { ...conversationData, [field]: value };
+    setConversationData(updatedData);
+
+    // Mark current question as answered
+    setMessages(prev => prev.map(msg => 
+      msg.type === 'question' && !msg.answered 
+        ? { ...msg, answered: true }
+        : msg
+    ));
+
+    // Add user response message
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: value,
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, userMessage]);
+
+    // Move to next question or generate recipe
+    proceedToNextQuestion(updatedData);
+  };
+
+  // Handle text input answer
+  const handleTextAnswer = (value: string, field: string) => {
+    const updatedData = { ...conversationData, [field]: value };
+    setConversationData(updatedData);
+
+    // Mark current question as answered
+    setMessages(prev => prev.map(msg => 
+      msg.type === 'question' && !msg.answered 
+        ? { ...msg, answered: true }
+        : msg
+    ));
+
+    // Add user response message
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: value,
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, userMessage]);
+
+    // Move to next question or generate recipe
+    proceedToNextQuestion(updatedData);
+  };
+
+  // Progress through structured question flow
+  const proceedToNextQuestion = (data: ConversationData) => {
+    const intent = data.intent;
+    if (!intent || !questionFlows[intent]) return;
+
+    const questions = questionFlows[intent];
+    const nextIndex = currentQuestionIndex + 1;
+
+    if (nextIndex < questions.length) {
+      // Ask next question
+      setCurrentQuestionIndex(nextIndex);
+      askStructuredQuestion(questions[nextIndex]);
+    } else {
+      // All questions answered, generate recipe
+      generateRecipeFromData(data);
+    }
+  };
+
+  // Ask a structured question with radio buttons or text input
+  const askStructuredQuestion = (question: QuestionFlow) => {
+    const questionMessage: Message = {
+      id: Date.now().toString(),
+      type: 'question',
+      content: question.question,
+      timestamp: new Date(),
+      questionType: question.type,
+      options: question.options,
+      field: question.field,
+      answered: false
+    };
+    setMessages(prev => [...prev, questionMessage]);
+  };
+
+  // Start structured question flow based on intent
+  const startStructuredFlow = (intent: string) => {
+    setIsStructuredFlow(true);
+    setCurrentQuestionIndex(0);
+    const updatedData = { ...conversationData, intent: intent as any };
+    setConversationData(updatedData);
+
+    if (questionFlows[intent] && questionFlows[intent].length > 0) {
+      askStructuredQuestion(questionFlows[intent][0]);
+    }
+  };
+
+  // Generate recipe from collected data
+  const generateRecipeFromData = async (data: ConversationData) => {
+    setIsLoading(true);
+    try {
+      const response = await apiRequest("POST", "/api/conversational-recipe", {
+        message: "Generate recipe with collected preferences",
+        conversationHistory: messages,
+        currentData: data,
+        generateRecipe: true
+      });
+
+      const result = await response.json();
+      
+      if (result.recipe) {
+        setGeneratedRecipe(result.recipe);
+        setConversationComplete(true);
+        setShowRecipeCard(true);
+        
+        const completionMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          type: 'assistant',
+          content: `Perfect! I've created "${result.recipe.title}" based on your preferences. Click the recipe card to see the full details and start cooking!`,
+          timestamp: new Date(),
+          suggestions: [
+            "Save to my cookbook",
+            "Modify the recipe",
+            "Generate shopping list",
+            "Start cooking mode"
+          ]
+        };
+        setMessages(prev => [...prev, completionMessage]);
+      }
+    } catch (error) {
+      console.error("Recipe generation error:", error);
+      toast({
+        title: "Recipe Generation Failed",
+        description: "Let me try creating your recipe again...",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     // Initialize conversation with welcome message
@@ -66,7 +334,7 @@ export default function ConversationalMode() {
       timestamp: new Date(),
       suggestions: [
         "I need recipes for shopping",
-        "I have ingredients to use up",
+        "I have ingredients to use up", 
         "I have a specific dish in mind",
         "Just looking for inspiration"
       ]
@@ -75,7 +343,20 @@ export default function ConversationalMode() {
   }, []);
 
   const handleSuggestionClick = (suggestion: string) => {
-    handleSendMessage(suggestion);
+    // Check if this is an initial intent selection
+    if (suggestion === "I need recipes for shopping") {
+      startStructuredFlow('shopping');
+    } else if (suggestion === "I have ingredients to use up") {
+      startStructuredFlow('ingredients');
+    } else if (suggestion === "I have a specific dish in mind") {
+      startStructuredFlow('idea');
+    } else if (suggestion === "Just looking for inspiration") {
+      // For inspiration, use free-form conversation
+      handleSendMessage(suggestion);
+    } else {
+      // Handle other suggestions normally
+      handleSendMessage(suggestion);
+    }
   };
 
   const handleSendMessage = async (messageText?: string) => {
@@ -256,6 +537,8 @@ export default function ConversationalMode() {
                           className={`rounded-2xl p-4 ${
                             message.type === 'user'
                               ? 'bg-orange-500 text-white max-w-[80%]'
+                              : message.type === 'question'
+                              ? 'bg-purple-500/20 text-white border border-purple-400/30 max-w-[90%]'
                               : 'bg-white/10 text-white border border-white/20 max-w-[90%]'
                           }`}
                         >
@@ -263,7 +546,67 @@ export default function ConversationalMode() {
                             {message.content}
                           </p>
                           
-                          {message.suggestions && message.suggestions.length > 0 && (
+                          {/* Radio Button Questions */}
+                          {message.type === 'question' && message.questionType === 'radio' && !message.answered && message.options && (
+                            <div className="mt-4">
+                              <RadioGroup onValueChange={(value) => handleRadioAnswer(value, message.field!)}>
+                                <div className="grid grid-cols-1 gap-2">
+                                  {message.options.map((option, index) => (
+                                    <div key={index} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 transition-colors">
+                                      <RadioGroupItem value={option} id={`${message.id}-${index}`} className="text-purple-400" />
+                                      <Label 
+                                        htmlFor={`${message.id}-${index}`} 
+                                        className="text-sm text-white flex-1 cursor-pointer"
+                                      >
+                                        {option}
+                                      </Label>
+                                    </div>
+                                  ))}
+                                </div>
+                              </RadioGroup>
+                              <p className="text-xs text-gray-400 mt-2">
+                                Select an option or type your own answer below
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Text Input Questions */}
+                          {message.type === 'question' && message.questionType === 'text' && !message.answered && (
+                            <div className="mt-4">
+                              <div className="flex space-x-2">
+                                <Input
+                                  placeholder="Type your answer..."
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 flex-1"
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                      const value = (e.target as HTMLInputElement).value;
+                                      if (value.trim()) {
+                                        handleTextAnswer(value, message.field!);
+                                        (e.target as HTMLInputElement).value = '';
+                                      }
+                                    }
+                                  }}
+                                />
+                                <Button
+                                  size="sm"
+                                  onClick={(e) => {
+                                    const input = e.currentTarget.parentElement?.querySelector('input') as HTMLInputElement;
+                                    const value = input?.value;
+                                    if (value?.trim()) {
+                                      handleTextAnswer(value, message.field!);
+                                      input.value = '';
+                                    }
+                                  }}
+                                  className="bg-purple-500 hover:bg-purple-600 text-white"
+                                >
+                                  <iconMap.send className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Regular Suggestion Buttons */}
+                          {message.suggestions && message.suggestions.length > 0 && message.type !== 'question' && (
                             <div className="mt-3 space-y-2">
                               {message.suggestions.map((suggestion, index) => (
                                 <Button
