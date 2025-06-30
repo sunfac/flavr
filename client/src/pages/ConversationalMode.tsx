@@ -149,9 +149,9 @@ export default function ConversationalMode() {
     idea: [
       {
         id: 'dish',
-        question: 'What dish do you have in mind?',
+        question: 'What specific dish would you like to make? (e.g., "paella", "chicken tikka masala", "beef wellington")',
         type: 'text',
-        field: 'dishIdea',
+        field: 'specificDish',
         required: true
       },
       {

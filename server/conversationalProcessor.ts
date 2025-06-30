@@ -37,7 +37,13 @@ export async function processConversationalInput(
     .map(msg => `${msg.type}: ${msg.content}`)
     .join('\n');
 
-  const extractionPrompt = `You are a cooking assistant having a conversation with a user to gather recipe requirements.
+  // Analyze what essential information is missing
+  const missingEssentials = [];
+  if (!currentData.intent && !currentData.specificDish && !currentData.dishIdea) missingEssentials.push('intent/dish');
+  if (!currentData.portions) missingEssentials.push('portions');
+  if (!currentData.timeAvailable && !currentData.skillLevel) missingEssentials.push('time/complexity');
+
+  const extractionPrompt = `You are a cooking assistant focused on efficiently gathering recipe requirements.
 
 Current conversation:
 ${conversationContext}
@@ -47,47 +53,41 @@ Latest user message: "${message}"
 Current data collected:
 ${JSON.stringify(currentData, null, 2)}
 
-Your task:
-1. Extract any new information from the user's message that helps define their recipe needs
-2. Pay special attention to specific dish names mentioned (like "paella", "carbonara", "risotto", etc.) and capture them in the "specificDish" field
-3. Determine if you have enough information to generate a recipe
-3. Provide an appropriate response to continue the conversation or generate the recipe
+Missing essentials: ${missingEssentials.join(', ')}
 
-Required information for recipe generation:
-- Intent (shopping/ingredients/idea/general)
-- Basic dish type or cuisine preference  
-- Number of portions
-- Available time or complexity preference
-- Mood/style of dish
-
-Extract information about:
-- intent: shopping, ingredients, idea, or general inspiration
-- cuisine: any cuisine preferences mentioned
-- portions: number of servings needed
-- equipment: cooking equipment available/preferred
-- timeAvailable: how much time they have
-- mood: the feeling/style of dish (e.g., "vibrant summer salad", "comfort food")
-- ingredients: specific ingredients they have or want to use
-- dietaryRestrictions: any dietary needs
+EXTRACTION RULES:
+- specificDish: Exact dish names like "paella", "carbonara", "beef wellington"
+- dishIdea: General dish concepts like "pasta", "salad", "stir-fry"  
+- intent: shopping (need shopping list), ingredients (use what I have), idea (specific dish), general (inspiration)
+- portions: Number of people or servings (convert text like "couple" to numbers)
+- timeAvailable: Time constraints like "30 minutes", "quick meal", "no rush"
 - skillLevel: beginner, intermediate, advanced
-- occasion: what this is for (dinner party, quick lunch, etc.)
-- budget: any budget considerations
+- cuisine: Specific cuisine preferences
+- ingredients: Available ingredients or must-use items
+- dietaryRestrictions: Allergies, vegetarian, etc.
 
-Respond with JSON:
+RESPONSE STRATEGY:
+- Ask ONLY ONE focused question per response
+- If missing dish/intent: Ask "What specific dish would you like to make?" with examples
+- If missing portions: Ask "How many people are you cooking for?" with number options
+- If missing time: Ask "How much time do you have for cooking?" with time ranges
+- If have all essentials: Generate recipe immediately
+- Keep responses under 20 words when asking questions
+- Provide 3-4 specific, actionable suggestions
+
+DECISION LOGIC:
+1. No dish identified → Ask for specific dish name
+2. Have dish but no portions → Ask for serving count  
+3. Have dish + portions but no time → Ask for time available
+4. Have dish + portions + time → Generate recipe
+
+JSON Response:
 {
   "shouldGenerateRecipe": boolean,
   "data": ConversationData,
-  "response": "Your conversational response",
-  "suggestions": ["suggestion1", "suggestion2", "suggestion3"]
-}
-
-Guidelines:
-- Be natural and conversational
-- Ask follow-up questions to gather missing essential information
-- Don't overwhelm with too many questions at once
-- Focus on understanding their cooking context and preferences
-- When you have enough core information (intent, basic dish idea, portions, time/complexity), suggest generating the recipe
-- Make suggestions relevant to their current context`;
+  "response": "Direct, focused question targeting the most critical missing info",
+  "suggestions": ["Specific actionable options"]
+}`;
 
   try {
     const response = await openai.chat.completions.create({
