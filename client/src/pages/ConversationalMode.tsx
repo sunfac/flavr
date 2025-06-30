@@ -342,7 +342,7 @@ export default function ConversationalMode() {
     setMessages([welcomeMessage]);
   }, []);
 
-  const handleSuggestionClick = (suggestion: string) => {
+  const handleSuggestionClick = async (suggestion: string) => {
     // Check if this is an initial intent selection
     if (suggestion === "I need recipes for shopping") {
       startStructuredFlow('shopping');
@@ -353,9 +353,60 @@ export default function ConversationalMode() {
     } else if (suggestion === "Just looking for inspiration") {
       // For inspiration, use free-form conversation
       handleSendMessage(suggestion);
+    } else if (suggestion === "Save to cookbook") {
+      // Save current recipe to cookbook
+      await saveRecipeToCookbook();
     } else {
       // Handle other suggestions normally
       handleSendMessage(suggestion);
+    }
+  };
+
+  // Save recipe to cookbook functionality
+  const saveRecipeToCookbook = async () => {
+    if (!generatedRecipe) return;
+    
+    try {
+      const response = await apiRequest("POST", "/api/save-recipe", {
+        title: generatedRecipe.title,
+        description: generatedRecipe.description,
+        cookTime: generatedRecipe.cookTime,
+        servings: generatedRecipe.servings,
+        difficulty: generatedRecipe.difficulty,
+        cuisine: generatedRecipe.cuisine,
+        ingredients: generatedRecipe.ingredients,
+        instructions: generatedRecipe.instructions,
+        tips: generatedRecipe.tips,
+        mode: 'conversational',
+        quizData: conversationData
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Recipe Saved!",
+          description: "Recipe has been added to your digital cookbook"
+        });
+        
+        // Add success message to chat
+        const saveMessage: Message = {
+          id: Date.now().toString(),
+          type: 'assistant',
+          content: "Great! I've saved this recipe to your digital cookbook. You can find it anytime by visiting your cookbook.",
+          timestamp: new Date(),
+          suggestions: [
+            "View my cookbook",
+            "Create another recipe",
+            "Modify this recipe"
+          ]
+        };
+        setMessages(prev => [...prev, saveMessage]);
+      }
+    } catch (error) {
+      toast({
+        title: "Save Failed",
+        description: "Could not save recipe. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 

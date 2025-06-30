@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Refrigerator, ChefHat, Clock, Calendar, Crown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { iconMap } from "@/lib/iconMap";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
 import GlobalNavigation from "@/components/GlobalNavigation";
