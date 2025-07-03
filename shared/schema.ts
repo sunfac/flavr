@@ -173,6 +173,23 @@ export const recipeGenerationLogs = pgTable("recipe_generation_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// User interaction logs for analytics and debugging
+export const interactionLogs = pgTable("interaction_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id), // FK to users table
+  pseudoUserId: text("pseudo_user_id"), // For anonymous users
+  sessionId: text("session_id"), // Browser session identifier
+  interactionType: text("interaction_type").notNull(), // page_view, button_click, form_submit, recipe_generated, etc.
+  page: text("page"), // current page/route
+  component: text("component"), // specific component that triggered the interaction
+  action: text("action"), // specific action taken
+  data: jsonb("data").$type<Record<string, any>>().notNull(), // structured interaction data
+  userAgent: text("user_agent"),
+  ipAddress: text("ip_address"),
+  browserFingerprint: text("browser_fingerprint"),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -207,6 +224,11 @@ export const insertRecipeGenerationLogSchema = createInsertSchema(recipeGenerati
   createdAt: true,
 });
 
+export const insertInteractionLogSchema = createInsertSchema(interactionLogs).omit({
+  id: true,
+  timestamp: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertPseudoUser = z.infer<typeof insertPseudoUserSchema>;
@@ -219,3 +241,5 @@ export type InsertDeveloperLog = z.infer<typeof insertDeveloperLogSchema>;
 export type DeveloperLog = typeof developerLogs.$inferSelect;
 export type InsertRecipeGenerationLog = z.infer<typeof insertRecipeGenerationLogSchema>;
 export type RecipeGenerationLog = typeof recipeGenerationLogs.$inferSelect;
+export type InsertInteractionLog = z.infer<typeof insertInteractionLogSchema>;
+export type InteractionLog = typeof interactionLogs.$inferSelect;

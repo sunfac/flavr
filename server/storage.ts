@@ -1,4 +1,4 @@
-import { users, recipes, chatMessages, developerLogs, pseudoUsers, type User, type InsertUser, type Recipe, type InsertRecipe, type ChatMessage, type InsertChatMessage, type DeveloperLog, type InsertDeveloperLog, type PseudoUser, type InsertPseudoUser, recipeGenerationLogs, type RecipeGenerationLog, type InsertRecipeGenerationLog } from "@shared/schema";
+import { users, recipes, chatMessages, developerLogs, pseudoUsers, interactionLogs, type User, type InsertUser, type Recipe, type InsertRecipe, type ChatMessage, type InsertChatMessage, type DeveloperLog, type InsertDeveloperLog, type PseudoUser, type InsertPseudoUser, recipeGenerationLogs, type RecipeGenerationLog, type InsertRecipeGenerationLog, type InteractionLog, type InsertInteractionLog } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -47,6 +47,13 @@ export interface IStorage {
   // Enhanced recipe generation logging for analytics
   createRecipeGenerationLog(log: InsertRecipeGenerationLog): Promise<RecipeGenerationLog>;
   getRecipeGenerationLogs(limit?: number): Promise<RecipeGenerationLog[]>;
+  
+  // User interaction logging for analytics and debugging
+  createInteractionLog(log: InsertInteractionLog): Promise<InteractionLog>;
+  getInteractionLogs(limit?: number): Promise<InteractionLog[]>;
+  getInteractionLogsByUser(userId: number, limit?: number): Promise<InteractionLog[]>;
+  getInteractionLogsBySession(sessionId: string, limit?: number): Promise<InteractionLog[]>;
+  
   getAllRecipes(): Promise<Recipe[]>;
   deleteRecipe(id: number): Promise<void>;
 }
@@ -242,6 +249,31 @@ export class DatabaseStorage implements IStorage {
   async getRecipeGenerationLogs(limit: number = 50): Promise<RecipeGenerationLog[]> {
     return await db.select().from(recipeGenerationLogs)
       .orderBy(desc(recipeGenerationLogs.createdAt))
+      .limit(limit);
+  }
+
+  async createInteractionLog(insertLog: InsertInteractionLog): Promise<InteractionLog> {
+    const [log] = await db.insert(interactionLogs).values(insertLog).returning();
+    return log;
+  }
+
+  async getInteractionLogs(limit: number = 100): Promise<InteractionLog[]> {
+    return await db.select().from(interactionLogs)
+      .orderBy(desc(interactionLogs.timestamp))
+      .limit(limit);
+  }
+
+  async getInteractionLogsByUser(userId: number, limit: number = 100): Promise<InteractionLog[]> {
+    return await db.select().from(interactionLogs)
+      .where(eq(interactionLogs.userId, userId))
+      .orderBy(desc(interactionLogs.timestamp))
+      .limit(limit);
+  }
+
+  async getInteractionLogsBySession(sessionId: string, limit: number = 100): Promise<InteractionLog[]> {
+    return await db.select().from(interactionLogs)
+      .where(eq(interactionLogs.sessionId, sessionId))
+      .orderBy(desc(interactionLogs.timestamp))
       .limit(limit);
   }
 

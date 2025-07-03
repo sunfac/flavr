@@ -262,31 +262,51 @@ Make sure all fields are properly filled out with practical, actionable content.
 // User interaction logging for B2B data collection
 export async function logUserInteractionData(userId: string, interactionData: any): Promise<void> {
   try {
+    // Import storage for database operations
+    const { storage } = await import('./storage');
+    
+    // Determine if this is a numeric userId or pseudoUserId
+    const isNumericUserId = !isNaN(Number(userId));
+    
     // Log structured user interaction data for B2B insights
-    const logEntry = {
-      userId,
-      timestamp: new Date(),
+    const interactionLogData = {
+      userId: isNumericUserId ? Number(userId) : null,
+      pseudoUserId: !isNumericUserId ? userId : null,
+      sessionId: interactionData.sessionId || `conv_${Date.now()}`,
       interactionType: 'conversational_recipe',
-      data: interactionData,
-      // B2B valuable data points
-      customerProfile: {
-        cookingIntent: interactionData.intent,
-        cuisinePreferences: interactionData.cuisine,
-        typicalPortions: interactionData.portions,
-        timeConstraints: interactionData.timeAvailable,
-        shoppingBehavior: interactionData.intent === 'shopping' ? 'recipe-driven' : 'ingredient-driven',
-        equipmentLevel: interactionData.equipment,
-        skillLevel: interactionData.skillLevel,
-        dietaryNeeds: interactionData.dietaryRestrictions,
-        occasionCooking: interactionData.occasion,
-        budgetConsciousness: interactionData.budget
-      }
+      page: 'chat_mode',
+      component: 'conversational_processor',
+      action: 'recipe_generation',
+      data: {
+        ...interactionData,
+        // B2B valuable data points
+        customerProfile: {
+          cookingIntent: interactionData.intent,
+          cuisinePreferences: interactionData.cuisine,
+          typicalPortions: interactionData.portions,
+          timeConstraints: interactionData.timeAvailable,
+          shoppingBehavior: interactionData.intent === 'shopping' ? 'recipe-driven' : 'ingredient-driven',
+          equipmentLevel: interactionData.equipment,
+          skillLevel: interactionData.skillLevel,
+          dietaryNeeds: interactionData.dietaryRestrictions,
+          occasionCooking: interactionData.occasion,
+          budgetConsciousness: interactionData.budget
+        }
+      },
+      userAgent: interactionData.userAgent || null,
+      ipAddress: interactionData.ipAddress || null,
+      browserFingerprint: interactionData.browserFingerprint || null
     };
 
-    console.log('B2B User Interaction Data:', JSON.stringify(logEntry, null, 2));
+    // Save to database using new interaction logs system
+    await storage.createInteractionLog(interactionLogData);
     
-    // In production, this would save to a dedicated analytics database
-    // For now, we'll use the existing developer logs structure
+    console.log('User interaction logged to database:', {
+      userId: interactionLogData.userId,
+      pseudoUserId: interactionLogData.pseudoUserId,
+      type: interactionLogData.interactionType,
+      action: interactionLogData.action
+    });
     
   } catch (error) {
     console.error("Failed to log user interaction data:", error);
