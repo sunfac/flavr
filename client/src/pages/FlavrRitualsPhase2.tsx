@@ -9,6 +9,7 @@ import { useLocation } from "wouter";
 import GlobalHeader from "@/components/GlobalHeader";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useRitualsStore } from "@/stores/ritualsStore";
 
 interface RecipeCard {
   title: string;
@@ -55,36 +56,41 @@ export default function FlavrRitualsPhase2() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
+  // Rituals store integration
+  const { weeklyPreferences, currentPhase, setCurrentPhase } = useRitualsStore();
+  
   const [selectedDay, setSelectedDay] = useState<typeof dayNames[number]>('monday');
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [ritualsRecipeSelections, setRitualsRecipeSelections] = useState<RitualsRecipeSelections>({});
-  const [weeklyInputs, setWeeklyInputs] = useState<WeeklyInputs | null>(null);
   const [generatedCards, setGeneratedCards] = useState<Record<string, RecipeCard[]>>({});
   const [isGenerating, setIsGenerating] = useState<Record<string, boolean>>({});
 
-  // Load weekly inputs from Phase 1
+  // Check for weekly preferences from Phase 1
   useEffect(() => {
-    const storedInputs = localStorage.getItem('flavr-rituals-weekly-inputs');
-    if (storedInputs) {
-      setWeeklyInputs(JSON.parse(storedInputs));
-    } else {
-      // If no inputs found, redirect back to Phase 1
+    if (!weeklyPreferences) {
+      toast({
+        title: "No Weekly Plan Found",
+        description: "Please complete Phase 1 first.",
+        variant: "destructive",
+      });
       setLocation('/flavr-rituals');
+    } else if (currentPhase !== 'generation') {
+      setCurrentPhase('generation');
     }
-  }, [setLocation]);
+  }, [weeklyPreferences, currentPhase, setCurrentPhase, setLocation, toast]);
 
   // Generate recipe cards for a specific day
   const generateRecipeCards = useMutation({
     mutationFn: async (day: string) => {
-      if (!weeklyInputs || !weeklyInputs[day as keyof WeeklyInputs]) {
-        throw new Error(`No inputs found for ${day}`);
+      if (!weeklyPreferences || !weeklyPreferences[day as keyof typeof weeklyPreferences]) {
+        throw new Error(`No preferences found for ${day}`);
       }
 
-      const dayInputs = weeklyInputs[day as keyof WeeklyInputs];
+      const dayPrefs = weeklyPreferences[day as keyof typeof weeklyPreferences];
       
       const response = await apiRequest('POST', '/api/generate-ritual-cards', {
         mode: 'rituals',
-        inputs: dayInputs,
+        inputs: dayPrefs,
         day: day
       });
 
@@ -150,21 +156,21 @@ export default function FlavrRitualsPhase2() {
 
   // Check if all non-skipped days have selections
   const canProceed = dayNames.every(day => {
-    const dayInputs = weeklyInputs?.[day];
-    return !dayInputs || dayInputs.mood === 'skip' || ritualsRecipeSelections[day];
+    const dayPrefs = weeklyPreferences?.[day];
+    return !dayPrefs || dayPrefs.skip || ritualsRecipeSelections[day];
   });
 
   // Generate cards for current day if not already generated
   useEffect(() => {
-    if (weeklyInputs && selectedDay && !generatedCards[selectedDay] && !isGenerating[selectedDay]) {
-      const dayInputs = weeklyInputs[selectedDay];
-      if (dayInputs && dayInputs.mood !== 'skip') {
+    if (weeklyPreferences && selectedDay && !generatedCards[selectedDay] && !isGenerating[selectedDay]) {
+      const dayPrefs = weeklyPreferences[selectedDay];
+      if (dayPrefs && !dayPrefs.skip) {
         generateRecipeCards.mutate(selectedDay);
       }
     }
-  }, [selectedDay, weeklyInputs, generatedCards, isGenerating]);
+  }, [selectedDay, weeklyPreferences, generatedCards, isGenerating]);
 
-  if (!weeklyInputs) {
+  if (!weeklyPreferences) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full" />
@@ -207,13 +213,13 @@ export default function FlavrRitualsPhase2() {
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">Weekly Recipe Selection</h2>
             <div className="text-sm text-gray-400">
-              {Object.keys(ritualsRecipeSelections).length} / {dayNames.filter(day => weeklyInputs[day]?.mood !== 'skip').length} selected
+              {Object.keys(ritualsRecipeSelections).length} / {dayNames.filter(day => !weeklyPreferences[day]?.skip).length} selected
             </div>
           </div>
           
           <div className="grid grid-cols-7 gap-2">
             {dayNames.map((day, index) => {
-              const isSkipped = weeklyInputs[day]?.mood === 'skip';
+              const isSkipped = weeklyPreferences[day]?.skip;
               const hasSelection = ritualsRecipeSelections[day];
               const isSelected = selectedDay === day;
               
@@ -251,7 +257,7 @@ export default function FlavrRitualsPhase2() {
 
         {/* Recipe Card Display */}
         <div className="max-w-md mx-auto">
-          {weeklyInputs[selectedDay]?.mood === 'skip' ? (
+          {weeklyPreferences[selectedDay]?.skip ? (
             <Card className="bg-gray-800 border-gray-700 text-center p-8">
               <CardContent>
                 <div className="text-gray-400 mb-4">

@@ -25,6 +25,8 @@ import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
 import AuthModal from "@/components/AuthModal";
 import { useLocation } from "wouter";
+import { useRitualsStore } from "@/stores/ritualsStore";
+import { useToast } from "@/hooks/use-toast";
 
 // Complete cuisine options matching other cooking modes
 const cuisineOptions = [
@@ -71,24 +73,8 @@ const budgetOptions = [
   { value: "high", label: "Premium", icon: <DollarSign className="w-4 h-4" /> },
 ];
 
-interface DayPreferences {
-  skip: boolean;
-  cuisine: string[];
-  mood: string;
-  ambition: string;
-  budget: string;
-  dietary: string[];
-}
-
-interface WeeklyPreferences {
-  monday: DayPreferences;
-  tuesday: DayPreferences;
-  wednesday: DayPreferences;
-  thursday: DayPreferences;
-  friday: DayPreferences;
-  saturday: DayPreferences;
-  sunday: DayPreferences;
-}
+// Import types from store to avoid duplication
+import type { DayPreferences, WeeklyPreferences } from "@/stores/ritualsStore";
 
 const defaultDayPreferences: DayPreferences = {
   skip: false,
@@ -117,11 +103,15 @@ const defaultMoods = {
 
 export default function FlavrRituals() {
   const [, navigate] = useLocation();
+  const { toast } = useToast();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [showNavigation, setShowNavigation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Rituals store integration
+  const { setWeeklyPreferences, setCurrentPhase } = useRitualsStore();
 
   // Close all menus
   const closeAllMenus = () => {
@@ -227,8 +217,50 @@ export default function FlavrRituals() {
   };
 
   const confirmWeeklyPlan = () => {
-    console.log('Weekly meal plan confirmed:', weeklyPrefs);
-    // TODO: Navigate to next phase or store in context
+    // Validate that at least one day is configured
+    const activeDays = Object.entries(weeklyPrefs).filter(([_, prefs]) => !prefs.skip);
+    
+    if (activeDays.length === 0) {
+      toast({
+        title: "Configuration Required",
+        description: "Please configure at least one day for your weekly meal plan.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate that active days have proper configuration
+    const incompleteDays = activeDays.filter(([_, prefs]) => 
+      !prefs.mood || !prefs.ambition || !prefs.budget
+    );
+
+    if (incompleteDays.length > 0) {
+      const dayNames = incompleteDays.map(([day]) => 
+        day.charAt(0).toUpperCase() + day.slice(1)
+      ).join(", ");
+      
+      toast({
+        title: "Incomplete Configuration",
+        description: `Please complete the configuration for: ${dayNames}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Store weekly preferences in Zustand store
+    setWeeklyPreferences(weeklyPrefs);
+    setCurrentPhase('generation');
+
+    // Show success message
+    toast({
+      title: "Weekly Plan Confirmed!",
+      description: "Advancing to recipe generation phase...",
+    });
+
+    // Navigate to Phase 2 with a slight delay for the toast
+    setTimeout(() => {
+      navigate("/flavr-rituals/phase2");
+    }, 1000);
   };
 
   return (
