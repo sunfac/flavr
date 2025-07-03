@@ -324,7 +324,8 @@ Promise.resolve('Recipe generation pipeline')
     console.log('• Integration Tests: NODE_ENV=test npx jest tests/integration/');
     console.log('• Database Tests: NODE_ENV=test npx jest tests/server/database.test.ts');
     console.log('• Authentication Tests: NODE_ENV=test npx jest tests/server/authentication.test.ts');
-    console.log('• Recipe Generation Tests: NODE_ENV=test npx jest tests/server/recipeGeneration.test.ts\n');
+    console.log('• Recipe Generation Tests: NODE_ENV=test npx jest tests/server/recipeGeneration.test.ts');
+    console.log('• Mobile Subscription Tests: NODE_ENV=test npx jest tests/server/mobileSubscriptionManager.test.ts\n');
     
     console.log('📋 Test Coverage Areas:');
     Object.entries(testCategories).forEach(([key, description]) => {
