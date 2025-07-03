@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { storage } from "../storage";
+import bcrypt from "bcrypt";
 
 // Authentication middleware
 export const requireAuth = (req: any, res: any, next: any) => {
@@ -46,8 +47,14 @@ export function registerAuthRoutes(app: Express) {
       }
 
       const user = await storage.getUserByEmail(email);
-      if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid credentials" });
+      if (!user) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Compare the provided password with the hashed password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid email or password" });
       }
 
       req.session.userId = user.id;

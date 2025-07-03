@@ -1,6 +1,7 @@
 import { users, recipes, chatMessages, developerLogs, pseudoUsers, type User, type InsertUser, type Recipe, type InsertRecipe, type ChatMessage, type InsertChatMessage, type DeveloperLog, type InsertDeveloperLog, type PseudoUser, type InsertPseudoUser, recipeGenerationLogs, type RecipeGenerationLog, type InsertRecipeGenerationLog } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
+import bcrypt from "bcrypt";
 
 export interface IStorage {
   // User operations
@@ -69,7 +70,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
+    // Hash the password before storing
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(insertUser.password, saltRounds);
+    
+    const userWithHashedPassword = {
+      ...insertUser,
+      password: hashedPassword
+    };
+    
+    const [user] = await db.insert(users).values(userWithHashedPassword).returning();
     return user;
   }
 

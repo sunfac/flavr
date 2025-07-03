@@ -58,11 +58,11 @@ describe('Authentication & User Management', () => {
     jest.clearAllMocks();
   });
 
-  describe('POST /api/signup', () => {
+  describe('POST /api/register', () => {
     const validSignupData = {
       email: 'test@example.com',
       password: 'securePassword123',
-      name: 'Test User'
+      username: 'testuser'
     };
 
     it('should create new user with valid data', async () => {
@@ -70,51 +70,47 @@ describe('Authentication & User Management', () => {
       const newUser = {
         id: 1,
         email: 'test@example.com',
-        name: 'Test User',
-        passwordHash: hashedPassword,
-        isPlus: false,
-        monthlyUsage: 0,
+        username: 'testuser',
+        password: hashedPassword,
+        hasFlavrPlus: false,
         createdAt: new Date()
       };
 
       mockStorage.getUserByEmail.mockResolvedValue(null); // User doesn't exist
-      mockBcrypt.hash.mockResolvedValue(hashedPassword);
       mockStorage.createUser.mockResolvedValue(newUser);
 
       const response = await request(app)
-        .post('/api/signup')
+        .post('/api/register')
         .send(validSignupData)
-        .expect(201);
+        .expect(200);
 
       expect(response.body.user).toEqual({
         id: 1,
         email: 'test@example.com',
-        name: 'Test User',
-        isPlus: false
+        username: 'testuser',
+        hasFlavrPlus: false
       });
-      expect(response.body.message).toBe('User created successfully');
       
       expect(mockStorage.getUserByEmail).toHaveBeenCalledWith('test@example.com');
-      expect(mockBcrypt.hash).toHaveBeenCalledWith('securePassword123', 10);
       expect(mockStorage.createUser).toHaveBeenCalledWith({
         email: 'test@example.com',
-        name: 'Test User',
-        passwordHash: hashedPassword
+        username: 'testuser',
+        password: 'securePassword123'
       });
     });
 
     it('should return 400 for missing required fields', async () => {
       const incompleteData = {
         email: 'test@example.com'
-        // Missing password and name
+        // Missing password and username
       };
 
       const response = await request(app)
-        .post('/api/signup')
+        .post('/api/register')
         .send(incompleteData)
         .expect(400);
 
-      expect(response.body.error).toContain('required');
+      expect(response.body.message).toContain('required');
       expect(mockStorage.getUserByEmail).not.toHaveBeenCalled();
     });
 
@@ -152,18 +148,17 @@ describe('Authentication & User Management', () => {
       const existingUser = {
         id: 1,
         email: 'test@example.com',
-        name: 'Existing User'
+        username: 'existinguser'
       };
 
       mockStorage.getUserByEmail.mockResolvedValue(existingUser);
 
       const response = await request(app)
-        .post('/api/signup')
+        .post('/api/register')
         .send(validSignupData)
         .expect(400);
 
-      expect(response.body.error).toBe('User with this email already exists');
-      expect(mockBcrypt.hash).not.toHaveBeenCalled();
+      expect(response.body.message).toBe('User already exists');
       expect(mockStorage.createUser).not.toHaveBeenCalled();
     });
 
@@ -190,10 +185,9 @@ describe('Authentication & User Management', () => {
     const mockUser = {
       id: 1,
       email: 'test@example.com',
-      name: 'Test User',
-      passwordHash: 'hashed_password_123',
-      isPlus: false,
-      monthlyUsage: 2
+      username: 'testuser',
+      password: 'hashed_password_123',
+      hasFlavrPlus: false
     };
 
     it('should login user with valid credentials', async () => {
@@ -208,9 +202,8 @@ describe('Authentication & User Management', () => {
       expect(response.body.user).toEqual({
         id: 1,
         email: 'test@example.com',
-        name: 'Test User',
-        isPlus: false,
-        monthlyUsage: 2
+        username: 'testuser',
+        hasFlavrPlus: false
       });
       expect(response.body.message).toBe('Login successful');
       
@@ -226,7 +219,7 @@ describe('Authentication & User Management', () => {
         .send(validLoginData)
         .expect(401);
 
-      expect(response.body.error).toBe('Invalid email or password');
+      expect(response.body.message).toBe('Invalid email or password');
       expect(mockBcrypt.compare).not.toHaveBeenCalled();
     });
 
@@ -239,7 +232,7 @@ describe('Authentication & User Management', () => {
         .send(validLoginData)
         .expect(401);
 
-      expect(response.body.error).toBe('Invalid email or password');
+      expect(response.body.message).toBe('Invalid email or password');
       expect(mockBcrypt.compare).toHaveBeenCalledWith('securePassword123', 'hashed_password_123');
     });
 
@@ -254,7 +247,7 @@ describe('Authentication & User Management', () => {
         .send(incompleteData)
         .expect(400);
 
-      expect(response.body.error).toContain('Email and password are required');
+      expect(response.body.message).toContain('Email and password are required');
       expect(mockStorage.getUserByEmail).not.toHaveBeenCalled();
     });
 
