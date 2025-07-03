@@ -1,7 +1,7 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import { IncomingMessage } from 'http';
 import { GoogleGenAI } from '@google/genai';
-import { GoogleLiveApiClient } from './googleLiveApiClient';
+// GoogleLiveApiClient removed during pruning
 
 interface GoogleLiveSession {
   id: string;

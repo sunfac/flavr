@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { ensureDeploymentReady, createMinimalBuild } from "./deploymentHelper";
+// Deployment helper functions removed during pruning
 // import { setupVoiceChat } from "./voiceChat";
 
 const app = express();
@@ -82,8 +82,7 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Setup deployment configuration
-  createMinimalBuild();
+  // Deployment configuration removed during pruning
 
   // Check if we're in production mode and have a build
   const isProduction = process.env.NODE_ENV === "production" || app.get("env") === "production" || process.env.REPLIT_DEPLOYMENT === "true";
