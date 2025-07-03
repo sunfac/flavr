@@ -119,6 +119,9 @@ Flavr is a modern full-stack web application that serves as an AI-powered culina
 - Stripe keys for payment processing
 - Replicate token for image generation
 
+### Development Files
+- `cookies.txt`: Local development file for testing purposes (gitignored, not tracked in repository)
+
 ### Stability Measures
 - Error boundaries for graceful failure handling
 - Fallback modes when production builds fail
@@ -197,6 +200,7 @@ Changelog:
 - July 3, 2025. Server routes refactored into maintainable modules - broke up massive 2075-line routes.ts into organized modules (authRoutes.ts, recipeRoutes.ts, chatRoutes.ts, subscriptionRoutes.ts), created server/routes/ directory structure, centralized route registration in routes/index.ts, maintained all existing functionality while improving code maintainability and separation of concerns
 - July 3, 2025. Comprehensive automated testing infrastructure complete - implemented Jest with TypeScript support, React Testing Library for component tests, Supertest for API testing, created organized test structure (tests/server/, tests/client/, tests/integration/), built authentication tests covering signup/login/session management, database operation tests for CRUD operations and data integrity, recipe generation pipeline tests, React component tests for core UI elements, end-to-end integration tests for complete user workflows, enhanced run-tests.js with 14 comprehensive test categories achieving 100% success rate, established robust foundation for continuous testing and quality assurance across all application layers
 - July 3, 2025. Bcrypt password security system implementation complete - integrated bcrypt library with 12-round salt configuration, implemented secure password hashing in storage.createUser method using 'password' field from schema, added bcrypt.compare verification in login endpoint for proper password authentication, updated authentication tests to work with bcrypt mocking and password comparison, ensured backward compatibility with existing user data structure, all authentication flows now use industry-standard password security with proper test coverage
+- July 3, 2025. OAuth2 service account authentication implementation complete - replaced getAccessToken function in GoogleLiveApiClient with comprehensive OAuth2 service account authentication using Google Auth Library, added support for GOOGLE_CLOUD_CREDENTIALS and GOOGLE_APPLICATION_CREDENTIALS environment variables, maintained API key fallback for development environments, implemented proper error handling and token refresh capabilities, enhanced WebSocket connection authentication with Bearer tokens for secure Google Live API access
 ```
 
 ## User Preferences

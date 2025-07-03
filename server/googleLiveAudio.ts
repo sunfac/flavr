@@ -1,13 +1,13 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import { IncomingMessage } from 'http';
 import { GoogleGenAI } from '@google/genai';
-// GoogleLiveApiClient removed during pruning
+import { GoogleLiveApiClient } from './googleLiveApiClient';
 
 interface GoogleLiveSession {
   id: string;
   websocket: WebSocket;
   googleApiClient?: GoogleLiveApiClient;
-  currentRecipe?: any;
+  currentRecipe?: any | null;
   conversationContext: string;
   isActive: boolean;
 }
@@ -33,7 +33,7 @@ export function setupGoogleLiveAudioWebSocket(server: any) {
     const session: GoogleLiveSession = {
       id: sessionId,
       websocket: ws,
-      googleApiClient: null,
+      googleApiClient: undefined,
       currentRecipe: null,
       isActive: true,
       conversationContext: 'You are Zest, a helpful cooking assistant. Provide cooking guidance in a friendly, conversational manner.'
