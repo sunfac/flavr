@@ -45,6 +45,33 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
+// Generate recipe image using DALL-E 3
+async function generateRecipeImage(recipeTitle: string, cuisine: string): Promise<string | null> {
+  try {
+    console.log('🎨 Generating recipe image with DALL-E 3...');
+    
+    const imagePrompt = `A beautifully plated ${recipeTitle} dish, ${cuisine} cuisine style, professional food photography, appetizing, vibrant colors, restaurant quality presentation, overhead view, natural lighting`;
+    
+    const response = await openai.images.generate({
+      model: "dall-e-3",
+      prompt: imagePrompt,
+      n: 1,
+      size: "1024x1024",
+      quality: "standard",
+    });
+
+    if (response.data && response.data[0] && response.data[0].url) {
+      console.log('✅ Recipe image generated successfully');
+      return response.data[0].url;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('❌ Failed to generate recipe image:', error);
+    return null;
+  }
+}
+
 export function registerRecipeRoutes(app: Express) {
   // Test endpoint
   app.get("/api/test", (req, res) => {
@@ -470,6 +497,17 @@ Return valid JSON only:
       recipeData.mode = mode;
       recipeData.id = Date.now().toString();
       recipeData.createdAt = new Date().toISOString();
+
+      // Generate recipe image
+      try {
+        const imageUrl = await generateRecipeImage(recipeData.title, recipeData.cuisine || 'international');
+        if (imageUrl) {
+          recipeData.imageUrl = imageUrl;
+        }
+      } catch (imageError) {
+        console.error('Image generation failed:', imageError);
+        // Continue without image - not critical
+      }
 
       // Save recipe to database if user is authenticated
       if (req.session?.userId) {
