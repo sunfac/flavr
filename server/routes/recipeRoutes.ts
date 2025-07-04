@@ -451,7 +451,15 @@ Return valid JSON only:
 
       let recipeData;
       try {
-        recipeData = JSON.parse(responseContent);
+        // Clean up response content - remove markdown code blocks if present
+        let cleanContent = responseContent.trim();
+        if (cleanContent.startsWith('```json')) {
+          cleanContent = cleanContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+        } else if (cleanContent.startsWith('```')) {
+          cleanContent = cleanContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
+        }
+        
+        recipeData = JSON.parse(cleanContent);
       } catch (parseError) {
         console.error("❌ Recipe JSON parsing failed:", parseError);
         console.log("Raw response:", responseContent);
@@ -500,22 +508,6 @@ Return valid JSON only:
 
     } catch (error) {
       console.error("❌ Full recipe generation failed:", error);
-      
-      // Log failed interaction
-      await logGPTInteraction({
-        endpoint: 'generate-full-recipe',
-        prompt: 'Error occurred during recipe generation',
-        response: '',
-        model: 'gpt-4o',
-        duration: 0,
-        inputTokens: 0,
-        outputTokens: 0,
-        cost: 0,
-        success: false,
-        userId: req.session?.userId || 'anonymous',
-        sessionId: req.session?.id || 'no-session',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
 
       res.status(500).json({ 
         error: "Failed to generate full recipe",
