@@ -120,13 +120,14 @@ export default function ModeSelection() {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                e.nativeEvent.stopImmediatePropagation();
                 console.log('Card clicked for mode:', mode.id);
                 
-                // Direct navigation test for budget-planner
+                // Force immediate navigation for budget-planner
                 if (mode.id === "budget-planner") {
-                  console.log('Direct navigation to budget planner');
-                  setTimeout(() => navigate("/budget-planner"), 0);
-                  return;
+                  console.log('Forcing navigation to budget planner');
+                  window.location.href = "/budget-planner";
+                  return false;
                 }
                 
                 handleModeSelect(mode.id);
