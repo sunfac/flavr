@@ -9,6 +9,7 @@ import { registerRecipeRoutes } from "./recipeRoutes";
 import { registerChatRoutes } from "./chatRoutes";
 import { registerSubscriptionRoutes } from "./subscriptionRoutes";
 import { registerInteractionRoutes } from "./interactionRoutes";
+import { registerBudgetPlannerRoutes } from "./budgetPlannerRoutes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Add route debugging
@@ -33,6 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerChatRoutes(app);
   registerSubscriptionRoutes(app);
   registerInteractionRoutes(app);
+  registerBudgetPlannerRoutes(app);
 
   // Additional utility routes
   

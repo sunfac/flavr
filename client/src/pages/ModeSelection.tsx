@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Refrigerator, ChefHat, Clock, Calendar, Crown } from "lucide-react";
+import { ShoppingCart, Refrigerator, ChefHat, Clock, Calendar, Crown, PiggyBank } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { iconMap } from "@/lib/iconMap";
 import GlobalHeader from "@/components/GlobalHeader";
@@ -50,6 +50,13 @@ export default function ModeSelection() {
       subtitle: "Elevate your culinary skills"
     },
     {
+      id: "budget-planner",
+      title: "Budget Planner",
+      icon: PiggyBank,
+      description: "Weekly meal plans optimized for your budget",
+      subtitle: "Smart shopping, authentic recipes, maximum value"
+    },
+    {
       id: "flavr-rituals",
       title: "Flavr Rituals",
       icon: Calendar,
@@ -62,6 +69,8 @@ export default function ModeSelection() {
   const handleModeSelect = (modeId: string) => {
     if (modeId === "flavr-rituals") {
       navigate("/flavr-rituals");
+    } else if (modeId === "budget-planner") {
+      navigate("/budget-planner");
     } else {
       navigate(`/app/${modeId}`);
     }
