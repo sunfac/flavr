@@ -69,10 +69,13 @@ export default function ModeSelection() {
   const handleModeSelect = (modeId: string) => {
     console.log('Mode selected:', modeId);
     if (modeId === "flavr-rituals") {
+      console.log('Navigating to flavr-rituals');
       navigate("/flavr-rituals");
     } else if (modeId === "budget-planner") {
+      console.log('Navigating to budget-planner');
       navigate("/budget-planner");
     } else {
+      console.log(`Navigating to /app/${modeId}`);
       navigate(`/app/${modeId}`);
     }
   };
@@ -115,7 +118,17 @@ export default function ModeSelection() {
               key={mode.id}
               className="bg-card/90 backdrop-blur-xl border border-border/50 group shadow-lg hover:shadow-orange-500/20 transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:border-orange-500/40 relative"
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
+                console.log('Card clicked for mode:', mode.id);
+                
+                // Direct navigation test for budget-planner
+                if (mode.id === "budget-planner") {
+                  console.log('Direct navigation to budget planner');
+                  setTimeout(() => navigate("/budget-planner"), 0);
+                  return;
+                }
+                
                 handleModeSelect(mode.id);
               }}
             >
