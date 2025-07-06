@@ -199,9 +199,10 @@ export default function ModeSelection() {
       <GlobalFooter />
 
       {/* Navigation overlays */}
-      {showNavigation && (
-        <GlobalNavigation onClose={() => setShowNavigation(false)} />
-      )}
+      <GlobalNavigation 
+        isOpen={showNavigation}
+        onClose={() => setShowNavigation(false)} 
+      />
       
       {showSettings && (
         <SettingsPanel onClose={() => setShowSettings(false)} />

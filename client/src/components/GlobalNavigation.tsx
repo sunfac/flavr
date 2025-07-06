@@ -16,11 +16,12 @@ import {
 import { useQuery } from "@tanstack/react-query";
 
 interface GlobalNavigationProps {
+  isOpen?: boolean;
   onClose?: () => void;
   onAuthRequired?: () => void;
 }
 
-export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavigationProps) {
+export default function GlobalNavigation({ isOpen, onClose, onAuthRequired }: GlobalNavigationProps) {
   const [location] = useLocation();
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -84,6 +85,11 @@ export default function GlobalNavigation({ onClose, onAuthRequired }: GlobalNavi
       developerOnly: true
     }
   ];
+
+  // Don't render if isOpen is explicitly false
+  if (isOpen === false) {
+    return null;
+  }
 
   return (
     <AnimatePresence>
