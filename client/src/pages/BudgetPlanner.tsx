@@ -38,6 +38,12 @@ export default function BudgetPlanner() {
   const [showSettings, setShowSettings] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
+  // Ensure navigation is closed when component mounts
+  useEffect(() => {
+    setShowNavigation(false);
+    setShowSettings(false);
+  }, []);
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (scrollAreaRef.current) {

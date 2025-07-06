@@ -67,15 +67,11 @@ export default function ModeSelection() {
   ];
 
   const handleModeSelect = (modeId: string) => {
-    console.log('Mode selected:', modeId);
     if (modeId === "flavr-rituals") {
-      console.log('Navigating to flavr-rituals');
       navigate("/flavr-rituals");
     } else if (modeId === "budget-planner") {
-      console.log('Navigating to budget-planner');
       navigate("/budget-planner");
     } else {
-      console.log(`Navigating to /app/${modeId}`);
       navigate(`/app/${modeId}`);
     }
   };
@@ -120,16 +116,6 @@ export default function ModeSelection() {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                e.nativeEvent.stopImmediatePropagation();
-                console.log('Card clicked for mode:', mode.id);
-                
-                // Force immediate navigation for budget-planner
-                if (mode.id === "budget-planner") {
-                  console.log('Forcing navigation to budget planner');
-                  window.location.href = "/budget-planner";
-                  return false;
-                }
-                
                 handleModeSelect(mode.id);
               }}
             >
