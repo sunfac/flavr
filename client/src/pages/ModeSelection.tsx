@@ -67,6 +67,7 @@ export default function ModeSelection() {
   ];
 
   const handleModeSelect = (modeId: string) => {
+    console.log('Mode selected:', modeId);
     if (modeId === "flavr-rituals") {
       navigate("/flavr-rituals");
     } else if (modeId === "budget-planner") {
@@ -113,7 +114,10 @@ export default function ModeSelection() {
             <Card 
               key={mode.id}
               className="bg-card/90 backdrop-blur-xl border border-border/50 group shadow-lg hover:shadow-orange-500/20 transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:border-orange-500/40 relative"
-              onClick={() => handleModeSelect(mode.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleModeSelect(mode.id);
+              }}
             >
               <CardContent className="text-center p-8">
                 {mode.premium && (
