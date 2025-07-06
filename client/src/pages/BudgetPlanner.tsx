@@ -76,7 +76,13 @@ export default function BudgetPlanner() {
       setIsLoading(false);
     },
     onError: (error) => {
-      console.error('Budget planner error:', error);
+      console.error('Budget planner error details:', {
+        error,
+        message: error?.message,
+        stack: error?.stack,
+        response: error?.response,
+        status: error?.status
+      });
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: "Sorry, I encountered an issue. Could you please try again?",
