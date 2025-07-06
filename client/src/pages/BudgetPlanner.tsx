@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { PiggyBank, Send, ArrowLeft, ShoppingCart, Calendar, BookOpen } from "lucide-react";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalNavigation from "@/components/GlobalNavigation";
-import SettingsPanel from "@/components/SettingsPanel";
+
 import { apiRequest } from "@/lib/queryClient";
 
 interface ChatMessage {
@@ -35,13 +35,11 @@ export default function BudgetPlanner() {
   const [currentMessage, setCurrentMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showNavigation, setShowNavigation] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Ensure navigation is closed when component mounts
   useEffect(() => {
     setShowNavigation(false);
-    setShowSettings(false);
   }, []);
 
   // Auto-scroll to bottom when new messages arrive
@@ -125,15 +123,10 @@ export default function BudgetPlanner() {
         onMenuClick={() => setShowNavigation(true)}
       />
 
-      {/* Navigation & Settings Panels */}
+      {/* Navigation Panel */}
       <GlobalNavigation 
         isOpen={showNavigation} 
         onClose={() => setShowNavigation(false)} 
-      />
-      
-      <SettingsPanel
-        isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
       />
 
       {/* Main Content */}
