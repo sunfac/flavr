@@ -28,7 +28,7 @@ export default function BudgetPlanner() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: "Welcome to Flavr's Budget Planner! I'll help you create a weekly meal plan that maximizes value while delivering authentic, delicious recipes.\n\nLet's start: How many **dinners**, **lunches**, and **kids' dinners** do you need recipes for this week? Please specify exact numbers for each.",
+      content: "Welcome to Flavr's Budget Planner! I'll help you create a weekly meal plan that maximizes value while delivering authentic, delicious recipes.\n\nLet's start: How many dinners, lunches, and kids' dinners do you need recipes for this week? Please specify exact numbers for each.",
       timestamp: new Date()
     }
   ]);
@@ -123,7 +123,6 @@ export default function BudgetPlanner() {
       {/* Header */}
       <GlobalHeader 
         onMenuClick={() => setShowNavigation(true)}
-        onSettingsClick={() => setShowSettings(true)}
       />
 
       {/* Navigation & Settings Panels */}

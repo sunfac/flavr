@@ -72,8 +72,8 @@ export default function GlobalHeader({
 
         {/* Right: Compact authentication/settings buttons pushed further right */}
         <div className="flex items-center gap-1 ml-auto">
-          {user ? (
-            // Authenticated user - show Settings only
+          {user && onSettingsClick ? (
+            // Authenticated user - show Settings only if onSettingsClick is provided
             <Button 
               variant="ghost"
               size="sm"
@@ -82,7 +82,7 @@ export default function GlobalHeader({
             >
               <iconMap.settings className="w-4 h-4" />
             </Button>
-          ) : (
+          ) : !user ? (
             // Not authenticated - show smaller Login and Sign Up buttons with text
             <>
               <Button 
@@ -105,7 +105,7 @@ export default function GlobalHeader({
                 <span className="text-xs">Sign Up</span>
               </Button>
             </>
-          )}
+          ) : null}
         </div>
       </div>
 
