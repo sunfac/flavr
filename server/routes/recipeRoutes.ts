@@ -499,6 +499,10 @@ Return valid JSON only:
         }
         
         recipeData = JSON.parse(cleanContent);
+        console.log('✅ Recipe JSON parsed successfully');
+        console.log('🍽️ Recipe structure:', JSON.stringify(recipeData, null, 2));
+        console.log('📋 Ingredients array:', recipeData.ingredients);
+        console.log('📝 Instructions array:', recipeData.instructions);
       } catch (parseError) {
         console.error("❌ Recipe JSON parsing failed:", parseError);
         console.log("Raw response:", responseContent);

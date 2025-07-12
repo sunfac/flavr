@@ -61,6 +61,11 @@ export default function RecipeCard({
       apiRequest("POST", "/api/generate-full-recipe", data),
     onSuccess: async (response) => {
       const result = await response.json();
+      console.log('🔍 Full recipe API response:', result);
+      console.log('🍽️ Recipe data structure:', result.recipe);
+      console.log('📋 Ingredients:', result.recipe?.ingredients);
+      console.log('📝 Instructions:', result.recipe?.instructions);
+      console.log('🖼️ Image URL:', result.recipe?.imageUrl);
       setFullRecipe(result.recipe);
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
@@ -263,6 +268,10 @@ export default function RecipeCard({
     instructions: fullRecipe.instructions || [],
     tips: fullRecipe.tips
   };
+
+  console.log('🎯 Enhanced recipe for display:', enhancedRecipe);
+  console.log('🥘 Enhanced ingredients count:', enhancedRecipe.ingredients.length);
+  console.log('📋 Enhanced instructions count:', enhancedRecipe.instructions.length);
 
   const handleShare = () => {
     if (fullRecipe.shareId) {
