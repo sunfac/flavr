@@ -202,19 +202,22 @@ Make each recipe distinctly different in style, technique, and flavor profile. F
   app.post("/api/generate-recipe-ideas", async (req, res) => {
     try {
       const startTime = Date.now();
-      const { 
-        portions, 
-        timeAvailable, 
-        equipment, 
-        mood, 
-        ambition, 
-        budget, 
-        cuisines, 
-        dietaryRestrictions,
-        supermarket 
+      // Extract data from either direct params or nested quizData object
+      const quizData = req.body.quizData || req.body;
+      const {
+        portions = quizData.servings,
+        timeAvailable = quizData.time,
+        equipment = quizData.equipment,
+        mood = quizData.mood,
+        ambition = quizData.ambition,
+        budget = quizData.budget,
+        cuisines = quizData.cuisine,
+        dietaryRestrictions = quizData.dietary,
+        supermarket = quizData.supermarket
       } = req.body;
 
       console.log('🔥 Generate Recipe Ideas Request:', { portions, timeAvailable, equipment, mood, ambition, budget, cuisines, dietaryRestrictions, supermarket });
+      console.log('🔥 Quiz Data:', quizData);
 
       // Build dynamic prompt components
       const timePrompt = getTimePromptText(timeAvailable);

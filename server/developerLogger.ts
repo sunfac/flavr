@@ -40,7 +40,7 @@ function analyzeOutputMatch(expected: Record<string, any>, actual: Record<string
   const fieldsToCheck = ['servings', 'cookTime', 'difficulty', 'budget', 'cuisine'];
   
   for (const field of fieldsToCheck) {
-    if (expected[field] && actual[field]) {
+    if (expected?.[field] && actual?.[field]) {
       if (String(expected[field]).toLowerCase() !== String(actual[field]).toLowerCase()) {
         discrepancies.push(`${field}: expected "${expected[field]}", got "${actual[field]}"`);
       }
