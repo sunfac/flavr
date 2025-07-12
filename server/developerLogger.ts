@@ -11,6 +11,7 @@ const STABLE_DIFFUSION_COST_PER_IMAGE = 0.0023; // $0.0023 per image generation
 // Simple token estimation (rough approximation)
 function estimateTokens(text: string): number {
   // Rough estimation: 1 token ≈ 4 characters for English text
+  if (!text || typeof text !== 'string') return 0;
   return Math.ceil(text.length / 4);
 }
 

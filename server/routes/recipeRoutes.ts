@@ -296,7 +296,16 @@ Return valid JSON only:
 
       let recipeData;
       try {
-        recipeData = JSON.parse(responseContent);
+        // Clean the response by removing markdown code blocks if present
+        let cleanedResponse = responseContent;
+        if (cleanedResponse.includes('```json')) {
+          cleanedResponse = cleanedResponse.replace(/```json\n?/g, '').replace(/\n?```/g, '');
+        }
+        if (cleanedResponse.includes('```')) {
+          cleanedResponse = cleanedResponse.replace(/```\n?/g, '');
+        }
+        
+        recipeData = JSON.parse(cleanedResponse.trim());
       } catch (parseError) {
         console.error("❌ JSON parsing failed:", parseError);
         console.log("Raw response:", responseContent);
