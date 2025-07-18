@@ -23,6 +23,12 @@ interface BudgetPlannerResult {
   complete?: boolean;
 }
 
+interface ParsedContent {
+  shoppingList?: string;
+  mealPlan?: string;
+  recipes?: string;
+}
+
 export default function BudgetPlanner() {
   const [, navigate] = useLocation();
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -35,6 +41,7 @@ export default function BudgetPlanner() {
   const [currentMessage, setCurrentMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showNavigation, setShowNavigation] = useState(false);
+  const [parsedContent, setParsedContent] = useState<ParsedContent>({});
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Ensure navigation is closed when component mounts
@@ -67,11 +74,26 @@ export default function BudgetPlanner() {
     onSuccess: async (response) => {
       const data = await response.json();
       console.log('🎯 Budget planner response received:', data);
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: data.response,
-        timestamp: new Date()
-      }]);
+      
+      // Parse content for cards
+      if (data.stage === 'shopping-list' && data.response.includes('🔹 **Shopping List**')) {
+        setParsedContent(prev => ({ ...prev, shoppingList: data.response }));
+      } else if (data.stage === 'meal-plan' && data.response.includes('🔹 **Meal Plan**')) {
+        setParsedContent(prev => ({ ...prev, mealPlan: data.response }));
+      } else if (data.response.includes('🔹 **Recipes**')) {
+        setParsedContent(prev => ({ ...prev, recipes: data.response }));
+      }
+      
+      // Don't add shopping list, meal plan, or recipes to chat - only show in cards
+      if (!data.response.includes('🔹 **Shopping List**') && 
+          !data.response.includes('🔹 **Meal Plan**') && 
+          !data.response.includes('🔹 **Recipes**')) {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: data.response,
+          timestamp: new Date()
+        }]);
+      }
       setIsLoading(false);
     },
     onError: (error) => {
@@ -236,32 +258,98 @@ export default function BudgetPlanner() {
           </CardContent>
         </Card>
 
-        {/* Quick Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-          <Card className="bg-green-800/30 border-green-300/20">
-            <CardContent className="p-4 text-center">
-              <ShoppingCart className="w-8 h-8 text-green-300 mx-auto mb-2" />
-              <h3 className="font-semibold text-white mb-1">Smart Shopping Lists</h3>
-              <p className="text-green-100 text-xs">Supermarket-specific with real pricing</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-green-800/30 border-green-300/20">
-            <CardContent className="p-4 text-center">
-              <Calendar className="w-8 h-8 text-green-300 mx-auto mb-2" />
-              <h3 className="font-semibold text-white mb-1">Weekly Meal Plans</h3>
-              <p className="text-green-100 text-xs">Organized by days with variety</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-green-800/30 border-green-300/20">
-            <CardContent className="p-4 text-center">
-              <BookOpen className="w-8 h-8 text-green-300 mx-auto mb-2" />
-              <h3 className="font-semibold text-white mb-1">Authentic Recipes</h3>
-              <p className="text-green-100 text-xs">Chef-quality with traditional techniques</p>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Content Cards */}
+        {(parsedContent.shoppingList || parsedContent.mealPlan || parsedContent.recipes) && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+            {/* Shopping List Card */}
+            {parsedContent.shoppingList && (
+              <Card className="bg-card/90 backdrop-blur-sm border-green-200/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2 text-green-700">
+                    <ShoppingCart className="w-5 h-5" />
+                    Shopping List
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose prose-sm max-w-none">
+                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                      {parsedContent.shoppingList.replace('🔹 **Shopping List**', '').trim()}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Meal Plan Card */}
+            {parsedContent.mealPlan && (
+              <Card className="bg-card/90 backdrop-blur-sm border-green-200/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2 text-green-700">
+                    <Calendar className="w-5 h-5" />
+                    Weekly Meal Plan
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose prose-sm max-w-none">
+                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                      {parsedContent.mealPlan.replace('🔹 **Meal Plan**', '').trim()}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Recipes Card */}
+            {parsedContent.recipes && (
+              <Card className="bg-card/90 backdrop-blur-sm border-green-200/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2 text-green-700">
+                    <BookOpen className="w-5 h-5" />
+                    Detailed Recipes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-96">
+                    <div className="prose prose-sm max-w-none pr-4">
+                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                        {parsedContent.recipes.replace('🔹 **Recipes**', '').trim()}
+                      </div>
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
+
+        {/* Quick Info Cards - Show when no content yet */}
+        {!parsedContent.shoppingList && !parsedContent.mealPlan && !parsedContent.recipes && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <Card className="bg-green-800/30 border-green-300/20">
+              <CardContent className="p-4 text-center">
+                <ShoppingCart className="w-8 h-8 text-green-300 mx-auto mb-2" />
+                <h3 className="font-semibold text-white mb-1">Smart Shopping Lists</h3>
+                <p className="text-green-100 text-xs">Supermarket-specific with real pricing</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-green-800/30 border-green-300/20">
+              <CardContent className="p-4 text-center">
+                <Calendar className="w-8 h-8 text-green-300 mx-auto mb-2" />
+                <h3 className="font-semibold text-white mb-1">Weekly Meal Plans</h3>
+                <p className="text-green-100 text-xs">Organized by days with variety</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-green-800/30 border-green-300/20">
+              <CardContent className="p-4 text-center">
+                <BookOpen className="w-8 h-8 text-green-300 mx-auto mb-2" />
+                <h3 className="font-semibold text-white mb-1">Authentic Recipes</h3>
+                <p className="text-green-100 text-xs">Chef-quality with traditional techniques</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );
