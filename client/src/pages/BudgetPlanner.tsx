@@ -107,36 +107,47 @@ export default function BudgetPlanner() {
       console.log('🎯 Budget planner response received:', data);
       
       // Parse content for cards - handle complete response with all sections
-      if (data.stage === 'complete' || (data.response.includes('🔹 **Shopping List**') && data.response.includes('🔹 **Meal Plan**') && data.response.includes('🔹 **Recipes**'))) {
-        // Parse all three sections from complete response
-        const shoppingListMatch = data.response.match(/🔹 \*\*Shopping List\*\*([\s\S]*?)(?=🔹 \*\*Meal Plan\*\*|$)/);
-        const mealPlanMatch = data.response.match(/🔹 \*\*Meal Plan\*\*([\s\S]*?)(?=🔹 \*\*Recipes\*\*|$)/);
-        const recipesMatch = data.response.match(/🔹 \*\*Recipes\*\*([\s\S]*?)$/);
+      if (data.response.includes('🔹 **Shopping List**') || data.response.includes('🔹 Shopping List')) {
+        console.log('✅ Found shopping list section, parsing...');
         
-        setParsedContent({
-          shoppingList: shoppingListMatch ? '🔹 **Shopping List**' + shoppingListMatch[1] : undefined,
-          mealPlan: mealPlanMatch ? '🔹 **Meal Plan**' + mealPlanMatch[1] : undefined,
-          recipes: recipesMatch ? '🔹 **Recipes**' + recipesMatch[1] : undefined
+        // Try to parse all sections from a complete response
+        const response = data.response;
+        
+        // Look for shopping list section (with or without asterisks)
+        const shoppingListMatch = response.match(/🔹\s*\*?\*?Shopping List\*?\*?[\s\S]*?(?=🔹\s*\*?\*?Meal Plan|🔹\s*\*?\*?Recipes|$)/i);
+        const mealPlanMatch = response.match(/🔹\s*\*?\*?Meal Plan\*?\*?[\s\S]*?(?=🔹\s*\*?\*?Recipes|$)/i);
+        const recipesMatch = response.match(/🔹\s*\*?\*?Recipes\*?\*?[\s\S]*$/i);
+        
+        console.log('🔍 Parsing results:', {
+          hasShoppingList: !!shoppingListMatch,
+          hasMealPlan: !!mealPlanMatch,
+          hasRecipes: !!recipesMatch,
+          shoppingPreview: shoppingListMatch?.[0]?.substring(0, 100) + '...',
+          mealPreview: mealPlanMatch?.[0]?.substring(0, 100) + '...',
+          recipesPreview: recipesMatch?.[0]?.substring(0, 100) + '...'
         });
-      } else if (data.stage === 'shopping-list' && data.response.includes('🔹 **Shopping List**')) {
-        setParsedContent(prev => ({ ...prev, shoppingList: data.response }));
-      } else if (data.stage === 'meal-plan' && data.response.includes('🔹 **Meal Plan**')) {
-        setParsedContent(prev => ({ ...prev, mealPlan: data.response }));
-      } else if (data.response.includes('🔹 **Recipes**')) {
-        setParsedContent(prev => ({ ...prev, recipes: data.response }));
+        
+        if (shoppingListMatch) {
+          setParsedContent(prev => ({ ...prev, shoppingList: shoppingListMatch[0] }));
+        }
+        if (mealPlanMatch) {
+          setParsedContent(prev => ({ ...prev, mealPlan: mealPlanMatch[0] }));
+        }
+        if (recipesMatch) {
+          setParsedContent(prev => ({ ...prev, recipes: recipesMatch[0] }));
+        }
       }
       
-      // Don't add shopping list, meal plan, or recipes to chat - only show in cards
-      // But do show completion message
-      if (data.stage === 'complete') {
+      // Show chat messages appropriately
+      if (data.response.includes('🔹') && (data.response.includes('Shopping List') || data.response.includes('Meal Plan') || data.response.includes('Recipes'))) {
+        // This is a card content response - show completion message instead
         setMessages(prev => [...prev, {
           role: 'assistant',
           content: "Perfect! I've created your complete budget meal plan with shopping list, weekly schedule, and detailed recipes. Check the cards below for all the details.",
           timestamp: new Date()
         }]);
-      } else if (!data.response.includes('🔹 **Shopping List**') && 
-          !data.response.includes('🔹 **Meal Plan**') && 
-          !data.response.includes('🔹 **Recipes**')) {
+      } else {
+        // Regular chat message
         setMessages(prev => [...prev, {
           role: 'assistant',
           content: data.response,
