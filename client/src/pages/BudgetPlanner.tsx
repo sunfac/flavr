@@ -59,12 +59,9 @@ export default function BudgetPlanner() {
         content: msg.content
       }));
 
-      return apiRequest<BudgetPlannerResult>('/api/budget-planner', {
-        method: 'POST',
-        body: JSON.stringify({
-          message,
-          conversationHistory
-        })
+      return apiRequest('POST', '/api/budget-planner', {
+        message,
+        conversationHistory
       });
     },
     onSuccess: (data) => {
