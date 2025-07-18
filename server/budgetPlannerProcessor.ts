@@ -87,12 +87,18 @@ export async function processBudgetPlannerInput(
   try {
     console.log('🏠 Processing budget planner input:', userMessage);
 
-    // Build conversation context
+    // Build conversation context - filter out null/empty content
+    const validHistory = conversationHistory.filter(msg => 
+      msg && msg.content && typeof msg.content === 'string' && msg.content.trim().length > 0
+    );
+    
     const messages = [
       { role: 'system', content: BUDGET_PLANNER_SYSTEM_PROMPT },
-      ...conversationHistory,
+      ...validHistory,
       { role: 'user', content: userMessage }
     ];
+    
+    console.log('🔍 Budget planner messages:', messages.map(m => ({ role: m.role, contentLength: m.content?.length })));
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
