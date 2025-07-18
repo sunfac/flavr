@@ -5,7 +5,7 @@ import multer from 'multer';
 import { storage } from "../storage";
 import { requireAuth } from "./authRoutes";
 import { insertRecipeSchema } from "@shared/schema";
-import { logGPTInteraction } from "../developerLogger";
+import { logGPTInteraction, logSimpleGPTInteraction } from "../developerLogger";
 import { processFridgeImage } from "../vision";
 import { getCreativeGuidanceBlock } from "../shoppingPromptBlocks";
 import { 
@@ -174,17 +174,17 @@ Make each recipe distinctly different in style, technique, and flavor profile. F
       const duration = Date.now() - startTime;
       
       // Log the interaction
-      await logGPTInteraction({
+      await logSimpleGPTInteraction({
         endpoint: 'recipe-ideas',
         prompt: basePrompt,
         response: responseContent,
         model: 'gpt-4o',
         duration,
-        inputTokens: 0,
-        outputTokens: 0,
-        cost: 0,
+        inputTokens: completion.usage?.prompt_tokens || 0,
+        outputTokens: completion.usage?.completion_tokens || 0,
+        cost: ((completion.usage?.prompt_tokens || 0) * 0.03 + (completion.usage?.completion_tokens || 0) * 0.06) / 1000,
         success: true,
-        userId: req.session?.userId || 'anonymous',
+        userId: req.session?.userId?.toString() || 'anonymous',
         sessionId: req.session?.id || 'no-session'
       });
 
@@ -318,7 +318,7 @@ Return valid JSON only:
       const duration = Date.now() - startTime;
 
       // Log successful interaction
-      await logGPTInteraction({
+      await logSimpleGPTInteraction({
         endpoint: 'generate-recipe-ideas',
         prompt,
         response: responseContent,
@@ -328,7 +328,7 @@ Return valid JSON only:
         outputTokens: completion.usage?.completion_tokens || 0,
         cost: ((completion.usage?.prompt_tokens || 0) * 0.03 + (completion.usage?.completion_tokens || 0) * 0.06) / 1000,
         success: true,
-        userId: req.session?.userId || 'anonymous',
+        userId: req.session?.userId?.toString() || 'anonymous',
         sessionId: req.session?.id || 'no-session'
       });
 
@@ -339,7 +339,7 @@ Return valid JSON only:
       console.error("❌ Recipe ideas generation failed:", error);
       
       // Log failed interaction
-      await logGPTInteraction({
+      await logSimpleGPTInteraction({
         endpoint: 'generate-recipe-ideas',
         prompt: 'Error occurred before prompt completion',
         response: '',
@@ -349,9 +349,8 @@ Return valid JSON only:
         outputTokens: 0,
         cost: 0,
         success: false,
-        userId: req.session?.userId || 'anonymous',
-        sessionId: req.session?.id || 'no-session',
-        error: error instanceof Error ? error.message : 'Unknown error'
+        userId: req.session?.userId?.toString() || 'anonymous',
+        sessionId: req.session?.id || 'no-session'
       });
 
       res.status(500).json({ 
@@ -542,20 +541,20 @@ Return valid JSON only:
 
       const duration = Date.now() - startTime;
 
-      // Log successful interaction (temporarily disabled due to data size limits)
-      // await logGPTInteraction({
-      //   endpoint: 'generate-full-recipe',
-      //   prompt,
-      //   response: responseContent,
-      //   model: 'gpt-4o',
-      //   duration,
-      //   inputTokens: completion.usage?.prompt_tokens || 0,
-      //   outputTokens: completion.usage?.completion_tokens || 0,
-      //   cost: ((completion.usage?.prompt_tokens || 0) * 0.03 + (completion.usage?.completion_tokens || 0) * 0.06) / 1000,
-      //   success: true,
-      //   userId: req.session?.userId || 'anonymous',
-      //   sessionId: req.session?.id || 'no-session'
-      // });
+      // Log successful interaction with simplified logging
+      await logSimpleGPTInteraction({
+        endpoint: 'generate-full-recipe',
+        prompt,
+        response: responseContent,
+        model: 'gpt-4o',
+        duration,
+        inputTokens: completion.usage?.prompt_tokens || 0,
+        outputTokens: completion.usage?.completion_tokens || 0,
+        cost: ((completion.usage?.prompt_tokens || 0) * 0.03 + (completion.usage?.completion_tokens || 0) * 0.06) / 1000,
+        success: true,
+        userId: req.session?.userId?.toString() || 'anonymous',
+        sessionId: req.session?.id || 'no-session'
+      });
 
       console.log('✅ Full recipe generated successfully for:', recipeData.title);
       res.json({ recipe: recipeData });

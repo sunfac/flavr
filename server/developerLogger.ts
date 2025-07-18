@@ -73,12 +73,16 @@ export async function logGPTInteraction(
     
     const analysis = analyzeOutputMatch(expectedOutput, actualOutput);
     
+    // Truncate large text fields to prevent database errors
+    const truncatedPrompt = promptSent.length > 5000 ? promptSent.substring(0, 5000) + '...[truncated]' : promptSent;
+    const truncatedResponse = gptResponse.length > 5000 ? gptResponse.substring(0, 5000) + '...[truncated]' : gptResponse;
+    
     const logEntry: InsertDeveloperLog = {
       userId,
       mode,
       quizInputs,
-      promptSent,
-      gptResponse,
+      promptSent: truncatedPrompt,
+      gptResponse: truncatedResponse,
       expectedOutput,
       actualOutput,
       inputTokens,
@@ -98,6 +102,31 @@ export async function logGPTInteraction(
     if (!analysis.matches) {
       console.log(`   Discrepancies: ${analysis.discrepancies.join(', ')}`);
     }
+  } catch (error) {
+    console.error('Failed to log GPT interaction:', error);
+  }
+}
+
+// Simplified logging function for API routes that don't need full analysis
+export async function logSimpleGPTInteraction(params: {
+  endpoint: string;
+  prompt: string;
+  response: string;
+  model: string;
+  duration: number;
+  inputTokens: number;
+  outputTokens: number;
+  cost: number;
+  success: boolean;
+  userId?: string;
+  sessionId?: string;
+}): Promise<void> {
+  try {
+    // Only log essential information to avoid database issues
+    console.log(`🔍 API LOG - ${params.endpoint}: ${params.success ? '✅' : '❌'} | Cost: $${params.cost.toFixed(4)} | Tokens: ${params.inputTokens}→${params.outputTokens} | Duration: ${params.duration}ms`);
+    
+    // For now, just log to console to avoid database field mismatches
+    // Could be enhanced later with a dedicated API logs table
   } catch (error) {
     console.error('Failed to log GPT interaction:', error);
   }
