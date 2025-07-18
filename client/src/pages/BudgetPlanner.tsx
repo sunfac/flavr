@@ -309,7 +309,7 @@ export default function BudgetPlanner() {
 
         {/* Content Cards */}
         {(parsedContent.shoppingList || parsedContent.mealPlan || parsedContent.recipes) && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             {/* Shopping List Card */}
             {parsedContent.shoppingList && (
               <Card className="bg-card/90 backdrop-blur-sm border-green-200/20">
@@ -333,7 +333,7 @@ export default function BudgetPlanner() {
                               {items.map((item, itemIndex) => (
                                 <li key={itemIndex} className="text-sm flex items-center gap-2">
                                   <CheckSquare className="w-3 h-3 text-green-600" />
-                                  {item.replace(/^-\s*/, '')}
+                                  <span className="text-gray-800 font-medium">{item.replace(/^-\s*/, '')}</span>
                                 </li>
                               ))}
                             </ul>
@@ -347,71 +347,74 @@ export default function BudgetPlanner() {
               </Card>
             )}
 
-            {/* Meal Plan Card */}
-            {parsedContent.mealPlan && (
-              <Card className="bg-card/90 backdrop-blur-sm border-green-200/20">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-semibold flex items-center gap-2 text-green-700">
-                    <Calendar className="w-5 h-5" />
-                    Weekly Meal Schedule
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {parsedContent.mealPlan.replace('🔹 **Meal Plan**', '').trim().split('\n').filter(line => line.includes('**') && line.includes(':')).map((meal, index) => {
-                      const dayMatch = meal.match(/\*\*(.*?):\*\*/);
-                      const dishMatch = meal.match(/\*\*.*?\*\*\s*(.+)/);
-                      return (
-                        <div key={index} className="p-3 bg-green-50 rounded-lg border border-green-200">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-semibold text-green-800">{dayMatch ? dayMatch[1] : 'Meal'}</h4>
-                              <p className="text-sm text-green-700">{dishMatch ? dishMatch[1] : meal.replace(/\*\*/g, '')}</p>
-                            </div>
-                            <Calendar className="w-4 h-4 text-green-600" />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Recipes Card */}
-            {parsedContent.recipes && (
+            {/* Combined Meal Plan & Recipes Card */}
+            {(parsedContent.mealPlan || parsedContent.recipes) && (
               <Card className="bg-card/90 backdrop-blur-sm border-green-200/20">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg font-semibold flex items-center gap-2 text-green-700">
                     <BookOpen className="w-5 h-5" />
-                    Complete Recipes
+                    Weekly Meal Plan & Recipes
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {parseRecipes(parsedContent.recipes.replace('🔹 **Recipes**', '').trim()).map((recipe, index) => (
-                      <Collapsible key={index}>
-                        <CollapsibleTrigger 
-                          className="w-full p-3 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition-colors"
-                          onClick={() => toggleRecipe(recipe.title)}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="text-left">
-                              <h4 className="font-semibold text-green-800">{recipe.title}</h4>
-                              <p className="text-sm text-green-700">{recipe.subtitle}</p>
+                    {parsedContent.recipes && parseRecipes(parsedContent.recipes.replace('🔹 **Recipes**', '').trim()).map((recipe, index) => {
+                      // Generate recipe image URL using a food image service
+                      const generateFoodImageUrl = (dishName: string) => {
+                        const foodImages = {
+                          'thai': 'https://images.unsplash.com/photo-1559847844-d721426d6edc?w=400&h=250&fit=crop&auto=format&q=80',
+                          'curry': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&h=250&fit=crop&auto=format&q=80',
+                          'chicken': 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=250&fit=crop&auto=format&q=80',
+                          'indian': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=250&fit=crop&auto=format&q=80',
+                          'spanish': 'https://images.unsplash.com/photo-1534080564583-6be75777b70a?w=400&h=250&fit=crop&auto=format&q=80',
+                          'paella': 'https://images.unsplash.com/photo-1534080564583-6be75777b70a?w=400&h=250&fit=crop&auto=format&q=80',
+                          'pasta': 'https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?w=400&h=250&fit=crop&auto=format&q=80',
+                          'rice': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&h=250&fit=crop&auto=format&q=80',
+                          'default': 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&h=250&fit=crop&auto=format&q=80'
+                        };
+                        
+                        const dishLower = dishName.toLowerCase();
+                        for (const [key, url] of Object.entries(foodImages)) {
+                          if (dishLower.includes(key)) {
+                            return url;
+                          }
+                        }
+                        return foodImages.default;
+                      };
+                      
+                      return (
+                        <Collapsible key={index}>
+                          <CollapsibleTrigger 
+                            className="w-full p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200 hover:from-green-100 hover:to-green-150 transition-all duration-200 shadow-sm"
+                            onClick={() => toggleRecipe(recipe.title)}
+                          >
+                            <div className="flex items-center gap-4">
+                              <img 
+                                src={generateFoodImageUrl(recipe.title)} 
+                                alt={recipe.title}
+                                className="w-16 h-16 rounded-lg object-cover shadow-md"
+                                onError={(e) => {
+                                  // Fallback to a generic food image if the specific one fails
+                                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&h=250&fit=crop&auto=format&q=80";
+                                }}
+                              />
+                              <div className="flex-1 text-left">
+                                <h4 className="font-bold text-green-900 text-lg">{recipe.title}</h4>
+                                <p className="text-green-700 font-medium">{recipe.subtitle}</p>
+                              </div>
+                              <ChevronDown className={`w-5 h-5 text-green-700 transition-transform duration-200 ${expandedRecipes.has(recipe.title) ? 'rotate-180' : ''}`} />
                             </div>
-                            <ChevronDown className={`w-4 h-4 text-green-600 transition-transform ${expandedRecipes.has(recipe.title) ? 'rotate-180' : ''}`} />
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="pt-3">
-                          <div className="pl-4 border-l-2 border-green-200">
-                            <div className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">
-                              {recipe.content}
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="pt-4">
+                            <div className="pl-4 border-l-4 border-green-300 bg-gradient-to-r from-green-50 to-white p-4 rounded-r-lg">
+                              <div className="whitespace-pre-wrap text-sm leading-relaxed text-gray-900 font-medium">
+                                {recipe.content}
+                              </div>
                             </div>
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    ))}
+                          </CollapsibleContent>
+                        </Collapsible>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
