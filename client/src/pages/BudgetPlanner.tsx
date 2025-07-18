@@ -334,27 +334,61 @@ export default function BudgetPlanner() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {parsedContent.shoppingList.replace('🔹 **Shopping List**', '').trim().split('\n\n').map((section, index) => {
-                      if (section.includes('**') && section.includes(':')) {
-                        const lines = section.split('\n');
+                    {(() => {
+                      const cleanedList = parsedContent.shoppingList.replace('🔹 **Shopping List**', '').trim();
+                      console.log('🛒 Processing shopping list:', cleanedList.substring(0, 200) + '...');
+                      
+                      // Split by double newlines for sections, then process each section
+                      const sections = cleanedList.split('\n\n').filter(section => section.trim());
+                      console.log('🛒 Found sections:', sections.length);
+                      
+                      return sections.map((section, index) => {
+                        const lines = section.split('\n').filter(line => line.trim());
+                        if (lines.length === 0) return null;
+                        
+                        // First line is usually the category (with ** markers)
                         const categoryLine = lines[0];
-                        const items = lines.slice(1);
-                        return (
-                          <div key={index} className="border-l-4 border-green-200 pl-3">
-                            <h4 className="font-semibold text-green-800 mb-2">{categoryLine.replace(/\*\*/g, '')}</h4>
-                            <ul className="space-y-1">
-                              {items.map((item, itemIndex) => (
-                                <li key={itemIndex} className="text-sm flex items-center gap-2">
-                                  <CheckSquare className="w-3 h-3 text-green-600" />
-                                  <span className="text-gray-800 font-medium">{item.replace(/^-\s*/, '')}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }).filter(Boolean)}
+                        const isCategory = categoryLine.includes('**');
+                        
+                        if (isCategory) {
+                          const items = lines.slice(1).filter(line => line.includes('-') || line.includes('£'));
+                          console.log(`🛒 Category "${categoryLine}" has ${items.length} items`);
+                          
+                          return (
+                            <div key={index} className="border-l-4 border-green-200 pl-3">
+                              <h4 className="font-semibold text-green-800 mb-2">{categoryLine.replace(/\*\*/g, '').replace(/:/g, '')}</h4>
+                              <ul className="space-y-1">
+                                {items.map((item, itemIndex) => (
+                                  <li key={itemIndex} className="text-sm flex items-center gap-2">
+                                    <CheckSquare className="w-3 h-3 text-green-600" />
+                                    <span className="text-gray-800 font-medium">{item.replace(/^-\s*/, '').trim()}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          );
+                        } else {
+                          // Handle items without clear category headers
+                          const items = lines.filter(line => line.includes('-') || line.includes('£'));
+                          if (items.length > 0) {
+                            return (
+                              <div key={index} className="border-l-4 border-green-200 pl-3">
+                                <h4 className="font-semibold text-green-800 mb-2">Items</h4>
+                                <ul className="space-y-1">
+                                  {items.map((item, itemIndex) => (
+                                    <li key={itemIndex} className="text-sm flex items-center gap-2">
+                                      <CheckSquare className="w-3 h-3 text-green-600" />
+                                      <span className="text-gray-800 font-medium">{item.replace(/^-\s*/, '').trim()}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }
+                      }).filter(Boolean);
+                    })()}
                   </div>
                 </CardContent>
               </Card>
