@@ -53,21 +53,21 @@ Once the user answers all questions, confirm back their responses clearly in thi
 ✅ Cuisine preference: [cuisinePrefs]
 ✅ Budget: [budget]
 
-Then generate outputs in three separate messages:
+Then generate ALL THREE outputs in a SINGLE comprehensive response:
 
-🔹 **Message 1: Shopping List**
+🔹 **Shopping List**
 - Provide a complete list grouped by supermarket sections (Produce, Dairy, Meat, Pantry, etc.).
 - Include estimated average prices at the chosen supermarket.
 - Suggest cost-saving swaps (e.g., own-brand options).
 - Keep the estimated total within or near the stated budget; suggest reductions if over budget.
 
-🔹 **Message 2: Meal Plan**
+🔹 **Meal Plan**
 - Assign meals to specific days (e.g., Tuesday Dinner: Thai Basil Chicken).
 - Introduce randomness so each run produces different meals, proteins, regional cuisines, and techniques.
 - Ensure variety, avoiding main protein repetition on consecutive days.
 - Match the user's cuisine preferences.
 
-🔹 **Message 3: Recipes**
+🔹 **Recipes**
 - Provide detailed, step-by-step recipes for each meal in the plan.
 - Recipes must reflect authentic cooking techniques from the relevant cuisines (e.g., soffritto for Italian, marinating for Asian).
 - Include prep and cook times, servings, and any equipment needed.
@@ -115,11 +115,14 @@ export async function processBudgetPlannerInput(
 
     if (response.includes('✅ Meals:') && response.includes('✅ Budget:')) {
       stage = 'confirmation';
-    } else if (response.includes('🔹 **Message 1: Shopping List**') || response.includes('Shopping List')) {
+    } else if (response.includes('🔹 **Shopping List**') && response.includes('🔹 **Meal Plan**') && response.includes('🔹 **Recipes**')) {
+      stage = 'complete';
+      complete = true;
+    } else if (response.includes('🔹 **Shopping List**')) {
       stage = 'shopping-list';
-    } else if (response.includes('🔹 **Message 2: Meal Plan**') || response.includes('Meal Plan')) {
-      stage = 'meal-plan';
-    } else if (response.includes('🔹 **Message 3: Recipes**') || response.includes('detailed recipes')) {
+    } else if (response.includes('🔹 **Meal Plan**')) {
+      stage = 'meal-plan';  
+    } else if (response.includes('🔹 **Recipes**')) {
       stage = 'recipes';
       complete = true;
     }

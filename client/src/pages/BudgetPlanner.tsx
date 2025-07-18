@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { PiggyBank, Send, ArrowLeft, ShoppingCart, Calendar, BookOpen } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { PiggyBank, Send, ArrowLeft, ShoppingCart, Calendar, BookOpen, ChevronDown, CheckSquare } from "lucide-react";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalNavigation from "@/components/GlobalNavigation";
 
@@ -42,7 +43,37 @@ export default function BudgetPlanner() {
   const [isLoading, setIsLoading] = useState(false);
   const [showNavigation, setShowNavigation] = useState(false);
   const [parsedContent, setParsedContent] = useState<ParsedContent>({});
+  const [expandedRecipes, setExpandedRecipes] = useState<Set<string>>(new Set());
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  // Helper function to parse individual recipes
+  const parseRecipes = (recipesText: string) => {
+    const recipePattern = /\*\*(.*?):\s*(.*?)\*\*([\s\S]*?)(?=\*\*[^:]*:\s*[^*]*\*\*|$)/g;
+    const recipes: Array<{title: string, subtitle: string, content: string}> = [];
+    let match;
+    
+    while ((match = recipePattern.exec(recipesText)) !== null) {
+      recipes.push({
+        title: match[1].trim(),
+        subtitle: match[2].trim(),
+        content: match[3].trim()
+      });
+    }
+    
+    return recipes;
+  };
+
+  const toggleRecipe = (recipeTitle: string) => {
+    setExpandedRecipes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(recipeTitle)) {
+        newSet.delete(recipeTitle);
+      } else {
+        newSet.add(recipeTitle);
+      }
+      return newSet;
+    });
+  };
 
   // Ensure navigation is closed when component mounts
   useEffect(() => {
@@ -75,8 +106,19 @@ export default function BudgetPlanner() {
       const data = await response.json();
       console.log('🎯 Budget planner response received:', data);
       
-      // Parse content for cards
-      if (data.stage === 'shopping-list' && data.response.includes('🔹 **Shopping List**')) {
+      // Parse content for cards - handle complete response with all sections
+      if (data.stage === 'complete' || (data.response.includes('🔹 **Shopping List**') && data.response.includes('🔹 **Meal Plan**') && data.response.includes('🔹 **Recipes**'))) {
+        // Parse all three sections from complete response
+        const shoppingListMatch = data.response.match(/🔹 \*\*Shopping List\*\*([\s\S]*?)(?=🔹 \*\*Meal Plan\*\*|$)/);
+        const mealPlanMatch = data.response.match(/🔹 \*\*Meal Plan\*\*([\s\S]*?)(?=🔹 \*\*Recipes\*\*|$)/);
+        const recipesMatch = data.response.match(/🔹 \*\*Recipes\*\*([\s\S]*?)$/);
+        
+        setParsedContent({
+          shoppingList: shoppingListMatch ? '🔹 **Shopping List**' + shoppingListMatch[1] : undefined,
+          mealPlan: mealPlanMatch ? '🔹 **Meal Plan**' + mealPlanMatch[1] : undefined,
+          recipes: recipesMatch ? '🔹 **Recipes**' + recipesMatch[1] : undefined
+        });
+      } else if (data.stage === 'shopping-list' && data.response.includes('🔹 **Shopping List**')) {
         setParsedContent(prev => ({ ...prev, shoppingList: data.response }));
       } else if (data.stage === 'meal-plan' && data.response.includes('🔹 **Meal Plan**')) {
         setParsedContent(prev => ({ ...prev, mealPlan: data.response }));
@@ -85,7 +127,14 @@ export default function BudgetPlanner() {
       }
       
       // Don't add shopping list, meal plan, or recipes to chat - only show in cards
-      if (!data.response.includes('🔹 **Shopping List**') && 
+      // But do show completion message
+      if (data.stage === 'complete') {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: "Perfect! I've created your complete budget meal plan with shopping list, weekly schedule, and detailed recipes. Check the cards below for all the details.",
+          timestamp: new Date()
+        }]);
+      } else if (!data.response.includes('🔹 **Shopping List**') && 
           !data.response.includes('🔹 **Meal Plan**') && 
           !data.response.includes('🔹 **Recipes**')) {
         setMessages(prev => [...prev, {
@@ -266,15 +315,33 @@ export default function BudgetPlanner() {
               <Card className="bg-card/90 backdrop-blur-sm border-green-200/20">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg font-semibold flex items-center gap-2 text-green-700">
-                    <ShoppingCart className="w-5 h-5" />
-                    Shopping List
+                    <CheckSquare className="w-5 h-5" />
+                    Weekly Shopping List
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="prose prose-sm max-w-none">
-                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                      {parsedContent.shoppingList.replace('🔹 **Shopping List**', '').trim()}
-                    </div>
+                  <div className="space-y-3">
+                    {parsedContent.shoppingList.replace('🔹 **Shopping List**', '').trim().split('\n\n').map((section, index) => {
+                      if (section.includes('**') && section.includes(':')) {
+                        const lines = section.split('\n');
+                        const categoryLine = lines[0];
+                        const items = lines.slice(1);
+                        return (
+                          <div key={index} className="border-l-4 border-green-200 pl-3">
+                            <h4 className="font-semibold text-green-800 mb-2">{categoryLine.replace(/\*\*/g, '')}</h4>
+                            <ul className="space-y-1">
+                              {items.map((item, itemIndex) => (
+                                <li key={itemIndex} className="text-sm flex items-center gap-2">
+                                  <CheckSquare className="w-3 h-3 text-green-600" />
+                                  {item.replace(/^-\s*/, '')}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }).filter(Boolean)}
                   </div>
                 </CardContent>
               </Card>
@@ -286,14 +353,26 @@ export default function BudgetPlanner() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg font-semibold flex items-center gap-2 text-green-700">
                     <Calendar className="w-5 h-5" />
-                    Weekly Meal Plan
+                    Weekly Meal Schedule
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="prose prose-sm max-w-none">
-                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                      {parsedContent.mealPlan.replace('🔹 **Meal Plan**', '').trim()}
-                    </div>
+                  <div className="space-y-3">
+                    {parsedContent.mealPlan.replace('🔹 **Meal Plan**', '').trim().split('\n').filter(line => line.includes('**') && line.includes(':')).map((meal, index) => {
+                      const dayMatch = meal.match(/\*\*(.*?):\*\*/);
+                      const dishMatch = meal.match(/\*\*.*?\*\*\s*(.+)/);
+                      return (
+                        <div key={index} className="p-3 bg-green-50 rounded-lg border border-green-200">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-semibold text-green-800">{dayMatch ? dayMatch[1] : 'Meal'}</h4>
+                              <p className="text-sm text-green-700">{dishMatch ? dishMatch[1] : meal.replace(/\*\*/g, '')}</p>
+                            </div>
+                            <Calendar className="w-4 h-4 text-green-600" />
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -305,17 +384,35 @@ export default function BudgetPlanner() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg font-semibold flex items-center gap-2 text-green-700">
                     <BookOpen className="w-5 h-5" />
-                    Detailed Recipes
+                    Complete Recipes
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-96">
-                    <div className="prose prose-sm max-w-none pr-4">
-                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                        {parsedContent.recipes.replace('🔹 **Recipes**', '').trim()}
-                      </div>
-                    </div>
-                  </ScrollArea>
+                  <div className="space-y-4">
+                    {parseRecipes(parsedContent.recipes.replace('🔹 **Recipes**', '').trim()).map((recipe, index) => (
+                      <Collapsible key={index}>
+                        <CollapsibleTrigger 
+                          className="w-full p-3 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition-colors"
+                          onClick={() => toggleRecipe(recipe.title)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="text-left">
+                              <h4 className="font-semibold text-green-800">{recipe.title}</h4>
+                              <p className="text-sm text-green-700">{recipe.subtitle}</p>
+                            </div>
+                            <ChevronDown className={`w-4 h-4 text-green-600 transition-transform ${expandedRecipes.has(recipe.title) ? 'rotate-180' : ''}`} />
+                          </div>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="pt-3">
+                          <div className="pl-4 border-l-2 border-green-200">
+                            <div className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">
+                              {recipe.content}
+                            </div>
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             )}
