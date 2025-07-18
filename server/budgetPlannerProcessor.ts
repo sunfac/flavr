@@ -11,6 +11,7 @@ export interface BudgetPlannerInputs {
   dietaryRestrictions: string;
   cuisinePreferences: string;
   difficultyLevel: string;
+  timeConstraints: string;
   budget: string;
 }
 
@@ -46,7 +47,8 @@ You must ask the user these questions one by one in the chat:
 4) Do you or your family have any dietary restrictions, allergies, or preferences (e.g., vegetarian, gluten-free, nut-free)?
 5) Are there any cuisines you'd love to include or avoid?
 6) What difficulty level do you prefer? (Beginner: simple techniques, Intermediate: moderate skills, Advanced: complex traditional methods)
-7) What is your total budget for this weekly shop? (e.g., £30, £50)
+7) Do you have any time constraints for cooking? (Quick: 30 mins or less, Standard: 30-60 mins, Extended: 60+ mins for special occasions)
+8) What is your total budget for this weekly shop? (e.g., £30, £50)
 
 Once the user answers all questions, confirm back their responses clearly in this format:
 ✅ Meals: [number and types]
@@ -55,6 +57,7 @@ Once the user answers all questions, confirm back their responses clearly in thi
 ✅ Dietary restrictions: [restrictions]
 ✅ Cuisine preference: [cuisinePrefs]
 ✅ Difficulty level: [difficulty]
+✅ Time constraints: [time constraints]
 ✅ Budget: [budget]
 
 Then generate ALL THREE outputs in a SINGLE comprehensive response:
@@ -73,12 +76,13 @@ Then generate ALL THREE outputs in a SINGLE comprehensive response:
 - Match the user's cuisine preferences.
 
 🔹 **Recipes**
-- Provide detailed, step-by-step recipes for each meal in the plan, adjusted for the user's difficulty level.
+- Provide detailed, step-by-step recipes for each meal in the plan, adjusted for the user's difficulty level AND time constraints.
 - AUTHENTIC TECHNIQUES: Include proper curry paste preparation, tempering spices for Indian dishes, creating sofrito for Spanish recipes.
-- DIFFICULTY-APPROPRIATE: Beginner (simple one-pot methods), Intermediate (multiple techniques), Advanced (traditional complex methods like making curry paste from scratch).
+- DIFFICULTY-APPROPRIATE: Beginner (simple one-pot methods), Intermediate (multiple cooking techniques, proper spice tempering, homemade sauces), Advanced (traditional complex methods like making curry paste from scratch).
+- TIME-APPROPRIATE: Match cooking complexity to stated time constraints while maintaining authenticity.
 - Include prep and cook times, servings, and specialized equipment when needed.
 - Provide authentic flavor enhancement tips specific to each cuisine.
-- Emphasize proper ingredient preparation and traditional cooking sequences for maximum authenticity.
+- For INTERMEDIATE level: Include techniques like proper spice blooming, sauce layering, marinating proteins, creating flavor bases from scratch.
 
 RANDOMNESS REQUIREMENT:
 - Maintain an internal randomness factor so repeated runs with identical inputs produce different combinations of main proteins, regional cuisines, sides, and cooking techniques.

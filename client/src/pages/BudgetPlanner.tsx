@@ -360,26 +360,40 @@ export default function BudgetPlanner() {
                   <div className="space-y-4">
                     {parsedContent.recipes && parseRecipes(parsedContent.recipes.replace('🔹 **Recipes**', '').trim()).map((recipe, index) => {
                       // Generate recipe image URL using a food image service
-                      const generateFoodImageUrl = (dishName: string) => {
+                      const generateFoodImageUrl = (dishName: string, index: number) => {
                         const foodImages = {
-                          'thai': 'https://images.unsplash.com/photo-1559847844-d721426d6edc?w=400&h=250&fit=crop&auto=format&q=80',
-                          'curry': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&h=250&fit=crop&auto=format&q=80',
-                          'chicken': 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=250&fit=crop&auto=format&q=80',
-                          'indian': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=250&fit=crop&auto=format&q=80',
-                          'spanish': 'https://images.unsplash.com/photo-1534080564583-6be75777b70a?w=400&h=250&fit=crop&auto=format&q=80',
+                          'thai red curry': 'https://images.unsplash.com/photo-1559847844-d721426d6edc?w=400&h=250&fit=crop&auto=format&q=80',
+                          'thai green curry': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&h=250&fit=crop&auto=format&q=80',
+                          'butter chicken': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=250&fit=crop&auto=format&q=80',
+                          'tikka masala': 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?w=400&h=250&fit=crop&auto=format&q=80',
+                          'biryani': 'https://images.unsplash.com/photo-1563379091339-03246d8c5960?w=400&h=250&fit=crop&auto=format&q=80',
+                          'dal': 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&h=250&fit=crop&auto=format&q=80',
                           'paella': 'https://images.unsplash.com/photo-1534080564583-6be75777b70a?w=400&h=250&fit=crop&auto=format&q=80',
                           'pasta': 'https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?w=400&h=250&fit=crop&auto=format&q=80',
-                          'rice': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&h=250&fit=crop&auto=format&q=80',
-                          'default': 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&h=250&fit=crop&auto=format&q=80'
+                          'carbonara': 'https://images.unsplash.com/photo-1588013273468-315900bafd4d?w=400&h=250&fit=crop&auto=format&q=80',
+                          'lasagna': 'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=400&h=250&fit=crop&auto=format&q=80',
+                          'risotto': 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&h=250&fit=crop&auto=format&q=80',
+                          'chicken': 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=250&fit=crop&auto=format&q=80',
+                          'lamb': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=250&fit=crop&auto=format&q=80'
                         };
                         
                         const dishLower = dishName.toLowerCase();
+                        
+                        // Try exact matches first for better accuracy
                         for (const [key, url] of Object.entries(foodImages)) {
                           if (dishLower.includes(key)) {
                             return url;
                           }
                         }
-                        return foodImages.default;
+                        
+                        // Fallback to different images based on index to ensure variety
+                        const fallbackImages = [
+                          'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&h=250&fit=crop&auto=format&q=80',
+                          'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=250&fit=crop&auto=format&q=80',
+                          'https://images.unsplash.com/photo-1534080564583-6be75777b70a?w=400&h=250&fit=crop&auto=format&q=80',
+                          'https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?w=400&h=250&fit=crop&auto=format&q=80'
+                        ];
+                        return fallbackImages[index % fallbackImages.length];
                       };
                       
                       return (
@@ -390,12 +404,17 @@ export default function BudgetPlanner() {
                           >
                             <div className="flex items-center gap-4">
                               <img 
-                                src={generateFoodImageUrl(recipe.title)} 
+                                src={generateFoodImageUrl(recipe.title, index)} 
                                 alt={recipe.title}
                                 className="w-16 h-16 rounded-lg object-cover shadow-md"
                                 onError={(e) => {
-                                  // Fallback to a generic food image if the specific one fails
-                                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&h=250&fit=crop&auto=format&q=80";
+                                  // Fallback to different images based on index
+                                  const fallbackImages = [
+                                    "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&h=250&fit=crop&auto=format&q=80",
+                                    "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=250&fit=crop&auto=format&q=80",
+                                    "https://images.unsplash.com/photo-1534080564583-6be75777b70a?w=400&h=250&fit=crop&auto=format&q=80"
+                                  ];
+                                  (e.target as HTMLImageElement).src = fallbackImages[index % fallbackImages.length];
                                 }}
                               />
                               <div className="flex-1 text-left">
