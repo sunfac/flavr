@@ -66,7 +66,19 @@ export default function RecipeCard({
       console.log('📋 Ingredients:', result.recipe?.ingredients);
       console.log('📝 Instructions:', result.recipe?.instructions);
       console.log('🖼️ Image URL:', result.recipe?.imageUrl);
-      setFullRecipe(result.recipe);
+      
+      // Ensure the recipe data has the expected structure
+      const recipeData = {
+        ...result.recipe,
+        ingredients: Array.isArray(result.recipe?.ingredients) ? result.recipe.ingredients : [],
+        instructions: Array.isArray(result.recipe?.instructions) ? result.recipe.instructions : []
+      };
+      
+      console.log('✅ Processed recipe data:', recipeData);
+      console.log('✅ Processed ingredients count:', recipeData.ingredients.length);
+      console.log('✅ Processed instructions count:', recipeData.instructions.length);
+      
+      setFullRecipe(recipeData);
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
     },
@@ -262,7 +274,7 @@ export default function RecipeCard({
     cookTime: fullRecipe.cookTime || 30,
     servings: fullRecipe.servings || 4,
     difficulty: fullRecipe.difficulty || "Medium",
-    cuisine: mode === "fridge" ? "Fresh & Simple" : mode === "chef" ? "Gourmet" : "Everyday",
+    cuisine: fullRecipe.cuisine || (mode === "fridge" ? "Fresh & Simple" : mode === "chef" ? "Gourmet" : "Everyday"),
     image: fullRecipe.imageUrl,
     ingredients: fullRecipe.ingredients || [],
     instructions: fullRecipe.instructions || [],
@@ -270,6 +282,9 @@ export default function RecipeCard({
   };
 
   console.log('🎯 Enhanced recipe for display:', enhancedRecipe);
+  console.log('🔍 Original fullRecipe data:', fullRecipe);
+  console.log('🥘 Original ingredients:', fullRecipe.ingredients);
+  console.log('📋 Original instructions:', fullRecipe.instructions);
   console.log('🥘 Enhanced ingredients count:', enhancedRecipe.ingredients.length);
   console.log('📋 Enhanced instructions count:', enhancedRecipe.instructions.length);
 
