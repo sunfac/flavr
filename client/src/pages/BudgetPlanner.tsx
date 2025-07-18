@@ -64,7 +64,9 @@ export default function BudgetPlanner() {
         conversationHistory
       });
     },
-    onSuccess: (data) => {
+    onSuccess: async (response) => {
+      const data = await response.json();
+      console.log('🎯 Budget planner response received:', data);
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: data.response,
