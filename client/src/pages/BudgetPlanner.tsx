@@ -127,14 +127,14 @@ export default function BudgetPlanner() {
           recipesPreview: recipesMatch?.[0]?.substring(0, 100) + '...'
         });
         
-        if (shoppingListMatch) {
-          setParsedContent(prev => ({ ...prev, shoppingList: shoppingListMatch[0] }));
-        }
-        if (mealPlanMatch) {
-          setParsedContent(prev => ({ ...prev, mealPlan: mealPlanMatch[0] }));
-        }
-        if (recipesMatch) {
-          setParsedContent(prev => ({ ...prev, recipes: recipesMatch[0] }));
+        if (shoppingListMatch || mealPlanMatch || recipesMatch) {
+          setParsedContent(prev => ({
+            ...prev,
+            shoppingList: shoppingListMatch ? shoppingListMatch[0] : prev.shoppingList,
+            mealPlan: mealPlanMatch ? mealPlanMatch[0] : prev.mealPlan,
+            recipes: recipesMatch ? recipesMatch[0] : prev.recipes
+          }));
+          console.log('✅ Updated parsed content state with sections');
         }
       }
       
@@ -318,10 +318,12 @@ export default function BudgetPlanner() {
           </CardContent>
         </Card>
 
-        {/* Content Cards */}
+        {/* Content Cards - Debug */}
+        {console.log('🔍 Parsed content state:', parsedContent)}
         {(parsedContent.shoppingList || parsedContent.mealPlan || parsedContent.recipes) && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             {/* Shopping List Card */}
+            {parsedContent.shoppingList && console.log('🛒 Rendering shopping list card')}
             {parsedContent.shoppingList && (
               <Card className="bg-card/90 backdrop-blur-sm border-green-200/20">
                 <CardHeader className="pb-3">
