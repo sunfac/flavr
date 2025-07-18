@@ -266,19 +266,22 @@ export default function RecipeCard({
     return null;
   }
 
+  // Handle nested recipe structure - check if data is nested under 'recipe' property
+  const actualRecipe = fullRecipe.recipe || fullRecipe;
+  
   // Transform recipe data to match EnhancedRecipeCard interface
   const enhancedRecipe = {
-    id: fullRecipe.id?.toString() || 'temp-recipe',
-    title: fullRecipe.title,
-    description: fullRecipe.description,
-    cookTime: fullRecipe.cookTime || 30,
-    servings: fullRecipe.servings || 4,
-    difficulty: fullRecipe.difficulty || "Medium",
-    cuisine: fullRecipe.cuisine || (mode === "fridge" ? "Fresh & Simple" : mode === "chef" ? "Gourmet" : "Everyday"),
-    image: fullRecipe.imageUrl,
-    ingredients: fullRecipe.ingredients || [],
-    instructions: fullRecipe.instructions || [],
-    tips: fullRecipe.tips
+    id: actualRecipe.id?.toString() || 'temp-recipe',
+    title: actualRecipe.title,
+    description: actualRecipe.description,
+    cookTime: actualRecipe.cookTime || 30,
+    servings: actualRecipe.servings || 4,
+    difficulty: actualRecipe.difficulty || "Medium",
+    cuisine: actualRecipe.cuisine || (mode === "fridge" ? "Fresh & Simple" : mode === "chef" ? "Gourmet" : "Everyday"),
+    image: actualRecipe.imageUrl,
+    ingredients: actualRecipe.ingredients || [],
+    instructions: actualRecipe.instructions || [],
+    tips: actualRecipe.tips
   };
 
   console.log('🎯 Enhanced recipe for display:', enhancedRecipe);
@@ -287,6 +290,13 @@ export default function RecipeCard({
   console.log('📋 Original instructions:', fullRecipe.instructions);
   console.log('🥘 Enhanced ingredients count:', enhancedRecipe.ingredients.length);
   console.log('📋 Enhanced instructions count:', enhancedRecipe.instructions.length);
+  
+  // Debug: Check if there's a nested recipe structure
+  if (fullRecipe.recipe) {
+    console.log('🔍 Found nested recipe structure!');
+    console.log('🥘 Nested recipe ingredients:', fullRecipe.recipe.ingredients);
+    console.log('📋 Nested recipe instructions:', fullRecipe.recipe.instructions);
+  }
 
   const handleShare = () => {
     if (fullRecipe.shareId) {
