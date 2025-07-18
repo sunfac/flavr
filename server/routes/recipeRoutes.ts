@@ -450,7 +450,7 @@ Return valid JSON only:
   "title": "${selectedRecipe.title}",
   "description": "Appetizing 2-3 sentence description of the finished dish",
   "cuisine": "${selectedRecipe.cuisine}",
-  "servings": ${portions},
+  "servings": ${parseInt(portions) || 4},
   "cookTime": "${selectedRecipe.estimatedTime}",
   "difficulty": "${selectedRecipe.difficulty}",
   "ingredients": [
@@ -542,20 +542,20 @@ Return valid JSON only:
 
       const duration = Date.now() - startTime;
 
-      // Log successful interaction
-      await logGPTInteraction({
-        endpoint: 'generate-full-recipe',
-        prompt,
-        response: responseContent,
-        model: 'gpt-4o',
-        duration,
-        inputTokens: completion.usage?.prompt_tokens || 0,
-        outputTokens: completion.usage?.completion_tokens || 0,
-        cost: ((completion.usage?.prompt_tokens || 0) * 0.03 + (completion.usage?.completion_tokens || 0) * 0.06) / 1000,
-        success: true,
-        userId: req.session?.userId || 'anonymous',
-        sessionId: req.session?.id || 'no-session'
-      });
+      // Log successful interaction (temporarily disabled due to data size limits)
+      // await logGPTInteraction({
+      //   endpoint: 'generate-full-recipe',
+      //   prompt,
+      //   response: responseContent,
+      //   model: 'gpt-4o',
+      //   duration,
+      //   inputTokens: completion.usage?.prompt_tokens || 0,
+      //   outputTokens: completion.usage?.completion_tokens || 0,
+      //   cost: ((completion.usage?.prompt_tokens || 0) * 0.03 + (completion.usage?.completion_tokens || 0) * 0.06) / 1000,
+      //   success: true,
+      //   userId: req.session?.userId || 'anonymous',
+      //   sessionId: req.session?.id || 'no-session'
+      // });
 
       console.log('✅ Full recipe generated successfully for:', recipeData.title);
       res.json({ recipe: recipeData });

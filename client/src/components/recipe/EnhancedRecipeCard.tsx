@@ -133,6 +133,15 @@ function EnhancedRecipeCard({
 
 
 
+  // Transform ingredients into the correct format for IngredientPanel
+  const formattedIngredients = useMemo(() => {
+    return activeIngredients.map((ingredient, index) => ({
+      id: `ingredient-${index}`,
+      text: ingredient,
+      checked: ingredientStates[`ingredient-${index}`] || false
+    }));
+  }, [activeIngredients, ingredientStates]);
+
   // Scale ingredients based on serving adjustments
   const scaledIngredients = useScaledIngredients(
     activeIngredients, 
@@ -184,11 +193,6 @@ function EnhancedRecipeCard({
 
   // Note: Removed ingredient state sync useEffect to prevent infinite loops
   // Ingredient states are now managed directly through user interactions
-
-  const ingredientsWithState = scaledIngredients.map(ingredient => ({
-    ...ingredient,
-    checked: ingredientStates[ingredient.id] || false
-  }));
 
   return (
     <div className={`min-h-screen bg-slate-900 text-white ${className}`}>
@@ -276,7 +280,7 @@ function EnhancedRecipeCard({
 
           {/* Ingredient Panel */}
           <IngredientPanel
-            ingredients={ingredientsWithState}
+            ingredients={formattedIngredients}
             onToggle={handleIngredientToggle}
             className="md:h-[600px] md:sticky md:top-0"
           />
