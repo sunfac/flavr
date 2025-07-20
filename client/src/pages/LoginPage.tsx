@@ -27,8 +27,10 @@ export default function LoginPage() {
   }, [location]);
 
   const loginMutation = useMutation({
-    mutationFn: (data: { email: string; password: string }) => 
-      apiRequest("POST", "/api/login", data),
+    mutationFn: async (data: { email: string; password: string }) => {
+      const response = await apiRequest("POST", "/api/login", data);
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
       toast({ title: "Welcome back!", description: "Successfully logged in." });
@@ -44,8 +46,10 @@ export default function LoginPage() {
   });
 
   const signupMutation = useMutation({
-    mutationFn: (data: { username: string; email: string; password: string }) => 
-      apiRequest("POST", "/api/signup", data),
+    mutationFn: async (data: { username: string; email: string; password: string }) => {
+      const response = await apiRequest("POST", "/api/register", data);
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
       toast({ title: "Welcome to Flavr!", description: "Account created successfully." });

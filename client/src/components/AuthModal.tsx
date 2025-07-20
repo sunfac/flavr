@@ -31,12 +31,15 @@ export default function AuthModal({
   const [registerData, setRegisterData] = useState({ username: "", email: "", password: "" });
 
   const loginMutation = useMutation({
-    mutationFn: (data: { email: string; password: string }) =>
-      apiRequest("POST", "/api/login", data),
-    onSuccess: async (response) => {
-      console.log("Login successful!");
+    mutationFn: async (data: { email: string; password: string }) => {
+      const response = await apiRequest("POST", "/api/login", data);
+      return response.json();
+    },
+    onSuccess: async (data) => {
+      console.log("Login successful!", data);
       await queryClient.invalidateQueries({ queryKey: ["/api/me"] });
-      await queryClient.refetchQueries({ queryKey: ["/api/me"] });
+      const meResult = await queryClient.refetchQueries({ queryKey: ["/api/me"] });
+      console.log("Refetch /api/me result:", meResult);
       toast({
         title: "Welcome back! 👋",
         description: "Ready to start cooking?",
@@ -54,12 +57,15 @@ export default function AuthModal({
   });
 
   const registerMutation = useMutation({
-    mutationFn: (data: { username: string; email: string; password: string }) =>
-      apiRequest("POST", "/api/register", data),
-    onSuccess: async (response) => {
-      console.log("Registration successful!");
+    mutationFn: async (data: { username: string; email: string; password: string }) => {
+      const response = await apiRequest("POST", "/api/register", data);
+      return response.json();
+    },
+    onSuccess: async (data) => {
+      console.log("Registration successful!", data);
       await queryClient.invalidateQueries({ queryKey: ["/api/me"] });
-      await queryClient.refetchQueries({ queryKey: ["/api/me"] });
+      const meResult = await queryClient.refetchQueries({ queryKey: ["/api/me"] });
+      console.log("Refetch /api/me result:", meResult);
       toast({
         title: "Welcome to Flavr! 🎉",
         description: "Your culinary journey begins now",
