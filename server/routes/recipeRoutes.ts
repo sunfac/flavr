@@ -247,7 +247,8 @@ Make each recipe distinctly different in style, technique, and flavor profile. F
 
       const creativityGuidance = getCreativeGuidanceBlock();
 
-      const prompt = `You are Zest, Flavr's AI culinary expert. Create 4-6 diverse recipe suggestions for shopping mode.
+      // Check if a custom prompt was provided (for fridge mode)
+      const prompt = req.body.prompt || `You are Zest, Flavr's AI culinary expert. Create 4-6 diverse recipe suggestions for shopping mode.
 
 USER PREFERENCES:
 • Portions: ${portions}
@@ -283,9 +284,12 @@ Return valid JSON only:
 
       console.log('🎯 Sending prompt to OpenAI...');
       
+      // Use the custom prompt or the constructed prompt
+      const finalPrompt = req.body.prompt || prompt;
+      
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
+        messages: [{ role: "user", content: finalPrompt }],
         temperature: 0.8,
         max_tokens: 2500,
       });
@@ -320,7 +324,7 @@ Return valid JSON only:
       // Log successful interaction
       await logSimpleGPTInteraction({
         endpoint: 'generate-recipe-ideas',
-        prompt,
+        prompt: finalPrompt,
         response: responseContent,
         model: 'gpt-4o',
         duration,
