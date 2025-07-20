@@ -57,7 +57,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      const recipes = await storage.getRecipesByUserId(req.session.userId);
+      const recipes = await storage.getRecipesByUser(req.session.userId);
       res.json(recipes);
     } catch (error) {
       console.error("Failed to fetch recipes:", error);
@@ -73,7 +73,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { id } = req.params;
-      await storage.deleteRecipe(id, req.session.userId);
+      await storage.deleteRecipe(parseInt(id), req.session.userId);
       res.json({ success: true });
     } catch (error) {
       console.error("Failed to delete recipe:", error);

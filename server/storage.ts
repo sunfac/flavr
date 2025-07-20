@@ -1,6 +1,6 @@
 import { users, recipes, chatMessages, developerLogs, pseudoUsers, interactionLogs, type User, type InsertUser, type Recipe, type InsertRecipe, type ChatMessage, type InsertChatMessage, type DeveloperLog, type InsertDeveloperLog, type PseudoUser, type InsertPseudoUser, recipeGenerationLogs, type RecipeGenerationLog, type InsertRecipeGenerationLog, type InteractionLog, type InsertInteractionLog } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, or } from "drizzle-orm";
+import { eq, desc, or, and } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
@@ -293,8 +293,16 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(recipes).orderBy(desc(recipes.createdAt));
   }
 
-  async deleteRecipe(id: number): Promise<void> {
-    await db.delete(recipes).where(eq(recipes.id, id));
+  async deleteRecipe(id: number, userId?: number): Promise<void> {
+    if (userId) {
+      // Delete only if the recipe belongs to the user
+      await db.delete(recipes).where(
+        and(eq(recipes.id, id), eq(recipes.userId, userId))
+      );
+    } else {
+      // Admin delete - delete any recipe
+      await db.delete(recipes).where(eq(recipes.id, id));
+    }
   }
 }
 
