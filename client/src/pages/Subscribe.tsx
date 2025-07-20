@@ -163,6 +163,18 @@ export default function Subscribe() {
 
   // Fetch payment intent when component mounts
   useEffect(() => {
+    // If user is not authenticated, don't try to create subscription
+    if (!user && !isLoading) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to subscribe to Flavr+",
+        variant: "destructive",
+      });
+      navigate("/");
+      return;
+    }
+    
+    // If user is authenticated and doesn't have Flavr+, create subscription
     if ((user as any)?.user && !(user as any).user.hasFlavrPlus) {
       apiRequest("POST", "/api/create-subscription")
         .then(async (res) => {
@@ -191,7 +203,7 @@ export default function Subscribe() {
           });
         });
     }
-  }, [user, toast]);
+  }, [user, isLoading, toast, navigate]);
 
   const hasFlavrPlus = (user as any)?.user?.hasFlavrPlus || (subscriptionData as any)?.hasFlavrPlus;
   const cancelAtPeriodEnd = (subscriptionData as any)?.cancelAtPeriodEnd;
@@ -199,6 +211,11 @@ export default function Subscribe() {
 
   if (isLoading) {
     return <Loading message="Loading your account..." />;
+  }
+
+  // Redirect non-authenticated users
+  if (!user && !isLoading) {
+    return null; // The useEffect will handle the redirect
   }
 
   // Show subscription management for existing Flavr+ users

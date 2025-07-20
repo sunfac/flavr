@@ -17,13 +17,13 @@ export default function FlavrPlus() {
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   // Get user authentication status
-  const { data: user } = useQuery({
+  const { data: user, isLoading } = useQuery({
     queryKey: ["/api/me"],
     retry: false,
   });
 
-  const isAuthenticated = !!user?.user;
-  const hasFlavrPlus = user?.user?.hasFlavrPlus || false;
+  const isAuthenticated = !!(user as any)?.user;
+  const hasFlavrPlus = (user as any)?.user?.hasFlavrPlus || false;
 
   // Close all menus
   const closeAllMenus = () => {
@@ -67,6 +67,15 @@ export default function FlavrPlus() {
       description: "Weekly curated meal plans and cooking challenges"
     }
   ];
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   if (hasFlavrPlus) {
     return (
