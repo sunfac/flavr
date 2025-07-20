@@ -12,10 +12,10 @@ if (!process.env.OPENAI_API_KEY) {
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export function registerChatRoutes(app: Express) {
-  // Chat endpoint for streaming responses
+  // Chat endpoint for streaming responses with function calling
   app.post("/api/chat/stream", async (req, res) => {
     try {
-      const { message, conversationHistory = [], recipeData } = req.body;
+      const { message, conversationHistory = [], currentRecipe, openAIContext } = req.body;
       
       if (!message) {
         return res.status(400).json({ error: "Message is required" });
@@ -29,44 +29,113 @@ export function registerChatRoutes(app: Express) {
       res.setHeader('Connection', 'keep-alive');
       res.setHeader('Access-Control-Allow-Origin', '*');
 
-      const messages = [
-        {
-          role: "system" as const,
-          content: `You are Zest, Flavr's friendly AI cooking assistant. You help users with recipe questions, cooking tips, and culinary guidance. 
+      // Enhanced system prompt with function calling support
+      const systemPrompt = `You are Zest, Flavr's expert AI cooking assistant. You help users modify recipes, answer cooking questions, and provide culinary guidance.
 
-Current recipe context: ${recipeData ? JSON.stringify(recipeData) : 'No active recipe'}
+${currentRecipe ? `Current Recipe Context: ${JSON.stringify(currentRecipe)}` : ''}
+${openAIContext ? `Original Context: ${JSON.stringify(openAIContext)}` : ''}
+
+IMPORTANT: When users request recipe modifications (changing ingredients, servings, cooking methods, adding side dishes, etc.), use the updateRecipe function to actually implement the changes instead of just suggesting them.
+
+Function: updateRecipe
+- Use this when users ask to modify recipes
+- Always include complete recipe data with all fields
+- Be specific and comprehensive in modifications
 
 Guidelines:
-- Be helpful, encouraging, and knowledgeable about cooking
-- If asked about modifying recipes, provide specific, actionable advice
-- Keep responses concise but informative
-- Focus on practical cooking guidance`
-        },
+- Detect modification requests (spicier, more/less servings, different ingredients, cooking methods, etc.)
+- Use updateRecipe function to implement changes immediately
+- Provide encouraging, specific cooking advice
+- Keep responses concise but informative`;
+
+      const messages = [
+        { role: "system" as const, content: systemPrompt },
         ...conversationHistory.map((msg: any) => ({
-          role: msg.type === 'user' ? 'user' : 'assistant',
-          content: msg.content
+          role: msg.role || (msg.sender === 'user' ? 'user' : 'assistant'),
+          content: msg.content || msg.text
         })),
-        {
-          role: "user" as const,
-          content: message
-        }
+        { role: "user" as const, content: message }
       ];
+
+      // Function definition for recipe updates
+      const functions = [{
+        name: "updateRecipe",
+        description: "Update the current recipe with modifications requested by the user",
+        parameters: {
+          type: "object",
+          properties: {
+            title: { type: "string", description: "Updated recipe title" },
+            ingredients: {
+              type: "array",
+              items: { type: "string" },
+              description: "Complete list of ingredients with quantities"
+            },
+            instructions: {
+              type: "array", 
+              items: { type: "string" },
+              description: "Complete step-by-step cooking instructions"
+            },
+            servings: { type: "number", description: "Number of servings" },
+            cookTime: { type: "string", description: "Total cooking time" },
+            difficulty: { type: "string", description: "Recipe difficulty level" },
+            cuisine: { type: "string", description: "Cuisine type" }
+          },
+          required: ["title", "ingredients", "instructions", "servings"]
+        }
+      }];
 
       const stream = await openai.chat.completions.create({
         model: "gpt-4o",
         messages,
+        functions,
+        function_call: "auto",
         temperature: 0.7,
-        max_tokens: 1000,
+        max_tokens: 1500,
         stream: true,
       });
 
       let fullResponse = '';
+      let functionCall = null;
 
       for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content || '';
-        if (content) {
-          fullResponse += content;
-          res.write(`data: ${JSON.stringify({ content })}\n\n`);
+        const choice = chunk.choices[0];
+        
+        if (choice?.delta?.content) {
+          fullResponse += choice.delta.content;
+          res.write(`data: ${JSON.stringify({ content: choice.delta.content })}\n\n`);
+        }
+        
+        if (choice?.delta?.function_call) {
+          if (!functionCall) {
+            functionCall = { name: '', arguments: '' };
+          }
+          if (choice.delta.function_call.name) {
+            functionCall.name = choice.delta.function_call.name;
+          }
+          if (choice.delta.function_call.arguments) {
+            functionCall.arguments += choice.delta.function_call.arguments;
+          }
+        }
+      }
+
+      // Handle function call if present
+      if (functionCall && functionCall.name === 'updateRecipe') {
+        try {
+          const updateData = JSON.parse(functionCall.arguments);
+          console.log('🔄 Function call: updateRecipe with data:', updateData);
+          
+          // Send recipe update via stream
+          res.write(`data: ${JSON.stringify({ 
+            type: 'recipeUpdate', 
+            recipe: {
+              id: currentRecipe?.id || 'updated-recipe',
+              ...updateData,
+              lastUpdated: Date.now()
+            }
+          })}\n\n`);
+          
+        } catch (error) {
+          console.error('Function call parsing error:', error);
         }
       }
 
@@ -86,6 +155,21 @@ Guidelines:
 
       res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
       res.end();
+
+      // Log the interaction
+      await logGPTInteraction({
+        endpoint: 'chat-stream',
+        prompt: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
+        response: fullResponse,
+        model: 'gpt-4o',
+        duration: 0,
+        inputTokens: 0,
+        outputTokens: 0,
+        cost: 0,
+        success: true,
+        userId: req.session?.userId || 'anonymous',
+        sessionId: req.session?.id || 'no-session'
+      });
 
     } catch (error) {
       console.error("Chat stream error:", error);

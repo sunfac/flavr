@@ -298,12 +298,39 @@ export default function RecipeCard({
     console.log('📋 Nested recipe instructions:', fullRecipe.recipe.instructions);
   }
 
-  const handleShare = () => {
-    if (fullRecipe.shareId) {
-      // Copy share link logic would go here
+  const handleShare = async () => {
+    try {
+      // First ensure recipe is saved and shared
+      if (fullRecipe.id) {
+        await apiRequest("POST", `/api/recipe/${fullRecipe.id}/share`, { 
+          isShared: true 
+        });
+      }
+
+      const shareUrl = fullRecipe.shareId 
+        ? `${window.location.origin}/recipe/share/${fullRecipe.shareId}`
+        : window.location.href;
+
+      if (navigator.share && fullRecipe.title) {
+        await navigator.share({
+          title: fullRecipe.title,
+          text: fullRecipe.description || `Check out this recipe: ${fullRecipe.title}`,
+          url: shareUrl,
+        });
+      } else {
+        // Fallback to copy link
+        await navigator.clipboard.writeText(shareUrl);
+        toast({
+          title: "Link copied!",
+          description: "Recipe sharing link copied to clipboard",
+        });
+      }
+    } catch (error) {
+      console.error('Sharing failed:', error);
       toast({
-        title: "Share Recipe",
-        description: "Share functionality activated",
+        title: "Error",
+        description: "Failed to share recipe",
+        variant: "destructive",
       });
     }
   };
@@ -339,35 +366,39 @@ export default function RecipeCard({
           </div>
         )}
 
-        {/* Save & Share Tools */}
-        {fullRecipe.id && (
-          <div className="mb-8 bg-slate-800/30 rounded-xl backdrop-blur-sm">
-            <RecipeShareTools
-              id={fullRecipe.id}
-              shareId={fullRecipe.shareId}
-              title={fullRecipe.title}
-              description={fullRecipe.description}
-              imageUrl={fullRecipe.imageUrl}
-              isShared={fullRecipe.isShared || false}
-              recipe={fullRecipe}
-              onShareToggle={async () => {
-                try {
-                  await apiRequest("POST", `/api/recipe/${fullRecipe.id}/share`, { 
-                    isShared: !fullRecipe.isShared 
-                  });
+        {/* Additional Sharing Tools for Shopping Mode */}
+        {mode === "shopping" && fullRecipe.id && (
+          <div className="mb-8 bg-slate-800/30 rounded-xl backdrop-blur-sm p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <iconMap.share2 className="w-5 h-5 text-orange-400" />
+              <h3 className="text-lg font-semibold text-white">Share Recipe</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Button
+                onClick={handleShare}
+                className="bg-orange-500 hover:bg-orange-600 text-white"
+              >
+                <iconMap.share2 className="w-4 h-4 mr-2" />
+                Share Recipe
+              </Button>
+              <Button
+                onClick={async () => {
+                  const shareUrl = fullRecipe.shareId 
+                    ? `${window.location.origin}/recipe/share/${fullRecipe.shareId}`
+                    : window.location.href;
+                  await navigator.clipboard.writeText(shareUrl);
                   toast({
-                    title: "Sharing updated",
-                    description: fullRecipe.isShared ? "Recipe is now private" : "Recipe is now public",
+                    title: "Link copied!",
+                    description: "Recipe link copied to clipboard",
                   });
-                } catch (error) {
-                  toast({
-                    title: "Error",
-                    description: "Failed to update sharing settings",
-                    variant: "destructive",
-                  });
-                }
-              }}
-            />
+                }}
+                variant="outline"
+                className="border-slate-600 text-slate-200 hover:bg-slate-700/50"
+              >
+                <iconMap.copy className="w-4 h-4 mr-2" />
+                Copy Link
+              </Button>
+            </div>
           </div>
         )}
 
