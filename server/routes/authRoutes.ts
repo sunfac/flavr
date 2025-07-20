@@ -56,13 +56,13 @@ export function registerAuthRoutes(app: Express) {
       const { email, password } = req.body;
       
       if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
+        return res.status(400).json({ message: "Email/username and password are required" });
       }
 
-      const user = await storage.getUserByEmail(email);
+      const user = await storage.getUserByEmailOrUsername(email);
       if (!user) {
-        console.log(`Login failed: user not found for email ${email}`);
-        return res.status(401).json({ message: "Invalid email or password" });
+        console.log(`Login failed: user not found for email/username ${email}`);
+        return res.status(401).json({ message: "Invalid email/username or password" });
       }
 
       console.log(`Login attempt for user ${user.email}, checking password...`);

@@ -1,6 +1,6 @@
 import { users, recipes, chatMessages, developerLogs, pseudoUsers, interactionLogs, type User, type InsertUser, type Recipe, type InsertRecipe, type ChatMessage, type InsertChatMessage, type DeveloperLog, type InsertDeveloperLog, type PseudoUser, type InsertPseudoUser, recipeGenerationLogs, type RecipeGenerationLog, type InsertRecipeGenerationLog, type InteractionLog, type InsertInteractionLog } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, or } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
@@ -8,6 +8,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByEmailOrUsername(emailOrUsername: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserUsage(id: number, recipes: number, images: number): Promise<User>;
   updateUserStripeInfo(id: number, customerId: string, subscriptionId?: string): Promise<User>;
@@ -73,6 +74,17 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async getUserByEmailOrUsername(emailOrUsername: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users)
+      .where(
+        or(
+          eq(users.email, emailOrUsername),
+          eq(users.username, emailOrUsername)
+        )
+      );
     return user || undefined;
   }
 

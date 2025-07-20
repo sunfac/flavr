@@ -187,8 +187,8 @@ export default function AuthModal({
               <div className="relative">
                 <iconMap.mail className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                 <Input
-                  type="email"
-                  placeholder="Email"
+                  type="text"
+                  placeholder="Email or Username"
                   value={loginData.email}
                   onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                   className="pl-10 bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-orange-400"
