@@ -200,6 +200,14 @@ export default function BudgetPlanner() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 relative overflow-hidden">
+      <style>{`
+        /* Ensure proper scrolling on mobile */
+        @media (max-width: 640px) {
+          .budget-planner-container {
+            padding-bottom: env(safe-area-inset-bottom);
+          }
+        }
+      `}</style>
       {/* Background decoration */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(34,197,94,0.3),transparent_50%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(16,185,129,0.2),transparent_50%)]" />
@@ -217,50 +225,50 @@ export default function BudgetPlanner() {
       />
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 pt-20 pb-8 min-h-screen flex flex-col">
-        {/* Header Section */}
-        <div className="flex items-center gap-4 mb-6">
+      <div className="budget-planner-container container mx-auto px-3 sm:px-4 pt-16 sm:pt-20 pb-4 sm:pb-8 min-h-screen flex flex-col max-w-6xl">
+        {/* Header Section - Mobile Responsive */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={() => navigate("/modes")}
-            className="text-white hover:bg-white/10"
+            className="text-white hover:bg-white/10 flex-shrink-0"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Modes
           </Button>
           
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-500 rounded-lg">
+          <div className="flex items-center gap-3 w-full">
+            <div className="p-2 bg-green-500 rounded-lg flex-shrink-0">
               <PiggyBank className="w-6 h-6 text-white" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white">Budget Planner</h1>
-              <p className="text-green-100 text-sm">Smart weekly meal planning for maximum value</p>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-2xl font-bold text-white break-words">Budget Planner</h1>
+              <p className="text-green-100 text-xs sm:text-sm break-words">Smart weekly meal planning for maximum value</p>
             </div>
           </div>
         </div>
 
         {/* Chat Interface */}
-        <Card className="flex-1 bg-card/90 backdrop-blur-sm border-green-200/20 flex flex-col">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <PiggyBank className="w-5 h-5" />
-              Budget Planning Assistant
+        <Card className="flex-1 bg-card/90 backdrop-blur-sm border-green-200/20 flex flex-col min-h-0">
+          <CardHeader className="pb-4 px-4 sm:px-6 flex-shrink-0">
+            <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2">
+              <PiggyBank className="w-5 h-5 flex-shrink-0" />
+              <span className="break-words min-w-0">Budget Planning Assistant</span>
             </CardTitle>
           </CardHeader>
           
-          <CardContent className="flex-1 flex flex-col">
+          <CardContent className="flex-1 flex flex-col px-4 sm:px-6 pb-4 min-h-0">
             {/* Messages Area */}
-            <ScrollArea ref={scrollAreaRef} className="flex-1 pr-4 mb-4">
-              <div className="space-y-4">
+            <ScrollArea ref={scrollAreaRef} className="flex-1 pr-2 mb-4 min-h-0">
+              <div className="space-y-4 pb-2">
                 {messages.map((message, index) => (
                   <div
                     key={index}
                     className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[80%] px-4 py-3 rounded-lg ${
+                      className={`max-w-[85%] sm:max-w-[80%] px-3 sm:px-4 py-2 sm:py-3 rounded-lg ${
                         message.role === 'user'
                           ? 'bg-green-600 text-white'
                           : 'bg-muted text-foreground'
@@ -283,12 +291,12 @@ export default function BudgetPlanner() {
                 
                 {isLoading && (
                   <div className="flex justify-start">
-                    <div className="bg-muted px-4 py-3 rounded-lg">
+                    <div className="bg-muted px-3 sm:px-4 py-2 sm:py-3 rounded-lg max-w-[85%] sm:max-w-[80%]">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" />
                         <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce animation-delay-100" />
                         <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce animation-delay-200" />
-                        <span className="text-sm text-muted-foreground ml-2">Planning your budget meals...</span>
+                        <span className="text-xs sm:text-sm text-muted-foreground ml-2">Planning your budget meals...</span>
                       </div>
                     </div>
                   </div>
@@ -297,20 +305,20 @@ export default function BudgetPlanner() {
             </ScrollArea>
 
             {/* Input Area */}
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3 flex-shrink-0">
               <Input
                 value={currentMessage}
                 onChange={(e) => setCurrentMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Type your response..."
                 disabled={isLoading}
-                className="flex-1"
+                className="flex-1 min-w-0 text-sm"
               />
               <Button 
                 onClick={handleSendMessage}
                 disabled={!currentMessage.trim() || isLoading}
                 size="icon"
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-green-600 hover:bg-green-700 flex-shrink-0"
               >
                 <Send className="w-4 h-4" />
               </Button>
@@ -318,21 +326,21 @@ export default function BudgetPlanner() {
           </CardContent>
         </Card>
 
-        {/* Content Cards - Debug */}
+        {/* Content Cards - Mobile Responsive */}
         {console.log('🔍 Parsed content state:', parsedContent)}
         {(parsedContent.shoppingList || parsedContent.mealPlan || parsedContent.recipes) && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 mt-4 sm:mt-6">
             {/* Shopping List Card */}
             {parsedContent.shoppingList && console.log('🛒 Rendering shopping list card')}
             {parsedContent.shoppingList && (
               <Card className="bg-card/90 backdrop-blur-sm border-green-200/20">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-semibold flex items-center gap-2 text-green-700">
-                    <CheckSquare className="w-5 h-5" />
-                    Weekly Shopping List
+                <CardHeader className="pb-3 px-4 sm:px-6">
+                  <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2 text-green-700">
+                    <CheckSquare className="w-4 sm:w-5 h-4 sm:h-5 flex-shrink-0" />
+                    <span className="break-words min-w-0">Weekly Shopping List</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-4 sm:px-6">
                   <div className="space-y-3">
                     {(() => {
                       const cleanedList = parsedContent.shoppingList.replace('🔹 **Shopping List**', '').trim();
@@ -355,13 +363,13 @@ export default function BudgetPlanner() {
                           console.log(`🛒 Category "${categoryLine}" has ${items.length} items`);
                           
                           return (
-                            <div key={index} className="border-l-4 border-green-200 pl-3">
-                              <h4 className="font-semibold text-green-800 mb-2">{categoryLine.replace(/\*\*/g, '').replace(/:/g, '')}</h4>
+                            <div key={index} className="border-l-4 border-green-200 pl-2 sm:pl-3">
+                              <h4 className="font-semibold text-green-800 mb-2 text-sm sm:text-base break-words">{categoryLine.replace(/\*\*/g, '').replace(/:/g, '')}</h4>
                               <ul className="space-y-1">
                                 {items.map((item, itemIndex) => (
-                                  <li key={itemIndex} className="text-sm flex items-center gap-2">
-                                    <CheckSquare className="w-3 h-3 text-green-600" />
-                                    <span className="text-gray-900 font-semibold">{item.replace(/^-\s*/, '').trim()}</span>
+                                  <li key={itemIndex} className="text-xs sm:text-sm flex items-start gap-2">
+                                    <CheckSquare className="w-3 h-3 text-green-600 flex-shrink-0 mt-0.5" />
+                                    <span className="text-gray-900 font-medium break-words min-w-0">{item.replace(/^-\s*/, '').trim()}</span>
                                   </li>
                                 ))}
                               </ul>
@@ -372,13 +380,13 @@ export default function BudgetPlanner() {
                           const items = lines.filter(line => line.includes('-') || line.includes('£'));
                           if (items.length > 0) {
                             return (
-                              <div key={index} className="border-l-4 border-green-200 pl-3">
-                                <h4 className="font-semibold text-green-800 mb-2">Items</h4>
+                              <div key={index} className="border-l-4 border-green-200 pl-2 sm:pl-3">
+                                <h4 className="font-semibold text-green-800 mb-2 text-sm sm:text-base">Items</h4>
                                 <ul className="space-y-1">
                                   {items.map((item, itemIndex) => (
-                                    <li key={itemIndex} className="text-sm flex items-center gap-2">
-                                      <CheckSquare className="w-3 h-3 text-green-600" />
-                                      <span className="text-gray-900 font-semibold">{item.replace(/^-\s*/, '').trim()}</span>
+                                    <li key={itemIndex} className="text-xs sm:text-sm flex items-start gap-2">
+                                      <CheckSquare className="w-3 h-3 text-green-600 flex-shrink-0 mt-0.5" />
+                                      <span className="text-gray-900 font-medium break-words min-w-0">{item.replace(/^-\s*/, '').trim()}</span>
                                     </li>
                                   ))}
                                 </ul>
@@ -397,10 +405,10 @@ export default function BudgetPlanner() {
             {/* Combined Meal Plan & Recipes Card */}
             {(parsedContent.mealPlan || parsedContent.recipes) && (
               <Card className="bg-card/90 backdrop-blur-sm border-green-200/20">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-semibold flex items-center gap-2 text-green-700">
-                    <BookOpen className="w-5 h-5" />
-                    Weekly Meal Plan & Recipes
+                <CardHeader className="pb-3 px-4 sm:px-6">
+                  <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2 text-green-700">
+                    <BookOpen className="w-4 sm:w-5 h-4 sm:h-5 flex-shrink-0" />
+                    <span className="break-words min-w-0">Weekly Meal Plan & Recipes</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
