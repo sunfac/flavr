@@ -108,7 +108,7 @@ export default function Subscribe() {
   // Get subscription status - moved before conditional returns
   const { data: subscriptionData } = useQuery({
     queryKey: ["/api/subscription-status"],
-    enabled: !!user?.user,
+    enabled: !!(user as any)?.user,
   });
 
   // Cancel subscription mutation
@@ -163,7 +163,7 @@ export default function Subscribe() {
 
   // Fetch payment intent when component mounts
   useEffect(() => {
-    if (user?.user && !user.user.hasFlavrPlus) {
+    if ((user as any)?.user && !(user as any).user.hasFlavrPlus) {
       apiRequest("POST", "/api/create-subscription")
         .then(async (res) => {
           if (!res.ok) {
@@ -193,9 +193,9 @@ export default function Subscribe() {
     }
   }, [user, toast]);
 
-  const hasFlavrPlus = user?.user?.hasFlavrPlus || subscriptionData?.hasFlavrPlus;
-  const cancelAtPeriodEnd = subscriptionData?.cancelAtPeriodEnd;
-  const currentPeriodEnd = subscriptionData?.currentPeriodEnd;
+  const hasFlavrPlus = (user as any)?.user?.hasFlavrPlus || (subscriptionData as any)?.hasFlavrPlus;
+  const cancelAtPeriodEnd = (subscriptionData as any)?.cancelAtPeriodEnd;
+  const currentPeriodEnd = (subscriptionData as any)?.currentPeriodEnd;
 
   if (isLoading) {
     return <Loading message="Loading your account..." />;
@@ -220,7 +220,7 @@ export default function Subscribe() {
                 </div>
                 <CardTitle className="font-playfair text-2xl text-orange-400">Flavr+ Subscription</CardTitle>
                 <p className="text-gray-300">
-                  {user?.user?.email === "william@blycontracting.co.uk" 
+                  {(user as any)?.user?.email === "william@blycontracting.co.uk" 
                     ? "Your developer account has unlimited access to all Flavr features"
                     : "Manage your premium subscription"
                   }
@@ -273,7 +273,7 @@ export default function Subscribe() {
                   </Button>
                   
                   {/* Subscription management buttons */}
-                  {user?.user?.email !== "william@blycontracting.co.uk" && (
+                  {(user as any)?.user?.email !== "william@blycontracting.co.uk" && (
                     <>
                       {cancelAtPeriodEnd ? (
                         <Button 
