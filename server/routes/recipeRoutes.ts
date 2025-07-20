@@ -275,7 +275,8 @@ Make each recipe distinctly different in style, technique, and flavor profile. F
       const creativityGuidance = getCreativeGuidanceBlock();
 
       // Check if a custom prompt was provided (for fridge mode)
-      const prompt = req.body.prompt || `You are Zest, Flavr's AI culinary expert. Create 4-6 diverse recipe suggestions for shopping mode.
+      const cuisineList = Array.isArray(cuisines) ? cuisines.join(', ') : cuisines;
+      const prompt = req.body.prompt || `You are Zest, Flavr's AI culinary expert. Create exactly 5 recipe suggestions from ONLY the following cuisine(s): ${cuisineList}
 
 USER PREFERENCES:
 • Portions: ${portions}
@@ -283,35 +284,30 @@ USER PREFERENCES:
 • ${moodPrompt}  
 • ${ambitionPrompt}
 • ${budgetPrompt}
-• Selected Cuisine(s): ${Array.isArray(cuisines) ? cuisines.join(', ') : cuisines}
+• Selected Cuisine(s): ${cuisineList}
 • Equipment: ${formatEquipmentText(equipment)}
 ${dietPrompt ? `• ${dietPrompt}` : ''}${supermarketContext}
 
 ${creativityGuidance}
 
-STRICT CUISINE REQUIREMENT:
-ALL recipes MUST be from the selected cuisine(s): ${Array.isArray(cuisines) ? cuisines.join(', ') : cuisines}
-- If "Mexican" is selected, provide ONLY authentic Mexican dishes (not fusion)
-- If multiple cuisines are selected, distribute recipes evenly among them
-- Do NOT include recipes from cuisines not explicitly selected by the user
+CRITICAL INSTRUCTIONS:
+When user selects "Mexican" - provide ONLY authentic Mexican recipes (tacos, enchiladas, pozole, mole, etc.)
+When user selects "Italian" - provide ONLY Italian recipes (pasta, risotto, pizza, etc.)
+Do NOT mix cuisines or create fusion dishes unless specifically requested.
 
 REQUIREMENTS:
-- Each recipe must be distinctly different in technique and flavor profile WITHIN the selected cuisine(s)
-- Include a mix of difficulty levels appropriate for the ambition level
-- Ensure recipes fit the time constraint and equipment availability
-- Make descriptions appetizing and specific to build excitement
-- CRITICAL: Cuisine field must match one of the selected cuisines exactly
+- Generate exactly 5 recipes
+- ALL recipes MUST be authentic dishes from: ${cuisineList}
+- Provide variety within the cuisine (different proteins, techniques, meal types)
+- Match the mood, time, and equipment constraints
 
-Return valid JSON only:
+Return JSON with this exact structure:
 {
   "recipes": [
     {
-      "title": "Specific dish name (not generic)",
-      "description": "2-3 sentences highlighting flavors, technique, and appeal",
-      "estimatedTime": "X minutes",
-      "difficulty": "Beginner/Intermediate/Advanced", 
-      "cuisine": "Must be one of the selected cuisines",
-      "highlights": ["Unique aspect 1", "Flavor highlight 2", "Technique or ingredient 3"]
+      "name": "Specific dish name",
+      "cuisine": "${Array.isArray(cuisines) ? cuisines[0] : cuisines}",
+      "ingredients": ["ingredient 1", "ingredient 2", "ingredient 3", "etc"]
     }
   ]
 }`;
@@ -324,8 +320,8 @@ Return valid JSON only:
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: `You are a JSON API that MUST strictly follow cuisine constraints. When the user selects specific cuisine(s), you MUST ONLY return recipes from those exact cuisines. If "Mexican" is selected, return ONLY authentic Mexican dishes. No fusion, no other cuisines. Respond ONLY with valid JSON.` },
-          { role: "user", content: finalPrompt + "\n\nCRITICAL REMINDER: You MUST only return recipes from the selected cuisine(s): " + (Array.isArray(cuisines) ? cuisines.join(', ') : cuisines) + ". NO EXCEPTIONS." }
+          { role: "system", content: "You are a JSON API. Respond ONLY with valid JSON - no explanations, no markdown, no text outside the JSON object." },
+          { role: "user", content: finalPrompt + "\n\nIMPORTANT: Return ONLY the JSON object, nothing else." }
         ],
         temperature: 0.7,
         max_tokens: 2500,

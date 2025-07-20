@@ -19,11 +19,9 @@ export function getCreativeGuidanceBlock(): string {
 Creative Guidance:
 Do not include kitchen equipment in the recipe title. Focus on flavor, cuisine, or emotional theme. Assume the user has access to standard kitchen tools. Equipment should not define the identity of the dish.
 
-Add a subtle variation or elevated element that enhances the recipe without violating any of the user's dietary, time, ingredient, equipment, OR CUISINE constraints. Do not introduce new tools, ingredients, or cuisines the user hasn't approved. Stay strictly within the selected cuisine(s) while maximizing flavour variety and originality.
+Add a subtle variation or elevated element that enhances the recipe without violating any of the user's dietary, time, ingredient, or equipment constraints. Do not introduce new tools or ingredients the user hasn't approved. Stay within the defined limits while maximizing flavour variety and originality.
 
 ${random}
-
-IMPORTANT: Maintain variety WITHIN the selected cuisine(s) only. If user selected Mexican, provide different Mexican dishes. Do NOT add fusion cuisines or dishes from other regions.
 
 Always prioritise maximising flavour to the highest possible level while keeping outputs efficient to generate.
   `.trim();
