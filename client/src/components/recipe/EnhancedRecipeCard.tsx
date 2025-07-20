@@ -295,7 +295,8 @@ function EnhancedRecipeCard({
             title: activeTitle,
             cookTime: activeCookTime,
             difficulty: activeDifficulty,
-            servings: activeServings
+            servings: activeServings,
+            description: recipe.description  // Explicitly pass description
           }}
           currentServings={activeServings}
           onServingsChange={(newServings) => {
