@@ -99,7 +99,7 @@ function StepCard({
         
         {step.duration && (
           <Badge variant="outline" className="border-orange-400 text-orange-300">
-            {step.duration}min
+            {step.duration} {step.duration === 1 ? 'minute' : 'minutes'}
           </Badge>
         )}
       </div>
