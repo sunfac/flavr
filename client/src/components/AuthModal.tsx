@@ -33,8 +33,10 @@ export default function AuthModal({
   const loginMutation = useMutation({
     mutationFn: (data: { email: string; password: string }) =>
       apiRequest("POST", "/api/login", data),
-    onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+    onSuccess: async (response) => {
+      console.log("Login successful!");
+      await queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/me"] });
       toast({
         title: "Welcome back! 👋",
         description: "Ready to start cooking?",
@@ -54,8 +56,10 @@ export default function AuthModal({
   const registerMutation = useMutation({
     mutationFn: (data: { username: string; email: string; password: string }) =>
       apiRequest("POST", "/api/register", data),
-    onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+    onSuccess: async (response) => {
+      console.log("Registration successful!");
+      await queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/me"] });
       toast({
         title: "Welcome to Flavr! 🎉",
         description: "Your culinary journey begins now",
