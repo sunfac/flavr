@@ -80,23 +80,32 @@ export default function RecipeCard({
       
       setFullRecipe(recipeData);
       
-      // Immediate scroll to top - no delay
-      const scrollToTop = () => {
+      // Immediate scroll to recipe header where the image and title are
+      const scrollToRecipeHeader = () => {
+        // Try to find the recipe header anchor first
+        const recipeHeader = document.getElementById('recipe-header-top');
+        if (recipeHeader) {
+          recipeHeader.scrollIntoView({ behavior: 'auto', block: 'start' });
+          return;
+        }
+        
+        // Fallback to general recipe-top anchor
         const recipeTop = document.getElementById('recipe-top');
         if (recipeTop) {
           recipeTop.scrollIntoView({ behavior: 'auto', block: 'start' });
+          return;
         }
         
-        // Force immediate scroll
+        // Final fallback to page top
         window.scrollTo({ top: 0, behavior: 'auto' });
         document.documentElement.scrollTop = 0;
         document.body.scrollTop = 0;
       };
       
       // Execute immediately and with slight delay for reliability
-      scrollToTop();
-      setTimeout(scrollToTop, 50);
-      setTimeout(scrollToTop, 150);
+      scrollToRecipeHeader();
+      setTimeout(scrollToRecipeHeader, 50);
+      setTimeout(scrollToRecipeHeader, 150);
       
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });

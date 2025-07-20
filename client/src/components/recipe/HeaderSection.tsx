@@ -30,6 +30,9 @@ export default function HeaderSection({
 
   return (
     <div className="relative">
+      {/* Recipe header anchor for scroll targeting */}
+      <div id="recipe-header-top"></div>
+      
       {/* Hero Image - Mobile First Design */}
       <div className="relative w-full">
         {/* Main Image Display */}
