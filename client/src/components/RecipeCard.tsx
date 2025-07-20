@@ -422,7 +422,7 @@ export default function RecipeCard({
         {mode === "shopping" && fullRecipe.id && (
           <div className="mb-8 bg-slate-800/30 rounded-xl backdrop-blur-sm p-6">
             <div className="flex items-center gap-3 mb-4">
-              <iconMap.share2 className="w-5 h-5 text-orange-400" />
+              <iconMap.share className="w-5 h-5 text-orange-400" />
               <h3 className="text-lg font-semibold text-white">Share Recipe</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -430,7 +430,7 @@ export default function RecipeCard({
                 onClick={handleShare}
                 className="bg-orange-500 hover:bg-orange-600 text-white"
               >
-                <iconMap.share2 className="w-4 h-4 mr-2" />
+                <iconMap.share className="w-4 h-4 mr-2" />
                 Share Recipe
               </Button>
               <Button

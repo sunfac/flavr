@@ -215,6 +215,7 @@ Changelog:
 - July 20, 2025. Recipe scroll behavior fixed - ensured recipe cards always load at the top where title and image are displayed, disabled conflicting auto-scroll in StepStack component, implemented consistent window.scrollTo(0,0) across all recipe loading scenarios, removed smooth scrolling that could cause recipes to display at middle of page
 - July 20, 2025. Button functionality and mobile description fixes complete - fixed Sign Up button to navigate with signup parameter, fixed Flavr Plus upgrade button to navigate to subscribe page instead of showing alert, simplified Budget Planner navigation to remove try-catch fallback, added full recipe description display on mobile below image to prevent text cutoff, enhanced mobile recipe card readability with proper text sizing and layout
 - July 20, 2025. Recipe display and copy functionality improvements - removed duplicate description display on mobile (now only shows in dedicated box below image), enhanced recipe copy feature to include full recipe details (ingredients, instructions, servings, cook time, difficulty, cuisine, and tips) formatted for easy pasting into Apple Notes or other apps
+- July 20, 2025. Fixed RecipeCard icon error - replaced undefined iconMap.share2 with iconMap.share to resolve component rendering crash, fixed nested recipe data structure handling in ShoppingMode to properly extract ingredients and instructions from API response
 ```
 
 ## User Preferences
