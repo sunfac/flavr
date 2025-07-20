@@ -231,7 +231,7 @@ export default function BudgetPlanner() {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => navigate("/modes")}
+            onClick={() => navigate("/app")}
             className="text-white hover:bg-white/10 flex-shrink-0"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
