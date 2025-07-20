@@ -78,20 +78,19 @@ export default function ChefAssistMode() {
     try {
       setIsLoading(true);
 
-      // Generate recipe directly for Chef mode using the full recipe endpoint
-      const fetchResponse = await fetch("/api/generate-full-recipe", {
+      // Generate recipe directly for Chef mode using the dedicated chef endpoint
+      const fetchResponse = await fetch("/api/chef-assist-recipe", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          selectedRecipe: { 
-            title: "Custom Chef Recipe", 
-            description: transformedData.intent 
-          },
-          mode: "chef",
-          quizData: transformedData,
-          prompt: `Create a recipe for: ${transformedData.intent}`
+          intent: transformedData.intent,
+          dietary: transformedData.dietary,
+          time: transformedData.time,
+          ambition: transformedData.ambition,
+          equipment: transformedData.equipment,
+          servings: transformedData.servings
         })
       });
       

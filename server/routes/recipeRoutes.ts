@@ -569,6 +569,184 @@ Return valid JSON only:
     }
   });
 
+  // Chef Assist Recipe Generation - contextual titles and images
+  app.post("/api/chef-assist-recipe", async (req, res) => {
+    try {
+      const startTime = Date.now();
+      const { intent, dietary, time, ambition, equipment, servings } = req.body;
+
+      console.log('👨‍🍳 Chef Assist Recipe Generation:', { intent, servings, time });
+
+      if (!intent) {
+        return res.status(400).json({ error: "Intent is required for chef assist mode" });
+      }
+
+      // Build context prompts
+      const timePrompt = getTimePromptText(time);
+      const ambitionPrompt = getAmbitionPromptText(ambition);
+      const dietPrompt = getDietPromptText(dietary);
+      const equipmentPrompt = getEquipmentPromptText(equipment);
+      const strictDietaryInstruction = getStrictDietaryInstruction(dietary);
+
+      const prompt = `You are Zest, Flavr's expert culinary AI. Create a complete recipe based on this cooking intent: "${intent}"
+
+USER PREFERENCES:
+• Cooking Intent: ${intent}
+• Servings: ${servings}
+• Available Time: ${timePrompt}
+• Cooking Level: ${ambitionPrompt}
+• Equipment Available: ${formatEquipmentText(equipment)}
+${dietPrompt ? `• Dietary Requirements: ${dietPrompt}` : ''}
+
+${strictDietaryInstruction}
+
+REQUIREMENTS:
+- Generate an appropriate, creative recipe title that matches the intent
+- Create a complete recipe with precise measurements for ${servings} servings
+- Include comprehensive ingredient list with specific quantities
+- Provide detailed, step-by-step cooking instructions
+- Add helpful cooking tips and techniques
+- Match the complexity to the user's cooking ambition level
+- Ensure the recipe can be completed within the available time
+- Choose appropriate cuisine style that fits the intent
+
+Return valid JSON only:
+{
+  "title": "Creative, descriptive recipe name that captures the intent",
+  "description": "Appetizing 2-3 sentence description of the finished dish",
+  "cuisine": "Most appropriate cuisine style for this recipe",
+  "servings": ${parseInt(servings) || 4},
+  "cookTime": ${time || 60},
+  "difficulty": "Easy/Medium/Hard based on ambition level",
+  "ingredients": [
+    "Specific quantity and ingredient (e.g., '2 tablespoons olive oil')",
+    "Another ingredient with exact measurement"
+  ],
+  "instructions": [
+    "Step 1: Detailed first instruction with technique",
+    "Step 2: Next instruction with timing and visual cues",
+    "Continue with clear, actionable steps"
+  ],
+  "tips": [
+    "Professional tip for better results",
+    "Ingredient substitution or technique advice",
+    "Storage or serving suggestion"
+  ],
+  "nutritionHighlights": [
+    "Key nutritional benefit 1",
+    "Key nutritional benefit 2",
+    "Key nutritional benefit 3"
+  ]
+}`;
+
+      console.log('🤖 Sending prompt to OpenAI for chef assist recipe...');
+      
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.8,
+        max_tokens: 2000
+      });
+
+      const recipeContent = completion.choices[0]?.message?.content;
+      if (!recipeContent) {
+        throw new Error("No recipe content received from OpenAI");
+      }
+
+      console.log('📋 Raw OpenAI response for chef assist:', recipeContent.substring(0, 200));
+
+      let recipeData;
+      try {
+        // Try to parse the JSON response
+        const jsonMatch = recipeContent.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          recipeData = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error("No JSON found in response");
+        }
+      } catch (parseError) {
+        console.error('JSON parse error for chef assist:', parseError);
+        throw new Error("Failed to parse recipe JSON from OpenAI response");
+      }
+
+      // Add unique ID and timestamp
+      recipeData.id = Date.now().toString();
+      recipeData.createdAt = new Date().toISOString();
+
+      // Generate contextual recipe image based on the generated title and cuisine
+      try {
+        const imageUrl = await generateRecipeImage(recipeData.title, recipeData.cuisine || 'international');
+        if (imageUrl) {
+          recipeData.imageUrl = imageUrl;
+        }
+      } catch (imageError) {
+        console.error('Image generation failed for chef assist:', imageError);
+        // Continue without image - not critical
+      }
+
+      // Store recipe in database
+      try {
+        const userId = req.session?.userId;
+        if (userId) {
+          await storage.createRecipe({
+            userId,
+            title: recipeData.title,
+            description: recipeData.description,
+            ingredients: recipeData.ingredients,
+            instructions: recipeData.instructions,
+            cookTime: recipeData.cookTime,
+            servings: recipeData.servings,
+            difficulty: recipeData.difficulty,
+            cuisine: recipeData.cuisine,
+            imageUrl: recipeData.imageUrl,
+            isShared: false,
+            mode: 'chef'
+          });
+          
+          console.log('✅ Chef assist recipe saved to database');
+        }
+      } catch (dbError) {
+        console.error('Database save failed for chef assist:', dbError);
+        // Continue without database save
+      }
+
+      // Log the interaction
+      const endTime = Date.now();
+      const duration = endTime - startTime;
+      
+      try {
+        const userId = req.session?.userId;
+        await logUserInteractionData(userId || 'anonymous', {
+          mode: 'chef',
+          intent,
+          dietary,
+          time,
+          ambition,
+          equipment,
+          servings,
+          generatedTitle: recipeData.title,
+          generatedCuisine: recipeData.cuisine,
+          hasImage: !!recipeData.imageUrl,
+          duration,
+          timestamp: new Date().toISOString()
+        });
+      } catch (logError) {
+        console.error('Failed to log chef assist interaction:', logError);
+      }
+
+      console.log(`✅ Chef assist recipe generation completed in ${duration}ms:`, recipeData.title);
+
+      res.json({ recipe: recipeData });
+
+    } catch (error) {
+      console.error('❌ Chef assist recipe generation failed:', error);
+      res.status(500).json({ 
+        error: "Failed to generate chef assist recipe", 
+        details: error.message 
+      });
+    }
+  });
+
   // Conversational recipe generation
   app.post("/api/conversational-recipe", async (req, res) => {
     try {
