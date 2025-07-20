@@ -57,7 +57,33 @@ ${publicUrl}`;
   };
 
   const handleCopyFullRecipe = async () => {
-    const fullText = `Recipe: ${title}\n\n${description}\n\nCreated with Flavr AI\nLink: ${publicUrl}`;
+    // Format ingredients
+    const ingredientsList = recipe?.ingredients ? 
+      recipe.ingredients.map((ing, idx) => `${idx + 1}. ${ing}`).join('\n') : '';
+    
+    // Format instructions
+    const instructionsList = recipe?.instructions ? 
+      recipe.instructions.map((inst, idx) => `${idx + 1}. ${inst}`).join('\n') : '';
+    
+    const fullText = `${title}
+
+${description}
+
+Servings: ${recipe?.servings || 4}
+Cook Time: ${recipe?.cookTime || '30 min'}
+Difficulty: ${recipe?.difficulty || 'Medium'}
+${recipe?.cuisine ? `Cuisine: ${recipe.cuisine}` : ''}
+
+INGREDIENTS:
+${ingredientsList}
+
+INSTRUCTIONS:
+${instructionsList}
+
+${recipe?.tips ? `\nTIPS:\n${recipe.tips}\n` : ''}
+Created with Flavr AI
+Link: ${publicUrl}`;
+    
     try {
       await navigator.clipboard.writeText(fullText);
       toast({

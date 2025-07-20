@@ -64,7 +64,7 @@ export default function HeaderSection({
                 {recipe.title}
               </h1>
               {recipe.description && (
-                <p className="text-white/90 text-shadow text-xs sm:text-sm md:text-base leading-relaxed break-words line-clamp-2 sm:line-clamp-3">
+                <p className="hidden sm:block text-white/90 text-shadow text-xs sm:text-sm md:text-base leading-relaxed break-words line-clamp-2 sm:line-clamp-3">
                   {recipe.description}
                 </p>
               )}
