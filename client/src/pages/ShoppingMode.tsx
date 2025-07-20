@@ -209,10 +209,13 @@ export default function ShoppingMode() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          selectedRecipe: recipe.originalData || recipe,
+          selectedRecipe: {
+            title: recipe.title,
+            description: recipe.description,
+            ...(recipe.originalData || recipe)
+          },
           mode: "shopping",
-          quizData: quizData,
-          prompt: `Generate a complete recipe for ${recipe.title}`
+          quizData: quizData
         })
       });
       
