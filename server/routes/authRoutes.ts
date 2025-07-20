@@ -52,8 +52,19 @@ export function registerAuthRoutes(app: Express) {
       });
 
       res.json({ user: { id: user.id, email: user.email, username: user.username, hasFlavrPlus: user.hasFlavrPlus || isDeveloper } });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Registration error:", error);
+      
+      // Handle specific database constraint errors
+      if (error.code === '23505') {
+        if (error.detail?.includes('email')) {
+          return res.status(400).json({ message: "Email already exists" });
+        } else if (error.detail?.includes('username')) {
+          return res.status(400).json({ message: "Username already taken" });
+        }
+        return res.status(400).json({ message: "User already exists" });
+      }
+      
       res.status(500).json({ message: "Registration failed" });
     }
   });

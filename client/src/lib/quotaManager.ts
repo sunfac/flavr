@@ -8,7 +8,22 @@ export async function checkQuotaBeforeGPT(): Promise<boolean> {
     return true;
   }
 
-  // Step 1: Create or retrieve pseudo-user ID
+  // Check if user is authenticated and has Flavr Plus
+  try {
+    const response = await fetch("/api/me", { credentials: "include" });
+    if (response.ok) {
+      const userData = await response.json();
+      if (userData.user?.hasFlavrPlus) {
+        console.log("[Flavr] Flavr Plus user - bypassing recipe limits");
+        return true;
+      }
+      console.log("[Flavr] Authenticated user without Plus - checking quota");
+    }
+  } catch (error) {
+    console.log("[Flavr] User not authenticated - checking pseudo-user quota");
+  }
+
+  // Step 1: Create or retrieve pseudo-user ID for non-authenticated or non-Plus users
   let userId = localStorage.getItem("flavrUserId");
   if (!userId) {
     userId = crypto.randomUUID();
