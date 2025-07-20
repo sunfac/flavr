@@ -64,7 +64,7 @@ export default function HeaderSection({
                 {recipe.title}
               </h1>
               {recipe.description && (
-                <p className="hidden sm:block text-white/90 text-shadow text-sm md:text-base leading-relaxed break-words line-clamp-3">
+                <p className="text-white/90 text-shadow text-xs sm:text-sm md:text-base leading-relaxed break-words line-clamp-2 sm:line-clamp-3">
                   {recipe.description}
                 </p>
               )}
@@ -90,6 +90,15 @@ export default function HeaderSection({
         
 
       </div>
+
+      {/* Mobile Description - Show full description below image on mobile */}
+      {recipe.description && (
+        <div className="block sm:hidden p-3 bg-slate-800/50">
+          <p className="text-slate-200 text-sm leading-relaxed">
+            {recipe.description}
+          </p>
+        </div>
+      )}
 
       {/* Fast Facts & Serving Controls */}
       <div className="p-3 sm:p-4 md:p-6 bg-slate-800/50 backdrop-blur-sm">

@@ -40,6 +40,10 @@ export default function GlobalHeader({
   const handleLoginClick = () => {
     navigate("/login");
   };
+  
+  const handleSignUpClick = () => {
+    navigate("/login?signup=true");
+  };
   return (
     <header className="absolute top-0 left-0 right-0 z-50 px-6 py-4 pointer-events-auto">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -98,7 +102,7 @@ export default function GlobalHeader({
               <Button 
                 variant="ghost"
                 size="sm"
-                onClick={handleLoginClick}
+                onClick={handleSignUpClick}
                 className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1.5 py-0.5 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50"
               >
                 <iconMap.userPlus className="w-3 h-3 mr-0.5" />

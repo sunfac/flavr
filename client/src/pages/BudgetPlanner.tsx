@@ -231,19 +231,7 @@ export default function BudgetPlanner() {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              console.log('🔄 Back to Modes button clicked, navigating to /app');
-              try {
-                navigate("/app");
-                console.log('✅ Navigation completed');
-              } catch (error) {
-                console.error('❌ Navigation failed:', error);
-                // Fallback to window.location
-                window.location.href = "/app";
-              }
-            }}
+            onClick={() => navigate("/app")}
             className="text-white hover:bg-white/10 flex-shrink-0"
             type="button"
           >

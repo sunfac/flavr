@@ -41,8 +41,8 @@ export default function FlavrPlus() {
   };
 
   const handleUpgradeClick = () => {
-    // For now, just show a coming soon message
-    alert("Stripe integration coming soon! This will redirect to secure payment processing.");
+    // Navigate to subscribe page with Stripe integration
+    navigate("/subscribe");
   };
 
   const features = [
