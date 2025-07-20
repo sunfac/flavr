@@ -473,6 +473,28 @@
     hyphens: auto;
   }
   
+  /* Line clamp utilities for text truncation */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
   /* Mobile-specific text sizing */
   @media (max-width: 768px) {
     .recipe-title {
@@ -483,6 +505,20 @@
     .recipe-description {
       font-size: 0.875rem !important; /* 14px */
       line-height: 1.5 !important;
+    }
+    
+    /* Enhanced mobile image display */
+    .recipe-image-container {
+      aspect-ratio: 16/10 !important;
+      border-radius: 0.75rem 0.75rem 0 0;
+      overflow: hidden;
+    }
+    
+    .recipe-image-container img {
+      object-fit: cover;
+      object-position: center;
+      width: 100%;
+      height: 100%;
     }
   }
 }

@@ -30,33 +30,60 @@ export default function HeaderSection({
 
   return (
     <div className="relative">
-      {/* Hero Image */}
-      <div 
-        className="relative w-full aspect-video bg-gradient-to-br from-orange-400 to-orange-600 rounded-t-xl overflow-hidden"
-        style={{
-          backgroundImage: recipe.image ? `url(${recipe.image})` : undefined,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
-        {/* Overlay for text readability */}
-        <div className="absolute inset-0 bg-black/30" />
+      {/* Hero Image - Mobile First Design */}
+      <div className="relative w-full">
+        {/* Main Image Display */}
+        {recipe.image ? (
+          <div className="relative w-full aspect-[16/10] sm:aspect-video bg-gradient-to-br from-orange-400 to-orange-600 rounded-t-xl overflow-hidden">
+            <img 
+              src={recipe.image} 
+              alt={recipe.title}
+              className="w-full h-full object-cover"
+              loading="eager"
+              style={{ objectPosition: 'center' }}
+            />
+            {/* Minimal overlay for mobile readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent sm:bg-black/30" />
+            
+            {/* Mobile: Minimal title overlay, Desktop: Full overlay */}
+            <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-6 text-white">
+              <h1 className="font-bold mb-1 sm:mb-2 text-shadow-lg text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight break-words hyphens-auto text-wrap-balance">
+                {recipe.title}
+              </h1>
+              {recipe.description && (
+                <p className="hidden sm:block text-white/90 text-shadow text-sm md:text-base leading-relaxed break-words line-clamp-3">
+                  {recipe.description}
+                </p>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="relative w-full aspect-[16/10] sm:aspect-video bg-gradient-to-br from-orange-400 to-orange-600 rounded-t-xl overflow-hidden flex items-center justify-center">
+            <div className="text-center p-6 text-white">
+              <h1 className="font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight break-words mb-2">
+                {recipe.title}
+              </h1>
+              {recipe.description && (
+                <p className="text-white/90 text-sm md:text-base leading-relaxed break-words">
+                  {recipe.description}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
         
-        {/* Recipe Title Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 text-white">
-          <h1 className="font-bold mb-2 text-shadow-lg recipe-title md:text-2xl lg:text-3xl leading-tight break-words hyphens-auto text-wrap-balance">
-            {recipe.title}
-          </h1>
-          {recipe.description && (
-            <p className="text-white/90 text-shadow recipe-description md:text-base leading-relaxed break-words">
+        {/* Mobile Description - Below Image */}
+        {recipe.description && recipe.image && (
+          <div className="sm:hidden p-3 bg-slate-800/70 backdrop-blur-sm">
+            <p className="text-slate-200 text-sm leading-relaxed break-words">
               {recipe.description}
             </p>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Fast Facts & Serving Controls */}
-      <div className="p-4 md:p-6 bg-slate-800/50 backdrop-blur-sm">
+      <div className="p-3 sm:p-4 md:p-6 bg-slate-800/50 backdrop-blur-sm">
         {/* Fast Facts Chips - Mobile Responsive */}
         <div className="flex items-center gap-2 md:gap-3 mb-4 flex-wrap">
           {fastFacts.map((fact, index) => {
