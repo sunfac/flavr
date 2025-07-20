@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useScaledIngredients } from '@/hooks/useScaledIngredients';
 import { useRecipeStore, recipeActions } from '@/stores/recipeStore';
-import RecipeShareTools from '../RecipeShareTools';
-import { apiRequest } from '@/lib/queryClient';
 
 // Extract duration from instruction text
 function extractDuration(instruction: string): number | undefined {
@@ -302,37 +300,7 @@ function EnhancedRecipeCard({
           </div>
         )}
 
-        {/* Sharing Tools */}
-        {recipe.id && (
-          <div className="mb-8 bg-slate-800/30 rounded-xl backdrop-blur-sm">
-            <RecipeShareTools
-              id={recipe.id}
-              shareId={recipe.shareId}
-              title={activeTitle}
-              description={recipe.description || `Delicious ${activeTitle} recipe`}
-              imageUrl={recipe.image}
-              isShared={recipe.isShared || false}
-              recipe={recipe}
-              onShareToggle={async () => {
-                try {
-                  await apiRequest("POST", `/api/recipe/${recipe.id}/share`, { 
-                    isShared: !recipe.isShared 
-                  });
-                  toast({
-                    title: "Sharing updated",
-                    description: recipe.isShared ? "Recipe is now private" : "Recipe is now public",
-                  });
-                } catch (error) {
-                  toast({
-                    title: "Error",
-                    description: "Failed to update sharing settings",
-                    variant: "destructive",
-                  });
-                }
-              }}
-            />
-          </div>
-        )}
+
 
         {/* Footer Section */}
         <FooterSection
