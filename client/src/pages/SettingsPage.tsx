@@ -71,6 +71,12 @@ export default function SettingsPage() {
     logoutMutation.mutate();
   };
 
+  // Get subscription status
+  const { data: subscriptionStatus } = useQuery({
+    queryKey: ["/api/subscription-status"],
+    enabled: !!user?.user,
+  });
+
   const handleUpgrade = () => {
     navigate("/subscribe");
   };
@@ -104,7 +110,7 @@ export default function SettingsPage() {
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Plan</label>
                 <p className="text-foreground flex items-center">
-                  {user.user.isPlus ? (
+                  {user.user.hasFlavrPlus || user.user.isPlus ? (
                     <>
                       <i className="fas fa-crown text-accent mr-2"></i>
                       Flavr+ Premium
@@ -160,8 +166,37 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          {/* Upgrade Section */}
-          {!user.user.isPlus && (
+          {/* Subscription Management */}
+          {user.user.hasFlavrPlus || user.user.isPlus ? (
+            <Card className="border-accent/20">
+              <CardHeader>
+                <CardTitle className="font-playfair text-accent flex items-center">
+                  <i className="fas fa-crown mr-2"></i>
+                  Flavr+ Subscription
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  You have unlimited access to all premium features.
+                </p>
+                {subscriptionStatus?.currentPeriodEnd && (
+                  <p className="text-sm">
+                    {subscriptionStatus.cancelAtPeriodEnd 
+                      ? `Your subscription will end on ${new Date(subscriptionStatus.currentPeriodEnd * 1000).toLocaleDateString()}`
+                      : `Next billing date: ${new Date(subscriptionStatus.currentPeriodEnd * 1000).toLocaleDateString()}`
+                    }
+                  </p>
+                )}
+                <Button 
+                  onClick={() => navigate("/subscribe")}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Manage Subscription
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
             <Card className="border-primary/20">
               <CardHeader>
                 <CardTitle className="font-playfair text-primary">Upgrade to Flavr+</CardTitle>

@@ -8,18 +8,21 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-01-27.acacia",
+  apiVersion: "2024-06-20",
 });
 
 export function registerSubscriptionRoutes(app: Express) {
   // Usage check endpoint
   app.post("/api/usage/check", async (req, res) => {
     try {
-      if (!req.isAuthenticated) {
+      if (!req.session?.userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      const user = req.user;
+      const user = await storage.getUser(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
       
       // Check if user has Flavr+ subscription
       if (user.hasFlavrPlus) {
@@ -51,11 +54,14 @@ export function registerSubscriptionRoutes(app: Express) {
   // Usage increment endpoint
   app.post("/api/usage/increment", async (req, res) => {
     try {
-      if (!req.isAuthenticated) {
+      if (!req.session?.userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      const user = req.user;
+      const user = await storage.getUser(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
       
       // Don't increment for Flavr+ users
       if (user.hasFlavrPlus) {

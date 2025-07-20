@@ -1,7 +1,8 @@
 import { useStripe, Elements, PaymentElement, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { useEffect, useState } from 'react';
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -77,9 +78,11 @@ const SubscribeForm = () => {
 
 export default function Subscribe() {
   const [, navigate] = useLocation();
+  const { toast } = useToast();
   const [showNavigation, setShowNavigation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [clientSecret, setClientSecret] = useState("");
 
   // Close all menus
   const closeAllMenus = () => {
@@ -102,14 +105,95 @@ export default function Subscribe() {
     retry: false,
   });
 
+  // Fetch payment intent when component mounts
+  useEffect(() => {
+    if (user?.user && !user.user.hasFlavrPlus) {
+      apiRequest("POST", "/api/create-subscription")
+        .then(async (res) => {
+          if (!res.ok) {
+            throw new Error('Failed to create subscription');
+          }
+          const data = await res.json();
+          setClientSecret(data.clientSecret);
+        })
+        .catch((error) => {
+          console.error("Failed to create subscription:", error);
+          toast({
+            title: "Error",
+            description: "Failed to initialize payment. Please try again.",
+            variant: "destructive",
+          });
+        });
+    }
+  }, [user, toast]);
+
   if (isLoading) {
     return <Loading message="Loading your account..." />;
   }
 
   // Check if user is already premium (developer account)
-  const isPremium = user?.user?.subscriptionTier === "premium";
+  // Get subscription status
+  const { data: subscriptionData } = useQuery({
+    queryKey: ["/api/subscription-status"],
+    enabled: !!user?.user,
+  });
 
-  if (isPremium) {
+  const hasFlavrPlus = user?.user?.hasFlavrPlus || subscriptionData?.hasFlavrPlus;
+  const cancelAtPeriodEnd = subscriptionData?.cancelAtPeriodEnd;
+  const currentPeriodEnd = subscriptionData?.currentPeriodEnd;
+
+  // Cancel subscription mutation
+  const cancelMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/cancel-subscription");
+      if (!response.ok) {
+        throw new Error("Failed to cancel subscription");
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Subscription Updated",
+        description: data.message,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/subscription-status"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Reactivate subscription mutation
+  const reactivateMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/reactivate-subscription");
+      if (!response.ok) {
+        throw new Error("Failed to reactivate subscription");
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Subscription Reactivated",
+        description: data.message,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/subscription-status"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Show subscription management for existing Flavr+ users
+  if (hasFlavrPlus) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black">
         <GlobalHeader 
@@ -125,9 +209,12 @@ export default function Subscribe() {
                 <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <i className="fas fa-crown text-white text-2xl"></i>
                 </div>
-                <CardTitle className="font-playfair text-2xl text-orange-400">You're Already Premium!</CardTitle>
+                <CardTitle className="font-playfair text-2xl text-orange-400">Flavr+ Subscription</CardTitle>
                 <p className="text-gray-300">
-                  Your developer account has unlimited access to all Flavr features
+                  {user?.user?.email === "william@blycontracting.co.uk" 
+                    ? "Your developer account has unlimited access to all Flavr features"
+                    : "Manage your premium subscription"
+                  }
                 </p>
               </CardHeader>
               
@@ -156,20 +243,59 @@ export default function Subscribe() {
                   </div>
                 </div>
 
-                <Button 
-                  onClick={() => navigate("/app")}
-                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700"
-                >
-                  Start Cooking with Flavr
-                </Button>
-                
-                <Button 
-                  variant="outline"
-                  onClick={() => navigate("/my-recipes")}
-                  className="w-full border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
-                >
-                  View My Recipes
-                </Button>
+                {/* Subscription status */}
+                {currentPeriodEnd && (
+                  <div className="text-center text-sm text-gray-400">
+                    {cancelAtPeriodEnd ? (
+                      <p>Your subscription will end on {new Date(currentPeriodEnd * 1000).toLocaleDateString()}</p>
+                    ) : (
+                      <p>Next billing date: {new Date(currentPeriodEnd * 1000).toLocaleDateString()}</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Action buttons */}
+                <div className="space-y-3">
+                  <Button 
+                    onClick={() => navigate("/app")}
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700"
+                  >
+                    Start Cooking with Flavr
+                  </Button>
+                  
+                  {/* Subscription management buttons */}
+                  {user?.user?.email !== "william@blycontracting.co.uk" && (
+                    <>
+                      {cancelAtPeriodEnd ? (
+                        <Button 
+                          onClick={() => reactivateMutation.mutate()}
+                          disabled={reactivateMutation.isPending}
+                          variant="outline"
+                          className="w-full border-green-500/30 text-green-400 hover:bg-green-500/10"
+                        >
+                          {reactivateMutation.isPending ? "Processing..." : "Reactivate Subscription"}
+                        </Button>
+                      ) : (
+                        <Button 
+                          onClick={() => cancelMutation.mutate()}
+                          disabled={cancelMutation.isPending}
+                          variant="outline"
+                          className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10"
+                        >
+                          {cancelMutation.isPending ? "Processing..." : "Cancel Subscription"}
+                        </Button>
+                      )}
+                    </>
+                  )}
+                  
+                  <Button 
+                    variant="outline"
+                    onClick={() => navigate("/my-recipes")}
+                    className="w-full border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
+                  >
+                    View My Recipes
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -250,9 +376,15 @@ export default function Subscribe() {
               </div>
 
               {/* Payment form */}
-              <Elements stripe={stripePromise} options={{ clientSecret }}>
-                <SubscribeForm />
-              </Elements>
+              {clientSecret ? (
+                <Elements stripe={stripePromise} options={{ clientSecret }}>
+                  <SubscribeForm />
+                </Elements>
+              ) : (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+                </div>
+              )}
 
               <div className="text-center">
                 <button 

@@ -8,6 +8,7 @@ import { registerAuthRoutes } from "./authRoutes";
 import { registerRecipeRoutes } from "./recipeRoutes";
 import { registerChatRoutes } from "./chatRoutes";
 import { registerSubscriptionRoutes } from "./subscriptionRoutes";
+import { registerStripeRoutes } from "./stripeRoutes";
 import { registerInteractionRoutes } from "./interactionRoutes";
 import { registerBudgetPlannerRoutes } from "./budgetPlannerRoutes";
 
@@ -34,6 +35,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerRecipeRoutes(app);
   registerChatRoutes(app);
   registerSubscriptionRoutes(app);
+  registerStripeRoutes(app);
   registerInteractionRoutes(app);
   registerBudgetPlannerRoutes(app);
 

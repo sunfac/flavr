@@ -29,8 +29,8 @@ export default function GlobalHeader({
     console.log("Settings clicked");
     console.log("User data:", user);
     
-    // Always allow navigation to settings/flavr-plus page
-    onSettingsClick?.();
+    // Navigate to settings page
+    navigate("/settings");
   };
 
   const handleFlavrPlusClick = () => {

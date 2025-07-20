@@ -6,13 +6,17 @@ import bcrypt from "bcrypt";
 export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
+  getUserById(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByEmailOrUsername(emailOrUsername: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserUsage(id: number, recipes: number, images: number): Promise<User>;
   updateUserStripeInfo(id: number, customerId: string, subscriptionId?: string): Promise<User>;
+  updateUserSubscription(id: number, updates: Partial<User>): Promise<User>;
   resetMonthlyUsage(id: number): Promise<User>;
+  getMonthlyUsage(userId: number, monthStart: Date): Promise<number>;
+  incrementUsage(userId: number): Promise<User>;
   
   // Pseudo-user operations for free users
   getPseudoUser(pseudoId: string): Promise<PseudoUser | undefined>;
@@ -67,6 +71,10 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
+  async getUserById(id: number): Promise<User | undefined> {
+    return this.getUser(id);
+  }
+
   async getUserByUsername(username: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.username, username));
     return user || undefined;
@@ -116,6 +124,52 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return user;
+  }
+
+  async updateUserSubscription(id: number, updates: Partial<User>): Promise<User> {
+    const [user] = await db.update(users)
+      .set(updates)
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async getMonthlyUsage(userId: number, monthStart: Date): Promise<number> {
+    const user = await this.getUser(userId);
+    if (!user) return 0;
+    
+    // Check if we need to reset monthly usage
+    const lastReset = user.lastMonthlyReset ? new Date(user.lastMonthlyReset) : new Date(0);
+    if (lastReset < monthStart) {
+      // Reset usage for new month
+      await this.resetMonthlyUsage(userId);
+      return 0;
+    }
+    
+    return user.recipesThisMonth || 0;
+  }
+
+  async incrementUsage(userId: number): Promise<User> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error('User not found');
+    
+    const [updatedUser] = await db.update(users)
+      .set({ 
+        recipesThisMonth: (user.recipesThisMonth || 0) + 1,
+        recipesGenerated: (user.recipesGenerated || 0) + 1
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser;
+  }
+
+  async resetMonthlyUsage(userId: number): Promise<void> {
+    await db.update(users)
+      .set({ 
+        recipesThisMonth: 0,
+        lastMonthlyReset: new Date()
+      })
+      .where(eq(users.id, userId));
   }
 
   async resetMonthlyUsage(id: number): Promise<User> {
