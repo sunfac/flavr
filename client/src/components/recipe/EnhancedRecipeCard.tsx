@@ -196,7 +196,8 @@ function EnhancedRecipeCard({
     return activeIngredients.map((ingredient, index) => ({
       id: `ingredient-${index}`,
       text: ingredient,
-      checked: ingredientStates[`ingredient-${index}`] || false
+      isSubstituted: ingredientStates[`ingredient-${index}_substituted`] || false,
+      isLoading: ingredientStates[`ingredient-${index}_loading`] || false
     }));
   }, [activeIngredients, ingredientStates]);
 
@@ -225,11 +226,72 @@ function EnhancedRecipeCard({
 
 
 
-  const handleIngredientToggle = (ingredientId: string) => {
+  const handleIngredientSubstitute = async (ingredientId: string, currentIngredient: string) => {
+    // Update the loading state
     setIngredientStates(prev => ({
       ...prev,
-      [ingredientId]: !prev[ingredientId]
+      [`${ingredientId}_loading`]: true
     }));
+
+    try {
+      // Call the API to get a substitute
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: `Suggest a direct substitute for "${currentIngredient}" that I can use in this recipe. Just give me the substitute ingredient name, nothing else.`,
+          mode: 'substitute'
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to get substitute');
+      
+      const data = await response.json();
+      const substitute = data.response || data.message || currentIngredient;
+
+      // Update the ingredient with the substitute
+      const updatedIngredients = [...activeIngredients];
+      const index = parseInt(ingredientId.split('-')[1]);
+      if (index >= 0 && index < updatedIngredients.length) {
+        updatedIngredients[index] = substitute;
+        
+        // Update recipe store by patching ingredients
+        const updatedIngredientsForStore = updatedIngredients.map((text, i) => ({
+          id: `ingredient-${i}`,
+          text,
+          checked: false
+        }));
+        
+        recipeActions.patchRecipe({
+          ingredients: updatedIngredientsForStore
+        });
+        
+        // Update local state to mark as substituted
+        setIngredientStates(prev => ({
+          ...prev,
+          [`${ingredientId}_substituted`]: true,
+          [`${ingredientId}_loading`]: false
+        }));
+
+        toast({
+          title: "Ingredient substituted!",
+          description: `Replaced "${currentIngredient}" with "${substitute}"`,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to substitute ingredient:', error);
+      toast({
+        title: "Substitution failed",
+        description: "Could not find a suitable substitute",
+        variant: "destructive"
+      });
+      
+      // Clear loading state
+      setIngredientStates(prev => ({
+        ...prev,
+        [`${ingredientId}_loading`]: false
+      }));
+    }
   };
 
   const handleRating = (recipeId: string, rating: number) => {
@@ -331,7 +393,7 @@ function EnhancedRecipeCard({
           {/* Ingredient Panel */}
           <IngredientPanel
             ingredients={formattedIngredients}
-            onToggle={handleIngredientToggle}
+            onSubstitute={handleIngredientSubstitute}
             className="md:h-[600px] md:sticky md:top-0"
           />
 
