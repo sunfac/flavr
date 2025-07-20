@@ -147,36 +147,7 @@ export default function ModeSelection() {
               </CardContent>
             </Card>
           ))}
-          
-          {/* Conversational Mode Card */}
-          <Card 
-            className="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/30 group shadow-lg hover:shadow-purple-500/20 transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:border-purple-500/40 relative"
-            onClick={() => navigate("/conversational")}
-          >
-            <CardContent className="text-center p-8">
-              <Badge className="absolute top-3 right-3 bg-gradient-to-r from-purple-400 to-indigo-400 text-white border-0 text-xs">
-                New
-              </Badge>
-              <div className="relative w-16 h-16 mx-auto mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/30 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-lg">
-                  <span className="text-2xl">💬</span>
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/30 to-indigo-500/30 rounded-2xl blur-xl opacity-0 group-hover:opacity-40 transition-opacity duration-300"></div>
-              </div>
-              
-              <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-purple-300 transition-colors duration-300">
-                Chat Mode
-              </h3>
-              
-              <p className="text-muted-foreground text-sm leading-relaxed mb-1">
-                Natural conversation recipe creation
-              </p>
-              
-              <p className="text-muted-foreground/70 text-xs">
-                Just chat about what you want to cook
-              </p>
-            </CardContent>
-          </Card>
+
         </div>
         
         {/* Digital Cookbook Button */}
