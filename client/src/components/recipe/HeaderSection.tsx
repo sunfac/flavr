@@ -76,11 +76,7 @@ export default function HeaderSection({
               <h1 className="font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight break-words mb-2">
                 {recipe.title}
               </h1>
-              {recipe.description && (
-                <p className="text-white/90 text-sm md:text-base leading-relaxed break-words">
-                  {recipe.description}
-                </p>
-              )}
+
               <div className="mt-4 text-xs text-white/60">
                 Image loading...
               </div>

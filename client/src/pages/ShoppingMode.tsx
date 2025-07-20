@@ -175,7 +175,21 @@ export default function ShoppingMode() {
       const response = await fetchResponse.json();
       console.log("Full recipe response:", response);
       
-      setSelectedRecipe(response);
+      // Extract the recipe from the nested structure
+      const fullRecipe = response.recipe || response;
+      console.log("🔍 Original fullRecipe data:", response);
+      console.log("🖼️ Image URLs:", { imageUrl: fullRecipe.imageUrl, enhanced: fullRecipe.image });
+      console.log("🥘 Enhanced ingredients count:", fullRecipe.ingredients?.length);
+      console.log("📋 Enhanced instructions count:", fullRecipe.instructions?.length);
+      
+      // Check if it's a nested structure
+      if (response.recipe) {
+        console.log("🔍 Found nested recipe structure!");
+        console.log("🥘 Nested recipe ingredients:", response.recipe.ingredients);
+        console.log("📋 Nested recipe instructions:", response.recipe.instructions);
+      }
+      
+      setSelectedRecipe(fullRecipe);
       setCurrentStep("recipe");
       
       // Scroll to top when recipe loads
