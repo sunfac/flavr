@@ -6,7 +6,26 @@ export function registerInteractionRoutes(app: Express) {
   // Create interaction log
   app.post("/api/interactions", async (req: Request, res: Response) => {
     try {
-      const validatedData = insertInteractionLogSchema.parse(req.body);
+      // Convert string IDs to numbers if they exist and are numeric
+      const requestData = { ...req.body };
+      if (requestData.userId && typeof requestData.userId === 'string') {
+        const parsedUserId = parseInt(requestData.userId, 10);
+        if (!isNaN(parsedUserId)) {
+          requestData.userId = parsedUserId;
+        } else {
+          requestData.userId = null; // Keep as null for anonymous users
+        }
+      }
+      if (requestData.pseudoUserId && typeof requestData.pseudoUserId === 'string') {
+        const parsedPseudoUserId = parseInt(requestData.pseudoUserId, 10);
+        if (!isNaN(parsedPseudoUserId)) {
+          requestData.pseudoUserId = parsedPseudoUserId;
+        } else {
+          requestData.pseudoUserId = null;
+        }
+      }
+      
+      const validatedData = insertInteractionLogSchema.parse(requestData);
       
       // Enhance with request metadata
       const interactionLogData = {

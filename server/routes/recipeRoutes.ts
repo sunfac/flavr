@@ -316,9 +316,13 @@ Return valid JSON only:
       
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
-        messages: [{ role: "user", content: finalPrompt }],
-        temperature: 0.8,
+        messages: [
+          { role: "system", content: "You are a JSON API. Respond ONLY with valid JSON - no explanations, no markdown, no text outside the JSON object." },
+          { role: "user", content: finalPrompt + "\n\nIMPORTANT: Return ONLY the JSON object, nothing else." }
+        ],
+        temperature: 0.7,
         max_tokens: 2500,
+        response_format: { type: "json_object" }
       });
 
       const responseContent = completion.choices[0]?.message?.content;
