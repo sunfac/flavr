@@ -313,6 +313,7 @@ export default function FridgeMode() {
 
         {currentStep === "recipe" && selectedRecipe && (
           <div className="bg-background min-h-screen">
+            <div id="recipe-top"></div>
             <RecipeCard
               recipe={selectedRecipe}
               mode="fridge"

@@ -80,18 +80,23 @@ export default function RecipeCard({
       
       setFullRecipe(recipeData);
       
-      // Scroll to top when recipe is loaded - multiple approaches for reliability
-      setTimeout(() => {
-        // Try multiple scroll methods for better reliability
+      // Immediate scroll to top - no delay
+      const scrollToTop = () => {
         const recipeTop = document.getElementById('recipe-top');
         if (recipeTop) {
-          recipeTop.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          document.documentElement.scrollTop = 0;
-          document.body.scrollTop = 0;
+          recipeTop.scrollIntoView({ behavior: 'auto', block: 'start' });
         }
-      }, 300);
+        
+        // Force immediate scroll
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      };
+      
+      // Execute immediately and with slight delay for reliability
+      scrollToTop();
+      setTimeout(scrollToTop, 50);
+      setTimeout(scrollToTop, 150);
       
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
