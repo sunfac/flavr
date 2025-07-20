@@ -101,7 +101,16 @@ export default function ShoppingMode() {
       const response = await fetchResponse.json();
       console.log("API Response:", response);
       console.log("Recipe ideas received:", response.recipes || []);
-      setRecipeIdeas(response.recipes || []);
+      
+      // Transform the recipe data to match TinderRecipeCards interface
+      const transformedRecipes = (response.recipes || []).map((recipe: any) => ({
+        title: recipe.name || recipe.title || "Delicious Recipe",
+        description: recipe.description || `A wonderful ${recipe.cuisine || 'international'} dish featuring ${recipe.ingredients?.slice(0, 3).join(', ') || 'fresh ingredients'}. Ready in ${recipe.prepTime || recipe.estimatedTime || '30 minutes'}.`,
+        // Keep original data for later use
+        originalData: recipe
+      }));
+      
+      setRecipeIdeas(transformedRecipes);
       setCurrentStep("suggestions");
     } catch (error) {
       console.error("Recipe generation failed:", error);
@@ -200,7 +209,7 @@ export default function ShoppingMode() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          selectedRecipe: recipe,
+          selectedRecipe: recipe.originalData || recipe,
           mode: "shopping",
           quizData: quizData,
           prompt: `Generate a complete recipe for ${recipe.title}`
