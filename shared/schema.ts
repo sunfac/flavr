@@ -76,13 +76,7 @@ export const recipes = pgTable("recipes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const chatMessages = pgTable("chat_messages", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id),
-  message: text("message").notNull(),
-  response: text("response").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-});
+
 
 export const developerLogs = pgTable("developer_logs", {
   id: serial("id").primaryKey(),
@@ -209,10 +203,7 @@ export const insertRecipeSchema = createInsertSchema(recipes).omit({
   createdAt: true,
 });
 
-export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
-  id: true,
-  createdAt: true,
-});
+
 
 export const insertDeveloperLogSchema = createInsertSchema(developerLogs).omit({
   id: true,
@@ -235,8 +226,7 @@ export type InsertPseudoUser = z.infer<typeof insertPseudoUserSchema>;
 export type PseudoUser = typeof pseudoUsers.$inferSelect;
 export type InsertRecipe = z.infer<typeof insertRecipeSchema>;
 export type Recipe = typeof recipes.$inferSelect;
-export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
-export type ChatMessage = typeof chatMessages.$inferSelect;
+
 export type InsertDeveloperLog = z.infer<typeof insertDeveloperLogSchema>;
 export type DeveloperLog = typeof developerLogs.$inferSelect;
 export type InsertRecipeGenerationLog = z.infer<typeof insertRecipeGenerationLogSchema>;
