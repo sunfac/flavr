@@ -80,13 +80,15 @@ Then generate ALL THREE outputs in a SINGLE comprehensive response:
 - Match the user's cuisine preferences.
 
 🔹 **Recipes**
-- Provide detailed, step-by-step recipes for each meal in the plan, adjusted for the user's difficulty level AND time constraints.
-- AUTHENTIC TECHNIQUES: Include proper curry paste preparation, tempering spices for Indian dishes, creating sofrito for Spanish recipes.
-- DIFFICULTY-APPROPRIATE: Beginner (simple one-pot methods), Intermediate (multiple cooking techniques, proper spice tempering, homemade sauces), Advanced (traditional complex methods like making curry paste from scratch).
-- TIME-APPROPRIATE: Match cooking complexity to stated time constraints while maintaining authenticity.
-- Include prep and cook times, servings, and specialized equipment when needed.
-- Provide authentic flavor enhancement tips specific to each cuisine.
-- For INTERMEDIATE level: Include techniques like proper spice blooming, sauce layering, marinating proteins, creating flavor bases from scratch.
+- Provide comprehensive, restaurant-quality recipes for each meal with detailed ingredient lists including exact measurements and step-by-step instructions.
+- MAXIMUM FLAVOR ENHANCEMENT: Include advanced flavor-building techniques (proper sautéing of aromatics, toasting whole spices, deglazing pans, building umami layers, creating flavor bases).
+- AUTHENTIC TRADITIONAL TECHNIQUES: Include proper curry paste preparation, tempering spices for Indian dishes, creating sofrito for Spanish recipes, proper roux for French sauces, wok hei for Chinese stir-fries.
+- DIFFICULTY-APPROPRIATE SOPHISTICATION: Beginner (simple techniques with flavor enhancement), Intermediate (multiple cooking techniques, proper spice tempering, homemade sauces, marinating), Advanced (traditional complex methods like making curry paste from scratch, stock reductions, emulsifications).
+- TIME-APPROPRIATE COMPLEXITY: Match cooking complexity to stated time constraints while maintaining maximum flavor and authenticity.
+- COMPREHENSIVE INSTRUCTIONS: Include exact prep and cook times, servings, specialized equipment, temperature guidelines, texture cues, visual indicators, and professional chef tips.
+- PREMIUM AUTHENTIC INGREDIENTS: Use high-quality authentic ingredients like Thai curry pastes, fish sauce, galangal for Thai; whole spices, ghee, paneer for Indian; saffron, bomba rice for Spanish; quality olive oil, aged cheeses for Mediterranean.
+- SOPHISTICATED SEASONING: Include proper seasoning throughout entire cooking process using cuisine-specific spice blends, aromatic pastes, fermented ingredients, quality oils, and traditional flavor enhancers.
+- FLAVOR MAXIMIZATION: Include techniques like blooming spices, proper stock usage, sauce layering, marinating proteins, creating flavor bases from scratch, and umami enhancement methods.
 
 RANDOMNESS REQUIREMENT:
 - Maintain an internal randomness factor so repeated runs with identical inputs produce different combinations of main proteins, regional cuisines, sides, and cooking techniques.

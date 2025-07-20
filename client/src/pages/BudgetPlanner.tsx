@@ -361,7 +361,7 @@ export default function BudgetPlanner() {
                                 {items.map((item, itemIndex) => (
                                   <li key={itemIndex} className="text-sm flex items-center gap-2">
                                     <CheckSquare className="w-3 h-3 text-green-600" />
-                                    <span className="text-gray-800 font-medium">{item.replace(/^-\s*/, '').trim()}</span>
+                                    <span className="text-gray-900 font-semibold">{item.replace(/^-\s*/, '').trim()}</span>
                                   </li>
                                 ))}
                               </ul>
@@ -378,7 +378,7 @@ export default function BudgetPlanner() {
                                   {items.map((item, itemIndex) => (
                                     <li key={itemIndex} className="text-sm flex items-center gap-2">
                                       <CheckSquare className="w-3 h-3 text-green-600" />
-                                      <span className="text-gray-800 font-medium">{item.replace(/^-\s*/, '').trim()}</span>
+                                      <span className="text-gray-900 font-semibold">{item.replace(/^-\s*/, '').trim()}</span>
                                     </li>
                                   ))}
                                 </ul>
@@ -465,15 +465,15 @@ export default function BudgetPlanner() {
                                 }}
                               />
                               <div className="flex-1 text-left">
-                                <h4 className="font-bold text-green-900 text-lg">{recipe.title}</h4>
-                                <p className="text-green-700 font-medium">{recipe.subtitle}</p>
+                                <h4 className="font-bold text-gray-950 text-lg">{recipe.title}</h4>
+                                <p className="text-gray-800 font-semibold">{recipe.subtitle}</p>
                               </div>
                               <ChevronDown className={`w-5 h-5 text-green-700 transition-transform duration-200 ${expandedRecipes.has(recipe.title) ? 'rotate-180' : ''}`} />
                             </div>
                           </CollapsibleTrigger>
                           <CollapsibleContent className="pt-4">
                             <div className="pl-4 border-l-4 border-green-300 bg-gradient-to-r from-green-50 to-white p-4 rounded-r-lg">
-                              <div className="whitespace-pre-wrap text-sm leading-relaxed text-gray-900 font-medium">
+                              <div className="whitespace-pre-wrap text-sm leading-relaxed text-gray-950 font-semibold">
                                 {recipe.content}
                               </div>
                             </div>
