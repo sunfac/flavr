@@ -278,7 +278,7 @@ export default function RecipeCard({
     servings: actualRecipe.servings || 4,
     difficulty: actualRecipe.difficulty || "Medium",
     cuisine: actualRecipe.cuisine || (mode === "fridge" ? "Fresh & Simple" : mode === "chef" ? "Gourmet" : "Everyday"),
-    image: actualRecipe.imageUrl,
+    image: actualRecipe.imageUrl || actualRecipe.image, // Check both imageUrl and image fields
     ingredients: actualRecipe.ingredients || [],
     instructions: actualRecipe.instructions || [],
     tips: actualRecipe.tips
@@ -286,8 +286,11 @@ export default function RecipeCard({
 
   console.log('🎯 Enhanced recipe for display:', enhancedRecipe);
   console.log('🔍 Original fullRecipe data:', fullRecipe);
-  console.log('🥘 Original ingredients:', fullRecipe.ingredients);
-  console.log('📋 Original instructions:', fullRecipe.instructions);
+  console.log('🖼️ Image URLs:', { 
+    imageUrl: actualRecipe.imageUrl, 
+    image: actualRecipe.image,
+    enhanced: enhancedRecipe.image 
+  });
   console.log('🥘 Enhanced ingredients count:', enhancedRecipe.ingredients.length);
   console.log('📋 Enhanced instructions count:', enhancedRecipe.instructions.length);
   

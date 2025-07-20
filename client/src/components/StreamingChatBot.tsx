@@ -173,21 +173,31 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                   // Live recipe card refresh - force immediate update
                   console.log('🔄 Received recipe update from stream:', data.recipe);
                   
-                  // Force recipe store update
-                  updateActiveRecipe({
+                  // Create updated recipe with proper structure
+                  const updatedRecipe = {
+                    ...currentRecipe,
                     ...data.recipe,
                     id: currentRecipe?.id || data.recipe.id,
-                    lastUpdated: Date.now() // Force re-render trigger
-                  });
+                    lastUpdated: Date.now()
+                  };
                   
-                  // Trigger parent callback for recipe card refresh
+                  console.log('📝 Updating recipe store with:', updatedRecipe);
+                  
+                  // Force recipe store update with complete data
+                  updateActiveRecipe(updatedRecipe);
+                  
+                  // Trigger parent callback with complete recipe data
                   if (onRecipeUpdate) {
-                    onRecipeUpdate({
-                      ...data.recipe,
-                      id: currentRecipe?.id || data.recipe.id,
-                      lastUpdated: Date.now()
-                    });
+                    console.log('📤 Triggering parent callback with recipe update');
+                    onRecipeUpdate(updatedRecipe);
                   }
+                  
+                  // Force a DOM refresh to ensure visual updates
+                  setTimeout(() => {
+                    window.dispatchEvent(new CustomEvent('recipe-updated', { 
+                      detail: updatedRecipe 
+                    }));
+                  }, 100);
                   
                   // Add confirmation message
                   fullResponse += `\n\n✅ Recipe updated: "${data.recipe.title}"`;

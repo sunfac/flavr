@@ -15,16 +15,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add route debugging
   console.log('🔧 Registering Express routes...');
   
-  // Setup session middleware
+  // Setup session middleware with enhanced persistence
   app.use(session({
-    secret: process.env.SESSION_SECRET || 'flavr-dev-secret-key',
+    secret: process.env.SESSION_SECRET || 'flavr-dev-secret-key-2025',
     resave: false,
     saveUninitialized: false,
+    rolling: true, // Reset expiration on activity
     cookie: { 
-      secure: process.env.NODE_ENV === 'production', 
-      maxAge: 24 * 60 * 60 * 1000,
+      secure: false, // Always false for development
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       httpOnly: true,
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+      sameSite: 'lax' // Better compatibility
     }
   }));
 

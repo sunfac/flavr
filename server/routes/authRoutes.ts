@@ -27,8 +27,21 @@ export function registerAuthRoutes(app: Express) {
       }
 
       const user = await storage.createUser({ email, password, username });
+      
+      // Ensure session is properly saved
       req.session.userId = user.id;
       req.session.isPlus = user.hasFlavrPlus || false;
+      
+      console.log(`Registration successful for user ${user.email}, session userId: ${req.session.userId}`);
+
+      // Save session explicitly
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+        } else {
+          console.log('Session saved successfully');
+        }
+      });
 
       res.json({ user: { id: user.id, email: user.email, username: user.username, hasFlavrPlus: user.hasFlavrPlus } });
     } catch (error) {
@@ -48,17 +61,33 @@ export function registerAuthRoutes(app: Express) {
 
       const user = await storage.getUserByEmail(email);
       if (!user) {
+        console.log(`Login failed: user not found for email ${email}`);
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
+      console.log(`Login attempt for user ${user.email}, checking password...`);
+      
       // Compare the provided password with the hashed password
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
+        console.log(`Login failed: invalid password for user ${user.email}`);
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
+      // Ensure session is properly saved
       req.session.userId = user.id;
       req.session.isPlus = user.hasFlavrPlus || false;
+      
+      console.log(`Login successful for user ${user.email}, session userId: ${req.session.userId}`);
+
+      // Save session explicitly
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+        } else {
+          console.log('Session saved successfully');
+        }
+      });
 
       res.json({ user: { id: user.id, email: user.email, username: user.username, hasFlavrPlus: user.hasFlavrPlus } });
     } catch (error) {

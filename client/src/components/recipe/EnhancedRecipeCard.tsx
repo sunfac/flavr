@@ -89,11 +89,28 @@ function EnhancedRecipeCard({
 }: EnhancedRecipeCardProps) {
 
   const [currentStep, setCurrentStep] = useState(0);
-
+  const [key, setKey] = useState(0); // Force re-render key
   const [ingredientStates, setIngredientStates] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
   
   const recipeStore = useRecipeStore();
+  
+  // Listen for recipe updates from Zest chatbot
+  useEffect(() => {
+    const handleRecipeUpdate = (event: CustomEvent) => {
+      console.log('🎯 EnhancedRecipeCard received recipe update:', event.detail);
+      // Force component re-render
+      setKey(prev => prev + 1);
+      
+      toast({
+        title: "Recipe updated!",
+        description: "Zest has modified your recipe",
+      });
+    };
+    
+    window.addEventListener('recipe-updated', handleRecipeUpdate as EventListener);
+    return () => window.removeEventListener('recipe-updated', handleRecipeUpdate as EventListener);
+  }, [toast]);
 
   // Sync servings from store without causing infinite loops
   const activeServings = useMemo(() => {
