@@ -366,8 +366,8 @@ export default function RecipeCard({
       }
 
       const shareUrl = fullRecipe.shareId 
-        ? `${window.location.origin}/recipe/share/${fullRecipe.shareId}`
-        : window.location.href;
+        ? `https://getflavr.ai/recipe/share/${fullRecipe.shareId}`
+        : `https://getflavr.ai/recipe/${fullRecipe.id}`;
 
       if (navigator.share && fullRecipe.title) {
         await navigator.share({
@@ -443,8 +443,8 @@ export default function RecipeCard({
               <Button
                 onClick={async () => {
                   const shareUrl = fullRecipe.shareId 
-                    ? `${window.location.origin}/recipe/share/${fullRecipe.shareId}`
-                    : window.location.href;
+                    ? `https://getflavr.ai/recipe/share/${fullRecipe.shareId}`
+                    : `https://getflavr.ai/recipe/${fullRecipe.id}`;
                   await navigator.clipboard.writeText(shareUrl);
                   toast({
                     title: "Link copied!",

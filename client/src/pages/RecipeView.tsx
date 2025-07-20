@@ -54,7 +54,7 @@ export default function RecipeView() {
 
   // Copy share link to clipboard
   const copyShareLink = async (shareId: string) => {
-    const shareUrl = `${window.location.origin}/share/${shareId}`;
+    const shareUrl = `https://getflavr.ai/share/${shareId}`;
     try {
       await navigator.clipboard.writeText(shareUrl);
       toast({

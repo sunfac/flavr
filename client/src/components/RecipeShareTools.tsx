@@ -32,7 +32,7 @@ const RecipeShareTools: React.FC<RecipeShareToolsProps> = ({
   const { toast } = useToast();
   const pdfRef = useRef<HTMLDivElement>(null);
   
-  const publicUrl = shareId ? `${window.location.origin}/share/${shareId}` : `${window.location.origin}/recipe/${id}`;
+  const publicUrl = shareId ? `https://getflavr.ai/share/${shareId}` : `https://getflavr.ai/recipe/${id}`;
   const caption = `Just made this with Flavr AI:
 🔥 "${title}"
 ${description}
@@ -96,15 +96,7 @@ ${publicUrl}`;
       whatsapp: `https://api.whatsapp.com/send?text=${encoded}`
     };
 
-    if (platform === 'instagram') {
-      await handleCopy();
-      toast({
-        title: "Caption copied!",
-        description: "Instagram doesn't support direct sharing – paste into your post!",
-      });
-    } else {
-      window.open(urlMap[platform], '_blank');
-    }
+    window.open(urlMap[platform], '_blank');
   };
 
   const downloadQRCode = () => {
@@ -277,8 +269,8 @@ ${publicUrl}`;
             )}
           </div>
 
-          {/* Social Media Buttons */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          {/* Social Media Buttons - Only platforms that support URL sharing */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
             <Button
               variant="outline"
               size="sm"
@@ -287,16 +279,6 @@ ${publicUrl}`;
             >
               <iconMap.share className="w-4 h-4" />
               Twitter
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleSocialClick('instagram')}
-              className="flex items-center gap-2 hover:bg-pink-500/10 hover:border-pink-500/50"
-            >
-              <iconMap.share className="w-4 h-4" />
-              Instagram
             </Button>
             
             <Button
