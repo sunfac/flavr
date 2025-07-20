@@ -184,6 +184,13 @@ export default function FridgeMode() {
         const result = await response.json();
         setSelectedRecipe(result);
         setCurrentStep("recipe");
+        
+        // Scroll to top when recipe loads
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        }, 100);
       } else {
         console.error("Failed to generate full recipe");
         setSelectedRecipe(recipe); // Fallback to basic recipe

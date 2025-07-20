@@ -28,17 +28,17 @@ export default function StepStack({
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to current step when it changes
-  useEffect(() => {
-    const currentStepElement = stepRefs.current[currentStep];
-    if (currentStepElement && scrollContainerRef.current) {
-      currentStepElement.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start',
-        inline: 'nearest'
-      });
-    }
-  }, [currentStep]);
+  // Auto-scroll to current step when it changes (disabled to prevent conflict with recipe header scroll)
+  // useEffect(() => {
+  //   const currentStepElement = stepRefs.current[currentStep];
+  //   if (currentStepElement && scrollContainerRef.current) {
+  //     currentStepElement.scrollIntoView({ 
+  //       behavior: 'smooth', 
+  //       block: 'start',
+  //       inline: 'nearest'
+  //     });
+  //   }
+  // }, [currentStep]);
 
 
 

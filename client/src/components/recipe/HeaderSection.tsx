@@ -45,13 +45,10 @@ export default function HeaderSection({
               loading="eager"
               style={{ objectPosition: 'center' }}
               onLoad={() => {
-                // Scroll to top after image loads
-                setTimeout(() => {
-                  const headerElement = document.getElementById('recipe-header-top');
-                  if (headerElement) {
-                    headerElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                }, 100);
+                // Scroll to absolute top after image loads
+                window.scrollTo(0, 0);
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
               }}
               onError={(e) => {
                 console.log('❌ Image failed to load:', recipe.image);

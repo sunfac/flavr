@@ -177,6 +177,13 @@ export default function ShoppingMode() {
       
       setSelectedRecipe(response);
       setCurrentStep("recipe");
+      
+      // Scroll to top when recipe loads
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }, 100);
     } catch (error) {
       console.error("Recipe generation failed:", error);
       setSelectedRecipe(recipe);

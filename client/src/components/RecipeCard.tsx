@@ -88,30 +88,23 @@ export default function RecipeCard({
       
       // Immediate scroll to recipe header where the image and title are
       const scrollToRecipeHeader = () => {
-        // Try to find the recipe header anchor first
-        const recipeHeader = document.getElementById('recipe-header-top');
-        if (recipeHeader) {
-          recipeHeader.scrollIntoView({ behavior: 'auto', block: 'start' });
-          return;
-        }
-        
-        // Fallback to general recipe-top anchor
-        const recipeTop = document.getElementById('recipe-top');
-        if (recipeTop) {
-          recipeTop.scrollIntoView({ behavior: 'auto', block: 'start' });
-          return;
-        }
-        
-        // Final fallback to page top
-        window.scrollTo({ top: 0, behavior: 'auto' });
+        // Always scroll to absolute top first
+        window.scrollTo(0, 0);
         document.documentElement.scrollTop = 0;
         document.body.scrollTop = 0;
+        
+        // Then try to find the recipe header anchor
+        setTimeout(() => {
+          const recipeHeader = document.getElementById('recipe-header-top');
+          if (recipeHeader) {
+            recipeHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
       };
       
-      // Execute immediately and with slight delay for reliability
-      scrollToRecipeHeader();
-      setTimeout(scrollToRecipeHeader, 50);
-      setTimeout(scrollToRecipeHeader, 200);
+      // Execute with delays to ensure DOM is ready
+      setTimeout(scrollToRecipeHeader, 300);
+      setTimeout(scrollToRecipeHeader, 600);
       
       // Additional scroll after potential image load
       setTimeout(() => {

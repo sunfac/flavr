@@ -134,12 +134,11 @@ function EnhancedRecipeCard({
       // Force component re-render
       setKey(prev => prev + 1);
       
-      // Scroll to top of recipe after update
+      // Scroll to absolute top of page after update
       setTimeout(() => {
-        const headerElement = document.getElementById('recipe-header-top');
-        if (headerElement) {
-          headerElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
       }, 300);
       
       toast({
