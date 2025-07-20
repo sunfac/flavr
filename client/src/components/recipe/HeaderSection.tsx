@@ -72,10 +72,10 @@ export default function HeaderSection({
           </div>
         )}
         
-        {/* Mobile Description - Below Image */}
+        {/* Mobile Description - Below Image - Only show if not already shown in overlay */}
         {recipe.description && recipe.image && (
           <div className="sm:hidden p-3 bg-slate-800/70 backdrop-blur-sm">
-            <p className="text-slate-200 text-sm leading-relaxed break-words">
+            <p className="text-slate-200 text-sm leading-relaxed break-words line-clamp-3">
               {recipe.description}
             </p>
           </div>

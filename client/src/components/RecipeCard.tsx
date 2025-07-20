@@ -79,6 +79,12 @@ export default function RecipeCard({
       console.log('✅ Processed instructions count:', recipeData.instructions.length);
       
       setFullRecipe(recipeData);
+      
+      // Scroll to top when recipe is loaded
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+      
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
     },
@@ -416,6 +422,21 @@ export default function RecipeCard({
               <iconMap.refresh className="w-4 h-4 mr-2" />
               Create Another Recipe
             </Button>
+          </div>
+        )}
+
+        {/* Recipe Share Tools - Only for Shopping Mode */}
+        {mode === "shopping" && fullRecipe && (
+          <div className="mt-12 mb-8">
+            <RecipeShareTools
+              id={fullRecipe.id || 'temp-recipe'}
+              shareId={fullRecipe.shareId}
+              title={fullRecipe.title || 'Recipe'}
+              description={fullRecipe.description || ''}
+              imageUrl={fullRecipe.imageUrl || fullRecipe.image}
+              isShared={fullRecipe.isShared || false}
+              recipe={fullRecipe}
+            />
           </div>
         )}
       </div>
