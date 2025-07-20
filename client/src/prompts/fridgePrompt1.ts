@@ -42,12 +42,14 @@ Respond with a JSON object in this format:
       "description": "Brief description highlighting the main ingredients",
       "cookTime": number (in minutes),
       "difficulty": "easy|medium|hard",
-      "mainIngredients": ["ingredient1", "ingredient2", "ingredient3"],
+      "mainIngredients": ["only ingredients from the available list"],
       "cookingMethod": "primary cooking technique",
       "mood": "style tag"
     }
   ]
 }
 
-Be creative with combinations and cooking techniques. Focus on maximizing flavor from the available ingredients. Each recipe should be distinctly different in preparation method or flavor profile.`;
+Be creative with combinations and cooking techniques. Focus on maximizing flavor from the available ingredients. Each recipe should be distinctly different in preparation method or flavor profile.
+
+CRITICAL REMINDER: You MUST ONLY use the ingredients listed above. Do NOT suggest recipes with salmon, beef, pork, vegetables, or ANY other ingredients not explicitly listed. If the user only has "Chicken, chorizo, onion" then ALL recipes must use ONLY those three ingredients plus basic pantry staples.`;
 }
