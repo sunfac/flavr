@@ -103,8 +103,9 @@ function EnhancedRecipeCard({
       // Update the recipe store with new data if available
       if (event.detail && event.detail.recipe) {
         const updatedRecipe = event.detail.recipe;
-        recipeActions.updateRecipe(recipe.id, {
-          title: updatedRecipe.title,
+        recipeActions.replaceRecipe({
+          id: recipe.id,
+          servings: updatedRecipe.servings || recipe.servings,
           ingredients: updatedRecipe.ingredients.map((text: string, index: number) => ({
             id: `ingredient-${index}`,
             text,
@@ -117,10 +118,16 @@ function EnhancedRecipeCard({
           })),
           meta: {
             title: updatedRecipe.title,
-            servings: updatedRecipe.servings,
-            cookTime: updatedRecipe.cookTime,
-            difficulty: updatedRecipe.difficulty
-          }
+            servings: updatedRecipe.servings || recipe.servings,
+            cookTime: updatedRecipe.cookTime || recipe.cookTime,
+            difficulty: updatedRecipe.difficulty || recipe.difficulty,
+            cuisine: updatedRecipe.cuisine || recipe.cuisine,
+            description: updatedRecipe.description || recipe.description,
+            image: updatedRecipe.image || updatedRecipe.imageUrl || recipe.image
+          },
+          currentStep: 0,
+          completedSteps: [],
+          lastUpdated: Date.now()
         });
       }
       
@@ -137,7 +144,7 @@ function EnhancedRecipeCard({
       
       toast({
         title: "Recipe updated!",
-        description: "Zest has modified your recipe",
+        description: `${updatedRecipe.title || "Your recipe"} has been modified`,
       });
     };
     

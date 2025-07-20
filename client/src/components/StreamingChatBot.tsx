@@ -184,6 +184,7 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                   console.log('📝 Updating recipe store with:', updatedRecipe);
                   
                   // Force recipe store update with complete data
+                  console.log('🔄 Updating recipe store with new data');
                   updateActiveRecipe(updatedRecipe);
                   
                   // Trigger parent callback with complete recipe data

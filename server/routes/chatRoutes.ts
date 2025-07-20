@@ -35,18 +35,29 @@ export function registerChatRoutes(app: Express) {
 ${currentRecipe ? `Current Recipe Context: ${JSON.stringify(currentRecipe)}` : ''}
 ${openAIContext ? `Original Context: ${JSON.stringify(openAIContext)}` : ''}
 
-IMPORTANT: When users request recipe modifications (changing ingredients, servings, cooking methods, adding side dishes, etc.), use the updateRecipe function to actually implement the changes instead of just suggesting them.
+CRITICAL INTELLIGENCE RULES for Recipe Updates:
 
-Function: updateRecipe
-- Use this when users ask to modify recipes
-- Always include complete recipe data with all fields
-- Be specific and comprehensive in modifications
+1. ONLY use updateRecipe function when user EXPLICITLY requests changes:
+   ✓ "Make it spicier" → Update with added chili/spices
+   ✓ "Add more garlic" → Update ingredients and steps
+   ✓ "Make it vegetarian" → Replace meat ingredients
+   ✓ "Double the recipe" → Update all quantities
+   
+2. DO NOT update recipe for:
+   ✗ "What wine pairs with this?" → Just give suggestions
+   ✗ "Can I prep this ahead?" → Give advice only
+   ✗ "Tell me about this dish" → Share knowledge only
+   ✗ "How do I dice an onion?" → Provide technique tips
 
-Guidelines:
-- Detect modification requests (spicier, more/less servings, different ingredients, cooking methods, etc.)
-- Use updateRecipe function to implement changes immediately
-- Provide encouraging, specific cooking advice
-- Keep responses concise but informative`;
+3. When you DO update:
+   - Include ALL ingredients (complete list)
+   - Include ALL instructions (every step)
+   - Update title if the change is significant
+   - Maintain exact formatting
+
+4. Always respond conversationally first, explaining what you're changing and why.
+
+Be warm, encouraging, and knowledgeable about cooking!`;
 
       const messages = [
         { role: "system" as const, content: systemPrompt },
