@@ -105,52 +105,11 @@ export default function Subscribe() {
     retry: false,
   });
 
-  // Fetch payment intent when component mounts
-  useEffect(() => {
-    if (user?.user && !user.user.hasFlavrPlus) {
-      apiRequest("POST", "/api/create-subscription")
-        .then(async (res) => {
-          if (!res.ok) {
-            const errorData = await res.json();
-            if (errorData.message && errorData.message.includes("set up Stripe")) {
-              toast({
-                title: "Stripe Configuration Required",
-                description: errorData.message,
-                variant: "destructive",
-              });
-            } else {
-              throw new Error(errorData.error || 'Failed to create subscription');
-            }
-            return;
-          }
-          const data = await res.json();
-          setClientSecret(data.clientSecret);
-        })
-        .catch((error) => {
-          console.error("Failed to create subscription:", error);
-          toast({
-            title: "Error",
-            description: error.message || "Failed to initialize payment. Please try again.",
-            variant: "destructive",
-          });
-        });
-    }
-  }, [user, toast]);
-
-  if (isLoading) {
-    return <Loading message="Loading your account..." />;
-  }
-
-  // Check if user is already premium (developer account)
-  // Get subscription status
+  // Get subscription status - moved before conditional returns
   const { data: subscriptionData } = useQuery({
     queryKey: ["/api/subscription-status"],
     enabled: !!user?.user,
   });
-
-  const hasFlavrPlus = user?.user?.hasFlavrPlus || subscriptionData?.hasFlavrPlus;
-  const cancelAtPeriodEnd = subscriptionData?.cancelAtPeriodEnd;
-  const currentPeriodEnd = subscriptionData?.currentPeriodEnd;
 
   // Cancel subscription mutation
   const cancelMutation = useMutation({
@@ -201,6 +160,46 @@ export default function Subscribe() {
       });
     },
   });
+
+  // Fetch payment intent when component mounts
+  useEffect(() => {
+    if (user?.user && !user.user.hasFlavrPlus) {
+      apiRequest("POST", "/api/create-subscription")
+        .then(async (res) => {
+          if (!res.ok) {
+            const errorData = await res.json();
+            if (errorData.message && errorData.message.includes("set up Stripe")) {
+              toast({
+                title: "Stripe Configuration Required",
+                description: errorData.message,
+                variant: "destructive",
+              });
+            } else {
+              throw new Error(errorData.error || 'Failed to create subscription');
+            }
+            return;
+          }
+          const data = await res.json();
+          setClientSecret(data.clientSecret);
+        })
+        .catch((error) => {
+          console.error("Failed to create subscription:", error);
+          toast({
+            title: "Error",
+            description: error.message || "Failed to initialize payment. Please try again.",
+            variant: "destructive",
+          });
+        });
+    }
+  }, [user, toast]);
+
+  const hasFlavrPlus = user?.user?.hasFlavrPlus || subscriptionData?.hasFlavrPlus;
+  const cancelAtPeriodEnd = subscriptionData?.cancelAtPeriodEnd;
+  const currentPeriodEnd = subscriptionData?.currentPeriodEnd;
+
+  if (isLoading) {
+    return <Loading message="Loading your account..." />;
+  }
 
   // Show subscription management for existing Flavr+ users
   if (hasFlavrPlus) {
