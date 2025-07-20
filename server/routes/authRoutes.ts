@@ -26,11 +26,19 @@ export function registerAuthRoutes(app: Express) {
         return res.status(400).json({ message: "User already exists" });
       }
 
-      const user = await storage.createUser({ email, password, username });
+      // Check if this is the developer account
+      const isDeveloper = email === "william@blycontracting.co.uk";
+      
+      const user = await storage.createUser({ 
+        email, 
+        password, 
+        username,
+        hasFlavrPlus: isDeveloper // Grant unlimited generations for developer
+      });
       
       // Ensure session is properly saved
       req.session.userId = user.id;
-      req.session.isPlus = user.hasFlavrPlus || false;
+      req.session.isPlus = user.hasFlavrPlus || isDeveloper;
       
       console.log(`Registration successful for user ${user.email}, session userId: ${req.session.userId}`);
 
@@ -43,7 +51,7 @@ export function registerAuthRoutes(app: Express) {
         }
       });
 
-      res.json({ user: { id: user.id, email: user.email, username: user.username, hasFlavrPlus: user.hasFlavrPlus } });
+      res.json({ user: { id: user.id, email: user.email, username: user.username, hasFlavrPlus: user.hasFlavrPlus || isDeveloper } });
     } catch (error) {
       console.error("Registration error:", error);
       res.status(500).json({ message: "Registration failed" });
@@ -74,11 +82,14 @@ export function registerAuthRoutes(app: Express) {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
+      // Check if this is the developer account
+      const isDeveloper = user.email === "william@blycontracting.co.uk";
+      
       // Ensure session is properly saved
       req.session.userId = user.id;
-      req.session.isPlus = user.hasFlavrPlus || false;
+      req.session.isPlus = user.hasFlavrPlus || isDeveloper;
       
-      console.log(`Login successful for user ${user.email}, session userId: ${req.session.userId}`);
+      console.log(`Login successful for user ${user.email}, session userId: ${req.session.userId}, isDeveloper: ${isDeveloper}`);
 
       // Save session explicitly
       req.session.save((err) => {
@@ -89,7 +100,7 @@ export function registerAuthRoutes(app: Express) {
         }
       });
 
-      res.json({ user: { id: user.id, email: user.email, username: user.username, hasFlavrPlus: user.hasFlavrPlus } });
+      res.json({ user: { id: user.id, email: user.email, username: user.username, hasFlavrPlus: user.hasFlavrPlus || isDeveloper } });
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Login failed" });
@@ -107,17 +118,19 @@ export function registerAuthRoutes(app: Express) {
   // Get current user endpoint
   app.get("/api/me", requireAuth, async (req, res) => {
     try {
-      const user = await storage.getUserById(req.session.userId);
+      const user = await storage.getUser(req.session.userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
+      const isDeveloper = user.email === "william@blycontracting.co.uk";
+      
       res.json({ 
         user: { 
           id: user.id, 
           email: user.email, 
           username: user.username, 
-          hasFlavrPlus: user.hasFlavrPlus 
+          hasFlavrPlus: user.hasFlavrPlus || isDeveloper 
         } 
       });
     } catch (error) {
