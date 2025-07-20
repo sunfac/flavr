@@ -75,7 +75,8 @@ export default function FridgeMode() {
       dietary: data.dietary || [],
       equipment: data.equipment || [],
       ambition: data.ambition || 3,
-      servings: data.servings || 4
+      servings: data.servings || 4,
+      ingredientFlexibility: data.ingredientFlexibility || 'strict'
     };
 
     console.log("Transformed data:", transformedData);
@@ -103,7 +104,8 @@ export default function FridgeMode() {
         time: transformedData.time || 30,
         dietary: transformedData.dietary || [],
         equipment: transformedData.equipment || [],
-        ambition: transformedData.ambition || 3
+        ambition: transformedData.ambition || 3,
+        ingredientFlexibility: transformedData.ingredientFlexibility || 'strict'
       };
       
       console.log("Final API data prepared:", apiData);

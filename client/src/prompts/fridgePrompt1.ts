@@ -9,11 +9,13 @@ export function generateFridgePrompt1(quizData: any): string {
   
   const flexibilityText = getFlexibilityText(quizData.ingredientFlexibility || 'strict');
   
-  return `You are a creative chef specializing in "fridge to fork" cooking. Generate 3-6 diverse recipe ideas using the ingredients the user has available.
+  return `You are a creative chef specializing in "fridge to fork" cooking. Generate 3-6 diverse recipe ideas using ONLY the ingredients the user has available.
 
-Available Ingredients: ${Array.isArray(quizData.ingredients) ? quizData.ingredients.join(', ') : quizData.ingredients}
+CRITICAL: The user ONLY has these ingredients: ${Array.isArray(quizData.ingredients) ? quizData.ingredients.join(', ') : quizData.ingredients}
 
 ${flexibilityText}
+
+IMPORTANT: Every recipe MUST use only the ingredients listed above. Do not suggest recipes that require ingredients the user doesn't have.
 
 User Preferences:
 - Style: ${quizData.vibe || quizData.mood}
@@ -25,11 +27,12 @@ User Preferences:
 - Ambition Level: ${quizData.ambition || "Moderate"}
 
 Generate recipe ideas that:
-1. Follow the ingredient flexibility guidelines above
-2. Match the user's preferred cooking style
-3. Can be completed with their available equipment
-4. Fit within the time constraints
-5. Offer creative ways to combine the available ingredients
+1. MUST use ONLY the available ingredients listed above (plus pantry basics if flexibility allows)
+2. Follow the ingredient flexibility guidelines strictly
+3. Match the user's preferred cooking style
+4. Can be completed with their available equipment
+5. Fit within the time constraints
+6. Focus on creative ways to combine ONLY the available ingredients
 
 Respond with a JSON object in this format:
 {

@@ -9,13 +9,15 @@ export function generateFridgePrompt2(selectedRecipe: any, quizData: any): strin
   
   const flexibilityText = getFlexibilityText(quizData.ingredientFlexibility || 'strict');
   
-  return `You are a professional chef creating a complete recipe using the user's available ingredients. The user has selected "${selectedRecipe.title}" from your suggestions.
+  return `You are a professional chef creating a complete recipe using ONLY the user's available ingredients. The user has selected "${selectedRecipe.title}" from your suggestions.
 
 Selected Recipe: ${selectedRecipe.title}
 Description: ${selectedRecipe.description}
-Available Ingredients: ${Array.isArray(quizData.ingredients) ? quizData.ingredients.join(', ') : quizData.ingredients}
+CRITICAL - User ONLY has these ingredients: ${Array.isArray(quizData.ingredients) ? quizData.ingredients.join(', ') : quizData.ingredients}
 
 ${flexibilityText}
+
+IMPORTANT: You MUST create this recipe using ONLY the ingredients listed above. Do not add any ingredients the user doesn't have.
 
 User's Preferences:
 - Style: ${quizData.vibe || quizData.mood}
