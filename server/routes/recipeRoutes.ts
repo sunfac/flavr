@@ -23,7 +23,7 @@ import {
   getEquipmentPromptText,
   getStrictDietaryInstruction 
 } from "../mappingUtils";
-
+import { processConversationalInput, generateRecipeFromConversation, logUserInteractionData } from "../conversationalProcessor";
 
 // Configure multer for file uploads
 const upload = multer({ 
@@ -747,7 +747,64 @@ Return valid JSON only:
     }
   });
 
+  // Conversational recipe generation
+  app.post("/api/conversational-recipe", async (req, res) => {
+    try {
+      const { message, conversationHistory = [], currentData = {} } = req.body;
+      
+      console.log('🗣️ Conversational Recipe Request:', { message, currentData });
 
+      if (!message) {
+        return res.status(400).json({ error: "Message is required" });
+      }
+
+      // Process the conversational input
+      const result = await processConversationalInput(message, conversationHistory, currentData);
+      
+      if (result.complete) {
+        // Generate the actual recipe
+        const recipe = await generateRecipeFromConversation(result.data);
+        
+        // Log user interaction data for B2B insights
+        logUserInteractionData(result.data);
+        
+        // Save recipe if user is authenticated
+        if (req.session?.userId) {
+          try {
+            await storage.createRecipe({
+              ...recipe,
+              userId: req.session.userId,
+              shareId: null
+            });
+            console.log('💾 Conversational recipe saved for user:', req.session.userId);
+          } catch (dbError) {
+            console.error('Database save error:', dbError);
+          }
+        }
+        
+        return res.json({
+          recipe,
+          response: null,
+          complete: true
+        });
+      } else {
+        // Continue conversation
+        return res.json({
+          response: result.response,
+          suggestions: result.suggestions || [],
+          updatedData: result.data,
+          complete: false
+        });
+      }
+      
+    } catch (error) {
+      console.error("❌ Conversational recipe error:", error);
+      res.status(500).json({
+        error: "Failed to process conversational recipe request",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
 
   // Analyze fridge image
   app.post("/api/analyze-fridge", upload.single('image'), async (req, res) => {

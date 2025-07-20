@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import session from "express-session";
 import WebSocket, { WebSocketServer } from "ws";
 import { storage } from "../storage";
-
+import { setupGoogleLiveAudioWebSocket } from "../googleLiveAudio";
 import { registerAuthRoutes } from "./authRoutes";
 import { registerRecipeRoutes } from "./recipeRoutes";
 import { registerChatRoutes } from "./chatRoutes";
@@ -100,7 +100,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Simple Voice Chat WebSocket endpoint
   const server = createServer(app);
   
-
+  // Setup Google Live Audio WebSocket
+  setupGoogleLiveAudioWebSocket(server);
 
   // Simple voice chat WebSocket for fallback
   const wss = new WebSocketServer({ 

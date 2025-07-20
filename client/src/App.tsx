@@ -23,7 +23,7 @@ import DeveloperLogs from "@/pages/DeveloperLogs";
 import DiagnosticPage from "@/pages/DiagnosticPage";
 import NotFound from "@/pages/not-found";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
-
+import ConversationalMode from "@/pages/ConversationalMode";
 import DigitalCookbook from "@/pages/DigitalCookbook";
 import BudgetPlanner from "@/pages/BudgetPlanner";
 
@@ -50,7 +50,7 @@ function Router() {
       <Route path="/subscribe" component={Subscribe} />
       <Route path="/developer-logs" component={DeveloperLogs} />
       <Route path="/diagnostic" component={DiagnosticPage} />
-
+      <Route path="/conversational" component={ConversationalMode} />
       <Route path="/cookbook" component={DigitalCookbook} />
       <Route path="/budget-planner" component={BudgetPlanner} />
       <Route component={NotFound} />
