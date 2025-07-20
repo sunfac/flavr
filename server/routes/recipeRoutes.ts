@@ -188,6 +188,33 @@ Make each recipe distinctly different in style, technique, and flavor profile. F
         sessionId: req.session?.id || 'no-session'
       });
 
+      // Enhanced behavioral tracking
+      try {
+        const userId = req.session?.userId?.toString() || 'anonymous';
+        await logUserInteractionData(userId, {
+          mode,
+          sessionId: req.session?.id,
+          action: 'recipe_ideas_generated',
+          quizData: req.body,
+          recipeCount: recipeData.recipes?.length || 0,
+          recipeTitles: recipeData.recipes?.map((r: any) => r.title) || [],
+          duration,
+          timestamp: new Date().toISOString(),
+          // Purchase intent indicators
+          customerProfile: {
+            supermarket: req.body.supermarket,
+            budget: req.body.budget,
+            portions: req.body.portions || req.body.servings,
+            timeConstraints: req.body.time,
+            dietaryNeeds: req.body.dietary,
+            cookingAmbition: req.body.ambition,
+            equipment: req.body.equipment,
+          }
+        });
+      } catch (trackingError) {
+        console.error('Behavioral tracking failed:', trackingError);
+      }
+
       res.json(recipeData);
     } catch (error) {
       console.error("Recipe ideas error:", error);
@@ -335,6 +362,46 @@ Return valid JSON only:
         userId: req.session?.userId?.toString() || 'anonymous',
         sessionId: req.session?.id || 'no-session'
       });
+
+      // Enhanced behavioral tracking for recipe ideas
+      try {
+        const userId = req.session?.userId?.toString() || 'anonymous';
+        await logUserInteractionData(userId, {
+          mode: 'shopping',
+          sessionId: req.session?.id,
+          action: 'recipe_ideas_generated', 
+          quizData: {
+            portions: portions || quizData.servings,
+            timeAvailable: timeAvailable || quizData.time,
+            equipment,
+            mood,
+            ambition,
+            budget,
+            cuisines,
+            dietaryRestrictions,
+            supermarket
+          },
+          recipeCount: recipeData.recipes?.length || 0,
+          recipeTitles: recipeData.recipes?.map((r: any) => r.title) || [],
+          recipeCuisines: recipeData.recipes?.map((r: any) => r.cuisine) || [],
+          duration,
+          timestamp: new Date().toISOString(),
+          // Enhanced purchase intent
+          customerProfile: {
+            supermarketPreference: supermarket,
+            budgetSegment: budget,
+            householdSize: portions || quizData.servings,
+            cookingTime: timeAvailable || quizData.time,
+            skillLevel: ambition,
+            dietaryProfile: dietaryRestrictions,
+            equipmentOwnership: equipment,
+            moodContext: mood,
+            cuisinePreferences: cuisines
+          }
+        });
+      } catch (trackingError) {
+        console.error('Behavioral tracking failed:', trackingError);
+      }
 
       console.log('✅ Recipe ideas generated successfully:', recipeData.recipes?.length || 0, 'recipes');
       res.json(recipeData);
@@ -559,6 +626,62 @@ Return valid JSON only:
         userId: req.session?.userId?.toString() || 'anonymous',
         sessionId: req.session?.id || 'no-session'
       });
+
+      // Enhanced behavioral tracking for full recipe
+      try {
+        const userId = req.session?.userId?.toString() || 'anonymous';
+        await logUserInteractionData(userId, {
+          mode,
+          sessionId: req.session?.id,
+          interactionType: 'full_recipe_generated',
+          page: '/recipe-generation',
+          component: 'recipe_generator',
+          action: 'recipe_completed',
+          selectedRecipe,
+          recipeData: {
+            title: recipeData.title,
+            cuisine: recipeData.cuisine,
+            difficulty: recipeData.difficulty,
+            cookTime: recipeData.cookTime,
+            servings: recipeData.servings,
+            ingredientCount: recipeData.ingredients?.length || 0,
+            instructionSteps: recipeData.instructions?.length || 0,
+            hasImage: !!recipeData.imageUrl
+          },
+          quizData: {
+            portions,
+            timeAvailable,
+            equipment,
+            mood,
+            ambition,
+            budget,
+            cuisines,
+            dietaryRestrictions,
+            supermarket
+          },
+          duration,
+          timestamp: new Date().toISOString(),
+          // Comprehensive purchase intent
+          customerProfile: {
+            supermarketPreference: supermarket,
+            budgetSegment: budget,
+            householdSize: parseInt(portions) || 4,
+            cookingTime: timeAvailable,
+            skillLevel: ambition,
+            dietaryProfile: dietaryRestrictions,
+            equipmentOwnership: equipment,
+            moodContext: mood,
+            cuisineSelection: cuisines,
+            // Recipe selection behavior
+            selectedRecipeTitle: selectedRecipe.title,
+            selectedRecipeDifficulty: selectedRecipe.difficulty,
+            selectedRecipeCuisine: selectedRecipe.cuisine,
+            recipeSelectionTime: duration
+          }
+        });
+      } catch (trackingError) {
+        console.error('Behavioral tracking failed:', trackingError);
+      }
 
       console.log('✅ Full recipe generated successfully for:', recipeData.title);
       res.json({ recipe: recipeData });

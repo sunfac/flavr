@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import SlideQuizShell from "@/components/SlideQuizShell";
@@ -16,6 +16,7 @@ import UpgradeModal from "@/components/UpgradeModal";
 import { shoppingQuestions } from "@/config/shoppingQuestions";
 import { useQuery } from "@tanstack/react-query";
 import { checkQuotaBeforeGPT } from "@/lib/quotaManager";
+import { trackUserInteraction } from "@/lib/userFingerprint";
 
 export default function ShoppingMode() {
   const [, navigate] = useLocation();
@@ -27,6 +28,7 @@ export default function ShoppingMode() {
   const [showNavigation, setShowNavigation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [quizStartTime, setQuizStartTime] = useState(Date.now());
 
   // Close all menus
   const closeAllMenus = () => {
@@ -121,6 +123,16 @@ export default function ShoppingMode() {
     }
   };
 
+  // Track page view on mount
+  useEffect(() => {
+    trackUserInteraction('page_view', {
+      component: 'ShoppingMode',
+      action: 'start_shopping_quiz',
+      mode: 'shopping'
+    });
+    setQuizStartTime(Date.now());
+  }, []);
+
   const handleQuizComplete = async (data: any) => {
     const transformedData = {
       mood: data.mood,
@@ -136,6 +148,16 @@ export default function ShoppingMode() {
 
     setQuizData(transformedData);
     setHasSentPrompt1Twice(false);
+    
+    // Track quiz completion with behavioral data
+    const quizDuration = Math.round((Date.now() - quizStartTime) / 1000);
+    await trackUserInteraction('quiz_completed', {
+      component: 'ShoppingMode',
+      action: 'complete_shopping_quiz',
+      mode: 'shopping',
+      quizDuration,
+      completionTime: new Date().toISOString()
+    }, transformedData);
     
     await generateRecipeIdeas(transformedData);
   };
@@ -155,6 +177,19 @@ export default function ShoppingMode() {
         return;
       }
     }
+
+    // Track recipe selection
+    await trackUserInteraction('recipe_selected', {
+      component: 'ShoppingMode',
+      action: 'select_recipe_card',
+      mode: 'shopping',
+      selectedRecipe: {
+        title: recipe.title,
+        cuisine: recipe.cuisine,
+        difficulty: recipe.difficulty,
+        cookTime: recipe.estimatedTime
+      }
+    }, quizData, recipe);
 
     try {
       setIsLoading(true);

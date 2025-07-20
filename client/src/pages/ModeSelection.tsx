@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import GlobalNavigation from "@/components/GlobalNavigation";
 import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
 import { getRemainingRecipes } from "@/lib/quotaManager";
+import { trackUserInteraction } from "@/lib/userFingerprint";
 
 export default function ModeSelection() {
   const [, navigate] = useLocation();
@@ -66,7 +67,27 @@ export default function ModeSelection() {
     }
   ];
 
-  const handleModeSelect = (modeId: string) => {
+  // Track page view on mount
+  useEffect(() => {
+    trackUserInteraction('page_view', {
+      component: 'ModeSelection',
+      action: 'view_cooking_modes',
+      userStatus: isAuthenticated ? 'authenticated' : 'anonymous',
+      availableModes: modes.map(m => m.id)
+    });
+  }, [isAuthenticated]);
+
+  const handleModeSelect = async (modeId: string) => {
+    // Track mode selection with behavioral data
+    await trackUserInteraction('mode_selected', {
+      component: 'ModeSelection',
+      action: 'select_cooking_mode',
+      selectedMode: modeId,
+      modeDetails: modes.find(m => m.id === modeId),
+      userStatus: isAuthenticated ? 'authenticated' : 'anonymous',
+      selectionTime: new Date().toISOString()
+    });
+
     if (modeId === "flavr-rituals") {
       navigate("/flavr-rituals");
     } else if (modeId === "budget-planner") {

@@ -56,6 +56,8 @@ Flavr is a modern full-stack web application that serves as an AI-powered culina
 - **Recipes**: Generated recipes with metadata and sharing capabilities
 - **Developer Logs**: Comprehensive logging for AI interactions and costs
 - **Chat Messages**: Conversational recipe assistance
+- **Interaction Logs**: Behavioral profiling system for B2B insights
+- **Recipe Generation Logs**: Detailed tracking of recipe generation events
 
 ## Data Flow
 
@@ -89,6 +91,7 @@ Flavr is a modern full-stack web application that serves as an AI-powered culina
 ### Payment & Analytics
 - **Stripe**: Subscription billing and payment processing
 - **Developer Analytics**: Cost tracking and usage monitoring
+- **Behavioral Analytics**: Comprehensive user profiling for B2B data insights
 
 ### Database & Infrastructure
 - **Neon Database**: Serverless PostgreSQL hosting
@@ -196,6 +199,7 @@ Changelog:
 - June 30, 2025. Chat mode step-by-step questions implementation complete - structured question flow with radio button UI for cuisine, portions, time, mood, and budget preferences, automated progression through question sequences, text input options for ingredients and custom responses, purple-themed question bubbles with interactive radio groups and suggestion chips
 - June 30, 2025. Digital cookbook feature implementation complete - comprehensive recipe management system with search and filtering, stunning visual recipe cards with cuisine and difficulty badges, recipe deletion and viewing capabilities, automatic recipe saving from all cooking modes, navigation integration from mode selection, organized by mode types and cooking preferences
 - June 30, 2025. Conversational question system enhanced for efficiency - focused question strategy that asks ONE targeted question per response, prioritizes essential recipe data (dish, portions, time), generates recipes after gathering 3 core pieces of information, eliminates vague questions with specific actionable options, improved from scattered multi-question approach to streamlined 3-step process
+- July 20, 2025. Behavioral profiling system implementation complete - comprehensive user behavioral tracking for B2B data insights, replaced technical fingerprinting with purchase intent profiling, integrated interaction_logs database table with structured JSON data capture, enhanced recipe generation endpoints with customer profiling, tracking user journey stages and engagement patterns, capturing supermarket preferences and shopping behavior for sellable business intelligence
 - July 3, 2025. Codebase optimization complete - pruned unused client and server modules, removed 15+ unused components (DeveloperMode, VoiceAssistant, VoiceChat, unused UI components), eliminated 14 unused package dependencies (lottie-react, embla-carousel-react, react-day-player, etc.), cleaned up unused configuration files and hooks, optimized bundle size and improved build performance
 - July 3, 2025. Server routes refactored into maintainable modules - broke up massive 2075-line routes.ts into organized modules (authRoutes.ts, recipeRoutes.ts, chatRoutes.ts, subscriptionRoutes.ts), created server/routes/ directory structure, centralized route registration in routes/index.ts, maintained all existing functionality while improving code maintainability and separation of concerns
 - July 3, 2025. Comprehensive automated testing infrastructure complete - implemented Jest with TypeScript support, React Testing Library for component tests, Supertest for API testing, created organized test structure (tests/server/, tests/client/, tests/integration/), built authentication tests covering signup/login/session management, database operation tests for CRUD operations and data integrity, recipe generation pipeline tests, React component tests for core UI elements, end-to-end integration tests for complete user workflows, enhanced run-tests.js with 14 comprehensive test categories achieving 100% success rate, established robust foundation for continuous testing and quality assurance across all application layers

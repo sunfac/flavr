@@ -273,14 +273,14 @@ export async function logUserInteractionData(userId: string, interactionData: an
       userId: isNumericUserId ? Number(userId) : null,
       pseudoUserId: !isNumericUserId ? userId : null,
       sessionId: interactionData.sessionId || `conv_${Date.now()}`,
-      interactionType: 'conversational_recipe',
-      page: 'chat_mode',
-      component: 'conversational_processor',
-      action: 'recipe_generation',
+      interactionType: interactionData.interactionType || 'conversational_recipe',
+      page: interactionData.page || 'chat_mode',
+      component: interactionData.component || 'conversational_processor',
+      action: interactionData.action || 'recipe_generation',
       data: {
         ...interactionData,
         // B2B valuable data points
-        customerProfile: {
+        customerProfile: interactionData.customerProfile || {
           cookingIntent: interactionData.intent,
           cuisinePreferences: interactionData.cuisine,
           typicalPortions: interactionData.portions,
