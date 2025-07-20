@@ -11,13 +11,14 @@ export function GoogleLiveAudioChat({ currentRecipe, onRecipeUpdate }: GoogleLiv
   const [isConnected, setIsConnected] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected');
+  const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected' | 'ready' | 'error'>('disconnected');
   
   const websocketRef = useRef<WebSocket | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
+  const audioProcessorRef = useRef<ScriptProcessorNode | null>(null);
 
   // Initialize audio context and elements
   useEffect(() => {
@@ -76,37 +77,57 @@ export function GoogleLiveAudioChat({ currentRecipe, onRecipeUpdate }: GoogleLiv
         console.error('❌ No Gemini API key available from any source');
         return;
       }
-      const websocket = new WebSocket(`wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${apiKey}`);
+      // Use our server's WebSocket endpoint instead of direct Google API
+      const wsUrl = `${protocol}//${window.location.host}/api/google-live-audio`;
+      console.log('🔗 Connecting to server WebSocket:', wsUrl);
+      
+      const websocket = new WebSocket(wsUrl);
       websocketRef.current = websocket;
+      websocket.binaryType = 'arraybuffer';
       
       websocket.onopen = () => {
-        console.log('🔊 Connected to Google Live Audio API');
+        console.log('🔊 Connected to Google Live Audio WebSocket');
         setConnectionStatus('connected');
         setIsConnected(true);
         
-        // Send initial context
+        // Send session setup
         websocket.send(JSON.stringify({
-          type: 'session_setup',
+          type: 'start_conversation',
           currentRecipe,
-          instructions: `You are Zest, Flavr's cooking assistant. Help with recipe questions, modifications, and cooking guidance. 
-          
-          Current recipe: ${currentRecipe?.title || 'None'}
-          Be conversational, helpful, and maintain natural dialogue flow.`
+          instructions: `You are Zest, Flavr's cooking assistant. Help with recipe questions, modifications, and cooking guidance. Current recipe: ${currentRecipe?.title || 'None'}`
         }));
         
-        // Start recording audio
-        startAudioCapture(stream, websocket);
+        // Start audio streaming
+        startAudioStreaming();
       };
       
       websocket.onmessage = (event) => {
         try {
-          const data = JSON.parse(event.data);
-          handleWebSocketMessage(data);
-        } catch (error) {
-          // Handle binary audio data
-          if (event.data instanceof Blob) {
-            playAudioResponse(event.data);
+          if (typeof event.data === 'string') {
+            const data = JSON.parse(event.data);
+            console.log('📨 Received message:', data.type);
+            
+            if (data.type === 'connected') {
+              console.log('✅ Voice conversation ready');
+              setConnectionStatus('ready');
+              setIsListening(true);
+            } else if (data.type === 'token' && data.data) {
+              console.log('🗣️ AI Response:', data.data);
+              // Use text-to-speech for the response
+              if ('speechSynthesis' in window && !isMuted) {
+                const utterance = new SpeechSynthesisUtterance(data.data);
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+                speechSynthesis.speak(utterance);
+              }
+            }
+          } else if (event.data instanceof ArrayBuffer) {
+            // Handle binary audio response
+            console.log('🎵 Received audio response');
+            handleAudioResponse(event.data);
           }
+        } catch (error) {
+          console.error('❌ Error processing message:', error);
         }
       };
       
@@ -127,43 +148,49 @@ export function GoogleLiveAudioChat({ currentRecipe, onRecipeUpdate }: GoogleLiv
     }
   };
 
-  // Start audio streaming to Gemini Live API
   const startAudioStreaming = useCallback(() => {
-    if (!streamRef.current || !audioContextRef.current || !websocketRef.current) return;
+    if (!streamRef.current || !audioContextRef.current || !websocketRef.current) {
+      console.error('❌ Missing required components for audio streaming');
+      return;
+    }
     
-    console.log('Starting audio streaming to Gemini Live API');
+    console.log('🎤 Starting audio streaming to server...');
     
     try {
       const source = audioContextRef.current.createMediaStreamSource(streamRef.current);
       const processor = audioContextRef.current.createScriptProcessor(4096, 1, 1);
       
+      let chunkCount = 0;
       processor.onaudioprocess = (event) => {
-        if (websocketRef.current?.readyState === WebSocket.OPEN) {
+        if (websocketRef.current?.readyState === WebSocket.OPEN && isListening) {
           const inputBuffer = event.inputBuffer.getChannelData(0);
           
-          // Convert to 16-bit PCM at 24kHz for Gemini Live
-          const pcmData = new Int16Array(inputBuffer.length);
-          for (let i = 0; i < inputBuffer.length; i++) {
-            pcmData[i] = Math.max(-32768, Math.min(32767, inputBuffer[i] * 32768));
+          // Check for audio activity
+          const sum = inputBuffer.reduce((acc, val) => acc + Math.abs(val), 0);
+          const average = sum / inputBuffer.length;
+          
+          chunkCount++;
+          if (chunkCount % 100 === 0) {
+            console.log(`🎤 Audio level: ${average.toFixed(6)} (chunk ${chunkCount})`);
           }
           
-          // Send proper Gemini Live client content message
-          const audioMessage = {
-            client_content: {
-              turns: [{
-                role: "user",
-                parts: [{
-                  inline_data: {
-                    mime_type: "audio/pcm",
-                    data: btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer)))
-                  }
-                }]
-              }],
-              turn_complete: false
+          // Only send when there's significant audio activity
+          if (average > 0.003) {
+            // Convert to 16-bit PCM
+            const pcmData = new Int16Array(inputBuffer.length);
+            for (let i = 0; i < inputBuffer.length; i++) {
+              pcmData[i] = Math.max(-32768, Math.min(32767, inputBuffer[i] * 32768));
             }
-          };
-          
-          websocketRef.current.send(JSON.stringify(audioMessage));
+            
+            // Send as base64 encoded audio data
+            const audioMessage = {
+              type: 'audio_data',
+              data: btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer)))
+            };
+            
+            console.log(`📤 Sending audio chunk ${chunkCount} (level: ${average.toFixed(4)})`);
+            websocketRef.current.send(JSON.stringify(audioMessage));
+          }
         }
       };
       
@@ -171,11 +198,11 @@ export function GoogleLiveAudioChat({ currentRecipe, onRecipeUpdate }: GoogleLiv
       processor.connect(audioContextRef.current.destination);
       
       audioProcessorRef.current = processor;
-      console.log('Audio streaming pipeline established');
+      console.log('✅ Audio streaming pipeline established');
     } catch (error) {
-      console.error('Error starting audio streaming:', error);
+      console.error('❌ Error starting audio streaming:', error);
     }
-  }, []);
+  }, [isListening]);
 
   const disconnect = () => {
     if (audioProcessorRef.current) {

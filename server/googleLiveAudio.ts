@@ -97,13 +97,42 @@ export function setupGoogleLiveAudioWebSocket(server: any) {
 
     ws.on('message', async (data: WebSocket.Data) => {
       try {
-        const message = JSON.parse(data.toString());
-        await handleLiveAudioMessage(session, message);
+        if (data instanceof Buffer) {
+          // Handle binary audio data
+          console.log(`📥 Received binary audio data: ${data.length} bytes`);
+          if (geminiSession) {
+            geminiSession.sendAudio(data);
+          }
+        } else {
+          // Handle JSON messages
+          const message = JSON.parse(data.toString());
+          console.log(`📥 Received message type: ${message.type}`);
+          
+          if (message.type === 'start_conversation') {
+            console.log('🎯 Starting conversation with Gemini Live');
+            ws.send(JSON.stringify({
+              type: 'connected',
+              message: 'Voice conversation started - speak now!'
+            }));
+          } else if (message.type === 'audio_data' && message.data) {
+            // Convert base64 audio to buffer and send to Gemini
+            const audioBuffer = Buffer.from(message.data, 'base64');
+            console.log(`🎤 Processing audio data: ${audioBuffer.length} bytes`);
+            if (geminiSession) {
+              geminiSession.sendAudio(audioBuffer);
+            }
+          } else if (message.type === 'text' && message.text) {
+            // Send text to Gemini Live session
+            if (geminiSession) {
+              geminiSession.sendText(message.text);
+            }
+          }
+        }
       } catch (error) {
-        console.error('Error handling live audio message:', error);
+        console.error('❌ Error handling live audio message:', error);
         ws.send(JSON.stringify({
           type: 'error',
-          message: 'Failed to process audio message'
+          message: 'Failed to process message'
         }));
       }
     });
