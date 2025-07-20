@@ -45,7 +45,7 @@ export default function HeaderSection({
             {/* Minimal overlay for mobile readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent sm:bg-black/30" />
             
-            {/* Mobile: Minimal title overlay, Desktop: Full overlay */}
+            {/* Mobile: Only title overlay, Desktop: Title + description overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-6 text-white">
               <h1 className="font-bold mb-1 sm:mb-2 text-shadow-lg text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight break-words hyphens-auto text-wrap-balance">
                 {recipe.title}
@@ -72,14 +72,7 @@ export default function HeaderSection({
           </div>
         )}
         
-        {/* Mobile Description - Below Image - Only show if not already shown in overlay */}
-        {recipe.description && recipe.image && (
-          <div className="sm:hidden p-3 bg-slate-800/70 backdrop-blur-sm">
-            <p className="text-slate-200 text-sm leading-relaxed break-words line-clamp-3">
-              {recipe.description}
-            </p>
-          </div>
-        )}
+
       </div>
 
       {/* Fast Facts & Serving Controls */}

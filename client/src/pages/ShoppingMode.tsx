@@ -298,6 +298,7 @@ export default function ShoppingMode() {
         />
         
         <main className="pt-20 pb-24">
+          <div id="recipe-top"></div>
           <RecipeCard
             recipe={selectedRecipe}
             mode="shopping"
