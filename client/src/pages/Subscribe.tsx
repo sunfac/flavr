@@ -111,7 +111,17 @@ export default function Subscribe() {
       apiRequest("POST", "/api/create-subscription")
         .then(async (res) => {
           if (!res.ok) {
-            throw new Error('Failed to create subscription');
+            const errorData = await res.json();
+            if (errorData.message && errorData.message.includes("set up Stripe")) {
+              toast({
+                title: "Stripe Configuration Required",
+                description: errorData.message,
+                variant: "destructive",
+              });
+            } else {
+              throw new Error(errorData.error || 'Failed to create subscription');
+            }
+            return;
           }
           const data = await res.json();
           setClientSecret(data.clientSecret);
@@ -120,7 +130,7 @@ export default function Subscribe() {
           console.error("Failed to create subscription:", error);
           toast({
             title: "Error",
-            description: "Failed to initialize payment. Please try again.",
+            description: error.message || "Failed to initialize payment. Please try again.",
             variant: "destructive",
           });
         });

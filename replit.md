@@ -89,7 +89,12 @@ Flavr is a modern full-stack web application that serves as an AI-powered culina
 - **Replicate**: Stable Diffusion for food image generation
 
 ### Payment & Analytics
-- **Stripe**: Subscription billing and payment processing
+- **Stripe**: Complete subscription billing and payment processing
+  - Monthly/annual subscription tiers
+  - Stripe Elements integration for secure payments
+  - Webhook handling for subscription events
+  - Cancel/reactivate functionality
+  - Comprehensive error handling and configuration guidance
 - **Developer Analytics**: Cost tracking and usage monitoring
 - **Behavioral Analytics**: Comprehensive user profiling for B2B data insights
 
@@ -130,6 +135,32 @@ Flavr is a modern full-stack web application that serves as an AI-powered culina
 - Fallback modes when production builds fail
 - Comprehensive logging for debugging
 - Cache management to prevent refresh loops
+
+## Stripe Integration
+
+### Overview
+Flavr+ subscription system is fully integrated with Stripe for payment processing:
+- Monthly subscription: $4.99/month
+- Annual subscription: $49.99/year (optional)
+- Free trial support ready
+- Automatic renewal and cancellation handling
+
+### Required Configuration
+To enable payments, the following environment variables must be set:
+1. `STRIPE_SECRET_KEY` - Your Stripe secret key
+2. `VITE_STRIPE_PUBLIC_KEY` - Your Stripe publishable key  
+3. `STRIPE_MONTHLY_PRICE_ID` - Price ID from Stripe Dashboard
+4. `STRIPE_ANNUAL_PRICE_ID` - (Optional) Annual price ID
+5. `STRIPE_WEBHOOK_SECRET` - (Optional) For webhook verification
+
+See `STRIPE_SETUP.md` for detailed setup instructions.
+
+### Key Features
+- **Payment Flow**: Stripe Elements integration on Subscribe page
+- **Subscription Management**: Cancel/reactivate in Settings page
+- **Developer Access**: william@blycontracting.co.uk has unlimited access
+- **Error Handling**: Clear guidance when Stripe is not configured
+- **Database Integration**: Full subscription tracking in user schema
 
 ## Changelog
 
@@ -225,6 +256,7 @@ Changelog:
 - July 20, 2025. Developer privileges implementation complete - enhanced authentication system to automatically grant unlimited recipe generations (hasFlavrPlus) for william@blycontracting.co.uk email, added developer detection during registration and login, ensured developer account gets unlimited access and developer logs visibility in deployed version, fixed getUserById reference to use getUser method
 - July 20, 2025. Shopping Mode recipe generation bug fixed - removed frontend prompt override that was bypassing backend quiz processing and cuisine selection, ensured Shopping Mode now properly generates recipes based on selected cuisines rather than random recipes, verified all other cooking modes (Fridge, Chef Assist, Budget Planner) are correctly processing quiz inputs
 - July 20, 2025. Recipe card data loading issue resolved - fixed recipe selection in Shopping Mode where ingredients and instructions weren't loading, updated frontend to properly pass selectedRecipe object with title to backend API, ensured full recipe generation includes all required fields (ingredients, instructions, image) for proper display in recipe cards
+- July 20, 2025. Complete Stripe integration implementation - built comprehensive payment system with Stripe Elements for secure payment processing, created subscription management endpoints for create/cancel/reactivate functionality, enhanced user schema with full subscription tracking fields (stripeCustomerId, stripeSubscriptionId, subscriptionStatus), implemented Stripe webhook handling for automatic subscription event processing, added developer account privileges for unlimited access, created Settings page with billing management interface, comprehensive error handling with clear configuration guidance when Stripe is not set up, documented complete setup process in STRIPE_SETUP.md for easy deployment
 ```
 
 ## User Preferences

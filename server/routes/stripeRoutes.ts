@@ -13,8 +13,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 // Define subscription prices (you'll need to create these in Stripe Dashboard)
 const PRICE_IDS = {
-  monthly: process.env.STRIPE_MONTHLY_PRICE_ID || 'price_monthly_flavr_499', // $4.99/month
-  annual: process.env.STRIPE_ANNUAL_PRICE_ID || 'price_annual_flavr_4999', // $49.99/year
+  monthly: process.env.STRIPE_MONTHLY_PRICE_ID || '', // Set STRIPE_MONTHLY_PRICE_ID in environment
+  annual: process.env.STRIPE_ANNUAL_PRICE_ID || '', // Set STRIPE_ANNUAL_PRICE_ID in environment
 };
 
 export function registerStripeRoutes(app: Express) {
@@ -26,6 +26,14 @@ export function registerStripeRoutes(app: Express) {
       }
 
       const { priceId = PRICE_IDS.monthly } = req.body;
+      
+      // Check if price ID is configured
+      if (!priceId) {
+        return res.status(400).json({ 
+          error: "Stripe is not configured", 
+          message: "Please set up Stripe products and prices. See STRIPE_SETUP.md for instructions." 
+        });
+      }
       const user = await storage.getUser(req.session.userId);
       
       if (!user) {
