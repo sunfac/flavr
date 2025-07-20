@@ -88,32 +88,13 @@ app.use((req, res, next) => {
   const isProduction = process.env.NODE_ENV === "production" || app.get("env") === "production" || process.env.REPLIT_DEPLOYMENT === "true";
   const distPublicDir = path.resolve(import.meta.dirname, "..", "dist", "public");
   const hasBuild = fs.existsSync(distPublicDir) && fs.existsSync(path.join(distPublicDir, "index.html"));
+  
+  log(`Environment check - NODE_ENV: ${process.env.NODE_ENV}, isProduction: ${isProduction}, hasBuild: ${hasBuild}`);
 
   if (isProduction && hasBuild) {
     log("Production mode detected with valid build - serving static files");
-    // Serve static files from production build
-    app.use(express.static(distPublicDir, {
-        setHeaders: (res, filePath) => {
-          // Set proper MIME types
-          const ext = path.extname(filePath);
-          if (ext === '.js' || ext === '.mjs' || ext === '.jsx' || ext === '.tsx') {
-            res.setHeader('Content-Type', 'application/javascript');
-          } else if (ext === '.css') {
-            res.setHeader('Content-Type', 'text/css');
-          } else if (filePath.endsWith('manifest.json')) {
-            res.setHeader('Content-Type', 'application/manifest+json');
-          } else if (ext === '.json') {
-            res.setHeader('Content-Type', 'application/json');
-          } else if (filePath.endsWith('service-worker.js') || filePath.endsWith('.worker.js')) {
-            res.setHeader('Content-Type', 'application/javascript');
-          } else if (ext === '.html') {
-            res.setHeader('Content-Type', 'text/html');
-          }
-        }
-      }));
-    app.use("*", (_req, res) => {
-      res.sendFile(path.resolve(distPublicDir, "index.html"));
-    });
+    // Use serveStatic function for production
+    serveStatic(app);
   } else if (isProduction) {
     // Production fallback - serve development files directly with production optimizations
     log("Production fallback mode - serving development files with optimizations");
