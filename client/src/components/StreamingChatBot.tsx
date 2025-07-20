@@ -161,7 +161,7 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
               try {
                 const data = JSON.parse(line.slice(6));
                 
-                if (data.type === 'content') {
+                if (data.content && !data.done) {
                   fullResponse += data.content;
                   // Update streaming message
                   setMessages(prev => prev.map(msg => 
@@ -196,7 +196,7 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                       ? { ...msg, text: fullResponse }
                       : msg
                   ));
-                } else if (data.type === 'done') {
+                } else if (data.done) {
                   setIsStreaming(false);
                   // Mark message as complete
                   setMessages(prev => prev.map(msg => 
