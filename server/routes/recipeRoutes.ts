@@ -283,17 +283,24 @@ USER PREFERENCES:
 • ${moodPrompt}  
 • ${ambitionPrompt}
 • ${budgetPrompt}
-• Cuisines: ${Array.isArray(cuisines) ? cuisines.join(', ') : cuisines}
+• Selected Cuisine(s): ${Array.isArray(cuisines) ? cuisines.join(', ') : cuisines}
 • Equipment: ${formatEquipmentText(equipment)}
 ${dietPrompt ? `• ${dietPrompt}` : ''}${supermarketContext}
 
 ${creativityGuidance}
 
+STRICT CUISINE REQUIREMENT:
+ALL recipes MUST be from the selected cuisine(s): ${Array.isArray(cuisines) ? cuisines.join(', ') : cuisines}
+- If "Mexican" is selected, provide ONLY authentic Mexican dishes (not fusion)
+- If multiple cuisines are selected, distribute recipes evenly among them
+- Do NOT include recipes from cuisines not explicitly selected by the user
+
 REQUIREMENTS:
-- Each recipe must be distinctly different in cuisine, technique, and flavor profile
+- Each recipe must be distinctly different in technique and flavor profile WITHIN the selected cuisine(s)
 - Include a mix of difficulty levels appropriate for the ambition level
 - Ensure recipes fit the time constraint and equipment availability
 - Make descriptions appetizing and specific to build excitement
+- CRITICAL: Cuisine field must match one of the selected cuisines exactly
 
 Return valid JSON only:
 {
@@ -303,7 +310,7 @@ Return valid JSON only:
       "description": "2-3 sentences highlighting flavors, technique, and appeal",
       "estimatedTime": "X minutes",
       "difficulty": "Beginner/Intermediate/Advanced", 
-      "cuisine": "Specific cuisine type",
+      "cuisine": "Must be one of the selected cuisines",
       "highlights": ["Unique aspect 1", "Flavor highlight 2", "Technique or ingredient 3"]
     }
   ]
@@ -317,8 +324,8 @@ Return valid JSON only:
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: "You are a JSON API. Respond ONLY with valid JSON - no explanations, no markdown, no text outside the JSON object." },
-          { role: "user", content: finalPrompt + "\n\nIMPORTANT: Return ONLY the JSON object, nothing else." }
+          { role: "system", content: `You are a JSON API that MUST strictly follow cuisine constraints. When the user selects specific cuisine(s), you MUST ONLY return recipes from those exact cuisines. If "Mexican" is selected, return ONLY authentic Mexican dishes. No fusion, no other cuisines. Respond ONLY with valid JSON.` },
+          { role: "user", content: finalPrompt + "\n\nCRITICAL REMINDER: You MUST only return recipes from the selected cuisine(s): " + (Array.isArray(cuisines) ? cuisines.join(', ') : cuisines) + ". NO EXCEPTIONS." }
         ],
         temperature: 0.7,
         max_tokens: 2500,
