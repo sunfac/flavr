@@ -50,6 +50,12 @@ export default function RecipeCard({
   const handleRecipeUpdate = (updatedRecipe: any) => {
     console.log('🔄 Recipe card received update:', updatedRecipe);
     setFullRecipe(updatedRecipe);
+    
+    // Dispatch custom event for EnhancedRecipeCard to listen
+    window.dispatchEvent(new CustomEvent('recipe-updated', { 
+      detail: updatedRecipe 
+    }));
+    
     toast({
       title: "Recipe updated!",
       description: "Your recipe has been modified based on your request.",
@@ -105,7 +111,15 @@ export default function RecipeCard({
       // Execute immediately and with slight delay for reliability
       scrollToRecipeHeader();
       setTimeout(scrollToRecipeHeader, 50);
-      setTimeout(scrollToRecipeHeader, 150);
+      setTimeout(scrollToRecipeHeader, 200);
+      
+      // Additional scroll after potential image load
+      setTimeout(() => {
+        const headerElement = document.getElementById('recipe-header-top');
+        if (headerElement) {
+          headerElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 500);
       
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
@@ -311,6 +325,19 @@ export default function RecipeCard({
     instructions: actualRecipe.instructions || [],
     tips: actualRecipe.tips
   };
+  
+  console.log('🖼️ Enhanced recipe image check:', {
+    actualImageUrl: actualRecipe.imageUrl,
+    actualImage: actualRecipe.image,
+    enhancedImage: enhancedRecipe.image,
+    hasImage: !!enhancedRecipe.image
+  });
+  
+  // Force image refresh if missing
+  if (!enhancedRecipe.image && actualRecipe.enhanced) {
+    enhancedRecipe.image = actualRecipe.enhanced;
+    console.log('🔧 Using enhanced image URL:', actualRecipe.enhanced);
+  }
 
   console.log('🎯 Enhanced recipe for display:', enhancedRecipe);
   console.log('🔍 Original fullRecipe data:', fullRecipe);
@@ -380,6 +407,7 @@ export default function RecipeCard({
         recipe={enhancedRecipe}
         onBack={onBack}
         onShare={handleShare}
+        key={`recipe-${enhancedRecipe.id}-${Date.now()}`} // Force re-render when recipe updates
       />
 
       {/* Additional Legacy Features */}

@@ -95,12 +95,45 @@ function EnhancedRecipeCard({
   
   const recipeStore = useRecipeStore();
   
-  // Listen for recipe updates from Zest chatbot
+  // Listen for recipe updates from Zest chatbot and auto-scroll to top
   useEffect(() => {
     const handleRecipeUpdate = (event: CustomEvent) => {
       console.log('🎯 EnhancedRecipeCard received recipe update:', event.detail);
+      
+      // Update the recipe store with new data if available
+      if (event.detail && event.detail.recipe) {
+        const updatedRecipe = event.detail.recipe;
+        recipeActions.updateRecipe(recipe.id, {
+          title: updatedRecipe.title,
+          ingredients: updatedRecipe.ingredients.map((text: string, index: number) => ({
+            id: `ingredient-${index}`,
+            text,
+            checked: false
+          })),
+          steps: updatedRecipe.instructions.map((instruction: string, index: number) => ({
+            id: `step-${index}`,
+            title: `Step ${index + 1}`,
+            description: instruction
+          })),
+          meta: {
+            title: updatedRecipe.title,
+            servings: updatedRecipe.servings,
+            cookTime: updatedRecipe.cookTime,
+            difficulty: updatedRecipe.difficulty
+          }
+        });
+      }
+      
       // Force component re-render
       setKey(prev => prev + 1);
+      
+      // Scroll to top of recipe after update
+      setTimeout(() => {
+        const headerElement = document.getElementById('recipe-header-top');
+        if (headerElement) {
+          headerElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 300);
       
       toast({
         title: "Recipe updated!",
@@ -110,7 +143,7 @@ function EnhancedRecipeCard({
     
     window.addEventListener('recipe-updated', handleRecipeUpdate as EventListener);
     return () => window.removeEventListener('recipe-updated', handleRecipeUpdate as EventListener);
-  }, [toast]);
+  }, [toast, recipe.id]);
 
   // Sync servings from store without causing infinite loops
   const activeServings = useMemo(() => {

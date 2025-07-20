@@ -195,7 +195,7 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                   // Force a DOM refresh to ensure visual updates
                   setTimeout(() => {
                     window.dispatchEvent(new CustomEvent('recipe-updated', { 
-                      detail: updatedRecipe 
+                      detail: { recipe: updatedRecipe }
                     }));
                   }, 100);
                   

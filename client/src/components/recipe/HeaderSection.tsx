@@ -44,6 +44,19 @@ export default function HeaderSection({
               className="w-full h-full object-cover"
               loading="eager"
               style={{ objectPosition: 'center' }}
+              onLoad={() => {
+                // Scroll to top after image loads
+                setTimeout(() => {
+                  const headerElement = document.getElementById('recipe-header-top');
+                  if (headerElement) {
+                    headerElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 100);
+              }}
+              onError={(e) => {
+                console.log('❌ Image failed to load:', recipe.image);
+                e.currentTarget.style.display = 'none';
+              }}
             />
             {/* Minimal overlay for mobile readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent sm:bg-black/30" />
@@ -71,6 +84,9 @@ export default function HeaderSection({
                   {recipe.description}
                 </p>
               )}
+              <div className="mt-4 text-xs text-white/60">
+                Image loading...
+              </div>
             </div>
           </div>
         )}
