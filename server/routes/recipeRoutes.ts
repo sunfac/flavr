@@ -317,6 +317,9 @@ Return JSON with this exact structure:
       // Use the custom prompt or the constructed prompt
       const finalPrompt = req.body.prompt || prompt;
       
+      // Log the actual prompt being sent
+      console.log('📋 Final prompt being sent:', finalPrompt.substring(0, 500) + '...');
+      
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [

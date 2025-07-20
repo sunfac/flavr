@@ -93,8 +93,8 @@ export default function ShoppingMode() {
         body: JSON.stringify({
           mode: "shopping",
           quizData: data,
-          isSecondAttempt,
-          prompt: "Generate 5 diverse recipe ideas for shopping mode"
+          isSecondAttempt
+          // Remove custom prompt to let backend build the proper prompt with cuisine constraints
         })
       });
       
