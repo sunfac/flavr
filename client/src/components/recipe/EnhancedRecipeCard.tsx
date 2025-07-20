@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useScaledIngredients } from '@/hooks/useScaledIngredients';
 import { useRecipeStore, recipeActions } from '@/stores/recipeStore';
+import RecipeShareTools from '../RecipeShareTools';
+import { apiRequest } from '@/lib/queryClient';
 
 // Extract duration from instruction text
 function extractDuration(instruction: string): number | undefined {
@@ -70,6 +72,8 @@ interface Recipe {
   ingredients: string[];
   instructions: string[];
   tips?: string;
+  shareId?: string;
+  isShared?: boolean;
 }
 
 interface EnhancedRecipeCardProps {
@@ -87,7 +91,7 @@ function EnhancedRecipeCard({
 }: EnhancedRecipeCardProps) {
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+
   const [ingredientStates, setIngredientStates] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
   
@@ -165,16 +169,7 @@ function EnhancedRecipeCard({
 
 
 
-  const handleStepComplete = (stepId: string) => {
-    const stepIndex = steps.findIndex(step => step.id === stepId);
-    if (stepIndex >= 0 && !completedSteps.includes(stepIndex)) {
-      setCompletedSteps(prev => [...prev, stepIndex]);
-      toast({
-        title: "Step completed!",
-        description: `Step ${stepIndex + 1} marked as complete`,
-      });
-    }
-  };
+
 
   const handleIngredientToggle = (ingredientId: string) => {
     setIngredientStates(prev => ({
@@ -200,7 +195,7 @@ function EnhancedRecipeCard({
       <ProgressBar
         currentStep={currentStep}
         totalSteps={steps.length}
-        completedSteps={completedSteps}
+        completedSteps={[]}
       />
 
       {/* Header Controls */}
@@ -289,7 +284,6 @@ function EnhancedRecipeCard({
           <StepStack
             steps={steps}
             currentStep={currentStep}
-            onStepComplete={handleStepComplete}
             onStepChange={setCurrentStep}
             className="min-h-[600px]"
           />
@@ -305,6 +299,38 @@ function EnhancedRecipeCard({
                 <p className="text-slate-300 leading-relaxed pr-4">{recipe.tips}</p>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Sharing Tools */}
+        {recipe.id && (
+          <div className="mb-8 bg-slate-800/30 rounded-xl backdrop-blur-sm">
+            <RecipeShareTools
+              id={recipe.id}
+              shareId={recipe.shareId}
+              title={activeTitle}
+              description={recipe.description || `Delicious ${activeTitle} recipe`}
+              imageUrl={recipe.image}
+              isShared={recipe.isShared || false}
+              recipe={recipe}
+              onShareToggle={async () => {
+                try {
+                  await apiRequest("POST", `/api/recipe/${recipe.id}/share`, { 
+                    isShared: !recipe.isShared 
+                  });
+                  toast({
+                    title: "Sharing updated",
+                    description: recipe.isShared ? "Recipe is now private" : "Recipe is now public",
+                  });
+                } catch (error) {
+                  toast({
+                    title: "Error",
+                    description: "Failed to update sharing settings",
+                    variant: "destructive",
+                  });
+                }
+              }}
+            />
           </div>
         )}
 
