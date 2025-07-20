@@ -8,7 +8,7 @@ interface HeaderSectionProps {
   recipe: {
     title: string;
     description?: string;
-    cookTime: number;
+    cookTime: number | string;
     servings: number;
     difficulty: string;
     cuisine?: string;
@@ -22,11 +22,24 @@ export default function HeaderSection({
   recipe, 
   currentServings
 }: HeaderSectionProps) {
-  const fastFacts = useMemo(() => [
-    { icon: Clock, label: `${recipe.cookTime}min`, value: 'time' },
-    { icon: Users, label: `Serves ${currentServings}`, value: 'servings' },
-    { icon: ChefHat, label: recipe.difficulty, value: 'difficulty' },
-  ], [recipe.cookTime, currentServings, recipe.difficulty]);
+  const fastFacts = useMemo(() => {
+    // Format cookTime properly whether it's a number or string
+    let cookTimeLabel = '';
+    if (typeof recipe.cookTime === 'number') {
+      cookTimeLabel = `${recipe.cookTime} minutes`;
+    } else if (typeof recipe.cookTime === 'string') {
+      // If it already has "minutes" or "min", use as is; otherwise add "minutes"
+      cookTimeLabel = recipe.cookTime.includes('min') ? recipe.cookTime : `${recipe.cookTime} minutes`;
+    } else {
+      cookTimeLabel = '30 minutes'; // Default fallback
+    }
+    
+    return [
+      { icon: Clock, label: cookTimeLabel, value: 'time' },
+      { icon: Users, label: `Serves ${currentServings}`, value: 'servings' },
+      { icon: ChefHat, label: recipe.difficulty, value: 'difficulty' },
+    ];
+  }, [recipe.cookTime, currentServings, recipe.difficulty]);
 
   return (
     <div className="relative">

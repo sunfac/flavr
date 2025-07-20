@@ -243,7 +243,7 @@ export default function RecipeCard({
               whileHover={{ scale: 1.05 }}
               className="bg-gradient-primary text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg"
             >
-              ⏱️ {recipe.cookTime || "25 min"}
+              ⏱️ {typeof recipe.cookTime === 'number' ? `${recipe.cookTime} minutes` : recipe.cookTime || "25 minutes"}
             </motion.span>
           </motion.div>
 
