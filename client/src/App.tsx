@@ -26,6 +26,7 @@ import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 
 import DigitalCookbook from "@/pages/DigitalCookbook";
 import BudgetPlanner from "@/pages/BudgetPlanner";
+import { ThemeProvider } from "@/providers/ThemeProvider";
 
 function Router() {
   return (
@@ -62,12 +63,14 @@ function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <ErrorBoundary>
-            <Router />
-          </ErrorBoundary>
-          <Toaster />
-        </TooltipProvider>
+        <ThemeProvider>
+          <TooltipProvider>
+            <ErrorBoundary>
+              <Router />
+            </ErrorBoundary>
+            <Toaster />
+          </TooltipProvider>
+        </ThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

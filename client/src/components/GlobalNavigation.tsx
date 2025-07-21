@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -14,6 +14,7 @@ import {
   Database
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useTheme } from "@/providers/ThemeProvider";
 
 interface GlobalNavigationProps {
   isOpen?: boolean;
@@ -23,7 +24,7 @@ interface GlobalNavigationProps {
 
 export default function GlobalNavigation({ isOpen, onClose, onAuthRequired }: GlobalNavigationProps) {
   const [location] = useLocation();
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   // User query
   const { data: user } = useQuery({
@@ -38,11 +39,6 @@ export default function GlobalNavigation({ isOpen, onClose, onAuthRequired }: Gl
       return;
     }
     onClose?.();
-  };
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle('dark');
   };
 
   const navigationItems = [
@@ -178,9 +174,9 @@ export default function GlobalNavigation({ isOpen, onClose, onAuthRequired }: Gl
               <button
                 onClick={toggleTheme}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
               >
-                {isDarkMode ? (
+                {theme === 'dark' ? (
                   <Sun className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 ) : (
                   <Moon className="w-5 h-5 text-gray-600 dark:text-gray-400" />

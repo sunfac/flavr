@@ -370,7 +370,7 @@ export default function BudgetPlanner() {
                                 {items.map((item, itemIndex) => (
                                   <li key={itemIndex} className="text-xs sm:text-sm flex items-start gap-2">
                                     <CheckSquare className="w-3 h-3 text-green-600 flex-shrink-0 mt-0.5" />
-                                    <span className="text-gray-900 font-medium break-words min-w-0">{item.replace(/^-\s*/, '').trim()}</span>
+                                    <span className="text-gray-600 font-medium break-words min-w-0">{item.replace(/^-\s*/, '').trim()}</span>
                                   </li>
                                 ))}
                               </ul>
@@ -387,7 +387,7 @@ export default function BudgetPlanner() {
                                   {items.map((item, itemIndex) => (
                                     <li key={itemIndex} className="text-xs sm:text-sm flex items-start gap-2">
                                       <CheckSquare className="w-3 h-3 text-green-600 flex-shrink-0 mt-0.5" />
-                                      <span className="text-gray-900 font-medium break-words min-w-0">{item.replace(/^-\s*/, '').trim()}</span>
+                                      <span className="text-gray-600 font-medium break-words min-w-0">{item.replace(/^-\s*/, '').trim()}</span>
                                     </li>
                                   ))}
                                 </ul>

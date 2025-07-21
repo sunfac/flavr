@@ -5,17 +5,17 @@
 @tailwind utilities;
 
 :root {
-  /* Modern Dark-First Design System */
-  --background: 222 47% 11%; /* #0F172A - Rich dark slate */
-  --foreground: 210 40% 98%; /* #F8FAFC - Clean white text */
-  --muted: 217 33% 17%; /* #1E293B - Muted dark surface */
-  --muted-foreground: 215 20% 65%; /* #94A3B8 - Subtle gray text */
-  --popover: 222 84% 5%; /* #020617 - Deep popover bg */
-  --popover-foreground: 210 40% 98%;
-  --card: 217 33% 17%; /* #1E293B - Card background */
-  --card-foreground: 210 40% 98%;
-  --border: 216 34% 24%; /* #334155 - Subtle borders */
-  --input: 217 33% 17%; /* #1E293B - Input background */
+  /* Light Theme (Default) */
+  --background: 0 0% 100%; /* #FFFFFF - Pure white */
+  --foreground: 222 47% 11%; /* #0F172A - Rich dark slate text */
+  --muted: 210 40% 96%; /* #F1F5F9 - Light gray surface */
+  --muted-foreground: 215 16% 47%; /* #64748B - Medium gray text */
+  --popover: 0 0% 100%; /* #FFFFFF - White popover */
+  --popover-foreground: 222 47% 11%;
+  --card: 0 0% 100%; /* #FFFFFF - White card */
+  --card-foreground: 222 47% 11%;
+  --border: 214 32% 91%; /* #E2E8F0 - Light border */
+  --input: 214 32% 91%; /* #E2E8F0 - Light input */
   --primary: 20 91% 56%; /* #F97316 - Vibrant orange */
   --primary-foreground: 0 0% 100%;
   --secondary: 142 76% 36%; /* #059669 - Fresh green */
@@ -70,25 +70,26 @@
 }
 
 .dark {
-  --background: 210 24% 16%;
-  --foreground: 0 0% 98%;
-  --muted: 210 20% 20%;
-  --muted-foreground: 210 10% 70%;
-  --popover: 210 24% 16%;
-  --popover-foreground: 0 0% 98%;
-  --card: 210 24% 16%;
-  --card-foreground: 0 0% 98%;
-  --border: 210 20% 25%;
-  --input: 210 20% 25%;
-  --primary: 14 100% 60%;
+  /* Dark Theme */
+  --background: 222 47% 11%; /* #0F172A - Rich dark slate */
+  --foreground: 210 40% 98%; /* #F8FAFC - Clean white text */
+  --muted: 217 33% 17%; /* #1E293B - Muted dark surface */
+  --muted-foreground: 215 20% 65%; /* #94A3B8 - Subtle gray text */
+  --popover: 222 84% 5%; /* #020617 - Deep popover bg */
+  --popover-foreground: 210 40% 98%;
+  --card: 217 33% 17%; /* #1E293B - Card background */
+  --card-foreground: 210 40% 98%;
+  --border: 216 34% 24%; /* #334155 - Subtle borders */
+  --input: 217 33% 17%; /* #1E293B - Input background */
+  --primary: 20 91% 56%; /* #F97316 - Vibrant orange */
   --primary-foreground: 0 0% 100%;
-  --secondary: 147 50% 36%;
+  --secondary: 142 76% 36%; /* #059669 - Fresh green */
   --secondary-foreground: 0 0% 100%;
-  --accent: 51 100% 50%;
-  --accent-foreground: 210 24% 16%;
-  --destructive: 0 72% 51%;
+  --accent: 262 83% 58%; /* #8B5CF6 - Modern purple */
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 62% 54%; /* #EF4444 - Clean red */
   --destructive-foreground: 0 0% 100%;
-  --ring: 210 10% 70%;
+  --ring: 20 91% 56%; /* Match primary */
 }
 
 @layer base {
