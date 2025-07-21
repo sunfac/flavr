@@ -234,28 +234,124 @@ function EnhancedRecipeCard({
     }));
 
     try {
-      // Call the API to get a substitute
+      // Call the chat API to get a comprehensive substitution that updates both ingredients and instructions
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: `Suggest a direct substitute for "${currentIngredient}" that I can use in this recipe. Just give me the substitute ingredient name, nothing else.`,
-          mode: 'substitute'
+          message: `I want to substitute "${currentIngredient}" in this recipe. Please suggest a suitable substitute and update both the ingredient list and cooking instructions accordingly. Here is the current recipe:
+          
+          INGREDIENTS:
+          ${activeIngredients.join('\n')}
+          
+          INSTRUCTIONS:
+          ${activeInstructions.join('\n')}
+          
+          Please provide a complete recipe update with the substitution applied.`,
+          conversationContext: {
+            recipe: {
+              title: activeTitle,
+              servings: activeServings,
+              ingredients: activeIngredients,
+              instructions: activeInstructions,
+              cookTime: activeCookTime,
+              difficulty: activeDifficulty
+            },
+            originalIngredient: currentIngredient,
+            mode: 'substitute'
+          }
         })
       });
 
       if (!response.ok) throw new Error('Failed to get substitute');
       
-      const data = await response.json();
-      const substitute = data.response || data.message || currentIngredient;
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('No response reader');
 
-      // Update the ingredient with the substitute
-      const updatedIngredients = [...activeIngredients];
+      let fullResponse = '';
+      const decoder = new TextDecoder();
+      
+      // Read the streaming response
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value, { stream: true });
+        fullResponse += chunk;
+      }
+
+      // Parse the response for function calls
+      const lines = fullResponse.split('\n').filter(line => line.trim());
+      
+      for (const line of lines) {
+        try {
+          const data = JSON.parse(line);
+          
+          // Look for function call to update recipe
+          if (data.type === 'function_call' && data.function?.name === 'updateRecipe') {
+            const updatedRecipe = data.function.arguments;
+            console.log('🔄 Applying ingredient substitution:', updatedRecipe);
+            
+            // Update recipe store with the comprehensive changes
+            recipeActions.replaceRecipe({
+              id: recipe.id,
+              servings: updatedRecipe.servings || activeServings,
+              ingredients: updatedRecipe.ingredients.map((text: string, index: number) => ({
+                id: `ingredient-${index}`,
+                text,
+                checked: false
+              })),
+              steps: updatedRecipe.instructions.map((instruction: string, index: number) => ({
+                id: `step-${index}`,
+                title: `Step ${index + 1}`,
+                description: instruction
+              })),
+              meta: {
+                title: updatedRecipe.title || activeTitle,
+                servings: updatedRecipe.servings || activeServings,
+                cookTime: updatedRecipe.cookTime || activeCookTime,
+                difficulty: updatedRecipe.difficulty || activeDifficulty,
+                cuisine: recipe.cuisine,
+                description: updatedRecipe.description || recipe.description,
+                image: recipe.image
+              },
+              currentStep: 0,
+              completedSteps: [],
+              lastUpdated: Date.now()
+            });
+            
+            // Update local state to mark as substituted
+            setIngredientStates(prev => ({
+              ...prev,
+              [`${ingredientId}_substituted`]: true,
+              [`${ingredientId}_loading`]: false
+            }));
+            
+            // Force re-render
+            setKey(prev => prev + 1);
+
+            toast({
+              title: "Recipe updated with substitution!",
+              description: `Successfully updated recipe with ingredient substitution`,
+            });
+            
+            return; // Successfully processed
+          }
+        } catch (parseError) {
+          // Continue parsing other lines
+        }
+      }
+      
+      // Fallback if no function call was found - simple ingredient replacement
       const index = parseInt(ingredientId.split('-')[1]);
-      if (index >= 0 && index < updatedIngredients.length) {
+      if (index >= 0 && index < activeIngredients.length) {
+        // Try to extract substitute from text response
+        const substitute = fullResponse.split('\n')[0]?.trim() || currentIngredient;
+        
+        const updatedIngredients = [...activeIngredients];
         updatedIngredients[index] = substitute;
         
-        // Update recipe store by patching ingredients
+        // Update recipe store
         const updatedIngredientsForStore = updatedIngredients.map((text, i) => ({
           id: `ingredient-${i}`,
           text,
@@ -266,7 +362,6 @@ function EnhancedRecipeCard({
           ingredients: updatedIngredientsForStore
         });
         
-        // Update local state to mark as substituted
         setIngredientStates(prev => ({
           ...prev,
           [`${ingredientId}_substituted`]: true,
@@ -278,6 +373,7 @@ function EnhancedRecipeCard({
           description: `Replaced "${currentIngredient}" with "${substitute}"`,
         });
       }
+      
     } catch (error) {
       console.error('Failed to substitute ingredient:', error);
       toast({
