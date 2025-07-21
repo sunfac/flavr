@@ -107,9 +107,9 @@ export default function BudgetPlanner() {
       console.log('🎯 Budget planner response received:', data);
       
       // Parse content for cards - handle complete response with all sections
-      let shoppingListMatch = null;
-      let mealPlanMatch = null;
-      let recipesMatch = null;
+      let shoppingListMatch: RegExpMatchArray | null = null;
+      let mealPlanMatch: RegExpMatchArray | null = null;
+      let recipesMatch: RegExpMatchArray | null = null;
       
       if (data.response.includes('Shopping List') && (data.response.includes('🔹') || data.response.includes('Produce') || data.response.includes('Meat'))) {
         console.log('✅ Found shopping list section, parsing...');
