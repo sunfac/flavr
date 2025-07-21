@@ -274,9 +274,20 @@ Make each recipe distinctly different in style, technique, and flavor profile. F
 
       const creativityGuidance = getCreativeGuidanceBlock();
 
+      // Add randomization factor to prevent repetitive results
+      const randomSeed = Math.random();
+      const diversityPrompts = [
+        "Explore regional variations and lesser-known traditional dishes.",
+        "Include both comfort food classics and restaurant-style presentations.",
+        "Mix familiar favorites with adventurous traditional recipes.",
+        "Focus on seasonal ingredients and contemporary interpretations.",
+        "Blend rustic home cooking with refined culinary techniques."
+      ];
+      const selectedDiversityPrompt = diversityPrompts[Math.floor(randomSeed * diversityPrompts.length)];
+
       // Check if a custom prompt was provided (for fridge mode)
       const cuisineList = Array.isArray(cuisines) ? cuisines.join(', ') : cuisines;
-      const prompt = req.body.prompt || `You are Zest, Flavr's AI culinary expert. Create exactly 5 recipe suggestions from ONLY the following cuisine(s): ${cuisineList}
+      const prompt = req.body.prompt || `You are Zest, Flavr's AI culinary expert. Create exactly 5 DIVERSE and UNIQUE recipe suggestions from ONLY the following cuisine(s): ${cuisineList}
 
 USER PREFERENCES:
 • Portions: ${portions}
@@ -290,16 +301,23 @@ ${dietPrompt ? `• ${dietPrompt}` : ''}${supermarketContext}
 
 ${creativityGuidance}
 
+DIVERSITY MANDATE: ${selectedDiversityPrompt}
+
 CRITICAL INSTRUCTIONS:
 When user selects "Mexican" - provide ONLY authentic Mexican recipes (tacos, enchiladas, pozole, mole, etc.)
 When user selects "Italian" - provide ONLY Italian recipes (pasta, risotto, pizza, etc.)
 Do NOT mix cuisines or create fusion dishes unless specifically requested.
 
-REQUIREMENTS:
-- Generate exactly 5 recipes
+UNIQUENESS REQUIREMENTS:
+- Generate exactly 5 COMPLETELY DIFFERENT recipes
+- Each recipe must use DIFFERENT primary proteins (chicken, beef, pork, seafood, vegetarian)
+- Each recipe must use DIFFERENT cooking techniques (grilling, braising, roasting, sautéing, etc.)
+- Each recipe must represent DIFFERENT meal types or regional styles
 - ALL recipes MUST be authentic dishes from: ${cuisineList}
-- Provide variety within the cuisine (different proteins, techniques, meal types)
-- Match the mood, time, and equipment constraints
+- Avoid basic/common dishes - include both familiar AND adventurous options
+- Ensure maximum variety in ingredients, complexity, and presentation
+
+RANDOMIZATION SEED: ${randomSeed.toFixed(3)} - Use this to ensure unique results on each generation
 
 Return JSON with this exact structure:
 {
@@ -326,7 +344,7 @@ Return JSON with this exact structure:
           { role: "system", content: "You are a JSON API. Respond ONLY with valid JSON - no explanations, no markdown, no text outside the JSON object." },
           { role: "user", content: finalPrompt + "\n\nIMPORTANT: Return ONLY the JSON object, nothing else." }
         ],
-        temperature: 0.7,
+        temperature: 0.9,
         max_tokens: 2500,
         response_format: { type: "json_object" }
       });
