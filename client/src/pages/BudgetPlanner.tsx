@@ -461,7 +461,12 @@ export default function BudgetPlanner() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {parsedContent.recipes && parseRecipes(parsedContent.recipes.replace(/Recipes:?\s*/i, '').trim()).map((recipe, index) => {
+                    {parsedContent.recipes && (() => {
+                      const recipesText = parsedContent.recipes.replace(/Recipes:?\s*/i, '').trim();
+                      console.log('📖 Raw recipes text:', recipesText.substring(0, 200) + '...');
+                      const parsedRecipes = parseRecipes(recipesText);
+                      console.log('📖 Parsed recipes:', parsedRecipes);
+                      return parsedRecipes.map((recipe, index) => {
                       // Generate recipe image URL using a food image service
                       const generateFoodImageUrl = (dishName: string, index: number) => {
                         const foodImages = {
@@ -545,7 +550,8 @@ export default function BudgetPlanner() {
                           </CollapsibleContent>
                         </Collapsible>
                       );
-                    })}
+                    });
+                    })()}
                   </div>
                 </CardContent>
               </Card>
