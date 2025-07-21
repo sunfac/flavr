@@ -475,6 +475,7 @@ export default function BudgetPlanner() {
                           'chicken': 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=250&fit=crop&auto=format&q=80',
                           'lamb': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=250&fit=crop&auto=format&q=80',
                           'paneer': 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&h=250&fit=crop&auto=format&q=80',
+                          'paneer curry': 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&h=250&fit=crop&auto=format&q=80',
                           'stir fry': 'https://images.unsplash.com/photo-1556909114-44e3e70034e2?w=400&h=250&fit=crop&auto=format&q=80',
                           'stir-fry': 'https://images.unsplash.com/photo-1556909114-44e3e70034e2?w=400&h=250&fit=crop&auto=format&q=80',
                           'beef': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=250&fit=crop&auto=format&q=80',
