@@ -245,6 +245,7 @@ Make each recipe distinctly different in style, technique, and flavor profile. F
 
       console.log('🔥 Generate Recipe Ideas Request:', { portions, timeAvailable, equipment, mood, ambition, budget, cuisines, dietaryRestrictions, supermarket });
       console.log('🔥 Quiz Data:', quizData);
+      console.log('🛒 Supermarket extracted:', supermarket, 'from quizData.supermarket:', quizData.supermarket);
 
       // Build dynamic prompt components
       const timePrompt = getTimePromptText(timeAvailable);
@@ -254,22 +255,31 @@ Make each recipe distinctly different in style, technique, and flavor profile. F
       const dietPrompt = getDietPromptText(dietaryRestrictions);
       const equipmentPrompt = getEquipmentPromptText(equipment);
 
-      // Get supermarket-specific context
+      // Get supermarket-specific context - now using proper UK supermarkets
       let supermarketContext = "";
       if (supermarket && supermarket !== "any") {
         const getSupermarketPromptText = (market: string) => {
           const prompts = {
-            "whole-foods": "Focus on organic, artisanal, and premium ingredients available at Whole Foods Market. Include specialty items, fresh produce, and high-quality proteins.",
-            "trader-joes": "Emphasize Trader Joe's unique products, affordable gourmet items, and their famous pre-made components that can elevate home cooking.",
-            "costco": "Design for bulk shopping and family-style meals. Include ingredients that work well when bought in larger quantities.",
-            "kroger": "Focus on accessible, mainstream ingredients with good value. Include both name-brand and store-brand options.",
-            "safeway": "Emphasize fresh, quality ingredients available at Safeway with focus on their produce and deli sections.",
-            "target": "Include Good & Gather and Market Pantry products along with accessible, everyday ingredients from Target's grocery section."
+            "tesco": "Shopping at Tesco: Consider their wide range of value, standard, and premium options. Tesco offers good variety in international ingredients and their Finest range for premium items. Focus on accessible pricing with quality options.",
+            "sainsburys": "Shopping at Sainsbury's: Take advantage of their Taste the Difference range for quality ingredients and their good selection of organic and specialty items. Known for fresh produce and premium own-brand products.",
+            "asda": "Shopping at ASDA: Focus on their Smart Price range for budget ingredients and their Extra Special line for premium touches. Great for bulk buying and family portions at competitive prices.",
+            "morrisons": "Shopping at Morrisons: Utilize their fresh markets and butcher counters for quality meat and fish. Their Signature range offers premium ingredients at competitive prices with focus on British sourcing.",
+            "waitrose": "Shopping at Waitrose: Take advantage of their premium quality ingredients, extensive organic range, and unique specialty items. Their own-brand products are consistently high quality with artisanal options.",
+            "aldi": "Shopping at Aldi: Focus on their excellent value basics and rotating special buys. Their Simply Nature range offers good organic options at budget-friendly prices. Great for cost-effective quality ingredients.",
+            "lidl": "Shopping at Lidl: Make use of their great value ingredients and special weekly offers. Their Deluxe range provides premium options without the premium price tag.",
+            "marks": "Shopping at M&S: Leverage their premium prepared ingredients and exceptional quality own-brand products. Perfect for special occasion ingredients and time-saving gourmet options.",
+            "iceland": "Shopping at Iceland: Great for frozen ingredients that maintain quality. Their premium frozen ranges can provide restaurant-quality ingredients at home with convenient storage.",
+            "coop": "Shopping at Co-op: Focus on their ethical and local sourcing. Good for last-minute shopping and their Irresistible range offers quality specialty ingredients with community focus.",
+            "local": "Shopping at Local shops: Emphasize seasonal, local ingredients and build relationships with independent suppliers. Focus on fresh, regional specialties and artisanal products.",
+            "online": "Online delivery shopping: Consider ingredients that travel well and have good shelf life. Focus on pantry staples, quality proteins, and items that maintain freshness during delivery."
           };
-          return prompts[market] || "";
+          return prompts[market.toLowerCase()] || `Shopping at ${market}: Choose ingredients that match your selected supermarket's strengths and available product ranges.`;
         };
         
         supermarketContext = `\n\nSUPERMARKET FOCUS: ${getSupermarketPromptText(supermarket)}`;
+        console.log('🛒 Supermarket context added:', supermarketContext);
+      } else {
+        console.log('🛒 No supermarket context - supermarket value:', supermarket);
       }
 
       const creativityGuidance = getCreativeGuidanceBlock();
