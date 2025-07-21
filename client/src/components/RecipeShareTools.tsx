@@ -59,11 +59,11 @@ ${publicUrl}`;
   const handleCopyFullRecipe = async () => {
     // Format ingredients
     const ingredientsList = recipe?.ingredients ? 
-      recipe.ingredients.map((ing, idx) => `${idx + 1}. ${ing}`).join('\n') : '';
+      recipe.ingredients.map((ing: string, idx: number) => `${idx + 1}. ${ing}`).join('\n') : '';
     
     // Format instructions
     const instructionsList = recipe?.instructions ? 
-      recipe.instructions.map((inst, idx) => `${idx + 1}. ${inst}`).join('\n') : '';
+      recipe.instructions.map((inst: string, idx: number) => `${idx + 1}. ${inst}`).join('\n') : '';
     
     const fullText = `${title}
 
@@ -94,6 +94,31 @@ Link: ${publicUrl}`;
       toast({
         title: "Copy failed",
         description: "Could not copy recipe",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCopyIngredients = async () => {
+    const ingredients = recipe?.ingredients || [];
+    
+    const ingredientsText = `${title} - Shopping List
+
+📝 Ingredients:
+${ingredients.map((ing: any) => `• ${ing}`).join('\n')}
+
+Servings: ${recipe?.servings || 4}`;
+    
+    try {
+      await navigator.clipboard.writeText(ingredientsText);
+      toast({
+        title: "Shopping list copied!",
+        description: "Ready to paste into your notes app",
+      });
+    } catch (error) {
+      toast({
+        title: "Copy failed",
+        description: "Could not copy shopping list",
         variant: "destructive",
       });
     }
@@ -329,7 +354,7 @@ Link: ${publicUrl}`;
           </div>
 
           {/* Utility Buttons */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
             <Button
               variant="outline"
               size="sm"
@@ -348,6 +373,16 @@ Link: ${publicUrl}`;
             >
               <iconMap.share className="w-4 h-4" />
               Copy Recipe
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopyIngredients}
+              className="flex items-center gap-2 hover:bg-green-500/10 hover:border-green-500/50"
+            >
+              <iconMap.shoppingBag className="w-4 h-4" />
+              Copy List
             </Button>
             
             <Button

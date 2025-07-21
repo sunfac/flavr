@@ -191,22 +191,22 @@ function EnhancedRecipeCard({
 
 
 
-  // Transform ingredients into the correct format for IngredientPanel
-  const formattedIngredients = useMemo(() => {
-    return activeIngredients.map((ingredient, index) => ({
-      id: `ingredient-${index}`,
-      text: ingredient,
-      isSubstituted: ingredientStates[`ingredient-${index}_substituted`] || false,
-      isLoading: ingredientStates[`ingredient-${index}_loading`] || false
-    }));
-  }, [activeIngredients, ingredientStates]);
-
   // Scale ingredients based on serving adjustments
   const scaledIngredients = useScaledIngredients(
     activeIngredients, 
-    activeServings, 
+    recipe.servings, // Use original servings for scaling calculation
     activeServings
   );
+
+  // Transform scaled ingredients into the correct format for IngredientPanel
+  const formattedIngredients = useMemo(() => {
+    return scaledIngredients.map((ingredient, index) => ({
+      id: ingredient.id,
+      text: ingredient.text,
+      isSubstituted: ingredientStates[`${ingredient.id}_substituted`] || false,
+      isLoading: ingredientStates[`${ingredient.id}_loading`] || false
+    }));
+  }, [scaledIngredients, ingredientStates]);
 
   // Transform instructions to steps format for StepStack
   const steps = activeInstructions.map((instruction, index) => ({

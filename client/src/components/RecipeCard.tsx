@@ -468,8 +468,8 @@ export default function RecipeCard({
           </div>
         )}
 
-        {/* Recipe Share Tools - Only for Shopping Mode */}
-        {mode === "shopping" && fullRecipe && (
+        {/* Recipe Share Tools - For Shopping and Chef Modes */}
+        {(mode === "shopping" || mode === "chef") && fullRecipe && (
           <div className="mt-12 mb-8">
             <RecipeShareTools
               id={fullRecipe.id || 'temp-recipe'}
