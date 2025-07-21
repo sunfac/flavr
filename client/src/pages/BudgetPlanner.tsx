@@ -156,7 +156,7 @@ export default function BudgetPlanner() {
       }
       setIsLoading(false);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Budget planner error details:', {
         error,
         message: error?.message,
@@ -328,11 +328,9 @@ export default function BudgetPlanner() {
         </Card>
 
         {/* Content Cards - Mobile Responsive */}
-        {console.log('🔍 Parsed content state:', parsedContent)}
         {(parsedContent.shoppingList || parsedContent.mealPlan || parsedContent.recipes) && (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 mt-4 sm:mt-6">
             {/* Shopping List Card */}
-            {parsedContent.shoppingList && console.log('🛒 Rendering shopping list card')}
             {parsedContent.shoppingList && (
               <Card className="bg-card/90 backdrop-blur-sm border-green-200/20">
                 <CardHeader className="pb-3 px-4 sm:px-6">
@@ -370,7 +368,7 @@ export default function BudgetPlanner() {
                                 {items.map((item, itemIndex) => (
                                   <li key={itemIndex} className="text-xs sm:text-sm flex items-start gap-2">
                                     <CheckSquare className="w-3 h-3 text-green-600 flex-shrink-0 mt-0.5" />
-                                    <span className="text-gray-600 font-medium break-words min-w-0">{item.replace(/^-\s*/, '').trim()}</span>
+                                    <span className="text-white dark:text-gray-100 font-medium text-sm sm:text-base break-words min-w-0">{item.replace(/^-\s*/, '').trim()}</span>
                                   </li>
                                 ))}
                               </ul>
@@ -387,7 +385,7 @@ export default function BudgetPlanner() {
                                   {items.map((item, itemIndex) => (
                                     <li key={itemIndex} className="text-xs sm:text-sm flex items-start gap-2">
                                       <CheckSquare className="w-3 h-3 text-green-600 flex-shrink-0 mt-0.5" />
-                                      <span className="text-gray-600 font-medium break-words min-w-0">{item.replace(/^-\s*/, '').trim()}</span>
+                                      <span className="text-white dark:text-gray-100 font-medium text-sm sm:text-base break-words min-w-0">{item.replace(/^-\s*/, '').trim()}</span>
                                     </li>
                                   ))}
                                 </ul>
@@ -430,7 +428,16 @@ export default function BudgetPlanner() {
                           'lasagna': 'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=400&h=250&fit=crop&auto=format&q=80',
                           'risotto': 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&h=250&fit=crop&auto=format&q=80',
                           'chicken': 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=250&fit=crop&auto=format&q=80',
-                          'lamb': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=250&fit=crop&auto=format&q=80'
+                          'lamb': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=250&fit=crop&auto=format&q=80',
+                          'paneer': 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&h=250&fit=crop&auto=format&q=80',
+                          'stir fry': 'https://images.unsplash.com/photo-1556909114-44e3e70034e2?w=400&h=250&fit=crop&auto=format&q=80',
+                          'stir-fry': 'https://images.unsplash.com/photo-1556909114-44e3e70034e2?w=400&h=250&fit=crop&auto=format&q=80',
+                          'beef': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=250&fit=crop&auto=format&q=80',
+                          'pork': 'https://images.unsplash.com/photo-1620374644498-af87802db7fc?w=400&h=250&fit=crop&auto=format&q=80',
+                          'fish': 'https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?w=400&h=250&fit=crop&auto=format&q=80',
+                          'salmon': 'https://images.unsplash.com/photo-1567067974934-75a3e4534c14?w=400&h=250&fit=crop&auto=format&q=80',
+                          'shrimp': 'https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=400&h=250&fit=crop&auto=format&q=80',
+                          'prawn': 'https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=400&h=250&fit=crop&auto=format&q=80'
                         };
                         
                         const dishLower = dishName.toLowerCase();
@@ -482,7 +489,7 @@ export default function BudgetPlanner() {
                           </CollapsibleTrigger>
                           <CollapsibleContent className="pt-4">
                             <div className="pl-4 border-l-4 border-green-300 bg-gradient-to-r from-green-50 to-white p-4 rounded-r-lg">
-                              <div className="whitespace-pre-wrap text-sm leading-relaxed text-gray-950 font-semibold">
+                              <div className="whitespace-pre-wrap text-base sm:text-lg leading-relaxed text-white dark:text-gray-100 font-medium">
                                 {recipe.content}
                               </div>
                             </div>
