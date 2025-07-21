@@ -48,16 +48,37 @@ export default function BudgetPlanner() {
 
   // Helper function to parse individual recipes
   const parseRecipes = (recipesText: string) => {
-    const recipePattern = /\*\*(.*?):\s*(.*?)\*\*([\s\S]*?)(?=\*\*[^:]*:\s*[^*]*\*\*|$)/g;
+    // Split by double newlines to separate recipes
+    const recipeSections = recipesText.split('\n\n').filter(section => section.trim());
     const recipes: Array<{title: string, subtitle: string, content: string}> = [];
-    let match;
     
-    while ((match = recipePattern.exec(recipesText)) !== null) {
-      recipes.push({
-        title: match[1].trim(),
-        subtitle: match[2].trim(),
-        content: match[3].trim()
-      });
+    let currentRecipe: {title: string, subtitle: string, content: string} | null = null;
+    
+    for (const section of recipeSections) {
+      // Check if this is a recipe title (e.g., "Monday Dinner: Thai Red Curry")
+      const titleMatch = section.match(/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s+(Dinner|Lunch|Breakfast):\s+(.+)$/i);
+      
+      if (titleMatch) {
+        // Save previous recipe if exists
+        if (currentRecipe) {
+          recipes.push(currentRecipe);
+        }
+        
+        // Start new recipe
+        currentRecipe = {
+          title: `${titleMatch[1]} ${titleMatch[2]}`,
+          subtitle: titleMatch[3],
+          content: ''
+        };
+      } else if (currentRecipe) {
+        // Add to current recipe content
+        currentRecipe.content += (currentRecipe.content ? '\n\n' : '') + section;
+      }
+    }
+    
+    // Don't forget the last recipe
+    if (currentRecipe) {
+      recipes.push(currentRecipe);
     }
     
     return recipes;
@@ -111,16 +132,16 @@ export default function BudgetPlanner() {
       let mealPlanMatch: RegExpMatchArray | null = null;
       let recipesMatch: RegExpMatchArray | null = null;
       
-      if (data.response.includes('Shopping List') && (data.response.includes('🔹') || data.response.includes('Produce') || data.response.includes('Meat'))) {
+      if (data.response.includes('Shopping List:') || (data.response.includes('Produce:') && data.response.includes('Meal Plan:'))) {
         console.log('✅ Found shopping list section, parsing...');
         
         // Try to parse all sections from a complete response
         const response = data.response;
         
         // Look for shopping list section (now without markdown)
-        shoppingListMatch = response.match(/Shopping List:?\s*\n([\s\S]*?)(?=Meal Plan:|Recipes:|$)/i);
-        mealPlanMatch = response.match(/Meal Plan:?\s*\n([\s\S]*?)(?=Recipes:|$)/i);
-        recipesMatch = response.match(/Recipes:?\s*\n([\s\S]*?)$/i);
+        shoppingListMatch = response.match(/Shopping List:?\s*([\s\S]*?)(?=Meal Plan:|$)/i);
+        mealPlanMatch = response.match(/Meal Plan:?\s*([\s\S]*?)(?=Recipes:|$)/i);
+        recipesMatch = response.match(/Recipes:?\s*([\s\S]*?)$/i);
         
         console.log('🔍 Parsing results:', {
           hasShoppingList: !!shoppingListMatch,
