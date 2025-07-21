@@ -1023,4 +1023,69 @@ Return valid JSON only:
     }
     res.json({ key: geminiKey });
   });
+
+  // Ingredient substitution endpoint
+  app.post("/api/ingredient-substitute", async (req, res) => {
+    try {
+      const { ingredient, recipeContext } = req.body;
+      
+      if (!ingredient) {
+        return res.status(400).json({ error: "Ingredient is required" });
+      }
+
+      console.log('🔄 Processing ingredient substitution:', { ingredient, recipeContext });
+
+      // Generate a simple, contextual substitute using OpenAI
+      const prompt = `You are a culinary expert. Suggest a direct 1:1 substitute for "${ingredient}" ${recipeContext?.cuisine ? `in ${recipeContext.cuisine} cooking` : ''}. 
+      
+      Consider:
+      - Recipe title: ${recipeContext?.title || 'General recipe'}
+      - Other ingredients: ${recipeContext?.allIngredients?.slice(0, 5).join(', ') || 'Not specified'}
+      
+      Provide only the substitute ingredient name with appropriate quantity/measurement. Be concise and practical.
+      
+      Examples:
+      - "2 tablespoons bourbon" → "2 tablespoons apple juice"  
+      - "1 cup heavy cream" → "1 cup coconut cream"
+      - "2 cloves garlic" → "1/2 teaspoon garlic powder"
+      
+      Substitute for "${ingredient}":`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 50
+      });
+
+      const substitute = completion.choices[0]?.message?.content?.trim();
+      
+      if (!substitute) {
+        throw new Error("No substitute suggestion received");
+      }
+
+      console.log('✅ Ingredient substitution generated:', { original: ingredient, substitute });
+
+      // Log the substitution for analytics
+      await logSimpleGPTInteraction('ingredient_substitution', {
+        originalIngredient: ingredient,
+        substitute,
+        recipeTitle: recipeContext?.title,
+        cuisine: recipeContext?.cuisine
+      });
+
+      res.json({ 
+        substitute: substitute,
+        original: ingredient,
+        suggestion: substitute
+      });
+
+    } catch (error) {
+      console.error('❌ Ingredient substitution failed:', error);
+      res.status(500).json({ 
+        error: "Failed to generate substitute",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
 }
