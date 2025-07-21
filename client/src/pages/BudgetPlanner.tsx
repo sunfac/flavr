@@ -482,7 +482,8 @@ export default function BudgetPlanner() {
                           'fish': 'https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?w=400&h=250&fit=crop&auto=format&q=80',
                           'salmon': 'https://images.unsplash.com/photo-1567067974934-75a3e4534c14?w=400&h=250&fit=crop&auto=format&q=80',
                           'shrimp': 'https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=400&h=250&fit=crop&auto=format&q=80',
-                          'prawn': 'https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=400&h=250&fit=crop&auto=format&q=80'
+                          'prawn': 'https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=400&h=250&fit=crop&auto=format&q=80',
+                          'curry': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=250&fit=crop&auto=format&q=80'
                         };
                         
                         const dishLower = dishName.toLowerCase();
@@ -533,8 +534,8 @@ export default function BudgetPlanner() {
                             </div>
                           </CollapsibleTrigger>
                           <CollapsibleContent className="pt-4">
-                            <div className="pl-4 border-l-4 border-green-300 bg-gradient-to-r from-green-50 to-white p-4 rounded-r-lg">
-                              <div className="whitespace-pre-wrap text-base sm:text-lg leading-relaxed text-white dark:text-gray-100 font-medium">
+                            <div className="pl-4 border-l-4 border-green-300 bg-white dark:bg-gray-800 p-4 rounded-r-lg">
+                              <div className="whitespace-pre-wrap text-base sm:text-lg leading-relaxed text-gray-900 dark:text-gray-100 font-medium">
                                 {recipe.content}
                               </div>
                             </div>
