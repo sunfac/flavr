@@ -48,39 +48,30 @@ export default function BudgetPlanner() {
 
   // Helper function to parse individual recipes
   const parseRecipes = (recipesText: string) => {
-    // Split by double newlines to separate recipes
-    const recipeSections = recipesText.split('\n\n').filter(section => section.trim());
     const recipes: Array<{title: string, subtitle: string, content: string}> = [];
     
-    let currentRecipe: {title: string, subtitle: string, content: string} | null = null;
+    // Split by recipe headers (day + meal type)
+    const recipePattern = /(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s+(Dinner|Lunch|Breakfast):\s+(.+?)(?=(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s+(?:Dinner|Lunch|Breakfast):|$)/gis;
     
-    for (const section of recipeSections) {
-      // Check if this is a recipe title (e.g., "Monday Dinner: Thai Red Curry")
-      const titleMatch = section.match(/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s+(Dinner|Lunch|Breakfast):\s+(.+)$/i);
+    let match;
+    while ((match = recipePattern.exec(recipesText)) !== null) {
+      const day = match[1];
+      const mealType = match[2];
+      const recipeNameAndContent = match[3].trim();
       
-      if (titleMatch) {
-        // Save previous recipe if exists
-        if (currentRecipe) {
-          recipes.push(currentRecipe);
-        }
-        
-        // Start new recipe
-        currentRecipe = {
-          title: `${titleMatch[1]} ${titleMatch[2]}`,
-          subtitle: titleMatch[3],
-          content: ''
-        };
-      } else if (currentRecipe) {
-        // Add to current recipe content
-        currentRecipe.content += (currentRecipe.content ? '\n\n' : '') + section;
-      }
+      // Extract the recipe name (first line) and content (rest)
+      const lines = recipeNameAndContent.split('\n');
+      const recipeName = lines[0].trim();
+      const content = lines.slice(1).join('\n').trim();
+      
+      recipes.push({
+        title: `${day} ${mealType}`,
+        subtitle: recipeName,
+        content: content
+      });
     }
     
-    // Don't forget the last recipe
-    if (currentRecipe) {
-      recipes.push(currentRecipe);
-    }
-    
+    console.log('🍳 Parsed recipes count:', recipes.length);
     return recipes;
   };
 
