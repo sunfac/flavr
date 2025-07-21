@@ -107,16 +107,16 @@ export default function BudgetPlanner() {
       console.log('🎯 Budget planner response received:', data);
       
       // Parse content for cards - handle complete response with all sections
-      if (data.response.includes('🔹 **Shopping List**') || data.response.includes('🔹 Shopping List')) {
+      if (data.response.includes('Shopping List') && (data.response.includes('🔹') || data.response.includes('Produce') || data.response.includes('Meat'))) {
         console.log('✅ Found shopping list section, parsing...');
         
         // Try to parse all sections from a complete response
         const response = data.response;
         
-        // Look for shopping list section (with or without asterisks)
-        const shoppingListMatch = response.match(/🔹\s*\*?\*?Shopping List\*?\*?[\s\S]*?(?=🔹\s*\*?\*?Meal Plan|🔹\s*\*?\*?Recipes|$)/i);
-        const mealPlanMatch = response.match(/🔹\s*\*?\*?Meal Plan\*?\*?[\s\S]*?(?=🔹\s*\*?\*?Recipes|$)/i);
-        const recipesMatch = response.match(/🔹\s*\*?\*?Recipes\*?\*?[\s\S]*$/i);
+        // Look for shopping list section (now without markdown)
+        const shoppingListMatch = response.match(/Shopping List:?\s*\n([\s\S]*?)(?=Meal Plan:|Recipes:|$)/i);
+        const mealPlanMatch = response.match(/Meal Plan:?\s*\n([\s\S]*?)(?=Recipes:|$)/i);
+        const recipesMatch = response.match(/Recipes:?\s*\n([\s\S]*?)$/i);
         
         console.log('🔍 Parsing results:', {
           hasShoppingList: !!shoppingListMatch,
@@ -139,7 +139,7 @@ export default function BudgetPlanner() {
       }
       
       // Show chat messages appropriately
-      if (data.response.includes('🔹') && (data.response.includes('Shopping List') || data.response.includes('Meal Plan') || data.response.includes('Recipes'))) {
+      if (shoppingListMatch || mealPlanMatch || recipesMatch) {
         // This is a card content response - show completion message instead
         setMessages(prev => [...prev, {
           role: 'assistant',
@@ -342,7 +342,7 @@ export default function BudgetPlanner() {
                 <CardContent className="px-4 sm:px-6">
                   <div className="space-y-3">
                     {(() => {
-                      const cleanedList = parsedContent.shoppingList.replace('🔹 **Shopping List**', '').trim();
+                      const cleanedList = parsedContent.shoppingList.replace(/Shopping List:?\s*/i, '').trim();
                       console.log('🛒 Processing shopping list:', cleanedList.substring(0, 200) + '...');
                       
                       // Split by double newlines for sections, then process each section
@@ -412,7 +412,7 @@ export default function BudgetPlanner() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {parsedContent.recipes && parseRecipes(parsedContent.recipes.replace('🔹 **Recipes**', '').trim()).map((recipe, index) => {
+                    {parsedContent.recipes && parseRecipes(parsedContent.recipes.replace(/Recipes:?\s*/i, '').trim()).map((recipe, index) => {
                       // Generate recipe image URL using a food image service
                       const generateFoodImageUrl = (dishName: string, index: number) => {
                         const foodImages = {

@@ -65,7 +65,7 @@ Once the user answers all questions, confirm back their responses clearly in thi
 
 Then generate ALL THREE outputs in a SINGLE comprehensive response:
 
-🔹 **Shopping List**
+Shopping List:
 - Provide a complete list grouped by supermarket sections (Produce, Dairy, Meat, Pantry, Specialty/International, etc.).
 - Include estimated average prices at the chosen supermarket.
 - MAXIMIZE BUDGET: Use the FULL allocated budget to include premium authentic ingredients (quality oils, traditional spices, specialty items).
@@ -74,13 +74,13 @@ Then generate ALL THREE outputs in a SINGLE comprehensive response:
 - ENHANCED INGREDIENTS: Add flavor-boosting components like quality stock, specialty vinegars, fermented sauces, fresh aromatics, and traditional seasonings.
 - Suggest premium upgrades when budget allows (organic vegetables, free-range meats, artisanal ingredients).
 
-🔹 **Meal Plan**
+Meal Plan:
 - Assign meals to specific days (e.g., Tuesday Dinner: Thai Basil Chicken).
 - Introduce randomness so each run produces different meals, proteins, regional cuisines, and techniques.
 - Ensure variety, avoiding main protein repetition on consecutive days.
 - Match the user's cuisine preferences.
 
-🔹 **Recipes**
+Recipes:
 - Provide comprehensive, restaurant-quality recipes for each meal with detailed ingredient lists including exact measurements and step-by-step instructions.
 - MAXIMUM FLAVOR ENHANCEMENT: Include advanced flavor-building techniques (proper sautéing of aromatics, toasting whole spices, deglazing pans, building umami layers, creating flavor bases).
 - AUTHENTIC TRADITIONAL TECHNIQUES: Include proper curry paste preparation, tempering spices for Indian dishes, creating sofrito for Spanish recipes, proper roux for French sauces, wok hei for Chinese stir-fries.
