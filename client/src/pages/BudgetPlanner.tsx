@@ -50,11 +50,15 @@ export default function BudgetPlanner() {
   const parseRecipes = (recipesText: string) => {
     const recipes: Array<{title: string, subtitle: string, content: string}> = [];
     
-    // Split by recipe headers (day + meal type)
-    const recipePattern = /(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s+(Dinner|Lunch|Breakfast):\s+(.+?)(?=(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s+(?:Dinner|Lunch|Breakfast):|$)/gis;
+    // Handle both formats: day-based and direct recipe names
+    // First try the day-based format
+    const dayBasedPattern = /(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s+(Dinner|Lunch|Breakfast):\s+(.+?)(?=(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s+(?:Dinner|Lunch|Breakfast):|$)/gis;
     
     let match;
-    while ((match = recipePattern.exec(recipesText)) !== null) {
+    let foundDayBased = false;
+    
+    while ((match = dayBasedPattern.exec(recipesText)) !== null) {
+      foundDayBased = true;
       const day = match[1];
       const mealType = match[2];
       const recipeNameAndContent = match[3].trim();
@@ -69,6 +73,23 @@ export default function BudgetPlanner() {
         subtitle: recipeName,
         content: content
       });
+    }
+    
+    // If no day-based recipes found, try direct recipe format
+    if (!foundDayBased) {
+      // Split by recipe titles ending with colon
+      const recipePattern = /([^:\n]+):\s*\n([\s\S]*?)(?=\n[^:\n]+:\s*\n|$)/g;
+      
+      while ((match = recipePattern.exec(recipesText)) !== null) {
+        const recipeTitle = match[1].trim();
+        const recipeContent = match[2].trim();
+        
+        recipes.push({
+          title: "Recipe",
+          subtitle: recipeTitle,
+          content: recipeContent
+        });
+      }
     }
     
     console.log('🍳 Parsed recipes count:', recipes.length);
