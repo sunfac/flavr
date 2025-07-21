@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Share2, BookOpen } from 'lucide-react';
+import { ArrowLeft, Share2, BookOpen, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useScaledIngredients } from '@/hooks/useScaledIngredients';
 import { useRecipeStore, recipeActions } from '@/stores/recipeStore';
+import { apiRequest } from '@/lib/queryClient';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Extract duration from instruction text
 function extractDuration(instruction: string): number | undefined {
@@ -339,6 +341,95 @@ function EnhancedRecipeCard({
   // Note: Removed ingredient state sync useEffect to prevent infinite loops
   // Ingredient states are now managed directly through user interactions
 
+  // Favorite button component
+  const FavoriteButton = ({ recipe }: { recipe: any }) => {
+    const queryClient = useQueryClient();
+    const [isSaved, setIsSaved] = useState(false);
+    
+    // Check if recipe is already saved in user's cookbook
+    const { data: savedRecipes } = useQuery({
+      queryKey: ['/api/recipes'],
+      queryFn: async () => {
+        const response = await apiRequest("GET", "/api/recipes");
+        if (!response.ok) return [];
+        return response.json();
+      }
+    });
+    
+    useEffect(() => {
+      if (savedRecipes && recipe.title) {
+        const alreadySaved = savedRecipes.some((r: any) => 
+          r.title === recipe.title && r.description === recipe.description
+        );
+        setIsSaved(alreadySaved);
+      }
+    }, [savedRecipes, recipe]);
+    
+    const saveMutation = useMutation({
+      mutationFn: async () => {
+        const recipeData = {
+          title: recipe.title,
+          description: recipe.description,
+          cuisine: recipe.cuisine || '',
+          difficulty: recipe.difficulty || 'Medium',
+          cookTime: recipe.cookTime || 30,
+          servings: recipe.servings || 4,
+          ingredients: recipe.ingredients || [],
+          instructions: recipe.instructions || [],
+          tips: recipe.tips || '',
+          mode: recipe.mode || 'shopping',
+          imageUrl: recipe.image || recipe.imageUrl || null
+        };
+        
+        const response = await apiRequest("POST", "/api/save-recipe", recipeData);
+        if (!response.ok) {
+          throw new Error('Failed to save recipe');
+        }
+        return response.json();
+      },
+      onSuccess: () => {
+        setIsSaved(true);
+        queryClient.invalidateQueries({ queryKey: ['/api/recipes'] });
+        toast({
+          title: "Recipe saved!",
+          description: "Recipe added to My Cookbook",
+        });
+      },
+      onError: (error: any) => {
+        if (error.message.includes('401')) {
+          toast({
+            title: "Sign in required",
+            description: "Please sign in to save recipes to My Cookbook",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Failed to save",
+            description: "Could not save recipe. Please try again.",
+            variant: "destructive"
+          });
+        }
+      }
+    });
+    
+    return (
+      <Button
+        onClick={() => !isSaved && saveMutation.mutate()}
+        disabled={isSaved || saveMutation.isPending}
+        variant="outline"
+        size="sm"
+        className={`${
+          isSaved 
+            ? 'bg-red-500/20 border-red-500 text-red-300 hover:bg-red-500/30' 
+            : 'bg-slate-800/80 border-slate-600 text-slate-200 hover:bg-slate-700/80'
+        } backdrop-blur-sm transition-colors`}
+      >
+        <Heart className={`w-4 h-4 mr-1 ${isSaved ? 'fill-current' : ''}`} />
+        {isSaved ? 'Saved' : 'Save'}
+      </Button>
+    );
+  };
+
   return (
     <div className={`min-h-screen bg-slate-900 text-white ${className}`}>
       {/* Progress Bar */}
@@ -363,6 +454,7 @@ function EnhancedRecipeCard({
         )}
         
         <div className="flex gap-2 ml-auto">
+          <FavoriteButton recipe={recipe} />
           {onShare && (
             <Button
               onClick={onShare}

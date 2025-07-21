@@ -993,6 +993,56 @@ Return valid JSON only:
     }
   });
 
+  // Save recipe endpoint (favorite)
+  app.post("/api/save-recipe", requireAuth, async (req, res) => {
+    try {
+      const { 
+        title, 
+        description, 
+        cuisine, 
+        difficulty, 
+        cookTime, 
+        servings, 
+        ingredients, 
+        instructions, 
+        tips, 
+        mode, 
+        imageUrl 
+      } = req.body;
+      
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const recipeData = {
+        title,
+        description,
+        cuisine,
+        difficulty,
+        cookTime,
+        servings,
+        ingredients,
+        instructions,
+        tips,
+        mode,
+        imageUrl,
+        userId: req.session.userId,
+        shareId: null
+      };
+
+      const recipe = await storage.createRecipe(recipeData);
+      
+      res.json({ 
+        success: true, 
+        recipeId: recipe.id,
+        message: "Recipe saved to My Cookbook" 
+      });
+    } catch (error) {
+      console.error('Failed to save recipe:', error);
+      res.status(500).json({ error: 'Failed to save recipe' });
+    }
+  });
+
   // Share recipe
   app.post("/api/recipes/share", async (req, res) => {
     try {

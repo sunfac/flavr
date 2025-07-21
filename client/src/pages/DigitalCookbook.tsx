@@ -158,7 +158,7 @@ export default function DigitalCookbook() {
               Back to Flavr
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-white">My Digital Cookbook</h1>
+              <h1 className="text-3xl font-bold text-white">My Cookbook</h1>
               <p className="text-gray-400">
                 {filteredRecipes.length} recipe{filteredRecipes.length !== 1 ? 's' : ''} saved
               </p>

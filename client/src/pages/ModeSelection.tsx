@@ -179,7 +179,7 @@ export default function ModeSelection() {
             className="bg-white/5 border-white/20 text-white hover:bg-white/10 mb-4"
           >
             <iconMap.book className="w-4 h-4 mr-2" />
-            My Digital Cookbook
+            My Cookbook
           </Button>
           <p className="text-sm text-muted-foreground/60">
             Tap any mode to get started with personalized recipes

@@ -56,8 +56,8 @@ export default function GlobalNavigation({ isOpen, onClose, onAuthRequired }: Gl
     },
     {
       icon: Bookmark,
-      label: "Saved Recipes",
-      href: "/my-recipes",
+      label: "My Cookbook",
+      href: "/cookbook",
       requiresAuth: true
     },
     {
