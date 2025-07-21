@@ -107,6 +107,10 @@ export default function BudgetPlanner() {
       console.log('🎯 Budget planner response received:', data);
       
       // Parse content for cards - handle complete response with all sections
+      let shoppingListMatch = null;
+      let mealPlanMatch = null;
+      let recipesMatch = null;
+      
       if (data.response.includes('Shopping List') && (data.response.includes('🔹') || data.response.includes('Produce') || data.response.includes('Meat'))) {
         console.log('✅ Found shopping list section, parsing...');
         
@@ -114,9 +118,9 @@ export default function BudgetPlanner() {
         const response = data.response;
         
         // Look for shopping list section (now without markdown)
-        const shoppingListMatch = response.match(/Shopping List:?\s*\n([\s\S]*?)(?=Meal Plan:|Recipes:|$)/i);
-        const mealPlanMatch = response.match(/Meal Plan:?\s*\n([\s\S]*?)(?=Recipes:|$)/i);
-        const recipesMatch = response.match(/Recipes:?\s*\n([\s\S]*?)$/i);
+        shoppingListMatch = response.match(/Shopping List:?\s*\n([\s\S]*?)(?=Meal Plan:|Recipes:|$)/i);
+        mealPlanMatch = response.match(/Meal Plan:?\s*\n([\s\S]*?)(?=Recipes:|$)/i);
+        recipesMatch = response.match(/Recipes:?\s*\n([\s\S]*?)$/i);
         
         console.log('🔍 Parsing results:', {
           hasShoppingList: !!shoppingListMatch,
