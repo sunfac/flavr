@@ -139,9 +139,23 @@ export default function BudgetPlanner() {
         const response = data.response;
         
         // Look for shopping list section (now without markdown)
-        shoppingListMatch = response.match(/Shopping List:?\s*([\s\S]*?)(?=Meal Plan:|$)/i);
-        mealPlanMatch = response.match(/Meal Plan:?\s*([\s\S]*?)(?=Recipes:|$)/i);
-        recipesMatch = response.match(/Recipes:?\s*([\s\S]*?)$/i);
+        const shoppingListIndex = response.search(/Shopping List:/i);
+        const mealPlanIndex = response.search(/Meal Plan:/i);
+        const recipesIndex = response.search(/Recipes:/i);
+        
+        if (shoppingListIndex !== -1) {
+          const shoppingListEnd = mealPlanIndex !== -1 ? mealPlanIndex : (recipesIndex !== -1 ? recipesIndex : response.length);
+          shoppingListMatch = ['Shopping List:\n' + response.substring(shoppingListIndex + 'Shopping List:'.length, shoppingListEnd).trim()];
+        }
+        
+        if (mealPlanIndex !== -1) {
+          const mealPlanEnd = recipesIndex !== -1 ? recipesIndex : response.length;
+          mealPlanMatch = ['Meal Plan:\n' + response.substring(mealPlanIndex + 'Meal Plan:'.length, mealPlanEnd).trim()];
+        }
+        
+        if (recipesIndex !== -1) {
+          recipesMatch = ['Recipes:\n' + response.substring(recipesIndex + 'Recipes:'.length).trim()];
+        }
         
         console.log('🔍 Parsing results:', {
           hasShoppingList: !!shoppingListMatch,
@@ -153,11 +167,21 @@ export default function BudgetPlanner() {
         });
         
         if (shoppingListMatch || mealPlanMatch || recipesMatch) {
+          const newContent = {
+            shoppingList: shoppingListMatch ? shoppingListMatch[0] : '',
+            mealPlan: mealPlanMatch ? mealPlanMatch[0] : '',
+            recipes: recipesMatch ? recipesMatch[0] : ''
+          };
+          
+          console.log('✅ Parsed content:', {
+            shoppingList: newContent.shoppingList.substring(0, 100) + '...',
+            mealPlan: newContent.mealPlan.substring(0, 100) + '...',
+            recipes: newContent.recipes.substring(0, 100) + '...'
+          });
+          
           setParsedContent(prev => ({
             ...prev,
-            shoppingList: shoppingListMatch ? shoppingListMatch[0] : prev.shoppingList,
-            mealPlan: mealPlanMatch ? mealPlanMatch[0] : prev.mealPlan,
-            recipes: recipesMatch ? recipesMatch[0] : prev.recipes
+            ...newContent
           }));
           console.log('✅ Updated parsed content state with sections');
         }
