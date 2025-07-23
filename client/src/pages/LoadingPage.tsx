@@ -72,52 +72,20 @@ export default function LoadingPage({
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center p-4 sm:p-6">
       {/* Main Loading Animation */}
       <div className="text-center mb-8 sm:mb-12">
-        <motion.div
-          className="relative mb-6 sm:mb-8"
-          animate={{ 
-            rotate: 360,
-            scale: [1, 1.1, 1]
-          }}
-          transition={{ 
-            rotate: { duration: 3, repeat: Infinity, ease: "linear" },
-            scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
-          }}
-        >
+        <div className="relative mb-6 sm:mb-8">
           <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-2xl">
             <ChefHat className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
           </div>
           
-          {/* Floating cooking icons */}
-          <motion.div
-            className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4"
-            animate={{ 
-              y: [-10, 10, -10],
-              rotate: [0, 180, 360]
-            }}
-            transition={{ 
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
+          {/* Static cooking icons */}
+          <div className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4">
             <Utensils className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400" />
-          </motion.div>
+          </div>
           
-          <motion.div
-            className="absolute -bottom-3 -left-3 sm:-bottom-4 sm:-left-4"
-            animate={{ 
-              y: [10, -10, 10],
-              rotate: [360, 180, 0]
-            }}
-            transition={{ 
-              duration: 2.5,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
+          <div className="absolute -bottom-3 -left-3 sm:-bottom-4 sm:-left-4">
             <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-red-400" />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         <motion.h1 
           className="text-2xl sm:text-4xl font-bold text-white mb-3 sm:mb-4 px-4"
