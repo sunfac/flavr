@@ -127,11 +127,22 @@ export default function Fridge2Fork() {
       const data = await response.json();
       
       if (data.recipes && data.recipes.length > 0) {
-        // For now, take the first recipe and navigate directly to recipe page
-        // Later we can implement the tinder-style selection
-        const firstRecipe = data.recipes[0];
-        updateActiveRecipe(firstRecipe);
-        navigate("/recipe");
+        // Take the first recipe suggestion and generate full recipe
+        const selectedRecipe = data.recipes[0];
+        
+        // Now generate the full recipe from the selected suggestion
+        const fullRecipeResponse = await apiRequest("POST", "/api/generate-full-recipe", {
+          recipeIdea: selectedRecipe,
+          quizData: quizData
+        });
+        const fullRecipeData = await fullRecipeResponse.json();
+        
+        if (fullRecipeData.recipe) {
+          updateActiveRecipe(fullRecipeData.recipe);
+          navigate("/recipe");
+        } else {
+          throw new Error("Failed to generate full recipe");
+        }
       } else {
         throw new Error("No recipes generated");
       }

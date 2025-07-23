@@ -151,15 +151,57 @@ For each recipe, provide:
 - Difficulty level (easy/medium/hard)
 - Key ingredients from the provided list
 
-Format as JSON array.`;
+Return a JSON object with this structure:
+{
+  "recipes": [
+    {
+      "title": "Recipe Name",
+      "description": "Brief description",
+      "cuisine": "Cuisine Type",
+      "cookTime": "30 minutes",
+      "difficulty": "easy",
+      "keyIngredients": ["ingredient1", "ingredient2"]
+    }
+  ]
+}`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: prompt }],
+        messages: [
+          { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations." },
+          { role: "user", content: prompt }
+        ],
         temperature: 0.9
       });
 
-      const response = JSON.parse(completion.choices[0].message.content || "{}");
+      let response;
+      try {
+        const content = completion.choices[0].message.content || "{}";
+        // Clean up any potential markdown or extra text
+        let cleanContent = content.replace(/```json\n?/g, '').replace(/\n?```/g, '').trim();
+        
+        // Fix common JSON errors: trailing commas
+        cleanContent = cleanContent.replace(/,(\s*[}\]])/g, '$1');
+        
+        response = JSON.parse(cleanContent);
+      } catch (parseError) {
+        console.error('JSON parsing error for Fridge2Fork:', parseError);
+        console.error('Raw content:', completion.choices[0].message.content);
+        
+        // Create fallback response
+        response = {
+          recipes: [
+            {
+              title: "Quick Ingredient Sauté",
+              description: "A simple dish using your available ingredients.",
+              cuisine: "International",
+              cookTime: "20 minutes",
+              difficulty: "easy",
+              keyIngredients: ingredients.slice(0, 3)
+            }
+          ]
+        };
+      }
       
       // Log the interaction using simplified logging
       await logSimpleGPTInteraction({
@@ -175,6 +217,7 @@ Format as JSON array.`;
         userId: req.session?.userId || undefined
       });
 
+      console.log('🍽️ Fridge2Fork recipes generated:', response.recipes?.length || 0);
       res.json({ recipes: response.recipes || [] });
     } catch (error: any) {
       console.error('Fridge recipe generation error:', error);
@@ -452,8 +495,8 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
       const systemPrompt = `You are an expert chef creating a complete recipe based on this recipe idea:
 
 RECIPE CONCEPT: ${recipeIdea.title}
-DESCRIPTION: ${recipeIdea.description}
-CUISINE: ${recipeIdea.cuisine}
+DESCRIPTION: ${recipeIdea.description || "A delicious dish using your available ingredients"}
+CUISINE: ${recipeIdea.cuisine || "International"}
 
 AVAILABLE INGREDIENTS: ${ingredients.join(", ")}
 CONSTRAINTS:
