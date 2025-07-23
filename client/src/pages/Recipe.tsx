@@ -10,7 +10,7 @@ import { useRecipeStore } from "@/stores/recipeStore";
 
 export default function Recipe() {
   const [location, navigate] = useLocation();
-  const [showChat, setShowChat] = useState(true);
+  const [showChat, setShowChat] = useState(false);
   const recipeStore = useRecipeStore();
   
   // Check if we have recipe data in the store
@@ -25,6 +25,15 @@ export default function Recipe() {
       window.scrollTo(0, 0);
     }
   }, [hasRecipe, navigate]);
+
+  // Listen for custom event to open chat
+  useEffect(() => {
+    const handleOpenChat = () => {
+      setShowChat(true);
+    };
+    window.addEventListener('openChat', handleOpenChat);
+    return () => window.removeEventListener('openChat', handleOpenChat);
+  }, []);
 
   if (!hasRecipe) {
     return null;
