@@ -396,14 +396,9 @@ export default function ChatBot({
 
       {/* Chat Panel - Right Side Panel */}
       <div 
-        className={`fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-96 bg-slate-900/95 backdrop-blur-md border-l border-orange-500/30 shadow-2xl transition-all duration-500 z-50 flex flex-col ${
+        className={`fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-96 bg-slate-900/95 backdrop-blur-md border-l border-orange-500/30 shadow-2xl transition-all duration-500 z-50 flex flex-col mobile-chat-panel ${
           isOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
         }`}
-        style={{ 
-          height: '100vh', 
-          maxHeight: '100vh',
-          minHeight: '-webkit-fill-available'
-        }}
       >
         <CardHeader className="p-3 sm:p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-3">
@@ -432,11 +427,11 @@ export default function ChatBot({
           </Button>
         </CardHeader>
         
-        <CardContent className="flex-1 overflow-hidden p-0 flex flex-col min-h-0">
+        <CardContent className="flex-1 overflow-hidden p-0 flex flex-col min-h-0 mobile-chat-content">
           {/* Messages Area */}
           <div 
             ref={scrollAreaRef}
-            className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3"
+            className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 min-h-0 mobile-chat-messages"
           >
             {localMessages.map((msg, index) => (
               <div key={msg.id} className={`mb-3 ${msg.isUser ? "text-right" : "text-left"}`}>
@@ -467,15 +462,16 @@ export default function ChatBot({
             )}
           </div>
 
-          {/* Suggestion Chips */}
-          {showSuggestions && localMessages.length === 1 && (
-            <div className="px-3 sm:px-4 pb-2">
+          {/* Suggestion Chips - Always show at start of conversation */}
+          {(localMessages.length <= 1 || (showSuggestions && localMessages.length <= 2)) && (
+            <div className="px-3 sm:px-4 py-3 border-t border-slate-700/50 flex-shrink-0 bg-slate-900/50">
+              <div className="text-xs text-slate-400 mb-2">Quick suggestions:</div>
               <div className="flex flex-wrap gap-2">
                 {suggestionChips.slice(0, 4).map((chip, index) => (
                   <Badge
                     key={index}
                     variant={chip.updatesRecipe ? "secondary" : "outline"}
-                    className="cursor-pointer hover:bg-orange-500 hover:text-white transition-all duration-300 flex items-center gap-1 shadow-md backdrop-blur-sm bg-slate-700/80 border-slate-600"
+                    className="cursor-pointer hover:bg-orange-500 hover:text-white transition-all duration-300 flex items-center gap-1 shadow-md backdrop-blur-sm bg-slate-700/80 border-slate-600 text-white"
                     onClick={handleSuggestionClick(chip.text)}
                   >
                     <chip.icon className="w-3 h-3" />
@@ -486,31 +482,31 @@ export default function ChatBot({
             </div>
           )}
 
-          {/* Input Area - Fixed at bottom with safe area for mobile */}
-          <div className="border-t border-slate-700/50 bg-slate-800/95 backdrop-blur-lg flex-shrink-0 mt-auto chat-input-container sm:static sm:bg-slate-800/50">
-            <div className="p-4 pb-6 sm:pb-4">
-              <div className="flex items-center space-x-3">
-                <Input
+          {/* Input Area - Bulletproof mobile */}
+          <div className="border-t-2 border-orange-500/50 bg-slate-800 flex-shrink-0 mobile-chat-input">
+            <div className="p-4 pb-8 sm:pb-4">
+              <div className="flex items-center gap-3">
+                <input
+                  type="text"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Ask me anything..."
-                  className="flex-1 bg-slate-700/90 border-slate-600 text-white placeholder:text-slate-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-base h-12 px-4 shadow-lg"
+                  className="flex-1 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder:text-slate-400 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   disabled={sendMessageMutation.isPending}
-                  style={{ fontSize: '16px' }} // Prevents zoom on iOS
+                  style={{ fontSize: '16px', minHeight: '48px' }}
                 />
-                <Button
+                <button
                   onClick={() => handleSend()}
                   disabled={!message.trim() || sendMessageMutation.isPending}
-                  size="sm"
-                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg h-12 px-4"
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg px-4 py-3 min-h-[48px] min-w-[48px] flex items-center justify-center disabled:opacity-50"
                 >
                   {sendMessageMutation.isPending ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <iconMap.send className="w-4 h-4" />
                   )}
-                </Button>
+                </button>
               </div>
             </div>
           </div>
