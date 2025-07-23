@@ -44,7 +44,17 @@ const chefExamples = [
   "Zuma inspired miso black cod",
   "A healthy authentic butter chicken recipe",
   "A Wagamama inspired katsu curry",
-  "An amazing dish to impress at a dinner party"
+  "An amazing dish to impress at a dinner party",
+  "A Dishoom-style black daal with garlic naan",
+  "A Gordon Ramsay beef wellington with mushroom duxelles",
+  "A Nobu-inspired yellowtail sashimi with jalapeño",
+  "A Hakkasan crispy duck with pancakes and hoisin",
+  "A Jamie Oliver 15-minute prawn linguine",
+  "A Ottolenghi-style roasted cauliflower with tahini",
+  "A Rick Stein fish pie with saffron mash",
+  "A Yotam Ottolenghi lamb shawarma with pickled vegetables",
+  "A Marcus Wareing chocolate fondant with salted caramel",
+  "A Tom Kerridge slow-cooked pork belly with apple sauce"
 ];
 
 // Helper function to get random examples
