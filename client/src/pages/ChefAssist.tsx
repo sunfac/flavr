@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { iconMap } from "@/lib/iconMap";
-import DidYouKnowLoader from "@/components/DidYouKnowLoader";
+import LoadingPage from "./LoadingPage";
 
 // Use the original chef assist examples
 const chefExamples = [
@@ -69,9 +69,10 @@ export default function ChefAssist() {
   const [, navigate] = useLocation();
   const [prompt, setPrompt] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [currentExampleIndex, setCurrentExampleIndex] = useState(0);
   const { toast } = useToast();
-  const { setActiveRecipe } = useRecipeStore();
+  const { updateActiveRecipe } = useRecipeStore();
 
   // Generate 9 random examples on component mount to show 3 different sets
   const randomExamples = useMemo(() => getRandomSelection(chefExamples, 9), []);
@@ -111,7 +112,7 @@ export default function ChefAssist() {
       return;
     }
 
-    setIsProcessing(true);
+    setIsGenerating(true);
     try {
       const response = await apiRequest("POST", "/api/chef-assist/generate", {
         prompt: prompt.trim(),
@@ -123,7 +124,7 @@ export default function ChefAssist() {
       // Store recipe in Zustand and navigate
       if (data.recipe) {
         console.log("Chef Assist: Recipe generated successfully", data.recipe);
-        setActiveRecipe(data.recipe);
+        updateActiveRecipe(data.recipe);
         navigate("/recipe");
       } else {
         throw new Error("No recipe data received");
@@ -136,10 +137,17 @@ export default function ChefAssist() {
         description: "Please try again",
         variant: "destructive",
       });
-    } finally {
-      setIsProcessing(false);
+      setIsGenerating(false);
     }
   };
+
+  // Show loading page when generating recipe
+  if (isGenerating) {
+    return <LoadingPage 
+      title="Creating Your Perfect Recipe" 
+      subtitle="Our AI chef is crafting something special just for you..."
+    />;
+  }
 
   return (
     <PageLayout>
@@ -225,17 +233,7 @@ export default function ChefAssist() {
                   )}
                 </Button>
 
-                {/* Did You Know Loader - Show while processing */}
-                {isProcessing && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="mt-6"
-                  >
-                    <DidYouKnowLoader />
-                  </motion.div>
-                )}
+
               </div>
             </CardContent>
           </Card>

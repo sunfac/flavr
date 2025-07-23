@@ -4,7 +4,7 @@ import { apiRequest } from "@/lib/queryClient";
 import SlideQuizShell from "@/components/SlideQuizShell";
 import TinderRecipeCards from "@/components/TinderRecipeCards";
 import RecipeCard from "@/components/RecipeCard";
-import Loading from "@/components/Loading";
+import LoadingPage from "./LoadingPage";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
 import GlobalNavigation from "@/components/GlobalNavigation";
@@ -311,7 +311,10 @@ export default function ShoppingMode() {
   }
 
   if (isLoading) {
-    return <Loading message="Creating your perfect recipe..." showDidYouKnow />;
+    return <LoadingPage 
+      title="Creating Your Perfect Recipe" 
+      subtitle="Our AI chef is preparing something delicious..."
+    />;
   }
 
   if (currentStep === "suggestions") {
