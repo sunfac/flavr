@@ -162,6 +162,29 @@ See `STRIPE_SETUP.md` for detailed setup instructions.
 - **Error Handling**: Clear guidance when Stripe is not configured
 - **Database Integration**: Full subscription tracking in user schema
 
+## Major Architectural Changes
+
+### January 23, 2025 - Complete App Restructure
+- **Simplified to 2-Mode Interface**: Removed Shopping, Fridge, and Chef Assist modes from old system
+- **New Fridge2Fork Mode**: 
+  - Google Vision API integration for photo-based ingredient detection
+  - No quiz - immediate recipe generation with randomized defaults (4 servings, 20-40min, £3-6 budget)
+  - Tinder-style recipe selection cards before full generation
+- **New Chef Assist Mode**:
+  - Single text input with rotating suggestion chips
+  - "Inspire Me" button for GPT-4 generated unique ideas
+  - Direct to full recipe generation (no intermediate selection)
+- **Streamlined Recipe Display**:
+  - New unified Recipe page that loads immediately after generation
+  - Integrated Zest chatbot for post-generation modifications
+  - Removed separate recipe card components in favor of single enhanced display
+- **API Endpoints Added**:
+  - `/api/vision/analyze-ingredients` - Google Vision ingredient detection
+  - `/api/generate-fridge-recipe` - Fridge2Fork recipe ideas
+  - `/api/chef-assist/inspire` - Dynamic inspiration suggestions
+  - `/api/chef-assist/generate` - Direct full recipe generation
+  - `/api/generate-full-recipe` - Convert recipe idea to full recipe
+
 ## Changelog
 
 ```
@@ -265,6 +288,7 @@ Changelog:
 - July 21, 2025. Ingredient substitution system simplified and fixed - created dedicated `/api/ingredient-substitute` endpoint using OpenAI GPT-3.5 for reliable contextual substitutions, simplified frontend logic to directly update recipe store and force UI re-renders, enhanced substitution prompts with recipe context and cuisine considerations, added comprehensive logging for substitution analytics, ingredient substitution buttons now visually update the recipe card immediately after processing
 - July 21, 2025. My Cookbook functionality unified and enhanced - renamed "Digital Cookbook" to "My Cookbook" throughout the app for consistency, added favorite/save button to recipe cards with heart icon, implemented `/api/save-recipe` endpoint for saving recipes to user's cookbook, enhanced EnhancedRecipeCard with FavoriteButton component that shows saved state and prevents duplicates, updated navigation links to use `/cookbook` route consistently, delete recipe functionality already available through existing endpoints
 - July 23, 2025. Comprehensive documentation suite created - generated complete Product Requirements Document (PRD) covering executive summary, target audience, core product offerings, user experience design, competitive advantage, success metrics, and development roadmap, created detailed Technical Specification covering system architecture, database schemas, API designs, AI integration patterns, authentication systems, and deployment strategies, produced full API Documentation with endpoint specifications, request/response examples, authentication requirements, WebSocket protocols, and SDK usage examples
+- January 23, 2025. Major app restructure to 2-mode system - simplified from 5 modes to 2 visible modes (Fridge2Fork + Chef Assist), Fridge2Fork mode with Google Vision photo input and no quiz, Chef Assist with single prompt and rotating suggestions, new streamlined Recipe page with integrated Zest chatbot, tinder-style recipe selection for Fridge2Fork, direct-to-recipe generation for Chef Assist
 ```
 
 ## User Preferences

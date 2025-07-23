@@ -26,6 +26,10 @@ import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 
 import DigitalCookbook from "@/pages/DigitalCookbook";
 import BudgetPlanner from "@/pages/BudgetPlanner";
+import Fridge2Fork from "@/pages/Fridge2Fork";
+import ChefAssist from "@/pages/ChefAssist";
+import Recipe from "@/pages/Recipe";
+import RecipeSelection from "@/pages/RecipeSelection";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 
 function Router() {
@@ -54,6 +58,10 @@ function Router() {
 
       <Route path="/cookbook" component={DigitalCookbook} />
       <Route path="/budget-planner" component={BudgetPlanner} />
+      <Route path="/fridge2fork" component={Fridge2Fork} />
+      <Route path="/chef-assist" component={ChefAssist} />
+      <Route path="/recipe" component={Recipe} />
+      <Route path="/recipe-selection" component={RecipeSelection} />
       <Route component={NotFound} />
     </Switch>
   );
