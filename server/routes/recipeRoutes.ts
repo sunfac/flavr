@@ -205,48 +205,51 @@ Examples: "Moroccan lamb with apricots", "Korean corn cheese skillet", "Brazilia
       }
 
       // Generate complete recipe directly
-      const systemPrompt = `You are an expert chef creating a complete recipe based on the user's request.
+      const systemPrompt = `You are an expert chef. Create a complete recipe based on this request: "${userPrompt}"
 
-USER REQUEST: ${userPrompt}
-SERVINGS: ${servings}
-PREFERRED TIME: ${cookingTime} minutes (be flexible if the dish requires more time)
+Requirements:
+- Servings: ${servings}
+- Cooking time: around ${cookingTime} minutes
+- Use ingredients available at UK supermarkets
+- Make it achievable for home cooks
 
-Create a COMPLETE recipe with:
-1. An appealing title
-2. Brief description (2-3 sentences)
-3. Complete ingredient list with exact measurements
-4. Step-by-step cooking instructions
-5. Tips for success
-6. Nutritional highlights
-
-Make it:
-- Achievable for home cooks
-- Using ingredients available at UK supermarkets
-- Flavorful and satisfying
-- True to the cuisine if one is specified
-
-Format as JSON with structure:
+Return ONLY a valid JSON object with this exact structure:
 {
   "title": "Recipe Name",
   "description": "Brief description",
   "cuisine": "Cuisine Type",
-  "difficulty": "easy/medium/hard",
-  "prepTime": number,
-  "cookTime": number,
-  "servings": number,
-  "ingredients": [{"name": "ingredient", "amount": "measurement"}],
-  "instructions": [{"step": 1, "instruction": "detailed step"}],
-  "tips": ["tip 1", "tip 2"],
-  "nutritionalHighlights": ["highlight 1", "highlight 2"]
-}`;
+  "difficulty": "easy",
+  "prepTime": 15,
+  "cookTime": 30,
+  "servings": ${servings},
+  "ingredients": [{"name": "ingredient name", "amount": "1 cup"}],
+  "instructions": [{"step": 1, "instruction": "detailed instruction"}],
+  "tips": ["helpful tip"],
+  "nutritionalHighlights": ["nutritional benefit"]
+}
+
+IMPORTANT: Return ONLY the JSON object, no other text.`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: systemPrompt }],
-        temperature: 0.8
+        messages: [
+          { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations." },
+          { role: "user", content: systemPrompt }
+        ],
+        temperature: 0.7
       });
 
-      const recipe = JSON.parse(completion.choices[0].message.content || "{}");
+      let recipe;
+      try {
+        const content = completion.choices[0].message.content || "{}";
+        // Clean up any potential markdown or extra text
+        const cleanContent = content.replace(/```json\n?/g, '').replace(/\n?```/g, '').trim();
+        recipe = JSON.parse(cleanContent);
+      } catch (parseError) {
+        console.error('JSON parsing error:', parseError);
+        console.error('Raw content:', completion.choices[0].message.content);
+        throw new Error('Failed to parse recipe JSON from AI response');
+      }
       
       // Generate image for the recipe
       const imageUrl = await generateRecipeImage(recipe.title, recipe.cuisine);

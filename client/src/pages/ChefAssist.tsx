@@ -59,10 +59,10 @@ export default function ChefAssist() {
   // Generate 6 random examples on component mount
   const randomExamples = useMemo(() => getRandomSelection(chefExamples, 6), []);
 
-  // Rotate examples every 3 seconds
+  // Rotate examples every 3 seconds (show 3 at a time)
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentExampleIndex((prev) => (prev + 1) % randomExamples.length);
+      setCurrentExampleIndex((prev) => (prev + 3) % randomExamples.length);
     }, 3000);
     return () => clearInterval(interval);
   }, [randomExamples.length]);
@@ -158,26 +158,25 @@ export default function ChefAssist() {
                   </Button>
                 </div>
 
-                {/* Cycling suggestion chips - original style */}
-                <div className="space-y-3">
+                {/* Cycling suggestion chips - small list style */}
+                <div className="space-y-2">
                   <p className="text-sm text-slate-400 text-center">Example ideas to get you started:</p>
                   <AnimatePresence mode="popLayout">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {randomExamples.map((example, index) => (
+                    <div className="space-y-1 max-w-lg mx-auto">
+                      {randomExamples.slice(currentExampleIndex, currentExampleIndex + 3).map((example, index) => (
                         <motion.div
                           key={`${example}-${currentExampleIndex}-${index}`}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          transition={{ duration: 0.3, delay: index * 0.05 }}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          transition={{ duration: 0.3, delay: index * 0.1 }}
                         >
-                          <Button
-                            variant="ghost"
+                          <button
                             onClick={() => setPrompt(example)}
-                            className="w-full h-auto py-3 px-4 text-sm text-slate-300 hover:text-white hover:bg-slate-800/50 border border-slate-700 hover:border-orange-400/50 text-left whitespace-normal"
+                            className="w-full text-left py-2 px-3 text-sm text-slate-300 hover:text-orange-400 hover:bg-slate-800/30 rounded-lg transition-colors border-l-2 border-orange-400/20 hover:border-orange-400/60"
                           >
-                            {example}
-                          </Button>
+                            • {example}
+                          </button>
                         </motion.div>
                       ))}
                     </div>

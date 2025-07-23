@@ -76,9 +76,17 @@ export default function Fridge2Fork() {
   };
 
   const addIngredient = () => {
-    if (currentIngredient.trim() && !ingredients.includes(currentIngredient.trim())) {
-      setIngredients([...ingredients, currentIngredient.trim()]);
-      setCurrentIngredient("");
+    if (currentIngredient.trim()) {
+      // Split by commas and clean up each ingredient
+      const newIngredients = currentIngredient
+        .split(',')
+        .map(item => item.trim())
+        .filter(item => item && !ingredients.includes(item));
+      
+      if (newIngredients.length > 0) {
+        setIngredients([...ingredients, ...newIngredients]);
+        setCurrentIngredient("");
+      }
     }
   };
 
@@ -203,7 +211,7 @@ export default function Fridge2Fork() {
                 {/* Manual ingredient input - matching original style */}
                 <div className="flex gap-2 max-w-2xl mx-auto">
                   <Input
-                    placeholder="e.g., eggs, spinach, tomatoes, chicken..."
+                    placeholder="Add ingredients (separate with commas): eggs, spinach, chicken..."
                     value={currentIngredient}
                     onChange={(e) => setCurrentIngredient(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && addIngredient()}
@@ -275,7 +283,7 @@ export default function Fridge2Fork() {
 
                 {/* Helper text */}
                 <p className="text-center text-sm text-slate-400">
-                  We'll create recipes using your ingredients, pantry staples, and 2-4 additional items
+                  We'll create recipes using your ingredients plus common pantry staples
                 </p>
               </div>
             </CardContent>
