@@ -484,31 +484,7 @@ export default function RecipeCard({
         )}
       </div>
 
-      {/* Floating Zest Chatbot - Only appears when triggered */}
-      {showChatbot && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-background border border-border rounded-t-3xl shadow-2xl">
-            <div className="p-4 border-b border-border flex items-center justify-between">
-              <h3 className="font-semibold text-foreground">Ask Zest</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowChatbot(false)}
-                className="h-6 w-6 p-0"
-              >
-                ✕
-              </Button>
-            </div>
-            <div className="max-h-96">
-              <ChatBot 
-                currentRecipe={fullRecipe}
-                currentMode={mode}
-                onRecipeUpdate={handleRecipeUpdate}
-              />
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Shopping List Modal */}
       {showShoppingList && fullRecipe.shoppingList && (

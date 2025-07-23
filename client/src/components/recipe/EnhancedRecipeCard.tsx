@@ -120,7 +120,6 @@ function EnhancedRecipeCard({
             title: `Step ${index + 1}`,
             description: instruction
           })),
-          servings: updatedRecipe.servings || recipe.servings,
           meta: {
             title: updatedRecipe.title,
             cookTime: updatedRecipe.cookTime || recipe.cookTime,
@@ -284,7 +283,6 @@ function EnhancedRecipeCard({
             title: `Step ${i + 1}`,
             description: instruction
           })),
-          servings: activeServings,
           meta: {
             title: activeTitle,
             cookTime: activeCookTime,

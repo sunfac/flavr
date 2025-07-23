@@ -117,7 +117,14 @@ export function registerRecipeRoutes(app: Express) {
       }
 
       // Create prompt for recipe ideas based on ingredients
-      const prompt = `You are a creative chef specializing in making delicious meals from available ingredients.
+      const prompt = `You are a creative chef specializing in making delicious COMPLETE MEALS from available ingredients.
+
+IMPORTANT: Always create COMPLETE DISHES that include:
+- Main component using the available ingredients
+- At least 1-2 side dishes or accompaniments that complement the main
+- Proper sauces, dressings, or condiments
+- Garnishes and finishing touches
+- A complete balanced meal, not just a single element
 
 AVAILABLE INGREDIENTS:
 ${ingredients.join(", ")}
@@ -286,7 +293,20 @@ Random approach #${randomSeed}`;
       }
 
       // Generate complete recipe directly
-      const systemPrompt = `You are an expert chef. Create a complete recipe based on this request: "${userPrompt}"
+      const systemPrompt = `You are an expert chef. Create a complete dish with suitable accompaniments based on the user's request.
+
+IMPORTANT: Always create COMPLETE DISHES that include:
+- Main component (protein, vegetable, or grain-based centerpiece)
+- At least 1-2 side dishes or accompaniments that complement the main
+- Proper sauces, dressings, or condiments
+- Garnishes and finishing touches
+- Complete balanced meal, not just a single element
+
+User request: ${userPrompt}
+Servings: ${servings}
+Time available: ${cookingTime} minutes
+
+Create a complete recipe based on this request: "${userPrompt}"
 
 Requirements:
 - Servings: ${servings}
