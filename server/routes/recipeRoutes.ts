@@ -173,35 +173,8 @@ Format as JSON array.`;
   // Chef Assist inspiration
   app.post("/api/chef-assist/inspire", async (req, res) => {
     try {
-      // Use our curated list of cooking inspirations as the foundation
-      const inspirationList = [
-        "I want to recreate peri-peri chicken like Nando's",
-        "I want to make a Zinger Tower Burger like the one from KFC",
-        "I want to cook a Greggs-style steak bake at home",
-        "I want to make a teriyaki chicken donburi like Itsu",
-        "I want to bake a luxurious chocolate and salted caramel celebration cake",
-        "I want to make sourdough pizza from scratch with honey and Nduja",
-        "I want to cook a Michelin-style mushroom risotto with truffle oil",
-        "I want to make a romantic date-night steak dinner with chimichurri",
-        "Zuma inspired miso black cod",
-        "A healthy authentic butter chicken recipe",
-        "A Wagamama inspired katsu curry",
-        "An amazing dish to impress at a dinner party",
-        "A Dishoom-style black daal with garlic naan",
-        "A Gordon Ramsay beef wellington with mushroom duxelles",
-        "A Nobu-inspired yellowtail sashimi with jalapeño",
-        "A Hakkasan crispy duck with pancakes and hoisin",
-        "A Jamie Oliver 15-minute prawn linguine",
-        "A Ottolenghi-style roasted cauliflower with tahini",
-        "A Rick Stein fish pie with saffron mash",
-        "A Yotam Ottolenghi lamb shawarma with pickled vegetables",
-        "A Marcus Wareing chocolate fondant with salted caramel",
-        "A Tom Kerridge slow-cooked pork belly with apple sauce"
-      ];
-
       // Add randomization to prevent repetitive suggestions
       const randomSeed = Math.floor(Math.random() * 10000);
-      const selectedInspiration = inspirationList[Math.floor(Math.random() * inspirationList.length)];
 
       // Create inspiration style variations
       const inspirationStyles = [
@@ -215,9 +188,15 @@ Format as JSON array.`;
       
       const selectedStyle = inspirationStyles[Math.floor(Math.random() * inspirationStyles.length)];
       
-      const prompt = `Take this inspiration: "${selectedInspiration}"
+      const prompt = `Create an innovative recipe idea using this approach: ${selectedStyle}
 
-Transform it using this approach: ${selectedStyle}
+Draw inspiration from popular cooking styles such as:
+• Recreating beloved restaurant dishes (like famous chain foods, high-end restaurant signatures)
+• Chef-inspired techniques (celebrity chef styles and signature methods)
+• Comfort food with elegant twists (luxurious versions of casual favorites)
+• Cultural fusion concepts (blending traditional cuisines with modern techniques)
+• Celebration and special occasion foods (impressive dishes for entertaining)
+• Quick but sophisticated meals (restaurant-quality food made accessible)
 
 Create a creative recipe name that captures this transformation. Examples:
 • "Ramsay-style beef wellington bites" (Chef-inspired)
