@@ -161,14 +161,19 @@ Format as JSON array.`;
 
       const response = JSON.parse(completion.choices[0].message.content || "{}");
       
-      // Log the interaction
-      await logGPTInteraction(
-        req.session?.userId || null,
-        "generate-fridge-recipe",
-        prompt,
-        response,
-        "gpt-4"
-      );
+      // Log the interaction using simplified logging
+      await logSimpleGPTInteraction({
+        endpoint: "generate-fridge-recipe",
+        prompt: prompt,
+        response: JSON.stringify(response),
+        model: "gpt-3.5-turbo",
+        duration: 0,
+        inputTokens: Math.ceil(prompt.length / 4),
+        outputTokens: Math.ceil(JSON.stringify(response).length / 4),
+        cost: 0.001,
+        success: true,
+        userId: req.session?.userId || undefined
+      });
 
       res.json({ recipes: response.recipes || [] });
     } catch (error: any) {
@@ -366,14 +371,19 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
         recipe.imageUrl = imageUrl;
       }
 
-      // Log the interaction
-      await logGPTInteraction(
-        req.session?.userId || null,
-        "chef-assist-generate",
-        systemPrompt,
-        recipe,
-        "gpt-4"
-      );
+      // Log the interaction using simplified logging
+      await logSimpleGPTInteraction({
+        endpoint: "chef-assist-generate",
+        prompt: systemPrompt,
+        response: JSON.stringify(recipe),
+        model: "gpt-3.5-turbo",
+        duration: 0,
+        inputTokens: Math.ceil(systemPrompt.length / 4),
+        outputTokens: Math.ceil(JSON.stringify(recipe).length / 4),
+        cost: 0.001,
+        success: true,
+        userId: req.session?.userId || undefined
+      });
 
       res.json({ recipe });
     } catch (error: any) {
