@@ -165,7 +165,7 @@ export const useRecipeStore = create<RecipeStore>()(
         // Handle both API response format and internal format
         const ingredients = recipe.ingredients?.map((ing: any, index: number) => ({
           id: `ingredient-${index}`,
-          text: typeof ing === 'string' ? ing : ing.name || ing,
+          text: typeof ing === 'string' ? ing : `${ing.amount || ''} ${ing.name || ing}`.trim(),
           amount: typeof ing === 'object' ? ing.amount : undefined,
           checked: false
         })) || [];

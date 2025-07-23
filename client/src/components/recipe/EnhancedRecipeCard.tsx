@@ -285,7 +285,7 @@ function EnhancedRecipeCard({
             text,
             checked: false
           })),
-          steps: updatedInstructions.map((instruction, i) => ({
+          steps: updatedInstructions.map((instruction: string, i: number) => ({
             id: `step-${i}`,
             title: `Step ${i + 1}`,
             description: instruction,

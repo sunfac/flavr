@@ -1524,7 +1524,8 @@ Recipe: ${recipeContext?.title || 'General recipe'}
 Cuisine: ${recipeContext?.cuisine || 'General'}
 Ingredient to substitute: "${ingredient}"
 All ingredients: ${recipeContext?.allIngredients?.join(', ') || 'Not specified'}
-Current instructions: ${recipeContext?.instructions?.join(' ') || 'Not provided'}
+Current instructions: 
+${recipeContext?.instructions?.map((step, i) => `Step ${i + 1}: ${step}`).join('\n') || 'Not provided'}
 
 Provide a JSON response with:
 1. "substitute" - the replacement ingredient with quantity/measurement
@@ -1536,7 +1537,9 @@ Format:
   "updatedInstructions": ["updated step 1", "updated step 2", ...]
 }
 
-If no instruction updates are needed, return the original instructions unchanged.`;
+If no instruction updates are needed, return the original instructions unchanged.
+
+Important: Return each instruction as a separate array element, do not combine multiple steps into one.`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -1550,8 +1553,14 @@ If no instruction updates are needed, return the original instructions unchanged
       
       try {
         result = JSON.parse(content || '{}');
+        // Ensure updatedInstructions is an array
+        if (!Array.isArray(result.updatedInstructions)) {
+          console.log('⚠️ updatedInstructions is not an array, using original instructions');
+          result.updatedInstructions = recipeContext?.instructions || [];
+        }
       } catch (parseError) {
         // Fallback to simple substitution if JSON parsing fails
+        console.log('⚠️ JSON parsing failed, using fallback');
         result = {
           substitute: content || ingredient,
           updatedInstructions: recipeContext?.instructions || []
