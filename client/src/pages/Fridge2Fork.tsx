@@ -11,6 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Badge } from "@/components/ui/badge";
 import LoadingPage from "./LoadingPage";
 import { useRecipeStore } from "@/stores/recipeStore";
+import RecipeSelectionCards from "@/components/RecipeSelectionCards";
 
 export default function Fridge2Fork() {
   const [, navigate] = useLocation();
@@ -19,6 +20,9 @@ export default function Fridge2Fork() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [recipeOptions, setRecipeOptions] = useState<any[]>([]);
+  const [showSelection, setShowSelection] = useState(false);
+  const [savedQuizData, setSavedQuizData] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -127,22 +131,11 @@ export default function Fridge2Fork() {
       const data = await response.json();
       
       if (data.recipes && data.recipes.length > 0) {
-        // Take the first recipe suggestion and generate full recipe
-        const selectedRecipe = data.recipes[0];
-        
-        // Now generate the full recipe from the selected suggestion
-        const fullRecipeResponse = await apiRequest("POST", "/api/generate-full-recipe", {
-          recipeIdea: selectedRecipe,
-          quizData: quizData
-        });
-        const fullRecipeData = await fullRecipeResponse.json();
-        
-        if (fullRecipeData.recipe) {
-          updateActiveRecipe(fullRecipeData.recipe);
-          navigate("/recipe");
-        } else {
-          throw new Error("Failed to generate full recipe");
-        }
+        // Show recipe selection cards instead of directly generating
+        setRecipeOptions(data.recipes);
+        setSavedQuizData(quizData);
+        setShowSelection(true);
+        setIsGenerating(false);
       } else {
         throw new Error("No recipes generated");
       }
@@ -156,12 +149,27 @@ export default function Fridge2Fork() {
     }
   };
 
-  // Show loading page when generating recipe
+  // Show loading page when generating recipe suggestions
   if (isGenerating) {
     return <LoadingPage 
-      title="Creating Your Perfect Recipe" 
-      subtitle="Finding the best recipe using your ingredients..."
+      title="Finding Recipe Ideas" 
+      subtitle="Looking for the perfect recipes using your ingredients..."
     />;
+  }
+
+  // Show recipe selection cards
+  if (showSelection && recipeOptions.length > 0) {
+    return (
+      <RecipeSelectionCards 
+        recipes={recipeOptions}
+        quizData={savedQuizData}
+        onBack={() => {
+          setShowSelection(false);
+          setRecipeOptions([]);
+          setSavedQuizData(null);
+        }}
+      />
+    );
   }
 
   return (
