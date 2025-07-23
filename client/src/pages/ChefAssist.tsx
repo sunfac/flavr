@@ -120,17 +120,23 @@ export default function ChefAssist() {
       });
       const data = await response.json() as { recipe: any };
 
-      // Store recipe in Zustand and navigate 
-      setActiveRecipe(data.recipe);
-      setIsProcessing(false);
-      navigate("/recipe");
+      // Store recipe in Zustand and navigate
+      if (data.recipe) {
+        console.log("Chef Assist: Recipe generated successfully", data.recipe);
+        setActiveRecipe(data.recipe);
+        navigate("/recipe");
+      } else {
+        throw new Error("No recipe data received");
+      }
       
     } catch (error) {
+      console.error("Recipe generation error:", error);
       toast({
         title: "Error generating recipe",
         description: "Please try again",
         variant: "destructive",
       });
+    } finally {
       setIsProcessing(false);
     }
   };
