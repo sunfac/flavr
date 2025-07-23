@@ -12,6 +12,19 @@ export function useScaledIngredients(
   currentServings: number
 ): ScaledIngredient[] {
   return useMemo(() => {
+    // Handle invalid inputs gracefully
+    if (!originalIngredients || !Array.isArray(originalIngredients)) {
+      return [];
+    }
+    
+    if (!originalServings || originalServings <= 0 || !currentServings || currentServings <= 0) {
+      return originalIngredients.map((ingredient, index) => ({
+        id: `ingredient-${index}`,
+        text: ingredient || '',
+        checked: false
+      }));
+    }
+    
     const scalingFactor = currentServings / originalServings;
     
     return originalIngredients.map((ingredient, index) => ({
@@ -23,6 +36,11 @@ export function useScaledIngredients(
 }
 
 function scaleIngredientText(ingredient: string, scalingFactor: number): string {
+  // Ensure ingredient is a string and handle null/undefined cases
+  if (!ingredient || typeof ingredient !== 'string') {
+    return ingredient || '';
+  }
+  
   let scaledText = ingredient;
   const processedIndices = new Set<number>();
 

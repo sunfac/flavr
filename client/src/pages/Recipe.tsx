@@ -29,6 +29,7 @@ export default function Recipe() {
 
   // Create activeRecipe object from store data for EnhancedRecipeCard
   const activeRecipe = {
+    id: recipeStore.id || 'recipe-1',
     title: recipeStore.meta.title,
     description: recipeStore.meta.description,
     cuisine: recipeStore.meta.cuisine,
@@ -37,14 +38,8 @@ export default function Recipe() {
     prepTime: 15, // Default prep time
     servings: recipeStore.servings,
     image: recipeStore.meta.image,
-    ingredients: recipeStore.ingredients.map(ing => ({
-      name: ing.text,
-      amount: ing.amount || ''
-    })),
-    instructions: recipeStore.steps.map(step => ({
-      step: parseInt(step.id.replace('step-', '')) + 1,
-      instruction: step.description
-    })),
+    ingredients: recipeStore.ingredients.map(ing => ing.text || ''), // Convert to string array
+    instructions: recipeStore.steps.map(step => step.description || ''), // Convert to string array
     tips: [] // Default empty tips
   };
 
