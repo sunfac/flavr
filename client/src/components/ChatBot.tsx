@@ -476,6 +476,7 @@ export default function ChatBot({
         }`}
         style={{
           height: '100vh',
+          height: '100dvh',
           maxHeight: '100vh',
           overflow: 'hidden'
         }}
@@ -562,41 +563,78 @@ export default function ChatBot({
             </div>
           )}
 
-          {/* Input Area - Always visible at bottom */}
-          <div className="border-t-2 border-orange-500/60 bg-slate-900 flex-shrink-0 safe-area-inset-bottom">
-            <div className="p-4 pb-6">
-              <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="w-full">
-                <div className="flex items-center gap-3 w-full">
-                  <input
-                    type="text"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Ask me anything..."
-                    className="flex-1 bg-slate-700 border-2 border-slate-600 rounded-xl text-white placeholder:text-slate-400 px-4 py-4 text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 shadow-lg min-h-[56px]"
-                    disabled={sendMessageMutation.isPending}
-                    style={{ 
-                      fontSize: '16px',
-                      WebkitAppearance: 'none',
-                      WebkitBorderRadius: '12px'
-                    }}
-                    autoComplete="off"
-                    autoCorrect="off"
-                    autoCapitalize="off"
-                    spellCheck="false"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!message.trim() || sendMessageMutation.isPending}
-                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-4 py-4 min-h-[56px] min-w-[56px] flex items-center justify-center disabled:opacity-50 shadow-lg flex-shrink-0"
-                  >
-                    {sendMessageMutation.isPending ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <iconMap.send className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
+          {/* Input Area - Forced visibility at bottom */}
+          <div 
+            className="border-t-2 border-orange-500/60 bg-slate-900 flex-shrink-0"
+            style={{
+              position: 'sticky',
+              bottom: 0,
+              zIndex: 999,
+              paddingBottom: 'max(env(safe-area-inset-bottom), 16px)'
+            }}
+          >
+            <div className="p-4">
+              <form 
+                onSubmit={(e) => { e.preventDefault(); handleSend(); }} 
+                className="w-full"
+                style={{ display: 'flex', gap: '12px', alignItems: 'center' }}
+              >
+                <input
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Ask me anything..."
+                  disabled={sendMessageMutation.isPending}
+                  style={{ 
+                    flex: 1,
+                    fontSize: '16px',
+                    minHeight: '52px',
+                    padding: '14px 16px',
+                    backgroundColor: 'rgb(51, 65, 85)',
+                    border: '2px solid rgb(71, 85, 105)',
+                    borderRadius: '12px',
+                    color: 'white',
+                    outline: 'none',
+                    WebkitAppearance: 'none',
+                    WebkitBorderRadius: '12px'
+                  }}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                />
+                <button
+                  type="submit"
+                  disabled={!message.trim() || sendMessageMutation.isPending}
+                  style={{
+                    minHeight: '52px',
+                    minWidth: '52px',
+                    padding: '14px',
+                    background: 'linear-gradient(to right, rgb(249, 115, 22), rgb(251, 146, 60))',
+                    border: 'none',
+                    borderRadius: '12px',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    opacity: (!message.trim() || sendMessageMutation.isPending) ? 0.5 : 1
+                  }}
+                >
+                  {sendMessageMutation.isPending ? (
+                    <div style={{
+                      width: '20px',
+                      height: '20px',
+                      border: '2px solid white',
+                      borderTop: '2px solid transparent',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }} />
+                  ) : (
+                    <iconMap.send style={{ width: '20px', height: '20px' }} />
+                  )}
+                </button>
               </form>
             </div>
           </div>
