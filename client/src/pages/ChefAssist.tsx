@@ -73,11 +73,11 @@ export default function ChefAssist() {
   // Generate 9 random examples on component mount to show 3 different sets
   const randomExamples = useMemo(() => getRandomSelection(chefExamples, 9), []);
 
-  // Rotate examples every 6 seconds (show 3 at a time)
+  // Rotate examples every 8 seconds (show 3 at a time)
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentExampleIndex((prev) => (prev + 3) % randomExamples.length);
-    }, 6000);
+    }, 8000);
     return () => clearInterval(interval);
   }, [randomExamples.length]);
 
