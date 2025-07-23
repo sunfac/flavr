@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { iconMap } from "@/lib/iconMap";
 import { useLocation } from "wouter";
+import { useEffect, useState } from "react";
 
 interface GlobalFooterProps {
   currentMode?: "fridge2fork" | "chef-assist" | "cookbook";
@@ -8,6 +9,38 @@ interface GlobalFooterProps {
 
 export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
   const [, navigate] = useLocation();
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const initialViewportHeight = window.visualViewport?.height || window.innerHeight;
+    
+    const handleViewportChange = () => {
+      if (window.visualViewport) {
+        const currentHeight = window.visualViewport.height;
+        const heightDifference = initialViewportHeight - currentHeight;
+        // Consider keyboard visible if viewport shrunk by more than 150px
+        setIsKeyboardVisible(heightDifference > 150);
+      }
+    };
+
+    // Listen for visual viewport changes (keyboard show/hide)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportChange);
+      return () => {
+        window.visualViewport?.removeEventListener('resize', handleViewportChange);
+      };
+    }
+
+    // Fallback for older browsers
+    const handleResize = () => {
+      const currentHeight = window.innerHeight;
+      const heightDifference = initialViewportHeight - currentHeight;
+      setIsKeyboardVisible(heightDifference > 150);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const modes = [
     {
@@ -31,7 +64,9 @@ export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
   ];
 
   return (
-    <footer className="global-footer fixed bottom-0 left-0 right-0 z-40 bg-slate-900/90 backdrop-blur-xl border-t border-slate-700">
+    <footer className={`global-footer fixed bottom-0 left-0 right-0 z-40 bg-slate-900/90 backdrop-blur-xl border-t border-slate-700 transition-transform duration-300 ease-in-out ${
+      isKeyboardVisible ? 'transform translate-y-full' : 'transform translate-y-0'
+    }`}>
       <div className="px-4 py-3">
         <div className="flex justify-around items-center max-w-md mx-auto">
           {modes.map((mode) => {
