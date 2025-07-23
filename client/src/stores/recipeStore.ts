@@ -187,7 +187,7 @@ export const useRecipeStore = create<RecipeStore>()(
             cookTime: recipe.cookTime || recipe.prepTime + recipe.cookTime || 30,
             difficulty: recipe.difficulty || 'Medium',
             cuisine: recipe.cuisine,
-            image: recipe.image
+            image: recipe.image || recipe.imageUrl // Handle both image and imageUrl fields
           },
           currentStep: 0,
           completedSteps: [],

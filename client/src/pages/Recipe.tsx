@@ -66,16 +66,7 @@ export default function Recipe() {
           animate={{ opacity: 1, x: 0 }}
           className="w-full lg:w-96"
         >
-          <div className="sticky top-24">
-            <div className="bg-card rounded-lg shadow-lg">
-              <div className="p-4 border-b">
-                <h3 className="font-semibold">Chat with Zest</h3>
-              </div>
-              <div className="h-[600px]">
-                <ChatBot />
-              </div>
-            </div>
-          </div>
+          <ChatBot />
         </motion.div>
       </div>
     </PageLayout>

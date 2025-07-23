@@ -369,6 +369,7 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
       const imageUrl = await generateRecipeImage(recipe.title, recipe.cuisine);
       if (imageUrl) {
         recipe.imageUrl = imageUrl;
+        recipe.image = imageUrl; // Also set image field for compatibility
       }
 
       // Log the interaction using simplified logging

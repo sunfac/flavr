@@ -514,7 +514,7 @@ export default function ChatBot({
           )}
 
           {/* Input Area */}
-          <div className="p-3 sm:p-4 border-t border-slate-700/50 bg-slate-800/50 backdrop-blur-sm">
+          <div className="p-3 sm:p-4 border-t border-slate-700/50 bg-slate-800/50 backdrop-blur-sm flex-shrink-0">
             <div className="flex items-center space-x-2">
               <Input
                 value={message}

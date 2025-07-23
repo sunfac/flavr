@@ -303,6 +303,7 @@ Changelog:
 - January 23, 2025. Recipe generation prompts enhanced for complete dishes - updated both Chef Assist and Fridge2Fork prompts to emphasize creating COMPLETE MEALS with main components, side dishes, accompaniments, sauces, and garnishes rather than single elements, ensuring all generated recipes are balanced, complete dishes ready for serving
 - January 23, 2025. Removed "Ask Zest" box from RecipeCard - simplified sharing tools area by removing redundant chat prompt below share buttons, maintaining clean interface while Zest chatbot remains fully accessible in Recipe page
 - January 23, 2025. Enhanced recipe display with dynamic updates - integrated StreamingChatBot component with live recipe card updates via function calling, fixed duplicate servings key in EnhancedRecipeCard, improved image handling in recipe generation with proper fallback support for both image and imageUrl properties
+- January 23, 2025. Fixed recipe image display and mobile ChatBot - updated recipeStore to handle both 'image' and 'imageUrl' fields from API responses, enhanced mobile responsiveness of ChatBot component by adding flex-shrink-0 to input area, removed sticky positioning from Recipe page chat panel to improve mobile experience, ensured recipe images display properly instead of showing "text"
 ```
 
 ## User Preferences
