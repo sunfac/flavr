@@ -304,17 +304,49 @@ export default function ChatBot({
     }
   }, [localMessages.length]); // Only depend on message count, not the entire array
 
-  // Lock body scroll when chat opens on mobile
+  // Lock body scroll when chat opens on mobile and handle viewport changes
   useEffect(() => {
     if (actualIsOpen) {
       document.body.classList.add('chat-open');
+      
+      // Store the current scroll position
+      const scrollY = window.scrollY;
+      document.body.style.top = `-${scrollY}px`;
+      
+      // Handle Visual Viewport API for better keyboard support
+      if ('visualViewport' in window) {
+        const handleViewportChange = () => {
+          const viewport = window.visualViewport;
+          if (viewport) {
+            // Adjust chat panel height when keyboard appears
+            const chatPanel = document.querySelector('.mobile-chat-panel') as HTMLElement;
+            if (chatPanel) {
+              chatPanel.style.height = `${viewport.height}px`;
+            }
+          }
+        };
+        
+        window.visualViewport.addEventListener('resize', handleViewportChange);
+        
+        return () => {
+          if (window.visualViewport) {
+            window.visualViewport.removeEventListener('resize', handleViewportChange);
+          }
+        };
+      }
     } else {
       document.body.classList.remove('chat-open');
+      
+      // Restore scroll position
+      const scrollY = document.body.style.top;
+      document.body.style.top = '';
+      window.scrollTo(0, parseInt(scrollY || '0') * -1);
     }
     
     // Cleanup on unmount
     return () => {
       document.body.classList.remove('chat-open');
+      document.body.style.top = '';
     };
   }, [actualIsOpen]);
 
@@ -446,7 +478,9 @@ export default function ChatBot({
           height: actualIsOpen ? '100vh' : 'auto',
           position: 'fixed',
           top: 0,
-          bottom: 0
+          bottom: 0,
+          maxHeight: '100vh',
+          overflow: 'hidden'
         }}
       >
         <CardHeader className="p-3 sm:p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
@@ -532,8 +566,8 @@ export default function ChatBot({
           )}
 
           {/* Input Area - Fixed at bottom with proper spacing */}
-          <div className="absolute bottom-0 left-0 right-0 border-t-2 border-orange-500/60 bg-slate-900/95 backdrop-blur-lg flex-shrink-0 mobile-chat-input">
-            <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="p-4">
+          <div className="absolute bottom-0 left-0 right-0 border-t-2 border-orange-500/60 bg-slate-900/95 backdrop-blur-lg flex-shrink-0 mobile-chat-input safe-area-bottom">
+            <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="p-4" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
               <div className="flex items-center gap-3">
                 <input
                   type="text"
