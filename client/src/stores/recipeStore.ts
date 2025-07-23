@@ -160,24 +160,31 @@ export const useRecipeStore = create<RecipeStore>()(
 
       updateActiveRecipe: (recipe: any) => {
         console.log('🔄 Recipe Store: Updating active recipe from chat', recipe);
+        
+        // Handle both API response format and internal format
+        const ingredients = recipe.ingredients?.map((ing: any, index: number) => ({
+          id: `ingredient-${index}`,
+          text: typeof ing === 'string' ? ing : `${ing.name}${ing.amount ? ` - ${ing.amount}` : ''}`,
+          amount: typeof ing === 'object' ? ing.amount : undefined,
+          checked: false
+        })) || [];
+
+        const instructions = recipe.instructions?.map((instruction: any, index: number) => ({
+          id: `step-${index}`,
+          title: `Step ${index + 1}`,
+          description: typeof instruction === 'string' ? instruction : instruction.instruction,
+          duration: 0
+        })) || [];
+
         const updatedState: RecipeState = {
           id: recipe.id || Date.now().toString(),
           servings: recipe.servings || 4,
-          ingredients: recipe.ingredients?.map((ing: string, index: number) => ({
-            id: `ingredient-${index}`,
-            text: ing,
-            checked: false
-          })) || [],
-          steps: recipe.instructions?.map((instruction: string, index: number) => ({
-            id: `step-${index}`,
-            title: `Step ${index + 1}`,
-            description: instruction,
-            duration: 0
-          })) || [],
+          ingredients: ingredients,
+          steps: instructions,
           meta: {
             title: recipe.title || 'Updated Recipe',
             description: recipe.description,
-            cookTime: recipe.cookTime || 30,
+            cookTime: recipe.cookTime || recipe.prepTime + recipe.cookTime || 30,
             difficulty: recipe.difficulty || 'Medium',
             cuisine: recipe.cuisine,
             image: recipe.image

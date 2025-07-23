@@ -11,19 +11,42 @@ import { useRecipeStore } from "@/stores/recipeStore";
 export default function Recipe() {
   const [location, navigate] = useLocation();
   const [showChat, setShowChat] = useState(true);
-  const { activeRecipe, setActiveRecipe } = useRecipeStore();
+  const recipeStore = useRecipeStore();
   
-  // Use activeRecipe from store as primary source
+  // Check if we have recipe data in the store
+  const hasRecipe = recipeStore.meta.title && recipeStore.ingredients.length > 0;
+  
   useEffect(() => {
-    if (!activeRecipe) {
+    if (!hasRecipe) {
       // No recipe in store, redirect to mode selection
       navigate("/app");
     }
-  }, [activeRecipe, navigate]);
+  }, [hasRecipe, navigate]);
 
-  if (!activeRecipe) {
+  if (!hasRecipe) {
     return null;
   }
+
+  // Create activeRecipe object from store data for EnhancedRecipeCard
+  const activeRecipe = {
+    title: recipeStore.meta.title,
+    description: recipeStore.meta.description,
+    cuisine: recipeStore.meta.cuisine,
+    difficulty: recipeStore.meta.difficulty,
+    cookTime: recipeStore.meta.cookTime,
+    prepTime: 15, // Default prep time
+    servings: recipeStore.servings,
+    image: recipeStore.meta.image,
+    ingredients: recipeStore.ingredients.map(ing => ({
+      name: ing.text,
+      amount: ing.amount || ''
+    })),
+    instructions: recipeStore.steps.map(step => ({
+      step: parseInt(step.id.replace('step-', '')) + 1,
+      instruction: step.description
+    })),
+    tips: [] // Default empty tips
+  };
 
   return (
     <PageLayout className="max-w-7xl mx-auto">
