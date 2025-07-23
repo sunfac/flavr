@@ -317,6 +317,7 @@ Requirements:
 - Servings: ${servings}
 - Cooking time: around ${cookingTime} minutes
 - Use ingredients available at UK supermarkets
+- IMPORTANT: Use UK measurement units ONLY (grams, ml, tbsp, tsp, litres) - NO cups or ounces
 - Make it achievable for home cooks
 - Stay authentic to ONE cuisine tradition - DO NOT mix cuisines or create fusion dishes
 - Choose one specific cuisine (Italian, French, Thai, Indian, Mexican, Japanese, Chinese, etc.) and keep the recipe authentic to that tradition
@@ -330,7 +331,7 @@ Return ONLY a valid JSON object with this exact structure (NO trailing commas):
   "prepTime": 15,
   "cookTime": 30,
   "servings": ${servings},
-  "ingredients": [{"name": "ingredient name", "amount": "1 cup"}],
+  "ingredients": [{"name": "ingredient name only", "amount": "UK quantity (e.g. '2 tbsp', '400g', '250ml')"}],
   "instructions": [{"step": 1, "instruction": "detailed instruction"}],
   "tips": ["helpful tip"],
   "nutritionalHighlights": ["nutritional benefit"]

@@ -510,7 +510,7 @@ export default function ChatBot({
           </Button>
         </CardHeader>
         
-        <CardContent className="flex-1 overflow-hidden p-0 flex flex-col min-h-0 mobile-chat-content relative">
+        <CardContent className="flex-1 overflow-hidden p-0 flex flex-col min-h-0 mobile-chat-content">
           {/* Messages Area */}
           <div 
             ref={scrollAreaRef}
@@ -550,7 +550,7 @@ export default function ChatBot({
             <div className="px-3 sm:px-4 py-3 border-t border-slate-700/50 flex-shrink-0 bg-slate-900/50">
               <div className="text-xs text-slate-400 mb-2">Quick suggestions:</div>
               <div className="flex flex-wrap gap-2">
-                {suggestionChips.slice(0, 4).map((chip, index) => (
+                {suggestionChips.slice(0, 6).map((chip, index) => (
                   <Badge
                     key={index}
                     variant={chip.updatesRecipe ? "secondary" : "outline"}
