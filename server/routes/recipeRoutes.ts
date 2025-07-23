@@ -182,15 +182,43 @@ Format as JSON array.`;
         "Mood-inspired: Capture cozy, elegant, or rustic vibes", 
         "Restaurant-inspired: Create elevated street food or bistro versions",
         "Weather-inspired: Perfect for current season and weather",
-        "Cultural-inspired: Blend with different regional traditions",
+        "Trending-inspired: Use viral social media recipes and techniques",
         "Technique-inspired: Highlight specific cooking methods"
       ];
       
+      // Trending ingredients and techniques for 2025
+      const trendingIngredients = [
+        "gochujang", "miso paste", "tahini", "harissa", "yuzu", "sumac", "za'atar", 
+        "black garlic", "fermented chili paste", "pomegranate molasses", "dulse seaweed",
+        "jackfruit", "cauliflower", "chickpea flour", "oat milk", "nutritional yeast",
+        "hemp seeds", "spirulina", "matcha", "turmeric", "adaptogenic mushrooms"
+      ];
+      
+      const trendingTechniques = [
+        "air fryer cooking", "fermentation", "smoking with wood chips", "sous vide",
+        "one-pot meals", "sheet pan dinners", "pickle brining", "cold smoking",
+        "dehydrating", "infusing oils", "compound butters", "grain bowls"
+      ];
+      
+      const viralRecipeTypes = [
+        "TikTok pasta trends", "Instagram breakfast bowls", "viral bread recipes",
+        "trending sauce combinations", "popular meal prep ideas", "social media snacks",
+        "trending dessert mashups", "viral comfort food twists"
+      ];
+      
       const selectedStyle = inspirationStyles[Math.floor(Math.random() * inspirationStyles.length)];
+      const trendingIngredient = trendingIngredients[Math.floor(Math.random() * trendingIngredients.length)];
+      const trendingTechnique = trendingTechniques[Math.floor(Math.random() * trendingTechniques.length)];
+      const viralRecipe = viralRecipeTypes[Math.floor(Math.random() * viralRecipeTypes.length)];
       
       const prompt = `Create a completely unique and innovative recipe idea using this approach: ${selectedStyle}
 
 IGNORE any previous suggestions you may have given. Generate something COMPLETELY DIFFERENT each time.
+
+TRENDING INSPIRATION (incorporate these randomly):
+• Featured ingredient: ${trendingIngredient}
+• Trending technique: ${trendingTechnique}  
+• Viral recipe style: ${viralRecipe}
 
 Choose ONE authentic cuisine and create an exciting dish within that tradition:
 • Italian: Regional specialties, pasta innovations, risottos, focaccia variations
@@ -208,9 +236,14 @@ Choose ONE authentic cuisine and create an exciting dish within that tradition:
 • Moroccan: Tagines, couscous dishes, spiced preparations
 • Turkish: Grilled meats, rice dishes, Mediterranean flavors
 
-DO NOT mix cuisines or create fusion dishes. Stay authentic to ONE cuisine tradition.
+CREATIVE GUIDELINES:
+• Incorporate trending ingredients naturally into traditional recipes
+• Use modern cooking techniques to enhance classic dishes
+• Draw inspiration from viral recipe trends while staying authentic
+• Consider seasonal and current food movements
+• Vary protein types: seafood, poultry, beef, pork, lamb, game, legumes, grains, vegetables
 
-Vary the protein types: seafood, poultry, beef, pork, lamb, game, legumes, grains, vegetables, etc.
+DO NOT mix cuisines or create fusion dishes. Stay authentic to ONE cuisine tradition.
 
 Return only the recipe name in 4-8 words. Be wildly creative and diverse.
 Random seed: ${randomSeed}`;
