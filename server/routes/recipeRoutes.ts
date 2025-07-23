@@ -173,52 +173,51 @@ Format as JSON array.`;
   // Chef Assist inspiration
   app.post("/api/chef-assist/inspire", async (req, res) => {
     try {
-      // Add randomization to prevent repetitive suggestions
-      const randomSeed = Math.floor(Math.random() * 10000);
-
-      // Create inspiration style variations
-      const inspirationStyles = [
-        "Chef-inspired: Add famous chef techniques",
-        "Mood-inspired: Capture cozy, elegant, or rustic vibes", 
-        "Restaurant-inspired: Create elevated street food or bistro versions",
-        "Weather-inspired: Perfect for current season and weather",
-        "Trending-inspired: Use viral social media recipes and techniques",
-        "Technique-inspired: Highlight specific cooking methods"
-      ];
+      // Random seed from 1-10 determines the single inspiration approach
+      const randomSeed = Math.floor(Math.random() * 10) + 1;
       
-      // Trending ingredients and techniques for 2025
-      const trendingIngredients = [
-        "gochujang", "miso paste", "tahini", "harissa", "yuzu", "sumac", "za'atar", 
-        "black garlic", "fermented chili paste", "pomegranate molasses", "dulse seaweed",
-        "jackfruit", "cauliflower", "chickpea flour", "oat milk", "nutritional yeast",
-        "hemp seeds", "spirulina", "matcha", "turmeric", "adaptogenic mushrooms"
-      ];
+      let inspirationPrompt = "";
       
-      const trendingTechniques = [
-        "air fryer cooking", "fermentation", "smoking with wood chips", "sous vide",
-        "one-pot meals", "sheet pan dinners", "pickle brining", "cold smoking",
-        "dehydrating", "infusing oils", "compound butters", "grain bowls"
-      ];
+      switch (randomSeed) {
+        case 1: // Regional to country
+          inspirationPrompt = "Focus on authentic regional specialties from a specific country or region. Think local ingredients, traditional techniques, and dishes that represent true regional heritage.";
+          break;
+        case 2: // Trending ingredients
+          const trendingIngredients = ["gochujang", "miso paste", "tahini", "harissa", "yuzu", "sumac", "za'atar", "black garlic", "fermented chili paste", "pomegranate molasses"];
+          const selectedTrending = trendingIngredients[Math.floor(Math.random() * trendingIngredients.length)];
+          inspirationPrompt = `Incorporate the trending ingredient "${selectedTrending}" into an authentic traditional recipe from any cuisine.`;
+          break;
+        case 3: // Clever techniques
+          const cleverTechniques = ["one-pot cooking", "sheet pan meals", "air fryer innovation", "no-knead techniques", "quick-pickle methods", "compound seasonings"];
+          const selectedTechnique = cleverTechniques[Math.floor(Math.random() * cleverTechniques.length)];
+          inspirationPrompt = `Use the clever technique of "${selectedTechnique}" to create an innovative version of a classic dish.`;
+          break;
+        case 4: // Cheap and cheerful
+          inspirationPrompt = "Create a budget-friendly, soul-warming dish using affordable ingredients that delivers maximum flavor and satisfaction without breaking the bank.";
+          break;
+        case 5: // Classic and traditional
+          inspirationPrompt = "Focus on time-honored, traditional recipes that have been passed down through generations. Emphasize authentic preparation methods and classic flavor profiles.";
+          break;
+        case 6: // Super authentic
+          inspirationPrompt = "Create the most authentic version possible of a traditional dish, using original ingredients, traditional techniques, and staying true to cultural heritage.";
+          break;
+        case 7: // Seasonal and fresh
+          inspirationPrompt = "Highlight seasonal ingredients at their peak freshness, creating dishes that celebrate the current season's best produce and natural flavors.";
+          break;
+        case 8: // Comfort food reimagined
+          inspirationPrompt = "Take a beloved comfort food classic and elevate it with better techniques or quality ingredients while maintaining its soul-warming essence.";
+          break;
+        case 9: // Quick and easy
+          inspirationPrompt = "Create a delicious, satisfying meal that can be prepared in 30 minutes or less with minimal prep work and simple cooking techniques.";
+          break;
+        case 10: // Restaurant-quality at home
+          inspirationPrompt = "Develop a restaurant-quality dish that home cooks can achieve with proper technique and attention to detail, bringing fine dining to the home kitchen.";
+          break;
+      }
       
-      const viralRecipeTypes = [
-        "TikTok pasta trends", "Instagram breakfast bowls", "viral bread recipes",
-        "trending sauce combinations", "popular meal prep ideas", "social media snacks",
-        "trending dessert mashups", "viral comfort food twists"
-      ];
-      
-      const selectedStyle = inspirationStyles[Math.floor(Math.random() * inspirationStyles.length)];
-      const trendingIngredient = trendingIngredients[Math.floor(Math.random() * trendingIngredients.length)];
-      const trendingTechnique = trendingTechniques[Math.floor(Math.random() * trendingTechniques.length)];
-      const viralRecipe = viralRecipeTypes[Math.floor(Math.random() * viralRecipeTypes.length)];
-      
-      const prompt = `Create a completely unique and innovative recipe idea using this approach: ${selectedStyle}
+      const prompt = `${inspirationPrompt}
 
 IGNORE any previous suggestions you may have given. Generate something COMPLETELY DIFFERENT each time.
-
-TRENDING INSPIRATION (incorporate these randomly):
-• Featured ingredient: ${trendingIngredient}
-• Trending technique: ${trendingTechnique}  
-• Viral recipe style: ${viralRecipe}
 
 Choose ONE authentic cuisine and create an exciting dish within that tradition:
 • Italian: Regional specialties, pasta innovations, risottos, focaccia variations
@@ -235,18 +234,19 @@ Choose ONE authentic cuisine and create an exciting dish within that tradition:
 • Vietnamese: Fresh herbs, pho variations, grilled specialties
 • Moroccan: Tagines, couscous dishes, spiced preparations
 • Turkish: Grilled meats, rice dishes, Mediterranean flavors
+• British: Pub classics, roasts, pies, comfort foods
+• German: Hearty stews, sausages, bread specialties
+• Russian: Warming soups, dumplings, preserved foods
 
 CREATIVE GUIDELINES:
-• Incorporate trending ingredients naturally into traditional recipes
-• Use modern cooking techniques to enhance classic dishes
-• Draw inspiration from viral recipe trends while staying authentic
-• Consider seasonal and current food movements
 • Vary protein types: seafood, poultry, beef, pork, lamb, game, legumes, grains, vegetables
+• Consider seasonal ingredients and cooking methods
+• Balance flavor, texture, and visual appeal
 
 DO NOT mix cuisines or create fusion dishes. Stay authentic to ONE cuisine tradition.
 
 Return only the recipe name in 4-8 words. Be wildly creative and diverse.
-Random seed: ${randomSeed}`;
+Random approach #${randomSeed}`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
