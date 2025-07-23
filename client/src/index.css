@@ -587,44 +587,20 @@
     padding-bottom: env(safe-area-inset-bottom, 1rem);
   }
   
-  /* Mobile chat fixes - Ensure input is above footer */
+  /* Mobile chat input visibility fix */
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+  
+  /* Ensure chat input is always visible on mobile */
   @media (max-width: 640px) {
-    .mobile-chat-panel {
-      height: 100vh !important;
-      height: 100dvh !important;
-      display: flex !important;
-      flex-direction: column !important;
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      bottom: 0 !important;
-      z-index: 1000 !important; /* Ensure above all other elements */
-    }
-    
-    .mobile-chat-content {
-      flex: 1 !important;
-      overflow: hidden !important;
-      display: flex !important;
-      flex-direction: column !important;
-      min-height: 0 !important;
-    }
-    
-    .mobile-chat-messages {
-      flex: 1 !important;
-      overflow-y: auto !important;
-      min-height: 200px !important;
-      padding-bottom: 20px !important;
-    }
-    
-    .mobile-chat-input {
-      flex-shrink: 0 !important;
-      border-top: 2px solid rgba(251, 146, 60, 0.8) !important;
-      background: rgba(30, 41, 59, 0.98) !important;
+    /* Force visibility of chat input on mobile */
+    .mobile-chat-input,
+    .safe-area-inset-bottom {
       position: relative !important;
-      z-index: 100 !important;
-      margin-bottom: 0 !important;
-      padding-bottom: env(safe-area-inset-bottom, 10px) !important;
+      z-index: 9999 !important;
+      background: rgb(15, 23, 42) !important;
+      border-top: 2px solid rgba(251, 146, 60, 0.6) !important;
     }
     
     /* Force input visibility with stronger styles */

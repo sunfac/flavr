@@ -471,17 +471,13 @@ export default function ChatBot({
 
       {/* Chat Panel - Right Side Panel with viewport lock */}
       <div 
-        className={`fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-96 bg-slate-900/95 backdrop-blur-md border-l border-orange-500/30 shadow-2xl transition-all duration-500 flex flex-col mobile-chat-panel ${
-          actualIsOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
+        className={`fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-96 bg-slate-900/95 backdrop-blur-md border-l border-orange-500/30 shadow-2xl transition-all duration-500 flex flex-col ${
+          actualIsOpen ? "translate-x-0 opacity-100 z-[1000]" : "translate-x-full opacity-0 z-[-1]"
         }`}
         style={{
           height: '100vh',
-          position: 'fixed',
-          top: 0,
-          bottom: 0,
           maxHeight: '100vh',
-          overflow: 'hidden',
-          zIndex: actualIsOpen ? 1000 : -1 // High z-index when open, hidden when closed
+          overflow: 'hidden'
         }}
       >
         <CardHeader className="p-3 sm:p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
@@ -511,11 +507,11 @@ export default function ChatBot({
           </Button>
         </CardHeader>
         
-        <CardContent className="flex-1 overflow-hidden p-0 flex flex-col min-h-0 mobile-chat-content">
+        <CardContent className="flex-1 overflow-hidden p-0 flex flex-col min-h-0">
           {/* Messages Area */}
           <div 
             ref={scrollAreaRef}
-            className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 min-h-0 mobile-chat-messages"
+            className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 min-h-0"
           >
             {localMessages.map((msg, index) => (
               <div key={msg.id} className={`mb-3 ${msg.isUser ? "text-right" : "text-left"}`}>
@@ -566,50 +562,43 @@ export default function ChatBot({
             </div>
           )}
 
-          {/* Input Area - Fixed at bottom with guaranteed visibility */}
-          <div className="border-t-2 border-orange-500/60 bg-slate-900/98 backdrop-blur-lg flex-shrink-0 mobile-chat-input" 
-               style={{ 
-                 position: 'relative', 
-                 zIndex: 1001,
-                 paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 16px)'
-               }}>
-            <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="p-4">
-              <div className="flex items-center gap-3">
-                <input
-                  type="text"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Ask me anything..."
-                  className="flex-1 bg-slate-700 border-2 border-slate-600 rounded-xl text-white placeholder:text-slate-400 px-4 py-4 text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 shadow-xl"
-                  disabled={sendMessageMutation.isPending}
-                  style={{ 
-                    fontSize: '16px', 
-                    minHeight: '56px', 
-                    WebkitAppearance: 'none',
-                    transform: 'translateZ(0)',
-                    position: 'relative',
-                    zIndex: 1002
-                  }}
-                  autoComplete="off"
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                  spellCheck="false"
-                />
-                <button
-                  type="submit"
-                  disabled={!message.trim() || sendMessageMutation.isPending}
-                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-4 py-4 min-h-[56px] min-w-[56px] flex items-center justify-center disabled:opacity-50 shadow-xl"
-                  style={{ position: 'relative', zIndex: 1002 }}
-                >
-                  {sendMessageMutation.isPending ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <iconMap.send className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
-            </form>
+          {/* Input Area - Always visible at bottom */}
+          <div className="border-t-2 border-orange-500/60 bg-slate-900 flex-shrink-0 safe-area-inset-bottom">
+            <div className="p-4 pb-6">
+              <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="w-full">
+                <div className="flex items-center gap-3 w-full">
+                  <input
+                    type="text"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Ask me anything..."
+                    className="flex-1 bg-slate-700 border-2 border-slate-600 rounded-xl text-white placeholder:text-slate-400 px-4 py-4 text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 shadow-lg min-h-[56px]"
+                    disabled={sendMessageMutation.isPending}
+                    style={{ 
+                      fontSize: '16px',
+                      WebkitAppearance: 'none',
+                      WebkitBorderRadius: '12px'
+                    }}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!message.trim() || sendMessageMutation.isPending}
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-4 py-4 min-h-[56px] min-w-[56px] flex items-center justify-center disabled:opacity-50 shadow-lg flex-shrink-0"
+                  >
+                    {sendMessageMutation.isPending ? (
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <iconMap.send className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </CardContent>
 
