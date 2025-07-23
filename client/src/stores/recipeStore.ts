@@ -14,6 +14,7 @@ export interface Step {
   title: string;
   description: string;
   duration?: number; // in minutes
+  completed?: boolean;
   image?: string;
 }
 

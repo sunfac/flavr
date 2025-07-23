@@ -275,7 +275,8 @@ function EnhancedRecipeCard({
           instructionsUpdated: updatedInstructions.length
         });
         
-        // Update recipe store with both ingredient and instruction changes
+        // Update recipe store with both ingredient and instruction changes while preserving step state
+        const currentRecipeState = recipeStore;
         recipeActions.replaceRecipe({
           id: recipe.id,
           servings: activeServings,
@@ -287,7 +288,9 @@ function EnhancedRecipeCard({
           steps: updatedInstructions.map((instruction, i) => ({
             id: `step-${i}`,
             title: `Step ${i + 1}`,
-            description: instruction
+            description: instruction,
+            duration: extractDuration(instruction),
+            completed: currentRecipeState.steps[i]?.completed || false
           })),
           meta: {
             title: activeTitle,
@@ -297,8 +300,8 @@ function EnhancedRecipeCard({
             description: recipe.description,
             image: recipe.image
           },
-          currentStep: 0,
-          completedSteps: [],
+          currentStep: currentRecipeState.currentStep || 0,
+          completedSteps: currentRecipeState.completedSteps || [],
           lastUpdated: Date.now()
         });
         
