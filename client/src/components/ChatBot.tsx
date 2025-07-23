@@ -45,9 +45,12 @@ interface ChatBotProps {
 export default function ChatBot({ 
   currentRecipe, 
   onRecipeUpdate, 
-  currentMode 
-}: ChatBotProps = {}) {
-  const [isOpen, setIsOpen] = useState(false);
+  currentMode,
+  isOpen = true,
+  onClose
+}: ChatBotProps & { isOpen?: boolean; onClose?: () => void }) {
+  // Use isOpen prop if provided, otherwise default to true
+  const actualIsOpen = isOpen !== undefined ? isOpen : true;
   const [message, setMessage] = useState("");
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
@@ -115,6 +118,12 @@ export default function ChatBot({
   // Send chat message with function calling support
   const sendMessageMutation = useMutation({
     mutationFn: async (data: { message: string; currentRecipe?: Recipe; mode?: string }) => {
+      // Build conversation history from local messages (not chatHistory from db)
+      const conversationHistory = localMessages.map(msg => ({
+        role: msg.isUser ? 'user' : 'assistant',
+        content: msg.isUser ? msg.message : msg.response
+      }));
+      
       const response = await fetch("/api/chat/stream", {
         method: "POST",
         headers: {
@@ -122,10 +131,7 @@ export default function ChatBot({
         },
         body: JSON.stringify({
           message: data.message,
-          conversationHistory: chatHistory.map((msg: any) => ({
-            role: msg.isUser ? 'user' : 'assistant',
-            content: msg.text || msg.message || msg.response
-          })),
+          conversationHistory, // Use local messages for continuity
           currentRecipe: getCurrentRecipeContext().recipe,
           openAIContext: getCurrentRecipeContext()
         }),
@@ -163,6 +169,14 @@ export default function ChatBot({
               
               if (data.function_call) {
                 functionCalls.push(data.function_call);
+              }
+              
+              if (data.type === 'recipeUpdate' && data.recipe) {
+                // Handle recipe update from server
+                functionCalls.push({
+                  name: 'updateRecipe',
+                  arguments: data.recipe
+                });
               }
             } catch (e) {
               // Skip invalid JSON
@@ -220,6 +234,11 @@ export default function ChatBot({
               // Use the updateActiveRecipe action which handles both formats
               recipeActions.updateActiveRecipe(args);
               
+              // Force a re-render by updating the recipe in parent component if available
+              if (onRecipeUpdate) {
+                onRecipeUpdate(args);
+              }
+              
               // Show confirmation message
               const updateMessage: ChatMessage = {
                 id: Date.now() + 1,
@@ -257,7 +276,7 @@ export default function ChatBot({
 
   // Initialize with Zest's welcome message when we have a recipe
   useEffect(() => {
-    if (!hasInitialized && isOpen && currentRecipe) {
+    if (!hasInitialized && actualIsOpen && currentRecipe) {
       const welcomeMessage: ChatMessage = {
         id: Date.now(),
         message: "",
@@ -269,7 +288,7 @@ export default function ChatBot({
       setLocalMessages([welcomeMessage]);
       setHasInitialized(true);
     }
-  }, [isOpen, hasInitialized, currentRecipe]);
+  }, [actualIsOpen, hasInitialized, currentRecipe]);
 
   // Auto-scroll to latest message with debouncing
   useEffect(() => {
@@ -287,7 +306,7 @@ export default function ChatBot({
 
   // Initialize with welcome message and history
   useEffect(() => {
-    if (isOpen && chatHistory) {
+    if (actualIsOpen && chatHistory) {
       const messages: ChatMessage[] = [];
       
       // Add Zest's welcome message if we have a recipe (check recipe store instead of prop)
@@ -329,7 +348,7 @@ export default function ChatBot({
         setLocalMessages(messages);
       }
     }
-  }, [isOpen, chatHistory, hasShownWelcome, recipeStore.meta.title]);
+  }, [actualIsOpen, chatHistory, hasShownWelcome, recipeStore.meta.title]);
 
   const handleSend = (messageText?: string) => {
     const textToSend = messageText || message;
@@ -376,17 +395,17 @@ export default function ChatBot({
       <div className="fixed bottom-24 right-4 z-50">
         <div className="relative">
           <Button
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={() => onClose && onClose()}
             className="w-12 h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-2 border-white"
             size="sm"
           >
-            {isOpen ? (
+            {actualIsOpen ? (
               <iconMap.x className="w-5 h-5" />
             ) : (
               <iconMap.messageCircle className="w-5 h-5" />
             )}
           </Button>
-          {!isOpen && (
+          {!actualIsOpen && (
             <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
               <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
             </div>
@@ -397,7 +416,7 @@ export default function ChatBot({
       {/* Chat Panel - Right Side Panel */}
       <div 
         className={`fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-96 bg-slate-900/95 backdrop-blur-md border-l border-orange-500/30 shadow-2xl transition-all duration-500 z-50 flex flex-col mobile-chat-panel ${
-          isOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
+          actualIsOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
         }`}
       >
         <CardHeader className="p-3 sm:p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
@@ -421,7 +440,7 @@ export default function ChatBot({
             variant="ghost"
             size="sm"
             className="w-8 h-8 p-0 rounded-xl glass hover:scale-110 transition-all duration-300 group"
-            onClick={() => setIsOpen(false)}
+            onClick={() => onClose && onClose()}
           >
             <iconMap.x className="w-4 h-4 text-slate-600 group-hover:text-slate-800" />
           </Button>
@@ -484,7 +503,7 @@ export default function ChatBot({
 
           {/* Input Area - Mobile Safe Above Footer */}
           <div className="border-t-2 border-orange-500/60 bg-slate-800/95 backdrop-blur-lg flex-shrink-0 mobile-chat-input">
-            <div className="p-4 pb-6">
+            <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="p-4 pb-6">
               <div className="flex items-center gap-3">
                 <input
                   type="text"
@@ -494,10 +513,14 @@ export default function ChatBot({
                   placeholder="Ask me anything..."
                   className="flex-1 bg-slate-700 border-2 border-slate-600 rounded-xl text-white placeholder:text-slate-400 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 shadow-xl"
                   disabled={sendMessageMutation.isPending}
-                  style={{ fontSize: '16px', minHeight: '50px' }}
+                  style={{ fontSize: '16px', minHeight: '50px', WebkitAppearance: 'none' }}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
                 />
                 <button
-                  onClick={() => handleSend()}
+                  type="submit"
                   disabled={!message.trim() || sendMessageMutation.isPending}
                   className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-4 py-3 min-h-[50px] min-w-[50px] flex items-center justify-center disabled:opacity-50 shadow-xl"
                 >
@@ -508,7 +531,7 @@ export default function ChatBot({
                   )}
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </CardContent>
 

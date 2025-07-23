@@ -32,15 +32,15 @@ export default function Recipe() {
 
   // Create activeRecipe object from store data for EnhancedRecipeCard
   const activeRecipe = {
-    id: recipeStore.id || 'recipe-1',
+    id: recipeStore.id || '1',
     title: recipeStore.meta.title,
-    description: recipeStore.meta.description,
-    cuisine: recipeStore.meta.cuisine,
+    description: recipeStore.meta.description || '',
+    cuisine: recipeStore.meta.cuisine || '',
     difficulty: recipeStore.meta.difficulty,
     cookTime: recipeStore.meta.cookTime,
     prepTime: 15, // Default prep time
     servings: recipeStore.servings,
-    image: recipeStore.meta.image,
+    image: recipeStore.meta.image || '',
     ingredients: recipeStore.ingredients.map(ing => ing.text || ''), // Convert to string array
     instructions: recipeStore.steps.map(step => step.description || ''), // Convert to string array
     tips: "Try garnishing with fresh herbs for extra flavor!" // Default tip
@@ -66,7 +66,15 @@ export default function Recipe() {
           animate={{ opacity: 1, x: 0 }}
           className="w-full lg:w-96"
         >
-          <ChatBot />
+          <ChatBot 
+            isOpen={showChat}
+            onClose={() => setShowChat(false)}
+            currentRecipe={activeRecipe}
+            onRecipeUpdate={(updatedRecipe) => {
+              // Force re-render when recipe updates
+              console.log('Recipe updated from ChatBot:', updatedRecipe);
+            }}
+          />
         </motion.div>
       </div>
     </PageLayout>
