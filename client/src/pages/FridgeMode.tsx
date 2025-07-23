@@ -357,7 +357,7 @@ export default function FridgeMode() {
       )}
       
       {/* Consistent footer across all modes */}
-      <GlobalFooter currentMode="fridge" />
+      <GlobalFooter currentMode="fridge2fork" />
 
       {/* Navigation overlays */}
       {showNavigation && (

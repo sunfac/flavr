@@ -3,7 +3,7 @@ import { iconMap } from "@/lib/iconMap";
 import { useLocation } from "wouter";
 
 interface GlobalFooterProps {
-  currentMode?: "shopping" | "fridge" | "chef" | "rituals" | "history";
+  currentMode?: "fridge2fork" | "chef-assist" | "cookbook";
 }
 
 export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
@@ -11,34 +11,22 @@ export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
 
   const modes = [
     {
-      id: "shopping",
-      label: "Shopping",
-      icon: iconMap.shoppingCart,
-      path: "/shopping",
-    },
-    {
-      id: "fridge", 
-      label: "Fridge",
+      id: "fridge2fork",
+      label: "Fridge2Fork",
       icon: iconMap.refrigerator,
-      path: "/fridge",
+      path: "/fridge2fork",
     },
     {
-      id: "chef",
-      label: "Chef",
+      id: "chef-assist",
+      label: "Chef Assist",
       icon: iconMap.chefHat,
-      path: "/chef",
+      path: "/chef-assist",
     },
     {
-      id: "rituals",
-      label: "Rituals",
-      icon: iconMap.calendar,
-      path: "/flavr-rituals",
-    },
-    {
-      id: "history",
-      label: "My Recipes", 
-      icon: iconMap.history,
-      path: "/my-recipes",
+      id: "cookbook",
+      label: "My Cookbook", 
+      icon: iconMap.bookOpen,
+      path: "/cookbook",
     },
   ];
 

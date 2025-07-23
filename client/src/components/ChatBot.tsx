@@ -396,10 +396,14 @@ export default function ChatBot({
 
       {/* Chat Panel - Right Side Panel */}
       <div 
-        className={`fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-96 bg-slate-900/95 backdrop-blur-md border-l border-orange-500/30 shadow-2xl transition-all duration-500 z-50 flex flex-col h-screen ${
+        className={`fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-96 bg-slate-900/95 backdrop-blur-md border-l border-orange-500/30 shadow-2xl transition-all duration-500 z-50 flex flex-col ${
           isOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
         }`}
-        style={{ height: '100vh', maxHeight: '-webkit-fill-available' }}
+        style={{ 
+          height: '100vh', 
+          maxHeight: '100vh',
+          minHeight: '-webkit-fill-available'
+        }}
       >
         <CardHeader className="p-3 sm:p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-3">
@@ -483,22 +487,23 @@ export default function ChatBot({
           )}
 
           {/* Input Area - Fixed at bottom with safe area for mobile */}
-          <div className="border-t border-slate-700/50 bg-slate-800/50 backdrop-blur-sm flex-shrink-0 safe-area-bottom">
-            <div className="p-3 sm:p-4">
-              <div className="flex items-center space-x-2">
+          <div className="border-t border-slate-700/50 bg-slate-800/95 backdrop-blur-lg flex-shrink-0 mt-auto chat-input-container sm:static sm:bg-slate-800/50">
+            <div className="p-4 pb-6 sm:pb-4">
+              <div className="flex items-center space-x-3">
                 <Input
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Ask me anything..."
-                  className="flex-1 bg-slate-700/70 border-slate-600 text-white placeholder:text-slate-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                  className="flex-1 bg-slate-700/90 border-slate-600 text-white placeholder:text-slate-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-base h-12 px-4 shadow-lg"
                   disabled={sendMessageMutation.isPending}
+                  style={{ fontSize: '16px' }} // Prevents zoom on iOS
                 />
                 <Button
                   onClick={() => handleSend()}
                   disabled={!message.trim() || sendMessageMutation.isPending}
                   size="sm"
-                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg h-12 px-4"
                 >
                   {sendMessageMutation.isPending ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

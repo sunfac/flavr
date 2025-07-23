@@ -339,7 +339,7 @@ export default function MyRecipes() {
         )}
       </main>
 
-      <GlobalFooter currentMode="history" />
+      <GlobalFooter currentMode="cookbook" />
 
       {/* Navigation Menu */}
       {showNavigation && (

@@ -107,7 +107,7 @@ export default function FlavrPlus() {
           </div>
         </main>
 
-        <GlobalFooter currentMode="chef" />
+        <GlobalFooter currentMode="chef-assist" />
         
         {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
         {showSettings && <SettingsPanel onClose={closeAllMenus} />}
@@ -225,7 +225,7 @@ export default function FlavrPlus() {
         </div>
       </main>
 
-      <GlobalFooter currentMode="chef" />
+      <GlobalFooter currentMode="chef-assist" />
       
       {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
       {showSettings && <SettingsPanel onClose={closeAllMenus} />}

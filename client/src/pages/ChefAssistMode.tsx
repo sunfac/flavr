@@ -193,7 +193,7 @@ export default function ChefAssistMode() {
         )}
       </main>
 
-      <GlobalFooter currentMode="chef" />
+      <GlobalFooter currentMode="chef-assist" />
 
       {showNavigation && (
         <GlobalNavigation 

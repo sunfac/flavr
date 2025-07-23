@@ -292,7 +292,7 @@ export default function ShoppingMode() {
           />
         </main>
 
-        <GlobalFooter currentMode="shopping" />
+        <GlobalFooter currentMode="fridge2fork" />
         
         {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
         {showSettings && <SettingsPanel onClose={closeAllMenus} />}
@@ -336,7 +336,7 @@ export default function ShoppingMode() {
           />
         </main>
 
-        <GlobalFooter currentMode="shopping" />
+        <GlobalFooter currentMode="fridge2fork" />
         
         {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
         {showSettings && <SettingsPanel onClose={closeAllMenus} />}
@@ -393,7 +393,7 @@ export default function ShoppingMode() {
           />
         </main>
 
-        <GlobalFooter currentMode="shopping" />
+        <GlobalFooter currentMode="fridge2fork" />
         
         {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
         {showSettings && <SettingsPanel onClose={closeAllMenus} />}
