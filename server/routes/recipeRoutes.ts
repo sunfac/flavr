@@ -173,20 +173,68 @@ Format as JSON array.`;
   // Chef Assist inspiration
   app.post("/api/chef-assist/inspire", async (req, res) => {
     try {
-      const prompt = `Generate ONE unique and creative recipe idea that would excite a home cook. 
-Make it different from common suggestions like pasta, stir-fry, tacos, curry, etc.
-Focus on interesting flavor combinations or lesser-known dishes.
-Keep it to 4-6 words maximum.
-Examples: "Moroccan lamb with apricots", "Korean corn cheese skillet", "Brazilian black bean stew"`;
+      // Add randomization to prevent repetitive suggestions
+      const randomSeed = Math.floor(Math.random() * 1000);
+      const cuisineStyles = ["Mediterranean", "Asian fusion", "Middle Eastern", "Nordic", "Latin American", "African", "Indian", "Thai", "Japanese", "French", "Italian"];
+      const cookingMethods = ["slow-roasted", "pan-seared", "grilled", "braised", "confit", "smoked", "pickled", "fermented"];
+      const proteins = ["duck", "lamb", "seafood", "mushroom", "lentil", "halloumi", "tofu", "venison"];
+      
+      const randomCuisine = cuisineStyles[Math.floor(Math.random() * cuisineStyles.length)];
+      const randomMethod = cookingMethods[Math.floor(Math.random() * cookingMethods.length)];
+      const randomProtein = proteins[Math.floor(Math.random() * proteins.length)];
+
+      const prompt = `Create ONE unique recipe idea inspired by high-end restaurant cooking. 
+
+STRICT RULES:
+- NO pineapple dishes whatsoever
+- NO basic pasta, curry, or stir-fry
+- NO repetitive ingredients from previous suggestions
+- Focus on sophisticated restaurant techniques
+
+Creative elements to incorporate:
+- Cuisine: ${randomCuisine}
+- Technique: ${randomMethod}  
+- Main ingredient: ${randomProtein}
+- Variation seed: ${randomSeed}
+
+Generate something a Michelin-starred chef would create, using:
+- Uncommon ingredient pairings
+- Advanced cooking methods
+- International fusion concepts
+- Premium ingredients
+
+Keep to 4-8 words maximum.
+
+Style examples: "Miso-glazed aubergine with black garlic", "Harissa lamb with pomegranate molasses", "Confit duck leg with cherry gastrique"`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.95,
-        max_tokens: 20
+        messages: [
+          { role: "system", content: "You are a Michelin-starred chef creating sophisticated restaurant dishes. NEVER suggest pineapple dishes." },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.98,
+        max_tokens: 25
       });
 
-      const suggestion = completion.choices[0].message.content?.trim() || "Surprise fusion dinner";
+      let suggestion = completion.choices[0].message.content?.trim().replace(/"/g, '') || "Surprise fusion dinner";
+      
+      // Final safety check - if pineapple appears, use a fallback
+      if (suggestion.toLowerCase().includes('pineapple')) {
+        const fallbacks = [
+          "Miso-glazed black cod with yuzu",
+          "Harissa lamb with pomegranate molasses", 
+          "Truffle mushroom risotto with aged parmesan",
+          "Confit duck with cherry gastrique",
+          "Seared scallops with cauliflower purée",
+          "Za'atar crusted salmon with tahini",
+          "Korean bulgogi beef lettuce wraps",
+          "Moroccan tagine with preserved lemons",
+          "Thai basil duck red curry",
+          "Peruvian ceviche with tiger's milk"
+        ];
+        suggestion = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+      }
       
       res.json({ suggestion });
     } catch (error: any) {
