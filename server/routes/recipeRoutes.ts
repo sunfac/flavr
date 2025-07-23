@@ -546,37 +546,26 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
       try {
         let content = completion.choices[0].message.content || "{}";
         
-        // Clean up any potential markdown, extra text, and trailing commas
+        // Remove any markdown code blocks
         content = content.replace(/```json\n?/g, '').replace(/\n?```/g, '').trim();
         
-        // Fix common JSON errors: trailing commas in arrays and objects
-        content = content.replace(/,(\s*[}\]])/g, '$1');
-        // Fix trailing commas specifically after object entries in arrays
-        content = content.replace(/},(\s*\])/g, '}$1');
+        // Remove any leading/trailing text that's not JSON
+        const jsonStart = content.indexOf('{');
+        const jsonEnd = content.lastIndexOf('}');
+        if (jsonStart !== -1 && jsonEnd !== -1) {
+          content = content.substring(jsonStart, jsonEnd + 1);
+        }
+        
+        // Fix common JSON errors
+        content = content.replace(/,(\s*[}\]])/g, '$1'); // trailing commas before closing brackets
+        content = content.replace(/},(\s*\])/g, '}$1'); // trailing commas in object arrays
+        content = content.replace(/,(\s*$)/g, ''); // trailing commas at end of string
         
         recipe = JSON.parse(content);
       } catch (parseError) {
         console.error('Fridge2Fork JSON parsing error:', parseError);
         console.error('Raw content:', completion.choices[0].message.content);
-        
-        // Create fallback recipe structure
-        recipe = {
-          title: recipeIdea.title || "Delicious Recipe",
-          description: recipeIdea.description || "A tasty dish using your ingredients",
-          cuisine: recipeIdea.cuisine || "International",
-          difficulty: recipeIdea.difficulty || "easy",
-          prepTime: 15,
-          cookTime: 25,
-          servings: servings,
-          ingredients: ingredients.slice(0, 5).map(ing => ({ name: ing, amount: "to taste" })),
-          instructions: [
-            { step: 1, instruction: "Prepare all ingredients by washing and chopping as needed." },
-            { step: 2, instruction: "Cook according to your preferred method until done." },
-            { step: 3, instruction: "Season to taste and serve hot." }
-          ],
-          tips: ["Adjust seasoning to your preference", "Use fresh ingredients when possible"],
-          nutritionalHighlights: ["Contains fresh ingredients", "Balanced nutrition"]
-        };
+        throw new Error('Failed to parse AI recipe response. Please try again.');
       }
       
       // Generate image for the recipe
