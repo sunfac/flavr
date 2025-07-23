@@ -472,13 +472,14 @@ export default function ChatBot({
       {/* Chat Panel - Right Side Panel with viewport lock */}
       <div 
         className={`fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-96 bg-slate-900/95 backdrop-blur-md border-l border-orange-500/30 shadow-2xl transition-all duration-500 flex flex-col ${
-          actualIsOpen ? "translate-x-0 opacity-100 z-[1000]" : "translate-x-full opacity-0 z-[-1]"
+          actualIsOpen ? "translate-x-0 opacity-100 z-[99999]" : "translate-x-full opacity-0 z-[-1]"
         }`}
         style={{
           height: '100vh',
           height: '100dvh',
           maxHeight: '100vh',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          paddingBottom: '80px' // Account for footer height
         }}
       >
         <CardHeader className="p-3 sm:p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
@@ -563,14 +564,15 @@ export default function ChatBot({
             </div>
           )}
 
-          {/* Input Area - Forced visibility at bottom */}
+          {/* Input Area - Positioned above footer */}
           <div 
             className="border-t-2 border-orange-500/60 bg-slate-900 flex-shrink-0"
             style={{
-              position: 'sticky',
-              bottom: 0,
-              zIndex: 999,
-              paddingBottom: 'max(env(safe-area-inset-bottom), 16px)'
+              position: 'relative',
+              zIndex: 99998,
+              paddingBottom: 'max(env(safe-area-inset-bottom), 85px)', // Add space for footer
+              backgroundColor: 'rgb(15, 23, 42)',
+              marginBottom: '-85px' // Pull content up to account for footer space
             }}
           >
             <div className="p-4">
