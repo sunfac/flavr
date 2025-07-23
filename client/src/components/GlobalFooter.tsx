@@ -31,7 +31,7 @@ export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
   ];
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/90 backdrop-blur-xl border-t border-slate-700">
+    <footer className="global-footer fixed bottom-0 left-0 right-0 z-40 bg-slate-900/90 backdrop-blur-xl border-t border-slate-700">
       <div className="px-4 py-3">
         <div className="flex justify-around items-center max-w-md mx-auto">
           {modes.map((mode) => {

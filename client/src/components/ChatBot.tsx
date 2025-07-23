@@ -482,9 +482,9 @@ export default function ChatBot({
             </div>
           )}
 
-          {/* Input Area - Bulletproof mobile */}
-          <div className="border-t-2 border-orange-500/50 bg-slate-800 flex-shrink-0 mobile-chat-input">
-            <div className="p-4 pb-8 sm:pb-4">
+          {/* Input Area - Mobile Safe Above Footer */}
+          <div className="border-t-2 border-orange-500/60 bg-slate-800/95 backdrop-blur-lg flex-shrink-0 mobile-chat-input">
+            <div className="p-4 pb-6">
               <div className="flex items-center gap-3">
                 <input
                   type="text"
@@ -492,19 +492,19 @@ export default function ChatBot({
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Ask me anything..."
-                  className="flex-1 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder:text-slate-400 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="flex-1 bg-slate-700 border-2 border-slate-600 rounded-xl text-white placeholder:text-slate-400 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 shadow-xl"
                   disabled={sendMessageMutation.isPending}
-                  style={{ fontSize: '16px', minHeight: '48px' }}
+                  style={{ fontSize: '16px', minHeight: '50px' }}
                 />
                 <button
                   onClick={() => handleSend()}
                   disabled={!message.trim() || sendMessageMutation.isPending}
-                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg px-4 py-3 min-h-[48px] min-w-[48px] flex items-center justify-center disabled:opacity-50"
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-4 py-3 min-h-[50px] min-w-[50px] flex items-center justify-center disabled:opacity-50 shadow-xl"
                 >
                   {sendMessageMutation.isPending ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
-                    <iconMap.send className="w-4 h-4" />
+                    <iconMap.send className="w-5 h-5" />
                   )}
                 </button>
               </div>

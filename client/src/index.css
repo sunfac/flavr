@@ -518,18 +518,18 @@
     padding-bottom: env(safe-area-inset-bottom, 1rem);
   }
   
-  /* Mobile chat fixes - Force proper layout on mobile */
+  /* Mobile chat fixes - Ensure input is above footer */
   @media (max-width: 640px) {
     .mobile-chat-panel {
-      height: 100vh !important;
-      height: 100dvh !important;
+      height: calc(100vh - 80px) !important; /* Account for footer height */
+      height: calc(100dvh - 80px) !important;
       display: flex !important;
       flex-direction: column !important;
       position: fixed !important;
       top: 0 !important;
       left: 0 !important;
       right: 0 !important;
-      bottom: 0 !important;
+      bottom: 80px !important; /* Leave space for footer */
     }
     
     .mobile-chat-content {
@@ -544,27 +544,40 @@
       flex: 1 !important;
       overflow-y: auto !important;
       min-height: 200px !important;
+      padding-bottom: 20px !important;
     }
     
     .mobile-chat-input {
       flex-shrink: 0 !important;
-      border-top: 2px solid rgba(251, 146, 60, 0.5) !important;
+      border-top: 2px solid rgba(251, 146, 60, 0.8) !important;
       background: rgba(30, 41, 59, 0.98) !important;
       position: relative !important;
-      z-index: 10 !important;
+      z-index: 100 !important;
+      margin-bottom: 0 !important;
     }
     
-    /* Force input visibility */
+    /* Force input visibility with stronger styles */
     .mobile-chat-input input {
-      background: rgba(51, 65, 85, 0.9) !important;
-      border: 1px solid rgba(251, 146, 60, 0.5) !important;
+      background: rgba(51, 65, 85, 0.95) !important;
+      border: 2px solid rgba(251, 146, 60, 0.7) !important;
       color: white !important;
-      min-height: 48px !important;
+      min-height: 50px !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
     }
     
     .mobile-chat-input button {
-      min-height: 48px !important;
-      min-width: 48px !important;
+      min-height: 50px !important;
+      min-width: 50px !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    /* Ensure footer doesn't overlap */
+    .global-footer {
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      z-index: 50 !important;
     }
   }
   
