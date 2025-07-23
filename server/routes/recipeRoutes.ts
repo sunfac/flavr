@@ -185,47 +185,82 @@ Format as JSON array.`;
   // Chef Assist inspiration
   app.post("/api/chef-assist/inspire", async (req, res) => {
     try {
-      // Random seed from 1-10 determines the single inspiration approach
-      const randomSeed = Math.floor(Math.random() * 10) + 1;
+      // Two random variables for more diversity
+      const complexityLevel = Math.floor(Math.random() * 10) + 1; // 1-10 for complexity approaches
+      const simpleStyle = Math.floor(Math.random() * 10) + 1; // 1-10 for simple styles
       
-      let inspirationPrompt = "";
-      
-      switch (randomSeed) {
-        case 1: // Regional to country
-          inspirationPrompt = "Focus on authentic regional specialties from a specific country or region. Think local ingredients, traditional techniques, and dishes that represent true regional heritage.";
+      // Complex cooking approaches (1-10)
+      let complexityPrompt = "";
+      switch (complexityLevel) {
+        case 1: // Regional authenticity
+          complexityPrompt = "Focus on authentic regional specialties with traditional techniques.";
           break;
-        case 2: // Trending ingredients
-          const trendingIngredients = ["gochujang", "miso paste", "tahini", "harissa", "yuzu", "sumac", "za'atar", "black garlic", "fermented chili paste", "pomegranate molasses"];
-          const selectedTrending = trendingIngredients[Math.floor(Math.random() * trendingIngredients.length)];
-          inspirationPrompt = `Incorporate the trending ingredient "${selectedTrending}" into an authentic traditional recipe from any cuisine.`;
+        case 2: // Advanced techniques  
+          complexityPrompt = "Use sophisticated cooking techniques like confit or professional plating.";
           break;
-        case 3: // Clever techniques
-          const cleverTechniques = ["one-pot cooking", "sheet pan meals", "air fryer innovation", "no-knead techniques", "quick-pickle methods", "compound seasonings"];
-          const selectedTechnique = cleverTechniques[Math.floor(Math.random() * cleverTechniques.length)];
-          inspirationPrompt = `Use the clever technique of "${selectedTechnique}" to create an innovative version of a classic dish.`;
+        case 3: // Fermentation & preservation
+          complexityPrompt = "Incorporate fermented ingredients or preserved components for deep flavors.";
           break;
-        case 4: // Cheap and cheerful
-          inspirationPrompt = "Create a budget-friendly, soul-warming dish using affordable ingredients that delivers maximum flavor and satisfaction without breaking the bank.";
+        case 4: // Texture layering
+          complexityPrompt = "Focus on multiple textural contrasts in one dish.";
           break;
-        case 5: // Classic and traditional
-          inspirationPrompt = "Focus on time-honored, traditional recipes that have been passed down through generations. Emphasize authentic preparation methods and classic flavor profiles.";
+        case 5: // Umami maximization  
+          complexityPrompt = "Build intense umami through browning, reducing, or combining savory elements.";
           break;
-        case 6: // Super authentic
-          inspirationPrompt = "Create the most authentic version possible of a traditional dish, using original ingredients, traditional techniques, and staying true to cultural heritage.";
+        case 6: // Seasonal showcase
+          complexityPrompt = "Highlight peak seasonal ingredients with enhancing techniques.";
           break;
-        case 7: // Seasonal and fresh
-          inspirationPrompt = "Highlight seasonal ingredients at their peak freshness, creating dishes that celebrate the current season's best produce and natural flavors.";
+        case 7: // Restaurant techniques
+          complexityPrompt = "Apply restaurant-quality techniques like proper sauce-making.";
           break;
-        case 8: // Comfort food reimagined
-          inspirationPrompt = "Take a beloved comfort food classic and elevate it with better techniques or quality ingredients while maintaining its soul-warming essence.";
+        case 8: // International mastery
+          complexityPrompt = "Master authentic international techniques within one cuisine tradition.";
           break;
-        case 9: // Quick and easy
-          inspirationPrompt = "Create a delicious, satisfying meal that can be prepared in 30 minutes or less with minimal prep work and simple cooking techniques.";
+        case 9: // Comfort food elevation
+          complexityPrompt = "Elevate classic comfort foods with better ingredients and refined methods.";
           break;
-        case 10: // Restaurant-quality at home
-          inspirationPrompt = "Develop a restaurant-quality dish that home cooks can achieve with proper technique and attention to detail, bringing fine dining to the home kitchen.";
+        case 10: // Visual artistry
+          complexityPrompt = "Create visually stunning presentations with professional plating.";
           break;
       }
+
+      // Simple cooking styles (1-10)
+      let simplePrompt = "";
+      switch (simpleStyle) {
+        case 1: // One-pot simplicity
+          simplePrompt = "Create everything in one pot or pan for easy cooking.";
+          break;
+        case 2: // Fresh and raw
+          simplePrompt = "Focus on fresh, minimally cooked ingredients.";
+          break;
+        case 3: // Quick weeknight
+          simplePrompt = "Design for 30 minutes or less total time.";
+          break;
+        case 4: // Pantry staples
+          simplePrompt = "Use common pantry ingredients most people have.";
+          break;
+        case 5: // Grilled simplicity
+          simplePrompt = "Center around simple grilling or roasting techniques.";
+          break;
+        case 6: // Fresh herb focus
+          simplePrompt = "Let fresh herbs be the star with simple preparation.";
+          break;
+        case 7: // Rustic homestyle
+          simplePrompt = "Create rustic, homestyle dishes focused on comfort.";
+          break;
+        case 8: // Minimal ingredients
+          simplePrompt = "Use only 5-7 high-quality ingredients for maximum impact.";
+          break;
+        case 9: // No-cook assembly
+          simplePrompt = "Focus on assembly dishes requiring no actual cooking.";
+          break;
+        case 10: // Simple but elegant
+          simplePrompt = "Create elegantly simple dishes using basic techniques.";
+          break;
+      }
+
+      // Combine both approaches
+      const inspirationPrompt = `${complexityPrompt} ${simplePrompt}`;
       
       const prompt = `${inspirationPrompt}
 
@@ -258,7 +293,7 @@ CREATIVE GUIDELINES:
 DO NOT mix cuisines or create fusion dishes. Stay authentic to ONE cuisine tradition.
 
 Return only the recipe name in 4-8 words. Be wildly creative and diverse.
-Random approach #${randomSeed}`;
+Complexity #${complexityLevel} + Style #${simpleStyle}`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -303,9 +338,10 @@ Random approach #${randomSeed}`;
 IMPORTANT: Always create COMPLETE DISHES that include:
 - Main component (protein, vegetable, or grain-based centerpiece)
 - At least 1-2 side dishes or accompaniments that complement the main
-- Proper sauces, dressings, or condiments
-- Garnishes and finishing touches
+- Proper sauces, dressings, or condiments that enhance flavors
+- Garnishes and finishing touches for visual appeal
 - Complete balanced meal, not just a single element
+- Focus on MAXIMUM FLAVOR through proper seasoning, technique, and ingredient combinations
 
 User request: ${userPrompt}
 Servings: ${servings}

@@ -52,7 +52,7 @@ export default function IngredientPanel({
                 <span className="text-orange-200 font-medium text-xs">Ask Zest to customize!</span>
               </div>
               <p className="text-orange-100/80 text-xs leading-relaxed">
-                Chat to modify servings, swap ingredients, or change cooking methods.
+                Try: "Make it vegan", "Add more spice", "Double the servings", "Simplify the method", "Add a side dish", "Make it gluten-free", "Reduce cooking time", "Add herbs", "Make it healthier"
               </p>
             </div>
           </motion.div>
