@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ChefHat, Clock, Utensils } from "lucide-react";
+import { ChefHat } from "lucide-react";
 
 const culinaryFacts = [
   "The word 'recipe' comes from the Latin 'recipere', meaning 'to take'",
@@ -72,18 +72,9 @@ export default function LoadingPage({
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center p-4 sm:p-6">
       {/* Main Loading Animation */}
       <div className="text-center mb-8 sm:mb-12">
-        <div className="relative mb-6 sm:mb-8">
+        <div className="mb-6 sm:mb-8">
           <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-2xl">
             <ChefHat className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
-          </div>
-          
-          {/* Static cooking icons */}
-          <div className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4">
-            <Utensils className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400" />
-          </div>
-          
-          <div className="absolute -bottom-3 -left-3 sm:-bottom-4 sm:-left-4">
-            <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-red-400" />
           </div>
         </div>
 
