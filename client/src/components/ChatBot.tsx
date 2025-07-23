@@ -304,6 +304,20 @@ export default function ChatBot({
     }
   }, [localMessages.length]); // Only depend on message count, not the entire array
 
+  // Lock body scroll when chat opens on mobile
+  useEffect(() => {
+    if (actualIsOpen) {
+      document.body.classList.add('chat-open');
+    } else {
+      document.body.classList.remove('chat-open');
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove('chat-open');
+    };
+  }, [actualIsOpen]);
+
   // Initialize with welcome message and history
   useEffect(() => {
     if (actualIsOpen && chatHistory) {
@@ -423,11 +437,17 @@ export default function ChatBot({
         </div>
       )}
 
-      {/* Chat Panel - Right Side Panel */}
+      {/* Chat Panel - Right Side Panel with viewport lock */}
       <div 
         className={`fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-96 bg-slate-900/95 backdrop-blur-md border-l border-orange-500/30 shadow-2xl transition-all duration-500 z-50 flex flex-col mobile-chat-panel ${
           actualIsOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
         }`}
+        style={{
+          height: actualIsOpen ? '100vh' : 'auto',
+          position: 'fixed',
+          top: 0,
+          bottom: 0
+        }}
       >
         <CardHeader className="p-3 sm:p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-3">
@@ -456,11 +476,11 @@ export default function ChatBot({
           </Button>
         </CardHeader>
         
-        <CardContent className="flex-1 overflow-hidden p-0 flex flex-col min-h-0 mobile-chat-content">
-          {/* Messages Area */}
+        <CardContent className="flex-1 overflow-hidden p-0 flex flex-col min-h-0 mobile-chat-content relative">
+          {/* Messages Area - Leave space for fixed input */}
           <div 
             ref={scrollAreaRef}
-            className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 min-h-0 mobile-chat-messages"
+            className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 min-h-0 mobile-chat-messages pb-24"
           >
             {localMessages.map((msg, index) => (
               <div key={msg.id} className={`mb-3 ${msg.isUser ? "text-right" : "text-left"}`}>
@@ -511,9 +531,9 @@ export default function ChatBot({
             </div>
           )}
 
-          {/* Input Area - Mobile Safe Above Footer */}
-          <div className="border-t-2 border-orange-500/60 bg-slate-800/95 backdrop-blur-lg flex-shrink-0 mobile-chat-input">
-            <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="p-4 pb-6">
+          {/* Input Area - Fixed at bottom with proper spacing */}
+          <div className="absolute bottom-0 left-0 right-0 border-t-2 border-orange-500/60 bg-slate-900/95 backdrop-blur-lg flex-shrink-0 mobile-chat-input">
+            <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="p-4">
               <div className="flex items-center gap-3">
                 <input
                   type="text"
