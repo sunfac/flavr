@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { PageLayout } from "@/components/PageLayout";
 import { EnhancedRecipeCard } from "@/components/recipe/EnhancedRecipeCard";
-import { ChatBot } from "@/components/chat/ChatBot";
+import ChatBot from "@/components/ChatBot";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
@@ -11,7 +11,7 @@ import { useRecipeStore } from "@/stores/recipeStore";
 export default function Recipe() {
   const [location, navigate] = useLocation();
   const [showChat, setShowChat] = useState(true);
-  const setCurrentRecipe = useRecipeStore(state => state.setCurrentRecipe);
+  const { activeRecipe, setActiveRecipe } = useRecipeStore();
   
   // Get recipe from navigation state
   const locationState = (location as any).state || {};
@@ -20,12 +20,12 @@ export default function Recipe() {
 
   useEffect(() => {
     if (recipe) {
-      setCurrentRecipe(recipe);
+      setActiveRecipe(recipe);
     } else {
       // No recipe provided, redirect to home
       navigate("/app");
     }
-  }, [recipe, setCurrentRecipe, navigate]);
+  }, [recipe, setActiveRecipe, navigate]);
 
   if (!recipe) {
     return null;
@@ -42,7 +42,6 @@ export default function Recipe() {
         >
           <EnhancedRecipeCard 
             recipe={recipe}
-            showFullRecipe={true}
           />
         </motion.div>
 
