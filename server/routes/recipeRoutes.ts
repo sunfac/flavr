@@ -188,31 +188,39 @@ Format as JSON array.`;
       
       const selectedStyle = inspirationStyles[Math.floor(Math.random() * inspirationStyles.length)];
       
-      const prompt = `Create an innovative recipe idea using this approach: ${selectedStyle}
+      const prompt = `Create a completely unique and innovative recipe idea using this approach: ${selectedStyle}
 
-Draw inspiration from popular cooking styles such as:
-• Recreating beloved restaurant dishes (like famous chain foods, high-end restaurant signatures)
-• Chef-inspired techniques (celebrity chef styles and signature methods)
-• Comfort food with elegant twists (luxurious versions of casual favorites)
-• Cultural fusion concepts (blending traditional cuisines with modern techniques)
-• Celebration and special occasion foods (impressive dishes for entertaining)
-• Quick but sophisticated meals (restaurant-quality food made accessible)
+IGNORE any previous suggestions you may have given. Generate something COMPLETELY DIFFERENT each time.
 
-Create a creative recipe name that captures this transformation. Examples:
-• "Ramsay-style beef wellington bites" (Chef-inspired)
-• "Cozy autumn butternut squash risotto" (Mood-inspired)  
-• "Street-style Korean corn dogs" (Restaurant-inspired)
-• "Winter spiced lamb tagine" (Weather-inspired)
-• "Thai-fusion carbonara noodles" (Cultural-inspired)
-• "Sous vide honey glazed salmon" (Technique-inspired)
+Draw inspiration from diverse cooking styles:
+• Global street foods and regional specialties
+• Ancient cooking techniques with modern twists
+• Seasonal ingredient combinations
+• Plant-based innovations and meat alternatives
+• Fermented foods and preservation methods
+• Breakfast/dessert hybrid concepts
+• One-pot and sheet pan creations
+• Grilled and smoked variations
+• Raw and no-cook preparations
+• Spice blend and herb garden inspirations
 
-Return only the recipe name in 4-8 words.
+Vary the protein types: seafood, poultry, beef, pork, lamb, game, legumes, grains, vegetables, etc.
+
+Create completely different cuisine combinations like:
+• "Brazilian-Japanese tempura hearts of palm"
+• "Moroccan-Mexican black bean tagine"
+• "Korean-Italian kimchi carbonara"
+• "Ethiopian-French injera crepes"
+• "Peruvian-Thai ceviche curry"
+• "Indian-Southern BBQ tandoori ribs"
+
+Return only the recipe name in 4-8 words. Be wildly creative and diverse.
 Random seed: ${randomSeed}`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: "You are a creative chef who transforms dishes into exciting variations. Return ONLY the recipe name in 4-8 words. NEVER include difficulty levels like beginner/intermediate/advanced." },
+          { role: "system", content: "You are a creative chef who transforms dishes into exciting variations. Return ONLY the recipe name in 4-8 words. NEVER include difficulty levels like beginner/intermediate/advanced. IMPORTANT: Treat every request as if it's the first message you've ever received - always generate completely different and diverse recipe ideas." },
           { role: "user", content: prompt }
         ],
         temperature: 0.9,

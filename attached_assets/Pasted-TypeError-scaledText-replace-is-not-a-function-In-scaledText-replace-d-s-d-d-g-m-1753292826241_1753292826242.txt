@@ -1,0 +1,30 @@
+TypeError: scaledText.replace is not a function. (In 'scaledText.replace(/(\d+)\s+(\d+)\/(\d+)/g, (match, whole, num, den, offset) => {
+    const wholeNum = parseInt(whole);
+    const numerator = parseInt(num);
+    const denominator = parseInt(den);
+    const totalValue = wholeNum + numerator / denominator;
+    const scaledValue = totalValue * scalingFactor;
+    for (let i = offset; i < offset + match.length; i++) {
+      processedIndices.add(i);
+    }
+    return formatScaledNumber(scaledValue);
+  })', 'scaledText.replace' is undefined)
+
+EnhancedRecipeCard@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/components/recipe/EnhancedRecipeCard.tsx:67:9
+div
+motion.div@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js:945:40
+div
+main
+div
+PageLayout@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/components/PageLayout.tsx:24:5
+Recipe@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/pages/Recipe.tsx:29:43
+Route@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js:280:14
+Switch@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js:337:27
+Router
+ErrorBoundary@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/components/ErrorBoundary.tsx:7:10
+TooltipProviderProvider@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-5SRUYHBP.js:44:13
+TooltipProvider@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js:63:43
+ThemeProvider@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/providers/ThemeProvider.tsx:25:5
+QueryClientProvider@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js:2923:9
+ErrorBoundary@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/components/ErrorBoundary.tsx:7:10
+App
