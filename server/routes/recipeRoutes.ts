@@ -138,10 +138,11 @@ ${dietaryRestrictions.length > 0 ? `- Dietary restrictions: ${dietaryRestriction
 - Ingredient flexibility: You can add common pantry staples (oil, salt, pepper, basic spices, garlic, onions)
 
 Create 3 DIVERSE recipe suggestions that:
-1. Use the available ingredients as primary components
-2. Are achievable within the time constraint
-3. Represent different cuisines or cooking styles
-4. Are suitable for UK home cooking
+1. Use SOME of the available ingredients as primary components (NOT necessarily all)
+2. Focus on ingredients that work harmoniously together within each cuisine
+3. Add common pantry items (spices, herbs, oils, aromatics) to create delicious flavors
+4. Prioritize culinary logic over using every single ingredient
+5. Are achievable within the time constraint and suitable for UK home cooking
 
 For each recipe, provide:
 - Title
@@ -507,10 +508,11 @@ CONSTRAINTS:
 ${dietaryRestrictions.length > 0 ? `- Dietary restrictions: ${dietaryRestrictions.join(", ")}` : ""}
 
 Create a COMPLETE recipe that:
-1. Uses the available ingredients as primary components
-2. Stays true to the recipe concept and cuisine
-3. Is achievable within the constraints
-4. Includes exact measurements and clear instructions
+1. Uses appropriate ingredients from the available list that work well with the chosen cuisine
+2. Adds suitable pantry staples, spices, and aromatics for authentic flavor
+3. Focuses on culinary harmony rather than forcing all ingredients into the dish
+4. Stays true to the recipe concept and cuisine
+5. Is achievable within the constraints with exact measurements and clear instructions
 
 Format as JSON with structure:
 {
