@@ -89,7 +89,7 @@ export function registerRecipeRoutes(app: Express) {
         return res.status(400).json({ error: "No image file provided" });
       }
 
-      const ingredients = await processFridgeImage(req.file.buffer);
+      const ingredients = await processFridgeImage(req.file.buffer, 'Detect ingredients in this image');
       
       res.json({ ingredients });
     } catch (error: any) {
@@ -541,14 +541,19 @@ Format as JSON with structure:
         recipe.imageUrl = imageUrl;
       }
 
-      // Log the interaction
-      await logGPTInteraction(
-        req.session?.userId || null,
-        "generate-full-recipe",
-        systemPrompt,
-        recipe,
-        "gpt-4"
-      );
+      // Log the interaction using simplified logging
+      await logSimpleGPTInteraction({
+        endpoint: "generate-full-recipe",
+        prompt: systemPrompt,
+        response: JSON.stringify(recipe),
+        model: "gpt-3.5-turbo",
+        duration: 0,
+        inputTokens: Math.ceil(systemPrompt.length / 4),
+        outputTokens: Math.ceil(JSON.stringify(recipe).length / 4),
+        cost: 0.001,
+        success: true,
+        userId: req.session?.userId || undefined
+      });
 
       res.json({ recipe });
     } catch (error: any) {
@@ -593,7 +598,7 @@ Format as JSON with structure:
             "safeway": "Emphasize fresh, quality ingredients available at Safeway with focus on their produce and deli sections.",
             "target": "Include Good & Gather and Market Pantry products along with accessible, everyday ingredients from Target's grocery section."
           };
-          return prompts[market] || "";
+          return prompts[market as keyof typeof prompts] || "";
         };
         
         supermarketContext = `\n\nSUPERMARKET CONTEXT: ${getSupermarketPromptText(supermarket)}`;
@@ -992,7 +997,7 @@ Return JSON with this exact structure:
             "safeway": "Focus on fresh ingredients from Safeway's produce and deli sections. Include Signature SELECT options.",
             "target": "Incorporate Good & Gather and Market Pantry products. Focus on accessible, everyday ingredients."
           };
-          return prompts[market] || "";
+          return prompts[market as keyof typeof prompts] || "";
         };
         
         supermarketInstructions = `\n\nSHOPPING GUIDANCE: ${getSupermarketPromptText(supermarket)}`;
