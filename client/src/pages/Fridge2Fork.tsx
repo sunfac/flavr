@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
-import { Camera, Upload, Loader2, Refrigerator, Plus, X } from "lucide-react";
+import { Camera, Upload, Loader2, Refrigerator, Plus, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -133,145 +133,154 @@ export default function Fridge2Fork() {
 
   return (
     <PageLayout>
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Original quiz-style layout */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          className="w-full"
         >
-          <div className="inline-flex p-3 bg-green-500/10 rounded-full mb-4">
-            <Refrigerator className="w-8 h-8 text-green-500" />
-          </div>
-          <h1 className="text-3xl font-bold mb-2">Fridge2Fork</h1>
-          <p className="text-muted-foreground">
-            Turn your ingredients into delicious recipes instantly
-          </p>
-        </motion.div>
+          <Card className="bg-slate-900/50 border-slate-700">
+            <CardContent className="p-8">
+              {/* Question header matching original fridge mode style */}
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-white mb-2">What's in your fridge?</h2>
+                <p className="text-lg text-slate-400">Add ingredients you want to use</p>
+              </div>
 
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Add Your Ingredients</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Photo Upload Section */}
-            <div className="flex gap-4">
-              <Button
-                variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isProcessing}
-                className="flex-1"
-              >
-                <Camera className="w-4 h-4 mr-2" />
-                Take Photo
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isProcessing}
-                className="flex-1"
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                Upload Photo
-              </Button>
-            </div>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-
-            {/* Image Preview */}
-            {imagePreview && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="relative rounded-lg overflow-hidden"
-              >
-                <img 
-                  src={imagePreview} 
-                  alt="Ingredient photo" 
-                  className="w-full h-48 object-cover"
-                />
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                  <Loader2 className="w-8 h-8 text-white animate-spin" />
-                  <span className="text-white ml-2">Analyzing ingredients...</span>
+              {/* Ingredient input section - original quiz style */}
+              <div className="space-y-6">
+                {/* Photo upload buttons matching original style */}
+                <div className="flex gap-3 justify-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isProcessing}
+                    className="border-orange-400 text-orange-400 hover:bg-orange-400/10"
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    Take Photo
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isProcessing}
+                    className="border-orange-400 text-orange-400 hover:bg-orange-400/10"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload Photo
+                  </Button>
                 </div>
-              </motion.div>
-            )}
 
-            {/* Manual Input */}
-            <div className="flex gap-2">
-              <Input
-                placeholder="Add ingredient manually..."
-                value={currentIngredient}
-                onChange={(e) => setCurrentIngredient(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && addIngredient()}
-              />
-              <Button onClick={addIngredient} size="icon">
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
 
-            {/* Ingredient List */}
-            <AnimatePresence>
-              {ingredients.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex flex-wrap gap-2"
-                >
-                  {ingredients.map((ingredient, index) => (
+                {/* Image Preview */}
+                {imagePreview && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="relative rounded-xl overflow-hidden max-w-md mx-auto"
+                  >
+                    <img 
+                      src={imagePreview} 
+                      alt="Ingredient photo" 
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <Loader2 className="w-8 h-8 text-white animate-spin" />
+                      <span className="text-white ml-2 font-medium">Analyzing ingredients...</span>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Manual ingredient input - matching original style */}
+                <div className="flex gap-2 max-w-2xl mx-auto">
+                  <Input
+                    placeholder="e.g., eggs, spinach, tomatoes, chicken..."
+                    value={currentIngredient}
+                    onChange={(e) => setCurrentIngredient(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && addIngredient()}
+                    className="text-lg bg-slate-800/50 border-slate-600 text-white focus:border-orange-400 rounded-xl placeholder:text-slate-500"
+                  />
+                  <Button 
+                    onClick={addIngredient} 
+                    size="icon"
+                    className="bg-orange-500 hover:bg-orange-600 rounded-xl"
+                  >
+                    <Plus className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                {/* Ingredient tags - original style */}
+                <AnimatePresence>
+                  {ingredients.length > 0 && (
                     <motion.div
-                      key={ingredient}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex flex-wrap gap-2 justify-center max-w-2xl mx-auto"
                     >
-                      <Badge variant="secondary" className="pl-3 pr-1 py-1.5">
-                        {ingredient}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="ml-1 h-auto p-1"
-                          onClick={() => removeIngredient(index)}
+                      {ingredients.map((ingredient, index) => (
+                        <motion.div
+                          key={ingredient}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
                         >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </Badge>
+                          <Badge 
+                            variant="secondary" 
+                            className="pl-3 pr-1 py-2 bg-orange-500/20 border-orange-400/50 text-orange-200"
+                          >
+                            {ingredient}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="ml-2 h-auto p-1 hover:bg-orange-400/20"
+                              onClick={() => removeIngredient(index)}
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          </Badge>
+                        </motion.div>
+                      ))}
                     </motion.div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </CardContent>
-        </Card>
+                  )}
+                </AnimatePresence>
 
-        <Button
-          onClick={handleGenerateRecipes}
-          disabled={ingredients.length === 0 || isProcessing}
-          className="w-full bg-green-600 hover:bg-green-700"
-          size="lg"
-        >
-          {isProcessing ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Generating recipes...
-            </>
-          ) : (
-            <>
-              Generate Recipes
-              <Refrigerator className="w-4 h-4 ml-2" />
-            </>
-          )}
-        </Button>
+                {/* Continue button matching original quiz style */}
+                <Button
+                  onClick={handleGenerateRecipes}
+                  disabled={ingredients.length === 0 || isProcessing}
+                  className="w-full h-14 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium text-lg rounded-xl shadow-lg"
+                  size="lg"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Generating recipes...
+                    </>
+                  ) : (
+                    <>
+                      Continue
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </>
+                  )}
+                </Button>
 
-        <p className="text-center text-sm text-muted-foreground mt-4">
-          We'll create recipes for 4 servings that take 20-40 minutes using ingredients available at UK supermarkets
-        </p>
+                {/* Helper text */}
+                <p className="text-center text-sm text-slate-400">
+                  We'll create recipes using your ingredients, pantry staples, and 2-4 additional items
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </PageLayout>
   );

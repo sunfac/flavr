@@ -147,10 +147,9 @@ For each recipe, provide:
 Format as JSON array.`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4",
+        model: "gpt-3.5-turbo",
         messages: [{ role: "user", content: prompt }],
-        temperature: 0.9,
-        response_format: { type: "json_object" }
+        temperature: 0.9
       });
 
       const response = JSON.parse(completion.choices[0].message.content || "{}");
@@ -242,10 +241,9 @@ Format as JSON with structure:
 }`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4",
+        model: "gpt-3.5-turbo",
         messages: [{ role: "user", content: systemPrompt }],
-        temperature: 0.8,
-        response_format: { type: "json_object" }
+        temperature: 0.8
       });
 
       const recipe = JSON.parse(completion.choices[0].message.content || "{}");
@@ -327,10 +325,9 @@ Format as JSON with structure:
 }`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4",
+        model: "gpt-3.5-turbo",
         messages: [{ role: "user", content: systemPrompt }],
-        temperature: 0.7,
-        response_format: { type: "json_object" }
+        temperature: 0.7
       });
 
       const recipe = JSON.parse(completion.choices[0].message.content || "{}");
@@ -631,7 +628,7 @@ Return JSON with this exact structure:
         ],
         temperature: 0.9,
         max_tokens: 2500,
-        response_format: { type: "json_object" }
+
       });
 
       const responseContent = completion.choices[0]?.message?.content;

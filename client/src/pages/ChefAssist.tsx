@@ -1,63 +1,82 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
-import { ChefHat, Sparkles, Loader2 } from "lucide-react";
+import { ChefHat, Sparkles, Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { PageLayout } from "@/components/PageLayout";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { iconMap } from "@/lib/iconMap";
 
-// Extended rotating suggestions
-const suggestions = [
-  "Quick weeknight pasta",
-  "Healthy Asian stir-fry", 
-  "Comfort food classics",
-  "Mediterranean feast",
-  "Mexican street tacos",
-  "Japanese ramen bowl",
-  "Indian curry night",
-  "French bistro dinner",
-  "Thai coconut curry",
-  "Spanish tapas spread",
-  "Korean BBQ at home",
-  "Middle Eastern mezze",
-  "Italian Sunday dinner",
-  "Greek island favorites",
-  "Vietnamese pho soup",
-  "Moroccan tagine",
-  "British pub classics",
-  "American BBQ feast",
-  "Chinese dim sum",
-  "Brazilian churrasco"
+// Use the original chef assist examples
+const chefExamples = [
+  "I want to recreate peri-peri chicken like Nando's",
+  "I want to make a Zinger Tower Burger like the one from KFC",
+  "I want to cook a Greggs-style steak bake at home",
+  "I want to make a teriyaki chicken donburi like Itsu",
+  "I want to bake a luxurious chocolate and salted caramel celebration cake",
+  "I want to make sourdough pizza from scratch with honey and Nduja",
+  "I want to cook a Michelin-style mushroom risotto with truffle oil",
+  "I want to make a romantic date-night steak dinner with chimichurri",
+  "I want to cook a dish using seasonal UK ingredients this month",
+  "I want to make a vibrant summer salad with strawberries and feta",
+  "I want to make a 15-minute garlic and chilli prawn pasta",
+  "I want to make a comforting mac & cheese with three cheeses",
+  "I want to bring an amazing BBQ dish to a summer party",
+  "I want to make something impressive for a dinner party",
+  "I want to make a vegan lentil shepherd's pie with crispy mash",
+  "I want to cook a Korean-inspired beef bulgogi rice bowl",
+  "I want to make a cosy dish for a cold, rainy evening",
+  "I'm craving something spicy that wakes up my taste buds",
+  "I want a light and refreshing meal for a hot summer day",
+  "I need a comforting dish after a stressful day",
+  "I want to treat myself with something rich and indulgent",
+  "I want a colourful, feel-good dinner that lifts my mood",
+  "I want to slow-cook something that fills the house with delicious smells",
+  "I want to cook something fun and playful with the kids",
+  "A light summery meal",
+  "I want to make a healthy weeknight dinner that's still exciting",
+  "I want to cook something warming and hearty for winter",
+  "I want to create a fresh and zesty dish with citrus flavours",
+  "I want to make a one-pot wonder that's both filling and flavourful"
 ];
+
+// Helper function to get random examples
+const getRandomSelection = (arr: string[], count: number) => {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+};
 
 export default function ChefAssist() {
   const [, navigate] = useLocation();
   const [prompt, setPrompt] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [currentSuggestionIndex, setCurrentSuggestionIndex] = useState(0);
+  const [currentExampleIndex, setCurrentExampleIndex] = useState(0);
   const { toast } = useToast();
 
-  // Rotate suggestions every 3 seconds
+  // Generate 6 random examples on component mount
+  const randomExamples = useMemo(() => getRandomSelection(chefExamples, 6), []);
+
+  // Rotate examples every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentSuggestionIndex((prev) => (prev + 1) % suggestions.length);
+      setCurrentExampleIndex((prev) => (prev + 1) % randomExamples.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [randomExamples.length]);
 
   const handleInspireMe = async () => {
     setIsProcessing(true);
     try {
       // Get AI-generated unique suggestion
-      const response = await apiRequest("POST", "/api/chef-assist/inspire", {});
+      const response = await apiRequest("POST", "/api/chef-assist/inspire", {}) as { suggestion: string };
       setPrompt(response.suggestion);
     } catch (error) {
       // Fallback to random suggestion if API fails
-      const randomIndex = Math.floor(Math.random() * suggestions.length);
-      setPrompt(suggestions[randomIndex]);
+      const randomIndex = Math.floor(Math.random() * chefExamples.length);
+      setPrompt(chefExamples[randomIndex]);
     } finally {
       setIsProcessing(false);
     }
@@ -79,7 +98,7 @@ export default function ChefAssist() {
         prompt: prompt.trim(),
         servings: 4, // Default servings
         cookingTime: 30 // Default cooking time
-      });
+      }) as { recipe: any };
 
       // Navigate directly to recipe card with full recipe
       navigate("/recipe", {
@@ -100,120 +119,93 @@ export default function ChefAssist() {
     }
   };
 
-  // Display 3 rotating suggestions
-  const visibleSuggestions = [
-    suggestions[currentSuggestionIndex],
-    suggestions[(currentSuggestionIndex + 1) % suggestions.length],
-    suggestions[(currentSuggestionIndex + 2) % suggestions.length]
-  ];
-
   return (
     <PageLayout>
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Original quiz-style layout */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          className="w-full"
         >
-          <div className="inline-flex p-3 bg-orange-500/10 rounded-full mb-4">
-            <ChefHat className="w-8 h-8 text-orange-500" />
-          </div>
-          <h1 className="text-3xl font-bold mb-2">Chef Assist</h1>
-          <p className="text-muted-foreground">
-            Tell us what you're craving and we'll create the perfect recipe
-          </p>
-        </motion.div>
+          <Card className="bg-slate-900/50 border-slate-700">
+            <CardContent className="p-8">
+              {/* Question header matching original quiz style */}
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-white mb-2">What's your culinary vision?</h2>
+                <p className="text-lg text-slate-400">Describe what you want to create today</p>
+              </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>What would you like to cook?</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <Input
-                placeholder="Describe your craving..."
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleGenerateRecipe()}
-                className="text-lg"
-              />
-              <Button
-                onClick={handleInspireMe}
-                variant="outline"
-                disabled={isProcessing}
-                className="whitespace-nowrap"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Inspire Me
-              </Button>
-            </div>
+              {/* Textarea matching original quiz style */}
+              <div className="space-y-6">
+                <Textarea
+                  placeholder="Tell me about the dish you have in mind..."
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  className="min-h-[150px] text-lg bg-slate-800/50 border-slate-600 text-white focus:border-orange-400 rounded-xl placeholder:text-slate-500"
+                />
 
-            {/* Rotating Suggestions */}
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Try these ideas:</p>
-              <AnimatePresence mode="popLayout">
-                <div className="flex flex-wrap gap-2">
-                  {visibleSuggestions.map((suggestion, index) => (
-                    <motion.div
-                      key={`${suggestion}-${currentSuggestionIndex}-${index}`}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                    >
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPrompt(suggestion)}
-                        className="text-sm"
-                      >
-                        {suggestion}
-                      </Button>
-                    </motion.div>
-                  ))}
+                {/* Inspire Me button matching original style */}
+                <div className="flex justify-center">
+                  <Button
+                    onClick={handleInspireMe}
+                    variant="outline"
+                    disabled={isProcessing}
+                    className="border-orange-400 text-orange-400 hover:bg-orange-400/10"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Inspire Me
+                  </Button>
                 </div>
-              </AnimatePresence>
-            </div>
 
-            <Button
-              onClick={handleGenerateRecipe}
-              disabled={!prompt.trim() || isProcessing}
-              className="w-full bg-orange-600 hover:bg-orange-700"
-              size="lg"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creating your recipe...
-                </>
-              ) : (
-                <>
-                  Generate Recipe
-                  <ChefHat className="w-4 h-4 ml-2" />
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
+                {/* Cycling suggestion chips - original style */}
+                <div className="space-y-3">
+                  <p className="text-sm text-slate-400 text-center">Example ideas to get you started:</p>
+                  <AnimatePresence mode="popLayout">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {randomExamples.map((example, index) => (
+                        <motion.div
+                          key={`${example}-${currentExampleIndex}-${index}`}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          transition={{ duration: 0.3, delay: index * 0.05 }}
+                        >
+                          <Button
+                            variant="ghost"
+                            onClick={() => setPrompt(example)}
+                            className="w-full h-auto py-3 px-4 text-sm text-slate-300 hover:text-white hover:bg-slate-800/50 border border-slate-700 hover:border-orange-400/50 text-left whitespace-normal"
+                          >
+                            {example}
+                          </Button>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </AnimatePresence>
+                </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-8 p-4 bg-muted/50 rounded-lg"
-        >
-          <h3 className="font-semibold mb-2 text-center">✨ Customize After Generation</h3>
-          <p className="text-sm text-muted-foreground text-center">
-            Once your recipe is ready, use Zest (our AI assistant) to make changes like:
-          </p>
-          <div className="grid grid-cols-2 gap-2 mt-3 text-sm">
-            <div className="text-center">• Scale servings (2-20 people)</div>
-            <div className="text-center">• Add dietary restrictions</div>
-            <div className="text-center">• Make it spicier or milder</div>
-            <div className="text-center">• Elevate with premium ingredients</div>
-            <div className="text-center">• Adjust cooking time</div>
-            <div className="text-center">• Change cooking methods</div>
-          </div>
+                {/* Continue button matching original quiz style */}
+                <Button
+                  onClick={handleGenerateRecipe}
+                  disabled={!prompt.trim() || isProcessing}
+                  className="w-full h-14 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium text-lg rounded-xl shadow-lg"
+                  size="lg"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Creating your recipe...
+                    </>
+                  ) : (
+                    <>
+                      Continue
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
       </div>
     </PageLayout>

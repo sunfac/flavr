@@ -170,10 +170,12 @@ See `STRIPE_SETUP.md` for detailed setup instructions.
   - Google Vision API integration for photo-based ingredient detection
   - No quiz - immediate recipe generation with randomized defaults (4 servings, 20-40min, £3-6 budget)
   - Tinder-style recipe selection cards before full generation
+  - Original quiz-style layout maintained with dark theme and orange accents
 - **New Chef Assist Mode**:
-  - Single text input with rotating suggestion chips
-  - "Inspire Me" button for GPT-4 generated unique ideas
+  - Single text input with rotating suggestion chips (6 random examples that cycle)
+  - "Inspire Me" button for GPT-3.5 generated unique ideas
   - Direct to full recipe generation (no intermediate selection)
+  - Original quiz-style question layout with textarea input
 - **Streamlined Recipe Display**:
   - New unified Recipe page that loads immediately after generation
   - Integrated Zest chatbot for post-generation modifications
@@ -184,6 +186,10 @@ See `STRIPE_SETUP.md` for detailed setup instructions.
   - `/api/chef-assist/inspire` - Dynamic inspiration suggestions
   - `/api/chef-assist/generate` - Direct full recipe generation
   - `/api/generate-full-recipe` - Convert recipe idea to full recipe
+- **Technical Updates**:
+  - Removed response_format parameter from OpenAI calls (not supported by GPT-3.5)
+  - Fixed ChatBot component import (uses default export)
+  - Maintained original styling with quiz cards and gradient buttons
 
 ## Changelog
 
@@ -289,6 +295,7 @@ Changelog:
 - July 21, 2025. My Cookbook functionality unified and enhanced - renamed "Digital Cookbook" to "My Cookbook" throughout the app for consistency, added favorite/save button to recipe cards with heart icon, implemented `/api/save-recipe` endpoint for saving recipes to user's cookbook, enhanced EnhancedRecipeCard with FavoriteButton component that shows saved state and prevents duplicates, updated navigation links to use `/cookbook` route consistently, delete recipe functionality already available through existing endpoints
 - July 23, 2025. Comprehensive documentation suite created - generated complete Product Requirements Document (PRD) covering executive summary, target audience, core product offerings, user experience design, competitive advantage, success metrics, and development roadmap, created detailed Technical Specification covering system architecture, database schemas, API designs, AI integration patterns, authentication systems, and deployment strategies, produced full API Documentation with endpoint specifications, request/response examples, authentication requirements, WebSocket protocols, and SDK usage examples
 - January 23, 2025. Major app restructure to 2-mode system - simplified from 5 modes to 2 visible modes (Fridge2Fork + Chef Assist), Fridge2Fork mode with Google Vision photo input and no quiz, Chef Assist with single prompt and rotating suggestions, new streamlined Recipe page with integrated Zest chatbot, tinder-style recipe selection for Fridge2Fork, direct-to-recipe generation for Chef Assist
+- January 23, 2025. UI restoration complete - restored original quiz-style layouts for both modes, Chef Assist uses textarea with cycling suggestion chips, Fridge2Fork uses ingredient input with photo upload options, maintained dark theme with orange gradient buttons, fixed ChatBot import issues and API response_format compatibility
 ```
 
 ## User Preferences
