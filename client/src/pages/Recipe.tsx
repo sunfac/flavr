@@ -40,11 +40,10 @@ export default function Recipe() {
     cookTime: recipeStore.meta.cookTime,
     prepTime: 15, // Default prep time
     servings: recipeStore.servings,
-    image: recipeStore.meta.image || recipeStore.meta.imageUrl,
-    imageUrl: recipeStore.meta.image || recipeStore.meta.imageUrl,
+    image: recipeStore.meta.image,
     ingredients: recipeStore.ingredients.map(ing => ing.text || ''), // Convert to string array
     instructions: recipeStore.steps.map(step => step.description || ''), // Convert to string array
-    tips: [] // Default empty tips
+    tips: "Try garnishing with fresh herbs for extra flavor!" // Default tip
   };
 
   return (

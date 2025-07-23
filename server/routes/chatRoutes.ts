@@ -3,7 +3,15 @@ import OpenAI from "openai";
 import { storage } from "../storage";
 import { requireAuth } from "./authRoutes";
 import { insertChatMessageSchema } from "@shared/schema";
-import { logGPTInteraction } from "../developerLogger";
+import { logGPTInteraction, logSimpleGPTInteraction } from "../developerLogger";
+
+// Session type extension
+declare module 'express-session' {
+  interface SessionData {
+    userId?: number;
+    isPlus?: boolean;
+  }
+}
 
 // Initialize OpenAI
 if (!process.env.OPENAI_API_KEY) {
@@ -156,8 +164,7 @@ Be warm, encouraging, and knowledgeable about cooking!`;
           await storage.createChatMessage({
             userId: req.session.userId,
             message,
-            response: fullResponse,
-            timestamp: new Date()
+            response: fullResponse
           });
         } catch (dbError) {
           console.error('Failed to save chat message:', dbError);
@@ -167,8 +174,8 @@ Be warm, encouraging, and knowledgeable about cooking!`;
       res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
       res.end();
 
-      // Log the interaction
-      await logGPTInteraction({
+      // Log the interaction using simplified logging
+      await logSimpleGPTInteraction({
         endpoint: 'chat-stream',
         prompt: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
         response: fullResponse,
@@ -178,8 +185,7 @@ Be warm, encouraging, and knowledgeable about cooking!`;
         outputTokens: 0,
         cost: 0,
         success: true,
-        userId: req.session?.userId || 'anonymous',
-        sessionId: req.session?.id || 'no-session'
+        userId: req.session?.userId?.toString() || undefined
       });
 
     } catch (error) {
@@ -238,16 +244,15 @@ Guidelines:
           await storage.createChatMessage({
             userId: req.session.userId,
             message,
-            response,
-            timestamp: new Date()
+            response
           });
         } catch (dbError) {
           console.error('Failed to save chat message:', dbError);
         }
       }
 
-      // Log the interaction
-      await logGPTInteraction({
+      // Log the interaction using simplified logging
+      await logSimpleGPTInteraction({
         endpoint: 'chat',
         prompt: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
         response,
@@ -257,8 +262,7 @@ Guidelines:
         outputTokens: completion.usage?.completion_tokens || 0,
         cost: ((completion.usage?.prompt_tokens || 0) * 0.03 + (completion.usage?.completion_tokens || 0) * 0.06) / 1000,
         success: true,
-        userId: req.session?.userId || 'anonymous',
-        sessionId: req.session?.id || 'no-session'
+        userId: req.session?.userId?.toString() || undefined
       });
 
       res.json({ response });
@@ -325,8 +329,8 @@ Guidelines:
       res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
       res.end();
 
-      // Log the successful interaction
-      await logGPTInteraction({
+      // Log the successful interaction using simplified logging
+      await logSimpleGPTInteraction({
         endpoint: 'chat-stream-openai',
         prompt: chatMessages.map(m => `${m.role}: ${m.content}`).join('\n'),
         response: fullResponse,
@@ -336,8 +340,7 @@ Guidelines:
         outputTokens: 0,
         cost: 0,
         success: true,
-        userId: req.session?.userId || 'anonymous',
-        sessionId: req.session?.id || 'no-session'
+        userId: req.session?.userId?.toString() || undefined
       });
 
     } catch (error) {

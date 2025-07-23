@@ -2,6 +2,14 @@ import type { Express } from "express";
 import { storage } from "../storage";
 import bcrypt from "bcrypt";
 
+// Session type extension
+declare module 'express-session' {
+  interface SessionData {
+    userId?: number;
+    isPlus?: boolean;
+  }
+}
+
 // Authentication middleware
 export const requireAuth = (req: any, res: any, next: any) => {
   if (!req.session?.userId) {
@@ -129,7 +137,7 @@ export function registerAuthRoutes(app: Express) {
   // Get current user endpoint
   app.get("/api/me", requireAuth, async (req, res) => {
     try {
-      const user = await storage.getUser(req.session.userId);
+      const user = await storage.getUser(req.session.userId!);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
