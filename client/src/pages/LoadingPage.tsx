@@ -17,7 +17,27 @@ const culinaryFacts = [
   "The average person eats about 35 tons of food in their lifetime",
   "Lobster was once considered poor people's food",
   "The fortune cookie was actually invented in San Francisco",
-  "Ketchup was sold as medicine in the 1830s"
+  "Ketchup was sold as medicine in the 1830s",
+  "Bananas are berries, but strawberries aren't",
+  "White chocolate isn't technically chocolate as it contains no cocoa solids",
+  "The Caesar salad was invented in Mexico, not Italy",
+  "Pineapples take two years to grow",
+  "The hottest part of a chili pepper is not the seeds, but the white pith",
+  "Nutmeg can be toxic in large quantities",
+  "Apples float because they are 25% air",
+  "The most stolen food in the world is cheese",
+  "Rhubarb leaves are poisonous but the stalks are edible",
+  "Almonds are not nuts - they're seeds from stone fruits",
+  "One gram of saffron requires about 150 flowers to produce",
+  "Wasabi and horseradish are from the same plant family",
+  "The spiciness of peppers is measured in Scoville Heat Units",
+  "Avocados are fruits, not vegetables, and they're technically berries",
+  "Coffee beans are actually seeds, not beans",
+  "Raw cashews are toxic and must be processed before eating",
+  "The first soup was likely made around 20,000 years ago",
+  "Pasta wasn't invented in Italy - it came from China via Marco Polo",
+  "The ice cream cone was invented at the 1904 World's Fair",
+  "French fries originated in Belgium, not France"
 ];
 
 interface LoadingPageProps {
@@ -29,22 +49,31 @@ export default function LoadingPage({
   title = "Crafting Your Perfect Recipe", 
   subtitle = "Our AI chef is working its magic..." 
 }: LoadingPageProps) {
+  const [shuffledFacts, setShuffledFacts] = useState<string[]>([]);
   const [currentFact, setCurrentFact] = useState(0);
 
+  // Shuffle facts on component mount
   useEffect(() => {
+    const shuffled = [...culinaryFacts].sort(() => Math.random() - 0.5);
+    setShuffledFacts(shuffled);
+  }, []);
+
+  useEffect(() => {
+    if (shuffledFacts.length === 0) return;
+    
     const interval = setInterval(() => {
-      setCurrentFact(prev => (prev + 1) % culinaryFacts.length);
+      setCurrentFact(prev => (prev + 1) % shuffledFacts.length);
     }, 4000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [shuffledFacts]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center p-4 sm:p-6">
       {/* Main Loading Animation */}
-      <div className="text-center mb-12">
+      <div className="text-center mb-8 sm:mb-12">
         <motion.div
-          className="relative mb-8"
+          className="relative mb-6 sm:mb-8"
           animate={{ 
             rotate: 360,
             scale: [1, 1.1, 1]
@@ -54,13 +83,13 @@ export default function LoadingPage({
             scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
           }}
         >
-          <div className="w-24 h-24 mx-auto bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-2xl">
-            <ChefHat className="w-12 h-12 text-white" />
+          <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-2xl">
+            <ChefHat className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
           </div>
           
           {/* Floating cooking icons */}
           <motion.div
-            className="absolute -top-4 -right-4"
+            className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4"
             animate={{ 
               y: [-10, 10, -10],
               rotate: [0, 180, 360]
@@ -71,11 +100,11 @@ export default function LoadingPage({
               ease: "easeInOut"
             }}
           >
-            <Utensils className="w-6 h-6 text-orange-400" />
+            <Utensils className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400" />
           </motion.div>
           
           <motion.div
-            className="absolute -bottom-4 -left-4"
+            className="absolute -bottom-3 -left-3 sm:-bottom-4 sm:-left-4"
             animate={{ 
               y: [10, -10, 10],
               rotate: [360, 180, 0]
@@ -86,12 +115,12 @@ export default function LoadingPage({
               ease: "easeInOut"
             }}
           >
-            <Clock className="w-6 h-6 text-red-400" />
+            <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-red-400" />
           </motion.div>
         </motion.div>
 
         <motion.h1 
-          className="text-4xl font-bold text-white mb-4"
+          className="text-2xl sm:text-4xl font-bold text-white mb-3 sm:mb-4 px-4"
           animate={{ opacity: [0.7, 1, 0.7] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
@@ -99,7 +128,7 @@ export default function LoadingPage({
         </motion.h1>
         
         <motion.p 
-          className="text-xl text-slate-300"
+          className="text-lg sm:text-xl text-slate-300 px-4"
           animate={{ opacity: [0.5, 0.8, 0.5] }}
           transition={{ duration: 2.5, repeat: Infinity }}
         >
@@ -108,7 +137,7 @@ export default function LoadingPage({
       </div>
 
       {/* Progress Indicator */}
-      <div className="w-full max-w-md mb-12">
+      <div className="w-full max-w-sm sm:max-w-md mb-8 sm:mb-12 px-4">
         <div className="bg-slate-700 rounded-full h-2 overflow-hidden">
           <motion.div
             className="h-full bg-gradient-to-r from-orange-500 to-red-500"
@@ -126,12 +155,12 @@ export default function LoadingPage({
 
       {/* Did You Know Section */}
       <motion.div
-        className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 max-w-2xl mx-auto border border-slate-700"
+        className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-4 sm:p-8 max-w-xs sm:max-w-2xl mx-auto border border-slate-700"
         animate={{ scale: [0.98, 1.02, 0.98] }}
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
       >
         <motion.h3 
-          className="text-orange-400 font-semibold text-lg mb-4 text-center"
+          className="text-orange-400 font-semibold text-base sm:text-lg mb-3 sm:mb-4 text-center"
           animate={{ opacity: [0.8, 1, 0.8] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
@@ -140,22 +169,22 @@ export default function LoadingPage({
         
         <motion.p
           key={currentFact}
-          className="text-slate-200 text-center text-lg leading-relaxed"
+          className="text-slate-200 text-center text-sm sm:text-base lg:text-lg leading-relaxed min-h-[3rem] sm:min-h-[2rem] flex items-center justify-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.8 }}
         >
-          {culinaryFacts[currentFact]}
+          {shuffledFacts[currentFact] || "Loading culinary wisdom..."}
         </motion.p>
       </motion.div>
 
       {/* Loading Dots */}
-      <div className="flex space-x-2 mt-8">
+      <div className="flex space-x-2 mt-6 sm:mt-8">
         {[0, 1, 2].map((index) => (
           <motion.div
             key={index}
-            className="w-3 h-3 bg-orange-500 rounded-full"
+            className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-orange-500 rounded-full"
             animate={{ 
               scale: [1, 1.3, 1],
               opacity: [0.5, 1, 0.5]
