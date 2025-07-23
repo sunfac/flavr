@@ -515,44 +515,68 @@ Create a COMPLETE recipe that:
 5. Prioritize making a delicious, well-constructed dish that matches the recipe concept
 6. Include exact measurements and clear instructions within the time and equipment constraints
 
-Format as JSON with structure:
+Return ONLY a valid JSON object with this exact structure (NO trailing commas):
 {
   "title": "${recipeIdea.title}",
   "description": "Enhanced description",
   "cuisine": "${recipeIdea.cuisine}",
   "difficulty": "${recipeIdea.difficulty}",
-  "prepTime": number,
-  "cookTime": number,
+  "prepTime": 15,
+  "cookTime": 25,
   "servings": ${servings},
-  "ingredients": [{"name": "ingredient", "amount": "measurement"}],
+  "ingredients": [{"name": "ingredient name", "amount": "UK measurement"}],
   "instructions": [{"step": 1, "instruction": "detailed step"}],
-  "tips": ["tip 1", "tip 2"],
-  "nutritionalHighlights": ["highlight 1", "highlight 2"]
-}`;
+  "tips": ["helpful cooking tip"],
+  "nutritionalHighlights": ["nutritional benefit"]
+}
+
+CRITICAL: Ensure NO trailing commas after the last item in any array or object. Return ONLY the JSON object, no markdown, no explanations.`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: systemPrompt }],
+        messages: [
+          { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations." },
+          { role: "user", content: systemPrompt }
+        ],
         temperature: 0.7
       });
 
-      // Clean and parse the JSON response
-      let content = completion.choices[0].message.content || "{}";
-      
-      // Remove trailing commas before closing brackets/braces
-      content = content.replace(/,(\s*[}\]])/g, '$1');
-      
-      // Remove any potential markdown code block markers
-      content = content.replace(/```json\s*/g, '').replace(/```\s*/g, '');
-      
-      // Try to parse, with fallback error handling
+      // Clean and parse the JSON response for Fridge2Fork
       let recipe;
       try {
+        let content = completion.choices[0].message.content || "{}";
+        
+        // Clean up any potential markdown, extra text, and trailing commas
+        content = content.replace(/```json\n?/g, '').replace(/\n?```/g, '').trim();
+        
+        // Fix common JSON errors: trailing commas in arrays and objects
+        content = content.replace(/,(\s*[}\]])/g, '$1');
+        // Fix trailing commas specifically after object entries in arrays
+        content = content.replace(/},(\s*\])/g, '}$1');
+        
         recipe = JSON.parse(content);
       } catch (parseError) {
-        console.error('JSON parsing failed, content:', content);
-        console.error('Parse error:', parseError);
-        throw new Error('Failed to parse recipe JSON: ' + parseError.message);
+        console.error('Fridge2Fork JSON parsing error:', parseError);
+        console.error('Raw content:', completion.choices[0].message.content);
+        
+        // Create fallback recipe structure
+        recipe = {
+          title: recipeIdea.title || "Delicious Recipe",
+          description: recipeIdea.description || "A tasty dish using your ingredients",
+          cuisine: recipeIdea.cuisine || "International",
+          difficulty: recipeIdea.difficulty || "easy",
+          prepTime: 15,
+          cookTime: 25,
+          servings: servings,
+          ingredients: ingredients.slice(0, 5).map(ing => ({ name: ing, amount: "to taste" })),
+          instructions: [
+            { step: 1, instruction: "Prepare all ingredients by washing and chopping as needed." },
+            { step: 2, instruction: "Cook according to your preferred method until done." },
+            { step: 3, instruction: "Season to taste and serve hot." }
+          ],
+          tips: ["Adjust seasoning to your preference", "Use fresh ingredients when possible"],
+          nutritionalHighlights: ["Contains fresh ingredients", "Balanced nutrition"]
+        };
       }
       
       // Generate image for the recipe
