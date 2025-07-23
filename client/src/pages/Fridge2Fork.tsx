@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Badge } from "@/components/ui/badge";
-import DidYouKnowLoader from "@/components/DidYouKnowLoader";
+import LoadingPage from "./LoadingPage";
 import { useRecipeStore } from "@/stores/recipeStore";
 
 export default function Fridge2Fork() {
@@ -17,10 +17,12 @@ export default function Fridge2Fork() {
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [currentIngredient, setCurrentIngredient] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { setActiveRecipe } = useRecipeStore();
+  const { updateActiveRecipe } = useRecipeStore();
 
   const handleImageUpload = async (file: File) => {
     if (!file) return;
@@ -107,7 +109,7 @@ export default function Fridge2Fork() {
       return;
     }
 
-    setIsProcessing(true);
+    setIsGenerating(true);
     try {
       // Create quiz data with randomized defaults
       const quizData = {
@@ -122,25 +124,34 @@ export default function Fridge2Fork() {
       };
 
       const response = await apiRequest("POST", "/api/generate-fridge-recipe", { quizData });
+      const data = await response.json();
       
-      // Navigate to recipe selection with the generated ideas
-      navigate("/recipe-selection", { 
-        state: { 
-          recipes: response.recipes, 
-          mode: "fridge2fork",
-          quizData 
-        } 
-      });
+      if (data.recipes && data.recipes.length > 0) {
+        // For now, take the first recipe and navigate directly to recipe page
+        // Later we can implement the tinder-style selection
+        const firstRecipe = data.recipes[0];
+        updateActiveRecipe(firstRecipe);
+        navigate("/recipe");
+      } else {
+        throw new Error("No recipes generated");
+      }
     } catch (error) {
       toast({
         title: "Error generating recipes",
         description: "Please try again",
         variant: "destructive",
       });
-    } finally {
-      setIsProcessing(false);
+      setIsGenerating(false);
     }
   };
+
+  // Show loading page when generating recipe
+  if (isGenerating) {
+    return <LoadingPage 
+      title="Creating Your Perfect Recipe" 
+      subtitle="Finding the best recipe using your ingredients..."
+    />;
+  }
 
   return (
     <PageLayout>
@@ -165,7 +176,7 @@ export default function Fridge2Fork() {
                 <div className="flex gap-3 justify-center">
                   <Button
                     variant="outline"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => cameraInputRef.current?.click()}
                     disabled={isProcessing}
                     className="border-orange-400 text-orange-400 hover:bg-orange-400/10"
                   >
@@ -183,11 +194,19 @@ export default function Fridge2Fork() {
                   </Button>
                 </div>
 
+                {/* Separate inputs for camera and photo library */}
+                <input
+                  ref={cameraInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept="image/*"
-                  capture="environment"
                   onChange={handleFileSelect}
                   className="hidden"
                 />
