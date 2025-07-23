@@ -11,8 +11,7 @@ import { useLocation } from "wouter";
 import { iconMap } from "@/lib/iconMap";
 import { useRecipeStore, recipeActions } from "@/stores/recipeStore";
 import { useTimerStore } from "@/stores/timerStore";
-import ZestVoiceChat from "@/components/ZestVoiceChat";
-import { StreamingChatBot } from "@/components/StreamingChatBot";
+
 
 interface ChatMessage {
   id: number;
@@ -460,12 +459,86 @@ export default function ChatBot({
           </Button>
         </CardHeader>
         
-        <div className="flex-1 min-h-0">
-          <StreamingChatBot 
-            currentRecipe={currentRecipe}
-            onRecipeUpdate={onRecipeUpdate}
-          />
-        </div>
+        <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
+          {/* Messages Area */}
+          <div 
+            ref={scrollAreaRef}
+            className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 min-h-0"
+          >
+            {localMessages.map((msg, index) => (
+              <div key={msg.id} className={`mb-3 ${msg.isUser ? "text-right" : "text-left"}`}>
+                <div
+                  className={`inline-block px-3 sm:px-4 py-2 rounded-xl max-w-[85%] shadow-lg ${
+                    msg.isUser
+                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white"
+                      : "bg-slate-700/90 backdrop-blur-sm text-white border border-slate-600/50"
+                  }`}
+                >
+                  <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.text}</p>
+                  <p className="text-[10px] sm:text-xs opacity-70 mt-1">
+                    {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+              </div>
+            ))}
+            {sendMessageMutation.isPending && (
+              <div className="text-left">
+                <div className="inline-block px-4 py-2 rounded-xl bg-slate-700/90 backdrop-blur-sm border border-slate-600/50">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Suggestion Chips */}
+          {showSuggestions && localMessages.length === 1 && (
+            <div className="px-3 sm:px-4 pb-2">
+              <div className="flex flex-wrap gap-2">
+                {suggestionChips.slice(0, 4).map((chip, index) => (
+                  <Badge
+                    key={index}
+                    variant={chip.updatesRecipe ? "secondary" : "outline"}
+                    className="cursor-pointer hover:bg-orange-500 hover:text-white transition-all duration-300 flex items-center gap-1 shadow-md backdrop-blur-sm bg-slate-700/80 border-slate-600"
+                    onClick={handleSuggestionClick(chip.text)}
+                  >
+                    <chip.icon className="w-3 h-3" />
+                    <span className="text-xs">{chip.text}</span>
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Input Area */}
+          <div className="p-3 sm:p-4 border-t border-slate-700/50 bg-slate-800/50 backdrop-blur-sm">
+            <div className="flex items-center space-x-2">
+              <Input
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask me anything..."
+                className="flex-1 bg-slate-700/70 border-slate-600 text-white placeholder:text-slate-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                disabled={sendMessageMutation.isPending}
+              />
+              <Button
+                onClick={() => handleSend()}
+                disabled={!message.trim() || sendMessageMutation.isPending}
+                size="sm"
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
+              >
+                {sendMessageMutation.isPending ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <iconMap.send className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
 
 
       </div>

@@ -7,6 +7,7 @@ import { useScaledIngredients } from '@/hooks/useScaledIngredients';
 import { useRecipeStore, recipeActions } from '@/stores/recipeStore';
 import { apiRequest } from '@/lib/queryClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import RecipeShareTools from '@/components/RecipeShareTools';
 
 // Extract duration from instruction text
 function extractDuration(instruction: string): number | undefined {
@@ -119,9 +120,9 @@ function EnhancedRecipeCard({
             title: `Step ${index + 1}`,
             description: instruction
           })),
+          servings: updatedRecipe.servings || recipe.servings,
           meta: {
             title: updatedRecipe.title,
-            servings: updatedRecipe.servings || recipe.servings,
             cookTime: updatedRecipe.cookTime || recipe.cookTime,
             difficulty: updatedRecipe.difficulty || recipe.difficulty,
             cuisine: updatedRecipe.cuisine || recipe.cuisine,
@@ -146,7 +147,7 @@ function EnhancedRecipeCard({
       
       toast({
         title: "Recipe updated!",
-        description: `${updatedRecipe.title || "Your recipe"} has been modified`,
+        description: `${event.detail.recipe.title || "Your recipe"} has been modified`,
       });
     };
     
@@ -283,9 +284,9 @@ function EnhancedRecipeCard({
             title: `Step ${i + 1}`,
             description: instruction
           })),
+          servings: activeServings,
           meta: {
             title: activeTitle,
-            servings: activeServings,
             cookTime: activeCookTime,
             difficulty: activeDifficulty,
             cuisine: recipe.cuisine,
@@ -546,23 +547,9 @@ function EnhancedRecipeCard({
           </div>
         )}
 
-        {/* Zest AI Guidance Text */}
+        {/* Share Recipe Section with Enhanced Tools */}
         <div className="p-6 bg-slate-800/20 border-t border-slate-700/50">
-          <div className="flex items-start gap-3">
-            <MessageCircle className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
-            <div className="w-full">
-              <h4 className="font-medium text-orange-400 mb-2">Ask Zest AI</h4>
-              <p className="text-slate-300 leading-relaxed text-sm">
-                Chat with Zest to modify this recipe, adjust ingredients, change cooking methods, 
-                add dietary restrictions, or get cooking tips. Just type your request in the chat panel!
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Share Recipe Section */}
-        <div className="p-6 bg-slate-800/20 border-t border-slate-700/50">
-          <SocialShareTools
+          <RecipeShareTools
             id={recipe.id}
             shareId={recipe.shareId}
             title={activeTitle}
@@ -570,6 +557,13 @@ function EnhancedRecipeCard({
             imageUrl={recipe.image}
             isShared={recipe.isShared || false}
             onShareToggle={onShare}
+            recipe={{
+              ...recipe,
+              title: activeTitle,
+              servings: activeServings,
+              cookTime: activeCookTime,
+              difficulty: activeDifficulty
+            }}
           />
         </div>
 
