@@ -56,8 +56,8 @@ export default function ChefAssist() {
   const [currentExampleIndex, setCurrentExampleIndex] = useState(0);
   const { toast } = useToast();
 
-  // Generate 6 random examples on component mount
-  const randomExamples = useMemo(() => getRandomSelection(chefExamples, 6), []);
+  // Generate 9 random examples on component mount to show 3 different sets
+  const randomExamples = useMemo(() => getRandomSelection(chefExamples, 9), []);
 
   // Rotate examples every 6 seconds (show 3 at a time)
   useEffect(() => {
