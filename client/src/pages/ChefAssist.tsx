@@ -40,7 +40,11 @@ const chefExamples = [
   "I want to make a healthy weeknight dinner that's still exciting",
   "I want to cook something warming and hearty for winter",
   "I want to create a fresh and zesty dish with citrus flavours",
-  "I want to make a one-pot wonder that's both filling and flavourful"
+  "I want to make a one-pot wonder that's both filling and flavourful",
+  "Zuma inspired miso black cod",
+  "A healthy authentic butter chicken recipe",
+  "A Wagamama inspired katsu curry",
+  "An amazing dish to impress at a dinner party"
 ];
 
 // Helper function to get random examples
