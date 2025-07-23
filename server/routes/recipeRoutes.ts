@@ -173,68 +173,64 @@ Format as JSON array.`;
   // Chef Assist inspiration
   app.post("/api/chef-assist/inspire", async (req, res) => {
     try {
+      // Use our curated list of cooking inspirations as the foundation
+      const inspirationList = [
+        "I want to recreate peri-peri chicken like Nando's",
+        "I want to make a Zinger Tower Burger like the one from KFC",
+        "I want to cook a Greggs-style steak bake at home",
+        "I want to make a teriyaki chicken donburi like Itsu",
+        "I want to bake a luxurious chocolate and salted caramel celebration cake",
+        "I want to make sourdough pizza from scratch with honey and Nduja",
+        "I want to cook a Michelin-style mushroom risotto with truffle oil",
+        "I want to make a romantic date-night steak dinner with chimichurri",
+        "Zuma inspired miso black cod",
+        "A healthy authentic butter chicken recipe",
+        "A Wagamama inspired katsu curry",
+        "An amazing dish to impress at a dinner party",
+        "A Dishoom-style black daal with garlic naan",
+        "A Gordon Ramsay beef wellington with mushroom duxelles",
+        "A Nobu-inspired yellowtail sashimi with jalapeño",
+        "A Hakkasan crispy duck with pancakes and hoisin",
+        "A Jamie Oliver 15-minute prawn linguine",
+        "A Ottolenghi-style roasted cauliflower with tahini",
+        "A Rick Stein fish pie with saffron mash",
+        "A Yotam Ottolenghi lamb shawarma with pickled vegetables",
+        "A Marcus Wareing chocolate fondant with salted caramel",
+        "A Tom Kerridge slow-cooked pork belly with apple sauce"
+      ];
+
       // Add randomization to prevent repetitive suggestions
-      const randomSeed = Math.floor(Math.random() * 1000);
-      const cuisineStyles = ["Mediterranean", "Asian fusion", "Middle Eastern", "Nordic", "Latin American", "African", "Indian", "Thai", "Japanese", "French", "Italian"];
-      const cookingMethods = ["slow-roasted", "pan-seared", "grilled", "braised", "confit", "smoked", "pickled", "fermented"];
-      const proteins = ["duck", "lamb", "seafood", "mushroom", "lentil", "halloumi", "tofu", "venison"];
-      
-      const randomCuisine = cuisineStyles[Math.floor(Math.random() * cuisineStyles.length)];
-      const randomMethod = cookingMethods[Math.floor(Math.random() * cookingMethods.length)];
-      const randomProtein = proteins[Math.floor(Math.random() * proteins.length)];
+      const randomSeed = Math.floor(Math.random() * 10000);
+      const selectedInspiration = inspirationList[Math.floor(Math.random() * inspirationList.length)];
 
-      const prompt = `Create ONE unique recipe idea inspired by high-end restaurant cooking. 
+      const prompt = `Create ONE unique recipe idea inspired by this concept: "${selectedInspiration}"
 
-STRICT RULES:
-- NO pineapple dishes whatsoever
-- NO basic pasta, curry, or stir-fry
-- NO repetitive ingredients from previous suggestions
-- Focus on sophisticated restaurant techniques
+Transform this inspiration into something fresh and different while maintaining the sophisticated style. 
+Create a variation that uses similar techniques or flavors but with:
+- Different main ingredients
+- Alternative cooking methods  
+- Creative fusion elements
+- Unexpected flavor combinations
 
-Creative elements to incorporate:
-- Cuisine: ${randomCuisine}
-- Technique: ${randomMethod}  
-- Main ingredient: ${randomProtein}
-- Variation seed: ${randomSeed}
+Keep it to 4-8 words maximum.
+Randomization seed: ${randomSeed}
 
-Generate something a Michelin-starred chef would create, using:
-- Uncommon ingredient pairings
-- Advanced cooking methods
-- International fusion concepts
-- Premium ingredients
-
-Keep to 4-8 words maximum.
-
-Style examples: "Miso-glazed aubergine with black garlic", "Harissa lamb with pomegranate molasses", "Confit duck leg with cherry gastrique"`;
+Examples of transformations:
+- "Miso black cod" → "Miso-glazed aubergine with black garlic"  
+- "Butter chicken" → "Butter paneer with saffron cream"
+- "Beef wellington" → "Mushroom wellington with herb crust"`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: "You are a Michelin-starred chef creating sophisticated restaurant dishes. NEVER suggest pineapple dishes." },
+          { role: "system", content: "You are a creative chef who transforms classic dishes into exciting variations using sophisticated techniques." },
           { role: "user", content: prompt }
         ],
-        temperature: 0.98,
+        temperature: 0.9,
         max_tokens: 25
       });
 
-      let suggestion = completion.choices[0].message.content?.trim().replace(/"/g, '') || "Surprise fusion dinner";
-      
-      // Final safety check - if pineapple appears, use a fallback
-      if (suggestion.toLowerCase().includes('pineapple')) {
-        const fallbacks = [
-          "Miso-glazed black cod with yuzu",
-          "Harissa lamb with pomegranate molasses", 
-          "Truffle mushroom risotto with aged parmesan",
-          "Confit duck with cherry gastrique",
-          "Seared scallops with cauliflower purée",
-          "Za'atar crusted salmon with tahini",
-          "Korean bulgogi beef lettuce wraps",
-          "Moroccan tagine with preserved lemons",
-          "Thai basil duck red curry",
-          "Peruvian ceviche with tiger's milk"
-        ];
-        suggestion = fallbacks[Math.floor(Math.random() * fallbacks.length)];
-      }
+      const suggestion = completion.choices[0].message.content?.trim().replace(/"/g, '') || "Creative fusion surprise";
       
       res.json({ suggestion });
     } catch (error: any) {
