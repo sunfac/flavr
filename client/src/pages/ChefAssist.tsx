@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
+import { useRecipeStore } from "@/stores/recipeStore";
 import { ChefHat, Sparkles, Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { iconMap } from "@/lib/iconMap";
+import DidYouKnowLoader from "@/components/DidYouKnowLoader";
 
 // Use the original chef assist examples
 const chefExamples = [
@@ -69,6 +71,7 @@ export default function ChefAssist() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentExampleIndex, setCurrentExampleIndex] = useState(0);
   const { toast } = useToast();
+  const { setActiveRecipe } = useRecipeStore();
 
   // Generate 9 random examples on component mount to show 3 different sets
   const randomExamples = useMemo(() => getRandomSelection(chefExamples, 9), []);
@@ -117,21 +120,17 @@ export default function ChefAssist() {
       });
       const data = await response.json() as { recipe: any };
 
-      // Navigate directly to recipe card with full recipe
-      navigate("/recipe", {
-        state: {
-          recipe: data.recipe,
-          mode: "chef-assist",
-          showChat: true // Enable chat for modifications
-        }
-      });
+      // Store recipe in Zustand and navigate 
+      setActiveRecipe(data.recipe);
+      setIsProcessing(false);
+      navigate("/recipe");
+      
     } catch (error) {
       toast({
         title: "Error generating recipe",
         description: "Please try again",
         variant: "destructive",
       });
-    } finally {
       setIsProcessing(false);
     }
   };
@@ -219,6 +218,18 @@ export default function ChefAssist() {
                     </>
                   )}
                 </Button>
+
+                {/* Did You Know Loader - Show while processing */}
+                {isProcessing && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="mt-6"
+                  >
+                    <DidYouKnowLoader />
+                  </motion.div>
+                )}
               </div>
             </CardContent>
           </Card>

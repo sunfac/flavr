@@ -9,6 +9,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Badge } from "@/components/ui/badge";
+import DidYouKnowLoader from "@/components/DidYouKnowLoader";
+import { useRecipeStore } from "@/stores/recipeStore";
 
 export default function Fridge2Fork() {
   const [, navigate] = useLocation();
@@ -18,6 +20,7 @@ export default function Fridge2Fork() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { setActiveRecipe } = useRecipeStore();
 
   const handleImageUpload = async (file: File) => {
     if (!file) return;

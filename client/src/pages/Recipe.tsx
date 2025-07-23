@@ -13,21 +13,15 @@ export default function Recipe() {
   const [showChat, setShowChat] = useState(true);
   const { activeRecipe, setActiveRecipe } = useRecipeStore();
   
-  // Get recipe from navigation state
-  const locationState = (location as any).state || {};
-  const recipe = locationState.recipe;
-  const mode = locationState.mode || "chef-assist";
-
+  // Use activeRecipe from store as primary source
   useEffect(() => {
-    if (recipe) {
-      setActiveRecipe(recipe);
-    } else {
-      // No recipe provided, redirect to home
+    if (!activeRecipe) {
+      // No recipe in store, redirect to mode selection
       navigate("/app");
     }
-  }, [recipe, setActiveRecipe, navigate]);
+  }, [activeRecipe, navigate]);
 
-  if (!recipe) {
+  if (!activeRecipe) {
     return null;
   }
 
@@ -41,7 +35,7 @@ export default function Recipe() {
           className="flex-1"
         >
           <EnhancedRecipeCard 
-            recipe={recipe}
+            recipe={activeRecipe}
           />
         </motion.div>
 
