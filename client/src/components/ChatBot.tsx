@@ -323,8 +323,9 @@ export default function ChatBot({
     if (isOpen && chatHistory) {
       const messages: ChatMessage[] = [];
       
-      // Add Zest's welcome message if we have a recipe
-      if (currentRecipe && !hasShownWelcome) {
+      // Add Zest's welcome message if we have a recipe (check recipe store instead of prop)
+      const hasRecipe = recipeStore.meta.title || (currentRecipe && currentRecipe.title);
+      if (hasRecipe && !hasShownWelcome) {
         messages.push({
           id: 0,
           message: "",
@@ -361,7 +362,7 @@ export default function ChatBot({
         setLocalMessages(messages);
       }
     }
-  }, [isOpen, chatHistory, currentRecipe, hasShownWelcome]);
+  }, [isOpen, chatHistory, hasShownWelcome, recipeStore.meta.title]);
 
   const handleSend = (messageText?: string) => {
     const textToSend = messageText || message;

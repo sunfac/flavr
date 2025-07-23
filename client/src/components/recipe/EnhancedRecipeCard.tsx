@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Share2, BookOpen, Heart } from 'lucide-react';
+import { ArrowLeft, Share2, BookOpen, Heart, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useScaledIngredients } from '@/hooks/useScaledIngredients';
@@ -59,6 +59,7 @@ import StepStack from './StepStack';
 import ProgressBar from './ProgressBar';
 import FooterSection from './FooterSection';
 import { animations, layout } from '@/styles/tokens';
+import SocialShareTools from '@/components/SocialShareTools';
 
 interface Recipe {
   id: string;
@@ -545,7 +546,32 @@ function EnhancedRecipeCard({
           </div>
         )}
 
+        {/* Zest AI Guidance Text */}
+        <div className="p-6 bg-slate-800/20 border-t border-slate-700/50">
+          <div className="flex items-start gap-3">
+            <MessageCircle className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
+            <div className="w-full">
+              <h4 className="font-medium text-orange-400 mb-2">Ask Zest AI</h4>
+              <p className="text-slate-300 leading-relaxed text-sm">
+                Chat with Zest to modify this recipe, adjust ingredients, change cooking methods, 
+                add dietary restrictions, or get cooking tips. Just type your request in the chat panel!
+              </p>
+            </div>
+          </div>
+        </div>
 
+        {/* Share Recipe Section */}
+        <div className="p-6 bg-slate-800/20 border-t border-slate-700/50">
+          <SocialShareTools
+            id={recipe.id}
+            shareId={recipe.shareId}
+            title={activeTitle}
+            description={recipe.description || 'A delicious recipe created with Flavr AI'}
+            imageUrl={recipe.image}
+            isShared={recipe.isShared || false}
+            onShareToggle={onShare}
+          />
+        </div>
 
         {/* Footer Section */}
         <FooterSection
