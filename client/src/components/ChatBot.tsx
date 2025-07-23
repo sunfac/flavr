@@ -114,19 +114,73 @@ export default function ChatBot({
 
   // Send chat message with function calling support
   const sendMessageMutation = useMutation({
-    mutationFn: (data: { message: string; currentRecipe?: Recipe; mode?: string }) =>
-      apiRequest("POST", "/api/chat", {
-        ...data,
-        currentRecipe: getCurrentRecipeContext().recipe,
-        contextData: getCurrentRecipeContext(),
-        enableFunctionCalling: true
-      }),
-    onSuccess: async (response) => {
-      const result = await response.json();
+    mutationFn: async (data: { message: string; currentRecipe?: Recipe; mode?: string }) => {
+      const response = await fetch("/api/chat/stream", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: data.message,
+          conversationHistory: chatHistory.map((msg: any) => ({
+            role: msg.isUser ? 'user' : 'assistant',
+            content: msg.text || msg.message || msg.response
+          })),
+          currentRecipe: getCurrentRecipeContext().recipe,
+          openAIContext: getCurrentRecipeContext()
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Chat request failed: ${response.statusText}`);
+      }
+
+      // Read streaming response
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let fullResponse = "";
+      let functionCalls: any[] = [];
+
+      while (reader) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              
+              if (data.done) {
+                break;
+              }
+              
+              if (data.content) {
+                fullResponse += data.content;
+              }
+              
+              if (data.function_call) {
+                functionCalls.push(data.function_call);
+              }
+            } catch (e) {
+              // Skip invalid JSON
+            }
+          }
+        }
+      }
+
+      return { 
+        response: fullResponse,
+        functionCalls 
+      };
+    },
+    onSuccess: async (result) => {
+      // Result is already parsed from streaming response
       
       console.log('🔍 CHAT RESPONSE RECEIVED:', {
         hasFunctionCalls: !!result.functionCalls,
-        hasUpdatedRecipe: !!result.updatedRecipe,
         responseLength: result.response?.length || 0
       });
       
@@ -145,7 +199,6 @@ export default function ChatBot({
       console.log('🔍 CHATBOT RESPONSE:', {
         hasFunctionCalls: !!result.functionCalls,
         functionCallsLength: result.functionCalls?.length || 0,
-        hasUpdatedRecipe: !!result.updatedRecipe,
         functionCalls: result.functionCalls
       });
 
@@ -154,52 +207,31 @@ export default function ChatBot({
         result.functionCalls.forEach((functionCall: any) => {
           if (functionCall.name === 'updateRecipe') {
             try {
-              const { mode, data } = functionCall.arguments;
-              console.log(`🔧 EXECUTING Function Call: ${mode} recipe update`, data);
+              // Parse the arguments if they're a string
+              const args = typeof functionCall.arguments === 'string' 
+                ? JSON.parse(functionCall.arguments) 
+                : functionCall.arguments;
               
-              if (mode === 'replace') {
-                console.log('🔄 REPLACING entire recipe in store');
-                recipeActions.replaceRecipe(data);
-              } else if (mode === 'patch') {
-                console.log('🩹 PATCHING recipe in store with data:', data);
-                
-                // Force complete recipe store replacement to trigger UI refresh
-                console.log('🔄 Forcing complete recipe store update with:', data);
-                recipeActions.replaceRecipe({
-                  id: data.id,
-                  servings: data.servings,
-                  meta: data.meta,
-                  ingredients: data.ingredients,
-                  steps: data.steps,
-                  currentStep: 0,
-                  completedSteps: [],
-                  lastUpdated: Date.now()
-                });
-                
-                // Trigger recipe update callback if available
-                if (onRecipeUpdate) {
-                  onRecipeUpdate({
-                    id: data.id,
-                    title: data.meta.title,
-                    description: data.meta.description,
-                    cookTime: data.meta.cookTime,
-                    servings: data.servings,
-                    difficulty: data.meta.difficulty,
-                    cuisine: data.meta.cuisine,
-                    ingredients: data.ingredients.map((ing: any) => ing.text),
-                    instructions: data.steps.map((step: any) => step.description)
-                  });
-                }
-                
-                // Handle timer rescaling if step durations changed
-                if (data.steps) {
-                  data.steps.forEach((step: any) => {
-                    if (step.duration && timerStore.timers[step.id]) {
-                      timerStore.resetTimer(step.id);
-                    }
-                  });
-                }
-              }
+              console.log(`🔧 EXECUTING Function Call: updateRecipe`, args);
+              
+              // Update the recipe with the new data
+              console.log('🔄 Updating recipe in store with:', args);
+              
+              // Use the updateActiveRecipe action which handles both formats
+              recipeActions.updateActiveRecipe(args);
+              
+              // Show confirmation message
+              const updateMessage: ChatMessage = {
+                id: Date.now() + 1,
+                message: "",
+                response: "✅ Recipe updated! I've made the changes you requested.",
+                isUser: false,
+                text: "✅ Recipe updated! I've made the changes you requested.",
+                timestamp: new Date(),
+              };
+              setTimeout(() => {
+                setLocalMessages(prev => [...prev, updateMessage]);
+              }, 500);
               
               console.log('✅ Recipe store updated successfully');
               
@@ -212,70 +244,6 @@ export default function ChatBot({
 
       // Add the message to local state AFTER processing function calls
       setLocalMessages(prev => [...prev, newMessage]);
-
-      // Legacy recipe update support - only if no function calls were processed
-      if (result.updatedRecipe && (!result.functionCalls || result.functionCalls.length === 0)) {
-        console.log('📝 Recipe update detected:', result.updatedRecipe);
-        
-        // Update the recipe store directly to sync with live recipe card
-        if (result.updatedRecipe.servings !== recipeStore.servings) {
-          console.log(`🔄 Updating servings: ${recipeStore.servings} → ${result.updatedRecipe.servings}`);
-          recipeActions.updateServings(result.updatedRecipe.servings);
-        }
-        
-        // Update recipe metadata
-        recipeActions.patchRecipe({
-          meta: {
-            title: result.updatedRecipe.title,
-            description: result.updatedRecipe.description,
-            cookTime: result.updatedRecipe.cookTime,
-            difficulty: result.updatedRecipe.difficulty,
-            cuisine: result.updatedRecipe.cuisine
-          }
-        });
-        
-        // Update ingredients if they changed
-        if (result.updatedRecipe.ingredients) {
-          const updatedIngredients = result.updatedRecipe.ingredients.map((ingredient: string, index: number) => ({
-            id: `ingredient-${index}`,
-            text: ingredient,
-            checked: false
-          }));
-          recipeActions.patchRecipe({
-            ingredients: updatedIngredients
-          });
-        }
-        
-        // Update instructions if they changed
-        if (result.updatedRecipe.instructions) {
-          const updatedSteps = result.updatedRecipe.instructions.map((instruction: string, index: number) => ({
-            id: `step-${index}`,
-            title: `Step ${index + 1}`,
-            description: instruction,
-            duration: 0
-          }));
-          recipeActions.patchRecipe({
-            steps: updatedSteps
-          });
-        }
-        
-        // Call legacy callback if provided
-        if (onRecipeUpdate) {
-          onRecipeUpdate(result.updatedRecipe);
-        }
-        
-        const updateMessage: ChatMessage = {
-          id: Date.now() + 1,
-          message: "",
-          response: "Recipe updated! Check out the changes above.",
-          isUser: false,
-          text: "Recipe updated! Check out the changes above.",
-          timestamp: new Date(),
-        };
-        setTimeout(() => {
-          setLocalMessages(prev => [...prev, updateMessage]);
-        }, 500);
-      }
     },
     onError: (error) => {
       console.error('Chat error:', error);
