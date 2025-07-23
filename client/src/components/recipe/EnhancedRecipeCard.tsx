@@ -239,7 +239,7 @@ function EnhancedRecipeCard({
     try {
       console.log('🔄 Starting ingredient substitution:', { ingredientId, currentIngredient });
       
-      // Call a simple API to get just the substitute ingredient
+      // Call API to get substitute ingredient and updated instructions
       const response = await fetch('/api/ingredient-substitute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -248,7 +248,8 @@ function EnhancedRecipeCard({
           recipeContext: {
             title: activeTitle,
             cuisine: recipe.cuisine,
-            allIngredients: activeIngredients
+            allIngredients: activeIngredients,
+            instructions: activeInstructions
           }
         })
       });
@@ -257,6 +258,7 @@ function EnhancedRecipeCard({
       
       const data = await response.json();
       const substitute = data.substitute || data.suggestion || currentIngredient;
+      const updatedInstructions = data.updatedInstructions || activeInstructions;
       
       console.log('🔄 Got substitute:', { original: currentIngredient, substitute });
 
@@ -267,9 +269,13 @@ function EnhancedRecipeCard({
         const updatedIngredients = [...activeIngredients];
         updatedIngredients[index] = substitute;
         
-        console.log('🔄 Updating ingredients:', { index, updatedIngredients });
+        console.log('🔄 Updating ingredients and instructions:', { 
+          index, 
+          updatedIngredients,
+          instructionsUpdated: updatedInstructions.length
+        });
         
-        // Update recipe store with the comprehensive changes
+        // Update recipe store with both ingredient and instruction changes
         recipeActions.replaceRecipe({
           id: recipe.id,
           servings: activeServings,
@@ -278,7 +284,7 @@ function EnhancedRecipeCard({
             text,
             checked: false
           })),
-          steps: activeInstructions.map((instruction, i) => ({
+          steps: updatedInstructions.map((instruction, i) => ({
             id: `step-${i}`,
             title: `Step ${i + 1}`,
             description: instruction

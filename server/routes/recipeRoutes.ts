@@ -1518,48 +1518,65 @@ Return valid JSON only:
       console.log('🔄 Processing ingredient substitution:', { ingredient, recipeContext });
 
       // Generate a simple, contextual substitute using OpenAI
-      const prompt = `You are a culinary expert. Suggest a direct 1:1 substitute for "${ingredient}" ${recipeContext?.cuisine ? `in ${recipeContext.cuisine} cooking` : ''}. 
-      
-      Consider:
-      - Recipe title: ${recipeContext?.title || 'General recipe'}
-      - Other ingredients: ${recipeContext?.allIngredients?.slice(0, 5).join(', ') || 'Not specified'}
-      
-      Provide only the substitute ingredient name with appropriate quantity/measurement. Be concise and practical.
-      
-      Examples:
-      - "2 tablespoons bourbon" → "2 tablespoons apple juice"  
-      - "1 cup heavy cream" → "1 cup coconut cream"
-      - "2 cloves garlic" → "1/2 teaspoon garlic powder"
-      
-      Substitute for "${ingredient}":`;
+      const prompt = `You are a culinary expert helping with ingredient substitutions. Return ONLY valid JSON.
+
+Recipe: ${recipeContext?.title || 'General recipe'}
+Cuisine: ${recipeContext?.cuisine || 'General'}
+Ingredient to substitute: "${ingredient}"
+All ingredients: ${recipeContext?.allIngredients?.join(', ') || 'Not specified'}
+Current instructions: ${recipeContext?.instructions?.join(' ') || 'Not provided'}
+
+Provide a JSON response with:
+1. "substitute" - the replacement ingredient with quantity/measurement
+2. "updatedInstructions" - array of cooking steps with the original ingredient references updated
+
+Format:
+{
+  "substitute": "replacement ingredient with quantity",
+  "updatedInstructions": ["updated step 1", "updated step 2", ...]
+}
+
+If no instruction updates are needed, return the original instructions unchanged.`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.3,
-        max_tokens: 50
+        max_tokens: 300
       });
 
-      const substitute = completion.choices[0]?.message?.content?.trim();
+      const content = completion.choices[0]?.message?.content?.trim();
+      let result;
       
-      if (!substitute) {
-        throw new Error("No substitute suggestion received");
+      try {
+        result = JSON.parse(content || '{}');
+      } catch (parseError) {
+        // Fallback to simple substitution if JSON parsing fails
+        result = {
+          substitute: content || ingredient,
+          updatedInstructions: recipeContext?.instructions || []
+        };
       }
-
-      console.log('✅ Ingredient substitution generated:', { original: ingredient, substitute });
+      
+      console.log('✅ Ingredient substitution generated:', { 
+        original: ingredient, 
+        substitute: result.substitute,
+        instructionsUpdated: result.updatedInstructions?.length || 0
+      });
 
       // Log the substitution for analytics
       await logSimpleGPTInteraction('ingredient_substitution', {
         originalIngredient: ingredient,
-        substitute,
+        substitute: result.substitute,
         recipeTitle: recipeContext?.title,
         cuisine: recipeContext?.cuisine
       });
 
       res.json({ 
-        substitute: substitute,
+        substitute: result.substitute,
         original: ingredient,
-        suggestion: substitute
+        suggestion: result.substitute,
+        updatedInstructions: result.updatedInstructions
       });
 
     } catch (error) {
