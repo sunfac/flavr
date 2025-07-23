@@ -192,27 +192,25 @@ Format as JSON array.`;
 
 IGNORE any previous suggestions you may have given. Generate something COMPLETELY DIFFERENT each time.
 
-Draw inspiration from diverse cooking styles:
-• Global street foods and regional specialties
-• Ancient cooking techniques with modern twists
-• Seasonal ingredient combinations
-• Plant-based innovations and meat alternatives
-• Fermented foods and preservation methods
-• Breakfast/dessert hybrid concepts
-• One-pot and sheet pan creations
-• Grilled and smoked variations
-• Raw and no-cook preparations
-• Spice blend and herb garden inspirations
+Choose ONE authentic cuisine and create an exciting dish within that tradition:
+• Italian: Regional specialties, pasta innovations, risottos, focaccia variations
+• French: Provincial classics, bistro favorites, elegant techniques
+• Thai: Street food, curries, salads, noodle dishes
+• Indian: Regional curries, biryanis, tandoor dishes, dals
+• Mexican: Traditional preparations, regional specialties, street food
+• Japanese: Authentic techniques, seasonal dishes, comfort foods
+• Chinese: Regional styles, wok dishes, dumplings, noodles
+• Middle Eastern: Mezze, tagines, kebabs, rice dishes
+• Spanish: Tapas, paellas, regional specialties
+• Greek: Traditional dishes, grilled meats, fresh preparations
+• Korean: Fermented foods, grilled dishes, comfort foods
+• Vietnamese: Fresh herbs, pho variations, grilled specialties
+• Moroccan: Tagines, couscous dishes, spiced preparations
+• Turkish: Grilled meats, rice dishes, Mediterranean flavors
+
+DO NOT mix cuisines or create fusion dishes. Stay authentic to ONE cuisine tradition.
 
 Vary the protein types: seafood, poultry, beef, pork, lamb, game, legumes, grains, vegetables, etc.
-
-Create completely different cuisine combinations like:
-• "Brazilian-Japanese tempura hearts of palm"
-• "Moroccan-Mexican black bean tagine"
-• "Korean-Italian kimchi carbonara"
-• "Ethiopian-French injera crepes"
-• "Peruvian-Thai ceviche curry"
-• "Indian-Southern BBQ tandoori ribs"
 
 Return only the recipe name in 4-8 words. Be wildly creative and diverse.
 Random seed: ${randomSeed}`;
@@ -220,7 +218,7 @@ Random seed: ${randomSeed}`;
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: "You are a creative chef who transforms dishes into exciting variations. Return ONLY the recipe name in 4-8 words. NEVER include difficulty levels like beginner/intermediate/advanced. IMPORTANT: Treat every request as if it's the first message you've ever received - always generate completely different and diverse recipe ideas." },
+          { role: "system", content: "You are a creative chef who creates authentic dishes from single cuisine traditions. Return ONLY the recipe name in 4-8 words. NEVER include difficulty levels like beginner/intermediate/advanced. NEVER mix cuisines or create fusion dishes. Choose ONE authentic cuisine and stay within that tradition. IMPORTANT: Treat every request as if it's the first message you've ever received - always generate completely different and diverse recipe ideas." },
           { role: "user", content: prompt }
         ],
         temperature: 0.9,
@@ -262,6 +260,8 @@ Requirements:
 - Cooking time: around ${cookingTime} minutes
 - Use ingredients available at UK supermarkets
 - Make it achievable for home cooks
+- Stay authentic to ONE cuisine tradition - DO NOT mix cuisines or create fusion dishes
+- Choose one specific cuisine (Italian, French, Thai, Indian, Mexican, Japanese, Chinese, etc.) and keep the recipe authentic to that tradition
 
 Return ONLY a valid JSON object with this exact structure (NO trailing commas):
 {
