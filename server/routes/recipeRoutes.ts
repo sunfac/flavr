@@ -536,7 +536,24 @@ Format as JSON with structure:
         temperature: 0.7
       });
 
-      const recipe = JSON.parse(completion.choices[0].message.content || "{}");
+      // Clean and parse the JSON response
+      let content = completion.choices[0].message.content || "{}";
+      
+      // Remove trailing commas before closing brackets/braces
+      content = content.replace(/,(\s*[}\]])/g, '$1');
+      
+      // Remove any potential markdown code block markers
+      content = content.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+      
+      // Try to parse, with fallback error handling
+      let recipe;
+      try {
+        recipe = JSON.parse(content);
+      } catch (parseError) {
+        console.error('JSON parsing failed, content:', content);
+        console.error('Parse error:', parseError);
+        throw new Error('Failed to parse recipe JSON: ' + parseError.message);
+      }
       
       // Generate image for the recipe
       const imageUrl = await generateRecipeImage(recipe.title, recipe.cuisine);
