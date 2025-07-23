@@ -396,9 +396,10 @@ export default function ChatBot({
 
       {/* Chat Panel - Right Side Panel */}
       <div 
-        className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-slate-900/95 backdrop-blur-md border-l border-orange-500/30 shadow-2xl transition-all duration-500 z-50 flex flex-col ${
+        className={`fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-96 bg-slate-900/95 backdrop-blur-md border-l border-orange-500/30 shadow-2xl transition-all duration-500 z-50 flex flex-col h-screen ${
           isOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
         }`}
+        style={{ height: '100vh', maxHeight: '-webkit-fill-available' }}
       >
         <CardHeader className="p-3 sm:p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-3">
@@ -427,11 +428,11 @@ export default function ChatBot({
           </Button>
         </CardHeader>
         
-        <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
+        <CardContent className="flex-1 overflow-hidden p-0 flex flex-col min-h-0">
           {/* Messages Area */}
           <div 
             ref={scrollAreaRef}
-            className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 min-h-0"
+            className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3"
           >
             {localMessages.map((msg, index) => (
               <div key={msg.id} className={`mb-3 ${msg.isUser ? "text-right" : "text-left"}`}>
@@ -481,29 +482,31 @@ export default function ChatBot({
             </div>
           )}
 
-          {/* Input Area */}
-          <div className="p-3 sm:p-4 border-t border-slate-700/50 bg-slate-800/50 backdrop-blur-sm flex-shrink-0">
-            <div className="flex items-center space-x-2">
-              <Input
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Ask me anything..."
-                className="flex-1 bg-slate-700/70 border-slate-600 text-white placeholder:text-slate-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
-                disabled={sendMessageMutation.isPending}
-              />
-              <Button
-                onClick={() => handleSend()}
-                disabled={!message.trim() || sendMessageMutation.isPending}
-                size="sm"
-                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
-              >
-                {sendMessageMutation.isPending ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <iconMap.send className="w-4 h-4" />
-                )}
-              </Button>
+          {/* Input Area - Fixed at bottom with safe area for mobile */}
+          <div className="border-t border-slate-700/50 bg-slate-800/50 backdrop-blur-sm flex-shrink-0 safe-area-bottom">
+            <div className="p-3 sm:p-4">
+              <div className="flex items-center space-x-2">
+                <Input
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Ask me anything..."
+                  className="flex-1 bg-slate-700/70 border-slate-600 text-white placeholder:text-slate-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                  disabled={sendMessageMutation.isPending}
+                />
+                <Button
+                  onClick={() => handleSend()}
+                  disabled={!message.trim() || sendMessageMutation.isPending}
+                  size="sm"
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
+                >
+                  {sendMessageMutation.isPending ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <iconMap.send className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>
