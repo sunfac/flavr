@@ -203,44 +203,53 @@ Format as JSON array.`;
       const randomSeed = Math.floor(Math.random() * 10000);
       const selectedInspiration = inspirationList[Math.floor(Math.random() * inspirationList.length)];
 
-      const prompt = `Create ONE unique recipe idea inspired by this concept: "${selectedInspiration}"
+      // Create inspiration style variations
+      const inspirationStyles = [
+        "Chef-inspired: Add famous chef techniques",
+        "Mood-inspired: Capture cozy, elegant, or rustic vibes", 
+        "Restaurant-inspired: Create elevated street food or bistro versions",
+        "Weather-inspired: Perfect for current season and weather",
+        "Cultural-inspired: Blend with different regional traditions",
+        "Technique-inspired: Highlight specific cooking methods"
+      ];
+      
+      const selectedStyle = inspirationStyles[Math.floor(Math.random() * inspirationStyles.length)];
+      
+      const prompt = `Take this inspiration: "${selectedInspiration}"
 
-Transform this inspiration using VARIED cooking skill levels and ingredient types:
+Transform it using this approach: ${selectedStyle}
 
-SKILL LEVEL VARIATION (rotate randomly):
-- Beginner: Simple techniques, 5-6 common ingredients, 30 minutes max
-- Intermediate: Moderate techniques, specialty ingredients, 45-60 minutes
-- Advanced: Complex techniques, premium/exotic ingredients, multiple steps
+Create a creative recipe name that captures this transformation. Examples:
+• "Ramsay-style beef wellington bites" (Chef-inspired)
+• "Cozy autumn butternut squash risotto" (Mood-inspired)  
+• "Street-style Korean corn dogs" (Restaurant-inspired)
+• "Winter spiced lamb tagine" (Weather-inspired)
+• "Thai-fusion carbonara noodles" (Cultural-inspired)
+• "Sous vide honey glazed salmon" (Technique-inspired)
 
-INGREDIENT TYPE VARIATION (rotate randomly):
-- Plant-based: Focus on vegetables, legumes, grains, plant proteins
-- Seafood: Fish, shellfish, seaweed, coastal flavors
-- Meat: Beef, pork, lamb, game meats, organ meats
-- Poultry: Chicken, duck, turkey, quail
-- Dairy-focused: Cheese, cream, butter as stars
-- Pantry staples: Pasta, rice, canned goods, dried ingredients
-- Exotic/Premium: Truffles, saffron, wagyu, caviar, rare spices
-
-Create something that varies the original concept with different skill demands and ingredient categories.
-Keep to 4-8 words maximum.
-Randomization seed: ${randomSeed}
-
-Examples across levels:
-- Beginner: "Easy chicken teriyaki rice bowl"
-- Intermediate: "Duck breast with five-spice glaze"  
-- Advanced: "Sous vide beef with truffle emulsion"`;
+Return only the recipe name in 4-8 words.
+Random seed: ${randomSeed}`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: "You are a creative chef who transforms classic dishes into exciting variations using sophisticated techniques." },
+          { role: "system", content: "You are a creative chef who transforms dishes into exciting variations. Return ONLY the recipe name in 4-8 words. NEVER include difficulty levels like beginner/intermediate/advanced." },
           { role: "user", content: prompt }
         ],
         temperature: 0.9,
         max_tokens: 25
       });
 
-      const suggestion = completion.choices[0].message.content?.trim().replace(/"/g, '') || "Creative fusion surprise";
+      let suggestion = completion.choices[0].message.content?.trim().replace(/"/g, '') || "Creative fusion surprise";
+      
+      // Strip out any difficulty level references
+      suggestion = suggestion
+        .replace(/^(Beginner|Intermediate|Advanced)[:.\s-]*/gi, '')
+        .replace(/\s*(Beginner|Intermediate|Advanced)\s*[:.\s-]*/gi, ' ')
+        .replace(/^-\s*\*?\*?(Beginner|Intermediate|Advanced)\*?\*?\s*[:.\s-]*/gi, '')
+        .replace(/^\s*[-•]\s*/g, '')
+        .replace(/\n.*$/g, '') // Remove any additional lines
+        .trim();
       
       res.json({ suggestion });
     } catch (error: any) {
