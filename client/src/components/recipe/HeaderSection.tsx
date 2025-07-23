@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Users, ChefHat } from 'lucide-react';
+import { Users, ChefHat } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { animations, spacing } from '@/styles/tokens';
 
@@ -23,23 +23,11 @@ export default function HeaderSection({
   currentServings
 }: HeaderSectionProps) {
   const fastFacts = useMemo(() => {
-    // Format cookTime properly whether it's a number or string
-    let cookTimeLabel = '';
-    if (typeof recipe.cookTime === 'number') {
-      cookTimeLabel = `${recipe.cookTime} minutes`;
-    } else if (typeof recipe.cookTime === 'string') {
-      // If it already has "minutes" or "min", use as is; otherwise add "minutes"
-      cookTimeLabel = recipe.cookTime.includes('min') ? recipe.cookTime : `${recipe.cookTime} minutes`;
-    } else {
-      cookTimeLabel = '30 minutes'; // Default fallback
-    }
-    
     return [
-      { icon: Clock, label: cookTimeLabel, value: 'time' },
       { icon: Users, label: `Serves ${currentServings}`, value: 'servings' },
       { icon: ChefHat, label: recipe.difficulty, value: 'difficulty' },
     ];
-  }, [recipe.cookTime, currentServings, recipe.difficulty]);
+  }, [currentServings, recipe.difficulty]);
 
   return (
     <div className="relative">
