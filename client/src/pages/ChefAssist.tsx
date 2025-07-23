@@ -59,11 +59,11 @@ export default function ChefAssist() {
   // Generate 6 random examples on component mount
   const randomExamples = useMemo(() => getRandomSelection(chefExamples, 6), []);
 
-  // Rotate examples every 3 seconds (show 3 at a time)
+  // Rotate examples every 6 seconds (show 3 at a time)
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentExampleIndex((prev) => (prev + 3) % randomExamples.length);
-    }, 3000);
+    }, 6000);
     return () => clearInterval(interval);
   }, [randomExamples.length]);
 
@@ -83,7 +83,7 @@ export default function ChefAssist() {
   };
 
   const handleGenerateRecipe = async () => {
-    if (!prompt.trim()) {
+    if (!prompt || !prompt.trim()) {
       toast({
         title: "Please enter what you'd like to cook",
         description: "Tell us what you're craving!",
