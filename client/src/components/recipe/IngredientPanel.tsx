@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { RefreshCw, Loader2 } from 'lucide-react';
+import { RefreshCw, Loader2, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { animations } from '@/styles/tokens';
@@ -39,6 +39,24 @@ export default function IngredientPanel({
       {/* Desktop: Fixed Sidebar */}
       <div className={`hidden md:block ${className}`}>
         <div className="h-full overflow-y-auto bg-slate-800/50 rounded-xl p-6" style={{ scrollbarGutter: 'stable' }}>
+          {/* Chat Feature Guide */}
+          <motion.div
+            className="mb-4"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="bg-gradient-to-r from-orange-500/20 to-orange-600/20 border border-orange-500/40 rounded-lg p-3 backdrop-blur-sm">
+              <div className="flex items-center gap-2 mb-1">
+                <MessageCircle className="w-4 h-4 text-orange-400" />
+                <span className="text-orange-200 font-medium text-xs">Ask Zest to customize!</span>
+              </div>
+              <p className="text-orange-100/80 text-xs leading-relaxed">
+                Chat to modify servings, swap ingredients, or change cooking methods.
+              </p>
+            </div>
+          </motion.div>
+
           <h3 className="font-semibold text-white mb-4" style={{ fontSize: 'var(--step-1)' }}>
             Ingredients ({ingredients.length})
           </h3>
@@ -58,6 +76,24 @@ export default function IngredientPanel({
       {/* Mobile: Compact Card Layout */}
       <div className={`md:hidden ${className}`}>
         <div className="p-4 bg-slate-800/40 border-b border-slate-700/50 mb-0">
+          {/* Mobile Chat Feature Guide */}
+          <motion.div
+            className="mb-4"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="bg-gradient-to-r from-orange-500/20 to-orange-600/20 border border-orange-500/40 rounded-lg p-2.5 backdrop-blur-sm">
+              <div className="flex items-center gap-2 mb-1">
+                <MessageCircle className="w-3.5 h-3.5 text-orange-400" />
+                <span className="text-orange-200 font-medium text-xs">Chat to customize</span>
+              </div>
+              <p className="text-orange-100/80 text-xs leading-relaxed">
+                Modify servings, swap ingredients, or change methods.
+              </p>
+            </div>
+          </motion.div>
+
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-white" style={{ fontSize: 'var(--step-0)' }}>
               Ingredients

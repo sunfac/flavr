@@ -469,23 +469,7 @@ function EnhancedRecipeCard({
         </div>
       </div>
 
-      {/* Chat Feature Guide */}
-      <motion.div
-        className="max-w-7xl mx-auto mb-4 px-4"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <div className="bg-gradient-to-r from-orange-500/20 to-orange-600/20 border border-orange-500/40 rounded-lg p-3 backdrop-blur-sm">
-          <div className="flex items-center gap-2 mb-1">
-            <MessageCircle className="w-4 h-4 text-orange-400" />
-            <span className="text-orange-200 font-medium text-sm">Ask Zest to customize this recipe!</span>
-          </div>
-          <p className="text-orange-100/80 text-xs leading-relaxed">
-            Chat to modify servings, swap ingredients, change cooking methods, add dietary restrictions, or ask cooking questions.
-          </p>
-        </div>
-      </motion.div>
+
 
       {/* Main Recipe Card */}
       <motion.div

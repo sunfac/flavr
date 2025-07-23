@@ -57,28 +57,7 @@ export default function Recipe() {
 
   return (
     <PageLayout className="max-w-7xl mx-auto">
-      {/* Chat Feature Guide Banner */}
-      <motion.div
-        className="mb-6 mx-4"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        <div className="bg-gradient-to-r from-orange-500/20 to-orange-600/20 border border-orange-500/40 rounded-lg p-4 backdrop-blur-sm">
-          <div className="flex items-start gap-3">
-            <MessageCircle className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
-            <div>
-              <h3 className="text-orange-200 font-medium text-sm mb-1">
-                Customize this recipe with Zest AI Assistant
-              </h3>
-              <p className="text-orange-100/80 text-xs leading-relaxed">
-                Ask to modify servings, swap ingredients, change cooking methods, add dietary restrictions, or get cooking tips. 
-                Click the chat button to start personalizing your recipe!
-              </p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+
 
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Recipe Card - Main Content */}

@@ -511,10 +511,10 @@ export default function ChatBot({
         </CardHeader>
         
         <CardContent className="flex-1 overflow-hidden p-0 flex flex-col min-h-0 mobile-chat-content relative">
-          {/* Messages Area - Leave space for fixed input */}
+          {/* Messages Area */}
           <div 
             ref={scrollAreaRef}
-            className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 min-h-0 mobile-chat-messages pb-24"
+            className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 min-h-0 mobile-chat-messages"
           >
             {localMessages.map((msg, index) => (
               <div key={msg.id} className={`mb-3 ${msg.isUser ? "text-right" : "text-left"}`}>
@@ -566,8 +566,8 @@ export default function ChatBot({
           )}
 
           {/* Input Area - Fixed at bottom with proper spacing */}
-          <div className="absolute bottom-0 left-0 right-0 border-t-2 border-orange-500/60 bg-slate-900/95 backdrop-blur-lg flex-shrink-0 mobile-chat-input safe-area-bottom">
-            <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="p-4" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
+          <div className="border-t-2 border-orange-500/60 bg-slate-900/95 backdrop-blur-lg flex-shrink-0 mobile-chat-input safe-area-bottom">
+            <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="p-4">
               <div className="flex items-center gap-3">
                 <input
                   type="text"
