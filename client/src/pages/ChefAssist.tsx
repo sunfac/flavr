@@ -71,9 +71,11 @@ export default function ChefAssist() {
     setIsProcessing(true);
     try {
       // Get AI-generated unique suggestion
-      const response = await apiRequest("POST", "/api/chef-assist/inspire", {}) as { suggestion: string };
-      setPrompt(response.suggestion);
+      const response = await apiRequest("POST", "/api/chef-assist/inspire", {});
+      const data = await response.json() as { suggestion: string };
+      setPrompt(data.suggestion);
     } catch (error) {
+      console.error('Inspire error:', error);
       // Fallback to random suggestion if API fails
       const randomIndex = Math.floor(Math.random() * chefExamples.length);
       setPrompt(chefExamples[randomIndex]);
@@ -98,12 +100,13 @@ export default function ChefAssist() {
         prompt: prompt.trim(),
         servings: 4, // Default servings
         cookingTime: 30 // Default cooking time
-      }) as { recipe: any };
+      });
+      const data = await response.json() as { recipe: any };
 
       // Navigate directly to recipe card with full recipe
       navigate("/recipe", {
         state: {
-          recipe: response.recipe,
+          recipe: data.recipe,
           mode: "chef-assist",
           showChat: true // Enable chat for modifications
         }
