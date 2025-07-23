@@ -94,7 +94,8 @@ export default function FridgeMode() {
 
     console.log("Quota approved, starting API call...");
     try {
-      setIsLoading(true);
+      // Navigate to dedicated loading page
+      navigate("/loading");
       
       // Use the already transformed data with random cuisine selection
       const apiData = {
@@ -145,10 +146,12 @@ export default function FridgeMode() {
       console.log("Recipe ideas received:", response.recipes || []);
       setRecipeIdeas(response.recipes || []);
       setCurrentStep("suggestions");
+      // Navigate back to fridge mode with results
+      navigate("/fridge");
     } catch (error) {
       console.error("Failed to generate recipe ideas:", error);
-    } finally {
-      setIsLoading(false);
+      // Navigate back even with error
+      navigate("/fridge");
     }
   };
 

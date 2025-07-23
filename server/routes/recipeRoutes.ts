@@ -267,7 +267,7 @@ Requirements:
 - Use ingredients available at UK supermarkets
 - Make it achievable for home cooks
 
-Return ONLY a valid JSON object with this exact structure:
+Return ONLY a valid JSON object with this exact structure (NO trailing commas):
 {
   "title": "Recipe Name",
   "description": "Brief description",
@@ -282,7 +282,7 @@ Return ONLY a valid JSON object with this exact structure:
   "nutritionalHighlights": ["nutritional benefit"]
 }
 
-IMPORTANT: Return ONLY the JSON object, no other text.`;
+CRITICAL: Ensure NO trailing commas after the last item in any array or object. Return ONLY the JSON object, no markdown, no explanations.`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -296,8 +296,14 @@ IMPORTANT: Return ONLY the JSON object, no other text.`;
       let recipe;
       try {
         const content = completion.choices[0].message.content || "{}";
-        // Clean up any potential markdown or extra text
-        const cleanContent = content.replace(/```json\n?/g, '').replace(/\n?```/g, '').trim();
+        // Clean up any potential markdown, extra text, and trailing commas
+        let cleanContent = content.replace(/```json\n?/g, '').replace(/\n?```/g, '').trim();
+        
+        // Fix common JSON errors: trailing commas in arrays and objects
+        cleanContent = cleanContent.replace(/,(\s*[}\]])/g, '$1');
+        // Fix trailing commas specifically after object entries in arrays
+        cleanContent = cleanContent.replace(/},(\s*\])/g, '}$1');
+        
         recipe = JSON.parse(cleanContent);
       } catch (parseError) {
         console.error('JSON parsing error:', parseError);

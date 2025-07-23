@@ -30,6 +30,7 @@ import Fridge2Fork from "@/pages/Fridge2Fork";
 import ChefAssist from "@/pages/ChefAssist";
 import Recipe from "@/pages/Recipe";
 import RecipeSelection from "@/pages/RecipeSelection";
+import LoadingPage from "@/pages/LoadingPage";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 
 function Router() {
@@ -62,6 +63,7 @@ function Router() {
       <Route path="/chef-assist" component={ChefAssist} />
       <Route path="/recipe" component={Recipe} />
       <Route path="/recipe-selection" component={RecipeSelection} />
+      <Route path="/loading" component={LoadingPage} />
       <Route component={NotFound} />
     </Switch>
   );

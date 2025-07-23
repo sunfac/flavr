@@ -83,7 +83,8 @@ export default function ShoppingMode() {
     }
 
     try {
-      setIsLoading(true);
+      // Navigate to dedicated loading page instead of inline loading
+      navigate("/loading");
       
       const fetchResponse = await fetch("/api/generate-recipe-ideas", {
         method: "POST",
@@ -112,6 +113,8 @@ export default function ShoppingMode() {
       
       setRecipeIdeas(transformedRecipes);
       setCurrentStep("suggestions");
+      // Navigate back to shopping mode with results
+      navigate("/shopping");
     } catch (error) {
       console.error("Recipe generation failed:", error);
       // Fallback recipes
@@ -127,8 +130,8 @@ export default function ShoppingMode() {
       ];
       setRecipeIdeas(fallbackRecipes);
       setCurrentStep("suggestions");
-    } finally {
-      setIsLoading(false);
+      // Navigate back even with fallback
+      navigate("/shopping");
     }
   };
 

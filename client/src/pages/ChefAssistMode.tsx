@@ -76,7 +76,8 @@ export default function ChefAssistMode() {
     }
 
     try {
-      setIsLoading(true);
+      // Navigate to dedicated loading page
+      navigate("/loading");
 
       // Generate recipe directly for Chef mode using the dedicated chef endpoint
       const fetchResponse = await fetch("/api/chef-assist-recipe", {
@@ -104,14 +105,16 @@ export default function ChefAssistMode() {
       if (response && (response.title || response.recipe)) {
         setGeneratedRecipe(response.recipe || response);
         setCurrentStep("recipe");
+        // Navigate back to chef assist mode with results
+        navigate("/chef");
       } else {
         throw new Error("No recipe data received");
       }
     } catch (error) {
       console.error("Failed to generate recipe:", error);
       setCurrentStep("recipe");
-    } finally {
-      setIsLoading(false);
+      // Navigate back even with error
+      navigate("/chef");
     }
   };
 
