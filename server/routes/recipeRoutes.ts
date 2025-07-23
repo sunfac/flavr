@@ -205,20 +205,30 @@ Format as JSON array.`;
 
       const prompt = `Create ONE unique recipe idea inspired by this concept: "${selectedInspiration}"
 
-Transform this inspiration into something fresh and different while maintaining the sophisticated style. 
-Create a variation that uses similar techniques or flavors but with:
-- Different main ingredients
-- Alternative cooking methods  
-- Creative fusion elements
-- Unexpected flavor combinations
+Transform this inspiration using VARIED cooking skill levels and ingredient types:
 
-Keep it to 4-8 words maximum.
+SKILL LEVEL VARIATION (rotate randomly):
+- Beginner: Simple techniques, 5-6 common ingredients, 30 minutes max
+- Intermediate: Moderate techniques, specialty ingredients, 45-60 minutes
+- Advanced: Complex techniques, premium/exotic ingredients, multiple steps
+
+INGREDIENT TYPE VARIATION (rotate randomly):
+- Plant-based: Focus on vegetables, legumes, grains, plant proteins
+- Seafood: Fish, shellfish, seaweed, coastal flavors
+- Meat: Beef, pork, lamb, game meats, organ meats
+- Poultry: Chicken, duck, turkey, quail
+- Dairy-focused: Cheese, cream, butter as stars
+- Pantry staples: Pasta, rice, canned goods, dried ingredients
+- Exotic/Premium: Truffles, saffron, wagyu, caviar, rare spices
+
+Create something that varies the original concept with different skill demands and ingredient categories.
+Keep to 4-8 words maximum.
 Randomization seed: ${randomSeed}
 
-Examples of transformations:
-- "Miso black cod" → "Miso-glazed aubergine with black garlic"  
-- "Butter chicken" → "Butter paneer with saffron cream"
-- "Beef wellington" → "Mushroom wellington with herb crust"`;
+Examples across levels:
+- Beginner: "Easy chicken teriyaki rice bowl"
+- Intermediate: "Duck breast with five-spice glaze"  
+- Advanced: "Sous vide beef with truffle emulsion"`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
