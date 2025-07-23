@@ -135,7 +135,7 @@ CONSTRAINTS:
 - Budget per serving: £${(budget / servings).toFixed(2)}
 - Equipment: ${equipment.join(", ")}
 ${dietaryRestrictions.length > 0 ? `- Dietary restrictions: ${dietaryRestrictions.join(", ")}` : ""}
-- Ingredient flexibility: You can add common pantry staples (oil, salt, pepper, basic spices, garlic, onions)
+- Ingredient flexibility: You can add common pantry staples AND substitute ingredients with more appropriate alternatives (e.g., pasta instead of rice for pasta dishes, appropriate proteins for the cuisine, etc.)
 
 Create 3 DIVERSE recipe suggestions that:
 1. Use SOME of the available ingredients as primary components (NOT necessarily all)
@@ -509,10 +509,11 @@ ${dietaryRestrictions.length > 0 ? `- Dietary restrictions: ${dietaryRestriction
 
 Create a COMPLETE recipe that:
 1. Uses appropriate ingredients from the available list that work well with the chosen cuisine
-2. Adds suitable pantry staples, spices, and aromatics for authentic flavor
-3. Focuses on culinary harmony rather than forcing all ingredients into the dish
-4. Stays true to the recipe concept and cuisine
-5. Is achievable within the constraints with exact measurements and clear instructions
+2. SUBSTITUTE available ingredients with more suitable alternatives when needed (e.g., use pasta instead of rice for pasta salad, use appropriate proteins for the dish style)
+3. Add common pantry staples, spices, and aromatics for authentic flavor and proper cooking
+4. Focus on culinary logic and authentic dish preparation over literally using every available ingredient
+5. Prioritize making a delicious, well-constructed dish that matches the recipe concept
+6. Include exact measurements and clear instructions within the time and equipment constraints
 
 Format as JSON with structure:
 {
