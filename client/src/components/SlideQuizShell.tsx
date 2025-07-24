@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Camera, Loader2 } from "lucide-react";
+import { Camera, Loader2, X } from "lucide-react";
 import { iconMap } from "@/lib/iconMap";
 import { useToast } from "@/hooks/use-toast";
 
@@ -427,17 +427,26 @@ export default function SlideQuizShell({
             </p>
 
             {ingredients.length > 0 && (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <p className="text-sm font-medium text-slate-300">Added ingredients:</p>
+                <p className="text-xs text-slate-400">Click the × to remove any ingredients you don't want to use</p>
                 <div className="flex flex-wrap gap-2">
                   {ingredients.map((ingredient, index) => (
                     <Badge
                       key={index}
                       variant="secondary"
-                      className="bg-orange-500/20 border border-orange-400/30 text-orange-200 hover:bg-orange-500/30 cursor-pointer"
-                      onClick={() => removeIngredient(index)}
+                      className="pl-3 pr-1 py-2 bg-orange-500/20 border border-orange-400/30 text-orange-200 hover:bg-orange-500/30 transition-colors"
                     >
-                      {ingredient} ×
+                      {ingredient}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="ml-2 h-auto p-1 hover:bg-red-400/20 rounded-full"
+                        onClick={() => removeIngredient(index)}
+                        title={`Remove ${ingredient}`}
+                      >
+                        <X className="w-3 h-3 text-red-300 hover:text-red-200" />
+                      </Button>
                     </Badge>
                   ))}
                 </div>

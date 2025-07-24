@@ -277,37 +277,43 @@ export default function Fridge2Fork() {
                   </Button>
                 </div>
 
-                {/* Ingredient tags - original style */}
+                {/* Ingredient tags - enhanced with clear delete functionality */}
                 <AnimatePresence>
                   {ingredients.length > 0 && (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="flex flex-wrap gap-2 justify-center max-w-2xl mx-auto"
+                      className="space-y-3"
                     >
-                      {ingredients.map((ingredient, index) => (
-                        <motion.div
-                          key={ingredient}
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                        >
-                          <Badge 
-                            variant="secondary" 
-                            className="pl-3 pr-1 py-2 bg-orange-500/20 border-orange-400/50 text-orange-200"
+                      <p className="text-center text-sm text-slate-400">
+                        Click the × to remove any ingredients you don't want to use
+                      </p>
+                      <div className="flex flex-wrap gap-2 justify-center max-w-2xl mx-auto">
+                        {ingredients.map((ingredient, index) => (
+                          <motion.div
+                            key={ingredient}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
                           >
-                            {ingredient}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="ml-2 h-auto p-1 hover:bg-orange-400/20"
-                              onClick={() => removeIngredient(index)}
+                            <Badge 
+                              variant="secondary" 
+                              className="pl-3 pr-1 py-2 bg-orange-500/20 border-orange-400/50 text-orange-200 hover:bg-orange-500/30 transition-colors"
                             >
-                              <X className="w-3 h-3" />
-                            </Button>
-                          </Badge>
-                        </motion.div>
-                      ))}
+                              {ingredient}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="ml-2 h-auto p-1 hover:bg-red-400/20 rounded-full"
+                                onClick={() => removeIngredient(index)}
+                                title={`Remove ${ingredient}`}
+                              >
+                                <X className="w-3 h-3 text-red-300 hover:text-red-200" />
+                              </Button>
+                            </Badge>
+                          </motion.div>
+                        ))}
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
