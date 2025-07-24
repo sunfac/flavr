@@ -175,12 +175,15 @@ IMPORTANT: Always create COMPLETE DISHES that include:
 AVAILABLE INGREDIENTS BY CUISINE COMPATIBILITY:
 ${cuisineNotes.join("\n")}
 
-RECIPE CREATION RULES:
-- Create each recipe using ingredients from ONE cuisine group + neutral ingredients
+RECIPE CREATION RULES - STRICT INGREDIENT RESTRICTIONS:
+- **PRIMARY RULE**: Use ONLY the ingredients provided by the user above
+- **ALLOWED ADDITIONS**: Basic pantry staples only (salt, pepper, cooking oil, water, flour, sugar)
+- **FORBIDDEN**: Do NOT suggest expensive or specialty ingredients like prawns, lobster, truffle, exotic spices, or proteins not provided by the user
+- Create each recipe using ingredients from ONE cuisine group + neutral ingredients from the provided list
 - DO NOT mix Asian ingredients (kimchi, gochujang) with Mediterranean/Western ingredients
 - Keep cuisine styles separate and authentic
-- Use 3-6 compatible ingredients per recipe that work together harmoniously
-- Each recipe should have a clear cuisine identity (Asian, Mediterranean, British, etc.)
+- Use 3-6 compatible ingredients per recipe from the PROVIDED LIST that work together harmoniously
+- Each recipe should have a clear cuisine identity based on the available ingredients
 
 CONSTRAINTS:
 - Servings: ${servings} people
@@ -601,12 +604,17 @@ CONSTRAINTS:
 - Equipment: ${equipment.join(", ")}
 ${dietaryRestrictions.length > 0 ? `- Dietary restrictions: ${dietaryRestrictions.join(", ")}` : ""}
 
+STRICT INGREDIENT CONSTRAINTS:
+- **PRIMARY RULE**: Use ONLY the ingredients provided by the user above
+- **ALLOWED ADDITIONS**: Basic pantry staples only (salt, pepper, cooking oil, water, flour, sugar, common dried herbs/spices)
+- **FORBIDDEN**: Do NOT add expensive ingredients like prawns, specialty cheeses, exotic spices, or proteins not provided by the user
+
 Create a COMPLETE recipe that:
-1. Uses appropriate ingredients from the available list that work well with the chosen cuisine
-2. SUBSTITUTE available ingredients with more suitable alternatives when needed (e.g., use pasta instead of rice for pasta salad, use appropriate proteins for the dish style)
-3. Add common pantry staples, spices, and aromatics for authentic flavor and proper cooking
-4. Focus on culinary logic and authentic dish preparation over literally using every available ingredient
-5. Prioritize making a delicious, well-constructed dish that matches the recipe concept
+1. Uses ONLY ingredients from the available list plus basic pantry staples
+2. Focus on making the best possible dish with what's actually available
+3. Substitute intelligently within the provided ingredients only (e.g., if pasta and tomatoes available, make pasta dish)
+4. Add only common pantry basics for proper seasoning and cooking
+5. Prioritize authentic preparation using the available ingredients
 6. Include exact measurements and clear instructions within the time and equipment constraints
 
 Return ONLY a valid JSON object with this exact structure (NO trailing commas):
@@ -627,7 +635,7 @@ Return ONLY a valid JSON object with this exact structure (NO trailing commas):
 CRITICAL: Ensure NO trailing commas after the last item in any array or object. Return ONLY the JSON object, no markdown, no explanations.`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
           { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations." },
           { role: "user", content: systemPrompt }
