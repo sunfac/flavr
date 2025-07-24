@@ -193,6 +193,11 @@ function EnhancedRecipeCard({
     return isStoreActive ? recipeStore.meta.difficulty : recipe.difficulty;
   }, [recipeStore.id, recipe.id, recipeStore.meta.difficulty, recipe.difficulty]);
 
+  const activeImage = useMemo(() => {
+    const isStoreActive = recipeStore.id === recipe.id && recipeStore.meta.image;
+    return isStoreActive ? recipeStore.meta.image : (recipe.image || recipe.imageUrl);
+  }, [recipeStore.id, recipe.id, recipeStore.meta.image, recipe.image, recipe.imageUrl]);
+
 
 
   // Scale ingredients based on serving adjustments
@@ -388,7 +393,7 @@ function EnhancedRecipeCard({
           instructions: recipe.instructions || [],
           tips: recipe.tips || '',
           mode: recipe.mode || 'shopping',
-          imageUrl: recipe.image || recipe.imageUrl || null
+          imageUrl: activeImage
         };
         
         const response = await apiRequest("POST", "/api/save-recipe", recipeData);
@@ -464,7 +469,17 @@ function EnhancedRecipeCard({
         )}
         
         <div className="flex gap-2 ml-auto">
-          <FavoriteButton recipe={recipe} />
+          <FavoriteButton recipe={{
+            ...recipe,
+            title: activeTitle,
+            ingredients: activeIngredients,
+            instructions: activeInstructions,
+            servings: activeServings,
+            cookTime: activeCookTime,
+            difficulty: activeDifficulty,
+            image: activeImage,
+            imageUrl: activeImage
+          }} />
           {onShare && (
             <Button
               onClick={onShare}
@@ -573,7 +588,7 @@ function EnhancedRecipeCard({
             shareId={recipe.shareId}
             title={activeTitle}
             description={recipe.description || 'A delicious recipe created with Flavr AI'}
-            imageUrl={recipe.image}
+            imageUrl={activeImage}
             isShared={recipe.isShared || false}
             onShareToggle={onShare}
             recipe={{
@@ -581,7 +596,9 @@ function EnhancedRecipeCard({
               title: activeTitle,
               servings: activeServings,
               cookTime: activeCookTime,
-              difficulty: activeDifficulty
+              difficulty: activeDifficulty,
+              image: activeImage,
+              imageUrl: activeImage
             }}
           />
         </div>
