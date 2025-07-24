@@ -169,7 +169,6 @@ RECIPE CREATION RULES:
 
 CONSTRAINTS:
 - Servings: ${servings} people
-- Max cooking time: ${cookingTime} minutes
 - Budget per serving: £${(budget / servings).toFixed(2)}
 - Equipment: ${equipment.join(", ")}
 ${dietaryRestrictions.length > 0 ? `- Dietary restrictions: ${dietaryRestrictions.join(", ")}` : ""}
@@ -185,7 +184,7 @@ For each recipe, provide:
 - Title
 - Brief description (2 sentences max)
 - Main cuisine type
-- Estimated cooking time
+- Realistic cooking time based on recipe requirements
 - Difficulty level (easy/medium/hard)
 - Key ingredients from the provided list
 
@@ -434,7 +433,7 @@ Create a complete recipe based on this request: "${userPrompt}"
 
 Requirements:
 - Servings: ${servings}
-- IMPORTANT: Calculate realistic cooking time based on the actual recipe - if it's braised lamb shanks that need 2+ hours, then cookTime should be 120+ minutes, not 30
+- Calculate realistic cooking time based on the actual recipe requirements
 - Use ingredients available at UK supermarkets
 - IMPORTANT: Use UK measurement units ONLY (grams, ml, tbsp, tsp, litres) - NO cups or ounces
 - Make it achievable for home cooks
@@ -448,7 +447,7 @@ Return ONLY a valid JSON object with this exact structure (NO trailing commas):
   "cuisine": "Cuisine Type",
   "difficulty": "easy",
   "prepTime": 15,
-  "cookTime": [REALISTIC total cooking time in minutes based on actual recipe requirements - e.g. 150 for braised dishes, 25 for stir-fries, etc.],
+  "cookTime": [REALISTIC total cooking time in minutes based on actual recipe requirements],
   "servings": ${servings},
   "ingredients": [{"name": "ingredient name only", "amount": "UK quantity (e.g. '2 tbsp', '400g', '250ml')"}],
   "instructions": [{"step": 1, "instruction": "detailed instruction"}],
