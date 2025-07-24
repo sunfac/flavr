@@ -155,8 +155,15 @@ export function registerRecipeRoutes(app: Express) {
 
 VARIATION SEED: ${randomSeed} (use this number to vary your recipe concepts, ingredient combinations, and cooking approaches to create diverse outputs)
 
-CUISINE DIVERSITY REQUIREMENT:
-When creating recipes, prioritize diverse global cuisines and avoid defaulting to Western/European dishes. Use the VARIATION SEED to explore authentic dishes from various food cultures (Thai, Vietnamese, Korean, Indian, Moroccan, Peruvian, Ethiopian, Lebanese, etc.). Choose lesser-known but delicious regional dishes within each cuisine tradition.
+CUISINE DIVERSITY REQUIREMENT - HARD RULE:
+FORBIDDEN: Never suggest Western/European dishes like coq au vin, beef bourguignon, shepherd's pie, or fish and chips.
+MANDATORY: Use VARIATION SEED to select from diverse global cuisines:
+- Seed 1-200: Asian cuisines (Thai, Vietnamese, Korean, Japanese, Chinese, Indonesian, Malaysian)
+- Seed 201-400: Middle Eastern (Lebanese, Persian, Turkish, Moroccan, Egyptian)  
+- Seed 401-600: African (Ethiopian, Nigerian, South African)
+- Seed 601-800: Latin American (Peruvian, Mexican, Argentinian, Brazilian)
+- Seed 801-1000: Indian Subcontinent (Indian, Pakistani, Bangladeshi, Sri Lankan)
+Choose lesser-known regional dishes within the selected cuisine tradition.
 
 IMPORTANT: Always create COMPLETE DISHES that include:
 - Main component using the available ingredients
@@ -441,15 +448,21 @@ Use this number to vary the entire output. It must influence:
 - Richness vs. freshness, spice level, and presentation style
 - A unique "chef's mood" which drives subtle intuitive variations in the dish (e.g., rustic vs. refined, bold vs. mellow)
 
-CUISINE DIVERSITY REQUIREMENT:
-When the user request is vague or open-ended (e.g. "impressive dinner party dish"), you must **randomly select from a wide range of global cuisines**, not default to classic French or Western-European dishes.
+CUISINE DIVERSITY REQUIREMENT - HARD RULE:
+When the user request is vague or open-ended (e.g. "impressive dinner party dish", "chicken dinner", "something special"), you MUST:
 
-The chosen recipe must **not repeat past outputs like coq au vin or beef bourguignon** unless the user has explicitly requested it.
-
-Use the VARIATION SEED to enforce unique outputs each time by:
-- Choosing a less common regional dish within the selected cuisine
-- Exploring authentic dishes from diverse food cultures (Thai, Vietnamese, Korean, Indian, Moroccan, Peruvian, Ethiopian, Lebanese, etc.)
-- Prioritizing lesser-known but impressive dishes over familiar classics
+1. **FORBIDDEN DISHES**: NEVER generate coq au vin, beef bourguignon, ratatouille, bouillabaisse, or any classic French bistro dishes
+2. **MANDATORY GLOBAL SELECTION**: Randomly select from NON-WESTERN cuisines using the variation seed:
+   - Asian: Thai, Vietnamese, Korean, Japanese, Chinese, Indonesian, Malaysian
+   - Middle Eastern: Lebanese, Persian, Turkish, Moroccan, Egyptian
+   - African: Ethiopian, Nigerian, South African
+   - Latin American: Peruvian, Mexican, Argentinian, Brazilian
+   - Indian Subcontinent: Indian, Pakistani, Bangladeshi, Sri Lankan
+3. **REGIONAL AUTHENTICITY**: Choose lesser-known regional dishes within the selected cuisine
+4. **VARIATION SEED ENFORCEMENT**: Use seed number to determine:
+   - Which global cuisine to select (1-200: Asian, 201-400: Middle Eastern, 401-600: African, 601-800: Latin American, 801-1000: Indian Subcontinent)
+   - Which regional variation within that cuisine
+   - Specific cooking techniques and ingredients authentic to that region
 
 IMPORTANT: Always create COMPLETE DISHES that include:
 - Main component (protein, vegetable, or grain-based centrepiece)
