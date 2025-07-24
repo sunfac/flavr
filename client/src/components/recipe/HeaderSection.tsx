@@ -61,7 +61,13 @@ export default function HeaderSection({
               }}
               onError={(e) => {
                 console.log('❌ Image failed to load:', recipe.image);
+                // Don't hide the image container, just show fallback
                 e.currentTarget.style.display = 'none';
+                // Show the fallback gradient container
+                const container = e.currentTarget.parentElement;
+                if (container) {
+                  container.style.background = 'linear-gradient(to bottom right, #fb923c, #ea580c)';
+                }
               }}
             />
             {/* Minimal overlay for mobile readability */}
@@ -101,8 +107,8 @@ export default function HeaderSection({
               <h1 className="font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight break-words mb-2">
                 {recipe.title}
               </h1>
-              <div className="mt-4 text-xs text-white/60">
-                Image loading...
+              <div className="mt-4 text-xs text-white/60 animate-pulse">
+                ✨ Generating beautiful food image...
               </div>
             </div>
             

@@ -41,32 +41,55 @@ export default function Recipe() {
 
   // Try to fetch image if not already present
   const [recipeImage, setRecipeImage] = useState(recipeStore.meta.image || '');
+  const [imageLoadAttempts, setImageLoadAttempts] = useState(0);
   
   useEffect(() => {
     // If no image is present, try to fetch one based on recipe title
-    if (!recipeImage && recipeStore.meta.title) {
+    if (!recipeImage && recipeStore.meta.title && imageLoadAttempts < 5) {
       const pollForImage = async () => {
         try {
-          // Simple polling mechanism - in production you'd use WebSockets or server-sent events
+          console.log('🖼️ Polling for image (attempt', imageLoadAttempts + 1, '):', recipeStore.meta.title);
           const response = await fetch(`/api/recipe-image/${encodeURIComponent(recipeStore.meta.title)}`);
           if (response.ok) {
             const data = await response.json();
             if (data.imageUrl) {
+              console.log('🖼️ Image found:', data.imageUrl);
               setRecipeImage(data.imageUrl);
+              // Also update the recipe store via the patchRecipe method
+              recipeStore.patchRecipe({
+                meta: {
+                  ...recipeStore.meta,
+                  image: data.imageUrl
+                }
+              });
+              return; // Stop polling
             }
+          } else {
+            console.log('🖼️ Image not ready yet');
+          }
+          
+          // Schedule next attempt
+          setImageLoadAttempts(prev => prev + 1);
+          if (imageLoadAttempts < 4) {
+            setTimeout(pollForImage, 3000); // Try again in 3 seconds
           }
         } catch (error) {
-          console.log('Image polling failed:', error);
+          console.log('🖼️ Image polling failed:', error);
+          setImageLoadAttempts(prev => prev + 1);
         }
       };
       
-      // Poll a few times with increasing intervals
-      const timeouts = [2000, 5000, 10000]; // 2s, 5s, 10s
-      timeouts.forEach((delay, index) => {
-        setTimeout(pollForImage, delay);
-      });
+      // Start polling after a short delay
+      setTimeout(pollForImage, 2000);
     }
-  }, [recipeStore.meta.title, recipeImage]);
+  }, [recipeStore.meta.title, recipeImage, imageLoadAttempts]);
+  
+  // Also check if the store has been updated with an image
+  useEffect(() => {
+    if (recipeStore.meta.image && !recipeImage) {
+      setRecipeImage(recipeStore.meta.image);
+    }
+  }, [recipeStore.meta.image, recipeImage]);
 
   // Create activeRecipe object from store data for EnhancedRecipeCard
   const activeRecipe = {
