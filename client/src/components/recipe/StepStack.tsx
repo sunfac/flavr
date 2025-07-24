@@ -25,10 +25,12 @@ async function extractDuration(instruction: string): Promise<number | undefined>
   
   // First check for explicit time patterns in the text
   const patterns = [
-    /(\d+(?:\.\d+)?)\s*(?:to\s+)?(\d+(?:\.\d+)?)?\s*hours?/,  // Handle decimal hours first
-    /(\d+(?:\.\d+)?)\s*(?:to\s+)?(\d+(?:\.\d+)?)?\s*hrs?/,    // Handle decimal hrs first
-    /(\d+)\s*(?:to\s+)?(\d+)?\s*minutes?/,
-    /(\d+)\s*(?:to\s+)?(\d+)?\s*mins?/,
+    /(\d+(?:\.\d+)?)\s*(?:to\s+|-)(\d+(?:\.\d+)?)\s*minutes?/,     // Range in minutes: "10-12 minutes"
+    /(\d+(?:\.\d+)?)\s*(?:to\s+|-)(\d+(?:\.\d+)?)\s*mins?/,       // Range in mins: "10-12 mins"
+    /(\d+(?:\.\d+)?)\s*(?:to\s+)?(\d+(?:\.\d+)?)?\s*hours?/,      // Handle decimal hours first
+    /(\d+(?:\.\d+)?)\s*(?:to\s+)?(\d+(?:\.\d+)?)?\s*hrs?/,        // Handle decimal hrs first
+    /(\d+)\s*minutes?/,                                            // Single minutes: "30 minutes"
+    /(\d+)\s*mins?/,                                              // Single mins: "30 mins"
     /(\d+)\s*(?:to\s+)?(\d+)?\s*seconds?/,
     /(\d+)\s*(?:to\s+)?(\d+)?\s*secs?/,
     /for\s+(\d+(?:\.\d+)?)\s*hours?/,
@@ -51,13 +53,17 @@ async function extractDuration(instruction: string): Promise<number | undefined>
       const duration = match[2] ? (firstNum + secondNum) / 2 : firstNum;
       
       // Convert to minutes if needed
+      let finalDuration;
       if (text.includes('hour') || text.includes('hr')) {
-        return Math.round(duration * 60); // Convert hours to minutes
+        finalDuration = Math.round(duration * 60); // Convert hours to minutes
       } else if (text.includes('second') || text.includes('sec')) {
-        return Math.max(1, Math.round(duration / 60)); // Convert seconds to minutes
+        finalDuration = Math.max(1, Math.round(duration / 60)); // Convert seconds to minutes
       } else {
-        return Math.round(duration); // Already in minutes
+        finalDuration = Math.round(duration); // Already in minutes
       }
+      
+      console.log(`🔍 Pattern match: "${instruction}" → matched "${match[0]}" → raw: ${duration}, final: ${finalDuration} minutes`);
+      return finalDuration;
     }
   }
   
@@ -258,15 +264,15 @@ function StepCard({
 
   // Start countdown timer
   const startTimer = () => {
-    console.log(`Starting timer for step ${stepNumber}, duration: ${stepDuration} minutes`);
+    console.log(`🚀 Starting timer for step ${stepNumber}, duration: ${stepDuration} minutes`);
     if (!stepDuration) {
-      console.log('No stepDuration found, cannot start timer');
+      console.log('❌ No stepDuration found, cannot start timer');
       return;
     }
     
     if (timeRemaining === null) {
       const seconds = stepDuration * 60;
-      console.log(`Setting timer to ${seconds} seconds`);
+      console.log(`⏰ Setting timer to ${seconds} seconds (${stepDuration} minutes)`);
       setTimeRemaining(seconds); // Convert minutes to seconds
     }
     
