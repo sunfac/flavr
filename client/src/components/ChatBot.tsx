@@ -488,10 +488,10 @@ export default function ChatBot({
           <div 
             className="absolute right-0 w-full sm:w-96 bg-slate-900 border-l border-orange-500/30 shadow-2xl flex flex-col transition-all duration-500 mobile-chat-panel"
             style={{
-              top: '64px', // Account for header height
-              bottom: '0',
-              height: 'calc(100vh - 64px)', // Subtract header height
-              maxHeight: 'calc(100vh - 64px)',
+              top: '0',
+              bottom: '0', 
+              height: '100vh',
+              maxHeight: '100vh',
               overflow: 'hidden',
               pointerEvents: 'all',
               display: 'flex',
@@ -499,7 +499,7 @@ export default function ChatBot({
             }}
             onClick={(e) => e.stopPropagation()} // Prevent backdrop clicks from closing when clicking inside panel
           >
-        <CardHeader className="p-3 sm:p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
+        <CardHeader className="p-3 sm:p-4 pt-16 sm:pt-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="relative group">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -591,7 +591,9 @@ export default function ChatBot({
             className="border-t-2 border-orange-500/60 bg-slate-900 p-3 sm:p-4"
             style={{
               flexShrink: 0,
-              paddingBottom: 'env(safe-area-inset-bottom, 16px)'
+              position: 'sticky',
+              bottom: 0,
+              paddingBottom: 'max(env(safe-area-inset-bottom), 16px)'
             }}
           >
             <form 
