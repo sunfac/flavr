@@ -493,27 +493,26 @@ export default function ChatBot({
         </div>
       )}
 
-      {/* Chat Overlay - Full screen blocking backdrop */}
+      {/* Chat Modal Container - Portal-style with maximum z-index */}
       {actualIsOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[99998] transition-all duration-500"
-          onClick={() => onClose && onClose()}
-        />
-      )}
-
-      {/* Chat Panel - Right Side Panel with viewport lock */}
-      <div 
-        className={`fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-96 bg-slate-900/95 backdrop-blur-md border-l border-orange-500/30 shadow-2xl transition-all duration-500 flex flex-col ${
-          actualIsOpen ? "translate-x-0 opacity-100 z-[99999]" : "translate-x-full opacity-0 z-[-1]"
-        }`}
-        style={{
-          height: '100dvh',
-          maxHeight: '100vh',
-          overflow: 'hidden',
-          paddingBottom: '80px' // Account for footer height
-        }}
-        onClick={(e) => e.stopPropagation()} // Prevent backdrop clicks from closing when clicking inside panel
-      >
+        <div className="fixed inset-0 z-[999999] pointer-events-auto">
+          {/* Full Screen Blocking Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => onClose && onClose()}
+          />
+          
+          {/* Chat Panel - Right Side Panel */}
+          <div 
+            className="absolute inset-y-0 right-0 w-full sm:w-96 bg-slate-900/95 backdrop-blur-md border-l border-orange-500/30 shadow-2xl flex flex-col transition-all duration-500"
+            style={{
+              height: '100dvh',
+              maxHeight: '100vh',
+              overflow: 'hidden',
+              paddingBottom: '80px' // Account for footer height
+            }}
+            onClick={(e) => e.stopPropagation()} // Prevent backdrop clicks from closing when clicking inside panel
+          >
         <CardHeader className="p-3 sm:p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="relative group">
@@ -673,9 +672,9 @@ export default function ChatBot({
             </div>
           </div>
         </CardContent>
-
-
-      </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
