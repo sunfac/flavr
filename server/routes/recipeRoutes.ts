@@ -156,13 +156,13 @@ export function registerRecipeRoutes(app: Express) {
 VARIATION SEED: ${randomSeed} (use this number to vary your recipe concepts, ingredient combinations, and cooking approaches to create diverse outputs)
 
 CUISINE DIVERSITY REQUIREMENT - HARD RULE:
-FORBIDDEN: Never suggest Western/European dishes like coq au vin, beef bourguignon, shepherd's pie, or fish and chips.
+FORBIDDEN: Never suggest overused Western dishes like coq au vin, beef bourguignon, shepherd's pie, or fish and chips.
 MANDATORY: Use VARIATION SEED to select from diverse global cuisines:
 - Seed 1-200: Asian cuisines (Thai, Vietnamese, Korean, Japanese, Chinese, Indonesian, Malaysian)
 - Seed 201-400: Middle Eastern (Lebanese, Persian, Turkish, Moroccan, Egyptian)  
-- Seed 401-600: African (Ethiopian, Nigerian, South African)
+- Seed 401-600: European (Italian, Spanish, Greek, Portuguese, Hungarian)
 - Seed 601-800: Latin American (Peruvian, Mexican, Argentinian, Brazilian)
-- Seed 801-1000: Indian Subcontinent (Indian, Pakistani, Bangladeshi, Sri Lankan)
+- Seed 801-1000: Indian Subcontinent (Indian, Sri Lankan)
 Choose lesser-known regional dishes within the selected cuisine tradition.
 
 IMPORTANT: Always create COMPLETE DISHES that include:
@@ -455,15 +455,15 @@ CUISINE DIVERSITY REQUIREMENT - HARD RULE:
 When the user request is vague or open-ended (e.g. "impressive dinner party dish", "chicken dinner", "something special"), you MUST:
 
 1. **FORBIDDEN DISHES**: NEVER generate coq au vin, beef bourguignon, ratatouille, bouillabaisse, or any classic French bistro dishes
-2. **MANDATORY GLOBAL SELECTION**: Randomly select from NON-WESTERN cuisines using the variation seed:
+2. **MANDATORY GLOBAL SELECTION**: Randomly select from diverse global cuisines using the variation seed:
    - Asian: Thai, Vietnamese, Korean, Japanese, Chinese, Indonesian, Malaysian
    - Middle Eastern: Lebanese, Persian, Turkish, Moroccan, Egyptian
-   - African: Ethiopian, Nigerian, South African
+   - European: Italian, Spanish, Greek, Portuguese, Hungarian
    - Latin American: Peruvian, Mexican, Argentinian, Brazilian
-   - Indian Subcontinent: Indian, Pakistani, Bangladeshi, Sri Lankan
+   - Indian Subcontinent: Indian, Sri Lankan
 3. **REGIONAL AUTHENTICITY**: Choose lesser-known regional dishes within the selected cuisine
 4. **VARIATION SEED ENFORCEMENT**: Use seed number to determine:
-   - Which global cuisine to select (1-200: Asian, 201-400: Middle Eastern, 401-600: African, 601-800: Latin American, 801-1000: Indian Subcontinent)
+   - Which global cuisine to select (1-200: Asian, 201-400: Middle Eastern, 401-600: European, 601-800: Latin American, 801-1000: Indian Subcontinent)
    - Which regional variation within that cuisine
    - Specific cooking techniques and ingredients authentic to that region
 
