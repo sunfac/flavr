@@ -1,10 +1,13 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, ChefHat, Clock, RotateCcw, Heart } from 'lucide-react';
+import { Users, ChefHat, Clock, RotateCcw, Heart, RefreshCw, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { animations, spacing } from '@/styles/tokens';
+import { useRecipeStore } from '@/stores/recipeStore';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 interface HeaderSectionProps {
   recipe: {
@@ -25,6 +28,10 @@ export default function HeaderSection({
   currentServings
 }: HeaderSectionProps) {
   const [location, navigate] = useLocation();
+  const [isRerolling, setIsRerolling] = useState(false);
+  const { toast } = useToast();
+  const generationParams = useRecipeStore((state) => state.generationParams);
+  const updateActiveRecipe = useRecipeStore((state) => state.updateActiveRecipe);
   
   const fastFacts = useMemo(() => {
     return [
@@ -35,6 +42,86 @@ export default function HeaderSection({
 
   const handleStartAgain = () => {
     navigate('/app');
+  };
+
+  const handleReroll = async () => {
+    if (!generationParams) {
+      toast({
+        title: "Unable to reroll",
+        description: "Recipe generation parameters not found",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsRerolling(true);
+    try {
+      const { mode, originalInputs } = generationParams;
+      let response;
+
+      if (mode === 'chef') {
+        response = await apiRequest('POST', '/api/chef-assist/generate', {
+          prompt: originalInputs.prompt,
+          servings: originalInputs.servings,
+          cookingTime: originalInputs.cookingTime
+        });
+      } else if (mode === 'fridge') {
+        // For fridge mode, regenerate from the recipe idea
+        response = await apiRequest('POST', '/api/generate-full-recipe', {
+          recipeIdea: originalInputs.recipeIdea,
+          quizData: originalInputs.quizData
+        });
+      } else if (mode === 'shopping') {
+        // For shopping mode, regenerate from the selected recipe
+        response = await apiRequest('POST', '/api/generate-full-recipe', {
+          selectedRecipe: originalInputs.selectedRecipe,
+          mode: 'shopping',
+          quizData: originalInputs.quizData
+        });
+      } else {
+        throw new Error('Unsupported reroll mode');
+      }
+
+      const data = await response.json();
+      
+      // Handle different response formats from different endpoints
+      const newRecipe = data.recipe || data;
+      
+      if (newRecipe && (newRecipe.title || newRecipe.ingredients)) {
+        // Preserve generation parameters for future rerolls
+        newRecipe.generationParams = generationParams;
+        updateActiveRecipe(newRecipe, generationParams);
+        
+        toast({
+          title: "Recipe rerolled successfully!",
+          description: "Here's a fresh variation using the same inputs",
+        });
+        
+        // Scroll to top to show new recipe
+        window.scrollTo(0, 0);
+      } else {
+        throw new Error("No recipe data received");
+      }
+    } catch (error: any) {
+      console.error('Error rerolling recipe:', error);
+      
+      // Check for quota limit errors
+      if (error.message && error.message.includes('You have no free recipes remaining')) {
+        toast({
+          title: "You have no free recipes remaining this month",
+          description: "Sign up for Flavr+ to get unlimited recipes!",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Failed to reroll recipe",
+          description: error.message || "Please try again",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsRerolling(false);
+    }
   };
 
   return (
@@ -93,6 +180,20 @@ export default function HeaderSection({
                 Start Again
               </Button>
               <Button
+                onClick={handleReroll}
+                disabled={isRerolling || !generationParams}
+                size="sm"
+                variant="secondary"
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm disabled:opacity-50"
+              >
+                {isRerolling ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                )}
+                Reroll
+              </Button>
+              <Button
                 size="sm"
                 variant="secondary"
                 className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
@@ -123,6 +224,20 @@ export default function HeaderSection({
               >
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Start Again
+              </Button>
+              <Button
+                onClick={handleReroll}
+                disabled={isRerolling || !generationParams}
+                size="sm"
+                variant="secondary"
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm disabled:opacity-50"
+              >
+                {isRerolling ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                )}
+                Reroll
               </Button>
               <Button
                 size="sm"

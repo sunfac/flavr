@@ -43,7 +43,15 @@ export default function RecipeSelectionCards({ recipes, quizData, onBack }: Reci
       const fullRecipeData = await fullRecipeResponse.json();
       
       if (fullRecipeData.recipe) {
-        updateActiveRecipe(fullRecipeData.recipe);
+        // Store generation parameters for rerolling
+        const generationParams = {
+          mode: 'fridge' as const,
+          originalInputs: {
+            recipeIdea: currentRecipe,
+            quizData: quizData
+          }
+        };
+        updateActiveRecipe(fullRecipeData.recipe, generationParams);
         navigate("/recipe");
       } else {
         throw new Error("Failed to generate full recipe");

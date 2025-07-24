@@ -239,6 +239,21 @@ export default function ShoppingMode() {
         console.log("📋 Nested recipe instructions:", response.recipe.instructions);
       }
       
+      // Store generation parameters for rerolling
+      const generationParams = {
+        mode: 'shopping' as const,
+        originalInputs: {
+          selectedRecipe: {
+            title: recipe.title,
+            description: recipe.description,
+            ...(recipe.originalData || recipe)
+          },
+          quizData: quizData
+        }
+      };
+      
+      // Store recipe in both local state (for ShoppingMode display) and global store (for reroll)
+      fullRecipe.generationParams = generationParams;
       setSelectedRecipe(fullRecipe);
       setCurrentStep("recipe");
       
@@ -388,6 +403,10 @@ export default function ShoppingMode() {
             currentRecipe={selectedRecipe}
             currentMode="shopping"
             onRecipeUpdate={(updatedRecipe: any) => {
+              // Preserve generationParams when recipe is updated
+              if (selectedRecipe && selectedRecipe.generationParams) {
+                updatedRecipe.generationParams = selectedRecipe.generationParams;
+              }
               setSelectedRecipe(updatedRecipe);
             }}
           />

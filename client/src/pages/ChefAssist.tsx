@@ -124,7 +124,16 @@ export default function ChefAssist() {
       // Store recipe in Zustand and navigate
       if (data.recipe) {
         console.log("Chef Assist: Recipe generated successfully", data.recipe);
-        updateActiveRecipe(data.recipe);
+        // Store generation parameters for rerolling
+        const generationParams = {
+          mode: 'chef' as const,
+          originalInputs: {
+            prompt: prompt.trim(),
+            servings: 4,
+            cookingTime: 30
+          }
+        };
+        updateActiveRecipe(data.recipe, generationParams);
         navigate("/recipe");
       } else {
         throw new Error("No recipe data received");

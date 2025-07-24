@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -45,10 +45,25 @@ export default function RecipeCard({
   const [showVoiceControl, setShowVoiceControl] = useState(false);
   const { toast } = useToast();
   const recipeStore = useRecipeStore();
+  const updateActiveRecipe = useRecipeStore((state) => state.updateActiveRecipe);
+
+  // Sync with global recipe store if generationParams are present
+  useEffect(() => {
+    if (fullRecipe && fullRecipe.generationParams) {
+      console.log('🔄 RecipeCard: Syncing recipe with global store for reroll functionality');
+      updateActiveRecipe(fullRecipe, fullRecipe.generationParams);
+    }
+  }, [fullRecipe, updateActiveRecipe]);
 
   // Handle recipe updates from chatbot
   const handleRecipeUpdate = (updatedRecipe: any) => {
     console.log('🔄 Recipe card received update:', updatedRecipe);
+    
+    // Preserve generationParams if they exist
+    if (fullRecipe && fullRecipe.generationParams) {
+      updatedRecipe.generationParams = fullRecipe.generationParams;
+    }
+    
     setFullRecipe(updatedRecipe);
     
     // Dispatch custom event for EnhancedRecipeCard to listen

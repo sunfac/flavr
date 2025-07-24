@@ -37,18 +37,24 @@ export interface RecipeState {
   currentStep: number;
   completedSteps: number[];
   lastUpdated: number;
+  // Generation parameters for rerolling
+  generationParams?: {
+    mode: 'chef' | 'fridge' | 'shopping';
+    originalInputs: any;
+  };
 }
 
 interface RecipeStore extends RecipeState {
   // Actions
   replaceRecipe: (payload: RecipeState) => void;
   patchRecipe: (payload: DeepPartial<RecipeState>) => void;
-  updateActiveRecipe: (recipe: any) => void;
+  updateActiveRecipe: (recipe: any, generationParams?: any) => void;
   updateServings: (servings: number) => void;
   toggleIngredient: (ingredientId: string) => void;
   setCurrentStep: (stepIndex: number) => void;
   markStepComplete: (stepIndex: number) => void;
   resetRecipe: () => void;
+  getGenerationParams: () => any;
 }
 
 type DeepPartial<T> = {
@@ -159,7 +165,7 @@ export const useRecipeStore = create<RecipeStore>()(
         }));
       },
 
-      updateActiveRecipe: (recipe: any) => {
+      updateActiveRecipe: (recipe: any, generationParams?: any) => {
         console.log('🔄 Recipe Store: Updating active recipe from chat', recipe);
         
         // Handle both API response format and internal format
@@ -193,8 +199,13 @@ export const useRecipeStore = create<RecipeStore>()(
           currentStep: 0,
           completedSteps: [],
           lastUpdated: Date.now(),
+          generationParams: generationParams
         };
         set(updatedState);
+      },
+
+      getGenerationParams: () => {
+        return get().generationParams;
       },
 
       resetRecipe: () => {
@@ -214,7 +225,7 @@ export const useRecipeStore = create<RecipeStore>()(
 export const recipeActions = {
   replaceRecipe: (payload: RecipeState) => useRecipeStore.getState().replaceRecipe(payload),
   patchRecipe: (payload: DeepPartial<RecipeState>) => useRecipeStore.getState().patchRecipe(payload),
-  updateActiveRecipe: (recipe: any) => useRecipeStore.getState().updateActiveRecipe(recipe),
+  updateActiveRecipe: (recipe: any, generationParams?: any) => useRecipeStore.getState().updateActiveRecipe(recipe, generationParams),
   updateServings: (servings: number) => useRecipeStore.getState().updateServings(servings),
   toggleIngredient: (ingredientId: string) => useRecipeStore.getState().toggleIngredient(ingredientId),
   setCurrentStep: (stepIndex: number) => useRecipeStore.getState().setCurrentStep(stepIndex),
