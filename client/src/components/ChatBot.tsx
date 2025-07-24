@@ -495,12 +495,24 @@ export default function ChatBot({
 
       {/* Chat Modal Container - Portal-style with maximum z-index */}
       {actualIsOpen && (
-        <div className="fixed inset-0 z-[999999] pointer-events-auto">
+        <div 
+          className="fixed inset-0 z-[999999]" 
+          style={{ 
+            pointerEvents: 'auto',
+            backgroundColor: 'rgba(0, 0, 0, 1)', // Completely opaque black
+            backdropFilter: 'blur(4px)'
+          }}
+        >
           {/* Full Screen Blocking Backdrop - Completely Opaque */}
           <div 
-            className="absolute inset-0 bg-black backdrop-blur-md"
+            className="absolute inset-0"
             onClick={() => onClose && onClose()}
-            style={{ pointerEvents: 'all' }}
+            style={{ 
+              pointerEvents: 'all',
+              backgroundColor: 'rgb(0, 0, 0)', // Solid black, no transparency
+              width: '100vw',
+              height: '100vh'
+            }}
           />
           
           {/* Chat Panel - Right Side Panel */}
