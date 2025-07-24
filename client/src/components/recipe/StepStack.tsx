@@ -23,14 +23,18 @@ interface StepStackProps {
 function extractDuration(instruction: string): number | undefined {
   const text = instruction.toLowerCase();
   
-  // Look for time patterns
+  // Enhanced time patterns with better regex
   const patterns = [
-    /(\d+)\s*(?:to\s*)?(\d+)?\s*minutes?/,
-    /(\d+)\s*(?:to\s*)?(\d+)?\s*mins?/,
-    /(\d+)\s*(?:to\s*)?(\d+)?\s*hours?/,
-    /(\d+)\s*(?:to\s*)?(\d+)?\s*hrs?/,
-    /(\d+)\s*(?:to\s*)?(\d+)?\s*seconds?/,
-    /(\d+)\s*(?:to\s*)?(\d+)?\s*secs?/
+    /(\d+)\s*(?:to\s+)?(\d+)?\s*minutes?/,
+    /(\d+)\s*(?:to\s+)?(\d+)?\s*mins?/,
+    /(\d+)\s*(?:to\s+)?(\d+)?\s*hours?/,
+    /(\d+)\s*(?:to\s+)?(\d+)?\s*hrs?/,
+    /(\d+)\s*(?:to\s+)?(\d+)?\s*seconds?/,
+    /(\d+)\s*(?:to\s+)?(\d+)?\s*secs?/,
+    /for\s+(\d+)\s*minutes?/,
+    /about\s+(\d+)\s*minutes?/,
+    /approximately\s+(\d+)\s*minutes?/,
+    /around\s+(\d+)\s*minutes?/
   ];
   
   for (const pattern of patterns) {
@@ -46,26 +50,55 @@ function extractDuration(instruction: string): number | undefined {
       if (text.includes('hour') || text.includes('hr')) {
         return duration * 60;
       } else if (text.includes('second') || text.includes('sec')) {
-        return Math.round(duration / 60);
+        return Math.max(1, Math.round(duration / 60)); // Minimum 1 minute
       } else {
         return duration; // Already in minutes
       }
     }
   }
   
-  // Default durations based on common cooking terms
-  if (text.includes('bring to a boil') || text.includes('boil')) return 5;
-  if (text.includes('simmer')) return 15;
-  if (text.includes('bake') || text.includes('roast')) return 30;
-  if (text.includes('sauté') || text.includes('fry')) return 8;
-  if (text.includes('marinate')) return 30;
-  if (text.includes('rest') || text.includes('cool')) return 10;
-  if (text.includes('preheat')) return 10;
-  if (text.includes('brown') || text.includes('sear')) return 5;
-  if (text.includes('chop') || text.includes('slice') || text.includes('dice')) return 3;
-  if (text.includes('mix') || text.includes('stir') || text.includes('combine')) return 2;
+  // More intelligent default durations based on context
+  // Prep work - shorter times
+  if (text.includes('chop') || text.includes('slice') || text.includes('dice') || text.includes('mince')) {
+    return 3;
+  }
+  if (text.includes('mix') || text.includes('stir') || text.includes('combine') || text.includes('whisk')) {
+    return 2;
+  }
+  if (text.includes('season') || text.includes('sprinkle') || text.includes('garnish')) {
+    return 1;
+  }
   
-  return undefined;
+  // Cooking actions - context-aware timing
+  if (text.includes('preheat')) return 10;
+  if (text.includes('bring to a boil') || text.includes('bring to the boil')) return 5;
+  if (text.includes('boil') && !text.includes('bring')) return 8; // Active boiling
+  if (text.includes('sear') || text.includes('brown')) return 4;
+  if (text.includes('sauté') || text.includes('fry') && !text.includes('deep')) return 6;
+  if (text.includes('deep fry')) return 3;
+  if (text.includes('simmer')) return 15;
+  if (text.includes('steam')) return 8;
+  if (text.includes('grill')) return 10;
+  
+  // Longer processes
+  if (text.includes('bake') || text.includes('roast')) return 25;
+  if (text.includes('braise')) return 45;
+  if (text.includes('marinate')) return 30;
+  if (text.includes('chill') || text.includes('refrigerate')) return 15;
+  if (text.includes('rest') || text.includes('stand') || text.includes('cool')) return 10;
+  if (text.includes('rise') || text.includes('proof')) return 60;
+  
+  // Special cases
+  if (text.includes('until tender') || text.includes('until soft')) return 12;
+  if (text.includes('until golden') || text.includes('until crispy')) return 8;
+  if (text.includes('until fragrant')) return 3;
+  
+  // If no specific timing found, only show timer for prep steps that clearly need timing
+  if (text.includes('heat') || text.includes('warm') || text.includes('cook')) {
+    return 5; // Generic cooking action
+  }
+  
+  return undefined; // No timer for steps that don't need timing
 }
 
 
