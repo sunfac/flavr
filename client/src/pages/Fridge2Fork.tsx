@@ -56,15 +56,25 @@ export default function Fridge2Fork() {
       const data = await response.json();
       const detectedIngredients = data.ingredients || [];
       
-      setIngredients(prev => {
-        const combined = [...prev, ...detectedIngredients];
-        return combined.filter((item, index) => combined.indexOf(item) === index);
-      });
-      
-      toast({
-        title: "Ingredients detected!",
-        description: `Found ${detectedIngredients.length} ingredients in your photo`,
-      });
+      if (detectedIngredients.length > 0) {
+        setIngredients(prev => {
+          const combined = [...prev, ...detectedIngredients];
+          return combined.filter((item, index) => combined.indexOf(item) === index);
+        });
+        
+        toast({
+          title: "Ingredients detected!",
+          description: `Found ${detectedIngredients.length} ingredients in your photo`,
+        });
+      } else {
+        // Handle no ingredients found
+        const errorMessage = data.message || data.error || "No ingredients detected in the photo";
+        toast({
+          title: "No ingredients found",
+          description: errorMessage,
+          variant: "default",
+        });
+      }
     } catch (error) {
       toast({
         title: "Error processing image",

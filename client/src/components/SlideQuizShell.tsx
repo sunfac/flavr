@@ -296,7 +296,7 @@ export default function SlideQuizShell({
             const formData = new FormData();
             formData.append('image', file);
 
-            const response = await fetch('/api/vision/fridge-scan', {
+            const response = await fetch('/api/vision/analyze-ingredients', {
               method: 'POST',
               body: formData
             });
@@ -306,20 +306,23 @@ export default function SlideQuizShell({
             }
 
             const result = await response.json();
+            const detectedIngredients = result.ingredients || [];
             
-            if (result.ingredients && result.ingredients.length > 0) {
-              setDetectedIngredients(result.ingredients);
+            if (detectedIngredients.length > 0) {
+              setDetectedIngredients(detectedIngredients);
               // Initialize all detected ingredients as selected
               const initialSelection: Record<string, boolean> = {};
-              result.ingredients.forEach((ingredient: string) => {
+              detectedIngredients.forEach((ingredient: string) => {
                 initialSelection[ingredient] = true;
               });
               setSelectedIngredients(initialSelection);
               setShowPhotoModal(true);
             } else {
+              // Handle no ingredients found with proper message
+              const errorMessage = result.message || result.error || "No ingredients detected in the photo";
               toast({
-                title: "No ingredients detected",
-                description: "Couldn't recognise foods – please list ingredients manually.",
+                title: "No ingredients found",
+                description: errorMessage,
                 variant: "default"
               });
             }

@@ -76,9 +76,10 @@ export const processFridgeImage = async (req: Request, res: Response) => {
     if (!process.env.OPENAI_API_KEY) {
       console.warn('OpenAI API key not configured - returning fallback response');
       return res.json({
-        ingredients: ['Upload an image to detect ingredients automatically', 'Or type ingredients manually below'],
-        count: 2,
-        error: 'Vision service not configured'
+        ingredients: [],
+        count: 0,
+        error: 'Vision service not configured',
+        message: 'Upload an image to detect ingredients automatically, or type ingredients manually below'
       });
     }
 
@@ -96,9 +97,10 @@ export const processFridgeImage = async (req: Request, res: Response) => {
     // Basic validation - check if image has content
     if (base64Image.length < 100) {
       return res.json({
-        ingredients: ['Image too small or corrupted', 'Please upload a clear photo of your ingredients'],
-        count: 2,
-        error: 'Invalid image file'
+        ingredients: [],
+        count: 0,
+        error: 'Invalid image file',
+        message: 'Image too small or corrupted. Please upload a clear photo of your ingredients'
       });
     }
 
@@ -162,9 +164,10 @@ Return only a simple list of ingredient names, one per line. Be specific but con
 
     if (ingredients.length === 0) {
       return res.json({
-        ingredients: ['No food ingredients detected in image', 'Please try a clearer photo or type ingredients manually'],
-        count: 2,
-        error: 'No ingredients found'
+        ingredients: [],
+        count: 0,
+        error: 'No food ingredients detected in image',
+        message: 'Please try a clearer photo or type ingredients manually'
       });
     }
 
@@ -175,11 +178,12 @@ Return only a simple list of ingredient names, one per line. Be specific but con
 
   } catch (error) {
     console.error('Error processing fridge image:', error);
-    // Return helpful fallback instead of error
+    // Return empty ingredients array with error message
     res.json({
-      ingredients: ['Unable to analyze image automatically', 'Please type ingredients manually below'],
-      count: 2,
-      error: 'Image processing failed - manual input available'
+      ingredients: [],
+      count: 0,
+      error: 'Unable to analyze image automatically',
+      message: 'Please type ingredients manually below'
     });
   }
 };
