@@ -497,11 +497,31 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
         // Fix trailing commas specifically after object entries in arrays
         cleanContent = cleanContent.replace(/},(\s*\])/g, '}$1');
         
+        // Fix common JSON structure errors
+        cleanContent = cleanContent
+          // Fix malformed nested structures like { "steps": 7 , { step:8, instruction:"..." }}
+          .replace(/{\s*"steps"\s*:\s*\d+\s*,\s*{/g, '{')
+          // Fix property names that aren't quoted (but don't double-quote)
+          .replace(/(?<!")(\b\w+)(?!"):/g, '"$1":')
+          // Fix trailing objects and arrays
+          .replace(/,\s*},\s*\]/g, '}]')
+          .replace(/,\s*\]/g, ']')
+          .replace(/,\s*}/g, '}')
+          // Remove malformed trailing structures
+          .replace(/},\s*\]\s*,\s*}\s*,?\s*}?\s*$/g, '}]');
+
         // Handle incomplete JSON by attempting to close open structures
         if (!cleanContent.endsWith('}')) {
           const openBraces = (cleanContent.match(/\{/g) || []).length;
           const closeBraces = (cleanContent.match(/\}/g) || []).length;
-          if (openBraces > closeBraces) {
+          const openBrackets = (cleanContent.match(/\[/g) || []).length;
+          const closeBrackets = (cleanContent.match(/\]/g) || []).length;
+          
+          // Close missing brackets first, then braces
+          for (let i = 0; i < openBrackets - closeBrackets; i++) {
+            cleanContent += ']';
+          }
+          for (let i = 0; i < openBraces - closeBraces; i++) {
             cleanContent += '}';
           }
         }
