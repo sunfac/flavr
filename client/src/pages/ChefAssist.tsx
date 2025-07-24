@@ -130,11 +130,34 @@ export default function ChefAssist() {
         throw new Error("No recipe data received");
       }
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Recipe generation error:", error);
+      
+      // Handle quota limit error specifically
+      let errorMessage = "Please try again";
+      let errorTitle = "Error generating recipe";
+      
+      try {
+        // Try to parse the response error from apiRequest
+        if (error.message && error.message.includes("403:")) {
+          // Format is "403: {JSON response}"
+          const jsonPart = error.message.substring(error.message.indexOf(': ') + 2);
+          const errorData = JSON.parse(jsonPart);
+          if (errorData.error) {
+            errorMessage = errorData.error;
+            errorTitle = "Recipe limit reached";
+          }
+        } else if (error.message && error.message.includes("You have no free recipes")) {
+          errorMessage = error.message;
+          errorTitle = "Recipe limit reached";
+        }
+      } catch (parseError) {
+        console.log("Could not parse error, using default message");
+      }
+      
       toast({
-        title: "Error generating recipe",
-        description: "Please try again",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
       setIsGenerating(false);
