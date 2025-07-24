@@ -515,14 +515,14 @@ export default function ChatBot({
             }}
           />
           
-          {/* Chat Panel - Right Side Panel */}
+          {/* Chat Panel - Right Side Panel with Mobile Keyboard Fix */}
           <div 
             className="absolute right-0 w-full sm:w-96 bg-slate-900 border-l border-orange-500/30 shadow-2xl flex flex-col transition-all duration-500"
             style={{
               top: '80px', // Start below header/navigation
-              bottom: '80px', // End above footer
-              height: 'calc(100vh - 160px)', // Adjust height for top/bottom spacing
-              maxHeight: 'calc(100vh - 160px)',
+              bottom: '0px', // Go to bottom of viewport for mobile
+              height: 'calc(100vh - 80px)', // Full height minus header
+              maxHeight: 'calc(100vh - 80px)',
               overflow: 'hidden',
               pointerEvents: 'all'
             }}
@@ -556,10 +556,13 @@ export default function ChatBot({
         </CardHeader>
         
         <CardContent className="flex-1 overflow-hidden p-0 flex flex-col min-h-0">
-          {/* Messages Area */}
+          {/* Messages Area with Input Space */}
           <div 
             ref={scrollAreaRef}
             className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 min-h-0"
+            style={{
+              paddingBottom: '100px' // Leave space for input area
+            }}
           >
             {localMessages.map((msg, index) => (
               <div key={msg.id} className={`mb-3 ${msg.isUser ? "text-right" : "text-left"}`}>
@@ -610,8 +613,17 @@ export default function ChatBot({
             </div>
           )}
 
-          {/* Input Area - Fixed Position to Prevent Jumping */}
-          <div className="border-t-2 border-orange-500/60 bg-slate-900 flex-shrink-0 p-3 sm:p-4">
+          {/* Input Area - Mobile Keyboard Safe */}
+          <div 
+            className="border-t-2 border-orange-500/60 bg-slate-900 flex-shrink-0 p-3 sm:p-4"
+            style={{
+              position: 'absolute',
+              bottom: '0',
+              left: '0',
+              right: '0',
+              zIndex: 1000
+            }}
+          >
             <form 
               onSubmit={(e) => { e.preventDefault(); handleSend(); }} 
               className="flex gap-2 sm:gap-3 w-full items-center"
