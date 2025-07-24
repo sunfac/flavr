@@ -152,9 +152,9 @@ export default function Recipe() {
           </motion.div>
         </div>
 
-        {/* Mobile Chat Modal - Render inside page layout */}
+        {/* Mobile Chat Modal - Always render when open */}
         {showChat && (
-          <div className="lg:hidden">
+          <div className="lg:hidden fixed inset-0 z-50">
             <ChatBot 
               isOpen={showChat}
               onClose={() => setShowChat(false)}
@@ -167,34 +167,26 @@ export default function Recipe() {
         )}
       </PageLayout>
 
-      {/* Floating Chat Button - Outside PageLayout to avoid overflow issues */}
+      {/* Floating Chat Button - Fixed position, smaller size */}
       <motion.div
-        className="fixed bottom-6 right-6 z-50"
+        className="fixed bottom-4 right-4 z-50"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 0.5, type: "spring" }}
-        style={{ 
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
-          zIndex: 9999,
-          pointerEvents: 'auto'
-        }}
       >
         <Button
           onClick={() => {
             console.log('🔥 Chat button clicked! Current showChat:', showChat);
             setShowChat(!showChat);
           }}
-          className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-2xl w-14 h-14 rounded-full p-0 relative group border-2 border-white"
+          className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg w-12 h-12 rounded-full p-0 relative group"
         >
-          <MessageCircle className="w-6 h-6" />
+          <MessageCircle className="w-5 h-5" />
           
           {/* Tooltip */}
           <div className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-            <div className="bg-slate-900 text-white text-xs px-3 py-2 rounded-lg whitespace-nowrap">
-              {showChat ? 'Close chat' : 'Chat with Zest'}
-              <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-900"></div>
+            <div className="bg-slate-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+              {showChat ? 'Close' : 'Chat'}
             </div>
           </div>
         </Button>
