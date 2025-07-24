@@ -63,20 +63,37 @@ export default function HeaderSection({
         response = await apiRequest('POST', '/api/chef-assist/generate', {
           prompt: originalInputs.prompt,
           servings: originalInputs.servings,
-          cookingTime: originalInputs.cookingTime
+          cookingTime: originalInputs.cookingTime,
+          isReroll: true // Flag to indicate this is a reroll for enhanced variation
         });
       } else if (mode === 'fridge') {
         // For fridge mode, regenerate from the recipe idea
-        response = await apiRequest('POST', '/api/generate-full-recipe', {
-          recipeIdea: originalInputs.recipeIdea,
-          quizData: originalInputs.quizData
-        });
+        // For fridge mode, need to check if we're using generate-fridge-recipe instead
+        if (originalInputs.ingredients) {
+          response = await apiRequest('POST', '/api/generate-fridge-recipe', {
+            ingredients: originalInputs.ingredients,
+            servings: originalInputs.servings || 4,
+            cookingTime: originalInputs.cookingTime || 30,
+            budget: originalInputs.budget || 4.5,
+            equipment: originalInputs.equipment || ["oven", "stovetop"],
+            dietaryRestrictions: originalInputs.dietaryRestrictions || [],
+            ingredientFlexibility: originalInputs.ingredientFlexibility || "pantry",
+            isReroll: true // Flag to indicate this is a reroll for enhanced variation
+          });
+        } else {
+          response = await apiRequest('POST', '/api/generate-full-recipe', {
+            recipeIdea: originalInputs.recipeIdea,
+            quizData: originalInputs.quizData,
+            isReroll: true // Flag to indicate this is a reroll for enhanced variation
+          });
+        }
       } else if (mode === 'shopping') {
         // For shopping mode, regenerate from the selected recipe
         response = await apiRequest('POST', '/api/generate-full-recipe', {
           selectedRecipe: originalInputs.selectedRecipe,
           mode: 'shopping',
-          quizData: originalInputs.quizData
+          quizData: originalInputs.quizData,
+          isReroll: true // Flag to indicate this is a reroll for enhanced variation
         });
       } else {
         throw new Error('Unsupported reroll mode');

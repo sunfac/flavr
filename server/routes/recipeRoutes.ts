@@ -272,8 +272,20 @@ export function registerRecipeRoutes(app: Express) {
         return res.status(403).json(limitCheck.error);
       }
 
-      // Add random seed for recipe variation
-      const randomSeed = Math.floor(Math.random() * 1000); // For AI diversity
+      // Add random seed for recipe variation with reroll-specific enhancement
+      const randomSeed = Math.floor(Math.random() * 1000);
+      const isReroll = req.body.isReroll || false;
+      
+      // Enhanced variation prompts for rerolls to ensure completely different recipes
+      const rerollVariationPrompts = [
+        "Create a COMPLETELY DIFFERENT recipe using entirely different proteins, cooking methods, and flavor profiles than typical dishes with these ingredients",
+        "Generate an UNEXPECTED dish that transforms these ingredients in a surprising way - different cuisine style, cooking technique, or meal type than common approaches",
+        "Design a UNIQUE recipe that takes these ingredients in a bold new direction - different proteins, accompaniments, or cooking style than standard preparations",
+        "Craft an INNOVATIVE dish that reimagines these ingredients - vary the main component, side dishes, marinades, or cooking method for maximum difference",
+        "Create a DISTINCTIVE recipe that uses these ingredients in an unconventional way - different regional style, protein choice, or preparation method"
+      ];
+      
+      const selectedVariationPrompt = isReroll ? rerollVariationPrompts[randomSeed % rerollVariationPrompts.length] : "";
 
       // Group ingredients by cuisine compatibility
       const groupedIngredients = groupIngredientsByCuisine(ingredients);
@@ -297,6 +309,8 @@ export function registerRecipeRoutes(app: Express) {
       const prompt = `You are a creative chef specializing in making delicious COMPLETE MEALS from available ingredients.
 
 VARIATION SEED: ${randomSeed} (use this number to vary your recipe concepts, ingredient combinations, and cooking approaches to create diverse outputs)
+
+${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : ""}
 
 CUISINE DIVERSITY REQUIREMENT - HARD RULE:
 FORBIDDEN: Never suggest overused Western dishes like coq au vin, beef bourguignon, shepherd's pie, or fish and chips.
@@ -631,13 +645,27 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
         return res.status(403).json(limitCheck.error);
       }
 
-      // Add random seed for recipe variation
-      const randomSeed = Math.floor(Math.random() * 1000); // For AI diversity
+      // Add random seed for recipe variation with reroll-specific enhancement
+      const randomSeed = Math.floor(Math.random() * 1000);
+      const isReroll = req.body.isReroll || false;
+      
+      // Enhanced variation prompts for rerolls to ensure completely different recipes
+      const rerollVariationPrompts = [
+        "Create a COMPLETELY DIFFERENT dish than typical interpretations of this request - vary the protein, cooking method, and cuisine style entirely",
+        "Generate an UNEXPECTED interpretation that takes this request in a bold new direction - different main ingredient, cooking technique, or regional style",
+        "Design a UNIQUE dish that reimagines this request - vary the protein choice, side dishes, flavor profile, or cooking method dramatically",
+        "Craft an INNOVATIVE interpretation using entirely different proteins, accompaniments, marinades, or cooking styles than common approaches",
+        "Create a DISTINCTIVE dish that transforms this request using different cuisine traditions, cooking methods, or ingredient combinations"
+      ];
+      
+      const selectedVariationPrompt = isReroll ? rerollVariationPrompts[randomSeed % rerollVariationPrompts.length] : "";
 
       // Generate complete recipe directly
       const systemPrompt = `You are an expert chef. Create a complete dish with suitable accompaniments based on the user's request.
 
 VARIATION SEED: ${randomSeed}
+
+${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : ""}
 
 Use this number to vary the entire output. It must influence:
 
@@ -810,12 +838,31 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
         dietaryRestrictions = []
       } = quizData || {};
 
+      // Add reroll variation logic for shopping mode
+      const isReroll = req.body.isReroll || false;
+      const randomSeed = Math.floor(Math.random() * 1000);
+      
+      // Enhanced variation prompts for rerolls 
+      const rerollVariationPrompts = [
+        "Create a COMPLETELY DIFFERENT recipe using entirely different proteins, cooking methods, and flavor profiles while maintaining the core concept",
+        "Generate an UNEXPECTED interpretation that transforms this concept in a surprising way - different cuisine style, cooking technique, or meal type",
+        "Design a UNIQUE recipe that takes this concept in a bold new direction - different proteins, accompaniments, or cooking style",
+        "Craft an INNOVATIVE dish that reimagines this concept - vary the main component, side dishes, marinades, or cooking method",
+        "Create a DISTINCTIVE recipe that uses this concept as inspiration but executes it in an unconventional way"
+      ];
+      
+      const selectedVariationPrompt = isReroll ? rerollVariationPrompts[randomSeed % rerollVariationPrompts.length] : "";
+
       // Generate complete recipe from the idea
       const systemPrompt = `You are an expert chef creating a complete recipe based on this recipe idea:
 
 RECIPE CONCEPT: ${recipeIdea.title}
 DESCRIPTION: ${recipeIdea.description || "A delicious dish using your available ingredients"}
 CUISINE: ${recipeIdea.cuisine || "International"}
+
+VARIATION SEED: ${randomSeed}
+
+${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : ""}
 
 AVAILABLE INGREDIENTS: ${ingredients.join(", ")}
 CONSTRAINTS:
