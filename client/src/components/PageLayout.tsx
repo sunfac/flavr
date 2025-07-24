@@ -20,7 +20,7 @@ export function PageLayout({ children, className }: PageLayoutProps) {
         onSettingsClick={() => {}}
       />
       
-      <main className={cn("container mx-auto px-6 py-6 relative z-10 pb-24 pt-20", className)}>
+      <main className={cn("container mx-auto px-6 py-6 relative z-10 pb-32 pt-20", className)}>
         {children}
       </main>
 
