@@ -9,7 +9,7 @@ import { iconMap } from "@/lib/iconMap";
 import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
-import EnhancedRecipeCard from "@/components/recipe/EnhancedRecipeCard";
+import { useRecipeStore } from "@/stores/recipeStore";
 
 interface SavedRecipe {
   id: number;
@@ -32,8 +32,7 @@ export default function DigitalCookbook() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
-  const [selectedRecipe, setSelectedRecipe] = useState<SavedRecipe | null>(null);
-  const [showRecipeModal, setShowRecipeModal] = useState(false);
+
 
   // Fetch user's saved recipes
   const { data: recipes, isLoading, error, refetch } = useQuery({
@@ -78,8 +77,37 @@ export default function DigitalCookbook() {
   };
 
   const handleRecipeClick = (recipe: SavedRecipe) => {
-    setSelectedRecipe(recipe);
-    setShowRecipeModal(true);
+    // Load recipe into store and navigate to Recipe page for full experience with chat
+    const { replaceRecipe } = useRecipeStore.getState();
+    
+    replaceRecipe({
+      id: recipe.id.toString(),
+      servings: recipe.servings,
+      ingredients: recipe.ingredients.map((text, index) => ({
+        id: `ingredient-${index}`,
+        text,
+        checked: false
+      })),
+      steps: recipe.instructions.map((instruction, index) => ({
+        id: `step-${index}`,
+        title: `Step ${index + 1}`,
+        description: instruction
+      })),
+      meta: {
+        title: recipe.title,
+        description: recipe.description,
+        cookTime: recipe.cookTime,
+        difficulty: recipe.difficulty,
+        cuisine: recipe.cuisine,
+        image: recipe.imageUrl
+      },
+      currentStep: 0,
+      completedSteps: [],
+      lastUpdated: Date.now()
+    });
+    
+    // Navigate to Recipe page for full experience
+    navigate("/recipe");
   };
 
   const handleDeleteRecipe = async (recipeId: number) => {
@@ -357,32 +385,7 @@ export default function DigitalCookbook() {
           </div>
         )}
 
-        {/* Recipe Detail Modal */}
-        {showRecipeModal && selectedRecipe && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowRecipeModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <EnhancedRecipeCard 
-                recipe={{
-                  ...selectedRecipe,
-                  id: selectedRecipe.id.toString()
-                }}
-                onClose={() => setShowRecipeModal(false)}
-              />
-            </motion.div>
-          </motion.div>
-        )}
+
       </div>
     </div>
   );
