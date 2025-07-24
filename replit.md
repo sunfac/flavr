@@ -314,6 +314,7 @@ Changelog:
 - January 23, 2025. Chef Assist cooking time calculation fixed - removed hardcoded 30-minute default cooking time, enhanced AI prompts to calculate realistic cooking times based on actual recipe requirements (e.g., 150+ minutes for braised dishes, 25 minutes for stir-fries), timer chip now displays accurate total cooking time for each recipe type
 - January 23, 2025. Individual step timing restored to StepStack - added intelligent duration extraction function that parses cooking instructions for explicit times and recognizes common cooking terms, displays timing badges with Clock icon for each step, supports both explicit times (e.g., "15 minutes") and cooking actions (e.g., "simmer" = 15min, "sear" = 5min), smart formatting shows hours and minutes for longer steps
 - January 23, 2025. Interactive countdown timers added to recipe steps - implemented clickable timer controls with play/pause/reset buttons for each cooking step, real-time countdown display in MM:SS format, visual state indicators (gray/orange/yellow/green) for timer status, automatic completion detection with console logging ready for audio notifications
+- January 23, 2025. Gentle audio alarm added to step timers - implemented soft chime sound using Web Audio API when timers reach zero, harmonious two-tone bell sound (C6/E6 frequencies) with gentle fade in/out, non-intrusive volume level, graceful fallback for browsers without audio support
 ```
 
 ## User Preferences

@@ -141,6 +141,45 @@ function StepCard({
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
 
+  // Play gentle completion sound
+  const playCompletionSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // Create a gentle bell-like sound
+      const oscillator1 = audioContext.createOscillator();
+      const oscillator2 = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      // First tone - main chime
+      oscillator1.connect(gainNode);
+      oscillator1.frequency.setValueAtTime(800, audioContext.currentTime); // C6
+      oscillator1.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.3);
+      oscillator1.type = 'sine';
+      
+      // Second tone - harmony
+      oscillator2.connect(gainNode);
+      oscillator2.frequency.setValueAtTime(1000, audioContext.currentTime); // E6
+      oscillator2.frequency.exponentialRampToValueAtTime(750, audioContext.currentTime + 0.3);
+      oscillator2.type = 'sine';
+      
+      gainNode.connect(audioContext.destination);
+      
+      // Gentle fade in and out
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.05);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+      
+      oscillator1.start(audioContext.currentTime);
+      oscillator2.start(audioContext.currentTime);
+      oscillator1.stop(audioContext.currentTime + 0.8);
+      oscillator2.stop(audioContext.currentTime + 0.8);
+      
+    } catch (error) {
+      console.log('Audio not available:', error);
+    }
+  };
+
   // Start countdown timer
   const startTimer = () => {
     if (!stepDuration) return;
@@ -155,9 +194,10 @@ function StepCard({
       setTimeRemaining(prev => {
         if (prev === null || prev <= 1) {
           setIsTimerRunning(false);
-          if (prev !== null) {
-            // Timer completed - could add notification here
+          if (prev !== null && prev <= 1) {
+            // Timer completed - play gentle sound
             console.log(`Step ${stepNumber} timer completed!`);
+            playCompletionSound();
           }
           return 0;
         }
