@@ -23,24 +23,31 @@ interface StepStackProps {
 async function extractDuration(instruction: string): Promise<number | undefined> {
   const text = instruction.toLowerCase();
   
-  // First check for explicit time patterns in the text
+  // First check for explicit time patterns in the text - prioritize hours detection
   const patterns = [
-    /(\d+(?:\.\d+)?)\s*(?:to\s+|-)(\d+(?:\.\d+)?)\s*minutes?/,     // Range in minutes: "10-12 minutes"
-    /(\d+(?:\.\d+)?)\s*(?:to\s+|-)(\d+(?:\.\d+)?)\s*mins?/,       // Range in mins: "10-12 mins"
-    /(\d+(?:\.\d+)?)\s*(?:to\s+)?(\d+(?:\.\d+)?)?\s*hours?/,      // Handle decimal hours first
-    /(\d+(?:\.\d+)?)\s*(?:to\s+)?(\d+(?:\.\d+)?)?\s*hrs?/,        // Handle decimal hrs first
-    /(\d+)\s*minutes?/,                                            // Single minutes: "30 minutes"
-    /(\d+)\s*mins?/,                                              // Single mins: "30 mins"
+    // Hours patterns first (most important for long cooking)
+    /(\d+(?:\.\d+)?)\s*(?:to\s+|-)(\d+(?:\.\d+)?)\s*hours?/,      // Range in hours: "2-3 hours"
+    /(\d+(?:\.\d+)?)\s*(?:to\s+|-)(\d+(?:\.\d+)?)\s*hrs?/,       // Range in hrs: "2-3 hrs"
+    /(\d+(?:\.\d+)?)\s*hours?/,                                   // Single hours: "3 hours"
+    /(\d+(?:\.\d+)?)\s*hrs?/,                                     // Single hrs: "3 hrs"
+    /for\s+(\d+(?:\.\d+)?)\s*hours?/,                            // "for 3 hours"
+    /about\s+(\d+(?:\.\d+)?)\s*hours?/,                          // "about 3 hours"
+    /approximately\s+(\d+(?:\.\d+)?)\s*hours?/,                  // "approximately 3 hours"
+    /around\s+(\d+(?:\.\d+)?)\s*hours?/,                         // "around 3 hours"
+    
+    // Minutes patterns
+    /(\d+(?:\.\d+)?)\s*(?:to\s+|-)(\d+(?:\.\d+)?)\s*minutes?/,   // Range in minutes: "10-12 minutes"
+    /(\d+(?:\.\d+)?)\s*(?:to\s+|-)(\d+(?:\.\d+)?)\s*mins?/,     // Range in mins: "10-12 mins"
+    /(\d+)\s*minutes?/,                                          // Single minutes: "30 minutes"
+    /(\d+)\s*mins?/,                                            // Single mins: "30 mins"
+    /for\s+(\d+)\s*minutes?/,                                   // "for 30 minutes"
+    /about\s+(\d+)\s*minutes?/,                                 // "about 30 minutes"
+    /approximately\s+(\d+)\s*minutes?/,                         // "approximately 30 minutes"
+    /around\s+(\d+)\s*minutes?/,                                // "around 30 minutes"
+    
+    // Seconds patterns
     /(\d+)\s*(?:to\s+)?(\d+)?\s*seconds?/,
-    /(\d+)\s*(?:to\s+)?(\d+)?\s*secs?/,
-    /for\s+(\d+(?:\.\d+)?)\s*hours?/,
-    /for\s+(\d+)\s*minutes?/,
-    /about\s+(\d+(?:\.\d+)?)\s*hours?/,
-    /about\s+(\d+)\s*minutes?/,
-    /approximately\s+(\d+(?:\.\d+)?)\s*hours?/,
-    /approximately\s+(\d+)\s*minutes?/,
-    /around\s+(\d+(?:\.\d+)?)\s*hours?/,
-    /around\s+(\d+)\s*minutes?/
+    /(\d+)\s*(?:to\s+)?(\d+)?\s*secs?/
   ];
   
   for (const pattern of patterns) {
@@ -52,17 +59,21 @@ async function extractDuration(instruction: string): Promise<number | undefined>
       // Use the average if it's a range, otherwise use the single value
       const duration = match[2] ? (firstNum + secondNum) / 2 : firstNum;
       
-      // Convert to minutes if needed
+      // Convert to minutes if needed - with detailed logging
       let finalDuration;
+      const matchedText = match[0];
+      
       if (text.includes('hour') || text.includes('hr')) {
         finalDuration = Math.round(duration * 60); // Convert hours to minutes
+        console.log(`⏰ HOURS detected: "${instruction}" → matched "${matchedText}" → ${duration} hours = ${finalDuration} minutes`);
       } else if (text.includes('second') || text.includes('sec')) {
         finalDuration = Math.max(1, Math.round(duration / 60)); // Convert seconds to minutes
+        console.log(`⏰ SECONDS detected: "${instruction}" → matched "${matchedText}" → ${duration} seconds = ${finalDuration} minutes`);
       } else {
         finalDuration = Math.round(duration); // Already in minutes
+        console.log(`⏰ MINUTES detected: "${instruction}" → matched "${matchedText}" → ${duration} = ${finalDuration} minutes`);
       }
       
-      console.log(`🔍 Pattern match: "${instruction}" → matched "${match[0]}" → raw: ${duration}, final: ${finalDuration} minutes`);
       return finalDuration;
     }
   }
