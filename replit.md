@@ -331,6 +331,7 @@ Changelog:
 - January 23, 2025. Global cuisine selection system updated - replaced African cuisine category with European (Italian, Spanish, Greek, Portuguese, Hungarian), limited Indian subcontinent to only India and Sri Lanka, maintaining diverse global representation while including European food traditions
 - January 23, 2025. Timer system pattern matching enhanced - prioritized hours detection patterns to prevent "3 hours" cooking steps from displaying as "3 minutes", improved regex pattern ordering with hours patterns first, added comprehensive logging for timer conversion debugging
 - January 23, 2025. Mode selection page mobile optimization complete - reduced padding and spacing for mobile viewport (py-4 vs py-12), scaled down header text (text-3xl vs text-5xl), compacted card elements with responsive icon sizes (w-8 h-8 vs w-12 h-12), reduced gaps between cards (gap-4 vs gap-8), optimized button sizes and descriptions for mobile screens
+- January 23, 2025. Orange progress dots removed and ChatBot close functionality fixed - eliminated mobile dot progress indicators from ProgressBar component per user request, enhanced ChatBot close button functionality to prevent interference with settings access, fixed LSP errors for visual viewport handling and duplicate CSS properties
 ```
 
 ## User Preferences

@@ -31,19 +31,7 @@ export default function ProgressBar({
         </div>
       </div>
 
-      {/* Mobile: Dot Progress Indicator */}
-      <div className={`md:hidden ${className}`}>
-        <div className="flex justify-center gap-2 py-4 px-6">
-          {Array.from({ length: totalSteps }, (_, index) => (
-            <ProgressDot
-              key={index}
-              isCompleted={completedSteps.includes(index)}
-              isCurrent={index === currentStep}
-              stepIndex={index}
-            />
-          ))}
-        </div>
-      </div>
+      {/* Mobile: Removed dot progress indicator per user request */}
     </>
   );
 }

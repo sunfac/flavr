@@ -51,6 +51,11 @@ export default function ChatBot({
 }: ChatBotProps & { isOpen?: boolean; onClose?: () => void }) {
   // Use isOpen prop if provided, otherwise default to true
   const actualIsOpen = isOpen !== undefined ? isOpen : true;
+  
+  // If not open, don't render anything
+  if (!actualIsOpen) {
+    return null;
+  }
   const [message, setMessage] = useState("");
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
@@ -350,7 +355,7 @@ export default function ChatBot({
           }
         };
         
-        window.visualViewport.addEventListener('resize', handleViewportChange);
+        window.visualViewport?.addEventListener('resize', handleViewportChange);
         
         return () => {
           if (window.visualViewport) {
@@ -499,7 +504,6 @@ export default function ChatBot({
           actualIsOpen ? "translate-x-0 opacity-100 z-[99999]" : "translate-x-full opacity-0 z-[-1]"
         }`}
         style={{
-          height: '100vh',
           height: '100dvh',
           maxHeight: '100vh',
           overflow: 'hidden',
