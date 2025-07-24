@@ -70,15 +70,41 @@ export default function ChatBot({
      location.includes('/fridge') ? 'fridge' : 
      location.includes('/chef') ? 'chef' : undefined);
 
-  // Direct example commands with Lucide icons (6 for mobile display)
-  const suggestionChips = [
+  // Expanded list of direct example commands with Lucide icons
+  const allSuggestionChips = [
     { text: "Make this for 6 people", icon: iconMap.users, updatesRecipe: true },
     { text: "Make it vegan", icon: iconMap.heart, updatesRecipe: true },
     { text: "Add more spice", icon: iconMap.flame, updatesRecipe: true },
     { text: "Make it gluten-free", icon: iconMap.shield, updatesRecipe: true },
     { text: "Add a side dish", icon: iconMap.utensilsCrossed, updatesRecipe: false },
-    { text: "Make it healthier", icon: iconMap.target, updatesRecipe: true }
+    { text: "Make it healthier", icon: iconMap.target, updatesRecipe: true },
+    { text: "Double the recipe", icon: iconMap.plus, updatesRecipe: true },
+    { text: "Make it dairy-free", icon: iconMap.droplets, updatesRecipe: true },
+    { text: "Suggest wine pairing", icon: iconMap.wine, updatesRecipe: false },
+    { text: "How can I prep ahead?", icon: iconMap.timer, updatesRecipe: false },
+    { text: "Make it easier to cook", icon: iconMap.chefHat, updatesRecipe: true },
+    { text: "Add more vegetables", icon: iconMap.leaf, updatesRecipe: true },
+    { text: "Make it low-carb", icon: iconMap.zap, updatesRecipe: true },
+    { text: "Turn into meal prep", icon: iconMap.calendar, updatesRecipe: true },
+    { text: "Make it kid-friendly", icon: iconMap.smile, updatesRecipe: true },
+    { text: "Add protein options", icon: iconMap.beef, updatesRecipe: true },
+    { text: "Make it spicier", icon: iconMap.sparkles, updatesRecipe: true },
+    { text: "Suggest leftovers ideas", icon: iconMap.refrigerator, updatesRecipe: false }
   ];
+
+  // Rotating chips state - show 6 at a time, rotate every 6 seconds
+  const [chipRotationIndex, setChipRotationIndex] = useState(0);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setChipRotationIndex(prev => (prev + 6) % allSuggestionChips.length);
+    }, 6000);
+    
+    return () => clearInterval(interval);
+  }, [allSuggestionChips.length]);
+  
+  // Get current 6 chips to display
+  const suggestionChips = allSuggestionChips.slice(chipRotationIndex, chipRotationIndex + 6);
 
   // Get chat history
   const { data: historyData } = useQuery({
