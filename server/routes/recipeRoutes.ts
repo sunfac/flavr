@@ -649,6 +649,9 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
       const randomSeed = Math.floor(Math.random() * 1000);
       const isReroll = req.body.isReroll || false;
       
+      // Detect BBQ/grilling requests for enhanced cuisine selection
+      const isBBQRequest = /\b(bbq|barbecue|grill|grilled|grilling|meat dish|steak|ribs|kebab|satay|yakitori)\b/i.test(userPrompt);
+      
       // Enhanced variation prompts for rerolls to ensure completely different recipes
       const rerollVariationPrompts = [
         "Create a COMPLETELY DIFFERENT dish than typical interpretations of this request - vary the protein, cooking method, and cuisine style entirely",
@@ -677,21 +680,32 @@ Use this number to vary the entire output. It must influence:
 - Richness vs. freshness, spice level, and presentation style
 - A unique "chef's mood" which drives subtle intuitive variations in the dish (e.g., rustic vs. refined, bold vs. mellow)
 
-CUISINE DIVERSITY REQUIREMENT - HARD RULE:
-When the user request is vague or open-ended (e.g. "impressive dinner party dish", "chicken dinner", "something special"), you MUST:
+${isBBQRequest ? `
+**BBQ/GRILLING REQUEST DETECTED** - Use variation seed ${randomSeed} to select from global BBQ traditions:
+- Seed 1-125: Asian grilling (Korean BBQ, Japanese yakitori, Thai satay, Indonesian sate)
+- Seed 126-250: Middle Eastern grilling (Turkish kebabs, Lebanese shish, Persian kabab)
+- Seed 251-375: European grilling (Spanish barbacoa, Greek souvlaki, Portuguese espetada)
+- Seed 376-500: American BBQ styles (Texas brisket, Carolina pulled pork, Kansas City ribs)
+- Seed 501-625: South American grilling (Brazilian churrasco, Colombian asado, Peruvian anticuchos - NEVER Argentina)
+- Seed 626-750: African grilling (South African braai, Moroccan mechoui)
+- Seed 751-875: Australian/Oceanic BBQ (Aussie prawns, Pacific island imu)
+- Seed 876-1000: Indian subcontinent tandoor and grilling traditions
 
-1. **FORBIDDEN DISHES**: NEVER generate coq au vin, beef bourguignon, ratatouille, bouillabaisse, or any classic French bistro dishes
-2. **MANDATORY GLOBAL SELECTION**: Randomly select from diverse global cuisines using the variation seed:
-   - Asian: Thai, Vietnamese, Korean, Japanese, Chinese, Indonesian, Malaysian
-   - Middle Eastern: Lebanese, Persian, Turkish, Moroccan, Egyptian
-   - European: Italian, Spanish, Greek, Portuguese, Hungarian
-   - Latin American: Peruvian, Mexican, Argentinian, Brazilian
-   - Indian Subcontinent: Indian, Sri Lankan
-3. **REGIONAL AUTHENTICITY**: Choose lesser-known regional dishes within the selected cuisine
-4. **VARIATION SEED ENFORCEMENT**: Use seed number to determine:
-   - Which global cuisine to select (1-200: Asian, 201-400: Middle Eastern, 401-600: European, 601-800: Latin American, 801-1000: Indian Subcontinent)
-   - Which regional variation within that cuisine
-   - Specific cooking techniques and ingredients authentic to that region
+**MANDATORY**: Select the appropriate grilling tradition based on seed ${randomSeed} and create an authentic dish from that tradition.
+**ABSOLUTE PROHIBITION**: NEVER generate Argentinian asado, steak, or any Argentine dishes regardless of seed value.
+` : `
+**GENERAL REQUEST** - Use seed ${randomSeed} for diverse global cuisines:
+1. **FORBIDDEN DISHES**: NEVER generate coq au vin, beef bourguignon, ratatouille, bouillabaisse, or repetitive Argentinian steak
+2. **ENHANCED GLOBAL SELECTION**: Use seed to select from diverse cuisines:
+   - Seed 1-140: Asian (Thai, Vietnamese, Korean, Japanese, Chinese, Indonesian, Malaysian)
+   - Seed 141-280: Middle Eastern (Lebanese, Persian, Turkish, Moroccan, Egyptian)
+   - Seed 281-420: European (Italian, Spanish, Greek, Portuguese, Hungarian, German)
+   - Seed 421-560: Latin American (Peruvian, Mexican, Brazilian, Colombian - rotate countries)
+   - Seed 561-700: Indian Subcontinent (Indian regional, Sri Lankan, Bangladeshi)
+   - Seed 701-840: African (Ethiopian, Moroccan, South African, Nigerian)
+   - Seed 841-1000: Pacific/Caribbean (Filipino, Hawaiian, Jamaican, Cuban)
+3. **ANTI-REPETITION RULE**: If seed falls in Latin American range, rotate between Peru, Mexico, Brazil, Colombia - NEVER default to Argentina
+`}
 
 IMPORTANT: Always create COMPLETE DISHES that include:
 - Main component (protein, vegetable, or grain-based centrepiece)
