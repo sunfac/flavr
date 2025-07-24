@@ -125,12 +125,6 @@ export default function Fridge2Fork() {
     setIngredientsWithConfidence(prev => prev.filter(item => item.name !== ingredientToRemove));
   };
 
-  // Helper function to get confidence for an ingredient
-  const getIngredientConfidence = (ingredientName: string): number | null => {
-    const confidenceItem = ingredientsWithConfidence.find(item => item.name === ingredientName);
-    return confidenceItem ? confidenceItem.confidence : null;
-  };
-
   const handleGenerateRecipes = async () => {
     if (ingredients.length === 0) {
       toast({
@@ -319,18 +313,10 @@ export default function Fridge2Fork() {
                               className="pl-3 pr-1 py-2 bg-orange-500/20 border-orange-400/50 text-orange-200 hover:bg-orange-500/30 transition-colors flex items-center gap-2"
                             >
                               <span>{ingredient}</span>
-                              {(() => {
-                                const confidence = getIngredientConfidence(ingredient);
-                                return confidence ? (
-                                  <span className="text-xs bg-orange-600/30 px-1.5 py-0.5 rounded-full text-orange-300">
-                                    {confidence}%
-                                  </span>
-                                ) : null;
-                              })()}
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="ml-1 h-auto p-1 hover:bg-red-400/20 rounded-full"
+                                className="ml-2 h-auto p-1 hover:bg-red-400/20 rounded-full"
                                 onClick={() => removeIngredient(index)}
                                 title={`Remove ${ingredient}`}
                               >

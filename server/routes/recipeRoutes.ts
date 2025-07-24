@@ -1795,13 +1795,7 @@ Return the data in this exact JSON format:
       console.log('✅ Nutrition analysis complete:', nutritionData);
 
       // Log the nutrition analysis for developer analytics
-      await logSimpleGPTInteraction('nutrition_analysis', {
-        recipeTitle: title,
-        ingredientCount: ingredients.length,
-        servings: servings,
-        totalCalories: nutritionData.calories,
-        caloriesPerServing: nutritionData.perServing.calories
-      });
+      console.log('🔍 API LOG - nutrition_analysis: ✅ | Recipe:', title, '| Ingredients:', ingredients.length, '| Calories per serving:', nutritionData.perServing.calories);
 
       res.json(nutritionData);
 

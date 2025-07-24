@@ -201,12 +201,12 @@ Use common cooking names and only include items with 30% confidence or higher.`
         const ingredientName = confidenceMatch[1].trim().toLowerCase();
         const confidence = parseInt(confidenceMatch[2]);
         
-        if (confidence >= 30 && isFood(ingredientName)) {
+        if (confidence >= 70 && isFood(ingredientName)) {
           ingredientsWithConfidence.push({
             name: normalizeIngredient(ingredientName),
             confidence: confidence
           });
-        } else if (confidence < 30) {
+        } else if (confidence < 70) {
           console.log(`Excluded low confidence item: "${ingredientName}" (${confidence}%)`);
         } else {
           console.log(`Filtered out non-food item: "${ingredientName}" (${confidence}%)`);
