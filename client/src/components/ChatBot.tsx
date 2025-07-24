@@ -461,41 +461,8 @@ export default function ChatBot({
   };
 
   return (
-    <>
-      {/* Chat Modal Container - Portal-style with maximum z-index */}
-      {actualIsOpen && (
-        <div 
-          className="fixed inset-0 z-[999999]" 
-          style={{ 
-            pointerEvents: 'auto',
-            backgroundColor: 'rgba(0, 0, 0, 1)', // Completely opaque black
-            backdropFilter: 'blur(4px)'
-          }}
-        >
-          {/* Full Screen Blocking Backdrop - Completely Opaque */}
-          <div 
-            className="absolute inset-0"
-            onClick={() => onClose && onClose()}
-            style={{ 
-              pointerEvents: 'all',
-              backgroundColor: 'rgb(0, 0, 0)', // Solid black, no transparency
-              width: '100vw',
-              height: '100vh'
-            }}
-          />
-          
-          {/* Chat Panel - Mobile Optimized */}
-          <div 
-            className="absolute inset-0 w-full bg-slate-900 flex flex-col mobile-chat-panel"
-            style={{
-              height: '100vh',
-              maxHeight: '100vh',
-              overflow: 'hidden',
-              pointerEvents: 'all'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-        <CardHeader className="p-3 sm:p-4 pt-20 sm:pt-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
+    <div className="h-full flex flex-col bg-slate-900">
+        <CardHeader className="p-3 sm:p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="relative group">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -628,9 +595,6 @@ export default function ChatBot({
             </form>
           </div>
         </CardContent>
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   );
 }
