@@ -194,6 +194,13 @@ function StepCard({
     }
 
     const getDuration = async () => {
+      // Add null check for step instruction
+      if (!step.description || typeof step.description !== 'string') {
+        console.log(`⏱️ Step ${stepNumber}: No valid instruction → undefined minutes`);
+        setStepDuration(undefined);
+        return;
+      }
+
       setIsLoadingDuration(true);
       try {
         const duration = await extractDuration(step.description);

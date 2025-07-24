@@ -129,6 +129,12 @@ export function registerRecipeRoutes(app: Express) {
         return res.status(400).json({ error: "No ingredients provided" });
       }
 
+      // Add randomization variables for recipe variation
+      const cookingApproach = ['quick sauté', 'roasted medley', 'one-pot comfort', 'fresh assembly', 'grilled combination'][Math.floor(Math.random() * 5)];
+      const flavorProfile = ['bold and spicy', 'mild and comforting', 'fresh and zesty', 'rich and savory', 'aromatic herbs'][Math.floor(Math.random() * 5)];
+      const textureStyle = ['crispy textures', 'soft and tender', 'mixed textures', 'rustic chunky', 'smooth creamy'][Math.floor(Math.random() * 5)];
+      const randomVariation = Math.floor(Math.random() * 100); // For AI diversity
+
       // Group ingredients by cuisine compatibility
       const groupedIngredients = groupIngredientsByCuisine(ingredients);
       console.log('Grouped ingredients:', groupedIngredients);
@@ -149,6 +155,12 @@ export function registerRecipeRoutes(app: Express) {
       }
 
       const prompt = `You are a creative chef specializing in making delicious COMPLETE MEALS from available ingredients.
+
+VARIATION CONSTRAINTS (apply these randomly to create diversity):
+- Cooking approach: ${cookingApproach}
+- Flavor profile: ${flavorProfile}  
+- Texture style: ${textureStyle}
+- Variation seed: ${randomVariation} (use this to vary recipe concepts and ingredients)
 
 IMPORTANT: Always create COMPLETE DISHES that include:
 - Main component using the available ingredients
@@ -211,7 +223,7 @@ Return a JSON object with this structure:
           },
           { role: "user", content: prompt }
         ],
-        temperature: 0.7 // Reduced temperature for more consistent results
+        temperature: 0.9 // Increased temperature for more creative variation
       });
 
       let response;
@@ -415,8 +427,22 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
         return res.status(400).json({ error: "No prompt provided" });
       }
 
+      // Add randomization variables for recipe variation
+      const cookingMethod = ['roasted', 'pan-seared', 'grilled', 'braised', 'slow-cooked', 'steamed', 'stir-fried'][Math.floor(Math.random() * 7)];
+      const seasoningStyle = ['herb-crusted', 'spice-rubbed', 'citrus-marinated', 'wine-braised', 'garlic-infused', 'honey-glazed'][Math.floor(Math.random() * 6)];
+      const temperatureNotes = ['piping hot', 'warm', 'at room temperature', 'slightly chilled'][Math.floor(Math.random() * 4)];
+      const platingSuggestion = ['rustic family-style', 'elegant plated', 'casual sharing', 'individual portions'][Math.floor(Math.random() * 4)];
+      const randomSeed = Math.floor(Math.random() * 1000); // For AI diversity
+
       // Generate complete recipe directly
       const systemPrompt = `You are an expert chef. Create a complete dish with suitable accompaniments based on the user's request.
+
+VARIATION CONSTRAINTS (apply these randomly to create diversity):
+- Primary cooking method: ${cookingMethod}
+- Seasoning approach: ${seasoningStyle}  
+- Serving temperature: ${temperatureNotes}
+- Plating style: ${platingSuggestion}
+- Random seed: ${randomSeed} (use this to vary ingredient choices and techniques)
 
 IMPORTANT: Always create COMPLETE DISHES that include:
 - Main component (protein, vegetable, or grain-based centerpiece)
@@ -463,7 +489,7 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
           { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations." },
           { role: "user", content: systemPrompt }
         ],
-        temperature: 0.7
+        temperature: 0.8 // Increased temperature for more recipe variation
       });
 
       let recipe;
