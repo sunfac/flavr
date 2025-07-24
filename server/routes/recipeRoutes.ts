@@ -426,46 +426,66 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
       // Generate complete recipe directly
       const systemPrompt = `You are an expert chef. Create a complete dish with suitable accompaniments based on the user's request.
 
-VARIATION SEED: ${randomSeed} (use this number to vary your ingredient choices, cooking techniques, and recipe approach to create diverse outputs even for similar requests)
+VARIATION SEED: ${randomSeed}
+
+Use this number to vary the entire output. It must influence:
+
+- Main ingredient selection (protein or veg)
+- Side dish pairing logic
+- Choice of cooking techniques (grilled, braised, roasted, sautéed, etc.)
+- Herb and spice selection
+- Whether the dish leans traditional or regional within the cuisine (e.g. Northern vs. Southern Italian)
+- Richness vs. freshness, spice level, and presentation style
+- A unique "chef's mood" which drives subtle intuitive variations in the dish (e.g., rustic vs. refined, bold vs. mellow)
 
 IMPORTANT: Always create COMPLETE DISHES that include:
-- Main component (protein, vegetable, or grain-based centerpiece)
-- At least 1-2 side dishes or accompaniments that complement the main
-- Proper sauces, dressings, or condiments that enhance flavors
-- Garnishes and finishing touches for visual appeal
-- Complete balanced meal, not just a single element
-- Focus on MAXIMUM FLAVOR through proper seasoning, technique, and ingredient combinations
+- Main component (protein, vegetable, or grain-based centrepiece)
+- At least 1–2 complementary side dishes
+- Proper sauces, dressings, or condiments to enhance flavour
+- Garnishes and visual/textural contrasts for plating appeal
+- A fully balanced meal — not just a main on its own
 
 User request: ${userPrompt}
 Servings: ${servings}
 
 Create a complete recipe based on this request: "${userPrompt}"
 
-Requirements:
+REQUIREMENTS:
 - Servings: ${servings}
-- Calculate realistic cooking time based on the actual recipe requirements
-- Use ingredients available at UK supermarkets
-- IMPORTANT: Use UK measurement units ONLY (grams, ml, tbsp, tsp, litres) - NO cups or ounces
-- Make it achievable for home cooks
-- Stay authentic to ONE cuisine tradition - DO NOT mix cuisines or create fusion dishes
-- Choose one specific cuisine (Italian, French, Thai, Indian, Mexican, Japanese, Chinese, etc.) and keep the recipe authentic to that tradition
+- Calculate a realistic cooking time based on actual recipe steps
+- Use ingredients commonly available in UK supermarkets
+- UK measurement units ONLY (e.g. grams, ml, tbsp, tsp, litres) — DO NOT use cups or ounces
+- Make it achievable for a home cook
+- Stay completely authentic to ONE cuisine tradition (e.g., Italian, French, Thai, Indian, Mexican, Japanese, Chinese, etc.)
+  - No fusion or cross-cuisine blends
+  - Stay regionally consistent within that cuisine if appropriate
+- Ensure at least 3 clear differences in dish structure or flavour if the same prompt is used with different variation seeds
+- Include at least one visual or textural contrast element
 
-Return ONLY a valid JSON object with this exact structure (NO trailing commas):
+Return ONLY a valid JSON object with this exact structure (NO markdown, no explanations, and no trailing commas):
+
 {
   "title": "Recipe Name",
-  "description": "Brief description",
+  "description": "Brief description of the dish, including any regional focus and standout flavours",
   "cuisine": "Cuisine Type",
-  "difficulty": "easy",
+  "difficulty": "[easy | medium | hard] (determine based on actual complexity)",
   "prepTime": 15,
-  "cookTime": [REALISTIC total cooking time in minutes based on actual recipe requirements],
+  "cookTime": [REALISTIC total cooking time in minutes],
   "servings": ${servings},
-  "ingredients": [{"name": "ingredient name only", "amount": "UK quantity (e.g. '2 tbsp', '400g', '250ml')"}],
-  "instructions": [{"step": 1, "instruction": "detailed instruction"}],
-  "tips": ["helpful tip"],
-  "nutritionalHighlights": ["nutritional benefit"]
-}
-
-CRITICAL: Ensure NO trailing commas after the last item in any array or object. Return ONLY the JSON object, no markdown, no explanations.`;
+  "ingredients": [
+    {"name": "ingredient name only", "amount": "UK quantity (e.g. '2 tbsp', '400g', '250ml')"}
+  ],
+  "instructions": [
+    {"step": 1, "instruction": "Detailed instruction"},
+    {"step": 2, "instruction": "Continue in this format"}
+  ],
+  "tips": [
+    "Helpful tip that improves flavour, speed, or presentation"
+  ],
+  "nutritionalHighlights": [
+    "Nutritional benefit (e.g. 'High in fibre', 'Rich in omega-3')"
+  ]
+}`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",

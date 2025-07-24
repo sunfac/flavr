@@ -324,6 +324,7 @@ Changelog:
 - January 23, 2025. Timer conversion bug fixes in progress - debugging critical issue where 12-minute cooking steps display as 12-hour timers, enhanced pattern matching for time ranges like "10-12 minutes", added comprehensive logging to track conversion errors at each step of the timing calculation process
 - January 23, 2025. Preheating steps excluded from timers - added "preheat", "heat", and "warm" to prep keywords so oven preheating and oil heating steps don't display unnecessary timers, since ovens have built-in indicators and heating is typically done by visual cues
 - January 23, 2025. Recipe variation system implemented - added random seeds to both Chef Assist and Fridge2Fork generation to ensure natural recipe diversity even when given the same concept, increased AI temperature to 0.8-0.9 for more creative outputs, fixed timer null checks to prevent UI crashes
+- January 23, 2025. Enhanced Chef Assist prompt structure - implemented comprehensive variation system that uses random seeds to influence main ingredient selection, cooking techniques, herb/spice selection, regional cuisine focus, chef's mood (rustic vs refined), richness vs freshness, and presentation style, ensuring at least 3 clear differences when same prompt used with different seeds
 ```
 
 ## User Preferences
