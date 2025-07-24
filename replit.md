@@ -343,6 +343,7 @@ Changelog:
 - January 23, 2025. "Inspire Me" variation system enhanced - added random seeds (0-9999) and cuisine category selection like recipe generation, implemented seed-based cuisine assignment (Asian, Middle Eastern, European, Latin American, Indian Subcontinent) with specific cuisine focus, ensures maximum diversity with each button click using same variation principles as recipe generation
 - January 23, 2025. Enhanced ChatBot functionality - fixed mobile text input visibility with bulletproof CSS layout, implemented conversation history persistence for retained chat memory between messages, fixed recipe updates from ChatBot to properly render in UI through recipeStore integration, resolved mobile input disappearing while typing through improved state management, ChatBot now sends full conversation history with each request for continuity
 - January 23, 2025. Mobile ChatBot input stabilized - eliminated viewport jumping by removing auto-scroll and sticky positioning, input now stays in fixed position when typing instead of moving around the screen, improved mobile typing experience with stable input field positioning
+- January 23, 2025. ChatBot input visibility restored - reverted problematic absolute positioning that was hiding input completely, returned to simple stable layout ensuring input is always visible and functional
 ```
 
 ## User Preferences
