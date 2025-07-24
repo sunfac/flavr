@@ -78,8 +78,8 @@ export default function ChatBot({
     { text: "Make it gluten-free", icon: iconMap.shield, updatesRecipe: true },
     { text: "Double the recipe", icon: iconMap.plus, updatesRecipe: true },
     { text: "Make it healthier", icon: iconMap.target, updatesRecipe: true },
+    { text: "Add a side dish", icon: iconMap.utensilsCrossed, updatesRecipe: false },
     { text: "Suggest a wine pairing", icon: iconMap.wine, updatesRecipe: false },
-    { text: "What sides go with this?", icon: iconMap.utensilsCrossed, updatesRecipe: false },
     { text: "How can I prep ahead?", icon: iconMap.timer, updatesRecipe: false },
     { text: "Make it easier to cook", icon: iconMap.chefHat, updatesRecipe: true }
   ];
