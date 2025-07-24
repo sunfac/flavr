@@ -344,6 +344,7 @@ Changelog:
 - January 23, 2025. Enhanced ChatBot functionality - fixed mobile text input visibility with bulletproof CSS layout, implemented conversation history persistence for retained chat memory between messages, fixed recipe updates from ChatBot to properly render in UI through recipeStore integration, resolved mobile input disappearing while typing through improved state management, ChatBot now sends full conversation history with each request for continuity
 - January 23, 2025. Mobile ChatBot input stabilized - eliminated viewport jumping by removing auto-scroll and sticky positioning, input now stays in fixed position when typing instead of moving around the screen, improved mobile typing experience with stable input field positioning
 - January 23, 2025. ChatBot input visibility restored - reverted problematic absolute positioning that was hiding input completely, returned to simple stable layout ensuring input is always visible and functional
+- January 23, 2025. Comprehensive UK English ingredient system implemented - created systematic UK ingredient terminology mappings (250+ translations), integrated UK English prompt guidance across all recipe generation endpoints, applied post-generation conversions for ingredients/measurements/spellings (aubergine not eggplant, courgette not zucchini, chilli not chili, double cream not heavy cream, etc.), expanded culinary facts with UK terminology, ensuring all generated recipes use proper British ingredient names and measurements
 ```
 
 ## User Preferences

@@ -24,6 +24,7 @@ import {
   getStrictDietaryInstruction 
 } from "../mappingUtils";
 import { processConversationalInput, generateRecipeFromConversation, logUserInteractionData } from "../conversationalProcessor";
+import { convertToUKIngredients, convertToUKMeasurements, ukRecipePromptAdditions } from "../ukIngredientMappings";
 
 // Configure multer for file uploads
 const upload = multer({ 
@@ -36,6 +37,63 @@ if (!process.env.OPENAI_API_KEY) {
   throw new Error('Missing required OpenAI API key: OPENAI_API_KEY');
 }
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Helper function to convert recipe text to UK English
+function convertRecipeToUKEnglish(recipe: any): any {
+  if (!recipe) return recipe;
+  
+  const convertedRecipe = { ...recipe };
+  
+  // Convert recipe title
+  if (convertedRecipe.title) {
+    convertedRecipe.title = convertToUKIngredients(convertedRecipe.title);
+  }
+  
+  // Convert description
+  if (convertedRecipe.description) {
+    convertedRecipe.description = convertToUKIngredients(convertedRecipe.description);
+  }
+  
+  // Convert ingredients
+  if (convertedRecipe.ingredients && Array.isArray(convertedRecipe.ingredients)) {
+    convertedRecipe.ingredients = convertedRecipe.ingredients.map((ingredient: any) => {
+      if (typeof ingredient === 'string') {
+        return convertToUKIngredients(convertToUKMeasurements(ingredient));
+      } else if (ingredient.name && ingredient.amount) {
+        return {
+          ...ingredient,
+          name: convertToUKIngredients(ingredient.name),
+          amount: convertToUKMeasurements(ingredient.amount)
+        };
+      }
+      return ingredient;
+    });
+  }
+  
+  // Convert instructions
+  if (convertedRecipe.instructions && Array.isArray(convertedRecipe.instructions)) {
+    convertedRecipe.instructions = convertedRecipe.instructions.map((instruction: any) => {
+      if (typeof instruction === 'string') {
+        return convertToUKIngredients(convertToUKMeasurements(instruction));
+      } else if (instruction.instruction) {
+        return {
+          ...instruction,
+          instruction: convertToUKIngredients(convertToUKMeasurements(instruction.instruction))
+        };
+      }
+      return instruction;
+    });
+  }
+  
+  // Convert tips
+  if (convertedRecipe.tips && Array.isArray(convertedRecipe.tips)) {
+    convertedRecipe.tips = convertedRecipe.tips.map((tip: string) => 
+      convertToUKIngredients(convertToUKMeasurements(tip))
+    );
+  }
+  
+  return convertedRecipe;
+}
 
 // Initialize Replicate for Stable Diffusion
 if (!process.env.REPLICATE_API_TOKEN) {
@@ -197,6 +255,10 @@ Create 3 DIVERSE recipe suggestions that:
 3. Create authentic dishes within each cuisine tradition
 4. Use neutral ingredients to support the main cuisine flavors
 5. Ensure each recipe makes culinary sense and tastes harmonious
+
+**CRITICAL: Use UK English throughout:**
+${ukRecipePromptAdditions.ingredientGuidance}
+${ukRecipePromptAdditions.spellingsGuidance}
 
 For each recipe, provide:
 - Title
@@ -530,6 +592,11 @@ REQUIREMENTS:
 - Ensure at least 3 clear differences in dish structure or flavour if the same prompt is used with different variation seeds
 - Include at least one visual or textural contrast element
 
+**CRITICAL: Use UK English throughout this recipe:**
+${ukRecipePromptAdditions.ingredientGuidance}
+${ukRecipePromptAdditions.measurementGuidance}
+${ukRecipePromptAdditions.spellingsGuidance}
+
 Return ONLY a valid JSON object with this exact structure (NO markdown, no explanations, and no trailing commas):
 
 {
@@ -581,6 +648,9 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
         console.error('Raw content:', completion.choices[0].message.content);
         throw new Error('Failed to parse recipe JSON from AI response');
       }
+      
+      // Apply UK English conversions to recipe text
+      recipe = convertRecipeToUKEnglish(recipe);
       
       // Send recipe immediately to user for faster response
       res.json({ recipe });
@@ -662,6 +732,11 @@ Create a COMPLETE recipe that:
 5. Prioritize authentic preparation using the available ingredients
 6. Include exact measurements and clear instructions within the time and equipment constraints
 
+**CRITICAL: Use UK English throughout this recipe:**
+${ukRecipePromptAdditions.ingredientGuidance}
+${ukRecipePromptAdditions.measurementGuidance}
+${ukRecipePromptAdditions.spellingsGuidance}
+
 Return ONLY a valid JSON object with this exact structure (NO trailing commas):
 {
   "title": "${recipeIdea.title}",
@@ -714,6 +789,9 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
         console.error('Raw content:', completion.choices[0].message.content);
         throw new Error('Failed to parse AI recipe response. Please try again.');
       }
+      
+      // Apply UK English conversions to recipe text
+      recipe = convertRecipeToUKEnglish(recipe);
       
       // Send recipe immediately to user for faster response
       res.json({ recipe });
