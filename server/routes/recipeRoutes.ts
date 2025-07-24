@@ -1717,4 +1717,100 @@ Important: Return each instruction as a separate array element, do not combine m
       });
     }
   });
+
+  // Nutritional Analysis endpoint
+  app.post("/api/nutrition/analyze", async (req, res) => {
+    try {
+      const { title, ingredients, servings } = req.body;
+
+      if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
+        return res.status(400).json({ error: "Ingredients array is required" });
+      }
+
+      console.log('🔬 Analyzing nutrition for:', { title, ingredientCount: ingredients.length, servings });
+
+      const prompt = `Analyze the nutritional content of this recipe and provide detailed nutritional information.
+
+Recipe: ${title}
+Ingredients: ${ingredients.join(", ")}
+Servings: ${servings}
+
+Please calculate and return the following nutritional information for the ENTIRE recipe and per serving:
+
+1. Total calories for whole recipe
+2. Protein (grams)
+3. Carbohydrates (grams) 
+4. Total fat (grams)
+5. Fiber (grams)
+6. Sugar (grams)
+7. Sodium (milligrams)
+
+Consider typical serving sizes and nutritional values for each ingredient. Be realistic and accurate.
+
+Return the data in this exact JSON format:
+{
+  "calories": [total_recipe_calories],
+  "protein": [total_protein_grams],
+  "carbs": [total_carbs_grams],
+  "fat": [total_fat_grams],
+  "fiber": [total_fiber_grams],
+  "sugar": [total_sugar_grams],
+  "sodium": [total_sodium_milligrams],
+  "perServing": {
+    "calories": [calories_per_serving],
+    "protein": [protein_per_serving],
+    "carbs": [carbs_per_serving],
+    "fat": [fat_per_serving]
+  }
+}`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          { 
+            role: "system", 
+            content: "You are a nutrition expert. Analyze recipes and provide accurate nutritional information. Return only valid JSON."
+          },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.3 // Lower temperature for more consistent results
+      });
+
+      let nutritionData;
+      try {
+        const content = completion.choices[0].message.content || "{}";
+        const cleanContent = content.replace(/```json\n?/g, '').replace(/\n?```/g, '').trim();
+        nutritionData = JSON.parse(cleanContent);
+      } catch (parseError) {
+        console.error('Failed to parse nutrition data:', parseError);
+        return res.status(500).json({ error: "Failed to parse nutritional analysis" });
+      }
+
+      // Validate the nutrition data structure
+      if (!nutritionData.calories || !nutritionData.perServing) {
+        console.error('Invalid nutrition data structure:', nutritionData);
+        return res.status(500).json({ error: "Invalid nutritional data received" });
+      }
+
+      console.log('✅ Nutrition analysis complete:', nutritionData);
+
+      // Log the nutrition analysis for developer analytics
+      await logSimpleGPTInteraction('nutrition_analysis', {
+        recipeTitle: title,
+        ingredientCount: ingredients.length,
+        servings: servings,
+        totalCalories: nutritionData.calories,
+        caloriesPerServing: nutritionData.perServing.calories
+      });
+
+      res.json(nutritionData);
+
+    } catch (error) {
+      console.error('❌ Nutritional analysis failed:', error);
+      res.status(500).json({ 
+        error: "Failed to analyze nutrition",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
 }

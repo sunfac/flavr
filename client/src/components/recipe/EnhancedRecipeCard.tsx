@@ -8,6 +8,7 @@ import { useRecipeStore, recipeActions } from '@/stores/recipeStore';
 import { apiRequest } from '@/lib/queryClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import RecipeShareTools from '@/components/RecipeShareTools';
+import NutritionalAnalysis from '@/components/NutritionalAnalysis';
 
 // Extract duration from instruction text
 function extractDuration(instruction: string): number | undefined {
@@ -542,6 +543,15 @@ function EnhancedRecipeCard({
             className="min-h-[600px]"
           />
         </div>
+
+        {/* Nutritional Analysis Section */}
+        <NutritionalAnalysis 
+          recipe={{
+            title: activeTitle,
+            ingredients: formattedIngredients.map(ing => ing.text),
+            servings: activeServings
+          }}
+        />
 
         {/* Recipe Tips - Above Footer to Prevent Overlap */}
         {recipe.tips && (
