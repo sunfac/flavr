@@ -462,38 +462,6 @@ export default function ChatBot({
 
   return (
     <>
-      {/* WhatsApp-style Floating Chat Button - Only show when chat is closed */}
-      {!actualIsOpen && (
-        <div className="fixed bottom-24 right-4 z-40">
-          <div className="relative">
-            <Button
-              onClick={() => {
-                // Toggle chat open/closed
-                const newIsOpen = !actualIsOpen;
-                if (onClose) {
-                  // If onClose is provided, we're controlling state externally
-                  if (newIsOpen) {
-                    // Need to trigger open - parent should handle this
-                    window.dispatchEvent(new CustomEvent('openChat'));
-                  } else {
-                    onClose();
-                  }
-                } else {
-                  // Internal state management would go here if needed
-                }
-              }}
-              className="w-12 h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-2 border-white"
-              size="sm"
-            >
-              <iconMap.messageCircle className="w-5 h-5" />
-            </Button>
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-              <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Chat Modal Container - Portal-style with maximum z-index */}
       {actualIsOpen && (
         <div 
