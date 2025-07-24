@@ -124,7 +124,7 @@ async function checkAndEnforceUsageLimit(req: any): Promise<{ allowed: boolean; 
         return { 
           allowed: false, 
           error: { 
-            error: "Monthly recipe limit reached", 
+            error: "You have no free recipes remaining this month. Sign up for Flavr+ to get unlimited recipes!", 
             recipesUsed: user.recipesThisMonth || 0,
             recipesLimit: 3,
             hasFlavrPlus: false
@@ -142,7 +142,7 @@ async function checkAndEnforceUsageLimit(req: any): Promise<{ allowed: boolean; 
         return { 
           allowed: false, 
           error: { 
-            error: "Monthly recipe limit reached", 
+            error: "You have no free recipes remaining this month. Sign up for Flavr+ to get unlimited recipes!", 
             recipesUsed: pseudoUser.recipesThisMonth || 0,
             recipesLimit: 3,
             hasFlavrPlus: false
