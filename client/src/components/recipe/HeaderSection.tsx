@@ -44,96 +44,70 @@ export default function HeaderSection({
       
       {/* Hero Image - Mobile First Design */}
       <div className="relative w-full">
-        {/* Main Image Display */}
-        {recipe.image ? (
-          <div className="relative w-full aspect-[16/10] sm:aspect-video bg-gradient-to-br from-orange-400 to-orange-600 rounded-t-xl overflow-hidden">
+        {/* Main Image Display with Instant Beautiful Placeholder */}
+        <div className="relative w-full aspect-[16/10] sm:aspect-video rounded-t-xl overflow-hidden">
+          {/* Always show beautiful gradient background for instant wow factor */}
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600" />
+          
+          {/* Real image loads on top when ready */}
+          {recipe.image && (
             <img 
               src={recipe.image} 
               alt={recipe.title}
-              className="w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 opacity-0"
               loading="eager"
               style={{ objectPosition: 'center' }}
-              onLoad={() => {
-                // Scroll to absolute top after image loads
-                window.scrollTo(0, 0);
-                document.documentElement.scrollTop = 0;
-                document.body.scrollTop = 0;
+              onLoad={(e) => {
+                console.log('✅ Image loaded successfully:', recipe.image);
+                // Fade in the real image smoothly
+                e.currentTarget.style.opacity = '1';
               }}
               onError={(e) => {
                 console.log('❌ Image failed to load:', recipe.image);
-                // Don't hide the image container, just show fallback
+                // Keep the gradient background visible
                 e.currentTarget.style.display = 'none';
-                // Show the fallback gradient container
-                const container = e.currentTarget.parentElement;
-                if (container) {
-                  container.style.background = 'linear-gradient(to bottom right, #fb923c, #ea580c)';
-                }
               }}
             />
-            {/* Minimal overlay for mobile readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent sm:bg-black/30" />
-            
-            {/* Mobile: Only title overlay, Desktop: Title + description overlay */}
-            <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-6 text-white">
-              <h1 className="font-bold mb-1 sm:mb-2 text-shadow-lg text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight break-words hyphens-auto text-wrap-balance">
-                {recipe.title}
-              </h1>
-            </div>
-            
-            {/* Action Buttons - Top Right */}
-            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2">
-              <Button
-                onClick={handleStartAgain}
-                size="sm"
-                variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
-              >
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Start Again
-              </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
-              >
-                <Heart className="w-4 h-4 mr-2" />
-                Save
-              </Button>
-            </div>
+          )}
+          
+          {/* Minimal overlay for mobile readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent sm:bg-black/30" />
+          
+          {/* Mobile: Only title overlay, Desktop: Title + description overlay */}
+          <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-6 text-white">
+            <h1 className="font-bold mb-1 sm:mb-2 text-shadow-lg text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight break-words hyphens-auto text-wrap-balance">
+              {recipe.title}
+            </h1>
           </div>
-        ) : (
-          <div className="relative w-full aspect-[16/10] sm:aspect-video bg-gradient-to-br from-orange-400 to-orange-600 rounded-t-xl overflow-hidden flex items-center justify-center">
-            <div className="text-center p-6 text-white">
-              <h1 className="font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight break-words mb-2">
-                {recipe.title}
-              </h1>
-              <div className="mt-4 text-xs text-white/60 animate-pulse">
-                ✨ Generating beautiful food image...
-              </div>
-            </div>
-            
-            {/* Action Buttons - Top Right (for no image state) */}
-            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2">
-              <Button
-                onClick={handleStartAgain}
-                size="sm"
-                variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
-              >
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Start Again
-              </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
-              >
-                <Heart className="w-4 h-4 mr-2" />
-                Save
-              </Button>
-            </div>
+          
+          {/* Action Buttons - Top Right */}
+          <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2">
+            <Button
+              onClick={handleStartAgain}
+              size="sm"
+              variant="secondary"
+              className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Start Again
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+            >
+              <Heart className="w-4 h-4 mr-2" />
+              Save
+            </Button>
           </div>
-        )}
+          
+          {/* Subtle loading indicator when image is enhancing */}
+          {recipe.image && (
+            <div className="absolute bottom-4 left-4 text-white/60 text-xs animate-pulse">
+              ✨ Enhancing image...
+            </div>
+          )}
+        </div>
         
 
       </div>
