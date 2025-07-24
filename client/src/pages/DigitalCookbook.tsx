@@ -358,19 +358,19 @@ export default function DigitalCookbook() {
                               {recipe.cuisine}
                             </Badge>
                           )}
+                          {recipe.cookTime && (
+                            <Badge variant="outline" className="text-orange-400 border-orange-400/30 bg-orange-400/10">
+                              <iconMap.clock className="w-3 h-3 mr-1" />
+                              {recipe.cookTime}min
+                            </Badge>
+                          )}
                         </div>
 
                         {/* Recipe Stats */}
                         <div className="flex justify-between items-center text-sm text-gray-400">
-                          <div className="flex items-center space-x-4">
-                            <div className="flex items-center">
-                              <iconMap.clock className="w-4 h-4 mr-1" />
-                              {recipe.cookTime}min
-                            </div>
-                            <div className="flex items-center">
-                              <iconMap.users className="w-4 h-4 mr-1" />
-                              {recipe.servings}
-                            </div>
+                          <div className="flex items-center">
+                            <iconMap.users className="w-4 h-4 mr-1" />
+                            {recipe.servings} servings
                           </div>
                           <div className="text-xs">
                             {formatDate(recipe.createdAt)}
