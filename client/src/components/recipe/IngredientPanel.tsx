@@ -52,7 +52,7 @@ export default function IngredientPanel({
                 <span className="text-orange-200 font-medium text-xs">Ask Zest to customize!</span>
               </div>
               <p className="text-orange-100/80 text-xs leading-relaxed">
-                Dietary requirements • Servings • Flavor profile • Skill level • Cook time • Cuisine changes
+                Dietary requirements • Servings • Spice level • Side dishes • Cooking method • Ingredient swaps • and more
               </p>
             </div>
           </motion.div>
@@ -89,7 +89,7 @@ export default function IngredientPanel({
                 <span className="text-orange-200 font-medium text-xs">Chat to customize</span>
               </div>
               <p className="text-orange-100/80 text-xs leading-relaxed">
-                Dietary requirements • Servings • Flavor profile • Skill level • Cook time • Cuisine changes
+                Dietary requirements • Servings • Spice level • Side dishes • Cooking method • Ingredient swaps • and more
               </p>
             </div>
           </motion.div>
