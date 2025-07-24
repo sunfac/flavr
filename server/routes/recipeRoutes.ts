@@ -952,6 +952,12 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
         });
       }
 
+      // Check usage limit before generating
+      const limitCheck = await checkAndEnforceUsageLimit(req);
+      if (!limitCheck.allowed) {
+        return res.status(403).json(limitCheck.error);
+      }
+
       const creativityGuidance = getCreativeGuidanceBlock();
       
       // Get supermarket-specific guidance if provided
@@ -1064,6 +1070,9 @@ Make each recipe distinctly different in style, technique, and flavor profile. F
       }
 
       res.json(recipeData);
+
+      // Increment usage counter after successful generation
+      incrementUsageCounter(req).catch(err => console.error('Failed to increment usage:', err));
     } catch (error) {
       console.error("Recipe ideas error:", error);
       res.status(500).json({ 
@@ -1077,6 +1086,13 @@ Make each recipe distinctly different in style, technique, and flavor profile. F
   app.post("/api/generate-recipe-ideas", async (req, res) => {
     try {
       const startTime = Date.now();
+      
+      // Check usage limit before generating
+      const limitCheck = await checkAndEnforceUsageLimit(req);
+      if (!limitCheck.allowed) {
+        return res.status(403).json(limitCheck.error);
+      }
+
       // Extract data from either direct params or nested quizData object
       const quizData = req.body.quizData || req.body;
       const {
@@ -1291,6 +1307,9 @@ Return JSON with this exact structure:
 
       console.log('✅ Recipe ideas generated successfully:', recipeData.recipes?.length || 0, 'recipes');
       res.json(recipeData);
+
+      // Increment usage counter after successful generation
+      incrementUsageCounter(req).catch(err => console.error('Failed to increment usage:', err));
 
     } catch (error) {
       console.error("❌ Recipe ideas generation failed:", error);

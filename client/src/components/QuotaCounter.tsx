@@ -35,8 +35,8 @@ export default function QuotaCounter({ className = '', showUpgradeHint = false }
     return () => clearInterval(interval);
   }, []);
 
-  // Don't show counter for authenticated Flavr+ users
-  if (user?.hasFlavrPlus) {
+  // Don't show counter for authenticated Flavr+ users or developer account
+  if (user?.hasFlavrPlus || user?.email === 'william@blycontracting.co.uk') {
     return null;
   }
 
