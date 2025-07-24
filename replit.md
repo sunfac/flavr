@@ -310,6 +310,7 @@ Changelog:
 - January 23, 2025. Enhanced photo detection with 70% confidence filtering - OpenAI Vision now filters ingredients below 70% confidence automatically without displaying percentages to users, improved cuisine-based ingredient grouping to prevent incompatible combinations (Asian, Mediterranean, British, neutral categories), enhanced prompts for better culinary authenticity, clean ingredient badges without confidence percentages for better user experience
 - January 23, 2025. My Cookbook chat functionality restored - fixed DigitalCookbook to navigate to full Recipe page instead of modal view, enabling full ChatBot integration for saved recipes, removed modal-based recipe viewing in favor of complete recipe experience with chat capabilities
 - January 23, 2025. Timer chips removed from all recipe displays - eliminated timer chips from RecipeCard components and My Cookbook recipe cards per user preference, maintained cooking time information in discrete text format in recipe stats sections without prominent chip display
+- January 23, 2025. Recipe card chip improvements complete - removed shopping mode from My Cookbook filter options, replaced difficulty chip with accurate timer chip in main recipe cards using Clock icon, removed timer badges from individual cooking steps in StepStack component while keeping step progression indicators
 ```
 
 ## User Preferences

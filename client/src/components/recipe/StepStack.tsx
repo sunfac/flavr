@@ -97,11 +97,7 @@ function StepCard({
           Step {stepNumber} of {totalSteps}
         </Badge>
         
-        {step.duration && (
-          <Badge variant="outline" className="border-orange-400 text-orange-300">
-            {step.duration} {step.duration === 1 ? 'minute' : 'minutes'}
-          </Badge>
-        )}
+
       </div>
 
       {/* Step Content */}

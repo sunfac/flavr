@@ -68,9 +68,12 @@ export default function DigitalCookbook() {
     const cuisines = Array.from(new Set(recipes.map((r: SavedRecipe) => r.cuisine))).filter(Boolean) as string[];
     const difficulties = Array.from(new Set(recipes.map((r: SavedRecipe) => r.difficulty))).filter(Boolean) as string[];
     
+    // Filter out shopping mode from the modes
+    const filteredModes = modes.filter(mode => mode !== 'shopping');
+    
     return [
       { label: "All Recipes", value: "all" },
-      ...modes.map(mode => ({ label: `${mode.charAt(0).toUpperCase() + mode.slice(1)} Mode`, value: mode })),
+      ...filteredModes.map(mode => ({ label: `${mode.charAt(0).toUpperCase() + mode.slice(1)} Mode`, value: mode })),
       ...cuisines.map(cuisine => ({ label: cuisine, value: cuisine.toLowerCase() })),
       ...difficulties.map(diff => ({ label: diff, value: diff.toLowerCase() }))
     ];

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, ChefHat } from 'lucide-react';
+import { Users, ChefHat, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { animations, spacing } from '@/styles/tokens';
 
@@ -25,9 +25,9 @@ export default function HeaderSection({
   const fastFacts = useMemo(() => {
     return [
       { icon: Users, label: `Serves ${currentServings}`, value: 'servings' },
-      { icon: ChefHat, label: recipe.difficulty, value: 'difficulty' },
+      { icon: Clock, label: `${recipe.cookTime} min`, value: 'timer' },
     ];
-  }, [currentServings, recipe.difficulty]);
+  }, [currentServings, recipe.cookTime]);
 
   return (
     <div className="relative">
