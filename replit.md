@@ -318,6 +318,7 @@ Changelog:
 - January 23, 2025. Time constraints removed from recipe generation - eliminated time limits from both Chef Assist and Fridge2Fork modes to allow full flexibility, users can now request timing adjustments via chat interface, AI calculates realistic cooking times based on actual recipe requirements without artificial constraints
 - January 23, 2025. Step timer accuracy improved - enhanced extractDuration function with better pattern recognition for explicit times, context-aware default timings based on cooking actions (prep work 1-3min, quick cooking 4-8min, longer processes 15-60min), intelligent timer assignment only for steps requiring timing, improved handling of time ranges and descriptive timing phrases
 - January 23, 2025. Timer system refined for cooking-only steps - redesigned timer logic to only show timers for actual cooking processes (oven cooking, protein cooking, liquid processes, marinating, time-dependent processes), eliminated timers for prep work (chopping, mixing, seasoning), visual cue steps (until golden/tender), and assembly steps, creating cleaner practical cooking experience
+- January 23, 2025. Pasta cooking time accuracy fixed - enhanced timer system with realistic pasta cooking times (10 minutes for spaghetti/pasta instead of 5 minutes), added specific timing for rice (18 minutes) and quinoa (15 minutes), ensuring step timers match actual packet instructions and cooking requirements
 ```
 
 ## User Preferences

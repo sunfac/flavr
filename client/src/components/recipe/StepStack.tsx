@@ -72,6 +72,11 @@ function extractDuration(instruction: string): number | undefined {
   if (text.includes('grill')) return 10;
   if (text.includes('steam') && (text.includes('fish') || text.includes('vegetables'))) return 8;
   
+  // Pasta and grain cooking - realistic cooking times
+  if (text.includes('cook') && (text.includes('pasta') || text.includes('spaghetti') || text.includes('penne') || text.includes('fettuccine'))) return 10;
+  if (text.includes('cook') && text.includes('rice')) return 18;
+  if (text.includes('cook') && text.includes('quinoa')) return 15;
+  
   // Liquid cooking - needs monitoring to prevent overcooking
   if (text.includes('boil') && !text.includes('bring')) return 8; // Active boiling
   if (text.includes('simmer')) return 15;
