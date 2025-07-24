@@ -18,25 +18,55 @@ const upload = multer({
   },
 });
 
-// Food whitelist for filtering Google Vision results
+// Comprehensive food whitelist for ingredient detection
 const foodWhitelist = [
+  // Fresh produce
   'apple', 'apples', 'banana', 'bananas', 'orange', 'oranges', 'lemon', 'lemons', 'lime', 'limes',
   'tomato', 'tomatoes', 'potato', 'potatoes', 'onion', 'onions', 'garlic', 'carrot', 'carrots',
   'broccoli', 'spinach', 'lettuce', 'cucumber', 'cucumbers', 'bell pepper', 'bell peppers',
   'mushroom', 'mushrooms', 'avocado', 'avocados', 'corn', 'peas', 'beans', 'green beans',
-  'chicken', 'beef', 'pork', 'fish', 'salmon', 'tuna', 'shrimp', 'eggs', 'egg', 'milk',
-  'cheese', 'butter', 'yogurt', 'bread', 'rice', 'pasta', 'flour', 'sugar', 'salt',
-  'pepper', 'basil', 'parsley', 'cilantro', 'mint', 'thyme', 'rosemary', 'oregano',
-  'olive oil', 'vegetable oil', 'vinegar', 'soy sauce', 'honey', 'lemon juice', 'lime juice',
   'celery', 'zucchini', 'eggplant', 'cauliflower', 'cabbage', 'kale', 'sweet potato',
   'ginger', 'chili', 'chili pepper', 'jalapeño', 'strawberry', 'strawberries', 'blueberry', 'blueberries',
   'grape', 'grapes', 'pineapple', 'mango', 'papaya', 'coconut', 'nuts', 'almonds', 'walnuts',
-  'turkey', 'bacon', 'ham', 'sausage', 'ground beef', 'ground turkey', 'lamb', 'duck',
-  'lobster', 'crab', 'mussels', 'scallops', 'squid', 'octopus', 'clams', 'oysters',
-  'cream', 'sour cream', 'heavy cream', 'cottage cheese', 'mozzarella', 'cheddar', 'parmesan',
-  'feta', 'goat cheese', 'blue cheese', 'swiss cheese', 'brie', 'camembert',
-  'quinoa', 'barley', 'oats', 'wheat', 'bulgur', 'couscous', 'lentils', 'chickpeas',
-  'black beans', 'kidney beans', 'navy beans', 'pinto beans', 'lima beans', 'tofu', 'tempeh'
+  
+  // Proteins
+  'chicken', 'beef', 'pork', 'fish', 'salmon', 'tuna', 'shrimp', 'turkey', 'bacon', 'ham', 
+  'sausage', 'ground beef', 'ground turkey', 'lamb', 'duck', 'lobster', 'crab', 'mussels', 
+  'scallops', 'squid', 'octopus', 'clams', 'oysters', 'tofu', 'tempeh',
+  
+  // Dairy and eggs
+  'eggs', 'egg', 'milk', 'cheese', 'butter', 'yogurt', 'cream', 'sour cream', 'heavy cream', 
+  'cottage cheese', 'mozzarella', 'cheddar', 'parmesan', 'feta', 'goat cheese', 'blue cheese', 
+  'swiss cheese', 'brie', 'camembert',
+  
+  // Pantry staples
+  'bread', 'rice', 'pasta', 'flour', 'sugar', 'salt', 'pepper', 'olive oil', 'vegetable oil', 
+  'vinegar', 'soy sauce', 'honey', 'quinoa', 'barley', 'oats', 'wheat', 'bulgur', 'couscous', 
+  'lentils', 'chickpeas', 'black beans', 'kidney beans', 'navy beans', 'pinto beans', 'lima beans',
+  
+  // Herbs and seasonings
+  'basil', 'parsley', 'cilantro', 'mint', 'thyme', 'rosemary', 'oregano', 'dill', 'sage', 'tarragon',
+  
+  // Common condiments and sauces
+  'ketchup', 'mustard', 'mayo', 'mayonnaise', 'hot sauce', 'sriracha', 'barbecue sauce', 'ranch',
+  'salad dressing', 'worcestershire', 'fish sauce', 'oyster sauce', 'teriyaki', 'balsamic',
+  
+  // Juices and liquids
+  'lemon juice', 'lime juice', 'orange juice', 'apple juice', 'tomato juice', 'broth', 'stock',
+  'chicken broth', 'beef broth', 'vegetable broth', 'wine', 'beer',
+  
+  // Canned/packaged items
+  'canned tomatoes', 'tomato sauce', 'tomato paste', 'coconut milk', 'almond milk', 'oat milk',
+  'peanut butter', 'jam', 'jelly', 'pickles', 'olives', 'capers', 'anchovies',
+  
+  // Frozen items
+  'frozen peas', 'frozen corn', 'frozen berries', 'ice cream', 'frozen vegetables', 'frozen fruit',
+  
+  // Baking ingredients
+  'baking powder', 'baking soda', 'vanilla', 'vanilla extract', 'cocoa powder', 'chocolate',
+  
+  // Additional common items
+  'noodles', 'crackers', 'cereal', 'granola', 'raisins', 'dates', 'cranberries'
 ];
 
 // Synonym mapping for ingredient normalization
@@ -113,17 +143,23 @@ export const processFridgeImage = async (req: Request, res: Response) => {
           content: [
             {
               type: "text",
-              text: `Analyze this image and identify all visible food ingredients, produce items, and cooking ingredients you can see. 
+              text: `Look at this fridge/kitchen photo and identify ALL visible food items and ingredients you can see, even if they're in packages, containers, or partially visible.
 
-Focus on:
-- Fresh fruits and vegetables
-- Meat, poultry, fish, and seafood
-- Dairy products (milk, cheese, eggs, etc.)
-- Pantry staples (spices, oils, sauces, etc.)
-- Grains, pasta, bread
-- Canned or packaged foods
+Look for:
+- Fresh produce (fruits, vegetables, herbs)
+- Meat, poultry, fish, seafood (fresh, frozen, or packaged)
+- Dairy products (milk cartons, cheese packages, yogurt containers, eggs)
+- Condiments and sauces (bottles, jars, squeeze containers)
+- Pantry items (canned goods, boxes, bags of grains/pasta)
+- Beverages (if they're cooking ingredients like wine, broth)
+- Leftovers or prepared foods you can identify
+- Frozen items if visible
+- Spices and seasonings
+- Oils, vinegars, cooking liquids
 
-Return only a simple list of ingredient names, one per line. Be specific but concise (e.g., "red bell pepper" not just "pepper", "ground beef" not just "meat"). Only include items you can clearly see and identify.`
+Be generous in your identification - if you can see a milk carton, list "milk". If there's a cheese package, list "cheese". If you see egg cartons, list "eggs". Include items even if they're partially obscured or in packaging.
+
+Return a simple list of ingredient names, one per line. Use common cooking names (e.g., "bell pepper", "ground beef", "cheddar cheese", "olive oil").`
             },
             {
               type: "image_url",
@@ -138,29 +174,35 @@ Return only a simple list of ingredient names, one per line. Be specific but con
     });
 
     const detectedText = response.choices[0].message.content || '';
+    console.log(`OpenAI Vision raw response:`, detectedText);
     
-    // Parse the response into individual ingredients
+    // Parse the response into individual ingredients - more robust parsing
     const rawIngredients = detectedText
-      .split('\n')
+      .split(/[\n,]/) // Split on newlines AND commas
       .map(line => line.trim())
-      .filter(line => line.length > 0 && !line.startsWith('-') && !line.includes(':'))
-      .map(line => line.replace(/^[\d\.\-\*\•\+]\s*/, '')) // Remove bullet points and numbers
-      .filter(ingredient => ingredient.length > 1);
+      .filter(line => line.length > 0)
+      .map(line => line.replace(/^[\d\.\-\*\•\+\s]*/, '')) // Remove bullet points, numbers, and leading spaces
+      .map(line => line.replace(/[^\w\s]/g, '')) // Remove special characters except spaces
+      .filter(ingredient => ingredient.length > 1)
+      .map(ingredient => ingredient.toLowerCase().trim());
 
-    // Filter and normalize ingredients
+    console.log(`Parsed raw ingredients:`, rawIngredients);
+
+    // Filter and normalize ingredients - more lenient approach
     const detectedItems = new Set<string>();
     
     rawIngredients.forEach(ingredient => {
-      const itemName = ingredient.toLowerCase().trim();
-      if (isFood(itemName)) {
-        detectedItems.add(normalizeIngredient(itemName));
+      if (isFood(ingredient)) {
+        detectedItems.add(normalizeIngredient(ingredient));
+      } else {
+        console.log(`Filtered out non-food item: "${ingredient}"`);
       }
     });
 
     // Convert to array and sort
     const ingredients = Array.from(detectedItems).sort();
 
-    console.log(`OpenAI Vision detected ${ingredients.length} food items:`, ingredients);
+    console.log(`Final detected food items (${ingredients.length}):`, ingredients);
 
     if (ingredients.length === 0) {
       return res.json({
@@ -188,11 +230,24 @@ Return only a simple list of ingredient names, one per line. Be specific but con
   }
 };
 
-// Check if detected item is food-related
+// Check if detected item is food-related - more lenient matching
 const isFood = (item: string): boolean => {
-  return foodWhitelist.some(food => 
+  // First check exact matches and substring matches
+  const exactMatch = foodWhitelist.some(food => 
     item.includes(food) || food.includes(item)
   );
+  
+  if (exactMatch) return true;
+  
+  // Additional patterns for common food-related words
+  const foodPatterns = [
+    /\b(fresh|frozen|canned|dried|organic|raw|cooked)\b/i,
+    /\b(sauce|dressing|oil|juice|milk|cream|butter|cheese)\b/i,
+    /\b(meat|fish|seafood|poultry|vegetable|fruit|herb|spice)\b/i,
+    /\b(bread|pasta|rice|grain|bean|nut|seed)\b/i
+  ];
+  
+  return foodPatterns.some(pattern => pattern.test(item));
 };
 
 // Normalize ingredient names using synonym table
