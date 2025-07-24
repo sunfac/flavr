@@ -383,17 +383,17 @@ function EnhancedRecipeCard({
     const saveMutation = useMutation({
       mutationFn: async () => {
         const recipeData = {
-          title: recipe.title,
+          title: activeTitle,
           description: recipe.description,
           cuisine: recipe.cuisine || '',
-          difficulty: recipe.difficulty || 'Medium',
-          cookTime: recipe.cookTime || 30,
-          servings: recipe.servings || 4,
-          ingredients: recipe.ingredients || [],
-          instructions: recipe.instructions || [],
+          difficulty: activeDifficulty || 'Medium',
+          cookTime: activeCookTime || 30,
+          servings: activeServings || 4,
+          ingredients: activeIngredients || [],
+          instructions: activeInstructions || [],
           tips: recipe.tips || '',
           mode: recipe.mode || 'shopping',
-          imageUrl: activeImage
+          imageUrl: activeImage || recipe.image || recipe.imageUrl || ''
         };
         
         const response = await apiRequest("POST", "/api/save-recipe", recipeData);
