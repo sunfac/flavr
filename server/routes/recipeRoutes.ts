@@ -1944,6 +1944,36 @@ Return valid JSON only:
     }
   });
 
+  // Get quota status for current user
+  app.get("/api/quota-status", async (req, res) => {
+    try {
+      const pseudoUserId = req.headers['x-pseudo-user-id'] as string;
+      
+      // Check if authenticated user
+      if (req.session?.userId) {
+        const user = await storage.getUser(req.session.userId);
+        if (user?.hasFlavrPlus || user?.email === 'william@blycontracting.co.uk') {
+          return res.json({ remainingRecipes: -1, isUnlimited: true }); // Unlimited
+        }
+        // Regular authenticated users get database usage count
+        const usage = await storage.getUserUsageCount(req.session.userId);
+        return res.json({ remainingRecipes: Math.max(0, 3 - usage) });
+      }
+      
+      // For pseudo users
+      if (pseudoUserId) {
+        const usage = await storage.getPseudoUserUsageCount(pseudoUserId);
+        return res.json({ remainingRecipes: Math.max(0, 3 - usage) });
+      }
+      
+      // New user
+      res.json({ remainingRecipes: 3 });
+    } catch (error) {
+      console.error('Quota status error:', error);
+      res.json({ remainingRecipes: 3 }); // Default to 3 on error
+    }
+  });
+
   // Get Gemini API key (for client-side usage)
   app.get("/api/gemini-key", (req, res) => {
     const geminiKey = process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;

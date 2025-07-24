@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Crown, Cookie } from 'lucide-react';
-import { getRemainingRecipes } from '@/lib/quotaManager';
 
 interface QuotaCounterProps {
   className?: string;
@@ -20,20 +19,19 @@ export default function QuotaCounter({ className = '', showUpgradeHint = false }
 
   const user = (userData as any)?.user;
 
-  // Update remaining recipes count
+  // Fetch quota from server
+  const { data: quotaData } = useQuery({
+    queryKey: ['/api/quota-status'],
+    retry: false,
+    refetchInterval: 2000, // Refresh every 2 seconds
+  });
+
+  // Update remaining recipes count from server
   useEffect(() => {
-    const updateCount = () => {
-      setRemainingRecipes(getRemainingRecipes());
-    };
-
-    // Update immediately
-    updateCount();
-
-    // Update every second to catch changes
-    const interval = setInterval(updateCount, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
+    if (quotaData && typeof quotaData === 'object' && 'remainingRecipes' in quotaData) {
+      setRemainingRecipes((quotaData as any).remainingRecipes || 0);
+    }
+  }, [quotaData]);
 
   // Don't show counter for authenticated Flavr+ users or developer account
   if (user?.hasFlavrPlus || user?.email === 'william@blycontracting.co.uk') {

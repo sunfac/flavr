@@ -19,11 +19,11 @@ interface StepStackProps {
   className?: string;
 }
 
-// AI-powered duration extraction
+// Simple duration extraction - only for explicit times in step text
 async function extractDuration(instruction: string): Promise<number | undefined> {
   const text = instruction.toLowerCase();
   
-  // First check for explicit time patterns in the text - prioritize hours detection
+  // Only check for EXPLICIT time patterns mentioned in the step text
   const patterns = [
     // Hours patterns first (most important for long cooking)
     /(\d+(?:\.\d+)?)\s*(?:to\s+|-)(\d+(?:\.\d+)?)\s*hours?/,      // Range in hours: "2-3 hours"
@@ -32,8 +32,6 @@ async function extractDuration(instruction: string): Promise<number | undefined>
     /(\d+(?:\.\d+)?)\s*hrs?/,                                     // Single hrs: "3 hrs"
     /for\s+(\d+(?:\.\d+)?)\s*hours?/,                            // "for 3 hours"
     /about\s+(\d+(?:\.\d+)?)\s*hours?/,                          // "about 3 hours"
-    /approximately\s+(\d+(?:\.\d+)?)\s*hours?/,                  // "approximately 3 hours"
-    /around\s+(\d+(?:\.\d+)?)\s*hours?/,                         // "around 3 hours"
     
     // Minutes patterns
     /(\d+(?:\.\d+)?)\s*(?:to\s+|-)(\d+(?:\.\d+)?)\s*minutes?/,   // Range in minutes: "10-12 minutes"
@@ -42,17 +40,10 @@ async function extractDuration(instruction: string): Promise<number | undefined>
     /(\d+)\s*mins?/,                                            // Single mins: "30 mins"
     /for\s+(\d+)\s*minutes?/,                                   // "for 30 minutes"
     /about\s+(\d+)\s*minutes?/,                                 // "about 30 minutes"
-    /approximately\s+(\d+)\s*minutes?/,                         // "approximately 30 minutes"
-    /around\s+(\d+)\s*minutes?/,                                // "around 30 minutes"
     
     // Fractional time patterns (common in recipes)
-    /(\d+)\s*(?:and\s*)?(?:a\s+)?half\s*hours?/,               // "1 and a half hours" or "1.5 hours"
     /(\d+\.\d+)\s*hours?/,                                      // "1.5 hours"
-    /(\d+)\s*(?:and\s*)?(?:a\s+)?half\s*minutes?/,             // "5 and a half minutes"
-    
-    // Seconds patterns
-    /(\d+)\s*(?:to\s+)?(\d+)?\s*seconds?/,
-    /(\d+)\s*(?:to\s+)?(\d+)?\s*secs?/
+    /(\d+)\s*(?:and\s*)?(?:a\s+)?half\s*hours?/,               // "1 and a half hours"
   ];
   
   for (const pattern of patterns) {
@@ -64,108 +55,26 @@ async function extractDuration(instruction: string): Promise<number | undefined>
       // Use the average if it's a range, otherwise use the single value
       const duration = match[2] ? (firstNum + secondNum) / 2 : firstNum;
       
-      // Convert to minutes if needed - with detailed logging
+      // Convert to minutes if needed
       let finalDuration;
       const matchedText = match[0];
       
       if (text.includes('hour') || text.includes('hr')) {
         finalDuration = Math.round(duration * 60); // Convert hours to minutes
-        console.log(`⏰ HOURS detected: "${instruction}" → matched "${matchedText}" → ${duration} hours = ${finalDuration} minutes`);
-      } else if (text.includes('second') || text.includes('sec')) {
-        finalDuration = Math.max(1, Math.round(duration / 60)); // Convert seconds to minutes
-        console.log(`⏰ SECONDS detected: "${instruction}" → matched "${matchedText}" → ${duration} seconds = ${finalDuration} minutes`);
+        console.log(`⏰ Timer found: "${instruction}" → "${matchedText}" → ${finalDuration} minutes`);
       } else {
         finalDuration = Math.round(duration); // Already in minutes
-        console.log(`⏰ MINUTES detected: "${instruction}" → matched "${matchedText}" → ${duration} = ${finalDuration} minutes`);
+        console.log(`⏰ Timer found: "${instruction}" → "${matchedText}" → ${finalDuration} minutes`);
       }
       
       return finalDuration;
     }
   }
   
-  // If no explicit timing, check if this step needs a timer via AI
-  if (await shouldStepHaveTimer(instruction)) {
-    return await getAIStepTiming(instruction);
-  }
-  
-  return undefined; // No timer needed
+  return undefined; // No explicit timing found, no timer needed
 }
 
-// Determine if a step should have a timer (cooking processes only)
-async function shouldStepHaveTimer(instruction: string): Promise<boolean> {
-  const text = instruction.toLowerCase();
-  
-  // Priority check: cooking processes that definitely need timers
-  const cookingKeywords = ['bake', 'roast', 'boil', 'simmer', 'sear', 'fry', 'grill', 'steam', 'braise', 'marinate', 'chill', 'rest', 'rise', 'proof', 'reduce', 'cook for', 'cook until', 'brown for', 'sauté'];
-  if (cookingKeywords.some(keyword => text.includes(keyword))) return true;
-  
-  // Check for explicit timing phrases
-  const timingPhrases = ['minutes', 'hours', 'seconds', 'for about', 'until reduced', 'until thickened', 'until bubbling'];
-  if (timingPhrases.some(phrase => text.includes(phrase))) return true;
-  
-  // Quick checks for obvious prep work only (no cooking involved)
-  const prepOnlyKeywords = ['chop', 'slice', 'dice', 'mince', 'mix together', 'whisk together', 'combine in bowl', 'sprinkle', 'garnish', 'arrange', 'serve immediately'];
-  if (prepOnlyKeywords.some(keyword => text.includes(keyword)) && !cookingKeywords.some(keyword => text.includes(keyword))) {
-    return false;
-  }
-  
-  // Visual cues without cooking action
-  const visualCueKeywords = ['until golden', 'until crispy', 'until tender', 'until fragrant', 'until soft', 'until translucent'];
-  if (visualCueKeywords.some(keyword => text.includes(keyword)) && !cookingKeywords.some(keyword => text.includes(keyword))) {
-    return false;
-  }
-  
-  return false; // Default to no timer for truly ambiguous cases
-}
 
-// Get AI-powered timing for cooking steps
-async function getAIStepTiming(instruction: string): Promise<number> {
-  try {
-    const response = await fetch('/api/get-step-timing', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ instruction }),
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to get AI timing');
-    }
-    
-    const data = await response.json();
-    console.log(`🤖 AI timing response for "${instruction}": ${data.duration} minutes`);
-    return data.duration || getIntelligentFallback(instruction);
-  } catch (error) {
-    console.error('Error getting AI step timing:', error);
-    return getIntelligentFallback(instruction);
-  }
-}
-
-// Intelligent fallback timing based on cooking action
-function getIntelligentFallback(instruction: string): number {
-  const text = instruction.toLowerCase();
-  
-  // Long cooking processes
-  if (text.includes('braise') || text.includes('slow cook') || text.includes('roast')) return 120;
-  if (text.includes('bake') || text.includes('oven')) return 25;
-  if (text.includes('simmer') || text.includes('stew')) return 30;
-  
-  // Medium cooking processes  
-  if (text.includes('boil') || text.includes('pasta') || text.includes('rice')) return 12;
-  if (text.includes('sauté') || text.includes('fry')) return 8;
-  if (text.includes('steam')) return 10;
-  
-  // Quick cooking processes
-  if (text.includes('sear') || text.includes('brown')) return 5;
-  if (text.includes('reduce') || text.includes('thicken')) return 15;
-  if (text.includes('rest') || text.includes('cool')) return 10;
-  
-  // Very short processes
-  if (text.includes('toast') || text.includes('warm')) return 3;
-  
-  return 5; // Default fallback
-}
 
 
 
@@ -232,11 +141,10 @@ function StepCard({
   totalSteps: number;
   isActive: boolean;
 }) {
-  // State for AI-powered duration
+  // State for simple duration extraction
   const [stepDuration, setStepDuration] = useState<number | undefined>(step.duration);
-  const [isLoadingDuration, setIsLoadingDuration] = useState(false);
 
-  // Calculate step duration from instruction text (async)
+  // Extract duration from explicit timing in step text only
   useEffect(() => {
     if (step.duration) {
       setStepDuration(step.duration);
@@ -244,14 +152,12 @@ function StepCard({
     }
 
     const getDuration = async () => {
-      // Add null check for step instruction
       if (!step.description || typeof step.description !== 'string') {
         console.log(`⏱️ Step ${stepNumber}: No valid instruction → undefined minutes`);
         setStepDuration(undefined);
         return;
       }
 
-      setIsLoadingDuration(true);
       try {
         const duration = await extractDuration(step.description);
         console.log(`⏱️ Step ${stepNumber}: "${step.description}" → ${duration} minutes`);
@@ -259,8 +165,6 @@ function StepCard({
       } catch (error) {
         console.error('Error getting step duration:', error);
         setStepDuration(undefined);
-      } finally {
-        setIsLoadingDuration(false);
       }
     };
 
