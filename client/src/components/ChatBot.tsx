@@ -486,18 +486,14 @@ export default function ChatBot({
           
           {/* Chat Panel - Mobile Optimized */}
           <div 
-            className="absolute right-0 w-full sm:w-96 bg-slate-900 border-l border-orange-500/30 shadow-2xl flex flex-col transition-all duration-500 mobile-chat-panel"
+            className="absolute inset-0 w-full bg-slate-900 flex flex-col mobile-chat-panel"
             style={{
-              top: '0',
-              bottom: '0', 
               height: '100vh',
               maxHeight: '100vh',
               overflow: 'hidden',
-              pointerEvents: 'all',
-              display: 'flex',
-              flexDirection: 'column'
+              pointerEvents: 'all'
             }}
-            onClick={(e) => e.stopPropagation()} // Prevent backdrop clicks from closing when clicking inside panel
+            onClick={(e) => e.stopPropagation()}
           >
         <CardHeader className="p-3 sm:p-4 pt-20 sm:pt-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-3">
