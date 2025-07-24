@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import multer from 'multer';
-import { ImageAnnotatorClient } from '@google-cloud/vision';
+import OpenAI from 'openai';
 
 // Configure multer for image upload handling
 const upload = multer({
@@ -65,58 +65,16 @@ const synonymTable: Record<string, string> = {
   'corn on the cob': 'corn'
 };
 
-// Initialize Google Cloud Vision client
-let visionClient: ImageAnnotatorClient | null = null;
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
-const initializeVisionClient = () => {
-  if (!process.env.GOOGLE_CLOUD_PROJECT_ID) {
-    console.warn('GOOGLE_CLOUD_PROJECT_ID not set - vision functionality disabled');
-    return null;
-  }
-
-  try {
-    const config: any = {
-      projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-    };
-
-    // Use credentials from environment variable if available
-    if (process.env.GOOGLE_CLOUD_CREDENTIALS) {
-      try {
-        // Try to parse as JSON first
-        const credentials = process.env.GOOGLE_CLOUD_CREDENTIALS.trim();
-        if (credentials.startsWith('{')) {
-          config.credentials = JSON.parse(credentials);
-        } else {
-          // If it's not JSON, it might be a service account key or project ID
-          console.warn('GOOGLE_CLOUD_CREDENTIALS does not appear to be valid JSON format');
-          return null;
-        }
-      } catch (parseError) {
-        console.error('Failed to parse GOOGLE_CLOUD_CREDENTIALS:', parseError);
-        console.error('Credentials preview:', process.env.GOOGLE_CLOUD_CREDENTIALS?.substring(0, 50) + '...');
-        return null;
-      }
-    } else if (process.env.GOOGLE_CLOUD_KEY_FILE) {
-      config.keyFilename = process.env.GOOGLE_CLOUD_KEY_FILE;
-    } else {
-      console.warn('No Google Cloud credentials provided - vision functionality disabled');
-      return null;
-    }
-
-    visionClient = new ImageAnnotatorClient(config);
-    return visionClient;
-  } catch (error) {
-    console.error('Failed to initialize Google Cloud Vision client:', error);
-    return null;
-  }
-};
-
-// Process image and extract food ingredients
+// Process image and extract food ingredients using OpenAI Vision
 export const processFridgeImage = async (req: Request, res: Response) => {
   try {
-    // Check if we have the required Google Cloud configuration
-    if (!process.env.GOOGLE_CLOUD_PROJECT_ID || !process.env.GOOGLE_CLOUD_CREDENTIALS) {
-      console.warn('Google Cloud Vision not configured - returning fallback response');
+    if (!process.env.OPENAI_API_KEY) {
+      console.warn('OpenAI API key not configured - returning fallback response');
       return res.json({
         ingredients: ['Upload an image to detect ingredients automatically', 'Or type ingredients manually below'],
         count: 2,
@@ -124,69 +82,91 @@ export const processFridgeImage = async (req: Request, res: Response) => {
       });
     }
 
-    if (!visionClient && !initializeVisionClient()) {
-      console.warn('Failed to initialize Vision client - returning fallback response');
-      return res.json({
-        ingredients: ['Unable to analyze image', 'Please type ingredients manually'],
-        count: 2,
-        error: 'Vision service initialization failed'
-      });
-    }
-
     const imageBuffer = req.file?.buffer;
-    if (!imageBuffer) {
+    if (!imageBuffer || imageBuffer.length === 0) {
       return res.status(400).json({
         error: 'No image provided',
         ingredients: []
       });
     }
 
-    // Call Google Cloud Vision API
-    const [result] = await visionClient!.annotateImage({
-      image: { content: imageBuffer },
-      features: [
+    // Validate image format and convert buffer to base64
+    const base64Image = imageBuffer.toString('base64');
+    
+    // Basic validation - check if image has content
+    if (base64Image.length < 100) {
+      return res.json({
+        ingredients: ['Image too small or corrupted', 'Please upload a clear photo of your ingredients'],
+        count: 2,
+        error: 'Invalid image file'
+      });
+    }
+
+    // Call OpenAI Vision API
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
         {
-          type: 'OBJECT_LOCALIZATION',
-          maxResults: 50,
-        },
-        {
-          type: 'LABEL_DETECTION',
-          maxResults: 50,
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `Analyze this image and identify all visible food ingredients, produce items, and cooking ingredients you can see. 
+
+Focus on:
+- Fresh fruits and vegetables
+- Meat, poultry, fish, and seafood
+- Dairy products (milk, cheese, eggs, etc.)
+- Pantry staples (spices, oils, sauces, etc.)
+- Grains, pasta, bread
+- Canned or packaged foods
+
+Return only a simple list of ingredient names, one per line. Be specific but concise (e.g., "red bell pepper" not just "pepper", "ground beef" not just "meat"). Only include items you can clearly see and identify.`
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:image/jpeg;base64,${base64Image}`
+              }
+            }
+          ],
         },
       ],
+      max_tokens: 500,
     });
 
-    // Extract and filter ingredients
+    const detectedText = response.choices[0].message.content || '';
+    
+    // Parse the response into individual ingredients
+    const rawIngredients = detectedText
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0 && !line.startsWith('-') && !line.includes(':'))
+      .map(line => line.replace(/^[\d\.\-\*\•\+]\s*/, '')) // Remove bullet points and numbers
+      .filter(ingredient => ingredient.length > 1);
+
+    // Filter and normalize ingredients
     const detectedItems = new Set<string>();
-
-    // Process object localization results
-    if (result.localizedObjectAnnotations) {
-      result.localizedObjectAnnotations.forEach(object => {
-        if (object.name && object.score && object.score >= 0.7) {
-          const itemName = object.name.toLowerCase().trim();
-          if (isFood(itemName)) {
-            detectedItems.add(normalizeIngredient(itemName));
-          }
-        }
-      });
-    }
-
-    // Process label detection results
-    if (result.labelAnnotations) {
-      result.labelAnnotations.forEach(label => {
-        if (label.description && label.score && label.score >= 0.7) {
-          const itemName = label.description.toLowerCase().trim();
-          if (isFood(itemName)) {
-            detectedItems.add(normalizeIngredient(itemName));
-          }
-        }
-      });
-    }
+    
+    rawIngredients.forEach(ingredient => {
+      const itemName = ingredient.toLowerCase().trim();
+      if (isFood(itemName)) {
+        detectedItems.add(normalizeIngredient(itemName));
+      }
+    });
 
     // Convert to array and sort
     const ingredients = Array.from(detectedItems).sort();
 
-    console.log(`Vision API detected ${ingredients.length} food items:`, ingredients);
+    console.log(`OpenAI Vision detected ${ingredients.length} food items:`, ingredients);
+
+    if (ingredients.length === 0) {
+      return res.json({
+        ingredients: ['No food ingredients detected in image', 'Please try a clearer photo or type ingredients manually'],
+        count: 2,
+        error: 'No ingredients found'
+      });
+    }
 
     res.json({
       ingredients,
