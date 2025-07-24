@@ -73,7 +73,7 @@ export default function ChatBot({
   // Conversation suggestion chips with Lucide icons
   const suggestionChips = [
     { text: "Change portion size", icon: iconMap.users, updatesRecipe: true },
-    { text: "Make it under 700 kcal", icon: iconMap.activity, updatesRecipe: true },
+    { text: "Make it under 700 kcal", icon: iconMap.target, updatesRecipe: true },
     { text: "Make gluten & dairy free", icon: iconMap.heart, updatesRecipe: true },
     { text: "Turn into quick lunch", icon: iconMap.clock, updatesRecipe: true },
     { text: "Make more advanced", icon: iconMap.chefHat, updatesRecipe: true },

@@ -1,0 +1,29 @@
+Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check the render method of `ChatBot`.
+
+div
+Badge@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/components/ui/badge.tsx:35:16
+div
+div
+div
+_c9@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/components/ui/card.tsx:114:10
+div
+ChatBot@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/components/ChatBot.tsx:29:16
+div
+motion.div@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js:945:40
+div
+main
+div
+PageLayout@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/components/PageLayout.tsx:24:5
+Recipe@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/pages/Recipe.tsx:29:43
+Route@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js:280:14
+Switch@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js:337:27
+Router
+ErrorBoundary@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/components/ErrorBoundary.tsx:7:10
+TooltipProviderProvider@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-5SRUYHBP.js:44:13
+TooltipProvider@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js:63:43
+ThemeProvider@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/providers/ThemeProvider.tsx:25:5
+QueryClientProvider@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js:2923:9
+ErrorBoundary@https://87276a54-16f2-4c11-84e4-1034f609930f-00-223ofj3js2li7.picard.replit.dev/src/components/ErrorBoundary.tsx:7:10
+App
