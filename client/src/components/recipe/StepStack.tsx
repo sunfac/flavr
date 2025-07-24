@@ -25,34 +25,38 @@ async function extractDuration(instruction: string): Promise<number | undefined>
   
   // First check for explicit time patterns in the text
   const patterns = [
+    /(\d+(?:\.\d+)?)\s*(?:to\s+)?(\d+(?:\.\d+)?)?\s*hours?/,  // Handle decimal hours first
+    /(\d+(?:\.\d+)?)\s*(?:to\s+)?(\d+(?:\.\d+)?)?\s*hrs?/,    // Handle decimal hrs first
     /(\d+)\s*(?:to\s+)?(\d+)?\s*minutes?/,
     /(\d+)\s*(?:to\s+)?(\d+)?\s*mins?/,
-    /(\d+)\s*(?:to\s+)?(\d+)?\s*hours?/,
-    /(\d+)\s*(?:to\s+)?(\d+)?\s*hrs?/,
     /(\d+)\s*(?:to\s+)?(\d+)?\s*seconds?/,
     /(\d+)\s*(?:to\s+)?(\d+)?\s*secs?/,
+    /for\s+(\d+(?:\.\d+)?)\s*hours?/,
     /for\s+(\d+)\s*minutes?/,
+    /about\s+(\d+(?:\.\d+)?)\s*hours?/,
     /about\s+(\d+)\s*minutes?/,
+    /approximately\s+(\d+(?:\.\d+)?)\s*hours?/,
     /approximately\s+(\d+)\s*minutes?/,
+    /around\s+(\d+(?:\.\d+)?)\s*hours?/,
     /around\s+(\d+)\s*minutes?/
   ];
   
   for (const pattern of patterns) {
     const match = text.match(pattern);
     if (match) {
-      const firstNum = parseInt(match[1]);
-      const secondNum = match[2] ? parseInt(match[2]) : firstNum;
+      const firstNum = parseFloat(match[1]);
+      const secondNum = match[2] ? parseFloat(match[2]) : firstNum;
       
       // Use the average if it's a range, otherwise use the single value
-      const duration = match[2] ? Math.round((firstNum + secondNum) / 2) : firstNum;
+      const duration = match[2] ? (firstNum + secondNum) / 2 : firstNum;
       
       // Convert to minutes if needed
       if (text.includes('hour') || text.includes('hr')) {
-        return duration * 60;
+        return Math.round(duration * 60); // Convert hours to minutes
       } else if (text.includes('second') || text.includes('sec')) {
-        return Math.max(1, Math.round(duration / 60)); // Minimum 1 minute
+        return Math.max(1, Math.round(duration / 60)); // Convert seconds to minutes
       } else {
-        return duration; // Already in minutes
+        return Math.round(duration); // Already in minutes
       }
     }
   }

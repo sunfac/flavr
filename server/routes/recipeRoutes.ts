@@ -1645,7 +1645,7 @@ Consider:
 - Typical cooking times for the technique described
 - Any contextual clues about doneness or completion
 
-Respond with ONLY a number representing the time in minutes. Be precise and realistic based on actual cooking requirements.
+IMPORTANT: Respond with ONLY a number representing the time in MINUTES. If the instruction mentions hours, convert to minutes first.
 
 Examples:
 - "Sear chicken breast until golden" → 4
@@ -1653,8 +1653,10 @@ Examples:
 - "Bake at 200°C until golden brown" → 25
 - "Simmer tomato sauce" → 15
 - "Rest the meat" → 5
+- "Braise for 1.5 hours" → 90
+- "Cook for 2 hours" → 120
 
-Response (number only):`;
+Response (number in minutes only):`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
