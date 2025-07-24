@@ -493,6 +493,14 @@ export default function ChatBot({
         </div>
       )}
 
+      {/* Chat Overlay - Full screen blocking backdrop */}
+      {actualIsOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[99998] transition-all duration-500"
+          onClick={() => onClose && onClose()}
+        />
+      )}
+
       {/* Chat Panel - Right Side Panel with viewport lock */}
       <div 
         className={`fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-96 bg-slate-900/95 backdrop-blur-md border-l border-orange-500/30 shadow-2xl transition-all duration-500 flex flex-col ${
@@ -504,6 +512,7 @@ export default function ChatBot({
           overflow: 'hidden',
           paddingBottom: '80px' // Account for footer height
         }}
+        onClick={(e) => e.stopPropagation()} // Prevent backdrop clicks from closing when clicking inside panel
       >
         <CardHeader className="p-3 sm:p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-3">
