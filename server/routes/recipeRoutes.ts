@@ -482,7 +482,8 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
         ],
         temperature: 0.9, // Higher temperature for more creativity and diversity
         presence_penalty: 0.6, // Penalize repetition of concepts
-        frequency_penalty: 0.3 // Slight penalty for word repetition
+        frequency_penalty: 0.3, // Slight penalty for word repetition
+        max_tokens: 2000 // Ensure sufficient tokens for complete JSON
       });
 
       let recipe;
@@ -496,11 +497,52 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
         // Fix trailing commas specifically after object entries in arrays
         cleanContent = cleanContent.replace(/},(\s*\])/g, '}$1');
         
+        // Handle incomplete JSON by attempting to close open structures
+        if (!cleanContent.endsWith('}')) {
+          const openBraces = (cleanContent.match(/\{/g) || []).length;
+          const closeBraces = (cleanContent.match(/\}/g) || []).length;
+          if (openBraces > closeBraces) {
+            cleanContent += '}';
+          }
+        }
+        
         recipe = JSON.parse(cleanContent);
+        
+        // Validate required fields and fix any issues
+        if (!recipe.instructions || !Array.isArray(recipe.instructions)) {
+          recipe.instructions = [
+            { step: 1, instruction: "Follow the recipe as described in the ingredients list." }
+          ];
+        }
+        
+        // Ensure all instructions have proper structure
+        recipe.instructions = recipe.instructions.map((inst, index) => ({
+          step: index + 1,
+          instruction: typeof inst === 'string' ? inst : inst.instruction || `Step ${index + 1}`
+        }));
+        
       } catch (parseError) {
         console.error('JSON parsing error:', parseError);
         console.error('Raw content:', completion.choices[0].message.content);
-        throw new Error('Failed to parse recipe JSON from AI response');
+        
+        // Create fallback recipe to prevent complete failure
+        recipe = {
+          title: userPrompt.substring(0, 50) + " Recipe",
+          description: "A delicious recipe based on your request.",
+          cuisine: "International",
+          difficulty: "easy",
+          prepTime: 15,
+          cookTime: 30,
+          servings: servings,
+          ingredients: [
+            { name: "Main ingredients", amount: "As needed" }
+          ],
+          instructions: [
+            { step: 1, instruction: "Please try generating the recipe again for complete instructions." }
+          ],
+          tips: ["Recipe generation encountered an error, please retry."],
+          nutritionalHighlights: ["Nutritional information unavailable"]
+        };
       }
       
       // Generate image for the recipe

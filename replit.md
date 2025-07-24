@@ -324,6 +324,7 @@ Changelog:
 - January 23, 2025. Timer conversion bug fixes in progress - debugging critical issue where 12-minute cooking steps display as 12-hour timers, enhanced pattern matching for time ranges like "10-12 minutes", added comprehensive logging to track conversion errors at each step of the timing calculation process
 - January 23, 2025. Preheating steps excluded from timers - added "preheat", "heat", and "warm" to prep keywords so oven preheating and oil heating steps don't display unnecessary timers, since ovens have built-in indicators and heating is typically done by visual cues
 - January 23, 2025. Chef Assist recipe diversity enhancement complete - added randomization system with random seed numbers, 8 different variation prompts (bold flavors, seasonal ingredients, comfort food, elegant dishes, rustic cooking, healthy focus, visual appeal, quick techniques), increased temperature to 0.9 with presence and frequency penalties to prevent repetitive outputs for similar prompts like "coq au vin"
+- January 23, 2025. Recipe generation error handling improved - increased max_tokens to 2000 for complete JSON responses, added fallback recipe creation for JSON parsing failures, enhanced incomplete JSON recovery with brace matching, added safety checks in frontend for undefined instructions to prevent "instruction.toLowerCase() is not a function" errors, comprehensive validation of recipe data structures
 ```
 
 ## User Preferences
