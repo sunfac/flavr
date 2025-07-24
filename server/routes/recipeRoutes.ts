@@ -112,6 +112,73 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
+// Helper function to check and enforce usage limits
+async function checkAndEnforceUsageLimit(req: any): Promise<{ allowed: boolean; error?: any }> {
+  const userId = req.session?.userId;
+  const pseudoId = req.headers['x-pseudo-user-id'] as string || req.session?.id || 'anonymous';
+  
+  try {
+    if (userId) {
+      const user = await storage.getUser(userId);
+      if (user && !user.hasFlavrPlus && (user.recipesThisMonth || 0) >= 3) {
+        return { 
+          allowed: false, 
+          error: { 
+            error: "Monthly recipe limit reached", 
+            recipesUsed: user.recipesThisMonth || 0,
+            recipesLimit: 3,
+            hasFlavrPlus: false
+          }
+        };
+      }
+      return { allowed: true };
+    } else {
+      let pseudoUser = await storage.getPseudoUser(pseudoId);
+      if (!pseudoUser) {
+        pseudoUser = await storage.createPseudoUser(pseudoId);
+      }
+      
+      if ((pseudoUser.recipesThisMonth || 0) >= 3) {
+        return { 
+          allowed: false, 
+          error: { 
+            error: "Monthly recipe limit reached", 
+            recipesUsed: pseudoUser.recipesThisMonth || 0,
+            recipesLimit: 3,
+            hasFlavrPlus: false
+          }
+        };
+      }
+      return { allowed: true };
+    }
+  } catch (error) {
+    console.error("Error checking usage limit:", error);
+    return { allowed: true }; // Allow if check fails
+  }
+}
+
+// Helper function to increment usage after successful generation
+async function incrementUsageCounter(req: any): Promise<void> {
+  const userId = req.session?.userId;
+  const pseudoId = req.headers['x-pseudo-user-id'] as string || req.session?.id || 'anonymous';
+  
+  try {
+    if (userId) {
+      const user = await storage.getUser(userId);
+      if (user && !user.hasFlavrPlus) {
+        await storage.updateUserUsage(userId, (user.recipesThisMonth || 0) + 1);
+      }
+    } else {
+      const pseudoUser = await storage.getPseudoUser(pseudoId);
+      if (pseudoUser) {
+        await storage.updatePseudoUserUsage(pseudoId, (pseudoUser.recipesThisMonth || 0) + 1);
+      }
+    }
+  } catch (error) {
+    console.error("Error updating usage counter:", error);
+  }
+}
+
 // Generate recipe image using DALL-E 3
 async function generateRecipeImage(recipeTitle: string, cuisine: string): Promise<string | null> {
   try {
@@ -194,6 +261,12 @@ export function registerRecipeRoutes(app: Express) {
 
       if (!ingredients || ingredients.length === 0) {
         return res.status(400).json({ error: "No ingredients provided" });
+      }
+
+      // Check usage limit before generating
+      const limitCheck = await checkAndEnforceUsageLimit(req);
+      if (!limitCheck.allowed) {
+        return res.status(403).json(limitCheck.error);
       }
 
       // Add random seed for recipe variation
@@ -348,6 +421,9 @@ Return a JSON object with this structure:
 
       console.log('🍽️ Fridge2Fork recipes generated:', response.recipes?.length || 0);
       res.json({ recipes: response.recipes || [] });
+
+      // Increment usage counter after successful generation
+      incrementUsageCounter(req).catch(err => console.error('Failed to increment usage:', err));
     } catch (error: any) {
       console.error('Fridge recipe generation error:', error);
       res.status(500).json({ error: error.message || "Failed to generate recipes" });
@@ -546,6 +622,12 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
         return res.status(400).json({ error: "No prompt provided" });
       }
 
+      // Check usage limit before generating
+      const limitCheck = await checkAndEnforceUsageLimit(req);
+      if (!limitCheck.allowed) {
+        return res.status(403).json(limitCheck.error);
+      }
+
       // Add random seed for recipe variation
       const randomSeed = Math.floor(Math.random() * 1000); // For AI diversity
 
@@ -667,6 +749,9 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
       // Send recipe immediately to user for faster response
       res.json({ recipe });
 
+      // Increment usage counter after successful generation
+      incrementUsageCounter(req).catch(err => console.error('Failed to increment usage:', err));
+
       // Generate image and log in background (don't await)
       generateRecipeImage(recipe.title, recipe.cuisine).then(imageUrl => {
         if (imageUrl) {
@@ -705,6 +790,12 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
 
       if (!recipeIdea) {
         return res.status(400).json({ error: "No recipe idea provided" });
+      }
+
+      // Check usage limit before generating
+      const limitCheck = await checkAndEnforceUsageLimit(req);
+      if (!limitCheck.allowed) {
+        return res.status(403).json(limitCheck.error);
       }
 
       const { 
@@ -806,6 +897,9 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
       
       // Send recipe immediately to user for faster response
       res.json({ recipe });
+
+      // Increment usage counter after successful generation
+      incrementUsageCounter(req).catch(err => console.error('Failed to increment usage:', err));
 
       // Generate image and log in background (don't await)
       generateRecipeImage(recipe.title, recipe.cuisine).then(imageUrl => {

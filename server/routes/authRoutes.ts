@@ -157,4 +157,44 @@ export function registerAuthRoutes(app: Express) {
       res.status(500).json({ message: "Failed to get user" });
     }
   });
+
+  // Check usage limit endpoint
+  app.get("/api/check-usage-limit", async (req, res) => {
+    try {
+      const userId = req.session?.userId;
+      const pseudoId = req.headers['x-pseudo-user-id'] as string || req.session?.id || 'anonymous';
+      
+      if (userId) {
+        // Check authenticated user
+        const user = await storage.getUser(userId);
+        if (!user) {
+          return res.status(404).json({ error: "User not found" });
+        }
+        
+        return res.json({
+          canGenerate: user.hasFlavrPlus || (user.recipesThisMonth || 0) < 3,
+          recipesUsed: user.recipesThisMonth || 0,
+          recipesLimit: user.hasFlavrPlus ? 999 : 3,
+          hasFlavrPlus: user.hasFlavrPlus || false
+        });
+      } else {
+        // Check pseudo user
+        let pseudoUser = await storage.getPseudoUser(pseudoId);
+        if (!pseudoUser) {
+          // Create new pseudo user
+          pseudoUser = await storage.createPseudoUser(pseudoId);
+        }
+        
+        return res.json({
+          canGenerate: (pseudoUser.recipesThisMonth || 0) < 3,
+          recipesUsed: pseudoUser.recipesThisMonth || 0,
+          recipesLimit: 3,
+          hasFlavrPlus: false
+        });
+      }
+    } catch (error) {
+      console.error("Check usage limit error:", error);
+      res.status(500).json({ error: "Failed to check usage limit" });
+    }
+  });
 }

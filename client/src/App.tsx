@@ -63,13 +63,22 @@ function Router() {
       <Route path="/chef-assist" component={ChefAssist} />
       <Route path="/recipe" component={Recipe} />
       <Route path="/recipe-selection" component={RecipeSelection} />
-      <Route path="/loading" component={LoadingPage} />
+      <Route path="/loading" component={() => <LoadingPage title="Loading..." subtitle="Please wait while we prepare your experience" />} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
 function App() {
+  // Initialize pseudo user ID on app load
+  React.useEffect(() => {
+    if (!localStorage.getItem('flavrUserId')) {
+      const newId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('flavrUserId', newId);
+      console.log('Generated new pseudo user ID:', newId);
+    }
+  }, []);
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>

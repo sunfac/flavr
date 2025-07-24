@@ -12,9 +12,20 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  // Get pseudo user ID from localStorage
+  const pseudoUserId = localStorage.getItem('flavrUserId') || 'anonymous';
+  
+  const headers: Record<string, string> = {
+    'x-pseudo-user-id': pseudoUserId
+  };
+  
+  if (data) {
+    headers['Content-Type'] = 'application/json';
+  }
+  
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers,
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
@@ -29,8 +40,14 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    // Get pseudo user ID from localStorage
+    const pseudoUserId = localStorage.getItem('flavrUserId') || 'anonymous';
+    
     const res = await fetch(queryKey[0] as string, {
       credentials: "include",
+      headers: {
+        'x-pseudo-user-id': pseudoUserId
+      }
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
