@@ -167,44 +167,42 @@ export default function Recipe() {
         )}
       </PageLayout>
 
-      {/* Floating Chat Button - Always fixed in viewport */}
-      <div
-        className="fixed bottom-4 right-4"
-        style={{
-          position: 'fixed',
-          bottom: '16px',
-          right: '16px',
-          zIndex: 99999,
-          pointerEvents: 'auto'
-        }}
-      >
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.5, type: "spring" }}
+      {/* Floating Chat Button - Fixed above mobile nav */}
+      {!showChat && (
+        <div
+          className="fixed right-4"
+          style={{
+            position: 'fixed',
+            bottom: '80px', // Above mobile navigation
+            right: '16px',
+            zIndex: 50,
+            pointerEvents: 'auto'
+          }}
         >
-          <Button
-            onClick={() => {
-              console.log('🔥 Chat button clicked! Current showChat:', showChat);
-              setShowChat(!showChat);
-            }}
-            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg w-12 h-12 rounded-full p-0 relative group"
-            style={{
-              position: 'relative',
-              zIndex: 1
-            }}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.5, type: "spring" }}
           >
-            <MessageCircle className="w-5 h-5" />
-            
-            {/* Tooltip */}
-            <div className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-              <div className="bg-slate-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                {showChat ? 'Close' : 'Chat'}
+            <Button
+              onClick={() => {
+                console.log('🔥 Chat button clicked! Current showChat:', showChat);
+                setShowChat(!showChat);
+              }}
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg w-12 h-12 rounded-full p-0 relative group"
+            >
+              <MessageCircle className="w-5 h-5" />
+              
+              {/* Tooltip */}
+              <div className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                <div className="bg-slate-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                  Chat with Zest
+                </div>
               </div>
-            </div>
-          </Button>
-        </motion.div>
-      </div>
+            </Button>
+          </motion.div>
+        </div>
+      )}
     </>
   );
 }

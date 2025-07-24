@@ -499,7 +499,7 @@ export default function ChatBot({
             }}
             onClick={(e) => e.stopPropagation()} // Prevent backdrop clicks from closing when clicking inside panel
           >
-        <CardHeader className="p-3 sm:p-4 pt-16 sm:pt-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
+        <CardHeader className="p-3 sm:p-4 pt-20 sm:pt-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="relative group">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -530,7 +530,7 @@ export default function ChatBot({
           {/* Messages Area */}
           <div 
             ref={scrollAreaRef}
-            className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3"
+            className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 chat-messages"
             style={{ 
               flex: '1 1 0%',
               minHeight: '0',
@@ -588,11 +588,10 @@ export default function ChatBot({
 
           {/* Input Area - Mobile Keyboard Safe */}
           <div 
-            className="border-t-2 border-orange-500/60 bg-slate-900 p-3 sm:p-4"
+            className="border-t-2 border-orange-500/60 bg-slate-900 p-3 sm:p-4 flex-shrink-0 chat-input-area"
             style={{
-              flexShrink: 0,
-              position: 'sticky',
-              bottom: 0,
+              position: 'relative',
+              zIndex: 10,
               paddingBottom: 'max(env(safe-area-inset-bottom), 16px)'
             }}
           >
@@ -605,14 +604,14 @@ export default function ChatBot({
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-
                 placeholder="Ask me anything..."
                 disabled={sendMessageMutation.isPending}
                 className="flex-1 min-h-[44px] sm:min-h-[52px] px-3 sm:px-4 py-2 sm:py-3 bg-slate-700 border-2 border-slate-600 rounded-xl text-white placeholder-slate-400 text-sm sm:text-base focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 disabled:opacity-50"
                 style={{
                   fontSize: '16px', // Prevent zoom on iOS
                   WebkitAppearance: 'none',
-                  WebkitBorderRadius: '12px'
+                  WebkitBorderRadius: '12px',
+                  touchAction: 'manipulation'
                 }}
                 autoComplete="off"
                 autoCorrect="off"

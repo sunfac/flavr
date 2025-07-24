@@ -337,6 +337,24 @@ body {
     height: 100dvh !important;
   }
 
+  /* Ensure mobile chat input is always visible */
+  .mobile-chat-panel {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .mobile-chat-panel .chat-messages {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+  }
+
+  .mobile-chat-panel .chat-input-area {
+    flex-shrink: 0 !important;
+    position: relative !important;
+    z-index: 10 !important;
+  }
+
   /* iOS Safari specific fixes */
   @supports (-webkit-touch-callout: none) {
     .mobile-chat-panel {
