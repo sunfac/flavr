@@ -42,23 +42,23 @@ export default function ModeSelection() {
   };
 
   return (
-    <PageLayout className="py-12">
+    <PageLayout className="py-4 md:py-12">
       <div className="max-w-4xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-16 pt-8"
+          className="text-center mb-8 md:mb-16 pt-2 md:pt-8"
         >
-          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-5xl font-bold mb-3 md:mb-4 bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
             What's Cooking?
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
             Choose how you'd like to discover your next delicious meal
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-12">
           {modes.map((mode, index) => (
             <motion.div
               key={mode.title}
@@ -79,17 +79,18 @@ export default function ModeSelection() {
                   mode.gradient
                 )} />
                 
-                <CardHeader className="relative text-center py-8">
-                  <div className={cn("p-4 rounded-full bg-background/80 backdrop-blur-sm inline-flex mx-auto mb-4", mode.color)}>
-                    {mode.icon}
+                <CardHeader className="relative text-center py-4 md:py-8">
+                  <div className={cn("p-3 md:p-4 rounded-full bg-background/80 backdrop-blur-sm inline-flex mx-auto mb-3 md:mb-4", mode.color)}>
+                    <Refrigerator className={cn("w-8 h-8 md:w-12 md:h-12", mode.title === "Fridge2Fork" ? "" : "hidden")} />
+                    <ChefHat className={cn("w-8 h-8 md:w-12 md:h-12", mode.title === "Chef Assist" ? "" : "hidden")} />
                   </div>
-                  <CardTitle className="text-2xl mb-2">{mode.title}</CardTitle>
-                  <CardDescription className="text-base">
+                  <CardTitle className="text-xl md:text-2xl mb-2">{mode.title}</CardTitle>
+                  <CardDescription className="text-sm md:text-base">
                     {mode.description}
                   </CardDescription>
                 </CardHeader>
                 
-                <CardContent className="relative pb-8">
+                <CardContent className="relative pb-4 md:pb-8">
                   <Button
                     className={cn(
                       "w-full group-hover:translate-y-[-2px] transition-transform",
@@ -98,7 +99,7 @@ export default function ModeSelection() {
                     size="lg"
                   >
                     Get Started
-                    <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight className="w-4 h-4 md:w-5 md:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </CardContent>
               </Card>
@@ -110,16 +111,16 @@ export default function ModeSelection() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="text-center pb-8"
+          className="text-center pb-4 md:pb-8"
         >
           <Button
-            size="lg"
+            size="default"
             onClick={() => navigate("/cookbook")}
             variant="outline"
-            className="group"
+            className="group text-sm md:text-base"
           >
             View My Cookbook
-            <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            <ChevronRight className="w-4 h-4 md:w-5 md:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
           </Button>
         </motion.div>
       </div>
