@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
+import { Clock } from 'lucide-react';
 
 interface Step {
   id: string;
@@ -15,6 +16,55 @@ interface StepStackProps {
   currentStep: number;
   onStepChange: (stepIndex: number) => void;
   className?: string;
+}
+
+// Extract duration from instruction text
+function extractDuration(instruction: string): number | undefined {
+  const text = instruction.toLowerCase();
+  
+  // Look for time patterns
+  const patterns = [
+    /(\d+)\s*(?:to\s*)?(\d+)?\s*minutes?/,
+    /(\d+)\s*(?:to\s*)?(\d+)?\s*mins?/,
+    /(\d+)\s*(?:to\s*)?(\d+)?\s*hours?/,
+    /(\d+)\s*(?:to\s*)?(\d+)?\s*hrs?/,
+    /(\d+)\s*(?:to\s*)?(\d+)?\s*seconds?/,
+    /(\d+)\s*(?:to\s*)?(\d+)?\s*secs?/
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) {
+      const firstNum = parseInt(match[1]);
+      const secondNum = match[2] ? parseInt(match[2]) : firstNum;
+      
+      // Use the average if it's a range, otherwise use the single value
+      const duration = match[2] ? Math.round((firstNum + secondNum) / 2) : firstNum;
+      
+      // Convert to minutes if needed
+      if (text.includes('hour') || text.includes('hr')) {
+        return duration * 60;
+      } else if (text.includes('second') || text.includes('sec')) {
+        return Math.round(duration / 60);
+      } else {
+        return duration; // Already in minutes
+      }
+    }
+  }
+  
+  // Default durations based on common cooking terms
+  if (text.includes('bring to a boil') || text.includes('boil')) return 5;
+  if (text.includes('simmer')) return 15;
+  if (text.includes('bake') || text.includes('roast')) return 30;
+  if (text.includes('sauté') || text.includes('fry')) return 8;
+  if (text.includes('marinate')) return 30;
+  if (text.includes('rest') || text.includes('cool')) return 10;
+  if (text.includes('preheat')) return 10;
+  if (text.includes('brown') || text.includes('sear')) return 5;
+  if (text.includes('chop') || text.includes('slice') || text.includes('dice')) return 3;
+  if (text.includes('mix') || text.includes('stir') || text.includes('combine')) return 2;
+  
+  return undefined;
 }
 
 
@@ -82,6 +132,9 @@ function StepCard({
   totalSteps: number;
   isActive: boolean;
 }) {
+  // Calculate step duration from instruction text
+  const stepDuration = step.duration || extractDuration(step.description);
+
   return (
     <motion.div
       className={`
@@ -97,7 +150,16 @@ function StepCard({
           Step {stepNumber} of {totalSteps}
         </Badge>
         
-
+        {/* Step Duration */}
+        {stepDuration && (
+          <Badge variant="secondary" className="flex items-center gap-1 bg-slate-700/50 text-slate-300 border-slate-600">
+            <Clock className="w-3 h-3" />
+            {stepDuration >= 60 
+              ? `${Math.floor(stepDuration / 60)}h ${stepDuration % 60}m`
+              : `${stepDuration} min`
+            }
+          </Badge>
+        )}
       </div>
 
       {/* Step Content */}
@@ -114,7 +176,6 @@ function StepCard({
       )}
       
       <p className="text-slate-300 leading-relaxed mb-6" style={{ fontSize: 'var(--step-0)' }}>{step.description}</p>
-
 
     </motion.div>
   );

@@ -312,6 +312,7 @@ Changelog:
 - January 23, 2025. Timer chips removed from all recipe displays - eliminated timer chips from RecipeCard components and My Cookbook recipe cards per user preference, maintained cooking time information in discrete text format in recipe stats sections without prominent chip display
 - January 23, 2025. Recipe card chip improvements complete - removed shopping mode from My Cookbook filter options, replaced difficulty chip with accurate timer chip in main recipe cards using Clock icon, removed timer badges from individual cooking steps in StepStack component while keeping step progression indicators
 - January 23, 2025. Chef Assist cooking time calculation fixed - removed hardcoded 30-minute default cooking time, enhanced AI prompts to calculate realistic cooking times based on actual recipe requirements (e.g., 150+ minutes for braised dishes, 25 minutes for stir-fries), timer chip now displays accurate total cooking time for each recipe type
+- January 23, 2025. Individual step timing restored to StepStack - added intelligent duration extraction function that parses cooking instructions for explicit times and recognizes common cooking terms, displays timing badges with Clock icon for each step, supports both explicit times (e.g., "15 minutes") and cooking actions (e.g., "simmer" = 15min, "sear" = 5min), smart formatting shows hours and minutes for longer steps
 ```
 
 ## User Preferences
