@@ -610,8 +610,15 @@ export default function ChatBot({
             </div>
           )}
 
-          {/* Input Area - Mobile-First Design */}
-          <div className="border-t-2 border-orange-500/60 bg-slate-900 flex-shrink-0 p-3 sm:p-4">
+          {/* Input Area - Mobile-First Design with Viewport Fix */}
+          <div 
+            className="border-t-2 border-orange-500/60 bg-slate-900 flex-shrink-0 p-3 sm:p-4"
+            style={{
+              position: 'sticky',
+              bottom: 0,
+              zIndex: 100
+            }}
+          >
             <form 
               onSubmit={(e) => { e.preventDefault(); handleSend(); }} 
               className="flex gap-2 sm:gap-3 w-full items-center"
@@ -621,6 +628,16 @@ export default function ChatBot({
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
+                onFocus={(e) => {
+                  // Scroll input into view when focused to prevent mobile keyboard issues
+                  setTimeout(() => {
+                    e.target.scrollIntoView({ 
+                      behavior: 'smooth', 
+                      block: 'center',
+                      inline: 'nearest'
+                    });
+                  }, 300); // Wait for keyboard animation
+                }}
                 placeholder="Ask me anything..."
                 disabled={sendMessageMutation.isPending}
                 className="flex-1 min-h-[44px] sm:min-h-[52px] px-3 sm:px-4 py-2 sm:py-3 bg-slate-700 border-2 border-slate-600 rounded-xl text-white placeholder-slate-400 text-sm sm:text-base focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 disabled:opacity-50"
