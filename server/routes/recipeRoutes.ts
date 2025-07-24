@@ -286,7 +286,8 @@ Return a JSON object with this structure:
   // Chef Assist inspiration
   app.post("/api/chef-assist/inspire", async (req, res) => {
     try {
-      // Two random variables for more diversity
+      // Add random seed for maximum variation like in recipe generation
+      const randomSeed = Math.floor(Math.random() * 10000); // 0-9999 for maximum diversity
       const complexityLevel = Math.floor(Math.random() * 10) + 1; // 1-10 for complexity approaches
       const simpleStyle = Math.floor(Math.random() * 10) + 1; // 1-10 for simple styles
       
@@ -360,12 +361,50 @@ Return a JSON object with this structure:
           break;
       }
 
-      // Combine both approaches
+      // Cuisine selection based on seed ranges for maximum diversity
+      let cuisineCategory = "";
+      let specificCuisines = [];
+      
+      const seedRange = randomSeed % 1000;
+      if (seedRange < 200) {
+        cuisineCategory = "Asian";
+        specificCuisines = ["Thai: Street food, curries, salads, noodle dishes", "Vietnamese: Fresh herbs, pho variations, grilled specialties", "Korean: Fermented foods, grilled dishes, comfort foods", "Japanese: Authentic techniques, seasonal dishes, comfort foods", "Chinese: Regional styles, wok dishes, dumplings, noodles", "Indonesian: Curry dishes, grilled specialties, rice preparations", "Malaysian: Curry variations, noodle dishes, coconut-based dishes"];
+      } else if (seedRange < 400) {
+        cuisineCategory = "Middle Eastern";
+        specificCuisines = ["Lebanese: Mezze dishes, grilled meats, rice preparations", "Persian: Rice dishes, stews, grilled specialties", "Turkish: Grilled meats, rice dishes, Mediterranean flavors", "Moroccan: Tagines, couscous dishes, spiced preparations", "Egyptian: Grain dishes, vegetable preparations, spiced specialties"];
+      } else if (seedRange < 600) {
+        cuisineCategory = "European";
+        specificCuisines = ["Italian: Regional specialties, pasta innovations, risottos", "Spanish: Tapas, paellas, regional specialties", "Greek: Traditional dishes, grilled meats, fresh preparations", "Portuguese: Seafood dishes, rice preparations, grilled specialties", "Hungarian: Stews, meat dishes, paprika-based preparations"];
+      } else if (seedRange < 800) {
+        cuisineCategory = "Latin American";
+        specificCuisines = ["Peruvian: Ceviche variations, potato dishes, grilled specialties", "Mexican: Traditional preparations, regional specialties, street food", "Argentinian: Grilled specialties, meat dishes, empanadas", "Brazilian: Rice dishes, grilled meats, tropical preparations"];
+      } else {
+        cuisineCategory = "Indian Subcontinent";
+        specificCuisines = ["Indian: Regional curries, biryanis, tandoor dishes, dals", "Sri Lankan: Curry dishes, rice preparations, coconut-based dishes"];
+      }
+      
+      const selectedCuisine = specificCuisines[randomSeed % specificCuisines.length];
+      
+      // Combine approaches with seed variation
       const inspirationPrompt = `${complexityPrompt} ${simplePrompt}`;
       
-      const prompt = `${inspirationPrompt}
+      const prompt = `VARIATION SEED: ${randomSeed}
+      
+${inspirationPrompt}
 
-IGNORE any previous suggestions you may have given. Generate something COMPLETELY DIFFERENT each time.
+SEED-BASED VARIATION REQUIREMENTS:
+Use seed ${randomSeed} to ensure maximum diversity. This number must influence:
+- Protein selection (seafood, poultry, beef, pork, lamb, game, legumes, grains, vegetables)
+- Cooking technique variation (grilled, braised, roasted, sautéed, steamed, fried, slow-cooked)
+- Regional authenticity within chosen cuisine
+- Ingredient complexity (simple pantry vs specialty ingredients)
+- Seasonal influence and ingredient selection
+- Preparation style (quick vs elaborate, rustic vs refined)
+
+MANDATORY CUISINE FOCUS: ${cuisineCategory}
+SPECIFIC CUISINE: ${selectedCuisine}
+
+IGNORE any previous suggestions you may have given. Generate something COMPLETELY DIFFERENT each time based on the variation seed.
 
 Choose ONE authentic cuisine and create an exciting dish within that tradition:
 • Italian: Regional specialties, pasta innovations, risottos, focaccia variations
@@ -399,7 +438,7 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: "You are a creative chef who creates authentic dishes from single cuisine traditions. Return ONLY the recipe name in 4-8 words. NEVER include difficulty levels like beginner/intermediate/advanced. NEVER mix cuisines or create fusion dishes. Choose ONE authentic cuisine and stay within that tradition. IMPORTANT: Treat every request as if it's the first message you've ever received - always generate completely different and diverse recipe ideas." },
+          { role: "system", content: `You are a creative chef who creates authentic dishes from single cuisine traditions. Use variation seed ${randomSeed} to ensure maximum diversity - every click should produce completely different suggestions. Return ONLY the recipe name in 4-8 words. NEVER include difficulty levels. NEVER mix cuisines. Choose ONE authentic cuisine and stay within that tradition. SEED: ${randomSeed}` },
           { role: "user", content: prompt }
         ],
         temperature: 0.9,
