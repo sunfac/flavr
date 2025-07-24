@@ -141,39 +141,47 @@ function StepCard({
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
 
-  // Play gentle completion sound
+  // Play two chimes only
   const playCompletionSound = () => {
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       
-      // Create a gentle bell-like sound
-      const oscillator1 = audioContext.createOscillator();
-      const oscillator2 = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
+      // Function to create a single chime
+      const createChime = (startTime: number) => {
+        const osc1 = audioContext.createOscillator();
+        const osc2 = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(audioContext.destination);
+        
+        // Set frequencies
+        osc1.frequency.setValueAtTime(800, startTime);
+        osc2.frequency.setValueAtTime(1000, startTime);
+        osc1.type = 'sine';
+        osc2.type = 'sine';
+        
+        // Create envelope for single chime
+        const chimeDuration = 0.4;
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.08, startTime + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + chimeDuration);
+        
+        // Frequency sweep
+        osc1.frequency.exponentialRampToValueAtTime(600, startTime + chimeDuration);
+        osc2.frequency.exponentialRampToValueAtTime(750, startTime + chimeDuration);
+        
+        osc1.start(startTime);
+        osc2.start(startTime);
+        osc1.stop(startTime + chimeDuration);
+        osc2.stop(startTime + chimeDuration);
+      };
       
-      // First tone - main chime
-      oscillator1.connect(gainNode);
-      oscillator1.frequency.setValueAtTime(800, audioContext.currentTime); // C6
-      oscillator1.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.3);
-      oscillator1.type = 'sine';
-      
-      // Second tone - harmony
-      oscillator2.connect(gainNode);
-      oscillator2.frequency.setValueAtTime(1000, audioContext.currentTime); // E6
-      oscillator2.frequency.exponentialRampToValueAtTime(750, audioContext.currentTime + 0.3);
-      oscillator2.type = 'sine';
-      
-      gainNode.connect(audioContext.destination);
-      
-      // Gentle fade in and out
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.05);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
-      
-      oscillator1.start(audioContext.currentTime);
-      oscillator2.start(audioContext.currentTime);
-      oscillator1.stop(audioContext.currentTime + 0.8);
-      oscillator2.stop(audioContext.currentTime + 0.8);
+      // Play exactly two chimes
+      const now = audioContext.currentTime;
+      createChime(now);           // First chime
+      createChime(now + 0.5);     // Second chime after 0.5 seconds
       
     } catch (error) {
       console.log('Audio not available:', error);
@@ -198,10 +206,11 @@ function StepCard({
     
     const interval = setInterval(() => {
       setTimeRemaining(prev => {
-        if (prev === null || prev <= 1) {
+        if (prev === null || prev <= 0) {
           setIsTimerRunning(false);
-          if (prev !== null && prev <= 1) {
-            // Timer completed - play gentle sound
+          clearInterval(interval);
+          if (prev === 1) {
+            // Timer completed - play sound only once
             console.log(`Step ${stepNumber} timer completed!`);
             playCompletionSound();
           }
