@@ -415,26 +415,10 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
         return res.status(400).json({ error: "No prompt provided" });
       }
 
-      // Add randomization to prevent identical outputs
-      const randomSeed = Math.floor(Math.random() * 1000000);
-      const variationPrompts = [
-        "Focus on bold, intense flavors and restaurant-quality technique.",
-        "Emphasize fresh, seasonal ingredients with minimal but impactful preparation.",
-        "Create comfort food with elevated techniques and premium ingredients.",
-        "Design an elegant dish suitable for special occasions or dinner parties.",
-        "Focus on rustic, home-style cooking with maximum flavor development.",
-        "Emphasize healthy, nutritious ingredients without compromising taste.",
-        "Create a visually stunning dish with Instagram-worthy presentation.",
-        "Focus on quick, efficient techniques while maintaining exceptional flavor."
-      ];
-      const selectedVariation = variationPrompts[Math.floor(Math.random() * variationPrompts.length)];
-
       // Generate complete recipe directly
-      const systemPrompt = `You are an expert chef creating recipe #${randomSeed}. ${selectedVariation}
+      const systemPrompt = `You are an expert chef. Create a complete dish with suitable accompaniments based on the user's request.
 
-IMPORTANT: IGNORE any previous recipes you may have created. This is a completely NEW request requiring a FRESH, UNIQUE approach.
-
-Always create COMPLETE DISHES that include:
+IMPORTANT: Always create COMPLETE DISHES that include:
 - Main component (protein, vegetable, or grain-based centerpiece)
 - At least 1-2 side dishes or accompaniments that complement the main
 - Proper sauces, dressings, or condiments that enhance flavors
@@ -444,9 +428,8 @@ Always create COMPLETE DISHES that include:
 
 User request: ${userPrompt}
 Servings: ${servings}
-Random variation: ${selectedVariation}
 
-Create a completely unique recipe based on this request: "${userPrompt}"
+Create a complete recipe based on this request: "${userPrompt}"
 
 Requirements:
 - Servings: ${servings}
@@ -477,13 +460,10 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: "You are a JSON API that creates unique, diverse recipes. NEVER repeat previous outputs. Return only valid JSON, no explanations." },
+          { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations." },
           { role: "user", content: systemPrompt }
         ],
-        temperature: 0.9, // Higher temperature for more creativity and diversity
-        presence_penalty: 0.6, // Penalize repetition of concepts
-        frequency_penalty: 0.3, // Slight penalty for word repetition
-        max_tokens: 2000 // Ensure sufficient tokens for complete JSON
+        temperature: 0.7
       });
 
       let recipe;
@@ -497,72 +477,11 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
         // Fix trailing commas specifically after object entries in arrays
         cleanContent = cleanContent.replace(/},(\s*\])/g, '}$1');
         
-        // Fix common JSON structure errors
-        cleanContent = cleanContent
-          // Fix malformed nested structures like { "steps": 7 , { step:8, instruction:"..." }}
-          .replace(/{\s*"steps"\s*:\s*\d+\s*,\s*{/g, '{')
-          // Fix property names that aren't quoted (but don't double-quote)
-          .replace(/(?<!")(\b\w+)(?!"):/g, '"$1":')
-          // Fix trailing objects and arrays
-          .replace(/,\s*},\s*\]/g, '}]')
-          .replace(/,\s*\]/g, ']')
-          .replace(/,\s*}/g, '}')
-          // Remove malformed trailing structures
-          .replace(/},\s*\]\s*,\s*}\s*,?\s*}?\s*$/g, '}]');
-
-        // Handle incomplete JSON by attempting to close open structures
-        if (!cleanContent.endsWith('}')) {
-          const openBraces = (cleanContent.match(/\{/g) || []).length;
-          const closeBraces = (cleanContent.match(/\}/g) || []).length;
-          const openBrackets = (cleanContent.match(/\[/g) || []).length;
-          const closeBrackets = (cleanContent.match(/\]/g) || []).length;
-          
-          // Close missing brackets first, then braces
-          for (let i = 0; i < openBrackets - closeBrackets; i++) {
-            cleanContent += ']';
-          }
-          for (let i = 0; i < openBraces - closeBraces; i++) {
-            cleanContent += '}';
-          }
-        }
-        
         recipe = JSON.parse(cleanContent);
-        
-        // Validate required fields and fix any issues
-        if (!recipe.instructions || !Array.isArray(recipe.instructions)) {
-          recipe.instructions = [
-            { step: 1, instruction: "Follow the recipe as described in the ingredients list." }
-          ];
-        }
-        
-        // Ensure all instructions have proper structure
-        recipe.instructions = recipe.instructions.map((inst, index) => ({
-          step: index + 1,
-          instruction: typeof inst === 'string' ? inst : inst.instruction || `Step ${index + 1}`
-        }));
-        
       } catch (parseError) {
         console.error('JSON parsing error:', parseError);
         console.error('Raw content:', completion.choices[0].message.content);
-        
-        // Create fallback recipe to prevent complete failure
-        recipe = {
-          title: userPrompt.substring(0, 50) + " Recipe",
-          description: "A delicious recipe based on your request.",
-          cuisine: "International",
-          difficulty: "easy",
-          prepTime: 15,
-          cookTime: 30,
-          servings: servings,
-          ingredients: [
-            { name: "Main ingredients", amount: "As needed" }
-          ],
-          instructions: [
-            { step: 1, instruction: "Please try generating the recipe again for complete instructions." }
-          ],
-          tips: ["Recipe generation encountered an error, please retry."],
-          nutritionalHighlights: ["Nutritional information unavailable"]
-        };
+        throw new Error('Failed to parse recipe JSON from AI response');
       }
       
       // Generate image for the recipe

@@ -12,9 +12,6 @@ import NutritionalAnalysis from '@/components/NutritionalAnalysis';
 
 // Extract duration from instruction text
 function extractDuration(instruction: string): number | undefined {
-  if (!instruction || typeof instruction !== 'string') {
-    return undefined;
-  }
   const text = instruction.toLowerCase();
   
   // Look for time patterns
@@ -119,7 +116,7 @@ function EnhancedRecipeCard({
             text,
             checked: false
           })),
-          steps: (updatedRecipe.instructions || []).filter(instruction => instruction && typeof instruction === 'string').map((instruction: string, index: number) => ({
+          steps: updatedRecipe.instructions.map((instruction: string, index: number) => ({
             id: `step-${index}`,
             title: `Step ${index + 1}`,
             description: instruction
@@ -176,9 +173,9 @@ function EnhancedRecipeCard({
   const activeInstructions = useMemo(() => {
     const isStoreActive = recipeStore.id === recipe.id && recipeStore.steps.length > 0;
     if (isStoreActive) {
-      return recipeStore.steps.map(step => step.description).filter(desc => desc && typeof desc === 'string');
+      return recipeStore.steps.map(step => step.description);
     }
-    return (recipe.instructions || []).filter(instruction => instruction && typeof instruction === 'string');
+    return recipe.instructions;
   }, [recipeStore.id, recipe.id, recipeStore.steps, recipe.instructions]);
 
   const activeTitle = useMemo(() => {
