@@ -151,7 +151,7 @@ export default function ChefAssist() {
 
   return (
     <PageLayout>
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-4 md:py-8">
         {/* Original quiz-style layout */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -159,20 +159,20 @@ export default function ChefAssist() {
           className="w-full"
         >
           <Card className="bg-slate-900/50 border-slate-700">
-            <CardContent className="p-8">
+            <CardContent className="p-4 md:p-8">
               {/* Question header matching original quiz style */}
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-white mb-2">What's your culinary vision?</h2>
-                <p className="text-lg text-slate-400">Describe what you want to create today</p>
+              <div className="text-center mb-4 md:mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">What's your culinary vision?</h2>
+                <p className="text-base md:text-lg text-slate-400">Describe what you want to create today</p>
               </div>
 
               {/* Textarea matching original quiz style */}
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 <Textarea
                   placeholder="Tell me about the dish you have in mind..."
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  className="min-h-[150px] text-lg bg-slate-800/50 border-slate-600 text-white focus:border-orange-400 rounded-xl placeholder:text-slate-500"
+                  className="min-h-[120px] md:min-h-[150px] text-base md:text-lg bg-slate-800/50 border-slate-600 text-white focus:border-orange-400 rounded-xl placeholder:text-slate-500"
                 />
 
                 {/* Inspire Me button matching original style */}
@@ -181,7 +181,7 @@ export default function ChefAssist() {
                     onClick={handleInspireMe}
                     variant="outline"
                     disabled={isProcessing}
-                    className="border-orange-400 text-orange-400 hover:bg-orange-400/10"
+                    className="border-orange-400 text-orange-400 hover:bg-orange-400/10 text-sm md:text-base"
                   >
                     <Sparkles className="w-4 h-4 mr-2" />
                     Inspire Me
@@ -192,27 +192,27 @@ export default function ChefAssist() {
                 <Button
                   onClick={handleGenerateRecipe}
                   disabled={!prompt.trim() || isProcessing}
-                  className="w-full h-14 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium text-lg rounded-xl shadow-lg"
+                  className="w-full h-12 md:h-14 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium text-base md:text-lg rounded-xl shadow-lg"
                   size="lg"
                 >
                   {isProcessing ? (
                     <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      <Loader2 className="w-4 h-4 md:w-5 md:h-5 mr-2 animate-spin" />
                       Creating your recipe...
                     </>
                   ) : (
                     <>
                       Continue
-                      <ArrowRight className="w-5 h-5 ml-2" />
+                      <ArrowRight className="w-4 h-4 md:w-5 md:h-5 ml-2" />
                     </>
                   )}
                 </Button>
 
-                {/* Cycling suggestion chips - small list style */}
-                <div className="space-y-2">
-                  <p className="text-sm text-slate-400 text-center">Example ideas to get you started:</p>
+                {/* Cycling suggestion chips - compact on mobile */}
+                <div className="space-y-1 md:space-y-2">
+                  <p className="text-xs md:text-sm text-slate-400 text-center">Example ideas to get you started:</p>
                   <AnimatePresence mode="popLayout">
-                    <div className="space-y-1 max-w-lg mx-auto">
+                    <div className="space-y-0.5 md:space-y-1 max-w-lg mx-auto">
                       {randomExamples.slice(currentExampleIndex, currentExampleIndex + 3).map((example, index) => (
                         <motion.div
                           key={`${example}-${currentExampleIndex}-${index}`}
@@ -223,7 +223,7 @@ export default function ChefAssist() {
                         >
                           <button
                             onClick={() => setPrompt(example)}
-                            className="w-full text-left py-2 px-3 text-sm text-slate-300 hover:text-orange-400 hover:bg-slate-800/30 rounded-lg transition-colors border-l-2 border-orange-400/20 hover:border-orange-400/60"
+                            className="w-full text-left py-1.5 md:py-2 px-3 text-xs md:text-sm text-slate-300 hover:text-orange-400 hover:bg-slate-800/30 rounded-lg transition-colors border-l-2 border-orange-400/20 hover:border-orange-400/60"
                           >
                             • {example}
                           </button>
