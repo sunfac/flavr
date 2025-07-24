@@ -85,6 +85,32 @@ export function registerRecipeRoutes(app: Express) {
   // Vision API - Analyze ingredients from image
   app.post("/api/vision/analyze-ingredients", upload.single('image'), processFridgeImage);
 
+  // Helper function to group ingredients by cuisine compatibility
+  const groupIngredientsByCuisine = (ingredients: string[]): { [key: string]: string[] } => {
+    const asianIngredients = ingredients.filter(ing => 
+      ['kimchi', 'gochujang', 'soy sauce', 'sesame oil', 'miso', 'rice wine', 'fish sauce', 'sriracha', 'sweet chili sauce'].some(asian => ing.toLowerCase().includes(asian.toLowerCase()))
+    );
+    
+    const mediterraneanIngredients = ingredients.filter(ing =>
+      ['olive oil', 'basil', 'oregano', 'tomato', 'cheese', 'garlic', 'lemon', 'olives', 'balsamic'].some(med => ing.toLowerCase().includes(med.toLowerCase()))
+    );
+    
+    const britishIngredients = ingredients.filter(ing =>
+      ['butter', 'cream', 'cheddar', 'ham', 'mustard', 'horseradish', 'pickles'].some(brit => ing.toLowerCase().includes(brit.toLowerCase()))
+    );
+    
+    const neutralIngredients = ingredients.filter(ing =>
+      !asianIngredients.includes(ing) && !mediterraneanIngredients.includes(ing) && !britishIngredients.includes(ing)
+    );
+    
+    return {
+      asian: asianIngredients,
+      mediterranean: mediterraneanIngredients,
+      british: britishIngredients,
+      neutral: neutralIngredients
+    };
+  };
+
   // Fridge2Fork recipe generation
   app.post("/api/generate-fridge-recipe", async (req, res) => {
     try {
@@ -103,7 +129,25 @@ export function registerRecipeRoutes(app: Express) {
         return res.status(400).json({ error: "No ingredients provided" });
       }
 
-      // Create prompt for recipe ideas based on ingredients
+      // Group ingredients by cuisine compatibility
+      const groupedIngredients = groupIngredientsByCuisine(ingredients);
+      console.log('Grouped ingredients:', groupedIngredients);
+
+      // Create enhanced prompt using cuisine groups
+      const cuisineNotes = [];
+      if (groupedIngredients.asian.length > 0) {
+        cuisineNotes.push(`Asian ingredients: ${groupedIngredients.asian.join(", ")}`);
+      }
+      if (groupedIngredients.mediterranean.length > 0) {
+        cuisineNotes.push(`Mediterranean ingredients: ${groupedIngredients.mediterranean.join(", ")}`);
+      }
+      if (groupedIngredients.british.length > 0) {
+        cuisineNotes.push(`British/Western ingredients: ${groupedIngredients.british.join(", ")}`);
+      }
+      if (groupedIngredients.neutral.length > 0) {
+        cuisineNotes.push(`Neutral ingredients: ${groupedIngredients.neutral.join(", ")}`);
+      }
+
       const prompt = `You are a creative chef specializing in making delicious COMPLETE MEALS from available ingredients.
 
 IMPORTANT: Always create COMPLETE DISHES that include:
@@ -113,8 +157,15 @@ IMPORTANT: Always create COMPLETE DISHES that include:
 - Garnishes and finishing touches
 - A complete balanced meal, not just a single element
 
-AVAILABLE INGREDIENTS:
-${ingredients.join(", ")}
+AVAILABLE INGREDIENTS BY CUISINE COMPATIBILITY:
+${cuisineNotes.join("\n")}
+
+RECIPE CREATION RULES:
+- Create each recipe using ingredients from ONE cuisine group + neutral ingredients
+- DO NOT mix Asian ingredients (kimchi, gochujang) with Mediterranean/Western ingredients
+- Keep cuisine styles separate and authentic
+- Use 3-6 compatible ingredients per recipe that work together harmoniously
+- Each recipe should have a clear cuisine identity (Asian, Mediterranean, British, etc.)
 
 CONSTRAINTS:
 - Servings: ${servings} people
@@ -122,14 +173,13 @@ CONSTRAINTS:
 - Budget per serving: £${(budget / servings).toFixed(2)}
 - Equipment: ${equipment.join(", ")}
 ${dietaryRestrictions.length > 0 ? `- Dietary restrictions: ${dietaryRestrictions.join(", ")}` : ""}
-- Ingredient flexibility: You can add common pantry staples AND substitute ingredients with more appropriate alternatives (e.g., pasta instead of rice for pasta dishes, appropriate proteins for the cuisine, etc.)
 
 Create 3 DIVERSE recipe suggestions that:
-1. Use SOME of the available ingredients as primary components (NOT necessarily all)
-2. Focus on ingredients that work harmoniously together within each cuisine
-3. Add common pantry items (spices, herbs, oils, aromatics) to create delicious flavors
-4. Prioritize culinary logic over using every single ingredient
-5. Are achievable within the time constraint and suitable for UK home cooking
+1. Each uses ingredients from ONE cuisine group (don't mix incompatible styles)
+2. Focus on proven, traditional flavor combinations
+3. Create authentic dishes within each cuisine tradition
+4. Use neutral ingredients to support the main cuisine flavors
+5. Ensure each recipe makes culinary sense and tastes harmonious
 
 For each recipe, provide:
 - Title
@@ -156,10 +206,13 @@ Return a JSON object with this structure:
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations." },
+          { 
+            role: "system", 
+            content: "You are a culinary expert specializing in ingredient compatibility. Group ingredients by cuisine style and create harmonious flavor combinations. Return only valid JSON, no explanations." 
+          },
           { role: "user", content: prompt }
         ],
-        temperature: 0.9
+        temperature: 0.7 // Reduced temperature for more consistent results
       });
 
       let response;
