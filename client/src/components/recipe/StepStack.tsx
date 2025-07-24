@@ -393,9 +393,7 @@ function StepCard({
                 ? timeRemaining > 0 
                   ? formatTime(timeRemaining)
                   : "Done!"
-                : stepDuration >= 60 
-                  ? `${Math.floor(stepDuration / 60)}h ${stepDuration % 60}m`
-                  : `${stepDuration}min`
+                : `${stepDuration}min`
               }
               {timeRemaining === null && (
                 <Play className="w-3 h-3 ml-1 opacity-60" />
