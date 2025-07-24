@@ -182,10 +182,16 @@ function StepCard({
 
   // Start countdown timer
   const startTimer = () => {
-    if (!stepDuration) return;
+    console.log(`Starting timer for step ${stepNumber}, duration: ${stepDuration} minutes`);
+    if (!stepDuration) {
+      console.log('No stepDuration found, cannot start timer');
+      return;
+    }
     
     if (timeRemaining === null) {
-      setTimeRemaining(stepDuration * 60); // Convert minutes to seconds
+      const seconds = stepDuration * 60;
+      console.log(`Setting timer to ${seconds} seconds`);
+      setTimeRemaining(seconds); // Convert minutes to seconds
     }
     
     setIsTimerRunning(true);
@@ -201,11 +207,16 @@ function StepCard({
           }
           return 0;
         }
-        return prev - 1;
+        const newTime = prev - 1;
+        if (newTime % 10 === 0) { // Log every 10 seconds for debugging
+          console.log(`Step ${stepNumber} timer: ${newTime} seconds remaining`);
+        }
+        return newTime;
       });
     }, 1000);
     
     setTimerInterval(interval);
+    console.log(`Timer interval set for step ${stepNumber}`);
   };
 
   // Pause timer
@@ -261,18 +272,20 @@ function StepCard({
         {/* Step Duration with Timer Controls */}
         {stepDuration && (
           <div className="flex items-center gap-2">
-            {/* Timer Display */}
+            {/* Timer Display - Clickable */}
             <Badge 
               variant="secondary" 
-              className={`flex items-center gap-1 transition-colors ${
+              className={`flex items-center gap-1 transition-all duration-200 cursor-pointer hover:scale-105 ${
                 timeRemaining !== null && timeRemaining > 0
                   ? isTimerRunning 
-                    ? 'bg-orange-500/20 text-orange-300 border-orange-400' 
-                    : 'bg-yellow-500/20 text-yellow-300 border-yellow-400'
+                    ? 'bg-orange-500/30 text-orange-200 border-orange-400 shadow-orange-400/20 shadow-md' 
+                    : 'bg-yellow-500/30 text-yellow-200 border-yellow-400 shadow-yellow-400/20 shadow-md'
                   : timeRemaining === 0
-                    ? 'bg-green-500/20 text-green-300 border-green-400'
-                    : 'bg-slate-700/50 text-slate-300 border-slate-600'
+                    ? 'bg-green-500/30 text-green-200 border-green-400 shadow-green-400/20 shadow-md animate-pulse'
+                    : 'bg-slate-700/50 text-slate-300 border-slate-600 hover:bg-orange-500/20 hover:border-orange-400'
               }`}
+              onClick={timeRemaining === null ? startTimer : undefined}
+              title={timeRemaining === null ? "Click to start timer" : undefined}
             >
               <Clock className="w-3 h-3" />
               {timeRemaining !== null 
@@ -283,43 +296,38 @@ function StepCard({
                   ? `${Math.floor(stepDuration / 60)}h ${stepDuration % 60}m`
                   : `${stepDuration} min`
               }
+              {timeRemaining === null && (
+                <Play className="w-3 h-3 ml-1 opacity-60" />
+              )}
             </Badge>
             
-            {/* Timer Controls */}
-            <div className="flex items-center gap-1">
-              {timeRemaining === null ? (
+            {/* Timer Controls - More Prominent */}
+            {timeRemaining !== null && (
+              <div className="flex items-center gap-1">
                 <Button
                   size="sm"
-                  variant="ghost"
-                  className="h-6 w-6 p-0 hover:bg-orange-500/20"
-                  onClick={startTimer}
-                  title="Start timer"
+                  variant="outline"
+                  className={`h-7 w-7 p-0 border transition-all duration-200 ${
+                    isTimerRunning 
+                      ? 'border-orange-400 bg-orange-500/20 hover:bg-orange-500/30 text-orange-300' 
+                      : 'border-slate-600 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300'
+                  }`}
+                  onClick={isTimerRunning ? pauseTimer : startTimer}
+                  title={isTimerRunning ? "Pause timer" : "Resume timer"}
                 >
-                  <Play className="w-3 h-3" />
+                  {isTimerRunning ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
                 </Button>
-              ) : (
-                <>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 w-6 p-0 hover:bg-orange-500/20"
-                    onClick={isTimerRunning ? pauseTimer : startTimer}
-                    title={isTimerRunning ? "Pause timer" : "Resume timer"}
-                  >
-                    {isTimerRunning ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 w-6 p-0 hover:bg-slate-500/20"
-                    onClick={resetTimer}
-                    title="Reset timer"
-                  >
-                    <RotateCcw className="w-3 h-3" />
-                  </Button>
-                </>
-              )}
-            </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 w-7 p-0 border-slate-600 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 transition-all duration-200"
+                  onClick={resetTimer}
+                  title="Reset timer"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
