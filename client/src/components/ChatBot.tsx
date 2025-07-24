@@ -72,14 +72,16 @@ export default function ChatBot({
 
   // Conversation suggestion chips with Lucide icons
   const suggestionChips = [
-    { text: "Make it spicier", icon: iconMap.flame, updatesRecipe: true },
+    { text: "Change portion size", icon: iconMap.users, updatesRecipe: true },
+    { text: "Make it under 700 kcal", icon: iconMap.activity, updatesRecipe: true },
+    { text: "Make gluten & dairy free", icon: iconMap.heart, updatesRecipe: true },
+    { text: "Turn into quick lunch", icon: iconMap.clock, updatesRecipe: true },
+    { text: "Make more advanced", icon: iconMap.chefHat, updatesRecipe: true },
+    { text: "Add more flavor", icon: iconMap.flame, updatesRecipe: true },
     { text: "Suggest a side dish", icon: iconMap.utensilsCrossed, updatesRecipe: false },
-    { text: "What can I prep ahead?", icon: iconMap.clock, updatesRecipe: false },
+    { text: "What can I prep ahead?", icon: iconMap.timer, updatesRecipe: false },
     { text: "Give me a wine pairing", icon: iconMap.wine, updatesRecipe: false },
-    { text: "Swap an ingredient", icon: iconMap.refresh, updatesRecipe: true },
-    { text: "Simplify the method", icon: iconMap.zap, updatesRecipe: true },
-    { text: "Convert measurements", icon: iconMap.scale, updatesRecipe: true },
-    { text: "Make a sauce", icon: iconMap.droplets, updatesRecipe: false }
+    { text: "Swap an ingredient", icon: iconMap.refresh, updatesRecipe: true }
   ];
 
   // Get chat history
