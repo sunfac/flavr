@@ -126,6 +126,14 @@ export default function HeaderSection({
             Serves {currentServings}
           </Badge>
         </div>
+
+        {/* Customization Tips */}
+        <div className="mt-4 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+          <p className="text-xs text-slate-400 mb-2 font-medium">💬 Chat to customise:</p>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Change portions • Make healthier (under 700 kcal) • Remove gluten/dairy • Turn into quick lunch • Add more flavor • Suggest wine pairings • Prep ahead tips
+          </p>
+        </div>
       </div>
     </div>
   );
