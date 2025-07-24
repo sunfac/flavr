@@ -33,7 +33,7 @@ export default function GlobalNavigation({ isOpen, onClose, onAuthRequired }: Gl
     retry: false,
   });
 
-  const user = userData as any;
+  const user = (userData as any)?.user;
 
   const handleNavigation = (href: string, requiresAuth: boolean = false) => {
     if (requiresAuth && !user?.id) {

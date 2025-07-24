@@ -18,7 +18,7 @@ export default function QuotaCounter({ className = '', showUpgradeHint = false }
     retry: false,
   });
 
-  const user = userData as any;
+  const user = (userData as any)?.user;
 
   // Update remaining recipes count
   useEffect(() => {
@@ -38,18 +38,6 @@ export default function QuotaCounter({ className = '', showUpgradeHint = false }
   // Don't show counter for authenticated Flavr+ users
   if (user?.hasFlavrPlus) {
     return null;
-  }
-
-  // Show Flavr+ badge for authenticated users with unlimited access
-  if (user?.id && !user?.hasFlavrPlus) {
-    return (
-      <div className={`flex items-center gap-2 ${className}`}>
-        <Badge variant="outline" className="border-orange-400 text-orange-600 dark:text-orange-400">
-          <Crown className="w-3 h-3 mr-1" />
-          Unlimited Recipes
-        </Badge>
-      </div>
-    );
   }
 
   // Show counter for non-authenticated users
