@@ -38,6 +38,15 @@ if (!process.env.OPENAI_API_KEY) {
 }
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Initialize global recipe image cache
+declare global {
+  var recipeImageCache: Map<string, string> | undefined;
+}
+
+if (!global.recipeImageCache) {
+  global.recipeImageCache = new Map();
+}
+
 // Helper function to convert recipe text to UK English
 function convertRecipeToUKEnglish(recipe: any): any {
   if (!recipe) return recipe;
@@ -2059,16 +2068,22 @@ Return the data in this exact JSON format (all values are per serving):
   app.get("/api/recipe-image/:title", (req, res) => {
     try {
       const title = decodeURIComponent(req.params.title);
+      console.log('🖼️ Image request for title:', title);
       
       if (!global.recipeImageCache) {
-        return res.status(404).json({ error: "Image not found" });
+        console.log('🖼️ Global cache not initialized');
+        return res.status(404).json({ error: "Image cache not initialized" });
       }
+      
+      console.log('🖼️ Cache contents:', Array.from(global.recipeImageCache.keys()));
       
       const imageUrl = global.recipeImageCache.get(title);
       if (imageUrl) {
+        console.log('🖼️ Image found in cache:', imageUrl);
         res.json({ imageUrl });
       } else {
-        res.status(404).json({ error: "Image not found" });
+        console.log('🖼️ Image not found in cache for:', title);
+        res.status(404).json({ error: "Image not ready yet" });
       }
     } catch (error) {
       console.error("Error retrieving recipe image:", error);
