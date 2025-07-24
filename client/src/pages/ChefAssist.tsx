@@ -188,6 +188,26 @@ export default function ChefAssist() {
                   </Button>
                 </div>
 
+                {/* Continue button matching original quiz style */}
+                <Button
+                  onClick={handleGenerateRecipe}
+                  disabled={!prompt.trim() || isProcessing}
+                  className="w-full h-14 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium text-lg rounded-xl shadow-lg"
+                  size="lg"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Creating your recipe...
+                    </>
+                  ) : (
+                    <>
+                      Continue
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </>
+                  )}
+                </Button>
+
                 {/* Cycling suggestion chips - small list style */}
                 <div className="space-y-2">
                   <p className="text-sm text-slate-400 text-center">Example ideas to get you started:</p>
@@ -212,26 +232,6 @@ export default function ChefAssist() {
                     </div>
                   </AnimatePresence>
                 </div>
-
-                {/* Continue button matching original quiz style */}
-                <Button
-                  onClick={handleGenerateRecipe}
-                  disabled={!prompt.trim() || isProcessing}
-                  className="w-full h-14 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium text-lg rounded-xl shadow-lg"
-                  size="lg"
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Creating your recipe...
-                    </>
-                  ) : (
-                    <>
-                      Continue
-                      <ArrowRight className="w-5 h-5 ml-2" />
-                    </>
-                  )}
-                </Button>
 
 
               </div>
