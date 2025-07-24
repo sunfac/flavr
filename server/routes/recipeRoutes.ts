@@ -83,20 +83,7 @@ export function registerRecipeRoutes(app: Express) {
   });
 
   // Vision API - Analyze ingredients from image
-  app.post("/api/vision/analyze-ingredients", upload.single('image'), async (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ error: "No image file provided" });
-      }
-
-      const ingredients = await processFridgeImage(req.file.buffer, 'Detect ingredients in this image');
-      
-      res.json({ ingredients });
-    } catch (error: any) {
-      console.error('Vision API error:', error);
-      res.status(500).json({ error: error.message || "Failed to process image" });
-    }
-  });
+  app.post("/api/vision/analyze-ingredients", upload.single('image'), processFridgeImage);
 
   // Fridge2Fork recipe generation
   app.post("/api/generate-fridge-recipe", async (req, res) => {

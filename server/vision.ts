@@ -82,9 +82,18 @@ const initializeVisionClient = () => {
     // Use credentials from environment variable if available
     if (process.env.GOOGLE_CLOUD_CREDENTIALS) {
       try {
-        config.credentials = JSON.parse(process.env.GOOGLE_CLOUD_CREDENTIALS);
+        // Try to parse as JSON first
+        const credentials = process.env.GOOGLE_CLOUD_CREDENTIALS.trim();
+        if (credentials.startsWith('{')) {
+          config.credentials = JSON.parse(credentials);
+        } else {
+          // If it's not JSON, it might be a service account key or project ID
+          console.warn('GOOGLE_CLOUD_CREDENTIALS does not appear to be valid JSON format');
+          return null;
+        }
       } catch (parseError) {
         console.error('Failed to parse GOOGLE_CLOUD_CREDENTIALS:', parseError);
+        console.error('Credentials preview:', process.env.GOOGLE_CLOUD_CREDENTIALS?.substring(0, 50) + '...');
         return null;
       }
     } else if (process.env.GOOGLE_CLOUD_KEY_FILE) {
@@ -105,10 +114,22 @@ const initializeVisionClient = () => {
 // Process image and extract food ingredients
 export const processFridgeImage = async (req: Request, res: Response) => {
   try {
+    // Check if we have the required Google Cloud configuration
+    if (!process.env.GOOGLE_CLOUD_PROJECT_ID || !process.env.GOOGLE_CLOUD_CREDENTIALS) {
+      console.warn('Google Cloud Vision not configured - returning fallback response');
+      return res.json({
+        ingredients: ['Upload an image to detect ingredients automatically', 'Or type ingredients manually below'],
+        count: 2,
+        error: 'Vision service not configured'
+      });
+    }
+
     if (!visionClient && !initializeVisionClient()) {
-      return res.status(500).json({
-        error: 'Vision service not available',
-        ingredients: []
+      console.warn('Failed to initialize Vision client - returning fallback response');
+      return res.json({
+        ingredients: ['Unable to analyze image', 'Please type ingredients manually'],
+        count: 2,
+        error: 'Vision service initialization failed'
       });
     }
 
@@ -174,9 +195,11 @@ export const processFridgeImage = async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error('Error processing fridge image:', error);
-    res.status(500).json({
-      error: 'Failed to process image',
-      ingredients: []
+    // Return helpful fallback instead of error
+    res.json({
+      ingredients: ['Unable to analyze image automatically', 'Please type ingredients manually below'],
+      count: 2,
+      error: 'Image processing failed - manual input available'
     });
   }
 };
