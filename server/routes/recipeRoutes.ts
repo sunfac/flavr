@@ -717,7 +717,6 @@ CUISINE: ${recipeIdea.cuisine || "International"}
 AVAILABLE INGREDIENTS: ${ingredients.join(", ")}
 CONSTRAINTS:
 - Servings: ${servings}
-- Target cooking time: ${cookingTime} minutes
 - Budget per serving: £${(budget / servings).toFixed(2)}
 - Equipment: ${equipment.join(", ")}
 ${dietaryRestrictions.length > 0 ? `- Dietary restrictions: ${dietaryRestrictions.join(", ")}` : ""}
@@ -746,8 +745,8 @@ Return ONLY a valid JSON object with this exact structure (NO trailing commas):
   "description": "Enhanced description",
   "cuisine": "${recipeIdea.cuisine}",
   "difficulty": "${recipeIdea.difficulty}",
-  "prepTime": 15,
-  "cookTime": 25,
+  "prepTime": [Calculate realistic prep time based on recipe complexity],
+  "cookTime": [Calculate REALISTIC total cooking time in minutes based on all recipe steps including baking/braising/marinating],
   "servings": ${servings},
   "ingredients": [{"name": "ingredient name", "amount": "UK measurement"}],
   "instructions": [{"step": 1, "instruction": "detailed step"}],
@@ -1295,6 +1294,7 @@ REQUIREMENTS:
 - Add helpful cooking tips and techniques
 - Ensure the recipe matches the selected concept while fitting all preferences
 - Make ingredients accessible for the specified supermarket context
+- Calculate REALISTIC total cooking time based on all recipe steps (including marination, baking, braising etc.)
 
 Return valid JSON only:
 {
@@ -1302,7 +1302,7 @@ Return valid JSON only:
   "description": "Appetizing 2-3 sentence description of the finished dish",
   "cuisine": "${selectedRecipe.cuisine}",
   "servings": ${parseInt(portions) || 4},
-  "cookTime": "${selectedRecipe.estimatedTime}",
+  "cookTime": [Calculate REALISTIC total minutes based on all cooking steps],
   "difficulty": "${selectedRecipe.difficulty}",
   "ingredients": [
     "Specific quantity and ingredient (e.g., '2 tablespoons olive oil')",

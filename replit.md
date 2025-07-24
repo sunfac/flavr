@@ -354,6 +354,7 @@ Changelog:
 - January 24, 2025. Chat button positioning and input visibility fixes - repositioned chat button above mobile navigation (80px from bottom) to avoid overlapping "My Cookbook" tab, button now hides when chat is open, increased chat header padding to 20px on mobile to avoid header interference, enhanced CSS classes for proper flex layout ensuring input area remains visible, improved touch interaction support for mobile devices
 - January 24, 2025. Recipe page chat redesigned as slide-out drawer - changed from modal overlay to slide-out panel that works alongside recipe card, chat now slides in from right side without disrupting recipe visuals, simplified ChatBot component structure to work within drawer container, maintained full-height flex layout ensuring input field remains visible at bottom
 - January 24, 2025. Step timer display bug fixed - removed hours display format that was incorrectly showing 3 minutes as "0h 3m" which appeared as 3 hours, timers now consistently display as "Xmin" format regardless of duration to avoid confusion
+- January 24, 2025. Recipe total cook time calculation fixed - updated Shopping and Fridge2Fork modes to calculate realistic total cooking times based on actual recipe steps instead of using estimated times from recipe ideas, ensuring the recipe header chip matches the sum of individual step durations
 ```
 
 ## User Preferences
