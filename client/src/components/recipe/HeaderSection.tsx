@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, ChefHat, Clock } from 'lucide-react';
+import { Users, ChefHat, Clock, RotateCcw, Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useLocation } from 'wouter';
 import { animations, spacing } from '@/styles/tokens';
 
 interface HeaderSectionProps {
@@ -22,12 +24,18 @@ export default function HeaderSection({
   recipe, 
   currentServings
 }: HeaderSectionProps) {
+  const [location, navigate] = useLocation();
+  
   const fastFacts = useMemo(() => {
     return [
       { icon: Users, label: `Serves ${currentServings}`, value: 'servings' },
       { icon: Clock, label: `${recipe.cookTime} min`, value: 'timer' },
     ];
   }, [currentServings, recipe.cookTime]);
+
+  const handleStartAgain = () => {
+    navigate('/app');
+  };
 
   return (
     <div className="relative">
@@ -64,7 +72,27 @@ export default function HeaderSection({
               <h1 className="font-bold mb-1 sm:mb-2 text-shadow-lg text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight break-words hyphens-auto text-wrap-balance">
                 {recipe.title}
               </h1>
-
+            </div>
+            
+            {/* Action Buttons - Top Right */}
+            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2">
+              <Button
+                onClick={handleStartAgain}
+                size="sm"
+                variant="secondary"
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Start Again
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+              >
+                <Heart className="w-4 h-4 mr-2" />
+                Save
+              </Button>
             </div>
           </div>
         ) : (
@@ -73,10 +101,30 @@ export default function HeaderSection({
               <h1 className="font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight break-words mb-2">
                 {recipe.title}
               </h1>
-
               <div className="mt-4 text-xs text-white/60">
                 Image loading...
               </div>
+            </div>
+            
+            {/* Action Buttons - Top Right (for no image state) */}
+            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2">
+              <Button
+                onClick={handleStartAgain}
+                size="sm"
+                variant="secondary"
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Start Again
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+              >
+                <Heart className="w-4 h-4 mr-2" />
+                Save
+              </Button>
             </div>
           </div>
         )}

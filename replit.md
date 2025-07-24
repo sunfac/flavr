@@ -336,6 +336,8 @@ Changelog:
 - January 23, 2025. ChatBot overlay made completely opaque - removed transparency from backdrop (bg-black instead of bg-black/60) and chat panel (bg-slate-900 instead of bg-slate-900/95), enhanced pointer events handling to ensure complete blocking of background interactions, eliminated visual interference when closing chat
 - January 23, 2025. ChatBot header positioning fixed - repositioned chat panel to start 80px from top to avoid overlap with header/navigation, adjusted height calculations to use calc(100vh - 160px) for proper spacing above footer, eliminated chat header interference with global navigation
 - January 23, 2025. Recipe generation performance optimization complete - implemented async image generation and logging to eliminate 10-15 second DALL-E blocking, recipes now return immediately to user while images generate in background, maintained full prompt quality and GPT-4o model for recipe accuracy, reduced perceived load time from 30+ seconds to 10-15 seconds
+- January 23, 2025. Start Again and Save buttons added to recipe cards - positioned buttons in top-right corner of recipe header images with backdrop blur styling, Start Again button navigates to mode selection, Save button ready for cookbook functionality, enhanced user control over recipe workflow
+- January 23, 2025. Dynamic image loading system implemented - created background image cache and polling API at /api/recipe-image/:title, recipes display immediately while images generate asynchronously, frontend polls for completed images at 2s, 5s, and 10s intervals, eliminates waiting for image generation in recipe flow
 ```
 
 ## User Preferences

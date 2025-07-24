@@ -550,7 +550,11 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
       generateRecipeImage(recipe.title, recipe.cuisine).then(imageUrl => {
         if (imageUrl) {
           console.log('🎨 Background image generated for:', recipe.title);
-          // Could store in database here for future use
+          // Store the image URL in a simple memory cache for retrieval
+          if (!global.recipeImageCache) {
+            global.recipeImageCache = new Map();
+          }
+          global.recipeImageCache.set(recipe.title, imageUrl);
         }
       }).catch(err => console.error('Background image generation failed:', err));
 
@@ -1929,4 +1933,25 @@ Return the data in this exact JSON format (all values are per serving):
       });
     }
   });
+  // API endpoint to get recipe image by title
+  app.get("/api/recipe-image/:title", (req, res) => {
+    try {
+      const title = decodeURIComponent(req.params.title);
+      
+      if (!global.recipeImageCache) {
+        return res.status(404).json({ error: "Image not found" });
+      }
+      
+      const imageUrl = global.recipeImageCache.get(title);
+      if (imageUrl) {
+        res.json({ imageUrl });
+      } else {
+        res.status(404).json({ error: "Image not found" });
+      }
+    } catch (error) {
+      console.error("Error retrieving recipe image:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
 }
+

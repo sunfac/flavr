@@ -39,6 +39,35 @@ export default function Recipe() {
     return null;
   }
 
+  // Try to fetch image if not already present
+  const [recipeImage, setRecipeImage] = useState(recipeStore.meta.image || '');
+  
+  useEffect(() => {
+    // If no image is present, try to fetch one based on recipe title
+    if (!recipeImage && recipeStore.meta.title) {
+      const pollForImage = async () => {
+        try {
+          // Simple polling mechanism - in production you'd use WebSockets or server-sent events
+          const response = await fetch(`/api/recipe-image/${encodeURIComponent(recipeStore.meta.title)}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.imageUrl) {
+              setRecipeImage(data.imageUrl);
+            }
+          }
+        } catch (error) {
+          console.log('Image polling failed:', error);
+        }
+      };
+      
+      // Poll a few times with increasing intervals
+      const timeouts = [2000, 5000, 10000]; // 2s, 5s, 10s
+      timeouts.forEach((delay, index) => {
+        setTimeout(pollForImage, delay);
+      });
+    }
+  }, [recipeStore.meta.title, recipeImage]);
+
   // Create activeRecipe object from store data for EnhancedRecipeCard
   const activeRecipe = {
     id: recipeStore.id || '1',
@@ -49,7 +78,7 @@ export default function Recipe() {
     cookTime: recipeStore.meta.cookTime,
     prepTime: 15, // Default prep time
     servings: recipeStore.servings,
-    image: recipeStore.meta.image || '',
+    image: recipeImage || recipeStore.meta.image || recipeStore.meta.imageUrl || '',
     ingredients: recipeStore.ingredients.map(ing => ing.text || ''), // Convert to string array
     instructions: recipeStore.steps.map(step => step.description || ''), // Convert to string array
     tips: "Try garnishing with fresh herbs for extra flavor!" // Default tip
