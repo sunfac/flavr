@@ -103,6 +103,7 @@ async function getAIStepTiming(instruction: string): Promise<number> {
     }
     
     const data = await response.json();
+    console.log(`🤖 AI timing response for "${instruction}": ${data.duration} minutes`);
     return data.duration || 5; // Fallback to 5 minutes
   } catch (error) {
     console.error('Error getting AI step timing:', error);
@@ -190,6 +191,7 @@ function StepCard({
       setIsLoadingDuration(true);
       try {
         const duration = await extractDuration(step.description);
+        console.log(`⏱️ Step ${stepNumber}: "${step.description}" → ${duration} minutes`);
         setStepDuration(duration);
       } catch (error) {
         console.error('Error getting step duration:', error);
@@ -369,7 +371,7 @@ function StepCard({
                   : "Done!"
                 : stepDuration >= 60 
                   ? `${Math.floor(stepDuration / 60)}h ${stepDuration % 60}m`
-                  : `${stepDuration} min`
+                  : `${stepDuration}min`
               }
               {timeRemaining === null && (
                 <Play className="w-3 h-3 ml-1 opacity-60" />

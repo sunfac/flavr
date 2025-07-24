@@ -1678,7 +1678,7 @@ Response (number in minutes only):`;
         ? 5 // Default to 5 minutes for invalid responses
         : duration;
 
-      console.log(`🕒 AI Step Timing: "${instruction}" → ${finalDuration} minutes`);
+      console.log(`🕒 AI Step Timing: "${instruction}" → AI returned: ${content} → Final: ${finalDuration} minutes`);
 
       res.json({ duration: finalDuration });
     } catch (error) {
