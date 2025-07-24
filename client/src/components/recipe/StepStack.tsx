@@ -1,7 +1,8 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
-import { Clock } from 'lucide-react';
+import { Clock, Play, Pause, RotateCcw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface Step {
   id: string;
@@ -134,6 +135,73 @@ function StepCard({
 }) {
   // Calculate step duration from instruction text
   const stepDuration = step.duration || extractDuration(step.description);
+  
+  // Timer state
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
+
+  // Start countdown timer
+  const startTimer = () => {
+    if (!stepDuration) return;
+    
+    if (timeRemaining === null) {
+      setTimeRemaining(stepDuration * 60); // Convert minutes to seconds
+    }
+    
+    setIsTimerRunning(true);
+    
+    const interval = setInterval(() => {
+      setTimeRemaining(prev => {
+        if (prev === null || prev <= 1) {
+          setIsTimerRunning(false);
+          if (prev !== null) {
+            // Timer completed - could add notification here
+            console.log(`Step ${stepNumber} timer completed!`);
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    setTimerInterval(interval);
+  };
+
+  // Pause timer
+  const pauseTimer = () => {
+    setIsTimerRunning(false);
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      setTimerInterval(null);
+    }
+  };
+
+  // Reset timer
+  const resetTimer = () => {
+    setIsTimerRunning(false);
+    setTimeRemaining(null);
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      setTimerInterval(null);
+    }
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+    };
+  }, [timerInterval]);
+
+  // Format time display
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <motion.div
@@ -150,15 +218,69 @@ function StepCard({
           Step {stepNumber} of {totalSteps}
         </Badge>
         
-        {/* Step Duration */}
+        {/* Step Duration with Timer Controls */}
         {stepDuration && (
-          <Badge variant="secondary" className="flex items-center gap-1 bg-slate-700/50 text-slate-300 border-slate-600">
-            <Clock className="w-3 h-3" />
-            {stepDuration >= 60 
-              ? `${Math.floor(stepDuration / 60)}h ${stepDuration % 60}m`
-              : `${stepDuration} min`
-            }
-          </Badge>
+          <div className="flex items-center gap-2">
+            {/* Timer Display */}
+            <Badge 
+              variant="secondary" 
+              className={`flex items-center gap-1 transition-colors ${
+                timeRemaining !== null && timeRemaining > 0
+                  ? isTimerRunning 
+                    ? 'bg-orange-500/20 text-orange-300 border-orange-400' 
+                    : 'bg-yellow-500/20 text-yellow-300 border-yellow-400'
+                  : timeRemaining === 0
+                    ? 'bg-green-500/20 text-green-300 border-green-400'
+                    : 'bg-slate-700/50 text-slate-300 border-slate-600'
+              }`}
+            >
+              <Clock className="w-3 h-3" />
+              {timeRemaining !== null 
+                ? timeRemaining > 0 
+                  ? formatTime(timeRemaining)
+                  : "Done!"
+                : stepDuration >= 60 
+                  ? `${Math.floor(stepDuration / 60)}h ${stepDuration % 60}m`
+                  : `${stepDuration} min`
+              }
+            </Badge>
+            
+            {/* Timer Controls */}
+            <div className="flex items-center gap-1">
+              {timeRemaining === null ? (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 w-6 p-0 hover:bg-orange-500/20"
+                  onClick={startTimer}
+                  title="Start timer"
+                >
+                  <Play className="w-3 h-3" />
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 w-6 p-0 hover:bg-orange-500/20"
+                    onClick={isTimerRunning ? pauseTimer : startTimer}
+                    title={isTimerRunning ? "Pause timer" : "Resume timer"}
+                  >
+                    {isTimerRunning ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 w-6 p-0 hover:bg-slate-500/20"
+                    onClick={resetTimer}
+                    title="Reset timer"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
