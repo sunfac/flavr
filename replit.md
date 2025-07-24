@@ -355,7 +355,7 @@ Changelog:
 - January 24, 2025. Recipe page chat redesigned as slide-out drawer - changed from modal overlay to slide-out panel that works alongside recipe card, chat now slides in from right side without disrupting recipe visuals, simplified ChatBot component structure to work within drawer container, maintained full-height flex layout ensuring input field remains visible at bottom
 - January 24, 2025. Step timer display bug fixed - removed hours display format that was incorrectly showing 3 minutes as "0h 3m" which appeared as 3 hours, timers now consistently display as "Xmin" format regardless of duration to avoid confusion
 - January 24, 2025. Recipe total cook time calculation fixed - updated Shopping and Fridge2Fork modes to calculate realistic total cooking times based on actual recipe steps instead of using estimated times from recipe ideas, ensuring the recipe header chip matches the sum of individual step durations
-- January 24, 2025. Recipe image generation prompt enhanced - updated DALL-E 3 prompt to create realistic home-cooked presentations instead of overly styled restaurant photos, images now show complete dish as it would actually appear when served, with natural plating on regular dinnerware, authentic textures and colors, proper portion sizes, and all components mentioned in the recipe title
+- January 24, 2025. Recipe image generation prompt enhanced for accomplished chefs - updated DALL-E 3 prompt to show dishes as expertly plated by professional chefs, featuring restaurant-quality presentation with professional plating techniques, excellent knife skills, thoughtful garnishing, and attention to color/texture/composition while remaining true to the actual dish described
 ```
 
 ## User Preferences
