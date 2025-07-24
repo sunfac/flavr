@@ -345,14 +345,6 @@ export default function DigitalCookbook() {
 
                         {/* Recipe Metadata */}
                         <div className="flex flex-wrap gap-2">
-                          <Badge className={getModeColor(recipe.mode)}>
-                            {recipe.mode}
-                          </Badge>
-                          {recipe.difficulty && (
-                            <Badge className={getDifficultyColor(recipe.difficulty)}>
-                              {recipe.difficulty}
-                            </Badge>
-                          )}
                           {recipe.cuisine && (
                             <Badge variant="outline" className="text-white border-white/20">
                               {recipe.cuisine}
@@ -362,15 +354,9 @@ export default function DigitalCookbook() {
 
                         {/* Recipe Stats */}
                         <div className="flex justify-between items-center text-sm text-gray-400">
-                          <div className="flex items-center space-x-4">
-                            <div className="flex items-center">
-                              <iconMap.clock className="w-4 h-4 mr-1" />
-                              {recipe.cookTime}min
-                            </div>
-                            <div className="flex items-center">
-                              <iconMap.users className="w-4 h-4 mr-1" />
-                              {recipe.servings} servings
-                            </div>
+                          <div className="flex items-center">
+                            <iconMap.users className="w-4 h-4 mr-1" />
+                            {recipe.servings} servings
                           </div>
                           <div className="text-xs">
                             {formatDate(recipe.createdAt)}
