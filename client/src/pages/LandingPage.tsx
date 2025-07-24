@@ -204,7 +204,7 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="text-xl md:text-2xl text-slate-300 font-light max-w-3xl mx-auto leading-relaxed"
           >
-            AI recipes personalized to your mood, time, and skill level.
+            Transform your ingredients into incredible dishes with AI that understands your kitchen and cravings.
           </motion.p>
         </motion.div>
 
@@ -257,10 +257,10 @@ export default function LandingPage() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight"
             >
-              Your AI Chef
+              Two Simple Ways
               <br />
               <span className="bg-gradient-to-r from-orange-400 via-amber-400 to-orange-300 bg-clip-text text-transparent">
-                Understands You
+                To Create Magic
               </span>
             </motion.h2>
             <motion.p 
@@ -269,29 +269,29 @@ export default function LandingPage() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-xl md:text-2xl text-slate-300 font-light max-w-3xl mx-auto leading-relaxed"
             >
-              Meet your intelligent culinary companion that reads your mood, adapts to your schedule, and grows with your skills—creating restaurant-quality experiences in your own kitchen.
+              Whether you're staring at your fridge or dreaming of the perfect dish, Flavr's AI transforms your moment into a personalized culinary experience.
             </motion.p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             {[
               {
+                icon: iconMap.refrigerator,
+                title: "Fridge2Fork Magic",
+                description: "Snap a photo of your ingredients or simply list what you have. Our AI instantly creates personalized recipes that turn your available ingredients into restaurant-quality dishes.",
+                gradient: "from-green-500/20 to-emerald-500/20"
+              },
+              {
                 icon: iconMap.chefHat,
-                title: "Intuitive Recipe Creation",
-                description: "Your AI chef reads your cravings, dietary needs, and skill level—then crafts recipes that feel like they were made just for you. No more guesswork, just pure culinary magic.",
-                gradient: "from-orange-500/20 to-red-500/20"
+                title: "Chef Assist Inspiration",
+                description: "Tell us what you're craving or let our AI inspire you with creative suggestions. From comfort food to gourmet masterpieces, your perfect dish is just one conversation away.",
+                gradient: "from-orange-500/20 to-amber-500/20"
               },
               {
                 icon: iconMap.sparkles,
-                title: "Learns Your Taste",
-                description: "Every dish you make teaches your AI chef more about your preferences. Watch as it evolves to suggest flavor combinations that surprise and delight your palate.",
-                gradient: "from-amber-500/20 to-orange-500/20"
-              },
-              {
-                icon: iconMap.timer,
-                title: "Adapts to Your Life",
-                description: "Whether you're rushing through a 15-minute dinner or savoring a weekend cooking session, your AI chef crafts experiences that fit perfectly into your rhythm.",
-                gradient: "from-yellow-500/20 to-amber-500/20"
+                title: "Instant Customization",
+                description: "Every recipe adapts in real-time. Change portions, swap ingredients, adjust difficulty, or modify cooking methods—your AI chef refines each dish to match your exact preferences.",
+                gradient: "from-purple-500/20 to-pink-500/20"
               }
             ].map((feature, index) => (
               <motion.div
@@ -353,10 +353,10 @@ export default function LandingPage() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight"
             >
-              Feel the
+              Refine Every
               <br />
               <span className="bg-gradient-to-r from-orange-400 via-amber-400 to-orange-300 bg-clip-text text-transparent">
-                Connection
+                Detail Live
               </span>
             </motion.h2>
             <motion.p 
@@ -365,7 +365,7 @@ export default function LandingPage() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-xl md:text-2xl text-slate-300 font-light max-w-3xl mx-auto leading-relaxed"
             >
-              Your AI chef doesn't just give you recipes—it engages with you, understanding your culinary journey and guiding you toward dishes that spark joy and confidence.
+              Once your recipe is created, chat with Zest, your AI cooking assistant. Adjust portions, modify ingredients, change cooking methods, or add wine pairings—all in real-time conversation.
             </motion.p>
           </motion.div>
 
