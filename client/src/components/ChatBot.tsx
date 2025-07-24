@@ -517,12 +517,13 @@ export default function ChatBot({
           
           {/* Chat Panel - Right Side Panel */}
           <div 
-            className="absolute inset-y-0 right-0 w-full sm:w-96 bg-slate-900 border-l border-orange-500/30 shadow-2xl flex flex-col transition-all duration-500"
+            className="absolute right-0 w-full sm:w-96 bg-slate-900 border-l border-orange-500/30 shadow-2xl flex flex-col transition-all duration-500"
             style={{
-              height: '100dvh',
-              maxHeight: '100vh',
+              top: '80px', // Start below header/navigation
+              bottom: '80px', // End above footer
+              height: 'calc(100vh - 160px)', // Adjust height for top/bottom spacing
+              maxHeight: 'calc(100vh - 160px)',
               overflow: 'hidden',
-              paddingBottom: '80px', // Account for footer height
               pointerEvents: 'all'
             }}
             onClick={(e) => e.stopPropagation()} // Prevent backdrop clicks from closing when clicking inside panel
