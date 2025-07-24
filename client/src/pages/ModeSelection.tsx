@@ -48,7 +48,7 @@ export default function ModeSelection() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-8 md:mb-16 pt-8 md:pt-12"
+          className="text-center mb-8 md:mb-16 pt-12 md:pt-16"
         >
           <h1 className="text-3xl md:text-5xl font-bold mb-3 md:mb-4 bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
             What's Cooking?
