@@ -1729,39 +1729,33 @@ Important: Return each instruction as a separate array element, do not combine m
 
       console.log('🔬 Analyzing nutrition for:', { title, ingredientCount: ingredients.length, servings });
 
-      const prompt = `Analyze the nutritional content of this recipe and provide detailed nutritional information.
+      const prompt = `Analyze the nutritional content of this recipe and provide detailed nutritional information per serving.
 
 Recipe: ${title}
 Ingredients: ${ingredients.join(", ")}
 Servings: ${servings}
 
-Please calculate and return the following nutritional information for the ENTIRE recipe and per serving:
+Please calculate and return the following nutritional information PER SERVING:
 
-1. Total calories for whole recipe
-2. Protein (grams)
-3. Carbohydrates (grams) 
-4. Total fat (grams)
-5. Fiber (grams)
-6. Sugar (grams)
-7. Sodium (milligrams)
+1. Calories per serving
+2. Protein (grams) per serving
+3. Carbohydrates (grams) per serving
+4. Total fat (grams) per serving
+5. Fiber (grams) per serving
+6. Sugar (grams) per serving
+7. Sodium (milligrams) per serving
 
 Consider typical serving sizes and nutritional values for each ingredient. Be realistic and accurate.
 
-Return the data in this exact JSON format:
+Return the data in this exact JSON format (all values are per serving):
 {
-  "calories": [total_recipe_calories],
-  "protein": [total_protein_grams],
-  "carbs": [total_carbs_grams],
-  "fat": [total_fat_grams],
-  "fiber": [total_fiber_grams],
-  "sugar": [total_sugar_grams],
-  "sodium": [total_sodium_milligrams],
-  "perServing": {
-    "calories": [calories_per_serving],
-    "protein": [protein_per_serving],
-    "carbs": [carbs_per_serving],
-    "fat": [fat_per_serving]
-  }
+  "calories": [calories_per_serving],
+  "protein": [protein_per_serving],
+  "carbs": [carbs_per_serving],
+  "fat": [fat_per_serving],
+  "fiber": [fiber_per_serving],
+  "sugar": [sugar_per_serving],
+  "sodium": [sodium_per_serving]
 }`;
 
       const completion = await openai.chat.completions.create({
@@ -1787,7 +1781,7 @@ Return the data in this exact JSON format:
       }
 
       // Validate the nutrition data structure
-      if (!nutritionData.calories || !nutritionData.perServing) {
+      if (!nutritionData.calories || !nutritionData.protein || !nutritionData.carbs || !nutritionData.fat) {
         console.error('Invalid nutrition data structure:', nutritionData);
         return res.status(500).json({ error: "Invalid nutritional data received" });
       }
@@ -1795,7 +1789,7 @@ Return the data in this exact JSON format:
       console.log('✅ Nutrition analysis complete:', nutritionData);
 
       // Log the nutrition analysis for developer analytics
-      console.log('🔍 API LOG - nutrition_analysis: ✅ | Recipe:', title, '| Ingredients:', ingredients.length, '| Calories per serving:', nutritionData.perServing.calories);
+      console.log('🔍 API LOG - nutrition_analysis: ✅ | Recipe:', title, '| Ingredients:', ingredients.length, '| Calories per serving:', nutritionData.calories);
 
       res.json(nutritionData);
 

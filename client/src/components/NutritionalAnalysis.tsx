@@ -147,13 +147,13 @@ export default function NutritionalAnalysis({ recipe }: NutritionalAnalysisProps
                       <div className="grid grid-cols-2 gap-2">
                         <div className="text-center p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
                           <div className="text-2xl font-bold text-orange-400">
-                            {nutritionData.perServing.calories}
+                            {nutritionData.calories}
                           </div>
                           <div className="text-xs text-slate-400">calories</div>
                         </div>
                         <div className="text-center p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
                           <div className="text-2xl font-bold text-blue-400">
-                            {nutritionData.perServing.protein.toFixed(1)}g
+                            {nutritionData.protein}g
                           </div>
                           <div className="text-xs text-slate-400">protein</div>
                         </div>
@@ -164,12 +164,12 @@ export default function NutritionalAnalysis({ recipe }: NutritionalAnalysisProps
                     <div>
                       <h4 className="text-slate-300 font-medium mb-3 flex items-center gap-2">
                         <Heart className="w-4 h-4" />
-                        Nutritional Breakdown
+                        Nutritional Breakdown (Per Serving)
                       </h4>
                       <div className="space-y-2">
                         <NutritionItem
                           icon={Zap}
-                          label="Total Calories"
+                          label="Calories"
                           value={nutritionData.calories}
                           unit=""
                           color="text-orange-400"
@@ -190,7 +190,7 @@ export default function NutritionalAnalysis({ recipe }: NutritionalAnalysisProps
                         />
                         <NutritionItem
                           icon={Heart}
-                          label="Total Fat"
+                          label="Fat"
                           value={nutritionData.fat}
                           unit="g"
                           color="text-purple-400"
