@@ -323,7 +323,7 @@ Changelog:
 - January 23, 2025. AI-powered step timing system implemented - replaced hardcoded cooking times with GPT-3.5 powered timing analysis that considers cooking method, ingredients, food safety, and contextual clues, providing accurate step-specific timers via `/api/get-step-timing` endpoint, ensuring realistic timing based on actual cooking requirements rather than predetermined assumptions
 - January 23, 2025. Timer conversion bug fixes in progress - debugging critical issue where 12-minute cooking steps display as 12-hour timers, enhanced pattern matching for time ranges like "10-12 minutes", added comprehensive logging to track conversion errors at each step of the timing calculation process
 - January 23, 2025. Preheating steps excluded from timers - added "preheat", "heat", and "warm" to prep keywords so oven preheating and oil heating steps don't display unnecessary timers, since ovens have built-in indicators and heating is typically done by visual cues
-- January 23, 2025. Recipe variation system implemented - added randomization variables to both Chef Assist and Fridge2Fork generation (cooking method, seasoning style, flavor profile, texture style, random seeds) to ensure natural recipe diversity even when given the same concept, increased AI temperature to 0.8-0.9 for more creative outputs, fixed timer null checks to prevent UI crashes
+- January 23, 2025. Recipe variation system implemented - added random seeds to both Chef Assist and Fridge2Fork generation to ensure natural recipe diversity even when given the same concept, increased AI temperature to 0.8-0.9 for more creative outputs, fixed timer null checks to prevent UI crashes
 ```
 
 ## User Preferences

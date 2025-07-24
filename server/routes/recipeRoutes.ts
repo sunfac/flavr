@@ -129,11 +129,8 @@ export function registerRecipeRoutes(app: Express) {
         return res.status(400).json({ error: "No ingredients provided" });
       }
 
-      // Add randomization variables for recipe variation
-      const cookingApproach = ['quick sauté', 'roasted medley', 'one-pot comfort', 'fresh assembly', 'grilled combination'][Math.floor(Math.random() * 5)];
-      const flavorProfile = ['bold and spicy', 'mild and comforting', 'fresh and zesty', 'rich and savory', 'aromatic herbs'][Math.floor(Math.random() * 5)];
-      const textureStyle = ['crispy textures', 'soft and tender', 'mixed textures', 'rustic chunky', 'smooth creamy'][Math.floor(Math.random() * 5)];
-      const randomVariation = Math.floor(Math.random() * 100); // For AI diversity
+      // Add random seed for recipe variation
+      const randomSeed = Math.floor(Math.random() * 1000); // For AI diversity
 
       // Group ingredients by cuisine compatibility
       const groupedIngredients = groupIngredientsByCuisine(ingredients);
@@ -156,11 +153,7 @@ export function registerRecipeRoutes(app: Express) {
 
       const prompt = `You are a creative chef specializing in making delicious COMPLETE MEALS from available ingredients.
 
-VARIATION CONSTRAINTS (apply these randomly to create diversity):
-- Cooking approach: ${cookingApproach}
-- Flavor profile: ${flavorProfile}  
-- Texture style: ${textureStyle}
-- Variation seed: ${randomVariation} (use this to vary recipe concepts and ingredients)
+VARIATION SEED: ${randomSeed} (use this number to vary your recipe concepts, ingredient combinations, and cooking approaches to create diverse outputs)
 
 IMPORTANT: Always create COMPLETE DISHES that include:
 - Main component using the available ingredients
@@ -427,22 +420,13 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
         return res.status(400).json({ error: "No prompt provided" });
       }
 
-      // Add randomization variables for recipe variation
-      const cookingMethod = ['roasted', 'pan-seared', 'grilled', 'braised', 'slow-cooked', 'steamed', 'stir-fried'][Math.floor(Math.random() * 7)];
-      const seasoningStyle = ['herb-crusted', 'spice-rubbed', 'citrus-marinated', 'wine-braised', 'garlic-infused', 'honey-glazed'][Math.floor(Math.random() * 6)];
-      const temperatureNotes = ['piping hot', 'warm', 'at room temperature', 'slightly chilled'][Math.floor(Math.random() * 4)];
-      const platingSuggestion = ['rustic family-style', 'elegant plated', 'casual sharing', 'individual portions'][Math.floor(Math.random() * 4)];
+      // Add random seed for recipe variation
       const randomSeed = Math.floor(Math.random() * 1000); // For AI diversity
 
       // Generate complete recipe directly
       const systemPrompt = `You are an expert chef. Create a complete dish with suitable accompaniments based on the user's request.
 
-VARIATION CONSTRAINTS (apply these randomly to create diversity):
-- Primary cooking method: ${cookingMethod}
-- Seasoning approach: ${seasoningStyle}  
-- Serving temperature: ${temperatureNotes}
-- Plating style: ${platingSuggestion}
-- Random seed: ${randomSeed} (use this to vary ingredient choices and techniques)
+VARIATION SEED: ${randomSeed} (use this number to vary your ingredient choices, cooking techniques, and recipe approach to create diverse outputs even for similar requests)
 
 IMPORTANT: Always create COMPLETE DISHES that include:
 - Main component (protein, vegetable, or grain-based centerpiece)
