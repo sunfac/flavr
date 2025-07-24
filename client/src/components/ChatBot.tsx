@@ -496,20 +496,22 @@ export default function ChatBot({
       {/* Chat Modal Container - Portal-style with maximum z-index */}
       {actualIsOpen && (
         <div className="fixed inset-0 z-[999999] pointer-events-auto">
-          {/* Full Screen Blocking Backdrop */}
+          {/* Full Screen Blocking Backdrop - Completely Opaque */}
           <div 
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black backdrop-blur-md"
             onClick={() => onClose && onClose()}
+            style={{ pointerEvents: 'all' }}
           />
           
           {/* Chat Panel - Right Side Panel */}
           <div 
-            className="absolute inset-y-0 right-0 w-full sm:w-96 bg-slate-900/95 backdrop-blur-md border-l border-orange-500/30 shadow-2xl flex flex-col transition-all duration-500"
+            className="absolute inset-y-0 right-0 w-full sm:w-96 bg-slate-900 border-l border-orange-500/30 shadow-2xl flex flex-col transition-all duration-500"
             style={{
               height: '100dvh',
               maxHeight: '100vh',
               overflow: 'hidden',
-              paddingBottom: '80px' // Account for footer height
+              paddingBottom: '80px', // Account for footer height
+              pointerEvents: 'all'
             }}
             onClick={(e) => e.stopPropagation()} // Prevent backdrop clicks from closing when clicking inside panel
           >
