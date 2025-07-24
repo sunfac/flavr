@@ -80,7 +80,7 @@ async function shouldStepHaveTimer(instruction: string): Promise<boolean> {
   const text = instruction.toLowerCase();
   
   // Quick checks for obvious prep work or visual cues (no AI needed)
-  const prepKeywords = ['chop', 'slice', 'dice', 'mince', 'mix', 'stir', 'combine', 'whisk', 'season', 'sprinkle', 'garnish', 'add', 'place', 'arrange', 'serve'];
+  const prepKeywords = ['chop', 'slice', 'dice', 'mince', 'mix', 'stir', 'combine', 'whisk', 'season', 'sprinkle', 'garnish', 'add', 'place', 'arrange', 'serve', 'preheat', 'heat', 'warm'];
   const visualCueKeywords = ['until golden', 'until crispy', 'until tender', 'until fragrant', 'until soft', 'until translucent'];
   
   if (prepKeywords.some(keyword => text.includes(keyword))) return false;
