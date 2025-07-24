@@ -166,7 +166,7 @@ async function incrementUsageCounter(req: any): Promise<void> {
     if (userId) {
       const user = await storage.getUser(userId);
       if (user && !user.hasFlavrPlus) {
-        await storage.updateUserUsage(userId, (user.recipesThisMonth || 0) + 1);
+        await storage.updateUserUsage(userId, (user.recipesThisMonth || 0) + 1, user.imagesThisMonth || 0);
       }
     } else {
       const pseudoUser = await storage.getPseudoUser(pseudoId);
