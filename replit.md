@@ -320,6 +320,7 @@ Changelog:
 - January 23, 2025. Timer system refined for cooking-only steps - redesigned timer logic to only show timers for actual cooking processes (oven cooking, protein cooking, liquid processes, marinating, time-dependent processes), eliminated timers for prep work (chopping, mixing, seasoning), visual cue steps (until golden/tender), and assembly steps, creating cleaner practical cooking experience
 - January 23, 2025. Pasta cooking time accuracy fixed - enhanced timer system with realistic pasta cooking times (10 minutes for spaghetti/pasta instead of 5 minutes), added specific timing for rice (18 minutes) and quinoa (15 minutes), ensuring step timers match actual packet instructions and cooking requirements
 - January 23, 2025. Enhanced chat customization suggestions in ingredient panel - updated chat guide box with more specific and actionable examples (spice level, side dishes, cooking method, ingredient swaps) and added "and more" to indicate additional possibilities, improving feature discoverability
+- January 23, 2025. AI-powered step timing system implemented - replaced hardcoded cooking times with GPT-3.5 powered timing analysis that considers cooking method, ingredients, food safety, and contextual clues, providing accurate step-specific timers via `/api/get-step-timing` endpoint, ensuring realistic timing based on actual cooking requirements rather than predetermined assumptions
 ```
 
 ## User Preferences

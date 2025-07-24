@@ -19,11 +19,11 @@ interface StepStackProps {
   className?: string;
 }
 
-// Extract duration from instruction text
-function extractDuration(instruction: string): number | undefined {
+// AI-powered duration extraction
+async function extractDuration(instruction: string): Promise<number | undefined> {
   const text = instruction.toLowerCase();
   
-  // Enhanced time patterns with better regex
+  // First check for explicit time patterns in the text
   const patterns = [
     /(\d+)\s*(?:to\s+)?(\d+)?\s*minutes?/,
     /(\d+)\s*(?:to\s+)?(\d+)?\s*mins?/,
@@ -57,48 +57,53 @@ function extractDuration(instruction: string): number | undefined {
     }
   }
   
-  // Only show timers for time-dependent cooking processes, not prep work
+  // If no explicit timing, check if this step needs a timer via AI
+  if (await shouldStepHaveTimer(instruction)) {
+    return await getAIStepTiming(instruction);
+  }
   
-  // COOKING PROCESSES THAT NEED TIMERS:
+  return undefined; // No timer needed
+}
+
+// Determine if a step should have a timer (cooking processes only)
+async function shouldStepHaveTimer(instruction: string): Promise<boolean> {
+  const text = instruction.toLowerCase();
   
-  // Oven cooking - needs precise timing
-  if (text.includes('bake') || text.includes('roast')) return 25;
-  if (text.includes('preheat')) return 10;
+  // Quick checks for obvious prep work or visual cues (no AI needed)
+  const prepKeywords = ['chop', 'slice', 'dice', 'mince', 'mix', 'stir', 'combine', 'whisk', 'season', 'sprinkle', 'garnish', 'add', 'place', 'arrange', 'serve'];
+  const visualCueKeywords = ['until golden', 'until crispy', 'until tender', 'until fragrant', 'until soft', 'until translucent'];
   
-  // Protein cooking - critical timing for food safety and texture
-  if (text.includes('sear') || text.includes('brown')) return 4;
-  if (text.includes('sauté') && (text.includes('chicken') || text.includes('beef') || text.includes('pork') || text.includes('fish'))) return 6;
-  if (text.includes('fry') && (text.includes('chicken') || text.includes('beef') || text.includes('pork') || text.includes('fish'))) return 6;
-  if (text.includes('grill')) return 10;
-  if (text.includes('steam') && (text.includes('fish') || text.includes('vegetables'))) return 8;
+  if (prepKeywords.some(keyword => text.includes(keyword))) return false;
+  if (visualCueKeywords.some(keyword => text.includes(keyword))) return false;
   
-  // Pasta and grain cooking - realistic cooking times
-  if (text.includes('cook') && (text.includes('pasta') || text.includes('spaghetti') || text.includes('penne') || text.includes('fettuccine'))) return 10;
-  if (text.includes('cook') && text.includes('rice')) return 18;
-  if (text.includes('cook') && text.includes('quinoa')) return 15;
+  // Quick checks for obvious cooking processes that need timers
+  const cookingKeywords = ['bake', 'roast', 'boil', 'simmer', 'sear', 'fry', 'grill', 'steam', 'braise', 'marinate', 'chill', 'rest', 'rise', 'proof'];
+  if (cookingKeywords.some(keyword => text.includes(keyword))) return true;
   
-  // Liquid cooking - needs monitoring to prevent overcooking
-  if (text.includes('boil') && !text.includes('bring')) return 8; // Active boiling
-  if (text.includes('simmer')) return 15;
-  if (text.includes('reduce') || text.includes('reduction')) return 12;
-  
-  // Time-dependent processes
-  if (text.includes('marinate')) return 30;
-  if (text.includes('chill') || text.includes('refrigerate')) return 15;
-  if (text.includes('rest') && (text.includes('meat') || text.includes('dough'))) return 10;
-  if (text.includes('rise') || text.includes('proof')) return 60;
-  if (text.includes('braise') || text.includes('stew')) return 45;
-  
-  // Process completion cues that don't need visual checking
-  if (text.includes('bring to a boil') || text.includes('bring to the boil')) return 5;
-  
-  // NO TIMERS FOR:
-  // - Prep work (chop, slice, dice, mix, stir, combine, whisk, season, sprinkle)
-  // - Visual cue steps (until golden, until crispy, until tender, until fragrant)
-  // - Assembly steps (add, place, arrange, top, serve)
-  // - Quick actions (heat oil, warm, add ingredients)
-  
-  return undefined; // No timer - either prep work or has visual completion cues
+  return false; // Default to no timer for ambiguous cases
+}
+
+// Get AI-powered timing for cooking steps
+async function getAIStepTiming(instruction: string): Promise<number> {
+  try {
+    const response = await fetch('/api/get-step-timing', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ instruction }),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to get AI timing');
+    }
+    
+    const data = await response.json();
+    return data.duration || 5; // Fallback to 5 minutes
+  } catch (error) {
+    console.error('Error getting AI step timing:', error);
+    return 5; // Fallback duration
+  }
 }
 
 
@@ -166,8 +171,32 @@ function StepCard({
   totalSteps: number;
   isActive: boolean;
 }) {
-  // Calculate step duration from instruction text
-  const stepDuration = step.duration || extractDuration(step.description);
+  // State for AI-powered duration
+  const [stepDuration, setStepDuration] = useState<number | undefined>(step.duration);
+  const [isLoadingDuration, setIsLoadingDuration] = useState(false);
+
+  // Calculate step duration from instruction text (async)
+  useEffect(() => {
+    if (step.duration) {
+      setStepDuration(step.duration);
+      return;
+    }
+
+    const getDuration = async () => {
+      setIsLoadingDuration(true);
+      try {
+        const duration = await extractDuration(step.description);
+        setStepDuration(duration);
+      } catch (error) {
+        console.error('Error getting step duration:', error);
+        setStepDuration(undefined);
+      } finally {
+        setIsLoadingDuration(false);
+      }
+    };
+
+    getDuration();
+  }, [step.description, step.duration]);
   
   // Timer state
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);

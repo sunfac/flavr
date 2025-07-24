@@ -1625,6 +1625,66 @@ Return valid JSON only:
     res.json({ key: geminiKey });
   });
 
+  // AI-powered step timing endpoint
+  app.post("/api/get-step-timing", async (req, res) => {
+    try {
+      const { instruction } = req.body;
+
+      if (!instruction) {
+        return res.status(400).json({ error: "Instruction is required" });
+      }
+
+      const prompt = `As a professional chef and cooking instructor, determine the optimal cooking time for this specific step:
+
+"${instruction}"
+
+Consider:
+- The specific cooking method being used
+- The type and quantity of ingredients mentioned
+- Food safety requirements for proteins
+- Typical cooking times for the technique described
+- Any contextual clues about doneness or completion
+
+Respond with ONLY a number representing the time in minutes. Be precise and realistic based on actual cooking requirements.
+
+Examples:
+- "Sear chicken breast until golden" → 4
+- "Cook spaghetti until al dente" → 10
+- "Bake at 200°C until golden brown" → 25
+- "Simmer tomato sauce" → 15
+- "Rest the meat" → 5
+
+Response (number only):`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        temperature: 0.3,
+        max_tokens: 10,
+      });
+
+      const content = response.choices[0].message.content?.trim();
+      const duration = parseInt(content || "5");
+
+      // Validate the response is a reasonable number
+      const finalDuration = isNaN(duration) || duration < 1 || duration > 480 
+        ? 5 // Default to 5 minutes for invalid responses
+        : duration;
+
+      console.log(`🕒 AI Step Timing: "${instruction}" → ${finalDuration} minutes`);
+
+      res.json({ duration: finalDuration });
+    } catch (error) {
+      console.error("Error getting AI step timing:", error);
+      res.status(500).json({ error: "Failed to get step timing", duration: 5 });
+    }
+  });
+
   // Ingredient substitution endpoint
   app.post("/api/ingredient-substitute", async (req, res) => {
     try {
