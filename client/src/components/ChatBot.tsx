@@ -51,11 +51,6 @@ export default function ChatBot({
 }: ChatBotProps & { isOpen?: boolean; onClose?: () => void }) {
   // Use isOpen prop if provided, otherwise default to true
   const actualIsOpen = isOpen !== undefined ? isOpen : true;
-  
-  // If not open, don't render anything
-  if (!actualIsOpen) {
-    return null;
-  }
   const [message, setMessage] = useState("");
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
