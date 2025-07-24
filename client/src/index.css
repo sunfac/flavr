@@ -303,10 +303,11 @@ body {
   .mobile-chat-panel {
     overscroll-behavior: contain;
     position: fixed !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-    max-height: 100vh !important;
-    max-height: 100dvh !important;
+    top: 64px !important; /* Below header */
+    height: calc(100vh - 64px) !important;
+    height: calc(100dvh - 64px) !important;
+    max-height: calc(100vh - 64px) !important;
+    max-height: calc(100dvh - 64px) !important;
   }
 
   .mobile-chat-input {
@@ -339,9 +340,10 @@ body {
   /* iOS Safari specific fixes */
   @supports (-webkit-touch-callout: none) {
     .mobile-chat-panel {
-      height: 100vh !important;
-      min-height: 100vh !important;
-      max-height: 100vh !important;
+      height: calc(100vh - 64px) !important; /* Account for header */
+      min-height: calc(100vh - 64px) !important;
+      max-height: calc(100vh - 64px) !important;
+      top: 64px !important; /* Position below header */
     }
     
     body.chat-open {
@@ -359,7 +361,7 @@ body {
   /* Visual viewport API support for modern browsers */
   @supports (height: 100svh) {
     .mobile-chat-panel {
-      height: 100svh !important;
+      height: calc(100svh - 64px) !important; /* Account for header */
     }
   }
 

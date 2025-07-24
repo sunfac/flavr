@@ -101,7 +101,7 @@ export default function Recipe() {
     cookTime: recipeStore.meta.cookTime,
     prepTime: 15, // Default prep time
     servings: recipeStore.servings,
-    image: recipeImage || recipeStore.meta.image || recipeStore.meta.imageUrl || '',
+    image: recipeImage || recipeStore.meta.image || '',
     ingredients: recipeStore.ingredients.map(ing => ing.text || ''), // Convert to string array
     instructions: recipeStore.steps.map(step => step.description || ''), // Convert to string array
     tips: "Try garnishing with fresh herbs for extra flavor!" // Default tip
@@ -123,23 +123,41 @@ export default function Recipe() {
           />
         </motion.div>
 
-        {/* Chat Panel - Modifications */}
+
+        
+        {/* Desktop Chat Panel */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="w-full lg:w-96"
+          className="hidden lg:block w-full lg:w-96"
         >
+          {showChat && (
+            <ChatBot 
+              isOpen={showChat}
+              onClose={() => setShowChat(false)}
+              currentRecipe={activeRecipe as any}
+              onRecipeUpdate={(updatedRecipe) => {
+                // Force re-render when recipe updates
+                console.log('Recipe updated from ChatBot:', updatedRecipe);
+              }}
+            />
+          )}
+        </motion.div>
+      </div>
+
+      {/* Mobile Chat Modal - Render outside of page layout */}
+      {showChat && (
+        <div className="lg:hidden">
           <ChatBot 
             isOpen={showChat}
             onClose={() => setShowChat(false)}
-            currentRecipe={activeRecipe}
+            currentRecipe={activeRecipe as any}
             onRecipeUpdate={(updatedRecipe) => {
-              // Force re-render when recipe updates
               console.log('Recipe updated from ChatBot:', updatedRecipe);
             }}
           />
-        </motion.div>
-      </div>
+        </div>
+      )}
 
       {/* Floating Chat Button - Only show when chat is closed */}
       {!showChat && (

@@ -345,7 +345,8 @@ export default function ChatBot({
             // Adjust chat panel height when keyboard appears
             const chatPanel = document.querySelector('.mobile-chat-panel') as HTMLElement;
             if (chatPanel) {
-              chatPanel.style.height = `${viewport.height}px`;
+              // Account for header height (64px) when adjusting for keyboard
+              chatPanel.style.height = `${Math.max(viewport.height - 64, 300)}px`;
             }
           }
         };
@@ -517,12 +518,12 @@ export default function ChatBot({
           
           {/* Chat Panel - Mobile Optimized */}
           <div 
-            className="absolute right-0 w-full sm:w-96 bg-slate-900 border-l border-orange-500/30 shadow-2xl flex flex-col transition-all duration-500"
+            className="absolute right-0 w-full sm:w-96 bg-slate-900 border-l border-orange-500/30 shadow-2xl flex flex-col transition-all duration-500 mobile-chat-panel"
             style={{
-              top: 'env(safe-area-inset-top, 0px)',
-              bottom: 'env(safe-area-inset-bottom, 0px)',
-              height: '100vh',
-              maxHeight: '100vh',
+              top: '64px', // Account for header height
+              bottom: '0',
+              height: 'calc(100vh - 64px)', // Subtract header height
+              maxHeight: 'calc(100vh - 64px)',
               overflow: 'hidden',
               pointerEvents: 'all',
               display: 'flex',
