@@ -24,6 +24,11 @@ export interface IStorage {
   updatePseudoUserUsage(pseudoId: string, recipes: number): Promise<PseudoUser>;
   resetPseudoUserMonthlyUsage(pseudoId: string): Promise<PseudoUser>;
   
+  // Usage counter methods for quota system
+  getUserUsageCount(userId: number): Promise<number>;
+  getPseudoUserUsageCount(pseudoId: string): Promise<number>;
+  incrementUsageCounter(userIdOrPseudoId: string | number, isAuthenticated: boolean): Promise<void>;
+  
   // Usage checking for gating
   checkUsageLimit(userIdOrPseudoId: string | number, isAuthenticated: boolean): Promise<{
     canGenerate: boolean;
@@ -356,6 +361,37 @@ export class DatabaseStorage implements IStorage {
     } else {
       // Admin delete - delete any recipe
       await db.delete(recipes).where(eq(recipes.id, id));
+    }
+  }
+
+  // Usage counter methods for quota system
+  async getUserUsageCount(userId: number): Promise<number> {
+    const user = await this.getUser(userId);
+    return user?.recipesThisMonth || 0;
+  }
+
+  async getPseudoUserUsageCount(pseudoId: string): Promise<number> {
+    const pseudoUser = await this.getPseudoUser(pseudoId);
+    return pseudoUser?.recipesThisMonth || 0;
+  }
+
+  async incrementUsageCounter(userIdOrPseudoId: string | number, isAuthenticated: boolean): Promise<void> {
+    if (isAuthenticated) {
+      const userId = userIdOrPseudoId as number;
+      const user = await this.getUser(userId);
+      if (user) {
+        await db.update(users)
+          .set({ recipesThisMonth: (user.recipesThisMonth || 0) + 1 })
+          .where(eq(users.id, userId));
+      }
+    } else {
+      const pseudoId = userIdOrPseudoId as string;
+      const pseudoUser = await this.getPseudoUser(pseudoId);
+      if (pseudoUser) {
+        await db.update(pseudoUsers)
+          .set({ recipesThisMonth: (pseudoUser.recipesThisMonth || 0) + 1 })
+          .where(eq(pseudoUsers.pseudoId, pseudoId));
+      }
     }
   }
 }
