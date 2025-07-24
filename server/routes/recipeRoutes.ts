@@ -1245,16 +1245,17 @@ Return valid JSON only:
       recipeData.id = Date.now().toString();
       recipeData.createdAt = new Date().toISOString();
 
-      // Generate recipe image
-      try {
-        const imageUrl = await generateRecipeImage(recipeData.title, recipeData.cuisine || 'international');
+      // Start image generation in background (don't await)
+      generateRecipeImage(recipeData.title, recipeData.cuisine || 'international').then(imageUrl => {
         if (imageUrl) {
-          recipeData.imageUrl = imageUrl;
+          console.log('🎨 Background image generated for fridge mode:', recipeData.title);
+          // Store in cache for retrieval
+          if (!global.recipeImageCache) {
+            global.recipeImageCache = new Map();
+          }
+          global.recipeImageCache.set(recipeData.title, imageUrl);
         }
-      } catch (imageError) {
-        console.error('Image generation failed:', imageError);
-        // Continue without image - not critical
-      }
+      }).catch(err => console.error('Background image generation failed:', err));
 
       // Save recipe to database if user is authenticated
       if (req.session?.userId) {
@@ -1461,16 +1462,17 @@ Return valid JSON only:
       recipeData.id = Date.now().toString();
       recipeData.createdAt = new Date().toISOString();
 
-      // Generate contextual recipe image based on the generated title and cuisine
-      try {
-        const imageUrl = await generateRecipeImage(recipeData.title, recipeData.cuisine || 'international');
+      // Start image generation in background (don't await)
+      generateRecipeImage(recipeData.title, recipeData.cuisine || 'international').then(imageUrl => {
         if (imageUrl) {
-          recipeData.imageUrl = imageUrl;
+          console.log('🎨 Background image generated for shopping mode:', recipeData.title);
+          // Store in cache for retrieval
+          if (!global.recipeImageCache) {
+            global.recipeImageCache = new Map();
+          }
+          global.recipeImageCache.set(recipeData.title, imageUrl);
         }
-      } catch (imageError) {
-        console.error('Image generation failed for chef assist:', imageError);
-        // Continue without image - not critical
-      }
+      }).catch(err => console.error('Background image generation failed:', err));
 
       // Store recipe in database
       try {

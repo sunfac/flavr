@@ -339,6 +339,7 @@ Changelog:
 - January 23, 2025. Start Again and Save buttons added to recipe cards - positioned buttons in top-right corner of recipe header images with backdrop blur styling, Start Again button navigates to mode selection, Save button ready for cookbook functionality, enhanced user control over recipe workflow
 - January 23, 2025. Dynamic image loading system implemented - created background image cache and polling API at /api/recipe-image/:title, recipes display immediately while images generate asynchronously, frontend polls for completed images at 2s, 5s, and 10s intervals, eliminates waiting for image generation in recipe flow
 - January 23, 2025. Image loading approach simplified - reverted to clean waiting approach per user preference, maintaining async generation with straightforward loading state rather than complex placeholder system, users prefer waiting for authentic images over visual tricks
+- January 23, 2025. True parallel image generation implemented - fixed all recipe endpoints to run image generation in background instead of blocking, Chef Assist and Fridge2Fork were already async but Shopping Mode was blocking with await, now all modes generate recipes and images simultaneously for maximum speed
 ```
 
 ## User Preferences
