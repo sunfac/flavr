@@ -45,6 +45,11 @@ async function extractDuration(instruction: string): Promise<number | undefined>
     /approximately\s+(\d+)\s*minutes?/,                         // "approximately 30 minutes"
     /around\s+(\d+)\s*minutes?/,                                // "around 30 minutes"
     
+    // Fractional time patterns (common in recipes)
+    /(\d+)\s*(?:and\s*)?(?:a\s+)?half\s*hours?/,               // "1 and a half hours" or "1.5 hours"
+    /(\d+\.\d+)\s*hours?/,                                      // "1.5 hours"
+    /(\d+)\s*(?:and\s*)?(?:a\s+)?half\s*minutes?/,             // "5 and a half minutes"
+    
     // Seconds patterns
     /(\d+)\s*(?:to\s+)?(\d+)?\s*seconds?/,
     /(\d+)\s*(?:to\s+)?(\d+)?\s*secs?/
@@ -90,18 +95,27 @@ async function extractDuration(instruction: string): Promise<number | undefined>
 async function shouldStepHaveTimer(instruction: string): Promise<boolean> {
   const text = instruction.toLowerCase();
   
-  // Quick checks for obvious prep work or visual cues (no AI needed)
-  const prepKeywords = ['chop', 'slice', 'dice', 'mince', 'mix', 'stir', 'combine', 'whisk', 'season', 'sprinkle', 'garnish', 'add', 'place', 'arrange', 'serve', 'preheat', 'heat', 'warm'];
-  const visualCueKeywords = ['until golden', 'until crispy', 'until tender', 'until fragrant', 'until soft', 'until translucent'];
-  
-  if (prepKeywords.some(keyword => text.includes(keyword))) return false;
-  if (visualCueKeywords.some(keyword => text.includes(keyword))) return false;
-  
-  // Quick checks for obvious cooking processes that need timers
-  const cookingKeywords = ['bake', 'roast', 'boil', 'simmer', 'sear', 'fry', 'grill', 'steam', 'braise', 'marinate', 'chill', 'rest', 'rise', 'proof'];
+  // Priority check: cooking processes that definitely need timers
+  const cookingKeywords = ['bake', 'roast', 'boil', 'simmer', 'sear', 'fry', 'grill', 'steam', 'braise', 'marinate', 'chill', 'rest', 'rise', 'proof', 'reduce', 'cook for', 'cook until', 'brown for', 'sauté'];
   if (cookingKeywords.some(keyword => text.includes(keyword))) return true;
   
-  return false; // Default to no timer for ambiguous cases
+  // Check for explicit timing phrases
+  const timingPhrases = ['minutes', 'hours', 'seconds', 'for about', 'until reduced', 'until thickened', 'until bubbling'];
+  if (timingPhrases.some(phrase => text.includes(phrase))) return true;
+  
+  // Quick checks for obvious prep work only (no cooking involved)
+  const prepOnlyKeywords = ['chop', 'slice', 'dice', 'mince', 'mix together', 'whisk together', 'combine in bowl', 'sprinkle', 'garnish', 'arrange', 'serve immediately'];
+  if (prepOnlyKeywords.some(keyword => text.includes(keyword)) && !cookingKeywords.some(keyword => text.includes(keyword))) {
+    return false;
+  }
+  
+  // Visual cues without cooking action
+  const visualCueKeywords = ['until golden', 'until crispy', 'until tender', 'until fragrant', 'until soft', 'until translucent'];
+  if (visualCueKeywords.some(keyword => text.includes(keyword)) && !cookingKeywords.some(keyword => text.includes(keyword))) {
+    return false;
+  }
+  
+  return false; // Default to no timer for truly ambiguous cases
 }
 
 // Get AI-powered timing for cooking steps
@@ -121,11 +135,36 @@ async function getAIStepTiming(instruction: string): Promise<number> {
     
     const data = await response.json();
     console.log(`🤖 AI timing response for "${instruction}": ${data.duration} minutes`);
-    return data.duration || 5; // Fallback to 5 minutes
+    return data.duration || getIntelligentFallback(instruction);
   } catch (error) {
     console.error('Error getting AI step timing:', error);
-    return 5; // Fallback duration
+    return getIntelligentFallback(instruction);
   }
+}
+
+// Intelligent fallback timing based on cooking action
+function getIntelligentFallback(instruction: string): number {
+  const text = instruction.toLowerCase();
+  
+  // Long cooking processes
+  if (text.includes('braise') || text.includes('slow cook') || text.includes('roast')) return 120;
+  if (text.includes('bake') || text.includes('oven')) return 25;
+  if (text.includes('simmer') || text.includes('stew')) return 30;
+  
+  // Medium cooking processes  
+  if (text.includes('boil') || text.includes('pasta') || text.includes('rice')) return 12;
+  if (text.includes('sauté') || text.includes('fry')) return 8;
+  if (text.includes('steam')) return 10;
+  
+  // Quick cooking processes
+  if (text.includes('sear') || text.includes('brown')) return 5;
+  if (text.includes('reduce') || text.includes('thicken')) return 15;
+  if (text.includes('rest') || text.includes('cool')) return 10;
+  
+  // Very short processes
+  if (text.includes('toast') || text.includes('warm')) return 3;
+  
+  return 5; // Default fallback
 }
 
 

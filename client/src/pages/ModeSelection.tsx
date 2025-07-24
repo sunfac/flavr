@@ -5,6 +5,7 @@ import { useLocation } from "wouter";
 import { PageLayout } from "@/components/PageLayout";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import QuotaCounter from "@/components/QuotaCounter";
 
 interface ModeCard {
   title: string;
@@ -53,9 +54,12 @@ export default function ModeSelection() {
           <h1 className="text-3xl md:text-5xl font-bold mb-3 md:mb-4 bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
             What's Cooking?
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-4 md:mb-6">
             Choose how you'd like to discover your next delicious meal
           </p>
+          <div className="flex justify-center">
+            <QuotaCounter showUpgradeHint={true} />
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-12">

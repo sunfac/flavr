@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useTheme } from "@/providers/ThemeProvider";
+import QuotaCounter from "@/components/QuotaCounter";
 
 interface GlobalNavigationProps {
   isOpen?: boolean;
@@ -27,10 +28,12 @@ export default function GlobalNavigation({ isOpen, onClose, onAuthRequired }: Gl
   const { theme, toggleTheme } = useTheme();
 
   // User query
-  const { data: user } = useQuery({
+  const { data: userData } = useQuery({
     queryKey: ['/api/me'],
     retry: false,
   });
+
+  const user = userData as any;
 
   const handleNavigation = (href: string, requiresAuth: boolean = false) => {
     if (requiresAuth && !user?.id) {
@@ -168,9 +171,14 @@ export default function GlobalNavigation({ isOpen, onClose, onAuthRequired }: Gl
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-gray-100 dark:border-gray-800">
+          <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-4">
+            {/* Quota Counter */}
+            <div className="flex justify-center">
+              <QuotaCounter showUpgradeHint={true} />
+            </div>
+            
             {/* Theme Toggle */}
-            <div className="flex justify-end mb-4">
+            <div className="flex justify-end">
               <button
                 onClick={toggleTheme}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
