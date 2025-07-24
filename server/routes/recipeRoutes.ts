@@ -410,7 +410,7 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
   // Chef Assist recipe generation - direct to full recipe
   app.post("/api/chef-assist/generate", async (req, res) => {
     try {
-      const { prompt: userPrompt, servings = 4, cookingTime = 30 } = req.body;
+      const { prompt: userPrompt, servings = 4 } = req.body;
 
       if (!userPrompt) {
         return res.status(400).json({ error: "No prompt provided" });
@@ -429,13 +429,12 @@ IMPORTANT: Always create COMPLETE DISHES that include:
 
 User request: ${userPrompt}
 Servings: ${servings}
-Time available: ${cookingTime} minutes
 
 Create a complete recipe based on this request: "${userPrompt}"
 
 Requirements:
 - Servings: ${servings}
-- Cooking time: around ${cookingTime} minutes
+- IMPORTANT: Calculate realistic cooking time based on the actual recipe - if it's braised lamb shanks that need 2+ hours, then cookTime should be 120+ minutes, not 30
 - Use ingredients available at UK supermarkets
 - IMPORTANT: Use UK measurement units ONLY (grams, ml, tbsp, tsp, litres) - NO cups or ounces
 - Make it achievable for home cooks
@@ -449,7 +448,7 @@ Return ONLY a valid JSON object with this exact structure (NO trailing commas):
   "cuisine": "Cuisine Type",
   "difficulty": "easy",
   "prepTime": 15,
-  "cookTime": 30,
+  "cookTime": [REALISTIC total cooking time in minutes based on actual recipe requirements - e.g. 150 for braised dishes, 25 for stir-fries, etc.],
   "servings": ${servings},
   "ingredients": [{"name": "ingredient name only", "amount": "UK quantity (e.g. '2 tbsp', '400g', '250ml')"}],
   "instructions": [{"step": 1, "instruction": "detailed instruction"}],
