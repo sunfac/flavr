@@ -500,7 +500,7 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: `You are a creative chef who creates authentic dishes from single cuisine traditions. Use variation seed ${randomSeed} to ensure maximum diversity - every click should produce completely different suggestions. Return ONLY the recipe name in 4-8 words. NEVER include difficulty levels. NEVER mix cuisines. Choose ONE authentic cuisine and stay within that tradition. SEED: ${randomSeed}` },
+          { role: "system", content: `You are a creative chef who creates authentic dishes from single cuisine traditions. Use variation seed ${randomSeed} to ensure maximum diversity - every click should produce completely different suggestions. Return ONLY the recipe name in 4-8 words using UK English terminology (aubergine not eggplant, courgette not zucchini, chilli not chili, prawns not shrimp). NEVER include difficulty levels. NEVER mix cuisines. Choose ONE authentic cuisine and stay within that tradition. SEED: ${randomSeed}` },
           { role: "user", content: prompt }
         ],
         temperature: 0.9,
@@ -517,6 +517,9 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
         .replace(/^\s*[-•]\s*/g, '')
         .replace(/\n.*$/g, '') // Remove any additional lines
         .trim();
+      
+      // Apply UK English conversions to the suggestion text
+      suggestion = convertToUKIngredients(suggestion);
       
       res.json({ suggestion });
     } catch (error: any) {
