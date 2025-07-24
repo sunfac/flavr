@@ -57,48 +57,43 @@ function extractDuration(instruction: string): number | undefined {
     }
   }
   
-  // More intelligent default durations based on context
-  // Prep work - shorter times
-  if (text.includes('chop') || text.includes('slice') || text.includes('dice') || text.includes('mince')) {
-    return 3;
-  }
-  if (text.includes('mix') || text.includes('stir') || text.includes('combine') || text.includes('whisk')) {
-    return 2;
-  }
-  if (text.includes('season') || text.includes('sprinkle') || text.includes('garnish')) {
-    return 1;
-  }
+  // Only show timers for time-dependent cooking processes, not prep work
   
-  // Cooking actions - context-aware timing
-  if (text.includes('preheat')) return 10;
-  if (text.includes('bring to a boil') || text.includes('bring to the boil')) return 5;
-  if (text.includes('boil') && !text.includes('bring')) return 8; // Active boiling
-  if (text.includes('sear') || text.includes('brown')) return 4;
-  if (text.includes('sauté') || text.includes('fry') && !text.includes('deep')) return 6;
-  if (text.includes('deep fry')) return 3;
-  if (text.includes('simmer')) return 15;
-  if (text.includes('steam')) return 8;
-  if (text.includes('grill')) return 10;
+  // COOKING PROCESSES THAT NEED TIMERS:
   
-  // Longer processes
+  // Oven cooking - needs precise timing
   if (text.includes('bake') || text.includes('roast')) return 25;
-  if (text.includes('braise')) return 45;
+  if (text.includes('preheat')) return 10;
+  
+  // Protein cooking - critical timing for food safety and texture
+  if (text.includes('sear') || text.includes('brown')) return 4;
+  if (text.includes('sauté') && (text.includes('chicken') || text.includes('beef') || text.includes('pork') || text.includes('fish'))) return 6;
+  if (text.includes('fry') && (text.includes('chicken') || text.includes('beef') || text.includes('pork') || text.includes('fish'))) return 6;
+  if (text.includes('grill')) return 10;
+  if (text.includes('steam') && (text.includes('fish') || text.includes('vegetables'))) return 8;
+  
+  // Liquid cooking - needs monitoring to prevent overcooking
+  if (text.includes('boil') && !text.includes('bring')) return 8; // Active boiling
+  if (text.includes('simmer')) return 15;
+  if (text.includes('reduce') || text.includes('reduction')) return 12;
+  
+  // Time-dependent processes
   if (text.includes('marinate')) return 30;
   if (text.includes('chill') || text.includes('refrigerate')) return 15;
-  if (text.includes('rest') || text.includes('stand') || text.includes('cool')) return 10;
+  if (text.includes('rest') && (text.includes('meat') || text.includes('dough'))) return 10;
   if (text.includes('rise') || text.includes('proof')) return 60;
+  if (text.includes('braise') || text.includes('stew')) return 45;
   
-  // Special cases
-  if (text.includes('until tender') || text.includes('until soft')) return 12;
-  if (text.includes('until golden') || text.includes('until crispy')) return 8;
-  if (text.includes('until fragrant')) return 3;
+  // Process completion cues that don't need visual checking
+  if (text.includes('bring to a boil') || text.includes('bring to the boil')) return 5;
   
-  // If no specific timing found, only show timer for prep steps that clearly need timing
-  if (text.includes('heat') || text.includes('warm') || text.includes('cook')) {
-    return 5; // Generic cooking action
-  }
+  // NO TIMERS FOR:
+  // - Prep work (chop, slice, dice, mix, stir, combine, whisk, season, sprinkle)
+  // - Visual cue steps (until golden, until crispy, until tender, until fragrant)
+  // - Assembly steps (add, place, arrange, top, serve)
+  // - Quick actions (heat oil, warm, add ingredients)
   
-  return undefined; // No timer for steps that don't need timing
+  return undefined; // No timer - either prep work or has visual completion cues
 }
 
 
