@@ -239,12 +239,6 @@ export default function RecipeCard({
             >
               {recipe.cuisine || recipe.mood || "Delicious"} 🌟
             </motion.span>
-            <motion.span 
-              whileHover={{ scale: 1.05 }}
-              className="bg-gradient-primary text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg"
-            >
-              ⏱️ {typeof recipe.cookTime === 'number' ? `${recipe.cookTime} minutes` : recipe.cookTime || "25 minutes"}
-            </motion.span>
           </motion.div>
 
           {/* Title and Description */}
