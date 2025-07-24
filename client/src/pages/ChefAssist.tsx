@@ -150,8 +150,8 @@ export default function ChefAssist() {
   }
 
   return (
-    <PageLayout className="min-h-screen py-4 sm:py-8">
-      <div className="max-w-4xl mx-auto px-4 min-h-full flex flex-col justify-center">
+    <PageLayout>
+      <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Original quiz-style layout */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -159,11 +159,11 @@ export default function ChefAssist() {
           className="w-full"
         >
           <Card className="bg-slate-900/50 border-slate-700">
-            <CardContent className="p-6 sm:p-8">
+            <CardContent className="p-8">
               {/* Question header matching original quiz style */}
-              <div className="text-center mb-6 sm:mb-8">
-                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">What's your culinary vision?</h2>
-                <p className="text-base sm:text-lg text-slate-400">Describe what you want to create today</p>
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-white mb-2">What's your culinary vision?</h2>
+                <p className="text-lg text-slate-400">Describe what you want to create today</p>
               </div>
 
               {/* Textarea matching original quiz style */}
@@ -172,7 +172,7 @@ export default function ChefAssist() {
                   placeholder="Tell me about the dish you have in mind..."
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  className="min-h-[120px] sm:min-h-[150px] text-base sm:text-lg bg-slate-800/50 border-slate-600 text-white focus:border-orange-400 rounded-xl placeholder:text-slate-500"
+                  className="min-h-[150px] text-lg bg-slate-800/50 border-slate-600 text-white focus:border-orange-400 rounded-xl placeholder:text-slate-500"
                 />
 
                 {/* Inspire Me button matching original style */}
@@ -217,7 +217,7 @@ export default function ChefAssist() {
                 <Button
                   onClick={handleGenerateRecipe}
                   disabled={!prompt.trim() || isProcessing}
-                  className="w-full h-12 sm:h-14 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium text-base sm:text-lg rounded-xl shadow-lg"
+                  className="w-full h-14 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium text-lg rounded-xl shadow-lg"
                   size="lg"
                 >
                   {isProcessing ? (

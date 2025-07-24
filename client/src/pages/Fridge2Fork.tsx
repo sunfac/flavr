@@ -195,8 +195,8 @@ export default function Fridge2Fork() {
   }
 
   return (
-    <PageLayout className="min-h-screen py-4 sm:py-8">
-      <div className="max-w-4xl mx-auto px-4 min-h-full flex flex-col justify-center">
+    <PageLayout>
+      <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Original quiz-style layout */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -204,11 +204,11 @@ export default function Fridge2Fork() {
           className="w-full"
         >
           <Card className="bg-slate-900/50 border-slate-700">
-            <CardContent className="p-6 sm:p-8">
+            <CardContent className="p-8">
               {/* Question header matching original fridge mode style */}
-              <div className="text-center mb-6 sm:mb-8">
-                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">What's in your fridge?</h2>
-                <p className="text-base sm:text-lg text-slate-400">Add ingredients you want to use</p>
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-white mb-2">What's in your fridge?</h2>
+                <p className="text-lg text-slate-400">Add ingredients you want to use</p>
               </div>
 
               {/* Ingredient input section - original quiz style */}
@@ -278,7 +278,7 @@ export default function Fridge2Fork() {
                     value={currentIngredient}
                     onChange={(e) => setCurrentIngredient(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && addIngredient()}
-                    className="text-base sm:text-lg bg-slate-800/50 border-slate-600 text-white focus:border-orange-400 rounded-xl placeholder:text-slate-500"
+                    className="text-lg bg-slate-800/50 border-slate-600 text-white focus:border-orange-400 rounded-xl placeholder:text-slate-500"
                   />
                   <Button 
                     onClick={addIngredient} 
@@ -334,7 +334,7 @@ export default function Fridge2Fork() {
                 <Button
                   onClick={handleGenerateRecipes}
                   disabled={ingredients.length === 0 || isProcessing}
-                  className="w-full h-12 sm:h-14 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium text-base sm:text-lg rounded-xl shadow-lg"
+                  className="w-full h-14 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium text-lg rounded-xl shadow-lg"
                   size="lg"
                 >
                   {isProcessing ? (

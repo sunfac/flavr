@@ -329,7 +329,6 @@ Changelog:
 - January 23, 2025. Hard rule cuisine enforcement implemented - created mandatory global cuisine selection system for vague user requests, forbidden classic French dishes (coq au vin, beef bourguignon, ratatouille, bouillabaisse), seed-based cuisine assignment (1-200: Asian, 201-400: Middle Eastern, 401-600: European, 601-800: Latin American, 801-1000: Indian Subcontinent), ensures diverse global cuisine selection for open-ended prompts
 - January 23, 2025. Fridge2Fork ingredient constraints tightened - implemented strict rules to only use ingredients provided by user plus basic pantry staples (salt, pepper, oil, flour, sugar), forbidden expensive additions like prawns or specialty ingredients not provided, upgraded full recipe generation to GPT-4o for better adherence to constraints
 - January 23, 2025. Global cuisine selection system updated - replaced African cuisine category with European (Italian, Spanish, Greek, Portuguese, Hungarian), limited Indian subcontinent to only India and Sri Lanka, maintaining diverse global representation while including European food traditions
-- January 23, 2025. Mobile layout optimization complete - made mode selector page, Chef Assist quiz, and Fridge2Fork quiz fully visible on mobile screens with responsive text sizing, proper viewport usage (min-h-screen), centered flex layouts, and reduced padding for mobile while maintaining desktop experience
 ```
 
 ## User Preferences

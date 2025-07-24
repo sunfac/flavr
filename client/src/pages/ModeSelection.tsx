@@ -42,23 +42,23 @@ export default function ModeSelection() {
   };
 
   return (
-    <PageLayout className="min-h-screen py-4 sm:py-8">
-      <div className="max-w-4xl mx-auto px-4 min-h-full flex flex-col justify-center">
+    <PageLayout className="py-12">
+      <div className="max-w-4xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-8 sm:mb-16"
+          className="text-center mb-16 pt-8"
         >
-          <h1 className="text-3xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
             What's Cooking?
           </h1>
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Choose how you'd like to discover your next delicious meal
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
           {modes.map((mode, index) => (
             <motion.div
               key={mode.title}
@@ -79,17 +79,17 @@ export default function ModeSelection() {
                   mode.gradient
                 )} />
                 
-                <CardHeader className="relative text-center py-6 sm:py-8">
-                  <div className={cn("p-3 sm:p-4 rounded-full bg-background/80 backdrop-blur-sm inline-flex mx-auto mb-4", mode.color)}>
+                <CardHeader className="relative text-center py-8">
+                  <div className={cn("p-4 rounded-full bg-background/80 backdrop-blur-sm inline-flex mx-auto mb-4", mode.color)}>
                     {mode.icon}
                   </div>
-                  <CardTitle className="text-xl sm:text-2xl mb-2">{mode.title}</CardTitle>
-                  <CardDescription className="text-sm sm:text-base">
+                  <CardTitle className="text-2xl mb-2">{mode.title}</CardTitle>
+                  <CardDescription className="text-base">
                     {mode.description}
                   </CardDescription>
                 </CardHeader>
                 
-                <CardContent className="relative pb-6 sm:pb-8">
+                <CardContent className="relative pb-8">
                   <Button
                     className={cn(
                       "w-full group-hover:translate-y-[-2px] transition-transform",
@@ -110,7 +110,7 @@ export default function ModeSelection() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="text-center pb-4 sm:pb-8"
+          className="text-center pb-8"
         >
           <Button
             size="lg"
