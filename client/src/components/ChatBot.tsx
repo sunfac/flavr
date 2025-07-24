@@ -515,16 +515,18 @@ export default function ChatBot({
             }}
           />
           
-          {/* Chat Panel - Right Side Panel */}
+          {/* Chat Panel - Mobile Optimized */}
           <div 
             className="absolute right-0 w-full sm:w-96 bg-slate-900 border-l border-orange-500/30 shadow-2xl flex flex-col transition-all duration-500"
             style={{
-              top: '80px', // Start below header/navigation
-              bottom: '80px', // End above footer
-              height: 'calc(100vh - 160px)', // Adjust height for top/bottom spacing
-              maxHeight: 'calc(100vh - 160px)',
+              top: 'env(safe-area-inset-top, 0px)',
+              bottom: 'env(safe-area-inset-bottom, 0px)',
+              height: '100vh',
+              maxHeight: '100vh',
               overflow: 'hidden',
-              pointerEvents: 'all'
+              pointerEvents: 'all',
+              display: 'flex',
+              flexDirection: 'column'
             }}
             onClick={(e) => e.stopPropagation()} // Prevent backdrop clicks from closing when clicking inside panel
           >
@@ -555,11 +557,16 @@ export default function ChatBot({
           </Button>
         </CardHeader>
         
-        <CardContent className="flex-1 overflow-hidden p-0 flex flex-col min-h-0">
+        <CardContent className="flex-1 overflow-hidden p-0 flex flex-col min-h-0" style={{ flex: '1 1 0%' }}>
           {/* Messages Area */}
           <div 
             ref={scrollAreaRef}
-            className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 min-h-0"
+            className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3"
+            style={{ 
+              flex: '1 1 0%',
+              minHeight: '0',
+              overscrollBehavior: 'contain'
+            }}
           >
             {localMessages.map((msg, index) => (
               <div key={msg.id} className={`mb-3 ${msg.isUser ? "text-right" : "text-left"}`}>
@@ -610,8 +617,14 @@ export default function ChatBot({
             </div>
           )}
 
-          {/* Input Area - Simple and Stable */}
-          <div className="border-t-2 border-orange-500/60 bg-slate-900 flex-shrink-0 p-3 sm:p-4">
+          {/* Input Area - Mobile Keyboard Safe */}
+          <div 
+            className="border-t-2 border-orange-500/60 bg-slate-900 p-3 sm:p-4"
+            style={{
+              flexShrink: 0,
+              paddingBottom: 'env(safe-area-inset-bottom, 16px)'
+            }}
+          >
             <form 
               onSubmit={(e) => { e.preventDefault(); handleSend(); }} 
               className="flex gap-2 sm:gap-3 w-full items-center"

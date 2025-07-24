@@ -4,6 +4,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile viewport and keyboard handling */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .chat-input-container {
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+}
+
+/* Prevent viewport resize on mobile keyboard */
+html {
+  height: -webkit-fill-available;
+}
+
+body {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
+/* iOS specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .chat-panel {
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+}
+
 :root {
   /* Light Theme (Default) */
   --background: 0 0% 100%; /* #FFFFFF - Pure white */
