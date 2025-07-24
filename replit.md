@@ -348,6 +348,7 @@ Changelog:
 - January 24, 2025. Mobile ChatBot positioning fixed - updated ChatBot inline styles to position chat panel at top: 64px with height calc(100vh - 64px) to account for header, modified CSS rules for mobile-chat-panel class with proper header height handling, restructured Recipe page rendering to ensure proper modal behavior, chat panel now sits properly below header without overlapping navigation
 - January 24, 2025. Inspire Me button UK English fix - updated chef assist inspire endpoint to use UK English terminology in system prompt, added post-processing conversion using convertToUKIngredients function, ensures recipe suggestions use proper British ingredient names (aubergine, courgette, chilli, prawns)
 - January 24, 2025. Floating chat icon fix - removed duplicate floating button from ChatBot component that was conflicting with Recipe page's floating button, ChatBot component previously had its own floating button at bottom-24 which was interfering with the Recipe page button at bottom-6, now Recipe page handles the floating chat button exclusively
+- January 24, 2025. Chat button visibility issue resolved - identified PageLayout component overflow-hidden was clipping fixed positioned chat button, moved floating chat button outside PageLayout component to avoid overflow restrictions, enhanced button styling with white border and maximum z-index for better visibility, added debug logging and always-visible state for troubleshooting
 ```
 
 ## User Preferences

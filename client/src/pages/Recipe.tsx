@@ -118,58 +118,56 @@ export default function Recipe() {
   };
 
   return (
-    <PageLayout className="max-w-7xl mx-auto">
+    <>
+      <PageLayout className="max-w-7xl mx-auto">
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Recipe Card - Main Content */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex-1"
+          >
+            <EnhancedRecipeCard 
+              recipe={activeRecipe}
+            />
+          </motion.div>
 
+          {/* Desktop Chat Panel */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="hidden lg:block w-full lg:w-96"
+          >
+            {showChat && (
+              <ChatBot 
+                isOpen={showChat}
+                onClose={() => setShowChat(false)}
+                currentRecipe={activeRecipe as any}
+                onRecipeUpdate={(updatedRecipe) => {
+                  // Force re-render when recipe updates
+                  console.log('Recipe updated from ChatBot:', updatedRecipe);
+                }}
+              />
+            )}
+          </motion.div>
+        </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Recipe Card - Main Content */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="flex-1"
-        >
-          <EnhancedRecipeCard 
-            recipe={activeRecipe}
-          />
-        </motion.div>
-
-
-        
-        {/* Desktop Chat Panel */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="hidden lg:block w-full lg:w-96"
-        >
-          {showChat && (
+        {/* Mobile Chat Modal - Render inside page layout */}
+        {showChat && (
+          <div className="lg:hidden">
             <ChatBot 
               isOpen={showChat}
               onClose={() => setShowChat(false)}
               currentRecipe={activeRecipe as any}
               onRecipeUpdate={(updatedRecipe) => {
-                // Force re-render when recipe updates
                 console.log('Recipe updated from ChatBot:', updatedRecipe);
               }}
             />
-          )}
-        </motion.div>
-      </div>
+          </div>
+        )}
+      </PageLayout>
 
-      {/* Mobile Chat Modal - Render outside of page layout */}
-      {showChat && (
-        <div className="lg:hidden">
-          <ChatBot 
-            isOpen={showChat}
-            onClose={() => setShowChat(false)}
-            currentRecipe={activeRecipe as any}
-            onRecipeUpdate={(updatedRecipe) => {
-              console.log('Recipe updated from ChatBot:', updatedRecipe);
-            }}
-          />
-        </div>
-      )}
-
-      {/* Floating Chat Button - Always visible for debugging */}
+      {/* Floating Chat Button - Outside PageLayout to avoid overflow issues */}
       <motion.div
         className="fixed bottom-6 right-6 z-50"
         initial={{ scale: 0 }}
@@ -201,6 +199,6 @@ export default function Recipe() {
           </div>
         </Button>
       </motion.div>
-    </PageLayout>
+    </>
   );
 }
