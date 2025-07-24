@@ -155,6 +155,9 @@ export function registerRecipeRoutes(app: Express) {
 
 VARIATION SEED: ${randomSeed} (use this number to vary your recipe concepts, ingredient combinations, and cooking approaches to create diverse outputs)
 
+CUISINE DIVERSITY REQUIREMENT:
+When creating recipes, prioritize diverse global cuisines and avoid defaulting to Western/European dishes. Use the VARIATION SEED to explore authentic dishes from various food cultures (Thai, Vietnamese, Korean, Indian, Moroccan, Peruvian, Ethiopian, Lebanese, etc.). Choose lesser-known but delicious regional dishes within each cuisine tradition.
+
 IMPORTANT: Always create COMPLETE DISHES that include:
 - Main component using the available ingredients
 - At least 1-2 side dishes or accompaniments that complement the main
@@ -208,7 +211,7 @@ Return a JSON object with this structure:
 }`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
           { 
             role: "system", 
@@ -438,6 +441,16 @@ Use this number to vary the entire output. It must influence:
 - Richness vs. freshness, spice level, and presentation style
 - A unique "chef's mood" which drives subtle intuitive variations in the dish (e.g., rustic vs. refined, bold vs. mellow)
 
+CUISINE DIVERSITY REQUIREMENT:
+When the user request is vague or open-ended (e.g. "impressive dinner party dish"), you must **randomly select from a wide range of global cuisines**, not default to classic French or Western-European dishes.
+
+The chosen recipe must **not repeat past outputs like coq au vin or beef bourguignon** unless the user has explicitly requested it.
+
+Use the VARIATION SEED to enforce unique outputs each time by:
+- Choosing a less common regional dish within the selected cuisine
+- Exploring authentic dishes from diverse food cultures (Thai, Vietnamese, Korean, Indian, Moroccan, Peruvian, Ethiopian, Lebanese, etc.)
+- Prioritizing lesser-known but impressive dishes over familiar classics
+
 IMPORTANT: Always create COMPLETE DISHES that include:
 - Main component (protein, vegetable, or grain-based centrepiece)
 - At least 1–2 complementary side dishes
@@ -488,7 +501,7 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
 }`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
           { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations." },
           { role: "user", content: systemPrompt }
