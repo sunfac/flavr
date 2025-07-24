@@ -437,59 +437,15 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
       const randomSeed = Math.floor(Math.random() * 1000); // For AI diversity
 
       // Generate complete recipe directly
-      const systemPrompt = `You are an expert chef. Create a complete dish with suitable accompaniments based on the user's request.
+      const systemPrompt = `Create complete recipe for: "${userPrompt}" (${servings} servings).
 
-VARIATION SEED: ${randomSeed}
+SPEED OPTIMIZED PROMPT:
 
-Use this number to vary the entire output. It must influence:
+SEED: ${randomSeed} (for cuisine/technique variation)
 
-- Main ingredient selection (protein or veg)
-- Side dish pairing logic
-- Choice of cooking techniques (grilled, braised, roasted, sautéed, etc.)
-- Herb and spice selection
-- Whether the dish leans traditional or regional within the cuisine (e.g. Northern vs. Southern Italian)
-- Richness vs. freshness, spice level, and presentation style
-- A unique "chef's mood" which drives subtle intuitive variations in the dish (e.g., rustic vs. refined, bold vs. mellow)
+CUISINE (vague requests): 1-200=Asian, 201-400=MiddleEast, 401-600=European, 601-800=Latin, 801-1000=Indian
 
-CUISINE DIVERSITY REQUIREMENT - HARD RULE:
-When the user request is vague or open-ended (e.g. "impressive dinner party dish", "chicken dinner", "something special"), you MUST:
-
-1. **FORBIDDEN DISHES**: NEVER generate coq au vin, beef bourguignon, ratatouille, bouillabaisse, or any classic French bistro dishes
-2. **MANDATORY GLOBAL SELECTION**: Randomly select from diverse global cuisines using the variation seed:
-   - Asian: Thai, Vietnamese, Korean, Japanese, Chinese, Indonesian, Malaysian
-   - Middle Eastern: Lebanese, Persian, Turkish, Moroccan, Egyptian
-   - European: Italian, Spanish, Greek, Portuguese, Hungarian
-   - Latin American: Peruvian, Mexican, Argentinian, Brazilian
-   - Indian Subcontinent: Indian, Sri Lankan
-3. **REGIONAL AUTHENTICITY**: Choose lesser-known regional dishes within the selected cuisine
-4. **VARIATION SEED ENFORCEMENT**: Use seed number to determine:
-   - Which global cuisine to select (1-200: Asian, 201-400: Middle Eastern, 401-600: European, 601-800: Latin American, 801-1000: Indian Subcontinent)
-   - Which regional variation within that cuisine
-   - Specific cooking techniques and ingredients authentic to that region
-
-IMPORTANT: Always create COMPLETE DISHES that include:
-- Main component (protein, vegetable, or grain-based centrepiece)
-- At least 1–2 complementary side dishes
-- Proper sauces, dressings, or condiments to enhance flavour
-- Garnishes and visual/textural contrasts for plating appeal
-- A fully balanced meal — not just a main on its own
-
-User request: ${userPrompt}
-Servings: ${servings}
-
-Create a complete recipe based on this request: "${userPrompt}"
-
-REQUIREMENTS:
-- Servings: ${servings}
-- Calculate a realistic cooking time based on actual recipe steps
-- Use ingredients commonly available in UK supermarkets
-- UK measurement units ONLY (e.g. grams, ml, tbsp, tsp, litres) — DO NOT use cups or ounces
-- Make it achievable for a home cook
-- Stay completely authentic to ONE cuisine tradition (e.g., Italian, French, Thai, Indian, Mexican, Japanese, Chinese, etc.)
-  - No fusion or cross-cuisine blends
-  - Stay regionally consistent within that cuisine if appropriate
-- Ensure at least 3 clear differences in dish structure or flavour if the same prompt is used with different variation seeds
-- Include at least one visual or textural contrast element
+RULES: Complete meal, realistic times, UK measurements, authentic cuisine
 
 Return ONLY a valid JSON object with this exact structure (NO markdown, no explanations, and no trailing commas):
 
@@ -517,12 +473,13 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
 }`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        model: "gpt-3.5-turbo", // Faster model for speed optimization
         messages: [
           { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations." },
           { role: "user", content: systemPrompt }
         ],
-        temperature: 0.8 // Increased temperature for more recipe variation
+        temperature: 0.8, // Increased temperature for more recipe variation
+        max_tokens: 1500 // Limit tokens for faster response
       });
 
       let recipe;
@@ -543,28 +500,30 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
         throw new Error('Failed to parse recipe JSON from AI response');
       }
       
-      // Generate image for the recipe
-      const imageUrl = await generateRecipeImage(recipe.title, recipe.cuisine);
-      if (imageUrl) {
-        recipe.imageUrl = imageUrl;
-        recipe.image = imageUrl; // Also set image field for compatibility
-      }
+      // Send recipe immediately to user for faster response
+      res.json({ recipe });
 
-      // Log the interaction using simplified logging
-      await logSimpleGPTInteraction({
-        endpoint: "chef-assist-generate",
+      // Generate image and log in background (don't await)
+      generateRecipeImage(recipe.title, recipe.cuisine).then(imageUrl => {
+        if (imageUrl) {
+          console.log('🎨 Background image generated for:', recipe.title);
+          // Could store in database here for future use
+        }
+      }).catch(err => console.error('Background image generation failed:', err));
+
+      // Log the interaction in background
+      logSimpleGPTInteraction({
+        endpoint: "chef-assist-generate", 
         prompt: systemPrompt,
         response: JSON.stringify(recipe),
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o",
         duration: 0,
         inputTokens: Math.ceil(systemPrompt.length / 4),
         outputTokens: Math.ceil(JSON.stringify(recipe).length / 4),
         cost: 0.001,
         success: true,
         userId: req.session?.userId || undefined
-      });
-
-      res.json({ recipe });
+      }).catch(err => console.error('Background logging failed:', err));
     } catch (error: any) {
       console.error('Chef assist generation error:', error);
       res.status(500).json({ error: error.message || "Failed to generate recipe" });
@@ -635,12 +594,13 @@ Return ONLY a valid JSON object with this exact structure (NO trailing commas):
 CRITICAL: Ensure NO trailing commas after the last item in any array or object. Return ONLY the JSON object, no markdown, no explanations.`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        model: "gpt-3.5-turbo", // Faster model for speed optimization
         messages: [
           { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations." },
           { role: "user", content: systemPrompt }
         ],
-        temperature: 0.7
+        temperature: 0.7,
+        max_tokens: 1500 // Limit tokens for faster response
       });
 
       // Clean and parse the JSON response for Fridge2Fork
@@ -670,27 +630,29 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
         throw new Error('Failed to parse AI recipe response. Please try again.');
       }
       
-      // Generate image for the recipe
-      const imageUrl = await generateRecipeImage(recipe.title, recipe.cuisine);
-      if (imageUrl) {
-        recipe.imageUrl = imageUrl;
-      }
+      // Send recipe immediately to user for faster response
+      res.json({ recipe });
 
-      // Log the interaction using simplified logging
-      await logSimpleGPTInteraction({
+      // Generate image and log in background (don't await)
+      generateRecipeImage(recipe.title, recipe.cuisine).then(imageUrl => {
+        if (imageUrl) {
+          console.log('🎨 Background image generated for Fridge2Fork:', recipe.title);
+        }
+      }).catch(err => console.error('Background image generation failed:', err));
+
+      // Log in background
+      logSimpleGPTInteraction({
         endpoint: "generate-full-recipe",
         prompt: systemPrompt,
         response: JSON.stringify(recipe),
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o", 
         duration: 0,
         inputTokens: Math.ceil(systemPrompt.length / 4),
         outputTokens: Math.ceil(JSON.stringify(recipe).length / 4),
         cost: 0.001,
         success: true,
         userId: req.session?.userId || undefined
-      });
-
-      res.json({ recipe });
+      }).catch(err => console.error('Background logging failed:', err));
     } catch (error: any) {
       console.error('Chef assist generation error:', error);
       res.status(500).json({ error: error.message || "Failed to generate recipe" });
