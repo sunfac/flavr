@@ -157,9 +157,22 @@ Look for:
 - Spices and seasonings
 - Oils, vinegars, cooking liquids
 
-Be generous in your identification - if you can see a milk carton, list "milk". If there's a cheese package, list "cheese". If you see egg cartons, list "eggs". Include items even if they're partially obscured or in packaging.
+For each ingredient you identify, provide your confidence level as a percentage (0-100%):
+- 90-100%: Clearly visible and easily identifiable
+- 70-89%: Mostly visible with clear packaging/labels
+- 50-69%: Partially visible or somewhat obscured but recognizable
+- 30-49%: Difficult to see but likely present based on packaging/context
+- Below 30%: Don't include (too uncertain)
 
-Return a simple list of ingredient names, one per line. Use common cooking names (e.g., "bell pepper", "ground beef", "cheddar cheese", "olive oil").`
+Return results in this format:
+ingredient_name: confidence%
+
+For example:
+milk: 95%
+cheese: 80%
+eggs: 75%
+
+Use common cooking names and only include items with 30% confidence or higher.`
             },
             {
               type: "image_url",
@@ -176,33 +189,52 @@ Return a simple list of ingredient names, one per line. Use common cooking names
     const detectedText = response.choices[0].message.content || '';
     console.log(`OpenAI Vision raw response:`, detectedText);
     
-    // Parse the response into individual ingredients - more robust parsing
-    const rawIngredients = detectedText
-      .split(/[\n,]/) // Split on newlines AND commas
-      .map(line => line.trim())
-      .filter(line => line.length > 0)
-      .map(line => line.replace(/^[\d\.\-\*\•\+\s]*/, '')) // Remove bullet points, numbers, and leading spaces
-      .map(line => line.replace(/[^\w\s]/g, '')) // Remove special characters except spaces
-      .filter(ingredient => ingredient.length > 1)
-      .map(ingredient => ingredient.toLowerCase().trim());
-
-    console.log(`Parsed raw ingredients:`, rawIngredients);
-
-    // Filter and normalize ingredients - more lenient approach
-    const detectedItems = new Set<string>();
+    // Parse the response with confidence levels
+    const ingredientsWithConfidence: Array<{name: string, confidence: number}> = [];
     
-    rawIngredients.forEach(ingredient => {
-      if (isFood(ingredient)) {
-        detectedItems.add(normalizeIngredient(ingredient));
+    const lines = detectedText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    
+    lines.forEach(line => {
+      // Look for pattern: "ingredient: XX%" or "ingredient (XX%)" or "ingredient - XX%"
+      const confidenceMatch = line.match(/^(.+?)[\:\-\(]\s*(\d+)%/);
+      if (confidenceMatch) {
+        const ingredientName = confidenceMatch[1].trim().toLowerCase();
+        const confidence = parseInt(confidenceMatch[2]);
+        
+        if (confidence >= 30 && isFood(ingredientName)) {
+          ingredientsWithConfidence.push({
+            name: normalizeIngredient(ingredientName),
+            confidence: confidence
+          });
+        } else if (confidence < 30) {
+          console.log(`Excluded low confidence item: "${ingredientName}" (${confidence}%)`);
+        } else {
+          console.log(`Filtered out non-food item: "${ingredientName}" (${confidence}%)`);
+        }
       } else {
-        console.log(`Filtered out non-food item: "${ingredient}"`);
+        // Fallback: treat as ingredient without confidence (assign default 60%)
+        const cleanLine = line.replace(/^[\d\.\-\*\•\+\s]*/, '').replace(/[^\w\s]/g, '').toLowerCase().trim();
+        if (cleanLine.length > 1 && isFood(cleanLine)) {
+          ingredientsWithConfidence.push({
+            name: normalizeIngredient(cleanLine),
+            confidence: 60
+          });
+        }
       }
     });
 
-    // Convert to array and sort
-    const ingredients = Array.from(detectedItems).sort();
+    console.log(`Parsed ingredients with confidence:`, ingredientsWithConfidence);
+
+    // Sort by confidence (highest first) and extract names
+    const sortedIngredients = ingredientsWithConfidence
+      .sort((a, b) => b.confidence - a.confidence)
+      .map(item => item.name);
+
+    // Remove duplicates while preserving order
+    const ingredients = Array.from(new Set(sortedIngredients));
 
     console.log(`Final detected food items (${ingredients.length}):`, ingredients);
+    console.log(`Confidence levels:`, ingredientsWithConfidence.map(item => `${item.name}: ${item.confidence}%`));
 
     if (ingredients.length === 0) {
       return res.json({
