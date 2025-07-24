@@ -135,7 +135,7 @@ async function checkAndEnforceUsageLimit(req: any): Promise<{ allowed: boolean; 
     } else {
       let pseudoUser = await storage.getPseudoUser(pseudoId);
       if (!pseudoUser) {
-        pseudoUser = await storage.createPseudoUser(pseudoId);
+        pseudoUser = await storage.createPseudoUser({ pseudoId });
       }
       
       if ((pseudoUser.recipesThisMonth || 0) >= 3) {
@@ -161,6 +161,8 @@ async function checkAndEnforceUsageLimit(req: any): Promise<{ allowed: boolean; 
 async function incrementUsageCounter(req: any): Promise<void> {
   const userId = req.session?.userId;
   const pseudoId = req.headers['x-pseudo-user-id'] as string || req.session?.id || 'anonymous';
+  
+  console.log('Increment usage - userId:', userId, 'pseudoId:', pseudoId, 'headers:', req.headers['x-pseudo-user-id']);
   
   try {
     if (userId) {
@@ -248,7 +250,8 @@ export function registerRecipeRoutes(app: Express) {
   // Fridge2Fork recipe generation
   app.post("/api/generate-fridge-recipe", async (req, res) => {
     try {
-      const { quizData } = req.body;
+      // Support both direct parameters and legacy quizData format
+      const data = req.body.quizData || req.body;
       const { 
         ingredients, 
         servings = 4, 
@@ -257,7 +260,7 @@ export function registerRecipeRoutes(app: Express) {
         equipment = ["oven", "stovetop", "basic kitchen tools"],
         dietaryRestrictions = [],
         ingredientFlexibility = "pantry"
-      } = quizData;
+      } = data;
 
       if (!ingredients || ingredients.length === 0) {
         return res.status(400).json({ error: "No ingredients provided" });
@@ -1593,6 +1596,12 @@ Return valid JSON only:
         return res.status(400).json({ error: "Intent is required for chef assist mode" });
       }
 
+      // Check usage limit before generating
+      const limitCheck = await checkAndEnforceUsageLimit(req);
+      if (!limitCheck.allowed) {
+        return res.status(403).json(limitCheck.error);
+      }
+
       // Build context prompts
       const timePrompt = getTimePromptText(time);
       const ambitionPrompt = getAmbitionPromptText(ambition);
@@ -1750,6 +1759,9 @@ Return valid JSON only:
       console.log(`✅ Chef assist recipe generation completed in ${duration}ms:`, recipeData.title);
 
       res.json({ recipe: recipeData });
+
+      // Increment usage counter after successful generation
+      incrementUsageCounter(req).catch(err => console.error('Failed to increment usage:', err));
 
     } catch (error) {
       console.error('❌ Chef assist recipe generation failed:', error);

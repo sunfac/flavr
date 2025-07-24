@@ -164,6 +164,8 @@ export function registerAuthRoutes(app: Express) {
       const userId = req.session?.userId;
       const pseudoId = req.headers['x-pseudo-user-id'] as string || req.session?.id || 'anonymous';
       
+      console.log('Check usage limit - userId:', userId, 'pseudoId:', pseudoId);
+      
       if (userId) {
         // Check authenticated user
         const user = await storage.getUser(userId);
@@ -182,7 +184,7 @@ export function registerAuthRoutes(app: Express) {
         let pseudoUser = await storage.getPseudoUser(pseudoId);
         if (!pseudoUser) {
           // Create new pseudo user
-          pseudoUser = await storage.createPseudoUser(pseudoId);
+          pseudoUser = await storage.createPseudoUser({ pseudoId });
         }
         
         return res.json({
