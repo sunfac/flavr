@@ -108,7 +108,7 @@ async function generateRecipeImage(recipeTitle: string, cuisine: string): Promis
   try {
     console.log('🎨 Generating recipe image with DALL-E 3...');
     
-    const imagePrompt = `A beautifully plated ${recipeTitle} dish, ${cuisine} cuisine style, professional food photography, appetizing, vibrant colors, restaurant quality presentation, overhead view, natural lighting`;
+    const imagePrompt = `A realistic photograph of ${recipeTitle} as it would actually appear when served at home. Show the complete dish with all components mentioned in the title, plated naturally on a regular dinner plate or serving dish. ${cuisine} cuisine style. The food should look delicious but achievable for a home cook - not overly styled or garnished. Natural home kitchen lighting, authentic presentation showing the actual textures and colors of the cooked ingredients. Include any sides, sauces, or accompaniments mentioned in the dish name. 45-degree angle view showing the full portion size.`;
     
     const response = await openai.images.generate({
       model: "dall-e-3",
