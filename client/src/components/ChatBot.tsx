@@ -70,18 +70,18 @@ export default function ChatBot({
      location.includes('/fridge') ? 'fridge' : 
      location.includes('/chef') ? 'chef' : undefined);
 
-  // Conversation suggestion chips with Lucide icons
+  // Direct example commands with Lucide icons
   const suggestionChips = [
-    { text: "Change portion size", icon: iconMap.users, updatesRecipe: true },
-    { text: "Make it under 700 kcal", icon: iconMap.target, updatesRecipe: true },
-    { text: "Make gluten & dairy free", icon: iconMap.heart, updatesRecipe: true },
-    { text: "Turn into quick lunch", icon: iconMap.clock, updatesRecipe: true },
-    { text: "Make more advanced", icon: iconMap.chefHat, updatesRecipe: true },
-    { text: "Add more flavor", icon: iconMap.flame, updatesRecipe: true },
-    { text: "Suggest a side dish", icon: iconMap.utensilsCrossed, updatesRecipe: false },
-    { text: "What can I prep ahead?", icon: iconMap.timer, updatesRecipe: false },
-    { text: "Give me a wine pairing", icon: iconMap.wine, updatesRecipe: false },
-    { text: "Swap an ingredient", icon: iconMap.refresh, updatesRecipe: true }
+    { text: "Make this for 6 people", icon: iconMap.users, updatesRecipe: true },
+    { text: "Make it vegan", icon: iconMap.heart, updatesRecipe: true },
+    { text: "Add more spice", icon: iconMap.flame, updatesRecipe: true },
+    { text: "Make it gluten-free", icon: iconMap.shield, updatesRecipe: true },
+    { text: "Double the recipe", icon: iconMap.plus, updatesRecipe: true },
+    { text: "Make it healthier", icon: iconMap.target, updatesRecipe: true },
+    { text: "Suggest a wine pairing", icon: iconMap.wine, updatesRecipe: false },
+    { text: "What sides go with this?", icon: iconMap.utensilsCrossed, updatesRecipe: false },
+    { text: "How can I prep ahead?", icon: iconMap.timer, updatesRecipe: false },
+    { text: "Make it easier to cook", icon: iconMap.chefHat, updatesRecipe: true }
   ];
 
   // Get chat history
