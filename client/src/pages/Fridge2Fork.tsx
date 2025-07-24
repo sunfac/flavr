@@ -16,6 +16,7 @@ import RecipeSelectionCards from "@/components/RecipeSelectionCards";
 export default function Fridge2Fork() {
   const [, navigate] = useLocation();
   const [ingredients, setIngredients] = useState<string[]>([]);
+  const [ingredientsWithConfidence, setIngredientsWithConfidence] = useState<Array<{name: string, confidence: number}>>([]);
   const [currentIngredient, setCurrentIngredient] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -55,11 +56,19 @@ export default function Fridge2Fork() {
       
       const data = await response.json();
       const detectedIngredients = data.ingredients || [];
+      const confidenceData = data.ingredientsWithConfidence || [];
       
       if (detectedIngredients.length > 0) {
         setIngredients(prev => {
           const combined = [...prev, ...detectedIngredients];
           return combined.filter((item, index) => combined.indexOf(item) === index);
+        });
+        
+        // Store confidence data for detected ingredients
+        setIngredientsWithConfidence(prev => {
+          const existingNames = prev.map(item => item.name);
+          const newConfidenceData = confidenceData.filter((item: any) => !existingNames.includes(item.name));
+          return [...prev, ...newConfidenceData];
         });
         
         toast({
@@ -110,7 +119,16 @@ export default function Fridge2Fork() {
   };
 
   const removeIngredient = (index: number) => {
+    const ingredientToRemove = ingredients[index];
     setIngredients(ingredients.filter((_, i) => i !== index));
+    // Also remove from confidence data
+    setIngredientsWithConfidence(prev => prev.filter(item => item.name !== ingredientToRemove));
+  };
+
+  // Helper function to get confidence for an ingredient
+  const getIngredientConfidence = (ingredientName: string): number | null => {
+    const confidenceItem = ingredientsWithConfidence.find(item => item.name === ingredientName);
+    return confidenceItem ? confidenceItem.confidence : null;
   };
 
   const handleGenerateRecipes = async () => {
@@ -298,13 +316,21 @@ export default function Fridge2Fork() {
                           >
                             <Badge 
                               variant="secondary" 
-                              className="pl-3 pr-1 py-2 bg-orange-500/20 border-orange-400/50 text-orange-200 hover:bg-orange-500/30 transition-colors"
+                              className="pl-3 pr-1 py-2 bg-orange-500/20 border-orange-400/50 text-orange-200 hover:bg-orange-500/30 transition-colors flex items-center gap-2"
                             >
-                              {ingredient}
+                              <span>{ingredient}</span>
+                              {(() => {
+                                const confidence = getIngredientConfidence(ingredient);
+                                return confidence ? (
+                                  <span className="text-xs bg-orange-600/30 px-1.5 py-0.5 rounded-full text-orange-300">
+                                    {confidence}%
+                                  </span>
+                                ) : null;
+                              })()}
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="ml-2 h-auto p-1 hover:bg-red-400/20 rounded-full"
+                                className="ml-1 h-auto p-1 hover:bg-red-400/20 rounded-full"
                                 onClick={() => removeIngredient(index)}
                                 title={`Remove ${ingredient}`}
                               >

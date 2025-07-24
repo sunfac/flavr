@@ -307,6 +307,7 @@ Changelog:
 - January 23, 2025. Enhanced recipe display with dynamic updates - integrated StreamingChatBot component with live recipe card updates via function calling, fixed duplicate servings key in EnhancedRecipeCard, improved image handling in recipe generation with proper fallback support for both image and imageUrl properties
 - January 23, 2025. Fixed Fridge2Fork ingredient substitution logic - enhanced prompts to intelligently substitute ingredients for culinary harmony (e.g., pasta instead of rice for pasta salad), removed inaccurate time chips from recipe headers, improved ingredient flexibility to prioritize authentic dish preparation over literal ingredient usage
 - January 23, 2025. Fixed recipe image display and mobile ChatBot - updated recipeStore to handle both 'image' and 'imageUrl' fields from API responses, enhanced mobile responsiveness of ChatBot component by adding flex-shrink-0 to input area, removed sticky positioning from Recipe page chat panel to improve mobile experience, ensured recipe images display properly instead of showing "text"
+- January 23, 2025. Enhanced photo detection with confidence percentages - OpenAI Vision now provides confidence levels (30-100%) for each detected ingredient, improved cuisine-based ingredient grouping to prevent incompatible combinations (Asian, Mediterranean, British, neutral categories), enhanced prompts for better culinary authenticity, ingredient badges now display confidence percentages in orange pills for AI-detected items
 ```
 
 ## User Preferences

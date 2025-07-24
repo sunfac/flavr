@@ -247,6 +247,7 @@ Use common cooking names and only include items with 30% confidence or higher.`
 
     res.json({
       ingredients,
+      ingredientsWithConfidence,
       count: ingredients.length
     });
 
