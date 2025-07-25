@@ -767,6 +767,12 @@ SEED TRACE: ${randomSeed}`;
           .replace(/,(\s*[}\]])/g, '$1')
           // Fix malformed strings with quotes
           .replace(/[""]/g, '"')
+          // Fix unquoted property names like 'runny honey' to "runny honey"
+          .replace(/'([^']+)'/g, '"$1"')
+          // Fix missing quotes around property names
+          .replace(/(\w+):/g, '"$1":')
+          // Fix instruction array structure issues
+          .replace(/],\s*\{[\s\S]*?"step"\s*:\s*1/g, '], "instructions": [{"step": 1')
           // Fix incomplete field definitions
           .replace(/,(\s*$)/g, '')
           // Fix broken array/object syntax
@@ -788,7 +794,7 @@ SEED TRACE: ${randomSeed}`;
         
         // Fallback: Create a basic recipe structure
         recipe = {
-          title: prompt || "Custom Recipe",
+          title: userPrompt || "Custom Recipe",
           description: "A delicious dish created just for you",
           cuisine: "International",
           difficulty: "medium",
@@ -988,15 +994,34 @@ SEED TRACE: ${randomSeed}`;
         }
         
         // Advanced JSON cleanup for malformed responses
+        console.log('🧼 Cleaning JSON content...');
+        
+        // First, try to extract just the valid JSON part
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          content = jsonMatch[0];
+        }
+        
         content = content
           // Remove unicode escape sequences that cause parsing errors
           .replace(/\\u[0-9a-fA-F]{4}/g, '')
           // Remove malformed unicode characters
           .replace(/[\u2681\u26817]/g, '')
-          // Fix trailing commas
-          .replace(/,(\s*[}\]])/g, '$1')
+          // Fix unquoted property names like 'runny honey' to "runny honey"  
+          .replace(/'([^']+)'/g, '"$1"')
+          // Fix missing quotes around property names (be careful not to break existing quotes)
+          .replace(/(\w+)\s*:/g, '"$1":')
+          // Fix double-quoted property names that got double-quoted
+          .replace(/""(\w+)""/g, '"$1"')
           // Fix malformed strings with quotes
           .replace(/[""]/g, '"')
+          // Fix instruction array structure issues where array closes and then objects start
+          .replace(/],\s*\{[\s\S]*?("step")\s*:\s*1/g, '], "instructions": [{"step": 1')
+          // Fix broken tips and nutritionalHighlights structure
+          .replace(/\{\s*tips\s*:\s*\[/g, '"tips": [')
+          .replace(/\{\s*nutritionalHighlights\s*:\s*\[/g, '"nutritionalHighlights": [')
+          // Fix trailing commas
+          .replace(/,(\s*[}\]])/g, '$1')
           // Fix incomplete field definitions
           .replace(/,(\s*$)/g, '')
           // Fix broken array/object syntax
@@ -1005,6 +1030,8 @@ SEED TRACE: ${randomSeed}`;
           .replace(/,\s*$/, '')
           // Remove garbage text after valid JSON
           .replace(/\}[^}]*$/, '}');
+          
+        console.log('🧼 Cleaned content preview:', content.substring(0, 500) + '...');
         
         // Validate essential fields are present
         if (!content.includes('"title"') || !content.includes('"ingredients"')) {
