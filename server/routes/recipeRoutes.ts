@@ -829,12 +829,12 @@ Return only the recipe name in 4-8 words. Be wildly creative and diverse using A
 Multi-Layer Seeds: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o",
         messages: [
           { role: "system", content: `You are a wildly creative chef who creates authentic dishes from single cuisine traditions. Use MULTIPLE variation seeds (${randomSeed}, ${complexityLevel}, ${simpleStyle}, ${creativityMode}, ${seasonalFocus}, ${textureTheme}, ${flavorProfile}) to ensure ULTRA-MAXIMUM diversity - every click should produce completely different suggestions that vary in complexity, style, creativity, seasonality, texture, and flavor. Return ONLY the recipe name in 4-8 words using UK English terminology (aubergine not eggplant, courgette not zucchini, chilli not chili, prawns not shrimp). NEVER include difficulty levels. NEVER mix cuisines. Choose ONE authentic cuisine and stay within that tradition. MULTI-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
           { role: "user", content: prompt }
         ],
-        temperature: 0.9,
+        temperature: 1.2,
         max_tokens: 25
       });
 
