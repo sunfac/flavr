@@ -695,10 +695,13 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
           "Mexican", "Spanish", "Greek", "Middle Eastern", "Japanese", "American BBQ", "Moroccan"
         ],
         
-        // Popular proteins for UK consumers  
+        // Popular proteins for UK consumers (weighted for frequency)
         proteins: [
-          "chicken breast", "salmon fillet", "beef mince", "lamb chops", "cod fillet", "pork tenderloin",
-          "king prawns", "duck breast", "sea bass", "tuna steak", "turkey breast", "venison", "mussels", "crab"
+          "chicken breast", "chicken thighs", "lamb chops", "lamb shoulder", "king prawns", "cod fillet", 
+          "beef mince", "beef steaks", "pork tenderloin", "pork chops", "sea bass", "salmon fillet",
+          "halloumi", "chicken breast", "lamb leg", "prawns", "cod loins", "beef joints", "pork belly",
+          "sea bream", "haddock", "turkey breast", "duck breast", "tuna steak", "mussels", "crab",
+          "venison", "game birds"
         ],
         
         // Popular cooking techniques
@@ -939,8 +942,11 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
           "Mexican", "Spanish", "Greek", "Middle Eastern", "Japanese", "American BBQ", "Moroccan"
         ],
         proteins: [
-          "chicken breast", "salmon fillet", "beef mince", "lamb chops", "cod fillet", "pork tenderloin",
-          "king prawns", "duck breast", "sea bass", "tuna steak", "turkey breast", "venison", "mussels", "crab"
+          "chicken breast", "chicken thighs", "lamb chops", "lamb shoulder", "king prawns", "cod fillet", 
+          "beef mince", "beef steaks", "pork tenderloin", "pork chops", "sea bass", "salmon fillet",
+          "halloumi", "chicken breast", "lamb leg", "prawns", "cod loins", "beef joints", "pork belly",
+          "sea bream", "haddock", "turkey breast", "duck breast", "tuna steak", "mussels", "crab",
+          "venison", "game birds"
         ],
         techniques: [
           "pan-seared", "roasted", "grilled", "braised", "slow-cooked", "sautéed", "poached", "baked", 
