@@ -733,14 +733,14 @@ SEED TRACE: ${randomSeed}`;
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: "You are a helpful assistant." },
+          { role: "system", content: "You are a JSON API that returns valid recipe data. Always return properly formatted JSON with no extra text, no markdown, and no unicode escape sequences." },
           { role: "user", content: systemPrompt }
         ],
-        temperature: 0.9,
-        top_p: 1,
-        presence_penalty: 0.8,
-        frequency_penalty: 0.4,
-        max_tokens: 2000
+        temperature: 0.7,
+        top_p: 0.9,
+        presence_penalty: 0.6,
+        frequency_penalty: 0.3,
+        max_tokens: 1500
       });
 
       let recipe;
@@ -759,6 +759,10 @@ SEED TRACE: ${randomSeed}`;
         
         // Advanced JSON cleanup for malformed responses
         content = content
+          // Remove unicode escape sequences that cause parsing errors
+          .replace(/\\u[0-9a-fA-F]{4}/g, '')
+          // Remove malformed unicode characters
+          .replace(/[\u2681\u26817]/g, '')
           // Fix trailing commas
           .replace(/,(\s*[}\]])/g, '$1')
           // Fix malformed strings with quotes
@@ -768,7 +772,9 @@ SEED TRACE: ${randomSeed}`;
           // Fix broken array/object syntax
           .replace(/\}\s*\{/g, '},{')
           // Remove any incomplete trailing elements
-          .replace(/,\s*$/, '');
+          .replace(/,\s*$/, '')
+          // Remove garbage text after valid JSON
+          .replace(/\}[^}]*$/, '}');
         
         // If content looks severely malformed, attempt to construct basic recipe
         if (!content.includes('"title"') || !content.includes('"ingredients"')) {
@@ -956,14 +962,14 @@ SEED TRACE: ${randomSeed}`;
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: "You are a helpful assistant." },
+          { role: "system", content: "You are a JSON API that returns valid recipe data. Always return properly formatted JSON with no extra text, no markdown, and no unicode escape sequences." },
           { role: "user", content: systemPrompt }
         ],
-        temperature: 0.9,
-        top_p: 1,
-        presence_penalty: 0.8,
-        frequency_penalty: 0.4,
-        max_tokens: 2000
+        temperature: 0.7,
+        top_p: 0.9,
+        presence_penalty: 0.6,
+        frequency_penalty: 0.3,
+        max_tokens: 1500
       });
 
       // Clean and parse the JSON response for Fridge2Fork
@@ -983,6 +989,10 @@ SEED TRACE: ${randomSeed}`;
         
         // Advanced JSON cleanup for malformed responses
         content = content
+          // Remove unicode escape sequences that cause parsing errors
+          .replace(/\\u[0-9a-fA-F]{4}/g, '')
+          // Remove malformed unicode characters
+          .replace(/[\u2681\u26817]/g, '')
           // Fix trailing commas
           .replace(/,(\s*[}\]])/g, '$1')
           // Fix malformed strings with quotes
@@ -992,7 +1002,9 @@ SEED TRACE: ${randomSeed}`;
           // Fix broken array/object syntax
           .replace(/\}\s*\{/g, '},{')
           // Remove any incomplete trailing elements
-          .replace(/,\s*$/, '');
+          .replace(/,\s*$/, '')
+          // Remove garbage text after valid JSON
+          .replace(/\}[^}]*$/, '}');
         
         // Validate essential fields are present
         if (!content.includes('"title"') || !content.includes('"ingredients"')) {
