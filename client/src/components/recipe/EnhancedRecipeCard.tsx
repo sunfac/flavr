@@ -224,6 +224,18 @@ function EnhancedRecipeCard({
     description: instruction,
     duration: extractDuration(instruction)
   }));
+  
+  // Debug logging for step creation
+  console.log('🔍 EnhancedRecipeCard Debug:', {
+    recipeId: recipe.id,
+    storeId: recipeStore.id,
+    isStoreActive: recipeStore.id === recipe.id,
+    storeStepsLength: recipeStore.steps.length,
+    activeInstructionsLength: activeInstructions.length,
+    finalStepsLength: steps.length,
+    firstInstruction: activeInstructions[0],
+    firstStep: steps[0]
+  });
 
   // Note: Removed Zustand store sync useEffect that was causing infinite loops
   // Voice commands and recipe updates are now handled through other mechanisms

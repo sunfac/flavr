@@ -167,6 +167,14 @@ export const useRecipeStore = create<RecipeStore>()(
 
       updateActiveRecipe: (recipe: any, generationParams?: any) => {
         console.log('🔄 Recipe Store: Updating active recipe from chat', recipe);
+        console.log('🔍 Recipe data structure:', {
+          hasIngredients: !!recipe.ingredients,
+          ingredientsLength: recipe.ingredients?.length,
+          hasInstructions: !!recipe.instructions,
+          instructionsLength: recipe.instructions?.length,
+          instructionsType: typeof recipe.instructions?.[0],
+          firstInstruction: recipe.instructions?.[0]
+        });
         
         // Handle both API response format and internal format
         const ingredients = recipe.ingredients?.map((ing: any, index: number) => ({
@@ -182,6 +190,12 @@ export const useRecipeStore = create<RecipeStore>()(
           description: typeof instruction === 'string' ? instruction : instruction.instruction,
           duration: 0
         })) || [];
+        
+        console.log('🔧 Processed instructions:', {
+          originalCount: recipe.instructions?.length,
+          processedCount: instructions.length,
+          firstProcessedInstruction: instructions[0]
+        });
 
         const updatedState: RecipeState = {
           id: recipe.id || Date.now().toString(),
