@@ -47,6 +47,121 @@ if (!global.recipeImageCache) {
   global.recipeImageCache = new Map();
 }
 
+// Helper function to parse malformed JSON from OpenAI
+function parseRecipeJSON(content: string, fallbackTitle: string = "Custom Recipe"): any {
+  console.log('🔧 Attempting to parse recipe JSON...');
+  
+  try {
+    // First attempt: Direct parse
+    const parsed = JSON.parse(content);
+    console.log('✅ Direct JSON parse succeeded!');
+    return parsed;
+  } catch (firstError) {
+    console.log('⚠️ Direct parse failed, attempting cleanup...');
+  }
+  
+  try {
+    // Second attempt: Clean and parse
+    let cleaned = content
+      .replace(/```json\n?/g, '').replace(/\n?```/g, '')
+      .replace(/[\u2681\u26817]/g, '')
+      .replace(/\\u[0-9a-fA-F]{4}/g, '')
+      .replace(/[""]/g, '"')
+      .replace(/'([^']+)'/g, '"$1"')
+      .replace(/,(\s*[}\]])/g, '$1')
+      .trim();
+    
+    const jsonStart = cleaned.indexOf('{');
+    const jsonEnd = cleaned.lastIndexOf('}');
+    if (jsonStart !== -1 && jsonEnd !== -1) {
+      cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
+    }
+    
+    const parsed = JSON.parse(cleaned);
+    console.log('✅ Cleaned JSON parse succeeded!');
+    return parsed;
+  } catch (secondError) {
+    console.log('⚠️ Cleaned parse failed, attempting reconstruction...');
+  }
+  
+  // Final attempt: Manual reconstruction
+  try {
+    const titleMatch = content.match(/"title"\s*:\s*"([^"]+)"/);
+    const descMatch = content.match(/"description"\s*:\s*"([^"]+)"/);
+    const cuisineMatch = content.match(/"cuisine"\s*:\s*"([^"]+)"/);
+    const difficultyMatch = content.match(/"difficulty"\s*:\s*"([^"]+)"/);
+    const prepTimeMatch = content.match(/"prepTime"\s*:\s*(\d+)/);
+    const cookTimeMatch = content.match(/"cookTime"\s*:\s*(\d+)/);
+    const servingsMatch = content.match(/"servings"\s*:\s*(\d+)/);
+    
+    // Extract ingredients
+    const ingredientsMatch = content.match(/"ingredients"\s*:\s*\[(.*?)\]/s);
+    let ingredients = [];
+    if (ingredientsMatch) {
+      const ingredientMatches = ingredientsMatch[1].match(/\{\s*"name"\s*:\s*"([^"]+)"\s*,\s*"amount"\s*:\s*"([^"]+)"\s*\}/g);
+      if (ingredientMatches) {
+        ingredients = ingredientMatches.map(match => {
+          const name = match.match(/"name"\s*:\s*"([^"]+)"/)?.[1] || "ingredient";
+          const amount = match.match(/"amount"\s*:\s*"([^"]+)"/)?.[1] || "to taste";
+          return { name, amount };
+        });
+      }
+    }
+    
+    // Extract instructions
+    let instructions = [];
+    const instructionMatches = content.match(/\{\s*"step"\s*:\s*(\d+)\s*,\s*"instruction"\s*:\s*"([^"]+)"\s*\}/g);
+    if (instructionMatches && instructionMatches.length > 3) {
+      instructions = instructionMatches.map((match, index) => {
+        const instruction = match.match(/"instruction"\s*:\s*"([^"]+)"/)?.[1] || `Step ${index + 1}`;
+        return { step: index + 1, instruction };
+      });
+    }
+    
+    const recipe = {
+      title: titleMatch?.[1] || fallbackTitle,
+      description: descMatch?.[1] || "A delicious dish created just for you",
+      cuisine: cuisineMatch?.[1] || "International",
+      difficulty: difficultyMatch?.[1] || "medium",
+      prepTime: prepTimeMatch ? parseInt(prepTimeMatch[1]) : 15,
+      cookTime: cookTimeMatch ? parseInt(cookTimeMatch[1]) : 30,
+      servings: servingsMatch ? parseInt(servingsMatch[1]) : 4,
+      ingredients: ingredients.length > 0 ? ingredients : [
+        { name: "See recipe description", amount: "As needed" }
+      ],
+      instructions: instructions.length > 0 ? instructions : [
+        { step: 1, instruction: "Please regenerate this recipe for complete instructions" }
+      ],
+      tips: ["Regenerate recipe if instructions are incomplete"],
+      nutritionalHighlights: ["Fresh ingredients", "Balanced nutrition"]
+    };
+    
+    console.log('✅ Manual reconstruction succeeded!', {
+      ingredients: ingredients.length,
+      instructions: instructions.length
+    });
+    
+    return recipe;
+  } catch (finalError) {
+    console.error('🔥 All parsing attempts failed:', finalError);
+    
+    // Absolute fallback
+    return {
+      title: fallbackTitle,
+      description: "A delicious dish created just for you",
+      cuisine: "International",
+      difficulty: "medium",
+      prepTime: 15,
+      cookTime: 30,
+      servings: 4,
+      ingredients: [{ name: "Various ingredients", amount: "As needed" }],
+      instructions: [{ step: 1, instruction: "Please try generating this recipe again" }],
+      tips: ["Recipe generation encountered an error"],
+      nutritionalHighlights: ["Nutritional information pending"]
+    };
+  }
+}
+
 // Helper function to convert recipe text to UK English
 function convertRecipeToUKEnglish(recipe: any): any {
   if (!recipe) return recipe;
@@ -746,140 +861,31 @@ SEED TRACE: ${randomSeed}`;
       let recipe;
       try {
         let content = completion.choices[0].message.content || "{}";
+        console.log('🔧 Raw OpenAI response:', content.substring(0, 200) + '...');
         
-        // Remove markdown code blocks
-        content = content.replace(/```json\n?/g, '').replace(/\n?```/g, '').trim();
+        // Use the parseRecipeJSON helper function
+        recipe = parseRecipeJSON(content, userPrompt || "Custom Recipe");
+      } catch (error) {
+        console.error('🔥 Unexpected error in Chef Assist:', error);
         
-        // Extract JSON from potential extra text
-        const jsonStart = content.indexOf('{');
-        const jsonEnd = content.lastIndexOf('}');
-        if (jsonStart !== -1 && jsonEnd !== -1) {
-          content = content.substring(jsonStart, jsonEnd + 1);
-        }
-        
-        // Advanced JSON cleanup for malformed responses
-        console.log('🧼 Raw content before cleanup:', content.substring(0, 200) + '...');
-        
-        content = content
-          // Remove unicode escape sequences that cause parsing errors
-          .replace(/\\u[0-9a-fA-F]{4}/g, '')
-          // Remove malformed unicode characters
-          .replace(/[\u2681\u26817]/g, '')
-          // Fix unquoted property names like 'runny honey' to "runny honey"
-          .replace(/'([^']+)'/g, '"$1"')
-          // Fix missing quotes around property names but preserve existing quoted ones
-          .replace(/(?<!")(\w+)(?=\s*:)/g, '"$1"')
-          // Fix double quotes that might have been created
-          .replace(/""(\w+)""/g, '"$1"')
-          // Fix malformed strings with quotes
-          .replace(/[""]/g, '"')
-          // Fix specific JSON structure where instructions array breaks
-          .replace(/],\s*\{[\s\S]*?"step"\s*:\s*1/g, '], "instructions": [{"step": 1')
-          // Fix orphaned properties after arrays
-          .replace(/],\s*\{\s*tips/g, '], "tips"')
-          .replace(/],\s*\{\s*nutritionalHighlights/g, '], "nutritionalHighlights"')
-          // Fix trailing commas
-          .replace(/,(\s*[}\]])/g, '$1')
-          // Fix broken array/object syntax
-          .replace(/\}\s*\{/g, '},{')
-          // Remove incomplete trailing elements
-          .replace(/,\s*$/, '')
-          // Ensure proper JSON structure end
-          .replace(/\}[^}]*$/, '}');
-          
-        console.log('🧼 Cleaned content preview:', content.substring(0, 300) + '...');
-        
-        // If content looks severely malformed, attempt to construct basic recipe
-        if (!content.includes('"title"') || !content.includes('"ingredients"')) {
-          throw new Error('Response missing required recipe fields');
-        }
-        
-        console.log('🧪 Attempting to parse cleaned JSON...');
-        recipe = JSON.parse(content);
-        console.log('✅ JSON parsed successfully!');
-      } catch (parseError) {
-        console.error('🔥 Chef Assist JSON parsing error:', parseError);
-        console.error('🔥 Raw OpenAI content:', completion.choices[0].message.content);
-        console.error('🔥 Cleaned content that failed:', content || 'undefined');
-        
-        // Try one more aggressive cleanup attempt for severely malformed JSON
-        try {
-          console.log('🔧 Attempting surgical JSON reconstruction...');
-          
-          let rawContent = completion.choices[0].message.content || "{}";
-          console.log('🔧 Raw content length:', rawContent.length);
-          
-          // Extract the basic recipe structure manually using regex
-          const titleMatch = rawContent.match(/"title"\s*:\s*"([^"]+)"/);
-          const descMatch = rawContent.match(/"description"\s*:\s*"([^"]+)"/);
-          const cuisineMatch = rawContent.match(/"cuisine"\s*:\s*"([^"]+)"/);
-          const difficultyMatch = rawContent.match(/"difficulty"\s*:\s*"([^"]+)"/);
-          const prepTimeMatch = rawContent.match(/"prepTime"\s*:\s*(\d+)/);
-          const cookTimeMatch = rawContent.match(/"cookTime"\s*:\s*(\d+)/);
-          const servingsMatch = rawContent.match(/"servings"\s*:\s*(\d+)/);
-          
-          // Extract ingredients manually
-          const ingredientsMatch = rawContent.match(/"ingredients"\s*:\s*\[(.*?)\]/s);
-          let ingredients = [];
-          if (ingredientsMatch) {
-            const ingredientText = ingredientsMatch[1];
-            const ingredientMatches = ingredientText.match(/\{"name"\s*:\s*"([^"]+)",\s*"amount"\s*:\s*"([^"]+)"\}/g);
-            if (ingredientMatches) {
-              ingredients = ingredientMatches.map(match => {
-                const nameMatch = match.match(/"name"\s*:\s*"([^"]+)"/);
-                const amountMatch = match.match(/"amount"\s*:\s*"([^"]+)"/);
-                return {
-                  name: nameMatch ? nameMatch[1] : "ingredient",
-                  amount: amountMatch ? amountMatch[1] : "to taste"
-                };
-              });
-            }
-          }
-          
-          // Create a clean recipe structure
-          recipe = {
-            title: titleMatch ? titleMatch[1] : userPrompt || "Custom Recipe",
-            description: descMatch ? descMatch[1] : "A delicious dish created just for you",
-            cuisine: cuisineMatch ? cuisineMatch[1] : "International",
-            difficulty: difficultyMatch ? difficultyMatch[1] : "medium",
-            prepTime: prepTimeMatch ? parseInt(prepTimeMatch[1]) : 15,
-            cookTime: cookTimeMatch ? parseInt(cookTimeMatch[1]) : 30,
-            servings: servingsMatch ? parseInt(servingsMatch[1]) : 4,
-            ingredients: ingredients.length > 0 ? ingredients : [
-              { name: "ingredients as described", amount: "as needed" }
-            ],
-            instructions: [
-              { step: 1, instruction: "Recipe structure was corrupted. Please generate again for complete instructions." }
-            ],
-            tips: ["Due to data corruption, please regenerate this recipe for complete cooking tips"],
-            nutritionalHighlights: ["Nutritional information will be available after successful generation"]
-          };
-          
-          console.log('✅ Surgical reconstruction succeeded! Created recipe with', ingredients.length, 'ingredients');
-        } catch (repairError) {
-          console.error('🔥 Surgical reconstruction also failed:', repairError);
-          
-          // Final fallback: Create a basic recipe structure
-          recipe = {
-            title: userPrompt || "Custom Recipe",
-            description: "A delicious dish created just for you",
-            cuisine: "International",
-            difficulty: "medium",
-            prepTime: 15,
-            cookTime: 30,
-            servings: 4,
-            ingredients: [
-              { name: "ingredients as described", amount: "as needed" }
-            ],
-            instructions: [
-              { step: 1, instruction: "Please try generating this recipe again for complete instructions" }
-            ],
-            tips: ["Recipe generation encountered an error - please try again"],
-            nutritionalHighlights: ["Nutritional information will be available after successful generation"]
-          };
-          
-          console.log('🔥 Using fallback recipe structure due to parsing error');
-        }
+        // Ultimate fallback
+        recipe = {
+          title: userPrompt || "Custom Recipe",
+          description: "A delicious dish created just for you",
+          cuisine: "International",
+          difficulty: "medium",
+          prepTime: 15,
+          cookTime: 30,
+          servings: 4,
+          ingredients: [
+            { name: "ingredients as described", amount: "as needed" }
+          ],
+          instructions: [
+            { step: 1, instruction: "Please try generating this recipe again for complete instructions" }
+          ],
+          tips: ["Recipe generation encountered an error - please try again"],
+          nutritionalHighlights: ["Nutritional information will be available after successful generation"]
+        };
       }
       
       // Apply UK English conversions to recipe text
@@ -1050,122 +1056,29 @@ SEED TRACE: ${randomSeed}`;
       let recipe;
       try {
         let content = completion.choices[0].message.content || "{}";
+        console.log('🔧 Raw OpenAI response for Fridge2Fork:', content.substring(0, 200) + '...');
         
-        // Remove markdown code blocks
-        content = content.replace(/```json\n?/g, '').replace(/\n?```/g, '').trim();
+        // Use the parseRecipeJSON helper function
+        recipe = parseRecipeJSON(content, recipeIdea.title || "Fridge2Fork Recipe");
+      } catch (error) {
+        console.error('🔥 Unexpected error in Fridge2Fork:', error);
         
-        // Extract JSON from potential extra text
-        const jsonStart = content.indexOf('{');
-        const jsonEnd = content.lastIndexOf('}');
-        if (jsonStart !== -1 && jsonEnd !== -1) {
-          content = content.substring(jsonStart, jsonEnd + 1);
-        }
-        
-        // Advanced JSON cleanup for malformed responses
-        console.log('🧼 Cleaning JSON content...');
-        
-        // First, try to extract just the valid JSON part
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          content = jsonMatch[0];
-        }
-        
-        content = content
-          // Remove unicode escape sequences that cause parsing errors
-          .replace(/\\u[0-9a-fA-F]{4}/g, '')
-          // Remove malformed unicode characters
-          .replace(/[\u2681\u26817]/g, '')
-          // Fix unquoted property names like 'runny honey' to "runny honey"  
-          .replace(/'([^']+)'/g, '"$1"')
-          // Fix missing quotes around property names (be careful not to break existing quotes)
-          .replace(/(\w+)\s*:/g, '"$1":')
-          // Fix double-quoted property names that got double-quoted
-          .replace(/""(\w+)""/g, '"$1"')
-          // Fix malformed strings with quotes
-          .replace(/[""]/g, '"')
-          // Fix instruction array structure issues where array closes and then objects start
-          .replace(/],\s*\{[\s\S]*?("step")\s*:\s*1/g, '], "instructions": [{"step": 1')
-          // Fix broken tips and nutritionalHighlights structure
-          .replace(/\{\s*tips\s*:\s*\[/g, '"tips": [')
-          .replace(/\{\s*nutritionalHighlights\s*:\s*\[/g, '"nutritionalHighlights": [')
-          // Fix trailing commas
-          .replace(/,(\s*[}\]])/g, '$1')
-          // Fix incomplete field definitions
-          .replace(/,(\s*$)/g, '')
-          // Fix broken array/object syntax
-          .replace(/\}\s*\{/g, '},{')
-          // Remove any incomplete trailing elements
-          .replace(/,\s*$/, '')
-          // Remove garbage text after valid JSON
-          .replace(/\}[^}]*$/, '}');
-          
-        console.log('🧼 Cleaned content preview:', content.substring(0, 500) + '...');
-        
-        // Validate essential fields are present
-        if (!content.includes('"title"') || !content.includes('"ingredients"')) {
-          throw new Error('Response missing required recipe fields');
-        }
-        
-        recipe = JSON.parse(content);
-        console.log('✅ Fridge2Fork JSON parsed successfully!');
-      } catch (parseError) {
-        console.error('🔥 Fridge2Fork JSON parsing error:', parseError);
-        console.error('🔥 Raw OpenAI content:', completion.choices[0].message.content);
-        console.error('🔥 Cleaned content that failed:', content);
-        
-        // Try aggressive cleanup attempt
-        try {
-          console.log('🔧 Attempting aggressive JSON repair for Fridge2Fork...');
-          
-          let repairAttempt = completion.choices[0].message.content || "{}";
-          
-          // Find JSON boundaries more aggressively
-          const startIndex = repairAttempt.indexOf('{"');
-          const endIndex = repairAttempt.lastIndexOf('}');
-          
-          if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
-            repairAttempt = repairAttempt.substring(startIndex, endIndex + 1);
-            console.log('🔧 Extracted JSON bounds:', repairAttempt.substring(0, 100) + '...');
-            
-            // Very aggressive cleanup
-            repairAttempt = repairAttempt
-              .replace(/\n/g, ' ')                    // Remove newlines
-              .replace(/\s+/g, ' ')                   // Normalize spaces
-              .replace(/'/g, '"')                     // Fix single quotes
-              .replace(/([{,]\s*)(\w+):/g, '$1"$2":') // Quote property names
-              .replace(/""(\w+)""/g, '"$1"')          // Fix double quotes
-              .replace(/,\s*}/g, '}')                 // Remove trailing commas
-              .replace(/,\s*]/g, ']')                 // Remove trailing commas in arrays
-              .trim();
-            
-            console.log('🔧 Aggressively cleaned:', repairAttempt.substring(0, 200) + '...');
-            recipe = JSON.parse(repairAttempt);
-            console.log('✅ Aggressive repair succeeded for Fridge2Fork!');
-          } else {
-            throw new Error('Could not find JSON boundaries');
-          }
-        } catch (repairError) {
-          console.error('🔥 Aggressive repair also failed for Fridge2Fork:', repairError);
-          
-          // Final fallback
-          recipe = {
-            title: recipeIdea.title || "Fridge2Fork Recipe",
-            description: recipeIdea.description || "A delicious dish using your available ingredients",
-            cuisine: recipeIdea.cuisine || "International",
-            difficulty: "medium",
-            prepTime: 15,
-            cookTime: 30,
-            servings: servings,
-            ingredients: ingredients.map(ing => ({ name: ing, amount: "as needed" })),
-            instructions: [
-              { step: 1, instruction: "Please try generating this recipe again for complete instructions" }
-            ],
-            tips: ["Recipe generation encountered an error - please try again"],
-            nutritionalHighlights: ["Nutritional information will be available after successful generation"]
-          };
-          
-          console.log('🔥 Using fallback recipe structure for Fridge2Fork due to parsing error');
-        }
+        // Ultimate fallback
+        recipe = {
+          title: recipeIdea.title || "Fridge2Fork Recipe",
+          description: recipeIdea.description || "A delicious dish using your available ingredients",
+          cuisine: recipeIdea.cuisine || "International",
+          difficulty: "medium",
+          prepTime: 15,
+          cookTime: 30,
+          servings: servings,
+          ingredients: ingredients.map(ing => ({ name: ing, amount: "as needed" })),
+          instructions: [
+            { step: 1, instruction: "Please try generating this recipe again for complete instructions" }
+          ],
+          tips: ["Recipe generation encountered an error - please try again"],
+          nutritionalHighlights: ["Nutritional information will be available after successful generation"]
+        };
       }
       
       // Apply UK English conversions to recipe text
