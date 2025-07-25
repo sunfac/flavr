@@ -332,17 +332,25 @@ export function registerRecipeRoutes(app: Express) {
         cuisineNotes.push(`Neutral ingredients: ${groupedIngredients.neutral.join(", ")}`);
       }
 
-      const prompt = `You are a creative chef specializing in making delicious COMPLETE MEALS from available ingredients for UK consumers.
+      const prompt = `You are an accomplished chef designing restaurant-quality dishes that showcase available ingredients. Create COMPLETE, COHERENT MENU-WORTHY MEALS that demonstrate professional culinary expertise.
+
+PROFESSIONAL MENU DESIGN PRINCIPLES:
+- Every ingredient must serve a specific purpose in the dish composition
+- Balance flavors, textures, temperatures, and visual appeal with restaurant-quality standards
+- Use cooking techniques that complement the ingredients and create harmony 
+- Design complete dishes with purposeful sauce, side, and garnish integration
+- Consider authentic preparation methods and seasonal ingredient treatment
+- Create dishes worthy of critical acclaim using available ingredients
 
 VARIATION SEED: ${randomSeed}
-UK CONSUMER FOCUS: Prioritize meat, fish, or shellfish proteins with popular cooking techniques and balanced flavor profiles.
+UK CONSUMER FOCUS: Design sophisticated dishes for UK palates using available ingredients with professional presentation.
 
 ${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : `
-SEED-BASED PREFERENCES (use ${randomSeed} to influence):
+SEED-BASED CHEF INSPIRATION (use ${randomSeed} to influence):
 - Cuisine Style: ${selectedCuisine}
-- Cooking Technique: ${selectedTechnique}
-- Carbohydrate Base: ${selectedCarb}
-- Sauce/Dressing: ${selectedSauce}
+- Primary Technique: ${selectedTechnique}
+- Starch Component: ${selectedCarb}
+- Signature Sauce: ${selectedSauce}
 `}
 
 FLAVOR BALANCE MANDATE: Every dish must achieve harmony between:
@@ -741,19 +749,27 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
       
       const selectedVariationPrompt = isReroll ? rerollVariationPrompts[randomSeed % rerollVariationPrompts.length] : "";
 
-      // Generate complete recipe directly with UK consumer focus
-      const systemPrompt = `You are an expert chef specializing in dishes popular with UK consumers. Create a complete dish with suitable accompaniments based on the user's request.
+      // Generate complete recipe directly with professional menu design focus
+      const systemPrompt = `You are an accomplished head chef designing restaurant-quality dishes for your menu. Create COMPLETE, COHERENT MEALS that demonstrate professional culinary expertise and menu-worthy presentation.
+
+PROFESSIONAL MENU DESIGN REQUIREMENTS:
+- Every element must serve a purpose in the overall dish composition
+- Balance flavors, textures, temperatures, and visual appeal like a Michelin-starred establishment  
+- Ensure cooking techniques are appropriate for the ingredients and complement each other
+- Create harmony between main protein, sides, sauces, and garnishes that work as a unified dish
+- Consider seasonal ingredients and authentic preparation methods
+- Design dishes that could earn critical acclaim in a professional kitchen
 
 VARIATION SEED: ${randomSeed}
-UK CONSUMER FOCUS: Prioritize meat, fish, or shellfish proteins with popular cooking techniques and balanced flavor profiles.
+UK CONSUMER FOCUS: Design for sophisticated UK palates with emphasis on quality proteins and balanced flavor profiles.
 
 ${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : `
-SEED-BASED PREFERENCES (use ${randomSeed} to influence):
+SEED-BASED CHEF INSPIRATION (use ${randomSeed} to influence):
 - Cuisine Style: ${selectedCuisine}
-- Primary Protein: ${selectedProtein} 
-- Cooking Technique: ${selectedTechnique}
-- Carbohydrate Base: ${selectedCarb}
-- Sauce/Dressing: ${selectedSauce}
+- Featured Protein: ${selectedProtein} 
+- Primary Technique: ${selectedTechnique}
+- Starch Component: ${selectedCarb}
+- Signature Sauce: ${selectedSauce}
 `}
 
 FLAVOR BALANCE MANDATE: Every dish must achieve harmony between:
@@ -980,23 +996,31 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
       
       const selectedVariationPrompt = isReroll ? rerollVariationPrompts[randomSeed % rerollVariationPrompts.length] : "";
 
-      // Generate complete recipe from the idea with UK consumer focus
-      const systemPrompt = `You are an expert chef creating a complete recipe based on this concept for UK consumers:
+      // Generate complete recipe from the idea with professional menu design focus
+      const systemPrompt = `You are an accomplished head chef creating a restaurant-quality dish based on this concept. Design a COMPLETE, COHERENT MENU-WORTHY MEAL that demonstrates professional culinary expertise.
 
 RECIPE CONCEPT: ${recipeIdea.title}
 DESCRIPTION: ${recipeIdea.description || "A delicious dish using your available ingredients"}
 CUISINE: ${recipeIdea.cuisine || "International"}
 
+PROFESSIONAL MENU DESIGN REQUIREMENTS:
+- Every ingredient must serve a specific purpose in the dish composition
+- Balance flavors, textures, temperatures, and visual appeal with restaurant-quality standards
+- Use cooking techniques that complement the ingredients and create harmony 
+- Design complete dishes with purposeful sauce, side, and garnish integration
+- Consider authentic preparation methods and seasonal ingredient treatment
+- Create dishes worthy of critical acclaim that could appear on a Michelin-starred menu
+
 VARIATION SEED: ${randomSeed}
-UK CONSUMER FOCUS: Prioritize meat, fish, or shellfish proteins with popular cooking techniques and balanced flavor profiles.
+UK CONSUMER FOCUS: Design sophisticated dishes for UK palates with professional presentation and balanced flavor profiles.
 
 ${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : `
-SEED-BASED PREFERENCES (use ${randomSeed} to influence):
+SEED-BASED CHEF INSPIRATION (use ${randomSeed} to influence):
 - Cuisine Style: ${selectedCuisine}
-- Primary Protein: ${selectedProtein}
-- Cooking Technique: ${selectedTechnique}
-- Carbohydrate Base: ${selectedCarb}
-- Sauce/Dressing: ${selectedSauce}
+- Featured Protein: ${selectedProtein}
+- Primary Technique: ${selectedTechnique}
+- Starch Component: ${selectedCarb}
+- Signature Sauce: ${selectedSauce}
 `}
 
 FLAVOR BALANCE MANDATE: Every dish must achieve harmony between:
