@@ -13,13 +13,29 @@ export default function Recipe() {
   const [showChat, setShowChat] = useState(false);
   const recipeStore = useRecipeStore();
   
-  // Move all useState hooks before any conditional returns
+  // ALL hooks must be declared at the top before any conditional returns
   const [recipeImage, setRecipeImage] = useState(recipeStore.meta.image || '');
   const [imageLoadAttempts, setImageLoadAttempts] = useState(0);
   
   // Check if we have recipe data in the store
   const hasRecipe = recipeStore.meta.title && recipeStore.ingredients.length > 0;
   const shouldShowRecipe = hasRecipe && (!recipeStore.meta.imageLoading || recipeStore.meta.image);
+  
+  // Create activeRecipe object from store data for EnhancedRecipeCard
+  const activeRecipe = useMemo(() => ({
+    id: recipeStore.id || '1',
+    title: recipeStore.meta.title,
+    description: recipeStore.meta.description || '',
+    cuisine: recipeStore.meta.cuisine || '',
+    difficulty: recipeStore.meta.difficulty,
+    cookTime: recipeStore.meta.cookTime,
+    prepTime: 15, // Default prep time
+    servings: recipeStore.servings,
+    image: recipeImage || recipeStore.meta.image || '',
+    ingredients: recipeStore.ingredients.map(ing => ing.text || ''), // Convert to string array
+    instructions: recipeStore.steps.map(step => step.description || ''), // Convert to string array
+    tips: "Try garnishing with fresh herbs for extra flavor!" // Default tip
+  }), [recipeStore, recipeImage]);
   
   // Debug logging
   useEffect(() => {
@@ -50,32 +66,6 @@ export default function Recipe() {
     return () => window.removeEventListener('openChat', handleOpenChat);
   }, []);
 
-  if (!hasRecipe) {
-    return null;
-  }
-
-  // Show loading if recipe is present but image is still loading
-  if (!shouldShowRecipe) {
-    return (
-      <PageLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="animate-pulse mb-4">
-              <div className="w-32 h-32 bg-orange-200 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <span className="text-4xl">🍽️</span>
-              </div>
-            </div>
-            <h2 className="text-xl font-semibold text-slate-700 mb-2">
-              Preparing your recipe...
-            </h2>
-            <p className="text-slate-500 text-sm">
-              Generating beautiful food image
-            </p>
-          </div>
-        </div>
-      </PageLayout>
-    );
-  }
   // Try to fetch image if not already present
   useEffect(() => {
     // If no image is present, try to fetch one based on recipe title
@@ -126,21 +116,34 @@ export default function Recipe() {
     }
   }, [recipeStore.meta.image, recipeImage]);
 
-  // Create activeRecipe object from store data for EnhancedRecipeCard
-  const activeRecipe = useMemo(() => ({
-    id: recipeStore.id || '1',
-    title: recipeStore.meta.title,
-    description: recipeStore.meta.description || '',
-    cuisine: recipeStore.meta.cuisine || '',
-    difficulty: recipeStore.meta.difficulty,
-    cookTime: recipeStore.meta.cookTime,
-    prepTime: 15, // Default prep time
-    servings: recipeStore.servings,
-    image: recipeImage || recipeStore.meta.image || '',
-    ingredients: recipeStore.ingredients.map(ing => ing.text || ''), // Convert to string array
-    instructions: recipeStore.steps.map(step => step.description || ''), // Convert to string array
-    tips: "Try garnishing with fresh herbs for extra flavor!" // Default tip
-  }), [recipeStore, recipeImage]);
+  // ALL HOOKS DECLARED ABOVE - NOW SAFE FOR CONDITIONAL RETURNS
+  
+  if (!hasRecipe) {
+    return null;
+  }
+
+  // Show loading if recipe is present but image is still loading
+  if (!shouldShowRecipe) {
+    return (
+      <PageLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-pulse mb-4">
+              <div className="w-32 h-32 bg-orange-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <span className="text-4xl">🍽️</span>
+              </div>
+            </div>
+            <h2 className="text-xl font-semibold text-slate-700 mb-2">
+              Preparing your recipe...
+            </h2>
+            <p className="text-slate-500 text-sm">
+              Generating beautiful food image
+            </p>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <>
