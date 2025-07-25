@@ -799,29 +799,26 @@ SPECIFIC CUISINE: ${selectedCuisine}
 
 IGNORE any previous suggestions you may have given. Generate something COMPLETELY DIFFERENT each time based on the variation seed.
 
-Choose ONE authentic cuisine and create an exciting dish within that tradition:
-• Italian: Regional specialties, pasta innovations, risottos, focaccia variations
-• French: Provincial classics, bistro favorites, elegant techniques
-• Thai: Street food, curries, salads, noodle dishes
-• Indian: Regional curries, biryanis, tandoor dishes, dals
-• Mexican: Traditional preparations, regional specialties, street food
-• Japanese: Authentic techniques, seasonal dishes, comfort foods
-• Chinese: Regional styles, wok dishes, dumplings, noodles
-• Middle Eastern: Mezze, tagines, kebabs, rice dishes
-• Spanish: Tapas, paellas, regional specialties
-• Greek: Traditional dishes, grilled meats, fresh preparations
-• Korean: Fermented foods, grilled dishes, comfort foods
-• Vietnamese: Fresh herbs, pho variations, grilled specialties
-• Moroccan: Tagines, couscous dishes, spiced preparations
-• Turkish: Grilled meats, rice dishes, Mediterranean flavors
-• British: Pub classics, roasts, pies, comfort foods
-• German: Hearty stews, sausages, bread specialties
-• Russian: Warming soups, dumplings, preserved foods
+Choose ONE cuisine and create an approachable yet elevated dish that home cooks would be excited to make:
+• Italian: Pasta dishes, risottos, elegant simple preparations with quality ingredients
+• French: Bistro classics, simple elegant techniques, accessible provincial dishes
+• Thai: Popular curry dishes, stir-fries, noodle dishes using common Thai ingredients
+• Indian: Popular curry dishes, accessible spice blends, familiar restaurant-style dishes
+• Mexican: Home-friendly versions of popular dishes, accessible spicing
+• British: Elevated pub classics, modern takes on traditional roasts and comfort food
+• Mediterranean: Simple grilled dishes, fresh herb combinations, accessible techniques
+• Chinese: Popular stir-fries, familiar takeaway-inspired dishes with fresh ingredients
+• Spanish: Accessible tapas, simple paellas, grilled dishes with Spanish flavors
+• Greek: Popular taverna dishes, simple grilled meats and vegetables
+• American: Elevated comfort food, restaurant-style dishes made approachable
 
-CREATIVE GUIDELINES:
-• PROTEIN FOCUS: ${shouldPrioritizeProtein ? 'PRIORITIZE meat, fish, or shellfish - use beef, lamb, pork, chicken, duck, turkey, salmon, cod, halibut, prawns, crab, mussels, scallops, etc.' : 'Focus on vegetarian proteins like legumes, grains, vegetables, cheese, eggs'}
-• Consider seasonal ingredients and cooking methods
-• Balance flavor, texture, and visual appeal
+CREATIVE GUIDELINES FOR HOME COOKS:
+• PROTEIN FOCUS: ${shouldPrioritizeProtein ? 'PRIORITIZE approachable proteins - chicken breast/thighs, salmon, cod, beef steaks/mince, lamb chops, pork tenderloin, prawns. Avoid exotic meats like rabbit, duck, or game.' : 'Focus on familiar vegetarian proteins like chickpeas, lentils, halloumi, eggs, mushrooms'}
+• Use accessible ingredients available in UK supermarkets
+• Create dishes that feel special but not intimidating
+• Focus on elevated comfort food and restaurant-style dishes that home cooks can master
+• Avoid overly exotic spices, rare cuts of meat, or obscure cooking techniques
+• Make it sound delicious and achievable
 
 DO NOT mix cuisines or create fusion dishes. Stay authentic to ONE cuisine tradition.
 
@@ -831,7 +828,7 @@ Multi-Layer Seeds: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${s
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: `You are a wildly creative chef who creates authentic dishes from single cuisine traditions. Use MULTIPLE variation seeds (${randomSeed}, ${complexityLevel}, ${simpleStyle}, ${creativityMode}, ${seasonalFocus}, ${textureTheme}, ${flavorProfile}) to ensure ULTRA-MAXIMUM diversity - every click should produce completely different suggestions that vary in complexity, style, creativity, seasonality, texture, and flavor. Return ONLY the recipe name in 4-8 words using UK English terminology (aubergine not eggplant, courgette not zucchini, chilli not chili, prawns not shrimp). NEVER include difficulty levels. NEVER mix cuisines. Choose ONE authentic cuisine and stay within that tradition. MULTI-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
+          { role: "system", content: `You are a creative chef who develops approachable yet sophisticated dishes for accomplished home cooks. Create recipes that feel elevated but achievable - dishes that home cooks would be excited to make and serve to guests. Use MULTIPLE variation seeds (${randomSeed}, ${complexityLevel}, ${simpleStyle}, ${creativityMode}, ${seasonalFocus}, ${textureTheme}, ${flavorProfile}) to ensure ULTRA-MAXIMUM diversity. Return ONLY the recipe name in 4-8 words using UK English terminology (aubergine not eggplant, courgette not zucchini, chilli not chili, prawns not shrimp). Focus on familiar ingredients with creative techniques or flavor combinations that feel special but not intimidating. Avoid exotic meats, obscure ingredients, or overly regional dishes. MULTI-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
           { role: "user", content: prompt }
         ],
         temperature: 1.2,
