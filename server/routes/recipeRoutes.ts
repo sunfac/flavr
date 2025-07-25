@@ -108,18 +108,84 @@ function parseRecipeJSON(content: string, fallbackTitle: string = "Custom Recipe
     const cookTimeMatch = content.match(/"cookTime"\s*:\s*(\d+)/);
     const servingsMatch = content.match(/"servings"\s*:\s*(\d+)/);
     
-    // Extract ingredients
-    const ingredientsMatch = content.match(/"ingredients"\s*:\s*\[(.*?)\]/s);
-    let ingredients = [];
+    // Extract ingredients - handle malformed JSON with better patterns
+    let ingredients: any[] = [];
+    
+    // Try different ingredient extraction patterns
+    const ingredientsPattern = /"ingredients"\s*:\s*\[(.*?)\]/s;
+    const ingredientsMatch = content.match(ingredientsPattern);
+    
     if (ingredientsMatch) {
-      const ingredientMatches = ingredientsMatch[1].match(/\{\s*"name"\s*:\s*"([^"]+)"\s*,\s*"amount"\s*:\s*"([^"]+)"\s*\}/g);
+      console.log('🥕 Found ingredients section');
+      const ingredientPattern = /\{\s*"name"\s*:\s*"([^"]+)"\s*,\s*"amount"\s*:\s*"([^"]+)"\s*\}/g;
+      const ingredientMatches = ingredientsMatch[1].match(ingredientPattern);
       if (ingredientMatches) {
         ingredients = ingredientMatches.map(match => {
-          const name = match.match(/"name"\s*:\s*"([^"]+)"/)?.[1] || "ingredient";
-          const amount = match.match(/"amount"\s*:\s*"([^"]+)"/)?.[1] || "to taste";
+          const nameMatch = match.match(/"name"\s*:\s*"([^"]+)"/);
+          const amountMatch = match.match(/"amount"\s*:\s*"([^"]+)"/);
+          const name = nameMatch ? nameMatch[1] : "ingredient";
+          const amount = amountMatch ? amountMatch[1] : "to taste";
           return { name, amount };
         });
+        console.log('🥕 Extracted ingredients via pattern:', ingredients.length);
       }
+    }
+    
+    // Fallback: Extract individual ingredient lines
+    if (ingredients.length === 0) {
+      console.log('🥕 Trying individual ingredient extraction...');
+      const individualIngredientPattern = /\{"name"\s*:\s*"([^"]+)"\s*,\s*"amount"\s*:\s*"([^"]+)"\}/g;
+      let match;
+      while ((match = individualIngredientPattern.exec(content)) !== null) {
+        ingredients.push({
+          name: match[1],
+          amount: match[2]
+        });
+      }
+      console.log('🥕 Extracted individual ingredients:', ingredients.length);
+    }
+    
+    // Final fallback: Try to extract ingredients from valid JSON portion before it becomes malformed
+    if (ingredients.length === 0) {
+      console.log('🥕 Trying early JSON ingredients extraction...');
+      // Look for the ingredients array at the beginning before JSON corruption
+      const earlyIngredientMatch = content.match(/"ingredients"\s*:\s*\[([\s\S]*?)\],?\s*"instructions"/);
+      if (earlyIngredientMatch) {
+        const ingredientSection = earlyIngredientMatch[1];
+        console.log('🥕 Found early ingredient section, length:', ingredientSection.length);
+        
+        // Extract all {name, amount} pairs from this section
+        const ingredientPairPattern = /\{\s*"name"\s*:\s*"([^"]+)"\s*,\s*"amount"\s*:\s*"([^"]+)"\s*\}/g;
+        let pairMatch;
+        while ((pairMatch = ingredientPairPattern.exec(ingredientSection)) !== null) {
+          ingredients.push({
+            name: pairMatch[1],
+            amount: pairMatch[2]
+          });
+        }
+        console.log('🥕 Extracted early JSON ingredients:', ingredients.length);
+      }
+    }
+    
+    // Ultra fallback: Extract from anywhere in the content
+    if (ingredients.length === 0) {
+      console.log('🥕 Trying ultra-wide ingredient search...');
+      // Look for any ingredient entries anywhere in the response
+      const globalIngredientPattern = /\{\s*"name"\s*:\s*"([^"]{2,50})"\s*,\s*"amount"\s*:\s*"([^"]{1,30})"\s*\}/g;
+      let globalMatch;
+      const foundIngredients = new Set(); // Prevent duplicates
+      
+      while ((globalMatch = globalIngredientPattern.exec(content)) !== null) {
+        const name = globalMatch[1];
+        const amount = globalMatch[2];
+        const key = `${name}:${amount}`;
+        
+        if (!foundIngredients.has(key) && name.length > 1 && !name.includes('step') && !name.includes('instruction')) {
+          foundIngredients.add(key);
+          ingredients.push({ name, amount });
+        }
+      }
+      console.log('🥕 Ultra-wide search found:', ingredients.length, 'ingredients');
     }
     
     // Extract instructions - try multiple patterns
@@ -138,25 +204,39 @@ function parseRecipeJSON(content: string, fallbackTitle: string = "Custom Recipe
     
     // Third try: Extract any step+instruction pairs
     if (!instructionMatches || instructionMatches.length === 0) {
-      // Try to find step numbers and instructions separately
-      const stepMatches = [...content.matchAll(/"?\s*step\s*"?\s*:\s*(\d+)/gi)];
+      // Try to find step numbers and instructions separately using exec pattern
+      const stepPattern = /"?\s*step\s*"?\s*:\s*(\d+)/gi;
+      const stepMatches: any[] = [];
+      let stepMatch;
+      while ((stepMatch = stepPattern.exec(content)) !== null) {
+        stepMatches.push(stepMatch);
+      }
+      
       // Handle both quoted and unquoted instructions
-      let instructionMatches = [...content.matchAll(/"?\s*instruction\s*"?\s*:\s*"([^"]+)"/gi)];
+      const instructionPattern = /"?\s*instruction\s*"?\s*:\s*"([^"]+)"/gi;
+      let instructionMatchArray: any[] = [];
+      let instructionMatch;
+      while ((instructionMatch = instructionPattern.exec(content)) !== null) {
+        instructionMatchArray.push(instructionMatch);
+      }
       
       // If no quoted instructions found, try unquoted pattern
-      if (instructionMatches.length === 0) {
-        instructionMatches = [...content.matchAll(/"?\s*instruction\s*"?\s*:\s*'([^']+)'/gi)];
+      if (instructionMatchArray.length === 0) {
+        const altInstructionPattern = /"?\s*instruction\s*"?\s*:\s*'([^']+)'/gi;
+        while ((instructionMatch = altInstructionPattern.exec(content)) !== null) {
+          instructionMatchArray.push(instructionMatch);
+        }
       }
       
       console.log('🔍 Step matches found:', stepMatches.length);
-      console.log('🔍 Instruction matches found:', instructionMatches.length);
+      console.log('🔍 Instruction matches found:', instructionMatchArray.length);
       
-      if (stepMatches.length > 0 && instructionMatches.length > 0) {
-        const count = Math.min(stepMatches.length, instructionMatches.length);
+      if (stepMatches.length > 0 && instructionMatchArray.length > 0) {
+        const count = Math.min(stepMatches.length, instructionMatchArray.length);
         for (let i = 0; i < count; i++) {
           instructions.push({
             step: parseInt(stepMatches[i][1]),
-            instruction: instructionMatches[i][1].trim()
+            instruction: instructionMatchArray[i][1].trim()
           });
         }
         console.log('✅ Extracted instructions via separate matching:', instructions.length);
@@ -191,7 +271,7 @@ function parseRecipeJSON(content: string, fallbackTitle: string = "Custom Recipe
       servings: servingsMatch ? parseInt(servingsMatch[1]) : 4,
       ingredients: ingredients.length > 0 ? ingredients : [
         { name: "See recipe description", amount: "As needed" }
-      ],
+      ] as any[],
       instructions: instructions.length > 0 ? instructions : [
         { step: 1, instruction: "Please regenerate this recipe for complete instructions" }
       ],
