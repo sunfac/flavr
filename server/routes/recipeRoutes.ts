@@ -758,36 +758,45 @@ SEED TRACE: ${randomSeed}`;
         }
         
         // Advanced JSON cleanup for malformed responses
+        console.log('🧼 Raw content before cleanup:', content.substring(0, 200) + '...');
+        
         content = content
           // Remove unicode escape sequences that cause parsing errors
           .replace(/\\u[0-9a-fA-F]{4}/g, '')
           // Remove malformed unicode characters
           .replace(/[\u2681\u26817]/g, '')
-          // Fix trailing commas
-          .replace(/,(\s*[}\]])/g, '$1')
-          // Fix malformed strings with quotes
-          .replace(/[""]/g, '"')
           // Fix unquoted property names like 'runny honey' to "runny honey"
           .replace(/'([^']+)'/g, '"$1"')
-          // Fix missing quotes around property names
-          .replace(/(\w+):/g, '"$1":')
-          // Fix instruction array structure issues
+          // Fix missing quotes around property names but preserve existing quoted ones
+          .replace(/(?<!")(\w+)(?=\s*:)/g, '"$1"')
+          // Fix double quotes that might have been created
+          .replace(/""(\w+)""/g, '"$1"')
+          // Fix malformed strings with quotes
+          .replace(/[""]/g, '"')
+          // Fix specific JSON structure where instructions array breaks
           .replace(/],\s*\{[\s\S]*?"step"\s*:\s*1/g, '], "instructions": [{"step": 1')
-          // Fix incomplete field definitions
-          .replace(/,(\s*$)/g, '')
+          // Fix orphaned properties after arrays
+          .replace(/],\s*\{\s*tips/g, '], "tips"')
+          .replace(/],\s*\{\s*nutritionalHighlights/g, '], "nutritionalHighlights"')
+          // Fix trailing commas
+          .replace(/,(\s*[}\]])/g, '$1')
           // Fix broken array/object syntax
           .replace(/\}\s*\{/g, '},{')
-          // Remove any incomplete trailing elements
+          // Remove incomplete trailing elements
           .replace(/,\s*$/, '')
-          // Remove garbage text after valid JSON
+          // Ensure proper JSON structure end
           .replace(/\}[^}]*$/, '}');
+          
+        console.log('🧼 Cleaned content preview:', content.substring(0, 300) + '...');
         
         // If content looks severely malformed, attempt to construct basic recipe
         if (!content.includes('"title"') || !content.includes('"ingredients"')) {
           throw new Error('Response missing required recipe fields');
         }
         
+        console.log('🧪 Attempting to parse cleaned JSON...');
         recipe = JSON.parse(content);
+        console.log('✅ JSON parsed successfully!');
       } catch (parseError) {
         console.error('Chef Assist JSON parsing error:', parseError);
         console.error('Raw content:', completion.choices[0].message.content);
