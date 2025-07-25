@@ -697,10 +697,10 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
         
         // Popular proteins for UK consumers (weighted for frequency)
         proteins: [
-          "chicken breast", "chicken thighs", "lamb chops", "lamb shoulder", "king prawns", "cod fillet", 
-          "beef mince", "beef steaks", "pork tenderloin", "pork chops", "sea bass", "salmon fillet",
-          "halloumi", "chicken breast", "lamb leg", "prawns", "cod loins", "beef joints", "pork belly",
-          "sea bream", "haddock", "turkey breast", "duck breast", "tuna steak", "mussels", "crab",
+          "chicken breast", "chicken thighs", "lamb chops", "lamb shoulder", "fish", "shellfish", 
+          "beef mince", "beef steaks", "pork tenderloin", "pork chops", "fish", "fish",
+          "halloumi", "chicken breast", "lamb leg", "shellfish", "fish", "beef joints", "pork belly",
+          "fish", "fish", "turkey breast", "duck breast", "fish", "shellfish", "shellfish",
           "venison", "game birds"
         ],
         
@@ -942,10 +942,10 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
           "Mexican", "Spanish", "Greek", "Middle Eastern", "Japanese", "American BBQ", "Moroccan"
         ],
         proteins: [
-          "chicken breast", "chicken thighs", "lamb chops", "lamb shoulder", "king prawns", "cod fillet", 
-          "beef mince", "beef steaks", "pork tenderloin", "pork chops", "sea bass", "salmon fillet",
-          "halloumi", "chicken breast", "lamb leg", "prawns", "cod loins", "beef joints", "pork belly",
-          "sea bream", "haddock", "turkey breast", "duck breast", "tuna steak", "mussels", "crab",
+          "chicken breast", "chicken thighs", "lamb chops", "lamb shoulder", "fish", "shellfish", 
+          "beef mince", "beef steaks", "pork tenderloin", "pork chops", "fish", "fish",
+          "halloumi", "chicken breast", "lamb leg", "shellfish", "fish", "beef joints", "pork belly",
+          "fish", "fish", "turkey breast", "duck breast", "fish", "shellfish", "shellfish",
           "venison", "game birds"
         ],
         techniques: [
