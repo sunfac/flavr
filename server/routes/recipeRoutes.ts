@@ -731,12 +731,16 @@ SEED TRACE: ${randomSeed}`;
 
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o", // Keep quality model but use async operations for speed
+        model: "gpt-4o",
         messages: [
-          { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations." },
+          { role: "system", content: "You are a helpful assistant." },
           { role: "user", content: systemPrompt }
         ],
-        temperature: 0.8 // Increased temperature for more recipe variation
+        temperature: 0.9,
+        top_p: 1,
+        presence_penalty: 0.8,
+        frequency_penalty: 0.4,
+        max_tokens: 1000
       });
 
       let recipe;
@@ -907,12 +911,16 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
 SEED TRACE: ${randomSeed}`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o", // Keep quality model but use async operations for speed
+        model: "gpt-4o",
         messages: [
-          { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations." },
+          { role: "system", content: "You are a helpful assistant." },
           { role: "user", content: systemPrompt }
         ],
-        temperature: 0.7
+        temperature: 0.9,
+        top_p: 1,
+        presence_penalty: 0.8,
+        frequency_penalty: 0.4,
+        max_tokens: 1000
       });
 
       // Clean and parse the JSON response for Fridge2Fork
