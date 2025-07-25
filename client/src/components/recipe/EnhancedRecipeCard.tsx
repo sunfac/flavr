@@ -172,6 +172,17 @@ function EnhancedRecipeCard({
 
   const activeInstructions = useMemo(() => {
     const isStoreActive = recipeStore.id === recipe.id && recipeStore.steps.length > 0;
+    
+    console.log('🍳 activeInstructions calculation:', {
+      recipeId: recipe.id,
+      storeId: recipeStore.id,
+      isStoreActive,
+      storeStepsLength: recipeStore.steps.length,
+      recipeInstructionsLength: recipe.instructions?.length || 0,
+      firstStoreStep: recipeStore.steps[0]?.description,
+      firstRecipeInstruction: recipe.instructions?.[0]
+    });
+    
     if (isStoreActive) {
       return recipeStore.steps.map(step => step.description);
     }
@@ -195,8 +206,8 @@ function EnhancedRecipeCard({
 
   const activeImage = useMemo(() => {
     const isStoreActive = recipeStore.id === recipe.id && recipeStore.meta.image;
-    return isStoreActive ? recipeStore.meta.image : (recipe.image || recipe.imageUrl);
-  }, [recipeStore.id, recipe.id, recipeStore.meta.image, recipe.image, recipe.imageUrl]);
+    return isStoreActive ? recipeStore.meta.image : recipe.image;
+  }, [recipeStore.id, recipe.id, recipeStore.meta.image, recipe.image]);
 
 
 

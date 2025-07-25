@@ -187,7 +187,7 @@ export const useRecipeStore = create<RecipeStore>()(
         const instructions = recipe.instructions?.map((instruction: any, index: number) => ({
           id: `step-${index}`,
           title: `Step ${index + 1}`,
-          description: typeof instruction === 'string' ? instruction : instruction.instruction,
+          description: typeof instruction === 'string' ? instruction : (instruction.instruction || instruction),
           duration: 0
         })) || [];
         
