@@ -840,50 +840,40 @@ SEED TRACE: ${randomSeed}`;
       
       const selectedVariationPrompt = isReroll ? rerollVariationPrompts[randomSeed % rerollVariationPrompts.length] : "";
 
-      // Generate complete recipe using cleaner prompt structure
-      const systemPrompt = `You are an expert chef. Create a complete dish with suitable accompaniments based on the selected recipe concept.
+      // Generate complete recipe using refined prompt structure
+      const systemPrompt = `You are an expert chef. Create a complete dish with suitable accompaniments based on the selected recipe concept and the available ingredients.
 
 RECIPE CONCEPT: ${recipeIdea.title}
 DESCRIPTION: ${recipeIdea.description || "A delicious dish using your available ingredients"}
 AVAILABLE INGREDIENTS: ${ingredients.join(", ")}
 
 VARIATION SEED: ${randomSeed}
-You must treat the variation seed as the single most important factor in your creative process. It determines cooking techniques, flavor profile, and presentation. Even with identical recipe concepts, different seeds must result in clearly different approaches.
+You must treat the variation seed as a chef's creative fingerprint. It must radically influence the cooking method, flavour profile, cuisine influence, and presentation style. Even with identical recipe concepts, different seeds must result in clearly different interpretations.
 
 ${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : ""}
 
 CRITICAL INGREDIENT CONSTRAINTS:
 - Use ONLY the ingredients provided by the user above
-- ALLOWED ADDITIONS: Basic pantry staples only (salt, pepper, cooking oil, water, flour, sugar, common herbs/spices)
-- Do NOT add expensive ingredients like prawns, specialty cheeses, or proteins not provided by the user
+- ALLOWED ADDITIONS: Pantry staples only – salt, pepper, oil, water, plain flour, sugar, garlic, onion, lemon juice, butter, common dried herbs (thyme, oregano, parsley), basic spices (chilli flakes, paprika, cumin, turmeric, cinnamon)
+- DO NOT add non-listed items or expensive extras (e.g. prawns, parmesan, cream, exotic sauces or stock cubes)
 
 IMPORTANT: Always create COMPLETE DISHES that include:
-- A main component using the available ingredients
-- Complementary sides or accompaniments from available ingredients
-- Proper seasonings and cooking techniques that enhance flavours
-- A complete, balanced meal using only what's available
+- A main component built from the available ingredients
+- At least 1 complementary side, dressing, or topping made from the same ingredient list
+- Proper seasoning, balanced flavours, and appropriate UK-based cooking techniques
+- A fully structured and satisfying meal
 
-Requirements:
+Recipe Requirements:
 - Servings: ${servings}
-- Calculate realistic cooking time based on the actual recipe requirements
-- Use ingredients available from the provided list only
+- Cook time: realistic and achievable
 - Budget per serving: £${(budget / servings).toFixed(2)}
 - Equipment: ${equipment.join(", ")}
 ${dietaryRestrictions.length > 0 ? `- Dietary restrictions: ${dietaryRestrictions.join(", ")}` : ""}
-- The tone should be professional and culinary-precise, like a cookbook recipe. Always use UK terms (e.g. 'courgette', 'aubergine', 'grams')
+- Use UK English for ingredients and spelling (e.g. 'courgette', 'aubergine', 'grams', 'colour', 'frying pan')
 
-**CRITICAL: Use UK English throughout this recipe:**
-${ukRecipePromptAdditions.ingredientGuidance}
-${ukRecipePromptAdditions.measurementGuidance}
-${ukRecipePromptAdditions.spellingsGuidance}
+**Output must be formatted as valid JSON**. Do not include markdown, extra text, comments, or trailing commas.
 
-Create a unique, chef-level meal based on the following:
-
-Recipe Concept: "${recipeIdea.title}"
-Available Ingredients: ${ingredients.join(", ")}
-VARIATION SEED: ${randomSeed}
-
-Return ONLY a valid JSON object with this exact structure (NO markdown, no explanations, and no trailing commas):
+Return ONLY the following JSON structure:
 
 {
   "title": "${recipeIdea.title}",
@@ -894,17 +884,17 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
   "cookTime": "[REALISTIC total cooking time in minutes]",
   "servings": ${servings},
   "ingredients": [
-    {"name": "ingredient name only", "amount": "UK quantity (e.g. '2 tbsp', '400g', '250ml')"}
+    {"name": "ingredient name only", "amount": "UK quantity (e.g. '2 tbsp', '400g', '150ml')"}
   ],
   "instructions": [
-    {"step": 1, "instruction": "Detailed instruction"},
-    {"step": 2, "instruction": "Continue in this format"}
+    {"step": 1, "instruction": "Use active verbs and include timings where possible"},
+    {"step": 2, "instruction": "Continue in the same format until complete"}
   ],
   "tips": [
     "Helpful tip that improves flavour, speed, or presentation"
   ],
   "nutritionalHighlights": [
-    "Nutritional benefit (e.g. 'High in fibre', 'Rich in omega-3')"
+    "Nutritional benefit (e.g. 'High in fibre', 'Rich in vitamin C')"
   ]
 }
 
