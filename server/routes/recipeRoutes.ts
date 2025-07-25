@@ -798,29 +798,66 @@ SEED TRACE: ${randomSeed}`;
         recipe = JSON.parse(content);
         console.log('✅ JSON parsed successfully!');
       } catch (parseError) {
-        console.error('Chef Assist JSON parsing error:', parseError);
-        console.error('Raw content:', completion.choices[0].message.content);
+        console.error('🔥 Chef Assist JSON parsing error:', parseError);
+        console.error('🔥 Raw OpenAI content:', completion.choices[0].message.content);
+        console.error('🔥 Cleaned content that failed:', content);
         
-        // Fallback: Create a basic recipe structure
-        recipe = {
-          title: userPrompt || "Custom Recipe",
-          description: "A delicious dish created just for you",
-          cuisine: "International",
-          difficulty: "medium",
-          prepTime: 15,
-          cookTime: 30,
-          servings: 4,
-          ingredients: [
-            { name: "ingredients as described", amount: "as needed" }
-          ],
-          instructions: [
-            { step: 1, instruction: "Please try generating this recipe again for complete instructions" }
-          ],
-          tips: ["Recipe generation encountered an error - please try again"],
-          nutritionalHighlights: ["Nutritional information will be available after successful generation"]
-        };
-        
-        console.log('Using fallback recipe structure due to parsing error');
+        // Try one more aggressive cleanup attempt
+        try {
+          console.log('🔧 Attempting aggressive JSON repair...');
+          
+          // Extract just the core JSON structure manually
+          let repairAttempt = completion.choices[0].message.content || "{}";
+          
+          // Find the actual JSON boundaries more aggressively
+          const startIndex = repairAttempt.indexOf('{"');
+          const endIndex = repairAttempt.lastIndexOf('}');
+          
+          if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+            repairAttempt = repairAttempt.substring(startIndex, endIndex + 1);
+            console.log('🔧 Extracted JSON bounds:', repairAttempt.substring(0, 100) + '...');
+            
+            // Very aggressive cleanup
+            repairAttempt = repairAttempt
+              .replace(/\n/g, ' ')                    // Remove newlines
+              .replace(/\s+/g, ' ')                   // Normalize spaces
+              .replace(/'/g, '"')                     // Fix single quotes
+              .replace(/([{,]\s*)(\w+):/g, '$1"$2":') // Quote property names
+              .replace(/""(\w+)""/g, '"$1"')          // Fix double quotes
+              .replace(/,\s*}/g, '}')                 // Remove trailing commas
+              .replace(/,\s*]/g, ']')                 // Remove trailing commas in arrays
+              .trim();
+            
+            console.log('🔧 Aggressively cleaned:', repairAttempt.substring(0, 200) + '...');
+            recipe = JSON.parse(repairAttempt);
+            console.log('✅ Aggressive repair succeeded!');
+          } else {
+            throw new Error('Could not find JSON boundaries');
+          }
+        } catch (repairError) {
+          console.error('🔥 Aggressive repair also failed:', repairError);
+          
+          // Final fallback: Create a basic recipe structure
+          recipe = {
+            title: userPrompt || "Custom Recipe",
+            description: "A delicious dish created just for you",
+            cuisine: "International",
+            difficulty: "medium",
+            prepTime: 15,
+            cookTime: 30,
+            servings: 4,
+            ingredients: [
+              { name: "ingredients as described", amount: "as needed" }
+            ],
+            instructions: [
+              { step: 1, instruction: "Please try generating this recipe again for complete instructions" }
+            ],
+            tips: ["Recipe generation encountered an error - please try again"],
+            nutritionalHighlights: ["Nutritional information will be available after successful generation"]
+          };
+          
+          console.log('🔥 Using fallback recipe structure due to parsing error');
+        }
       }
       
       // Apply UK English conversions to recipe text
@@ -1048,28 +1085,65 @@ SEED TRACE: ${randomSeed}`;
         }
         
         recipe = JSON.parse(content);
+        console.log('✅ Fridge2Fork JSON parsed successfully!');
       } catch (parseError) {
-        console.error('Fridge2Fork JSON parsing error:', parseError);
-        console.error('Raw content:', completion.choices[0].message.content);
+        console.error('🔥 Fridge2Fork JSON parsing error:', parseError);
+        console.error('🔥 Raw OpenAI content:', completion.choices[0].message.content);
+        console.error('🔥 Cleaned content that failed:', content);
         
-        // Fallback: Create a basic recipe structure using the original recipe idea
-        recipe = {
-          title: recipeIdea.title || "Fridge2Fork Recipe",
-          description: recipeIdea.description || "A delicious dish using your available ingredients",
-          cuisine: recipeIdea.cuisine || "International",
-          difficulty: "medium",
-          prepTime: 15,
-          cookTime: 30,
-          servings: servings,
-          ingredients: ingredients.map(ing => ({ name: ing, amount: "as needed" })),
-          instructions: [
-            { step: 1, instruction: "Please try generating this recipe again for complete instructions" }
-          ],
-          tips: ["Recipe generation encountered an error - please try again"],
-          nutritionalHighlights: ["Nutritional information will be available after successful generation"]
-        };
-        
-        console.log('Using fallback recipe structure for Fridge2Fork due to parsing error');
+        // Try aggressive cleanup attempt
+        try {
+          console.log('🔧 Attempting aggressive JSON repair for Fridge2Fork...');
+          
+          let repairAttempt = completion.choices[0].message.content || "{}";
+          
+          // Find JSON boundaries more aggressively
+          const startIndex = repairAttempt.indexOf('{"');
+          const endIndex = repairAttempt.lastIndexOf('}');
+          
+          if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+            repairAttempt = repairAttempt.substring(startIndex, endIndex + 1);
+            console.log('🔧 Extracted JSON bounds:', repairAttempt.substring(0, 100) + '...');
+            
+            // Very aggressive cleanup
+            repairAttempt = repairAttempt
+              .replace(/\n/g, ' ')                    // Remove newlines
+              .replace(/\s+/g, ' ')                   // Normalize spaces
+              .replace(/'/g, '"')                     // Fix single quotes
+              .replace(/([{,]\s*)(\w+):/g, '$1"$2":') // Quote property names
+              .replace(/""(\w+)""/g, '"$1"')          // Fix double quotes
+              .replace(/,\s*}/g, '}')                 // Remove trailing commas
+              .replace(/,\s*]/g, ']')                 // Remove trailing commas in arrays
+              .trim();
+            
+            console.log('🔧 Aggressively cleaned:', repairAttempt.substring(0, 200) + '...');
+            recipe = JSON.parse(repairAttempt);
+            console.log('✅ Aggressive repair succeeded for Fridge2Fork!');
+          } else {
+            throw new Error('Could not find JSON boundaries');
+          }
+        } catch (repairError) {
+          console.error('🔥 Aggressive repair also failed for Fridge2Fork:', repairError);
+          
+          // Final fallback
+          recipe = {
+            title: recipeIdea.title || "Fridge2Fork Recipe",
+            description: recipeIdea.description || "A delicious dish using your available ingredients",
+            cuisine: recipeIdea.cuisine || "International",
+            difficulty: "medium",
+            prepTime: 15,
+            cookTime: 30,
+            servings: servings,
+            ingredients: ingredients.map(ing => ({ name: ing, amount: "as needed" })),
+            instructions: [
+              { step: 1, instruction: "Please try generating this recipe again for complete instructions" }
+            ],
+            tips: ["Recipe generation encountered an error - please try again"],
+            nutritionalHighlights: ["Nutritional information will be available after successful generation"]
+          };
+          
+          console.log('🔥 Using fallback recipe structure for Fridge2Fork due to parsing error');
+        }
       }
       
       // Apply UK English conversions to recipe text
