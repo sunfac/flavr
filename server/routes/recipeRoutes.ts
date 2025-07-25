@@ -976,12 +976,14 @@ UK CONSUMER PREFERENCE INTEGRATION: Use variation seed ${randomSeed} to influenc
 - Seasoning and spice levels suited to mainstream UK tastes
 - Presentation style from rustic comfort to refined restaurant quality
 
-CUISINE SELECTION PHILOSOPHY:
-- ALWAYS honor the user's specific dish requests (if they say "pasta dish", create pasta)
-- ALWAYS honor their cuisine preferences (if they say "Thai curry", make Thai cuisine)
-- Only use seed-based cuisine selection for completely open prompts like "something delicious"
-- When user specifies ingredients or dish types, build around those rather than forcing seed variations
-- Let the user's intent drive the dish, with seed variation providing creative touches within that framework
+CUISINE AUTHENTICITY MANDATE:
+- ALWAYS match the cuisine to the actual dish being created (grilled lamb with aioli = Mediterranean, not Japanese)
+- If creating Italian pasta, label it "Italian" - if creating Thai curry, label it "Thai" 
+- NEVER assign random cuisines that don't match the dish (lamb with aioli is NOT Japanese)
+- The cuisine field must accurately reflect the dish's authentic culinary tradition
+- Use seed-based cuisine selection ONLY for completely open prompts, then create authentic dishes from that tradition
+- When user specifies techniques or ingredients, assign the cuisine that naturally fits those elements
+- Let the actual dish determine its cuisine label, not random seed assignments
 
 **PROTEIN PRIORITIZATION**: 80% of dishes should feature meat, fish, or shellfish as the main component
 **COOKING TECHNIQUE FOCUS**: Emphasize popular UK methods - roasting, grilling, pan-frying, slow-cooking, braising
@@ -1010,6 +1012,7 @@ REQUIREMENTS:
 - Stay completely authentic to ONE cuisine tradition (e.g., Italian, French, Thai, Indian, Mexican, Japanese, Chinese, etc.)
   - No fusion or cross-cuisine blends
   - Stay regionally consistent within that cuisine if appropriate
+  - CRITICAL: The "cuisine" field MUST accurately match the dish being created (lamb with aioli = Mediterranean, not Japanese)
 - Ensure at least 3 clear differences in dish structure or flavour if the same prompt is used with different variation seeds
 - Include at least one visual or textural contrast element
 
@@ -1073,23 +1076,29 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
       // Apply UK English conversions to recipe text
       recipe = convertRecipeToUKEnglish(recipe);
       
-      // Send recipe immediately to user for faster response
-      res.json({ recipe });
-
-      // Increment usage counter after successful generation
-      incrementUsageCounter(req).catch(err => console.error('Failed to increment usage:', err));
-
-      // Generate image and log in background (don't await)
-      generateRecipeImage(recipe.title, recipe.cuisine).then(imageUrl => {
+      // Generate image first, then send complete response
+      try {
+        console.log('🎨 Generating image for:', recipe.title);
+        const imageUrl = await generateRecipeImage(recipe.title, recipe.cuisine);
         if (imageUrl) {
-          console.log('🎨 Background image generated for:', recipe.title);
-          // Store the image URL in a simple memory cache for retrieval
+          recipe.image = imageUrl;
+          console.log('✅ Recipe image generated successfully');
+          // Store in cache for future requests
           if (!global.recipeImageCache) {
             global.recipeImageCache = new Map();
           }
           global.recipeImageCache.set(recipe.title, imageUrl);
         }
-      }).catch(err => console.error('Background image generation failed:', err));
+      } catch (imageError) {
+        console.error('🖼️ Image generation failed, continuing without image:', imageError);
+        // Continue without image - recipe will show placeholder
+      }
+
+      // Send complete recipe with image
+      res.json({ recipe });
+
+      // Increment usage counter after successful generation
+      incrementUsageCounter(req).catch(err => console.error('Failed to increment usage:', err));
 
       // Log the interaction in background
       logSimpleGPTInteraction({
@@ -1102,7 +1111,7 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
         outputTokens: Math.ceil(JSON.stringify(recipe).length / 4),
         cost: 0.001,
         success: true,
-        userId: req.session?.userId || undefined
+        userId: req.session?.userId?.toString() || 'anonymous'
       }).catch(err => console.error('Background logging failed:', err));
     } catch (error: any) {
       console.error('Chef assist generation error:', error);

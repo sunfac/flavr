@@ -18,6 +18,7 @@ interface HeaderSectionProps {
     difficulty: string;
     cuisine?: string;
     image?: string;
+    imageLoading?: boolean;
   };
   currentServings: number;
   onServingsChange?: (servings: number) => void;
