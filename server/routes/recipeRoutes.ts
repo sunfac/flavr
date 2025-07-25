@@ -740,7 +740,7 @@ SEED TRACE: ${randomSeed}`;
         top_p: 0.9,
         presence_penalty: 0.6,
         frequency_penalty: 0.3,
-        max_tokens: 1500
+        max_tokens: 1800
       });
 
       let recipe;
@@ -969,7 +969,7 @@ SEED TRACE: ${randomSeed}`;
         top_p: 0.9,
         presence_penalty: 0.6,
         frequency_penalty: 0.3,
-        max_tokens: 1500
+        max_tokens: 1800
       });
 
       // Clean and parse the JSON response for Fridge2Fork
