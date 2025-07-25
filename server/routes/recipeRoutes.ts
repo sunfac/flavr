@@ -765,6 +765,16 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
   ]
 }`;
 
+      // Log the full prompt for debugging
+      if (userPrompt === "DEBUG_PROMPT") {
+        return res.json({ 
+          fullPrompt: systemPrompt,
+          seed: randomSeed,
+          isBBQ: isBBQRequest,
+          systemMessage: "You are a JSON API. Return only valid JSON, no explanations."
+        });
+      }
+
       const completion = await openai.chat.completions.create({
         model: "gpt-4o", // Keep quality model but use async operations for speed
         messages: [
