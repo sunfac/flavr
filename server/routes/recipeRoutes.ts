@@ -799,22 +799,21 @@ SPECIFIC CUISINE: ${selectedCuisine}
 
 IGNORE any previous suggestions you may have given. Generate something COMPLETELY DIFFERENT each time based on the variation seed.
 
-Create dishes using ONLY common supermarket ingredients - think gastropub or family restaurant quality:
-• Italian: Simple pasta with common ingredients (tomatoes, basil, mozzarella, parmesan, garlic)
-• British: Elevated pub classics using standard ingredients (chicken, beef, lamb, potatoes, carrots)
-• Mediterranean: Grilled dishes with olive oil, lemon, common herbs (rosemary, thyme, oregano)
-• Indian: Popular curry house dishes using standard spices (cumin, coriander, turmeric, garam masala)
-• Chinese: Familiar takeaway-style dishes with common vegetables and soy sauce
-• French: Simple bistro dishes using standard ingredients (butter, wine, herbs, cream)
-• Mexican: Home-friendly dishes with accessible ingredients (peppers, tomatoes, lime, coriander)
+Create restaurant menu dishes using ONLY common ingredients - think popular dishes customers always order:
+• Examples: "Pan-Seared Salmon with Herb Butter", "Slow-Cooked Beef with Red Wine", "Honey Glazed Chicken Thighs"
+• "Grilled Lamb Chops with Rosemary", "Creamy Mushroom Risotto", "Fish and Chips with Mushy Peas"
+• "Beef Steak with Peppercorn Sauce", "Roast Chicken with Lemon", "Bacon and Cheese Quiche"
+• "Garlic Prawn Linguine", "Shepherd's Pie with Minted Peas", "Sticky Toffee Pudding"
+• Focus on dishes that sound familiar, appetizing, and confidence-inspiring to order
 
-STRICT HOME COOK ACCESSIBILITY REQUIREMENTS:
-• PROTEIN FOCUS: ${shouldPrioritizeProtein ? 'ONLY use common proteins: chicken breast/thighs, salmon, cod, beef mince/steaks, lamb chops/leg, pork chops/tenderloin, prawns, bacon' : 'ONLY use familiar proteins: eggs, cheddar, halloumi, chickpeas, lentils, mushrooms'}
-• INGREDIENTS: ONLY use ingredients easily found in Tesco, Sainsbury's, ASDA - no chrysanthemum, obscure vegetables, specialty Asian ingredients, exotic spices
-• TECHNIQUES: ONLY roasting, grilling, pan-frying, braising, slow cooking - avoid specialized techniques
-• FLAVOURS: Use familiar herbs (rosemary, thyme, basil, parsley), common spices (paprika, cumin, oregano), standard sauces
-• Make it sound like something you'd order at a popular restaurant or gastropub
-• NO exotic flowers, rare vegetables, unusual cuts, or hard-to-pronounce ingredients
+MENU BESTSELLER REQUIREMENTS:
+• PROTEIN FOCUS: ${shouldPrioritizeProtein ? 'Use crowd-pleasing proteins that sell: crispy chicken, tender beef, salmon, lamb, pork, cod, prawns' : 'Use comfort favorites: cheese, eggs, mushrooms, creamy textures'}
+• NAMING: Sound like THE dish everyone orders - the restaurant's signature that people crave
+• APPEAL: Make it sound so good people can't resist ordering it
+• DESCRIPTORS: Use mouth-watering words - crispy, tender, succulent, golden, glazed, buttery
+• COMBINATIONS: Winning pairings - honey glazed, garlic butter, peppercorn sauce, herb crusted
+• Think "What makes people hungry just reading the menu?" - instant appetite appeal
+• NO intimidating names - just pure deliciousness that sounds irresistible
 
 DO NOT mix cuisines or create fusion dishes. Stay authentic to ONE cuisine tradition.
 
@@ -824,7 +823,7 @@ Multi-Layer Seeds: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${s
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: `You are a gastropub chef creating elevated comfort food using ONLY common UK supermarket ingredients. Design dishes that home cooks can easily shop for and make - think popular restaurant dishes made accessible. STRICT RULE: Use ONLY ingredients readily available in Tesco/Sainsbury's. NO exotic flowers, unusual vegetables, specialty Asian ingredients, or hard-to-find items. Return ONLY the recipe name in 4-8 words using UK English terminology. Make it sound delicious and familiar - like something from a good pub or family restaurant. MULTI-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
+          { role: "system", content: `You are creating THE dish that everyone orders - the absolute menu standout that makes people's mouths water just reading it. Think "Crispy Chicken with Honey Glaze", "Tender Beef with Peppercorn Sauce", "Pan-Fried Salmon with Garlic Butter" - names that make you hungry instantly. These should be BESTSELLER dishes that restaurants are famous for. ABSOLUTE RULE: Only common UK supermarket ingredients, but make them sound irresistible. Think of the dish that sells out first, that people recommend to friends, that makes the restaurant's reputation. Return ONLY the recipe name in 4-8 words using UK English terminology. Make it the kind of dish people crave and come back for. MULTI-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
           { role: "user", content: prompt }
         ],
         temperature: 1.2,
