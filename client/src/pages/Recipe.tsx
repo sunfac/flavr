@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { PageLayout } from "@/components/PageLayout";
 import { EnhancedRecipeCard } from "@/components/recipe/EnhancedRecipeCard";
 import ChatBot from "@/components/ChatBot";
-import { motion } from "framer-motion";
+
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { useRecipeStore } from "@/stores/recipeStore";
@@ -37,29 +37,23 @@ export default function Recipe() {
     instructions: recipeStore.steps.map(step => step.description || ''), // Convert to string array
     tips: "Try garnishing with fresh herbs for extra flavor!" // Default tip
   }), [
-    recipeStore.id,
     recipeStore.meta.title,
-    recipeStore.meta.description,
     recipeStore.meta.cuisine,
-    recipeStore.meta.difficulty,
-    recipeStore.meta.cookTime,
-    recipeStore.meta.image,
     recipeStore.servings,
-    recipeStore.ingredients,
-    recipeStore.steps,
-    recipeStore.lastUpdated, // This ensures updates trigger re-computation
     recipeImage
   ]);
   
-  // Debug logging
+  // Debug logging - only log once when recipe loads
   useEffect(() => {
-    console.log('🧪 Recipe page loaded with:', {
-      hasRecipe,
-      showChat,
-      recipeTitle: recipeStore.meta.title,
-      ingredientsCount: recipeStore.ingredients.length
-    });
-  }, [hasRecipe, showChat, recipeStore.meta.title, recipeStore.ingredients.length]);
+    if (hasRecipe) {
+      console.log('🧪 Recipe page loaded with:', {
+        hasRecipe,
+        showChat,
+        recipeTitle: recipeStore.meta.title,
+        ingredientsCount: recipeStore.ingredients.length
+      });
+    }
+  }, [recipeStore.meta.title]); // Only depend on title to avoid constant re-renders
   
   useEffect(() => {
     if (!hasRecipe) {
@@ -80,55 +74,12 @@ export default function Recipe() {
     return () => window.removeEventListener('openChat', handleOpenChat);
   }, []);
 
-  // Try to fetch image if not already present
+  // Simple image sync - no polling to avoid flickering
   useEffect(() => {
-    // If no image is present, try to fetch one based on recipe title
-    if (!recipeImage && recipeStore.meta.title && imageLoadAttempts < 5 && hasRecipe) {
-      const pollForImage = async () => {
-        try {
-          console.log('🖼️ Polling for image (attempt', imageLoadAttempts + 1, '):', recipeStore.meta.title);
-          const response = await fetch(`/api/recipe-image/${encodeURIComponent(recipeStore.meta.title)}`);
-          if (response.ok) {
-            const data = await response.json();
-            if (data.imageUrl) {
-              console.log('🖼️ Image found:', data.imageUrl);
-              setRecipeImage(data.imageUrl);
-              // Also update the recipe store via the patchRecipe method
-              recipeStore.patchRecipe({
-                meta: {
-                  ...recipeStore.meta,
-                  image: data.imageUrl,
-                  imageLoading: false
-                }
-              });
-              return; // Stop polling
-            }
-          } else {
-            console.log('🖼️ Image not ready yet');
-          }
-          
-          // Schedule next attempt
-          setImageLoadAttempts(prev => prev + 1);
-          if (imageLoadAttempts < 4) {
-            setTimeout(pollForImage, 3000); // Try again in 3 seconds
-          }
-        } catch (error) {
-          console.log('🖼️ Image polling failed:', error);
-          setImageLoadAttempts(prev => prev + 1);
-        }
-      };
-      
-      // Start polling after a short delay
-      setTimeout(pollForImage, 2000);
-    }
-  }, [recipeStore.meta.title, recipeImage, imageLoadAttempts, recipeStore, hasRecipe]);
-  
-  // Also check if the store has been updated with an image
-  useEffect(() => {
-    if (recipeStore.meta.image && !recipeImage) {
+    if (recipeStore.meta.image) {
       setRecipeImage(recipeStore.meta.image);
     }
-  }, [recipeStore.meta.image, recipeImage]);
+  }, [recipeStore.meta.image]);
 
   // ALL HOOKS DECLARED ABOVE - NOW SAFE FOR CONDITIONAL RETURNS
   
@@ -141,16 +92,11 @@ export default function Recipe() {
       <PageLayout className="max-w-7xl mx-auto">
         <div className="w-full">
           {/* Recipe Card - Full Width */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="w-full"
-          >
+          <div className="w-full">
             <EnhancedRecipeCard 
-              key={`recipe-${recipeStore.lastUpdated}`} // Force re-render on updates
               recipe={activeRecipe}
             />
-          </motion.div>
+          </div>
         </div>
       </PageLayout>
 
@@ -197,11 +143,7 @@ export default function Recipe() {
             pointerEvents: 'auto'
           }}
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.5, type: "spring" }}
-          >
+          <div>
             <Button
               onClick={() => {
                 console.log('🔥 Chat button clicked! Current showChat:', showChat);
@@ -218,7 +160,7 @@ export default function Recipe() {
                 </div>
               </div>
             </Button>
-          </motion.div>
+          </div>
         </div>
       )}
     </>
