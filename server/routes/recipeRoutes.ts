@@ -69,6 +69,20 @@ function parseRecipeJSON(content: string, fallbackTitle: string = "Custom Recipe
       .replace(/[""]/g, '"')
       .replace(/'([^']+)'/g, '"$1"')
       .replace(/,(\s*[}\]])/g, '$1')
+      // Fix common JSON issues in instructions
+      .replace(/"\\"([^"]+)\\""/g, '"$1"') // Remove extra escaped quotes
+      .replace(/\\"/g, '"') // Replace escaped quotes with regular quotes
+      .replace(/"\s*:\s*"([^"]*)",\s*([^",}]+),/g, '": "$1$2",') // Fix split instruction text
+      .replace(/"\s*;\s*/g, '". ') // Replace semicolons with periods in strings
+      // Fix OpenAI's broken property names with spaces
+      .replace(/" ([a-zA-Z]+) "/g, '"$1"') // Fix quoted property names with spaces
+      .replace(/"\s+([a-zA-Z]+)\s+"/g, '"$1"') // More aggressive space removal
+      .replace(/" (step|instruction|name|amount|title|description|cuisine|difficulty|prepTime|cookTime|servings|ingredients|instructions|tips|nutritionalHighlights) "/g, '"$1"')
+      // Fix broken object syntax
+      .replace(/\}\s*,\s*\}/g, '}}') // Fix double closing braces
+      .replace(/\[\s*,/g, '[') // Fix array starting with comma
+      .replace(/,\s*,/g, ',') // Fix double commas
+      .replace(/"\s*,\s*\{/g, '",{') // Fix missing quote before object
       .trim();
     
     const jsonStart = cleaned.indexOf('{');
@@ -108,14 +122,63 @@ function parseRecipeJSON(content: string, fallbackTitle: string = "Custom Recipe
       }
     }
     
-    // Extract instructions
+    // Extract instructions - try multiple patterns
     let instructions = [];
-    const instructionMatches = content.match(/\{\s*"step"\s*:\s*(\d+)\s*,\s*"instruction"\s*:\s*"([^"]+)"\s*\}/g);
-    if (instructionMatches && instructionMatches.length > 3) {
+    
+    // First try: Standard instruction format (handle escaped quotes)
+    let instructionMatches = content.match(/\{\s*"step"\s*:\s*(\d+)\s*,\s*"instruction"\s*:\s*"((?:[^"\\]|\\.)*)"\s*\}/g);
+    console.log('🔍 Standard instruction matches:', instructionMatches?.length || 0);
+    
+    // Second try: Look for instructions with broken quotes (OpenAI bug)
+    if (!instructionMatches || instructionMatches.length === 0) {
+      // Match patterns like {"step":1,"instruction":"text"} with various quote issues
+      instructionMatches = content.match(/\{\s*"*step"*\s*:\s*(\d+)\s*,\s*"*instruction"*\s*:\s*"([^}]+?)"\s*\}/g);
+      console.log('🔍 Broken quote instruction matches:', instructionMatches?.length || 0);
+    }
+    
+    // Third try: Extract any step+instruction pairs
+    if (!instructionMatches || instructionMatches.length === 0) {
+      // Try to find step numbers and instructions separately
+      const stepMatches = [...content.matchAll(/"?\s*step\s*"?\s*:\s*(\d+)/gi)];
+      // Handle both quoted and unquoted instructions
+      let instructionMatches = [...content.matchAll(/"?\s*instruction\s*"?\s*:\s*"([^"]+)"/gi)];
+      
+      // If no quoted instructions found, try unquoted pattern
+      if (instructionMatches.length === 0) {
+        instructionMatches = [...content.matchAll(/"?\s*instruction\s*"?\s*:\s*'([^']+)'/gi)];
+      }
+      
+      console.log('🔍 Step matches found:', stepMatches.length);
+      console.log('🔍 Instruction matches found:', instructionMatches.length);
+      
+      if (stepMatches.length > 0 && instructionMatches.length > 0) {
+        const count = Math.min(stepMatches.length, instructionMatches.length);
+        for (let i = 0; i < count; i++) {
+          instructions.push({
+            step: parseInt(stepMatches[i][1]),
+            instruction: instructionMatches[i][1].trim()
+          });
+        }
+        console.log('✅ Extracted instructions via separate matching:', instructions.length);
+      }
+    }
+    
+    if (instructionMatches && instructionMatches.length > 0 && instructions.length === 0) {
       instructions = instructionMatches.map((match, index) => {
-        const instruction = match.match(/"instruction"\s*:\s*"([^"]+)"/)?.[1] || `Step ${index + 1}`;
-        return { step: index + 1, instruction };
+        const stepMatch = match.match(/"*step"*\s*:\s*(\d+)/);
+        const instructionMatch = match.match(/"*instruction"*\s*:\s*"([^"]+)"/);
+        return { 
+          step: stepMatch ? parseInt(stepMatch[1]) : index + 1, 
+          instruction: instructionMatch?.[1] || `Step ${index + 1}` 
+        };
       });
+    }
+    
+    if (instructions.length === 0) {
+      console.log('⚠️ No instructions found in content');
+      console.log('⚠️ Content sample:', content.substring(0, 1000));
+    } else {
+      console.log('✅ Extracted instructions:', instructions.length);
     }
     
     const recipe = {
@@ -781,7 +844,14 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
       const selectedVariationPrompt = isReroll ? rerollVariationPrompts[randomSeed % rerollVariationPrompts.length] : "";
 
       // Generate complete recipe directly using new cleaner prompt structure
-      const systemPrompt = `You are an expert chef. Create a complete dish with suitable accompaniments based on the user's request.
+      const systemPrompt = `**CRITICAL JSON FORMATTING RULES:**
+1. Return ONLY valid JSON - no markdown, no comments, no extra text
+2. Use proper JSON syntax: "key": "value" with colons and quotes
+3. Instructions must be an array of objects like: {"step": 1, "instruction": "text"}
+4. NO trailing commas anywhere in the JSON
+5. Escape quotes inside strings with backslash: \"
+
+You are an expert chef. Create a complete dish with suitable accompaniments based on the user's request.
 
 VARIATION SEED: ${randomSeed}
 You must treat the variation seed as the single most important factor in your creative process. It determines cuisine, structure, flavour profile, inspiration, and presentation. Even with identical user input, different seeds must result in clearly different recipes.
@@ -848,7 +918,7 @@ SEED TRACE: ${randomSeed}`;
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: "You are a JSON API that returns valid recipe data. Always return properly formatted JSON with no extra text, no markdown, and no unicode escape sequences." },
+          { role: "system", content: "You MUST return ONLY valid JSON. No markdown, no code blocks, no comments. Each instruction MUST be {\"step\": number, \"instruction\": \"text\"} with proper quotes and colons. CRITICAL: Validate your JSON syntax before responding." },
           { role: "user", content: systemPrompt }
         ],
         temperature: 0.7,
@@ -861,10 +931,13 @@ SEED TRACE: ${randomSeed}`;
       let recipe;
       try {
         let content = completion.choices[0].message.content || "{}";
-        console.log('🔧 Raw OpenAI response:', content.substring(0, 200) + '...');
+        console.log('🔧 Raw OpenAI response length:', content.length);
+        console.log('🔧 Raw OpenAI response preview:', content.substring(0, 500) + '...');
+        console.log('🔧 Raw OpenAI full response:', content);
         
         // Use the parseRecipeJSON helper function
         recipe = parseRecipeJSON(content, userPrompt || "Custom Recipe");
+        console.log('✅ Parsed recipe instructions count:', recipe.instructions?.length);
       } catch (error) {
         console.error('🔥 Unexpected error in Chef Assist:', error);
         
@@ -1114,6 +1187,45 @@ SEED TRACE: ${randomSeed}`;
       console.error('Chef assist generation error:', error);
       res.status(500).json({ error: error.message || "Failed to generate recipe" });
     }
+  });
+
+  // Test endpoint for recipe parsing
+  app.get("/api/test-recipe-parsing", async (req, res) => {
+    const testRecipe = {
+      title: "Test Recipe",
+      description: "Testing recipe parsing",
+      cuisine: "International",
+      difficulty: "medium",
+      prepTime: 15,
+      cookTime: 30,
+      servings: 4,
+      ingredients: [
+        { name: "test ingredient 1", amount: "100g" },
+        { name: "test ingredient 2", amount: "200ml" }
+      ],
+      instructions: [
+        { step: 1, instruction: "First step of the recipe" },
+        { step: 2, instruction: "Second step with some \"quoted text\" inside" },
+        { step: 3, instruction: "Third step of cooking" }
+      ],
+      tips: ["Test tip"],
+      nutritionalHighlights: ["Test nutrition"]
+    };
+    
+    const jsonString = JSON.stringify(testRecipe);
+    console.log('🧪 Test JSON:', jsonString);
+    
+    const parsed = parseRecipeJSON(jsonString, "Test Recipe");
+    console.log('🧪 Parsed result:', {
+      instructionCount: parsed.instructions?.length,
+      firstInstruction: parsed.instructions?.[0]
+    });
+    
+    res.json({ 
+      original: testRecipe,
+      parsed: parsed,
+      instructionsParsedCorrectly: parsed.instructions?.length === 3
+    });
   });
 
   // Recipe ideas generation (Shopping Mode)
