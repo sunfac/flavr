@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { PageLayout } from "@/components/PageLayout";
 import { EnhancedRecipeCard } from "@/components/recipe/EnhancedRecipeCard";
@@ -12,6 +12,10 @@ export default function Recipe() {
   const [location, navigate] = useLocation();
   const [showChat, setShowChat] = useState(false);
   const recipeStore = useRecipeStore();
+  
+  // Move all useState hooks before any conditional returns
+  const [recipeImage, setRecipeImage] = useState(recipeStore.meta.image || '');
+  const [imageLoadAttempts, setImageLoadAttempts] = useState(0);
   
   // Check if we have recipe data in the store
   const hasRecipe = recipeStore.meta.title && recipeStore.ingredients.length > 0;
@@ -72,14 +76,10 @@ export default function Recipe() {
       </PageLayout>
     );
   }
-
   // Try to fetch image if not already present
-  const [recipeImage, setRecipeImage] = useState(recipeStore.meta.image || '');
-  const [imageLoadAttempts, setImageLoadAttempts] = useState(0);
-  
   useEffect(() => {
     // If no image is present, try to fetch one based on recipe title
-    if (!recipeImage && recipeStore.meta.title && imageLoadAttempts < 5) {
+    if (!recipeImage && recipeStore.meta.title && imageLoadAttempts < 5 && hasRecipe) {
       const pollForImage = async () => {
         try {
           console.log('🖼️ Polling for image (attempt', imageLoadAttempts + 1, '):', recipeStore.meta.title);
@@ -117,7 +117,7 @@ export default function Recipe() {
       // Start polling after a short delay
       setTimeout(pollForImage, 2000);
     }
-  }, [recipeStore.meta.title, recipeImage, imageLoadAttempts]);
+  }, [recipeStore.meta.title, recipeImage, imageLoadAttempts, recipeStore, hasRecipe]);
   
   // Also check if the store has been updated with an image
   useEffect(() => {
@@ -127,7 +127,7 @@ export default function Recipe() {
   }, [recipeStore.meta.image, recipeImage]);
 
   // Create activeRecipe object from store data for EnhancedRecipeCard
-  const activeRecipe = {
+  const activeRecipe = useMemo(() => ({
     id: recipeStore.id || '1',
     title: recipeStore.meta.title,
     description: recipeStore.meta.description || '',
@@ -140,7 +140,7 @@ export default function Recipe() {
     ingredients: recipeStore.ingredients.map(ing => ing.text || ''), // Convert to string array
     instructions: recipeStore.steps.map(step => step.description || ''), // Convert to string array
     tips: "Try garnishing with fresh herbs for extra flavor!" // Default tip
-  };
+  }), [recipeStore, recipeImage]);
 
   return (
     <>
