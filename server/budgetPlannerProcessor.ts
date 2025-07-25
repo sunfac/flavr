@@ -1,4 +1,10 @@
 import OpenAI from "openai";
+import { 
+  FLAVOR_MAXIMIZATION_CORE, 
+  FLAVOR_BALANCE_REQUIREMENTS, 
+  UK_CONSUMER_FLAVOR_PREFERENCES, 
+  PROFESSIONAL_TECHNIQUE_INTEGRATION 
+} from "./flavorMaximizationPrompts";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -25,6 +31,14 @@ export interface BudgetPlannerResult {
 }
 
 const BUDGET_PLANNER_SYSTEM_PROMPT = `You are Flavr's Budget Planner Mode, an elite AI culinary assistant dedicated to creating high-quality, budget-conscious weekly meal plans for families. Your mission is to:
+
+${FLAVOR_MAXIMIZATION_CORE}
+
+${FLAVOR_BALANCE_REQUIREMENTS}
+
+${UK_CONSUMER_FLAVOR_PREFERENCES}
+
+${PROFESSIONAL_TECHNIQUE_INTEGRATION}
 
 - Collect user inputs on number of meals, servings, supermarket, dietary restrictions, cuisine preferences, and budget.
 - Build a supermarket-specific shopping list optimised for budget, availability, and minimal waste.

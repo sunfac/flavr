@@ -25,6 +25,12 @@ import {
 } from "../mappingUtils";
 import { processConversationalInput, generateRecipeFromConversation, logUserInteractionData } from "../conversationalProcessor";
 import { convertToUKIngredients, convertToUKMeasurements, ukRecipePromptAdditions } from "../ukIngredientMappings";
+import { 
+  FLAVOR_MAXIMIZATION_CORE, 
+  FLAVOR_BALANCE_REQUIREMENTS, 
+  UK_CONSUMER_FLAVOR_PREFERENCES, 
+  PROFESSIONAL_TECHNIQUE_INTEGRATION 
+} from "../flavorMaximizationPrompts";
 
 // Configure multer for file uploads
 const upload = multer({ 
@@ -333,6 +339,14 @@ export function registerRecipeRoutes(app: Express) {
       }
 
       const prompt = `You are an accomplished chef designing restaurant-quality dishes that showcase available ingredients. Create COMPLETE, COHERENT MENU-WORTHY MEALS that demonstrate professional culinary expertise.
+
+${FLAVOR_MAXIMIZATION_CORE}
+
+${FLAVOR_BALANCE_REQUIREMENTS}
+
+${UK_CONSUMER_FLAVOR_PREFERENCES}
+
+${PROFESSIONAL_TECHNIQUE_INTEGRATION}
 
 CHEF'S CREATIVE FREEDOM:
 - Build dishes naturally as a professional chef would, using culinary instinct and technique
@@ -752,6 +766,14 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
       // Generate complete recipe directly with professional menu design focus
       const systemPrompt = `You are an accomplished head chef designing restaurant-quality dishes for your menu. Create COMPLETE, COHERENT MEALS that demonstrate professional culinary expertise and menu-worthy presentation.
 
+${FLAVOR_MAXIMIZATION_CORE}
+
+${FLAVOR_BALANCE_REQUIREMENTS}
+
+${UK_CONSUMER_FLAVOR_PREFERENCES}
+
+${PROFESSIONAL_TECHNIQUE_INTEGRATION}
+
 CHEF'S CREATIVE FREEDOM:
 - Build dishes naturally as a professional chef would, using culinary instinct and technique
 - Focus on maximizing flavor through proper technique, seasoning, and ingredient harmony
@@ -999,6 +1021,14 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
       // Generate complete recipe from the idea with professional menu design focus
       const systemPrompt = `You are an accomplished head chef creating a restaurant-quality dish based on this concept. Design a COMPLETE, COHERENT MENU-WORTHY MEAL that demonstrates professional culinary expertise.
 
+${FLAVOR_MAXIMIZATION_CORE}
+
+${FLAVOR_BALANCE_REQUIREMENTS}
+
+${UK_CONSUMER_FLAVOR_PREFERENCES}
+
+${PROFESSIONAL_TECHNIQUE_INTEGRATION}
+
 RECIPE CONCEPT: ${recipeIdea.title}
 DESCRIPTION: ${recipeIdea.description || "A delicious dish using your available ingredients"}
 CUISINE: ${recipeIdea.cuisine || "International"}
@@ -1192,6 +1222,12 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
 
       const basePrompt = `You are Zest, a culinary genius and the creative mind behind Flavr. Generate 4-6 diverse, exciting recipe suggestions for a shopping list based on these preferences:
 
+${FLAVOR_MAXIMIZATION_CORE}
+
+${FLAVOR_BALANCE_REQUIREMENTS}
+
+${UK_CONSUMER_FLAVOR_PREFERENCES}
+
 REQUIREMENTS:
 - Portions: ${portions}
 - Time Available: ${timeAvailable}
@@ -1374,6 +1410,14 @@ Make each recipe distinctly different in style, technique, and flavor profile. F
       // Check if a custom prompt was provided (for fridge mode)
       const cuisineList = Array.isArray(cuisines) ? cuisines.join(', ') : cuisines;
       const prompt = req.body.prompt || `You are Zest, Flavr's AI culinary expert. Create exactly 5 DIVERSE and UNIQUE recipe suggestions from ONLY the following cuisine(s): ${cuisineList}
+
+${FLAVOR_MAXIMIZATION_CORE}
+
+${FLAVOR_BALANCE_REQUIREMENTS}
+
+${UK_CONSUMER_FLAVOR_PREFERENCES}
+
+${PROFESSIONAL_TECHNIQUE_INTEGRATION}
 
 USER PREFERENCES:
 • Portions: ${portions}
