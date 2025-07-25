@@ -510,78 +510,240 @@ Return a JSON object with this structure:
   // Chef Assist inspiration
   app.post("/api/chef-assist/inspire", async (req, res) => {
     try {
-      // Add random seed for maximum variation like in recipe generation
-      const randomSeed = Math.floor(Math.random() * 10000); // 0-9999 for maximum diversity
-      const complexityLevel = Math.floor(Math.random() * 10) + 1; // 1-10 for complexity approaches
-      const simpleStyle = Math.floor(Math.random() * 10) + 1; // 1-10 for simple styles
+      // Multi-layer randomization system for maximum variation
+      const randomSeed = Math.floor(Math.random() * 100000); // 0-99999 for ultra-maximum diversity
+      const complexityLevel = Math.floor(Math.random() * 15) + 1; // 1-15 for more complexity approaches
+      const simpleStyle = Math.floor(Math.random() * 15) + 1; // 1-15 for more simple styles
+      const creativityMode = Math.floor(Math.random() * 8) + 1; // 1-8 for creative approaches
+      const seasonalFocus = Math.floor(Math.random() * 6) + 1; // 1-6 for seasonal variations
+      const textureTheme = Math.floor(Math.random() * 10) + 1; // 1-10 for texture focus
+      const flavorProfile = Math.floor(Math.random() * 12) + 1; // 1-12 for flavor directions
       
-      // Complex cooking approaches (1-10)
+      // Expanded complex cooking approaches (1-15)
       let complexityPrompt = "";
       switch (complexityLevel) {
         case 1: // Regional authenticity
           complexityPrompt = "Focus on authentic regional specialties with traditional techniques.";
           break;
         case 2: // Advanced techniques  
-          complexityPrompt = "Use sophisticated cooking techniques like confit or professional plating.";
+          complexityPrompt = "Use sophisticated cooking techniques like confit, sous vide, or professional plating.";
           break;
         case 3: // Fermentation & preservation
-          complexityPrompt = "Incorporate fermented ingredients or preserved components for deep flavors.";
+          complexityPrompt = "Incorporate fermented ingredients, pickled elements, or preserved components for deep flavors.";
           break;
         case 4: // Texture layering
-          complexityPrompt = "Focus on multiple textural contrasts in one dish.";
+          complexityPrompt = "Focus on multiple textural contrasts - crispy, creamy, chewy, tender in one dish.";
           break;
         case 5: // Umami maximization  
-          complexityPrompt = "Build intense umami through browning, reducing, or combining savory elements.";
+          complexityPrompt = "Build intense umami through browning, reducing, mushrooms, or combining savory elements.";
           break;
         case 6: // Seasonal showcase
-          complexityPrompt = "Highlight peak seasonal ingredients with enhancing techniques.";
+          complexityPrompt = "Highlight peak seasonal ingredients with enhancing techniques and preservation methods.";
           break;
         case 7: // Restaurant techniques
-          complexityPrompt = "Apply restaurant-quality techniques like proper sauce-making.";
+          complexityPrompt = "Apply restaurant-quality techniques like proper mother sauces, reductions, or emulsifications.";
           break;
         case 8: // International mastery
-          complexityPrompt = "Master authentic international techniques within one cuisine tradition.";
+          complexityPrompt = "Master authentic international techniques like hand-pulled noodles or traditional spice blending.";
           break;
         case 9: // Comfort food elevation
-          complexityPrompt = "Elevate classic comfort foods with better ingredients and refined methods.";
+          complexityPrompt = "Elevate classic comfort foods with premium ingredients and refined cooking methods.";
           break;
         case 10: // Visual artistry
-          complexityPrompt = "Create visually stunning presentations with professional plating.";
+          complexityPrompt = "Create visually stunning presentations with professional plating and garnishing techniques.";
+          break;
+        case 11: // Temperature play
+          complexityPrompt = "Incorporate hot and cold elements, or temperature-sensitive cooking techniques.";
+          break;
+        case 12: // Smoke & char
+          complexityPrompt = "Use smoking, charring, or fire-based techniques for deep smoky flavors.";
+          break;
+        case 13: // Acid balance mastery
+          complexityPrompt = "Master acid balance through citrus, vinegars, wine reductions, or fermented elements.";
+          break;
+        case 14: // Fat technique mastery
+          complexityPrompt = "Focus on fat techniques - compound butters, infused oils, or proper rendering.";
+          break;
+        case 15: // Multi-stage cooking
+          complexityPrompt = "Create dishes requiring multiple cooking stages or preparation techniques.";
           break;
       }
 
-      // Simple cooking styles (1-10)
+      // Expanded simple cooking styles (1-15)
       let simplePrompt = "";
       switch (simpleStyle) {
         case 1: // One-pot simplicity
-          simplePrompt = "Create everything in one pot or pan for easy cooking.";
+          simplePrompt = "Create everything in one pot, pan, or baking dish for easy cooking and cleanup.";
           break;
         case 2: // Fresh and raw
-          simplePrompt = "Focus on fresh, minimally cooked ingredients.";
+          simplePrompt = "Focus on fresh, minimally cooked or raw ingredients showcasing natural flavors.";
           break;
         case 3: // Quick weeknight
-          simplePrompt = "Design for 30 minutes or less total time.";
+          simplePrompt = "Design for 30 minutes or less total preparation and cooking time.";
           break;
         case 4: // Pantry staples
-          simplePrompt = "Use common pantry ingredients most people have.";
+          simplePrompt = "Use common pantry ingredients and store cupboard staples most people have.";
           break;
         case 5: // Grilled simplicity
-          simplePrompt = "Center around simple grilling or roasting techniques.";
+          simplePrompt = "Center around simple grilling, roasting, or high-heat cooking techniques.";
           break;
         case 6: // Fresh herb focus
-          simplePrompt = "Let fresh herbs be the star with simple preparation.";
+          simplePrompt = "Let fresh herbs and aromatics be the star with simple preparation methods.";
           break;
         case 7: // Rustic homestyle
-          simplePrompt = "Create rustic, homestyle dishes focused on comfort.";
+          simplePrompt = "Create rustic, homestyle dishes focused on comfort and familiar flavors.";
           break;
         case 8: // Minimal ingredients
-          simplePrompt = "Use only 5-7 high-quality ingredients for maximum impact.";
+          simplePrompt = "Use only 5-7 high-quality ingredients for maximum flavor impact.";
           break;
         case 9: // No-cook assembly
-          simplePrompt = "Focus on assembly dishes requiring no actual cooking.";
+          simplePrompt = "Focus on assembly dishes requiring no actual cooking or heating.";
           break;
         case 10: // Simple but elegant
-          simplePrompt = "Create elegantly simple dishes using basic techniques.";
+          simplePrompt = "Create elegantly simple dishes using basic techniques with refined presentation.";
+          break;
+        case 11: // Sheet pan ease
+          simplePrompt = "Everything roasts together on one sheet pan for effortless cooking.";
+          break;
+        case 12: // Slow cooker comfort
+          simplePrompt = "Set-and-forget slow cooking for tender, flavorful results.";
+          break;
+        case 13: // Batch cooking
+          simplePrompt = "Create dishes perfect for meal prep and batch cooking for the week.";
+          break;
+        case 14: // Cast iron mastery
+          simplePrompt = "Simple one-skillet dishes that go from hob to table.";
+          break;
+        case 15: // Marinate and cook
+          simplePrompt = "Simple marinating followed by straightforward cooking techniques.";
+          break;
+      }
+
+      // Additional creativity modes (1-8)
+      let creativityPrompt = "";
+      switch (creativityMode) {
+        case 1: // Traditional mastery
+          creativityPrompt = "Master traditional techniques and authentic preparations.";
+          break;
+        case 2: // Modern innovation
+          creativityPrompt = "Apply modern cooking innovations and contemporary twists.";
+          break;
+        case 3: // Fusion exploration
+          creativityPrompt = "Explore respectful fusion between compatible cuisine traditions.";
+          break;
+        case 4: // Health-conscious
+          creativityPrompt = "Create nutritious dishes without sacrificing flavor or satisfaction.";
+          break;
+        case 5: // Indulgent comfort
+          creativityPrompt = "Focus on rich, indulgent comfort food experiences.";
+          break;
+        case 6: // Artistic presentation
+          creativityPrompt = "Emphasize beautiful, Instagram-worthy artistic presentation.";
+          break;
+        case 7: // Bold flavors
+          creativityPrompt = "Use bold, intense flavors and striking spice combinations.";
+          break;
+        case 8: // Subtle sophistication
+          creativityPrompt = "Create subtle, sophisticated dishes with refined flavor balance.";
+          break;
+      }
+
+      // Seasonal focus variations (1-6)
+      let seasonalPrompt = "";
+      switch (seasonalFocus) {
+        case 1: // Spring freshness
+          seasonalPrompt = "Incorporate spring vegetables, fresh herbs, and light preparations.";
+          break;
+        case 2: // Summer abundance
+          seasonalPrompt = "Use peak summer produce, grilling techniques, and refreshing elements.";
+          break;
+        case 3: // Autumn warmth
+          seasonalPrompt = "Include autumn harvest ingredients, warming spices, and hearty preparations.";
+          break;
+        case 4: // Winter comfort
+          seasonalPrompt = "Focus on winter comfort foods, braising techniques, and rich flavors.";
+          break;
+        case 5: // Preserved & stored
+          seasonalPrompt = "Use preserved ingredients, fermented elements, and pantry staples.";
+          break;
+        case 6: // Year-round flexibility
+          seasonalPrompt = "Create dishes adaptable to any season with ingredient substitutions.";
+          break;
+      }
+
+      // Texture themes (1-10)
+      let texturePrompt = "";
+      switch (textureTheme) {
+        case 1: // Crispy contrasts
+          texturePrompt = "Include multiple crispy elements and textural contrasts.";
+          break;
+        case 2: // Creamy richness
+          texturePrompt = "Focus on creamy, velvety textures and rich mouthfeel.";
+          break;
+        case 3: // Chewy satisfaction
+          texturePrompt = "Incorporate satisfying chewy elements like grains or pasta.";
+          break;
+        case 4: // Tender perfection
+          texturePrompt = "Achieve perfect tenderness through proper cooking techniques.";
+          break;
+        case 5: // Crunchy elements
+          texturePrompt = "Add interesting crunchy components like nuts, seeds, or vegetables.";
+          break;
+        case 6: // Silky smooth
+          texturePrompt = "Create silky smooth sauces, purées, or cooking techniques.";
+          break;
+        case 7: // Flaky layers
+          texturePrompt = "Include flaky pastry, fish, or layered preparations.";
+          break;
+        case 8: // Juicy bursts
+          texturePrompt = "Incorporate juicy elements that burst with flavor.";
+          break;
+        case 9: // Firm bite
+          texturePrompt = "Maintain perfect firm textures that provide satisfying bite.";
+          break;
+        case 10: // Mixed textures
+          texturePrompt = "Combine 3+ different textures in harmonious balance.";
+          break;
+      }
+
+      // Flavor profiles (1-12)
+      let flavorPrompt = "";
+      switch (flavorProfile) {
+        case 1: // Spicy heat
+          flavorPrompt = "Build layers of spicy heat from mild to intense.";
+          break;
+        case 2: // Sweet & savory
+          flavorPrompt = "Balance sweet and savory elements in sophisticated harmony.";
+          break;
+        case 3: // Acidic brightness
+          flavorPrompt = "Use bright acidity to lift and enhance all other flavors.";
+          break;
+        case 4: // Umami depth
+          flavorPrompt = "Layer multiple umami sources for extraordinary depth.";
+          break;
+        case 5: // Herbal aromatics
+          flavorPrompt = "Showcase fresh and dried herbs for aromatic complexity.";
+          break;
+        case 6: // Smoky richness
+          flavorPrompt = "Incorporate smoky elements through technique or ingredients.";
+          break;
+        case 7: // Citrus zest
+          flavorPrompt = "Use citrus in multiple forms for bright, zesty character.";
+          break;
+        case 8: // Earthy depths
+          flavorPrompt = "Explore earthy flavors through mushrooms, roots, or techniques.";
+          break;
+        case 9: // Floral notes
+          flavorPrompt = "Include subtle floral elements through spices or aromatics.";
+          break;
+        case 10: // Rich & fatty
+          flavorPrompt = "Create rich, satisfying dishes using quality fats effectively.";
+          break;
+        case 11: // Clean & fresh
+          flavorPrompt = "Emphasize clean, fresh flavors that highlight ingredients.";
+          break;
+        case 12: // Complex layers
+          flavorPrompt = "Build complex flavor layers that evolve with each bite.";
           break;
       }
 
@@ -609,21 +771,24 @@ Return a JSON object with this structure:
       
       const selectedCuisine = specificCuisines[randomSeed % specificCuisines.length];
       
-      // Combine approaches with seed variation
-      const inspirationPrompt = `${complexityPrompt} ${simplePrompt}`;
+      // Combine all approaches with multi-layer seed variation
+      const inspirationPrompt = `${complexityPrompt} ${simplePrompt} ${creativityPrompt} ${seasonalPrompt} ${texturePrompt} ${flavorPrompt}`;
       
-      const prompt = `VARIATION SEED: ${randomSeed}
+      const prompt = `ULTRA-VARIATION SEED: ${randomSeed} | Complexity: ${complexityLevel} | Style: ${simpleStyle} | Creativity: ${creativityMode} | Season: ${seasonalFocus} | Texture: ${textureTheme} | Flavor: ${flavorProfile}
       
 ${inspirationPrompt}
 
-SEED-BASED VARIATION REQUIREMENTS:
-Use seed ${randomSeed} to ensure maximum diversity. This number must influence:
-- Protein selection (seafood, poultry, beef, pork, lamb, game, legumes, grains, vegetables)
-- Cooking technique variation (grilled, braised, roasted, sautéed, steamed, fried, slow-cooked)
-- Regional authenticity within chosen cuisine
-- Ingredient complexity (simple pantry vs specialty ingredients)
-- Seasonal influence and ingredient selection
-- Preparation style (quick vs elaborate, rustic vs refined)
+MULTI-LAYER VARIATION REQUIREMENTS:
+Use ALL variation seeds (${randomSeed}, ${complexityLevel}, ${simpleStyle}, ${creativityMode}, ${seasonalFocus}, ${textureTheme}, ${flavorProfile}) to ensure ULTRA-MAXIMUM diversity:
+- Protein selection influenced by seed ranges (seafood, poultry, beef, pork, lamb, game, legumes, grains, vegetables)
+- Cooking technique based on complexity level (grilled, braised, roasted, sautéed, steamed, fried, slow-cooked, fermented)
+- Regional authenticity within chosen cuisine tradition
+- Ingredient complexity from simple pantry to specialty imports
+- Seasonal influence and peak ingredient selection
+- Preparation style from quick weeknight to elaborate showcase
+- Texture focus creating specific mouthfeel experiences
+- Flavor profile targeting specific taste sensations
+- Creative approach from traditional to innovative modern
 
 MANDATORY CUISINE FOCUS: ${cuisineCategory}
 SPECIFIC CUISINE: ${selectedCuisine}
@@ -656,13 +821,13 @@ CREATIVE GUIDELINES:
 
 DO NOT mix cuisines or create fusion dishes. Stay authentic to ONE cuisine tradition.
 
-Return only the recipe name in 4-8 words. Be wildly creative and diverse.
-Complexity #${complexityLevel} + Style #${simpleStyle}`;
+Return only the recipe name in 4-8 words. Be wildly creative and diverse using ALL variation parameters.
+Multi-Layer Seeds: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: `You are a creative chef who creates authentic dishes from single cuisine traditions. Use variation seed ${randomSeed} to ensure maximum diversity - every click should produce completely different suggestions. Return ONLY the recipe name in 4-8 words using UK English terminology (aubergine not eggplant, courgette not zucchini, chilli not chili, prawns not shrimp). NEVER include difficulty levels. NEVER mix cuisines. Choose ONE authentic cuisine and stay within that tradition. SEED: ${randomSeed}` },
+          { role: "system", content: `You are a wildly creative chef who creates authentic dishes from single cuisine traditions. Use MULTIPLE variation seeds (${randomSeed}, ${complexityLevel}, ${simpleStyle}, ${creativityMode}, ${seasonalFocus}, ${textureTheme}, ${flavorProfile}) to ensure ULTRA-MAXIMUM diversity - every click should produce completely different suggestions that vary in complexity, style, creativity, seasonality, texture, and flavor. Return ONLY the recipe name in 4-8 words using UK English terminology (aubergine not eggplant, courgette not zucchini, chilli not chili, prawns not shrimp). NEVER include difficulty levels. NEVER mix cuisines. Choose ONE authentic cuisine and stay within that tradition. MULTI-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
           { role: "user", content: prompt }
         ],
         temperature: 0.9,
