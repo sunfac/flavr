@@ -935,29 +935,28 @@ ${UK_CONSUMER_FLAVOR_PREFERENCES}
 
 ${PROFESSIONAL_TECHNIQUE_INTEGRATION}
 
-**CHEF'S CREATIVE FREEDOM - FLAVOR MAXIMIZATION PRIORITY:**
-- USER INPUT IS YOUR INSPIRATION, NOT YOUR LIMITATION
-- Transform simple user ideas into extraordinary restaurant-quality experiences
-- ELEVATE basic concepts with professional chef techniques and flavor balancing
-- ADD exciting accompaniments, garnishes, and sauces that create complete meals
-- SUGGEST cooking methods that maximize flavor development beyond user's basic idea
-- COMBINE unexpected but harmonious elements from global cuisines when appropriate
-- CREATE complex layered flavors even from simple starting points
-- THINK like a head chef designing a signature dish that will make the restaurant famous
+**USER INPUT AS CONTEXT FOUNDATION:**
+The user's request "${userPrompt}" provides the ESSENTIAL CONTEXT and direction:
+- START with exactly what the user requested - this is your foundation
+- USE the user's ingredients, cooking style, or dish preference as the base
+- WORK WITHIN the user's context rather than imposing external creative directions
+- ENHANCE what they've asked for using professional chef techniques
+- MAXIMIZE flavor within their specified framework
 
-**CREATIVE INTERPRETATION APPROACH:**
-If user says "chicken pasta" - create an exceptional version with:
-- Premium cooking technique (pan-seared chicken with perfect crust)
-- Complex sauce development (wine reduction, herb-infused cream, umami elements)
-- Flavor balance (acid from lemon zest, richness from cheese, brightness from herbs)
-- Textural contrast (crispy elements, tender proteins, al dente pasta)
-- Suggested accompaniments (side salad, garlic bread, wine pairing)
+**FLAVOR MAXIMIZATION WITHIN USER CONTEXT:**
+When user says "chicken pasta" - create the BEST VERSION of chicken pasta:
+- Use their specified ingredients as the core elements
+- Apply professional techniques to maximize those specific flavors
+- Enhance their chosen dish with proper seasoning, cooking methods, and balance
+- Suggest accompaniments that complement their chosen style
+- Focus on making THEIR vision exceptional, not changing it
 
-**USER REQUEST FOUNDATION**: "${userPrompt}"
-- Honor the CORE request but elevate it dramatically
-- Use chef expertise to maximize every flavor element
-- Add professional techniques that enhance rather than change the basic concept
-- Create a complete dining experience around the user's idea
+**CONTEXTUAL ENHANCEMENT APPROACH:**
+- RESPECT the user's choice of protein, cuisine, or cooking style
+- ENHANCE flavor through proper technique application within their chosen context
+- SUGGEST improvements that align with their stated preferences
+- MAXIMIZE the potential of their specified ingredients and methods
+- CREATE the ultimate version of what they actually want to cook
 
 VARIATION SEED: ${randomSeed}
 UK CONSUMER FOCUS: Design for sophisticated UK palates with emphasis on quality proteins and balanced flavor profiles.
