@@ -111,13 +111,7 @@ export default function Recipe() {
           
           {/* Chat Panel Container */}
           <div className="relative ml-auto h-full">
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 20 }}
-              className="w-screen sm:w-[400px] h-full bg-slate-900 shadow-2xl flex flex-col"
-            >
+            <div className="w-screen sm:w-[400px] h-full bg-slate-900 shadow-2xl flex flex-col">
               <ChatBot 
                 isOpen={showChat}
                 onClose={() => setShowChat(false)}
@@ -126,7 +120,7 @@ export default function Recipe() {
                   console.log('Recipe updated from ChatBot:', updatedRecipe);
                 }}
               />
-            </motion.div>
+            </div>
           </div>
         </div>
       )}
