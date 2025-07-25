@@ -943,11 +943,19 @@ CHEF'S CREATIVE FREEDOM:
 - Prioritize what makes culinary sense for the specific ingredients and cuisine
 - Use chef techniques to elevate ingredients into exceptional, approachable dishes
 
+**ABSOLUTE PRIORITY: USER INPUT RULES ALL**
+The user's request "${userPrompt}" is the HIGHEST PRIORITY and must be followed exactly:
+- If user specifies a dish, protein, or cuisine - that's what you create
+- If user asks for "chicken pasta", make chicken pasta - not lamb curry
+- If user wants "beef stew", make beef stew - not fish tacos
+- User input ALWAYS overrides any seed-based variations
+- Only use seed variations for creativity WITHIN the user's request
+
 VARIATION SEED: ${randomSeed}
 UK CONSUMER FOCUS: Design for sophisticated UK palates with emphasis on quality proteins and balanced flavor profiles.
 
-${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : `
-SEED-BASED CHEF INSPIRATION (use ${randomSeed} to influence):
+${selectedVariationPrompt ? `REROLL VARIATION (apply ONLY if it aligns with user request): ${selectedVariationPrompt}` : `
+SEED-BASED INSPIRATION (use ONLY if user request is open-ended):
 - Cuisine Style: ${selectedCuisine}
 - Featured Protein: ${selectedProtein} 
 - Primary Technique: ${selectedTechnique}
@@ -980,6 +988,7 @@ CUISINE AUTHENTICITY MANDATE:
 - Use seed-based cuisine selection ONLY for completely open prompts, then create authentic dishes from that tradition
 - When user specifies techniques or ingredients, assign the cuisine that naturally fits those elements
 - Let the actual dish determine its cuisine label, not random seed assignments
+- **USER INPUT PRIORITY**: If user asks for "Chinese braised beef", make it Chinese. If they ask for "Italian pasta", make it Italian.
 
 **PROTEIN PRIORITIZATION**: 80% of dishes should feature meat, fish, or shellfish as the main component
 **COOKING TECHNIQUE FOCUS**: Emphasize popular UK methods - roasting, grilling, pan-frying, slow-cooking, braising
@@ -994,10 +1003,15 @@ DISH COMPOSITION PHILOSOPHY:
 - Let the cuisine tradition and ingredients guide the dish structure
 - Focus on flavor balance and accessibility over forced complexity
 
-User request: ${userPrompt}
+USER REQUEST (HIGHEST PRIORITY): ${userPrompt}
 Servings: ${servings}
 
-Create a complete recipe based on this request: "${userPrompt}"
+Create a complete recipe that EXACTLY matches what the user asked for: "${userPrompt}"
+
+**USER REQUEST TAKES ABSOLUTE PRIORITY**:
+- If user mentions specific ingredients, dishes, or cuisines - honor them exactly
+- Seed variations should only add creative flair, not change the fundamental request
+- If user says "pasta", don't make rice. If user says "chicken", don't use beef.
 
 REQUIREMENTS:
 - Servings: ${servings}
@@ -1020,9 +1034,9 @@ ${ukRecipePromptAdditions.spellingsGuidance}
 Return ONLY a valid JSON object with this exact structure (NO markdown, no explanations, and no trailing commas):
 
 {
-  "title": "Recipe Name",
-  "description": "Brief description of the dish, including any regional focus and standout flavours",
-  "cuisine": "Cuisine Type",
+  "title": "Recipe Name (based on user's request)",
+  "description": "Brief description of the dish that matches what the user asked for",
+  "cuisine": "Cuisine Type (match the actual dish created, honor user's cuisine request if specified)",
   "difficulty": "[easy | medium | hard] (determine based on actual complexity)",
   "prepTime": 15,
   "cookTime": [REALISTIC total cooking time in minutes],
@@ -1045,7 +1059,7 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
       const completion = await openai.chat.completions.create({
         model: "gpt-4o", // Keep quality model but use async operations for speed
         messages: [
-          { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations." },
+          { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations. CRITICAL: Always prioritize what the user asked for - if they specify ingredients, cuisines, or dishes, create exactly what they requested." },
           { role: "user", content: systemPrompt }
         ],
         temperature: 0.8 // Increased temperature for more recipe variation
