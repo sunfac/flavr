@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+// Removed framer-motion to fix ReferenceError
 import { RefreshCw, Loader2, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -40,12 +40,7 @@ export default function IngredientPanel({
       <div className={`hidden md:block ${className}`}>
         <div className="h-full overflow-y-auto bg-slate-800/50 rounded-xl p-6" style={{ scrollbarGutter: 'stable' }}>
           {/* Chat Feature Guide */}
-          <motion.div
-            className="mb-4"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
+          <div className="mb-4">
             <div className="bg-gradient-to-r from-orange-500/20 to-orange-600/20 border border-orange-500/40 rounded-lg p-3 backdrop-blur-sm">
               <div className="flex items-center gap-2 mb-1">
                 <MessageCircle className="w-4 h-4 text-orange-400" />
@@ -55,7 +50,7 @@ export default function IngredientPanel({
                 Dietary requirements • Servings • Spice level • Side dishes • Cooking method • Ingredient swaps • and more
               </p>
             </div>
-          </motion.div>
+          </div>
 
           <h3 className="font-semibold text-white mb-4" style={{ fontSize: 'var(--step-1)' }}>
             Ingredients ({ingredients.length})
