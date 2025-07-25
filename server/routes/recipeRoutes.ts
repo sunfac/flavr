@@ -800,42 +800,64 @@ SEED TRACE: ${randomSeed}`;
       } catch (parseError) {
         console.error('🔥 Chef Assist JSON parsing error:', parseError);
         console.error('🔥 Raw OpenAI content:', completion.choices[0].message.content);
-        console.error('🔥 Cleaned content that failed:', content);
+        console.error('🔥 Cleaned content that failed:', content || 'undefined');
         
-        // Try one more aggressive cleanup attempt
+        // Try one more aggressive cleanup attempt for severely malformed JSON
         try {
-          console.log('🔧 Attempting aggressive JSON repair...');
+          console.log('🔧 Attempting surgical JSON reconstruction...');
           
-          // Extract just the core JSON structure manually
-          let repairAttempt = completion.choices[0].message.content || "{}";
+          let rawContent = completion.choices[0].message.content || "{}";
+          console.log('🔧 Raw content length:', rawContent.length);
           
-          // Find the actual JSON boundaries more aggressively
-          const startIndex = repairAttempt.indexOf('{"');
-          const endIndex = repairAttempt.lastIndexOf('}');
+          // Extract the basic recipe structure manually using regex
+          const titleMatch = rawContent.match(/"title"\s*:\s*"([^"]+)"/);
+          const descMatch = rawContent.match(/"description"\s*:\s*"([^"]+)"/);
+          const cuisineMatch = rawContent.match(/"cuisine"\s*:\s*"([^"]+)"/);
+          const difficultyMatch = rawContent.match(/"difficulty"\s*:\s*"([^"]+)"/);
+          const prepTimeMatch = rawContent.match(/"prepTime"\s*:\s*(\d+)/);
+          const cookTimeMatch = rawContent.match(/"cookTime"\s*:\s*(\d+)/);
+          const servingsMatch = rawContent.match(/"servings"\s*:\s*(\d+)/);
           
-          if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
-            repairAttempt = repairAttempt.substring(startIndex, endIndex + 1);
-            console.log('🔧 Extracted JSON bounds:', repairAttempt.substring(0, 100) + '...');
-            
-            // Very aggressive cleanup
-            repairAttempt = repairAttempt
-              .replace(/\n/g, ' ')                    // Remove newlines
-              .replace(/\s+/g, ' ')                   // Normalize spaces
-              .replace(/'/g, '"')                     // Fix single quotes
-              .replace(/([{,]\s*)(\w+):/g, '$1"$2":') // Quote property names
-              .replace(/""(\w+)""/g, '"$1"')          // Fix double quotes
-              .replace(/,\s*}/g, '}')                 // Remove trailing commas
-              .replace(/,\s*]/g, ']')                 // Remove trailing commas in arrays
-              .trim();
-            
-            console.log('🔧 Aggressively cleaned:', repairAttempt.substring(0, 200) + '...');
-            recipe = JSON.parse(repairAttempt);
-            console.log('✅ Aggressive repair succeeded!');
-          } else {
-            throw new Error('Could not find JSON boundaries');
+          // Extract ingredients manually
+          const ingredientsMatch = rawContent.match(/"ingredients"\s*:\s*\[(.*?)\]/s);
+          let ingredients = [];
+          if (ingredientsMatch) {
+            const ingredientText = ingredientsMatch[1];
+            const ingredientMatches = ingredientText.match(/\{"name"\s*:\s*"([^"]+)",\s*"amount"\s*:\s*"([^"]+)"\}/g);
+            if (ingredientMatches) {
+              ingredients = ingredientMatches.map(match => {
+                const nameMatch = match.match(/"name"\s*:\s*"([^"]+)"/);
+                const amountMatch = match.match(/"amount"\s*:\s*"([^"]+)"/);
+                return {
+                  name: nameMatch ? nameMatch[1] : "ingredient",
+                  amount: amountMatch ? amountMatch[1] : "to taste"
+                };
+              });
+            }
           }
+          
+          // Create a clean recipe structure
+          recipe = {
+            title: titleMatch ? titleMatch[1] : userPrompt || "Custom Recipe",
+            description: descMatch ? descMatch[1] : "A delicious dish created just for you",
+            cuisine: cuisineMatch ? cuisineMatch[1] : "International",
+            difficulty: difficultyMatch ? difficultyMatch[1] : "medium",
+            prepTime: prepTimeMatch ? parseInt(prepTimeMatch[1]) : 15,
+            cookTime: cookTimeMatch ? parseInt(cookTimeMatch[1]) : 30,
+            servings: servingsMatch ? parseInt(servingsMatch[1]) : 4,
+            ingredients: ingredients.length > 0 ? ingredients : [
+              { name: "ingredients as described", amount: "as needed" }
+            ],
+            instructions: [
+              { step: 1, instruction: "Recipe structure was corrupted. Please generate again for complete instructions." }
+            ],
+            tips: ["Due to data corruption, please regenerate this recipe for complete cooking tips"],
+            nutritionalHighlights: ["Nutritional information will be available after successful generation"]
+          };
+          
+          console.log('✅ Surgical reconstruction succeeded! Created recipe with', ingredients.length, 'ingredients');
         } catch (repairError) {
-          console.error('🔥 Aggressive repair also failed:', repairError);
+          console.error('🔥 Surgical reconstruction also failed:', repairError);
           
           // Final fallback: Create a basic recipe structure
           recipe = {
