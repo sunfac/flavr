@@ -170,39 +170,42 @@ export const useRecipeStore = create<RecipeStore>()(
       updateActiveRecipe: (recipe: any, generationParams?: any) => {
         console.log('🔄 Recipe Store: Updating active recipe from chat', recipe);
         
+        // Get current state to preserve existing data
+        const currentState = get();
+        
         // Handle both API response format and internal format
         const ingredients = recipe.ingredients?.map((ing: any, index: number) => ({
           id: `ingredient-${index}`,
           text: typeof ing === 'string' ? ing : `${ing.amount || ''} ${ing.name || ing}`.trim(),
           amount: typeof ing === 'object' ? ing.amount : undefined,
           checked: false
-        })) || [];
+        })) || currentState.ingredients; // Fallback to existing ingredients
 
         const instructions = recipe.instructions?.map((instruction: any, index: number) => ({
           id: `step-${index}`,
           title: `Step ${index + 1}`,
           description: typeof instruction === 'string' ? instruction : instruction.instruction,
           duration: 0
-        })) || [];
+        })) || currentState.steps; // Fallback to existing steps
 
         const updatedState: RecipeState = {
-          id: recipe.id || Date.now().toString(),
-          servings: recipe.servings || 4,
+          id: recipe.id || currentState.id || Date.now().toString(),
+          servings: recipe.servings || currentState.servings || 4,
           ingredients: ingredients,
           steps: instructions,
           meta: {
-            title: recipe.title || 'Updated Recipe',
-            description: recipe.description,
-            cookTime: recipe.cookTime || recipe.prepTime + recipe.cookTime || 30,
-            difficulty: recipe.difficulty || 'Medium',
-            cuisine: recipe.cuisine,
-            image: recipe.image || recipe.imageUrl || recipe.imageSrc, // Handle multiple image field names
-            imageLoading: recipe.imageLoading !== undefined ? recipe.imageLoading : !recipe.image // Loading if no image provided
+            title: recipe.title || currentState.meta.title || 'Updated Recipe',
+            description: recipe.description !== undefined ? recipe.description : currentState.meta.description,
+            cookTime: recipe.cookTime || currentState.meta.cookTime || 30,
+            difficulty: recipe.difficulty || currentState.meta.difficulty || 'Medium',
+            cuisine: recipe.cuisine || currentState.meta.cuisine,
+            image: recipe.image || recipe.imageUrl || recipe.imageSrc || currentState.meta.image, // Preserve existing image
+            imageLoading: false // Since we're updating an existing recipe, not loading
           },
-          currentStep: 0,
-          completedSteps: [],
+          currentStep: currentState.currentStep,
+          completedSteps: currentState.completedSteps,
           lastUpdated: Date.now(),
-          generationParams: generationParams
+          generationParams: generationParams || currentState.generationParams
         };
         set(updatedState);
       },

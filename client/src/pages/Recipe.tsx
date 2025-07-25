@@ -19,7 +19,8 @@ export default function Recipe() {
   
   // Check if we have recipe data in the store
   const hasRecipe = recipeStore.meta.title && recipeStore.ingredients.length > 0;
-  const shouldShowRecipe = hasRecipe && (!recipeStore.meta.imageLoading || recipeStore.meta.image);
+  // Don't show loading screen if we already have a recipe (even if image is loading)
+  const shouldShowRecipe = hasRecipe;
   
   // Create activeRecipe object from store data for EnhancedRecipeCard
   const activeRecipe = useMemo(() => ({
