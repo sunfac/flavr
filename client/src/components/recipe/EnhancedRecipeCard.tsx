@@ -446,7 +446,7 @@ function EnhancedRecipeCard({
   };
 
   return (
-    <div className={`bg-slate-900 text-white ${className}`}>
+    <div className={`text-white ${className}`}>
       {/* Progress Bar */}
       <ProgressBar
         currentStep={currentStep}
