@@ -272,17 +272,43 @@ export function registerRecipeRoutes(app: Express) {
         return res.status(403).json(limitCheck.error);
       }
 
-      // Add random seed for recipe variation with reroll-specific enhancement
+      // Add random seed for recipe variation with UK consumer-focused enhancement
       const randomSeed = Math.floor(Math.random() * 1000);
       const isReroll = req.body.isReroll || false;
       
-      // Enhanced variation prompts for rerolls to ensure completely different recipes
+      // UK Consumer-focused variation system for Fridge2Fork
+      const ukConsumerVariations = {
+        cuisines: [
+          "British Contemporary", "Italian", "French Bistro", "Mediterranean", "Indian", "Thai", "Chinese", 
+          "Mexican", "Spanish", "Greek", "Middle Eastern", "Japanese", "American BBQ", "Moroccan"
+        ],
+        techniques: [
+          "pan-seared", "roasted", "grilled", "braised", "slow-cooked", "sautéed", "poached", "baked", 
+          "flash-fried", "confit", "smoked", "char-grilled", "steamed", "caramelised"
+        ],
+        carbs: [
+          "new potatoes", "basmati rice", "pasta", "crusty bread", "quinoa", "couscous", 
+          "wild rice", "sweet potato", "polenta", "orzo", "risotto rice", "sourdough"
+        ],
+        sauces: [
+          "herb butter", "lemon vinaigrette", "garlic aioli", "red wine jus", "hollandaise", 
+          "pesto", "chimichurri", "tahini drizzle", "balsamic glaze", "curry sauce", "gravy"
+        ]
+      };
+      
+      // Use seed to determine UK-focused variations
+      const selectedCuisine = ukConsumerVariations.cuisines[randomSeed % ukConsumerVariations.cuisines.length];
+      const selectedTechnique = ukConsumerVariations.techniques[Math.floor(randomSeed/100) % ukConsumerVariations.techniques.length];
+      const selectedCarb = ukConsumerVariations.carbs[Math.floor(randomSeed/50) % ukConsumerVariations.carbs.length];
+      const selectedSauce = ukConsumerVariations.sauces[Math.floor(randomSeed/25) % ukConsumerVariations.sauces.length];
+      
+      // Enhanced variation prompts for rerolls with UK consumer focus
       const rerollVariationPrompts = [
-        "Create a COMPLETELY DIFFERENT recipe using entirely different proteins, cooking methods, and flavor profiles than typical dishes with these ingredients",
-        "Generate an UNEXPECTED dish that transforms these ingredients in a surprising way - different cuisine style, cooking technique, or meal type than common approaches",
-        "Design a UNIQUE recipe that takes these ingredients in a bold new direction - different proteins, accompaniments, or cooking style than standard preparations",
-        "Craft an INNOVATIVE dish that reimagines these ingredients - vary the main component, side dishes, marinades, or cooking method for maximum difference",
-        "Create a DISTINCTIVE recipe that uses these ingredients in an unconventional way - different regional style, protein choice, or preparation method"
+        `Create ${selectedCuisine} dishes using ${selectedTechnique} technique with ${selectedCarb} base and ${selectedSauce} - ensure meat/fish focus where possible`,
+        `Design ${selectedTechnique} recipes with ${selectedCuisine} influences, featuring ${selectedCarb} and ${selectedSauce} for balanced flavor profiles`,
+        `Craft ${selectedCuisine}-inspired meals using ${selectedTechnique} cooking method, paired with ${selectedCarb} and enhanced with ${selectedSauce}`,
+        `Generate complete dishes using ${selectedTechnique} technique, drawing from ${selectedCuisine} traditions with ${selectedCarb} and ${selectedSauce}`,
+        `Create balanced ${selectedCuisine} meals featuring ${selectedTechnique} cooking alongside ${selectedCarb} with ${selectedSauce} for optimal harmony`
       ];
       
       const selectedVariationPrompt = isReroll ? rerollVariationPrompts[randomSeed % rerollVariationPrompts.length] : "";
@@ -306,21 +332,33 @@ export function registerRecipeRoutes(app: Express) {
         cuisineNotes.push(`Neutral ingredients: ${groupedIngredients.neutral.join(", ")}`);
       }
 
-      const prompt = `You are a creative chef specializing in making delicious COMPLETE MEALS from available ingredients.
+      const prompt = `You are a creative chef specializing in making delicious COMPLETE MEALS from available ingredients for UK consumers.
 
-VARIATION SEED: ${randomSeed} (use this number to vary your recipe concepts, ingredient combinations, and cooking approaches to create diverse outputs)
+VARIATION SEED: ${randomSeed}
+UK CONSUMER FOCUS: Prioritize meat, fish, or shellfish proteins with popular cooking techniques and balanced flavor profiles.
 
-${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : ""}
+${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : `
+SEED-BASED PREFERENCES (use ${randomSeed} to influence):
+- Cuisine Style: ${selectedCuisine}
+- Cooking Technique: ${selectedTechnique}
+- Carbohydrate Base: ${selectedCarb}
+- Sauce/Dressing: ${selectedSauce}
+`}
 
-CUISINE DIVERSITY REQUIREMENT - HARD RULE:
-FORBIDDEN: Never suggest overused Western dishes like coq au vin, beef bourguignon, shepherd's pie, or fish and chips.
-MANDATORY: Use VARIATION SEED to select from diverse global cuisines:
-- Seed 1-200: Asian cuisines (Thai, Vietnamese, Korean, Japanese, Chinese, Indonesian, Malaysian)
-- Seed 201-400: Middle Eastern (Lebanese, Persian, Turkish, Moroccan, Egyptian)  
-- Seed 401-600: European (Italian, Spanish, Greek, Portuguese, Hungarian)
-- Seed 601-800: Latin American (Peruvian, Mexican, Argentinian, Brazilian)
-- Seed 801-1000: Indian Subcontinent (Indian, Sri Lankan)
-Choose lesser-known regional dishes within the selected cuisine tradition.
+FLAVOR BALANCE MANDATE: Every dish must achieve harmony between:
+- SWEETNESS: Natural sweetness from caramelisation, roasting, or fruit/vegetable elements
+- ACIDITY: Citrus, vinegar, wine, or fermented elements for brightness  
+- SALTINESS/UMAMI: Proper seasoning plus umami depth from cheese, mushrooms, anchovies, or stocks
+- FAT: Richness from oils, butter, nuts, or naturally fatty proteins for mouthfeel and satisfaction
+
+UK CONSUMER CUISINE PREFERENCE - POPULARITY-BASED SELECTION:
+When creating recipes, select from cuisines popular with UK consumers:
+1. **PRIMARY UK FAVORITES** (Seeds 1-400): Italian, Indian, Chinese, Thai, French, Mediterranean, Greek, Spanish
+2. **SECONDARY POPULAR** (Seeds 401-700): Mexican, Japanese, Middle Eastern, Turkish, American, Korean  
+3. **EMERGING FAVORITES** (Seeds 701-1000): Vietnamese, Moroccan, Peruvian, Lebanese, Malaysian
+
+**PROTEIN PRIORITIZATION**: 80% of dishes should feature meat, fish, or shellfish as the main component
+**COOKING TECHNIQUE FOCUS**: Emphasize popular UK methods - roasting, grilling, pan-frying, slow-cooking, braising
 
 IMPORTANT: Always create COMPLETE DISHES that include:
 - Main component using the available ingredients
@@ -649,49 +687,101 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
       const randomSeed = Math.floor(Math.random() * 1000);
       const isReroll = req.body.isReroll || false;
       
-      // Enhanced variation prompts for rerolls to ensure completely different recipes
+      // UK Consumer-focused variation system using seed for targeted preferences
+      const ukConsumerVariations = {
+        // Popular UK cuisines (seed-based selection)
+        cuisines: [
+          "British Contemporary", "Italian", "French Bistro", "Mediterranean", "Indian", "Thai", "Chinese", 
+          "Mexican", "Spanish", "Greek", "Middle Eastern", "Japanese", "American BBQ", "Moroccan"
+        ],
+        
+        // Popular proteins for UK consumers  
+        proteins: [
+          "chicken breast", "salmon fillet", "beef mince", "lamb chops", "cod fillet", "pork tenderloin",
+          "king prawns", "duck breast", "sea bass", "tuna steak", "turkey breast", "venison", "mussels", "crab"
+        ],
+        
+        // Popular cooking techniques
+        techniques: [
+          "pan-seared", "roasted", "grilled", "braised", "slow-cooked", "sautéed", "poached", "baked", 
+          "flash-fried", "confit", "smoked", "char-grilled", "steamed", "caramelised"
+        ],
+        
+        // Popular carbohydrate bases
+        carbs: [
+          "new potatoes", "basmati rice", "pasta", "crusty bread", "quinoa", "couscous", 
+          "wild rice", "sweet potato", "polenta", "orzo", "risotto rice", "sourdough"
+        ],
+        
+        // Sauce/dressing styles
+        sauces: [
+          "herb butter", "lemon vinaigrette", "garlic aioli", "red wine jus", "hollandaise", 
+          "pesto", "chimichurri", "tahini drizzle", "balsamic glaze", "curry sauce", "gravy"
+        ]
+      };
+      
+      // Use seed to determine UK-focused variations
+      const selectedCuisine = ukConsumerVariations.cuisines[randomSeed % ukConsumerVariations.cuisines.length];
+      const selectedProtein = ukConsumerVariations.proteins[Math.floor(randomSeed/10) % ukConsumerVariations.proteins.length];
+      const selectedTechnique = ukConsumerVariations.techniques[Math.floor(randomSeed/100) % ukConsumerVariations.techniques.length];
+      const selectedCarb = ukConsumerVariations.carbs[Math.floor(randomSeed/50) % ukConsumerVariations.carbs.length];
+      const selectedSauce = ukConsumerVariations.sauces[Math.floor(randomSeed/25) % ukConsumerVariations.sauces.length];
+      
+      // Enhanced variation prompts for rerolls with UK consumer focus
       const rerollVariationPrompts = [
-        "Create a COMPLETELY DIFFERENT dish than typical interpretations of this request - vary the protein, cooking method, and cuisine style entirely",
-        "Generate an UNEXPECTED interpretation that takes this request in a bold new direction - different main ingredient, cooking technique, or regional style",
-        "Design a UNIQUE dish that reimagines this request - vary the protein choice, side dishes, flavor profile, or cooking method dramatically",
-        "Craft an INNOVATIVE interpretation using entirely different proteins, accompaniments, marinades, or cooking styles than common approaches",
-        "Create a DISTINCTIVE dish that transforms this request using different cuisine traditions, cooking methods, or ingredient combinations"
+        `Create a ${selectedCuisine} dish featuring ${selectedProtein} using ${selectedTechnique} technique with ${selectedCarb} and ${selectedSauce} - ensure complete flavor balance`,
+        `Design a ${selectedTechnique} ${selectedProtein} dish with ${selectedCuisine} influences, served with ${selectedCarb} and complemented by ${selectedSauce}`,
+        `Craft a ${selectedCuisine}-inspired meal centered on ${selectedTechnique} ${selectedProtein}, paired with ${selectedCarb} and enhanced with ${selectedSauce}`,
+        `Generate a complete ${selectedProtein} dish using ${selectedTechnique} method, drawing from ${selectedCuisine} traditions with ${selectedCarb} and ${selectedSauce}`,
+        `Create a balanced ${selectedCuisine} meal featuring ${selectedTechnique} ${selectedProtein} alongside ${selectedCarb} with ${selectedSauce} for optimal flavor harmony`
       ];
       
       const selectedVariationPrompt = isReroll ? rerollVariationPrompts[randomSeed % rerollVariationPrompts.length] : "";
 
-      // Generate complete recipe directly
-      const systemPrompt = `You are an expert chef. Create a complete dish with suitable accompaniments based on the user's request.
+      // Generate complete recipe directly with UK consumer focus
+      const systemPrompt = `You are an expert chef specializing in dishes popular with UK consumers. Create a complete dish with suitable accompaniments based on the user's request.
 
 VARIATION SEED: ${randomSeed}
+UK CONSUMER FOCUS: Prioritize meat, fish, or shellfish proteins with popular cooking techniques and balanced flavor profiles.
 
-${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : ""}
+${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : `
+SEED-BASED PREFERENCES (use ${randomSeed} to influence):
+- Cuisine Style: ${selectedCuisine}
+- Primary Protein: ${selectedProtein} 
+- Cooking Technique: ${selectedTechnique}
+- Carbohydrate Base: ${selectedCarb}
+- Sauce/Dressing: ${selectedSauce}
+`}
 
-Use this number to vary the entire output. It must influence:
+FLAVOR BALANCE MANDATE: Every dish must achieve harmony between:
+- SWEETNESS: Natural sweetness from caramelisation, roasting, or fruit/vegetable elements
+- ACIDITY: Citrus, vinegar, wine, or fermented elements for brightness  
+- SALTINESS/UMAMI: Proper seasoning plus umami depth from cheese, mushrooms, anchovies, or stocks
+- FAT: Richness from oils, butter, nuts, or naturally fatty proteins for mouthfeel and satisfaction
 
-- Main ingredient selection (protein or veg)
-- Side dish pairing logic
-- Choice of cooking techniques (grilled, braised, roasted, sautéed, etc.)
-- Herb and spice selection
-- Whether the dish leans traditional or regional within the cuisine (e.g. Northern vs. Southern Italian)
-- Richness vs. freshness, spice level, and presentation style
-- A unique "chef's mood" which drives subtle intuitive variations in the dish (e.g., rustic vs. refined, bold vs. mellow)
+UK CONSUMER PREFERENCE INTEGRATION: Use variation seed ${randomSeed} to influence the entire output through:
 
-CUISINE DIVERSITY REQUIREMENT - HARD RULE:
-When the user request is vague or open-ended (e.g. "impressive dinner party dish", "chicken dinner", "something special"), you MUST:
+- Main protein selection prioritizing meat, fish, or shellfish preferred by UK consumers
+- Popular UK cooking techniques (roasting, grilling, braising, pan-searing, slow-cooking)
+- Carbohydrate bases commonly enjoyed (potatoes, rice, pasta, bread)  
+- Sauce and dressing styles that complement British palates
+- Regional authenticity within chosen cuisine tradition
+- Balance of richness vs. freshness appropriate for UK preferences
+- Seasoning and spice levels suited to mainstream UK tastes
+- Presentation style from rustic comfort to refined restaurant quality
 
-1. **FORBIDDEN DISHES**: NEVER generate coq au vin, beef bourguignon, ratatouille, bouillabaisse, or any classic French bistro dishes
-2. **MANDATORY GLOBAL SELECTION**: Randomly select from diverse global cuisines using the variation seed:
-   - Asian: Thai, Vietnamese, Korean, Japanese, Chinese, Indonesian, Malaysian
-   - Middle Eastern: Lebanese, Persian, Turkish, Moroccan, Egyptian
-   - European: Italian, Spanish, Greek, Portuguese, Hungarian
-   - Latin American: Peruvian, Mexican, Argentinian, Brazilian
-   - Indian Subcontinent: Indian, Sri Lankan
-3. **REGIONAL AUTHENTICITY**: Choose lesser-known regional dishes within the selected cuisine
-4. **VARIATION SEED ENFORCEMENT**: Use seed number to determine:
-   - Which global cuisine to select (1-200: Asian, 201-400: Middle Eastern, 401-600: European, 601-800: Latin American, 801-1000: Indian Subcontinent)
-   - Which regional variation within that cuisine
-   - Specific cooking techniques and ingredients authentic to that region
+UK CONSUMER CUISINE PREFERENCE - POPULARITY-BASED SELECTION:
+When the user request is vague or open-ended, select from cuisines popular with UK consumers using the variation seed:
+
+1. **PRIMARY UK FAVORITES** (Seeds 1-400): Italian, Indian, Chinese, Thai, French, Mediterranean, Greek, Spanish
+2. **SECONDARY POPULAR** (Seeds 401-700): Mexican, Japanese, Middle Eastern, Turkish, American, Korean  
+3. **EMERGING FAVORITES** (Seeds 701-1000): Vietnamese, Moroccan, Peruvian, Lebanese, Malaysian
+
+**PROTEIN PRIORITIZATION**: 80% of dishes should feature meat, fish, or shellfish as the main component
+**COOKING TECHNIQUE FOCUS**: Emphasize popular UK methods - roasting, grilling, pan-frying, slow-cooking, braising
+**FLAVOR BALANCE**: Ensure each dish achieves the four-pillar balance (sweet, acid, salt/umami, fat)
+**CARBOHYDRATE INTEGRATION**: Include popular bases like potatoes, rice, pasta, or quality bread
+**SAUCE/DRESSING**: Feature complementary sauces that enhance rather than mask the main protein
 
 IMPORTANT: Always create COMPLETE DISHES that include:
 - Main component (protein, vegetable, or grain-based centrepiece)
@@ -838,31 +928,76 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
         dietaryRestrictions = []
       } = quizData || {};
 
-      // Add reroll variation logic for shopping mode
+      // Add UK consumer-focused reroll variation logic for shopping mode
       const isReroll = req.body.isReroll || false;
       const randomSeed = Math.floor(Math.random() * 1000);
       
-      // Enhanced variation prompts for rerolls 
+      // UK Consumer-focused variation system for Shopping Mode
+      const ukConsumerVariations = {
+        cuisines: [
+          "British Contemporary", "Italian", "French Bistro", "Mediterranean", "Indian", "Thai", "Chinese", 
+          "Mexican", "Spanish", "Greek", "Middle Eastern", "Japanese", "American BBQ", "Moroccan"
+        ],
+        proteins: [
+          "chicken breast", "salmon fillet", "beef mince", "lamb chops", "cod fillet", "pork tenderloin",
+          "king prawns", "duck breast", "sea bass", "tuna steak", "turkey breast", "venison", "mussels", "crab"
+        ],
+        techniques: [
+          "pan-seared", "roasted", "grilled", "braised", "slow-cooked", "sautéed", "poached", "baked", 
+          "flash-fried", "confit", "smoked", "char-grilled", "steamed", "caramelised"
+        ],
+        carbs: [
+          "new potatoes", "basmati rice", "pasta", "crusty bread", "quinoa", "couscous", 
+          "wild rice", "sweet potato", "polenta", "orzo", "risotto rice", "sourdough"
+        ],
+        sauces: [
+          "herb butter", "lemon vinaigrette", "garlic aioli", "red wine jus", "hollandaise", 
+          "pesto", "chimichurri", "tahini drizzle", "balsamic glaze", "curry sauce", "gravy"
+        ]
+      };
+      
+      // Use seed to determine UK-focused variations
+      const selectedCuisine = ukConsumerVariations.cuisines[randomSeed % ukConsumerVariations.cuisines.length];
+      const selectedProtein = ukConsumerVariations.proteins[Math.floor(randomSeed/10) % ukConsumerVariations.proteins.length];
+      const selectedTechnique = ukConsumerVariations.techniques[Math.floor(randomSeed/100) % ukConsumerVariations.techniques.length];
+      const selectedCarb = ukConsumerVariations.carbs[Math.floor(randomSeed/50) % ukConsumerVariations.carbs.length];
+      const selectedSauce = ukConsumerVariations.sauces[Math.floor(randomSeed/25) % ukConsumerVariations.sauces.length];
+      
+      // Enhanced variation prompts for rerolls with UK consumer focus
       const rerollVariationPrompts = [
-        "Create a COMPLETELY DIFFERENT recipe using entirely different proteins, cooking methods, and flavor profiles while maintaining the core concept",
-        "Generate an UNEXPECTED interpretation that transforms this concept in a surprising way - different cuisine style, cooking technique, or meal type",
-        "Design a UNIQUE recipe that takes this concept in a bold new direction - different proteins, accompaniments, or cooking style",
-        "Craft an INNOVATIVE dish that reimagines this concept - vary the main component, side dishes, marinades, or cooking method",
-        "Create a DISTINCTIVE recipe that uses this concept as inspiration but executes it in an unconventional way"
+        `Create a ${selectedCuisine} version of this concept featuring ${selectedProtein} using ${selectedTechnique} technique with ${selectedCarb} and ${selectedSauce}`,
+        `Design a ${selectedTechnique} interpretation with ${selectedCuisine} influences, featuring ${selectedProtein} served with ${selectedCarb} and ${selectedSauce}`,
+        `Craft a ${selectedCuisine}-inspired version centered on ${selectedTechnique} ${selectedProtein}, paired with ${selectedCarb} and enhanced with ${selectedSauce}`,
+        `Generate a complete ${selectedProtein} dish using ${selectedTechnique} method, drawing from ${selectedCuisine} traditions with ${selectedCarb} and ${selectedSauce}`,
+        `Create a balanced ${selectedCuisine} interpretation featuring ${selectedTechnique} ${selectedProtein} alongside ${selectedCarb} with ${selectedSauce}`
       ];
       
       const selectedVariationPrompt = isReroll ? rerollVariationPrompts[randomSeed % rerollVariationPrompts.length] : "";
 
-      // Generate complete recipe from the idea
-      const systemPrompt = `You are an expert chef creating a complete recipe based on this recipe idea:
+      // Generate complete recipe from the idea with UK consumer focus
+      const systemPrompt = `You are an expert chef creating a complete recipe based on this concept for UK consumers:
 
 RECIPE CONCEPT: ${recipeIdea.title}
 DESCRIPTION: ${recipeIdea.description || "A delicious dish using your available ingredients"}
 CUISINE: ${recipeIdea.cuisine || "International"}
 
 VARIATION SEED: ${randomSeed}
+UK CONSUMER FOCUS: Prioritize meat, fish, or shellfish proteins with popular cooking techniques and balanced flavor profiles.
 
-${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : ""}
+${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : `
+SEED-BASED PREFERENCES (use ${randomSeed} to influence):
+- Cuisine Style: ${selectedCuisine}
+- Primary Protein: ${selectedProtein}
+- Cooking Technique: ${selectedTechnique}
+- Carbohydrate Base: ${selectedCarb}
+- Sauce/Dressing: ${selectedSauce}
+`}
+
+FLAVOR BALANCE MANDATE: Every dish must achieve harmony between:
+- SWEETNESS: Natural sweetness from caramelisation, roasting, or fruit/vegetable elements
+- ACIDITY: Citrus, vinegar, wine, or fermented elements for brightness  
+- SALTINESS/UMAMI: Proper seasoning plus umami depth from cheese, mushrooms, anchovies, or stocks
+- FAT: Richness from oils, butter, nuts, or naturally fatty proteins for mouthfeel and satisfaction
 
 AVAILABLE INGREDIENTS: ${ingredients.join(", ")}
 CONSTRAINTS:
