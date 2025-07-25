@@ -225,6 +225,44 @@ function parseRecipeJSON(content: string, fallbackTitle: string = "Custom Recipe
   }
 }
 
+// Helper function to generate seed variation profiles
+function defineSeed(seed: number): string {
+  const styles = [
+    "rustic", "elevated home-cooking", "modern gastropub", "street food-inspired",
+    "fusion", "heritage-style", "plant-forward fine dining", "farmhouse-style", "hyper-local", "playful comfort food"
+  ];
+
+  const cuisines = [
+    "Middle Eastern", "East Asian", "Southern European", "Nordic", "Caribbean", "South Asian",
+    "West African", "Mexican", "Modern British", "French Provincial"
+  ];
+
+  const techniques = [
+    "grilled and glazed", "braised and reduced", "pan-seared and layered",
+    "roasted and spiced", "charred and dressed", "steamed and seasoned",
+    "baked and stuffed", "flash-fried and drizzled", "slow-cooked and finished under the grill"
+  ];
+
+  const platingStyles = [
+    "minimalist", "family-style", "stacked", "scattered", "bowl-based", "layered",
+    "handheld", "drizzled and garnished", "elevated but comforting", "vibrant and rustic"
+  ];
+
+  // Use seed to deterministically select options
+  const style = styles[seed % styles.length];
+  const cuisine = cuisines[Math.floor(seed / 10) % cuisines.length];
+  const technique = techniques[Math.floor(seed / 100) % techniques.length];
+  const plating = platingStyles[Math.floor(seed / 1000) % platingStyles.length];
+
+  return `VARIATION SEED: ${seed}
+Style Modifier: ${style}
+Cuisine Influence: ${cuisine}
+Technique Focus: ${technique}
+Plating: ${plating}
+
+These seed attributes must strongly influence the recipe's structure, flavour profile, and presentation. They represent a chef's unique creative take and must result in a dish that feels distinct even with similar ingredients.`;
+}
+
 // Helper function to convert recipe text to UK English
 function convertRecipeToUKEnglish(recipe: any): any {
   if (!recipe) return recipe;
@@ -727,21 +765,15 @@ Return a JSON object with this structure:
       
       const selectedCuisine = specificCuisines[randomSeed % specificCuisines.length];
       
+      // Generate seed variation profile
+      const seedProfile = defineSeed(randomSeed);
+      
       // Combine approaches with seed variation
       const inspirationPrompt = `${complexityPrompt} ${simplePrompt}`;
       
-      const prompt = `VARIATION SEED: ${randomSeed}
+      const prompt = `${seedProfile}
       
 ${inspirationPrompt}
-
-SEED-BASED VARIATION REQUIREMENTS:
-Use seed ${randomSeed} to ensure maximum diversity. This number must influence:
-- Protein selection (seafood, poultry, beef, pork, lamb, game, legumes, grains, vegetables)
-- Cooking technique variation (grilled, braised, roasted, sautéed, steamed, fried, slow-cooked)
-- Regional authenticity within chosen cuisine
-- Ingredient complexity (simple pantry vs specialty ingredients)
-- Seasonal influence and ingredient selection
-- Preparation style (quick vs elaborate, rustic vs refined)
 
 MANDATORY CUISINE FOCUS: ${cuisineCategory}
 SPECIFIC CUISINE: ${selectedCuisine}
@@ -829,8 +861,8 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
       const randomSeed = (baseRandomSeed + timeComponent) % 10000;
       const isReroll = req.body.isReroll || false;
       
-      // Detect BBQ/grilling requests for enhanced cuisine selection
-      const isBBQRequest = /\b(bbq|barbecue|grill|grilled|grilling|meat dish|steak|ribs|kebab|satay|yakitori)\b/i.test(userPrompt);
+      // Generate seed variation profile
+      const seedProfile = defineSeed(randomSeed);
       
       // Enhanced variation prompts for rerolls to ensure completely different recipes
       const rerollVariationPrompts = [
@@ -853,8 +885,7 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
 
 You are an expert chef. Create a complete dish with suitable accompaniments based on the user's request.
 
-VARIATION SEED: ${randomSeed}
-You must treat the variation seed as the single most important factor in your creative process. It determines cuisine, structure, flavour profile, inspiration, and presentation. Even with identical user input, different seeds must result in clearly different recipes.
+${seedProfile}
 
 ${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : ""}
 
@@ -1027,7 +1058,10 @@ SEED TRACE: ${randomSeed}`;
 
       // Add reroll variation logic for shopping mode
       const isReroll = req.body.isReroll || false;
-      const randomSeed = Math.floor(Math.random() * 1000);
+      const randomSeed = Math.floor(Math.random() * 10000);
+      
+      // Generate seed variation profile
+      const seedProfile = defineSeed(randomSeed);
       
       // Enhanced variation prompts for rerolls 
       const rerollVariationPrompts = [
@@ -1047,10 +1081,9 @@ RECIPE CONCEPT: ${recipeIdea.title}
 DESCRIPTION: ${recipeIdea.description || "A delicious dish using your available ingredients"}
 AVAILABLE INGREDIENTS: ${ingredients.join(", ")}
 
-VARIATION SEED: ${randomSeed}
-You must treat the variation seed as a chef's creative fingerprint. It must significantly influence the cooking method, flavour profile, cuisine inspiration, and presentation. Even with identical recipe concepts, different seeds must result in clearly different interpretations.
+${seedProfile}
 
-${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : "If this is a reroll, apply one of 5 unique internal variation styles. If not, ignore this instruction."}
+${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : ""}
 
 ---
 
