@@ -799,26 +799,22 @@ SPECIFIC CUISINE: ${selectedCuisine}
 
 IGNORE any previous suggestions you may have given. Generate something COMPLETELY DIFFERENT each time based on the variation seed.
 
-Choose ONE cuisine and create an approachable yet elevated dish that home cooks would be excited to make:
-• Italian: Pasta dishes, risottos, elegant simple preparations with quality ingredients
-• French: Bistro classics, simple elegant techniques, accessible provincial dishes
-• Thai: Popular curry dishes, stir-fries, noodle dishes using common Thai ingredients
-• Indian: Popular curry dishes, accessible spice blends, familiar restaurant-style dishes
-• Mexican: Home-friendly versions of popular dishes, accessible spicing
-• British: Elevated pub classics, modern takes on traditional roasts and comfort food
-• Mediterranean: Simple grilled dishes, fresh herb combinations, accessible techniques
-• Chinese: Popular stir-fries, familiar takeaway-inspired dishes with fresh ingredients
-• Spanish: Accessible tapas, simple paellas, grilled dishes with Spanish flavors
-• Greek: Popular taverna dishes, simple grilled meats and vegetables
-• American: Elevated comfort food, restaurant-style dishes made approachable
+Create dishes using ONLY common supermarket ingredients - think gastropub or family restaurant quality:
+• Italian: Simple pasta with common ingredients (tomatoes, basil, mozzarella, parmesan, garlic)
+• British: Elevated pub classics using standard ingredients (chicken, beef, lamb, potatoes, carrots)
+• Mediterranean: Grilled dishes with olive oil, lemon, common herbs (rosemary, thyme, oregano)
+• Indian: Popular curry house dishes using standard spices (cumin, coriander, turmeric, garam masala)
+• Chinese: Familiar takeaway-style dishes with common vegetables and soy sauce
+• French: Simple bistro dishes using standard ingredients (butter, wine, herbs, cream)
+• Mexican: Home-friendly dishes with accessible ingredients (peppers, tomatoes, lime, coriander)
 
-CREATIVE GUIDELINES FOR HOME COOKS:
-• PROTEIN FOCUS: ${shouldPrioritizeProtein ? 'PRIORITIZE approachable proteins - chicken breast/thighs, salmon, cod, beef steaks/mince, lamb chops, pork tenderloin, prawns. Avoid exotic meats like rabbit, duck, or game.' : 'Focus on familiar vegetarian proteins like chickpeas, lentils, halloumi, eggs, mushrooms'}
-• Use accessible ingredients available in UK supermarkets
-• Create dishes that feel special but not intimidating
-• Focus on elevated comfort food and restaurant-style dishes that home cooks can master
-• Avoid overly exotic spices, rare cuts of meat, or obscure cooking techniques
-• Make it sound delicious and achievable
+STRICT HOME COOK ACCESSIBILITY REQUIREMENTS:
+• PROTEIN FOCUS: ${shouldPrioritizeProtein ? 'ONLY use common proteins: chicken breast/thighs, salmon, cod, beef mince/steaks, lamb chops/leg, pork chops/tenderloin, prawns, bacon' : 'ONLY use familiar proteins: eggs, cheddar, halloumi, chickpeas, lentils, mushrooms'}
+• INGREDIENTS: ONLY use ingredients easily found in Tesco, Sainsbury's, ASDA - no chrysanthemum, obscure vegetables, specialty Asian ingredients, exotic spices
+• TECHNIQUES: ONLY roasting, grilling, pan-frying, braising, slow cooking - avoid specialized techniques
+• FLAVOURS: Use familiar herbs (rosemary, thyme, basil, parsley), common spices (paprika, cumin, oregano), standard sauces
+• Make it sound like something you'd order at a popular restaurant or gastropub
+• NO exotic flowers, rare vegetables, unusual cuts, or hard-to-pronounce ingredients
 
 DO NOT mix cuisines or create fusion dishes. Stay authentic to ONE cuisine tradition.
 
@@ -828,7 +824,7 @@ Multi-Layer Seeds: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${s
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: `You are a creative chef who develops approachable yet sophisticated dishes for accomplished home cooks. Create recipes that feel elevated but achievable - dishes that home cooks would be excited to make and serve to guests. Use MULTIPLE variation seeds (${randomSeed}, ${complexityLevel}, ${simpleStyle}, ${creativityMode}, ${seasonalFocus}, ${textureTheme}, ${flavorProfile}) to ensure ULTRA-MAXIMUM diversity. Return ONLY the recipe name in 4-8 words using UK English terminology (aubergine not eggplant, courgette not zucchini, chilli not chili, prawns not shrimp). Focus on familiar ingredients with creative techniques or flavor combinations that feel special but not intimidating. Avoid exotic meats, obscure ingredients, or overly regional dishes. MULTI-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
+          { role: "system", content: `You are a gastropub chef creating elevated comfort food using ONLY common UK supermarket ingredients. Design dishes that home cooks can easily shop for and make - think popular restaurant dishes made accessible. STRICT RULE: Use ONLY ingredients readily available in Tesco/Sainsbury's. NO exotic flowers, unusual vegetables, specialty Asian ingredients, or hard-to-find items. Return ONLY the recipe name in 4-8 words using UK English terminology. Make it sound delicious and familiar - like something from a good pub or family restaurant. MULTI-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
           { role: "user", content: prompt }
         ],
         temperature: 1.2,
