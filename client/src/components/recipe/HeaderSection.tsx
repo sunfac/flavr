@@ -58,6 +58,17 @@ export default function HeaderSection({
 
     setIsRerolling(true);
     setImageLoading(true); // Set placeholder image during reroll
+    
+    // Clear the current image to show loading state immediately
+    updateActiveRecipe({
+      ...useRecipeStore.getState(),
+      meta: {
+        ...useRecipeStore.getState().meta,
+        image: undefined,
+        imageLoading: true
+      }
+    }, generationParams);
+    
     try {
       const { mode, originalInputs } = generationParams;
       let response;
@@ -233,7 +244,7 @@ export default function HeaderSection({
                 {recipe.title}
               </h1>
               <div className="mt-4 text-xs text-white/60 animate-pulse">
-              {isRerolling ? "🔄 Creating new recipe image..." : "✨ Generating beautiful food image..."}
+              {isRerolling ? "🔄 Creating new recipe and image..." : "✨ Generating beautiful food image..."}
             </div>
             </div>
             
