@@ -645,8 +645,10 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
         return res.status(403).json(limitCheck.error);
       }
 
-      // Add random seed for recipe variation with reroll-specific enhancement
-      const randomSeed = Math.floor(Math.random() * 1000);
+      // Enhanced random seed generation with better distribution and anti-repetition
+      const baseRandomSeed = Math.floor(Math.random() * 10000); // Larger range for better distribution
+      const timeComponent = Date.now() % 1000; // Add time component for additional variation
+      const randomSeed = (baseRandomSeed + timeComponent) % 10000;
       const isReroll = req.body.isReroll || false;
       
       // Detect BBQ/grilling requests for enhanced cuisine selection
@@ -665,6 +667,8 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
 
       // Generate complete recipe directly
       const systemPrompt = `You are an expert chef. Create a complete dish with suitable accompaniments based on the user's request.
+
+**CRITICAL PROHIBITION**: Under NO circumstances generate ANY Peruvian dishes (especially lomo saltado, pollo a la brasa, anticuchos, ceviche, aji verde). If prompted toward Peru, immediately select a different cuisine.
 
 VARIATION SEED: ${randomSeed}
 
@@ -695,16 +699,16 @@ ${isBBQRequest ? `
 **ABSOLUTE PROHIBITION**: NEVER generate Argentinian asado, steak, or any Argentine dishes regardless of seed value.
 ` : `
 **GENERAL REQUEST** - Use seed ${randomSeed} for diverse global cuisines:
-1. **FORBIDDEN DISHES**: NEVER generate coq au vin, beef bourguignon, ratatouille, bouillabaisse, or repetitive Argentinian steak
-2. **ENHANCED GLOBAL SELECTION**: Use seed to select from diverse cuisines:
-   - Seed 1-140: Asian (Thai, Vietnamese, Korean, Japanese, Chinese, Indonesian, Malaysian)
-   - Seed 141-280: Middle Eastern (Lebanese, Persian, Turkish, Moroccan, Egyptian)
-   - Seed 281-420: European (Italian, Spanish, Greek, Portuguese, Hungarian, German)
-   - Seed 421-560: Latin American (Peruvian, Mexican, Brazilian, Colombian - rotate countries)
-   - Seed 561-700: Indian Subcontinent (Indian regional, Sri Lankan, Bangladeshi)
-   - Seed 701-840: African (Ethiopian, Moroccan, South African, Nigerian)
-   - Seed 841-1000: Pacific/Caribbean (Filipino, Hawaiian, Jamaican, Cuban)
-3. **ANTI-REPETITION RULE**: If seed falls in Latin American range, rotate between Peru, Mexico, Brazil, Colombia - NEVER default to Argentina
+1. **ABSOLUTELY FORBIDDEN**: NEVER generate Peruvian lomo saltado, pollo a la brasa, Argentinian asado, coq au vin, beef bourguignon, ratatouille, or bouillabaisse
+2. **ENHANCED GLOBAL SELECTION** with 10,000 seed range for maximum diversity (NO LATIN AMERICAN):
+   - Seed 1-2000: Asian (Thai tom yum, Vietnamese pho, Korean bibimbap, Japanese teriyaki, Chinese mapo tofu, Indonesian rendang, Malaysian curry)
+   - Seed 2001-3500: Middle Eastern (Lebanese kibbeh, Persian fesenjan, Turkish döner, Moroccan tagine, Egyptian koshari, Israeli shakshuka)
+   - Seed 3501-5000: European (Italian risotto, Spanish paella, Greek moussaka, Portuguese bacalhau, Hungarian goulash, German schnitzel)
+   - Seed 5001-6500: African (Ethiopian doro wat, Moroccan couscous, South African bobotie, Nigerian jollof rice, Kenyan nyama choma)
+   - Seed 6501-8000: Indian Subcontinent (Indian curry varieties, Sri Lankan hoppers, Bangladeshi fish curry, Pakistani biryani)
+   - Seed 8001-9500: Pacific/Caribbean (Filipino adobo, Hawaiian poke, Jamaican curry goat, Cuban ropa vieja, Thai coconut curry)
+   - Seed 9501-10000: Nordic/North American (Swedish meatballs, Norwegian salmon, Canadian tourtière, American BBQ ribs)
+3. **STRICT ANTI-REPETITION**: If Latin American dishes appear, IMMEDIATELY switch to a completely different cuisine category
 `}
 
 IMPORTANT: Always create COMPLETE DISHES that include:
