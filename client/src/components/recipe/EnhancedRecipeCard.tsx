@@ -195,8 +195,8 @@ function EnhancedRecipeCard({
 
   const activeImage = useMemo(() => {
     const isStoreActive = recipeStore.id === recipe.id && recipeStore.meta.image;
-    return isStoreActive ? recipeStore.meta.image : (recipe.image || recipe.imageUrl);
-  }, [recipeStore.id, recipe.id, recipeStore.meta.image, recipe.image, recipe.imageUrl]);
+    return isStoreActive ? recipeStore.meta.image : recipe.image;
+  }, [recipeStore.id, recipe.id, recipeStore.meta.image, recipe.image]);
 
 
 
@@ -393,7 +393,7 @@ function EnhancedRecipeCard({
           instructions: activeInstructions || [],
           tips: recipe.tips || '',
           mode: recipe.mode || 'shopping',
-          imageUrl: activeImage || recipe.image || recipe.imageUrl || ''
+          imageUrl: activeImage || recipe.image || ''
         };
         
         const response = await apiRequest("POST", "/api/save-recipe", recipeData);
@@ -446,7 +446,7 @@ function EnhancedRecipeCard({
   };
 
   return (
-    <div className={`min-h-screen bg-slate-900 text-white ${className}`}>
+    <div className={`bg-slate-900 text-white ${className}`}>
       {/* Progress Bar */}
       <ProgressBar
         currentStep={currentStep}
