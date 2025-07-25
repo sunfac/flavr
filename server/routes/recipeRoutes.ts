@@ -740,25 +740,66 @@ SEED TRACE: ${randomSeed}`;
         top_p: 1,
         presence_penalty: 0.8,
         frequency_penalty: 0.4,
-        max_tokens: 1000
+        max_tokens: 2000
       });
 
       let recipe;
       try {
-        const content = completion.choices[0].message.content || "{}";
-        // Clean up any potential markdown, extra text, and trailing commas
-        let cleanContent = content.replace(/```json\n?/g, '').replace(/\n?```/g, '').trim();
+        let content = completion.choices[0].message.content || "{}";
         
-        // Fix common JSON errors: trailing commas in arrays and objects
-        cleanContent = cleanContent.replace(/,(\s*[}\]])/g, '$1');
-        // Fix trailing commas specifically after object entries in arrays
-        cleanContent = cleanContent.replace(/},(\s*\])/g, '}$1');
+        // Remove markdown code blocks
+        content = content.replace(/```json\n?/g, '').replace(/\n?```/g, '').trim();
         
-        recipe = JSON.parse(cleanContent);
+        // Extract JSON from potential extra text
+        const jsonStart = content.indexOf('{');
+        const jsonEnd = content.lastIndexOf('}');
+        if (jsonStart !== -1 && jsonEnd !== -1) {
+          content = content.substring(jsonStart, jsonEnd + 1);
+        }
+        
+        // Advanced JSON cleanup for malformed responses
+        content = content
+          // Fix trailing commas
+          .replace(/,(\s*[}\]])/g, '$1')
+          // Fix malformed strings with quotes
+          .replace(/[""]/g, '"')
+          // Fix incomplete field definitions
+          .replace(/,(\s*$)/g, '')
+          // Fix broken array/object syntax
+          .replace(/\}\s*\{/g, '},{')
+          // Remove any incomplete trailing elements
+          .replace(/,\s*$/, '');
+        
+        // If content looks severely malformed, attempt to construct basic recipe
+        if (!content.includes('"title"') || !content.includes('"ingredients"')) {
+          throw new Error('Response missing required recipe fields');
+        }
+        
+        recipe = JSON.parse(content);
       } catch (parseError) {
-        console.error('JSON parsing error:', parseError);
+        console.error('Chef Assist JSON parsing error:', parseError);
         console.error('Raw content:', completion.choices[0].message.content);
-        throw new Error('Failed to parse recipe JSON from AI response');
+        
+        // Fallback: Create a basic recipe structure
+        recipe = {
+          title: prompt || "Custom Recipe",
+          description: "A delicious dish created just for you",
+          cuisine: "International",
+          difficulty: "medium",
+          prepTime: 15,
+          cookTime: 30,
+          servings: 4,
+          ingredients: [
+            { name: "ingredients as described", amount: "as needed" }
+          ],
+          instructions: [
+            { step: 1, instruction: "Please try generating this recipe again for complete instructions" }
+          ],
+          tips: ["Recipe generation encountered an error - please try again"],
+          nutritionalHighlights: ["Nutritional information will be available after successful generation"]
+        };
+        
+        console.log('Using fallback recipe structure due to parsing error');
       }
       
       // Apply UK English conversions to recipe text
@@ -922,7 +963,7 @@ SEED TRACE: ${randomSeed}`;
         top_p: 1,
         presence_penalty: 0.8,
         frequency_penalty: 0.4,
-        max_tokens: 1000
+        max_tokens: 2000
       });
 
       // Clean and parse the JSON response for Fridge2Fork
@@ -930,26 +971,57 @@ SEED TRACE: ${randomSeed}`;
       try {
         let content = completion.choices[0].message.content || "{}";
         
-        // Remove any markdown code blocks
+        // Remove markdown code blocks
         content = content.replace(/```json\n?/g, '').replace(/\n?```/g, '').trim();
         
-        // Remove any leading/trailing text that's not JSON
+        // Extract JSON from potential extra text
         const jsonStart = content.indexOf('{');
         const jsonEnd = content.lastIndexOf('}');
         if (jsonStart !== -1 && jsonEnd !== -1) {
           content = content.substring(jsonStart, jsonEnd + 1);
         }
         
-        // Fix common JSON errors
-        content = content.replace(/,(\s*[}\]])/g, '$1'); // trailing commas before closing brackets
-        content = content.replace(/},(\s*\])/g, '}$1'); // trailing commas in object arrays
-        content = content.replace(/,(\s*$)/g, ''); // trailing commas at end of string
+        // Advanced JSON cleanup for malformed responses
+        content = content
+          // Fix trailing commas
+          .replace(/,(\s*[}\]])/g, '$1')
+          // Fix malformed strings with quotes
+          .replace(/[""]/g, '"')
+          // Fix incomplete field definitions
+          .replace(/,(\s*$)/g, '')
+          // Fix broken array/object syntax
+          .replace(/\}\s*\{/g, '},{')
+          // Remove any incomplete trailing elements
+          .replace(/,\s*$/, '');
+        
+        // Validate essential fields are present
+        if (!content.includes('"title"') || !content.includes('"ingredients"')) {
+          throw new Error('Response missing required recipe fields');
+        }
         
         recipe = JSON.parse(content);
       } catch (parseError) {
         console.error('Fridge2Fork JSON parsing error:', parseError);
         console.error('Raw content:', completion.choices[0].message.content);
-        throw new Error('Failed to parse AI recipe response. Please try again.');
+        
+        // Fallback: Create a basic recipe structure using the original recipe idea
+        recipe = {
+          title: recipeIdea.title || "Fridge2Fork Recipe",
+          description: recipeIdea.description || "A delicious dish using your available ingredients",
+          cuisine: recipeIdea.cuisine || "International",
+          difficulty: "medium",
+          prepTime: 15,
+          cookTime: 30,
+          servings: servings,
+          ingredients: ingredients.map(ing => ({ name: ing, amount: "as needed" })),
+          instructions: [
+            { step: 1, instruction: "Please try generating this recipe again for complete instructions" }
+          ],
+          tips: ["Recipe generation encountered an error - please try again"],
+          nutritionalHighlights: ["Nutritional information will be available after successful generation"]
+        };
+        
+        console.log('Using fallback recipe structure for Fridge2Fork due to parsing error');
       }
       
       // Apply UK English conversions to recipe text
