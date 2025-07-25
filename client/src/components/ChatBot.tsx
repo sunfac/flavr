@@ -263,19 +263,6 @@ export default function ChatBot({
                 onRecipeUpdate(args);
               }
               
-              // Show confirmation message
-              const updateMessage: ChatMessage = {
-                id: Date.now() + 1,
-                message: "",
-                response: "✅ Recipe updated! I've made the changes you requested.",
-                isUser: false,
-                text: "✅ Recipe updated! I've made the changes you requested.",
-                timestamp: new Date(),
-              };
-              setTimeout(() => {
-                setLocalMessages(prev => [...prev, updateMessage]);
-              }, 500);
-              
               console.log('✅ Recipe store updated successfully');
               
             } catch (error) {

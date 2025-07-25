@@ -35,7 +35,20 @@ export default function Recipe() {
     ingredients: recipeStore.ingredients.map(ing => ing.text || ''), // Convert to string array
     instructions: recipeStore.steps.map(step => step.description || ''), // Convert to string array
     tips: "Try garnishing with fresh herbs for extra flavor!" // Default tip
-  }), [recipeStore, recipeImage]);
+  }), [
+    recipeStore.id,
+    recipeStore.meta.title,
+    recipeStore.meta.description,
+    recipeStore.meta.cuisine,
+    recipeStore.meta.difficulty,
+    recipeStore.meta.cookTime,
+    recipeStore.meta.image,
+    recipeStore.servings,
+    recipeStore.ingredients,
+    recipeStore.steps,
+    recipeStore.lastUpdated, // This ensures updates trigger re-computation
+    recipeImage
+  ]);
   
   // Debug logging
   useEffect(() => {
@@ -156,6 +169,7 @@ export default function Recipe() {
             className="w-full"
           >
             <EnhancedRecipeCard 
+              key={`recipe-${recipeStore.lastUpdated}`} // Force re-render on updates
               recipe={activeRecipe}
             />
           </motion.div>
