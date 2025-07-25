@@ -136,29 +136,6 @@ export default function Recipe() {
     return null;
   }
 
-  // Show loading if recipe is present but image is still loading
-  if (!shouldShowRecipe) {
-    return (
-      <PageLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="animate-pulse mb-4">
-              <div className="w-32 h-32 bg-orange-200 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <span className="text-4xl">🍽️</span>
-              </div>
-            </div>
-            <h2 className="text-xl font-semibold text-slate-700 mb-2">
-              Preparing your recipe...
-            </h2>
-            <p className="text-slate-500 text-sm">
-              Generating beautiful food image
-            </p>
-          </div>
-        </div>
-      </PageLayout>
-    );
-  }
-
   return (
     <>
       <PageLayout className="max-w-7xl mx-auto">
