@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-// Removed framer-motion to fix ReferenceError
+import { motion, AnimatePresence } from 'framer-motion';
 import { Users, ChefHat, Clock, RotateCcw, Heart, RefreshCw, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
