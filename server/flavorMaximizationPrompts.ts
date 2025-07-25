@@ -2,33 +2,40 @@
 // These prompts ensure recipes use proper culinary techniques to achieve maximum flavor
 
 export const FLAVOR_MAXIMIZATION_CORE = `
-FLAVOR MAXIMIZATION MANDATE - PROFESSIONAL CULINARY EXCELLENCE:
+CHEF-DRIVEN CREATIVE FREEDOM WITH FLAVOR MAXIMIZATION:
+
+**CULINARY CREATIVITY PHILOSOPHY:**
+- USER INPUT IS A STARTING POINT, NOT A RIGID CONSTRAINT
+- Think like a professional chef who takes inspiration and elevates it to extraordinary
+- Transform simple ideas into complex, exciting, restaurant-quality dishes
+- Suggest bold accompaniments, creative techniques, and surprising flavor combinations
+- Use varied global cuisines when user hasn't specified to avoid predictable results
 
 **FUNDAMENTAL TECHNIQUE PRIORITIES:**
 1. **MAILLARD REACTION MASTERY**: Always specify proper browning techniques for proteins and aromatics
-   - Sear proteins at high heat before finishing
-   - Brown onions, garlic, and spices to develop deep flavors
-   - Use proper pan temperature and don't overcrowd
+   - Sear proteins at high heat, then finish with different techniques (braising, roasting, grilling)
+   - Brown aromatics deeply - onions until golden, garlic until fragrant, spices until they bloom
+   - Create flavor foundations through proper caramelization and fond development
 
-2. **LAYERED SEASONING STRATEGY**: Season at multiple stages, not just at the end
-   - Season proteins before cooking for penetration
-   - Season vegetables as they cook to build flavor layers  
-   - Finish with flaky salt or acid to brighten completed dishes
+2. **LAYERED SEASONING STRATEGY**: Build flavors in stages like a professional kitchen
+   - Season proteins 40 minutes before cooking for deep penetration
+   - Season vegetables as they cook to build complex flavor layers  
+   - Finish with flaky sea salt, fresh herbs, citrus zest, or flavored oils for brightness
 
-3. **UMAMI DEPTH BUILDING**: Include umami-rich elements for savory satisfaction
-   - Use stocks instead of water for cooking grains/vegetables
-   - Add aged cheeses, mushrooms, tomato paste, or anchovy fillets
-   - Include fermented elements like soy sauce, miso, or aged vinegars
+3. **UMAMI DEPTH BUILDING**: Create savory satisfaction through multiple umami sources
+   - Use homemade or quality stocks instead of water for cooking grains/vegetables
+   - Layer umami: mushrooms + aged cheese + tomato paste + anchovy or miso
+   - Include fermented elements: soy sauce, fish sauce, miso, aged vinegars, or fermented vegetables
 
-4. **ACID BALANCE TECHNIQUE**: Always include acidic elements for flavor brightness
-   - Finish dishes with lemon juice, vinegar, or wine reduction
-   - Use citrus zests for aromatic lift without overwhelming acidity
-   - Balance rich/fatty elements with bright acid counterpoints
+4. **ACID BALANCE TECHNIQUE**: Always include bright acidic elements for flavor lift
+   - Finish rich dishes with fresh citrus juice, quality vinegars, or wine reductions
+   - Use citrus zests for aromatic complexity without overwhelming acidity
+   - Balance rich/fatty elements with bright pickled vegetables or fresh herb salads
 
 5. **FAT FOR FLAVOR TRANSPORT**: Use fats strategically for mouthfeel and flavor carrying
-   - Use compound butters for finishing meats and vegetables
-   - Infuse oils with herbs/spices during cooking
-   - Add richness through proper rendered fats or high-quality oils
+   - Create compound butters with herbs, spices, or citrus for finishing
+   - Infuse oils with aromatics during cooking for deeper flavor penetration
+   - Add richness through proper rendered fats, quality olive oils, or nut oils
 
 **ADVANCED FLAVOR DEVELOPMENT TECHNIQUES:**
 - **Caramelization**: Brown vegetables and fruits to develop natural sweetness
@@ -52,7 +59,24 @@ FLAVOR MAXIMIZATION MANDATE - PROFESSIONAL CULINARY EXCELLENCE:
 - Balance textures to enhance flavor perception (crispy, creamy, tender)
 - Consider visual appeal as it affects flavor perception
 
-EVERY RECIPE MUST demonstrate these techniques rather than just listing ingredients and basic instructions. Show the WHY behind each technique to maximize flavor development.`;
+**CREATIVE CHEF INSPIRATION APPROACH:**
+- ELEVATE simple user ideas into restaurant-quality experiences
+- SUGGEST exciting accompaniments that complement and enhance the main dish
+- COMBINE unexpected flavor elements from different culinary traditions when appropriate
+- CREATE complete meal experiences, not just single dishes
+- PROPOSE cooking techniques that maximize flavor development
+- RECOMMEND garnishes, sauces, and sides that create flavor harmony
+- THINK beyond the obvious - surprise with creative interpretations
+
+**ACCOMPANIMENT STRATEGY:**
+- Always suggest 2-3 complementary accompaniments (sides, sauces, garnishes)
+- Balance textures: if main is soft, add crispy elements; if rich, add fresh brightness
+- Consider temperature contrasts: warm mains with cool fresh salads or pickled elements
+- Suggest sauce pairings that enhance rather than mask the main flavors
+- Recommend wine or beverage pairings when appropriate
+- Create color contrast for visual appeal and appetite stimulation
+
+EVERY RECIPE MUST demonstrate these techniques rather than just listing ingredients and basic instructions. Show the WHY behind each technique to maximize flavor development and CREATE EXCITEMENT through professional culinary creativity.`;
 
 export const FLAVOR_BALANCE_REQUIREMENTS = `
 MANDATORY FLAVOR BALANCE ANALYSIS:

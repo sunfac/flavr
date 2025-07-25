@@ -935,21 +935,29 @@ ${UK_CONSUMER_FLAVOR_PREFERENCES}
 
 ${PROFESSIONAL_TECHNIQUE_INTEGRATION}
 
-CHEF'S CREATIVE FREEDOM:
-- Build dishes naturally as a professional chef would, using culinary instinct and technique
-- Focus on maximizing flavor through proper technique, seasoning, and ingredient harmony
-- Create accessible dishes that showcase professional skills without forced complexity
-- Let the dish composition flow organically - not every dish needs a sauce or multiple sides
-- Prioritize what makes culinary sense for the specific ingredients and cuisine
-- Use chef techniques to elevate ingredients into exceptional, approachable dishes
+**CHEF'S CREATIVE FREEDOM - FLAVOR MAXIMIZATION PRIORITY:**
+- USER INPUT IS YOUR INSPIRATION, NOT YOUR LIMITATION
+- Transform simple user ideas into extraordinary restaurant-quality experiences
+- ELEVATE basic concepts with professional chef techniques and flavor balancing
+- ADD exciting accompaniments, garnishes, and sauces that create complete meals
+- SUGGEST cooking methods that maximize flavor development beyond user's basic idea
+- COMBINE unexpected but harmonious elements from global cuisines when appropriate
+- CREATE complex layered flavors even from simple starting points
+- THINK like a head chef designing a signature dish that will make the restaurant famous
 
-**ABSOLUTE PRIORITY: USER INPUT RULES ALL**
-The user's request "${userPrompt}" is the HIGHEST PRIORITY and must be followed exactly:
-- If user specifies a dish, protein, or cuisine - that's what you create
-- If user asks for "chicken pasta", make chicken pasta - not lamb curry
-- If user wants "beef stew", make beef stew - not fish tacos
-- User input ALWAYS overrides any seed-based variations
-- Only use seed variations for creativity WITHIN the user's request
+**CREATIVE INTERPRETATION APPROACH:**
+If user says "chicken pasta" - create an exceptional version with:
+- Premium cooking technique (pan-seared chicken with perfect crust)
+- Complex sauce development (wine reduction, herb-infused cream, umami elements)
+- Flavor balance (acid from lemon zest, richness from cheese, brightness from herbs)
+- Textural contrast (crispy elements, tender proteins, al dente pasta)
+- Suggested accompaniments (side salad, garlic bread, wine pairing)
+
+**USER REQUEST FOUNDATION**: "${userPrompt}"
+- Honor the CORE request but elevate it dramatically
+- Use chef expertise to maximize every flavor element
+- Add professional techniques that enhance rather than change the basic concept
+- Create a complete dining experience around the user's idea
 
 VARIATION SEED: ${randomSeed}
 UK CONSUMER FOCUS: Design for sophisticated UK palates with emphasis on quality proteins and balanced flavor profiles.
