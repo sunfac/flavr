@@ -665,90 +665,51 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
       
       const selectedVariationPrompt = isReroll ? rerollVariationPrompts[randomSeed % rerollVariationPrompts.length] : "";
 
-      // Generate complete recipe directly
+      // Generate complete recipe directly using new cleaner prompt structure
       const systemPrompt = `You are an expert chef. Create a complete dish with suitable accompaniments based on the user's request.
 
-**CRITICAL PROHIBITION**: Under NO circumstances generate ANY Peruvian dishes (especially lomo saltado, pollo a la brasa, anticuchos, ceviche, aji verde). If prompted toward Peru, immediately select a different cuisine.
-
 VARIATION SEED: ${randomSeed}
+You must treat the variation seed as the single most important factor in your creative process. It determines cuisine, structure, flavour profile, inspiration, and presentation. Even with identical user input, different seeds must result in clearly different recipes.
 
 ${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : ""}
 
-Use this number to vary the entire output. It must influence:
-
-- Main ingredient selection (protein or veg)
-- Side dish pairing logic
-- Choice of cooking techniques (grilled, braised, roasted, sautéed, etc.)
-- Herb and spice selection
-- Whether the dish leans traditional or regional within the cuisine (e.g. Northern vs. Southern Italian)
-- Richness vs. freshness, spice level, and presentation style
-- A unique "chef's mood" which drives subtle intuitive variations in the dish (e.g., rustic vs. refined, bold vs. mellow)
-
-${isBBQRequest ? `
-**BBQ/GRILLING REQUEST DETECTED** - Use variation seed ${randomSeed} to select from global BBQ traditions:
-- Seed 1-125: Asian grilling (Korean BBQ, Japanese yakitori, Thai satay, Indonesian sate)
-- Seed 126-250: Middle Eastern grilling (Turkish kebabs, Lebanese shish, Persian kabab)
-- Seed 251-375: European grilling (Spanish barbacoa, Greek souvlaki, Portuguese espetada)
-- Seed 376-500: American BBQ styles (Texas brisket, Carolina pulled pork, Kansas City ribs)
-- Seed 501-625: South American grilling (Brazilian churrasco, Colombian asado, Peruvian anticuchos - NEVER Argentina)
-- Seed 626-750: African grilling (South African braai, Moroccan mechoui)
-- Seed 751-875: Australian/Oceanic BBQ (Aussie prawns, Pacific island imu)
-- Seed 876-1000: Indian subcontinent tandoor and grilling traditions
-
-**MANDATORY**: Select the appropriate grilling tradition based on seed ${randomSeed} and create an authentic dish from that tradition.
-**ABSOLUTE PROHIBITION**: NEVER generate Argentinian asado, steak, or any Argentine dishes regardless of seed value.
-` : `
-**GENERAL REQUEST** - Use seed ${randomSeed} for diverse global cuisines:
-1. **ABSOLUTELY FORBIDDEN**: NEVER generate Peruvian lomo saltado, pollo a la brasa, Argentinian asado, coq au vin, beef bourguignon, ratatouille, or bouillabaisse
-2. **ENHANCED GLOBAL SELECTION** with 10,000 seed range for maximum diversity (NO LATIN AMERICAN):
-   - Seed 1-2000: Asian (Thai tom yum, Vietnamese pho, Korean bibimbap, Japanese teriyaki, Chinese mapo tofu, Indonesian rendang, Malaysian curry)
-   - Seed 2001-3500: Middle Eastern (Lebanese kibbeh, Persian fesenjan, Turkish döner, Moroccan tagine, Egyptian koshari, Israeli shakshuka)
-   - Seed 3501-5000: European (Italian risotto, Spanish paella, Greek moussaka, Portuguese bacalhau, Hungarian goulash, German schnitzel)
-   - Seed 5001-6500: African (Ethiopian doro wat, Moroccan couscous, South African bobotie, Nigerian jollof rice, Kenyan nyama choma)
-   - Seed 6501-8000: Indian Subcontinent (Indian curry varieties, Sri Lankan hoppers, Bangladeshi fish curry, Pakistani biryani)
-   - Seed 8001-9500: Pacific/Caribbean (Filipino adobo, Hawaiian poke, Jamaican curry goat, Cuban ropa vieja, Thai coconut curry)
-   - Seed 9501-10000: Nordic/North American (Swedish meatballs, Norwegian salmon, Canadian tourtière, American BBQ ribs)
-3. **STRICT ANTI-REPETITION**: If Latin American dishes appear, IMMEDIATELY switch to a completely different cuisine category
-`}
-
 IMPORTANT: Always create COMPLETE DISHES that include:
-- Main component (protein, vegetable, or grain-based centrepiece)
-- At least 1–2 complementary side dishes
-- Proper sauces, dressings, or condiments to enhance flavour
-- Garnishes and visual/textural contrasts for plating appeal
-- A fully balanced meal — not just a main on its own
+- A main component (protein, vegetable, or grain-based centrepiece)
+- At least 1–2 side dishes or accompaniments that complement the main
+- Proper sauces, dressings, or condiments that enhance flavours
+- Garnishes and finishing touches for visual appeal
+- A complete, balanced meal — not just a single element
+- Deliver maximum flavour by balancing richness, acidity, heat, texture, and aromatics — using advanced techniques and ingredient synergy
 
-User request: ${userPrompt}
-Servings: ${servings}
-
-Create a complete recipe based on this request: "${userPrompt}"
-
-REQUIREMENTS:
+Requirements:
 - Servings: ${servings}
-- Calculate a realistic cooking time based on actual recipe steps
-- Use ingredients commonly available in UK supermarkets
-- UK measurement units ONLY (e.g. grams, ml, tbsp, tsp, litres) — DO NOT use cups or ounces
-- Make it achievable for a home cook
-- Stay completely authentic to ONE cuisine tradition (e.g., Italian, French, Thai, Indian, Mexican, Japanese, Chinese, etc.)
-  - No fusion or cross-cuisine blends
-  - Stay regionally consistent within that cuisine if appropriate
-- Ensure at least 3 clear differences in dish structure or flavour if the same prompt is used with different variation seeds
-- Include at least one visual or textural contrast element
+- Calculate realistic cooking time based on the actual recipe requirements
+- Use ingredients available at UK supermarkets
+- Do not constrain cuisines or suggest specific dishes unless requested
+- Do not repeat the same dish unless the same variation seed is used
+- The tone should be professional and culinary-precise, like a cookbook or restaurant recipe. Always use UK terms (e.g. 'courgette', 'aubergine', 'grams')
+- Where appropriate, subtly align the recipe's tone or comfort level with the emotional undertone implied by the user request (e.g. warming, refreshing, nostalgic, indulgent)
 
 **CRITICAL: Use UK English throughout this recipe:**
 ${ukRecipePromptAdditions.ingredientGuidance}
 ${ukRecipePromptAdditions.measurementGuidance}
 ${ukRecipePromptAdditions.spellingsGuidance}
 
+Create a unique, chef-level meal based on the following user request:
+
+User Request: "${userPrompt}"
+Servings: ${servings}
+VARIATION SEED: ${randomSeed}
+
 Return ONLY a valid JSON object with this exact structure (NO markdown, no explanations, and no trailing commas):
 
 {
   "title": "Recipe Name",
-  "description": "Brief description of the dish, including any regional focus and standout flavours",
+  "description": "Brief description explaining the inspiration and variation",
   "cuisine": "Cuisine Type",
-  "difficulty": "[easy | medium | hard] (determine based on actual complexity)",
+  "difficulty": "easy | medium | hard",
   "prepTime": 15,
-  "cookTime": [REALISTIC total cooking time in minutes],
+  "cookTime": "[REALISTIC total cooking time in minutes]",
   "servings": ${servings},
   "ingredients": [
     {"name": "ingredient name only", "amount": "UK quantity (e.g. '2 tbsp', '400g', '250ml')"}
@@ -763,17 +724,11 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
   "nutritionalHighlights": [
     "Nutritional benefit (e.g. 'High in fibre', 'Rich in omega-3')"
   ]
-}`;
+}
 
-      // Log the full prompt for debugging
-      if (userPrompt === "DEBUG_PROMPT") {
-        return res.json({ 
-          fullPrompt: systemPrompt,
-          seed: randomSeed,
-          isBBQ: isBBQRequest,
-          systemMessage: "You are a JSON API. Return only valid JSON, no explanations."
-        });
-      }
+SEED TRACE: ${randomSeed}`;
+
+
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o", // Keep quality model but use async operations for speed
@@ -881,58 +836,75 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
       
       const selectedVariationPrompt = isReroll ? rerollVariationPrompts[randomSeed % rerollVariationPrompts.length] : "";
 
-      // Generate complete recipe from the idea
-      const systemPrompt = `You are an expert chef creating a complete recipe based on this recipe idea:
+      // Generate complete recipe using cleaner prompt structure
+      const systemPrompt = `You are an expert chef. Create a complete dish with suitable accompaniments based on the selected recipe concept.
 
 RECIPE CONCEPT: ${recipeIdea.title}
 DESCRIPTION: ${recipeIdea.description || "A delicious dish using your available ingredients"}
-CUISINE: ${recipeIdea.cuisine || "International"}
+AVAILABLE INGREDIENTS: ${ingredients.join(", ")}
 
 VARIATION SEED: ${randomSeed}
+You must treat the variation seed as the single most important factor in your creative process. It determines cooking techniques, flavor profile, and presentation. Even with identical recipe concepts, different seeds must result in clearly different approaches.
 
 ${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : ""}
 
-AVAILABLE INGREDIENTS: ${ingredients.join(", ")}
-CONSTRAINTS:
+CRITICAL INGREDIENT CONSTRAINTS:
+- Use ONLY the ingredients provided by the user above
+- ALLOWED ADDITIONS: Basic pantry staples only (salt, pepper, cooking oil, water, flour, sugar, common herbs/spices)
+- Do NOT add expensive ingredients like prawns, specialty cheeses, or proteins not provided by the user
+
+IMPORTANT: Always create COMPLETE DISHES that include:
+- A main component using the available ingredients
+- Complementary sides or accompaniments from available ingredients
+- Proper seasonings and cooking techniques that enhance flavours
+- A complete, balanced meal using only what's available
+
+Requirements:
 - Servings: ${servings}
+- Calculate realistic cooking time based on the actual recipe requirements
+- Use ingredients available from the provided list only
 - Budget per serving: £${(budget / servings).toFixed(2)}
 - Equipment: ${equipment.join(", ")}
 ${dietaryRestrictions.length > 0 ? `- Dietary restrictions: ${dietaryRestrictions.join(", ")}` : ""}
-
-STRICT INGREDIENT CONSTRAINTS:
-- **PRIMARY RULE**: Use ONLY the ingredients provided by the user above
-- **ALLOWED ADDITIONS**: Basic pantry staples only (salt, pepper, cooking oil, water, flour, sugar, common dried herbs/spices)
-- **FORBIDDEN**: Do NOT add expensive ingredients like prawns, specialty cheeses, exotic spices, or proteins not provided by the user
-
-Create a COMPLETE recipe that:
-1. Uses ONLY ingredients from the available list plus basic pantry staples
-2. Focus on making the best possible dish with what's actually available
-3. Substitute intelligently within the provided ingredients only (e.g., if pasta and tomatoes available, make pasta dish)
-4. Add only common pantry basics for proper seasoning and cooking
-5. Prioritize authentic preparation using the available ingredients
-6. Include exact measurements and clear instructions within the time and equipment constraints
+- The tone should be professional and culinary-precise, like a cookbook recipe. Always use UK terms (e.g. 'courgette', 'aubergine', 'grams')
 
 **CRITICAL: Use UK English throughout this recipe:**
 ${ukRecipePromptAdditions.ingredientGuidance}
 ${ukRecipePromptAdditions.measurementGuidance}
 ${ukRecipePromptAdditions.spellingsGuidance}
 
-Return ONLY a valid JSON object with this exact structure (NO trailing commas):
+Create a unique, chef-level meal based on the following:
+
+Recipe Concept: "${recipeIdea.title}"
+Available Ingredients: ${ingredients.join(", ")}
+VARIATION SEED: ${randomSeed}
+
+Return ONLY a valid JSON object with this exact structure (NO markdown, no explanations, and no trailing commas):
+
 {
   "title": "${recipeIdea.title}",
-  "description": "Enhanced description",
+  "description": "Enhanced description explaining the variation and inspiration",
   "cuisine": "${recipeIdea.cuisine}",
-  "difficulty": "${recipeIdea.difficulty}",
-  "prepTime": [Calculate realistic prep time based on recipe complexity],
-  "cookTime": [Calculate REALISTIC total cooking time in minutes based on all recipe steps including baking/braising/marinating],
+  "difficulty": "easy | medium | hard",
+  "prepTime": 15,
+  "cookTime": "[REALISTIC total cooking time in minutes]",
   "servings": ${servings},
-  "ingredients": [{"name": "ingredient name", "amount": "UK measurement"}],
-  "instructions": [{"step": 1, "instruction": "detailed step"}],
-  "tips": ["helpful cooking tip"],
-  "nutritionalHighlights": ["nutritional benefit"]
+  "ingredients": [
+    {"name": "ingredient name only", "amount": "UK quantity (e.g. '2 tbsp', '400g', '250ml')"}
+  ],
+  "instructions": [
+    {"step": 1, "instruction": "Detailed instruction"},
+    {"step": 2, "instruction": "Continue in this format"}
+  ],
+  "tips": [
+    "Helpful tip that improves flavour, speed, or presentation"
+  ],
+  "nutritionalHighlights": [
+    "Nutritional benefit (e.g. 'High in fibre', 'Rich in omega-3')"
+  ]
 }
 
-CRITICAL: Ensure NO trailing commas after the last item in any array or object. Return ONLY the JSON object, no markdown, no explanations.`;
+SEED TRACE: ${randomSeed}`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o", // Keep quality model but use async operations for speed
