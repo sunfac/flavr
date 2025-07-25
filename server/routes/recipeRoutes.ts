@@ -519,6 +519,10 @@ Return a JSON object with this structure:
       const textureTheme = Math.floor(Math.random() * 10) + 1; // 1-10 for texture focus
       const flavorProfile = Math.floor(Math.random() * 12) + 1; // 1-12 for flavor directions
       
+      // Protein prioritization: 80% meat/fish/shellfish, 20% vegetarian
+      const proteinSeed = Math.random();
+      const shouldPrioritizeProtein = proteinSeed < 0.8; // 80% chance for meat/fish/shellfish
+      
       // Expanded complex cooking approaches (1-15)
       let complexityPrompt = "";
       switch (complexityLevel) {
@@ -780,7 +784,7 @@ ${inspirationPrompt}
 
 MULTI-LAYER VARIATION REQUIREMENTS:
 Use ALL variation seeds (${randomSeed}, ${complexityLevel}, ${simpleStyle}, ${creativityMode}, ${seasonalFocus}, ${textureTheme}, ${flavorProfile}) to ensure ULTRA-MAXIMUM diversity:
-- Protein selection influenced by seed ranges (seafood, poultry, beef, pork, lamb, game, legumes, grains, vegetables)
+- PROTEIN PRIORITY: ${shouldPrioritizeProtein ? 'MUST feature meat, fish, or shellfish as the main component (beef, lamb, pork, chicken, duck, salmon, cod, prawns, crab, mussels, etc.)' : 'Can focus on vegetarian proteins (legumes, grains, vegetables, dairy)'}
 - Cooking technique based on complexity level (grilled, braised, roasted, sautéed, steamed, fried, slow-cooked, fermented)
 - Regional authenticity within chosen cuisine tradition
 - Ingredient complexity from simple pantry to specialty imports
@@ -815,7 +819,7 @@ Choose ONE authentic cuisine and create an exciting dish within that tradition:
 • Russian: Warming soups, dumplings, preserved foods
 
 CREATIVE GUIDELINES:
-• Vary protein types: seafood, poultry, beef, pork, lamb, game, legumes, grains, vegetables
+• PROTEIN FOCUS: ${shouldPrioritizeProtein ? 'PRIORITIZE meat, fish, or shellfish - use beef, lamb, pork, chicken, duck, turkey, salmon, cod, halibut, prawns, crab, mussels, scallops, etc.' : 'Focus on vegetarian proteins like legumes, grains, vegetables, cheese, eggs'}
 • Consider seasonal ingredients and cooking methods
 • Balance flavor, texture, and visual appeal
 
