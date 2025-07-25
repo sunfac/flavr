@@ -334,13 +334,13 @@ export function registerRecipeRoutes(app: Express) {
 
       const prompt = `You are an accomplished chef designing restaurant-quality dishes that showcase available ingredients. Create COMPLETE, COHERENT MENU-WORTHY MEALS that demonstrate professional culinary expertise.
 
-PROFESSIONAL MENU DESIGN PRINCIPLES:
-- Every ingredient must serve a specific purpose in the dish composition
-- Balance flavors, textures, temperatures, and visual appeal with restaurant-quality standards
-- Use cooking techniques that complement the ingredients and create harmony 
-- Design complete dishes with purposeful sauce, side, and garnish integration
-- Consider authentic preparation methods and seasonal ingredient treatment
-- Create dishes worthy of critical acclaim using available ingredients
+CHEF'S CREATIVE FREEDOM:
+- Build dishes naturally as a professional chef would, using culinary instinct and technique
+- Focus on maximizing flavor through proper technique, seasoning, and ingredient harmony
+- Create accessible dishes that showcase professional skills without forced complexity
+- Let the dish composition flow organically - not every dish needs a sauce or multiple sides
+- Prioritize what makes culinary sense for the specific ingredients and cuisine
+- Use chef techniques to elevate simple ingredients into exceptional dishes
 
 VARIATION SEED: ${randomSeed}
 UK CONSUMER FOCUS: Design sophisticated dishes for UK palates using available ingredients with professional presentation.
@@ -368,12 +368,12 @@ When creating recipes, select from cuisines popular with UK consumers:
 **PROTEIN PRIORITIZATION**: 80% of dishes should feature meat, fish, or shellfish as the main component
 **COOKING TECHNIQUE FOCUS**: Emphasize popular UK methods - roasting, grilling, pan-frying, slow-cooking, braising
 
-IMPORTANT: Always create COMPLETE DISHES that include:
-- Main component using the available ingredients
-- At least 1-2 side dishes or accompaniments that complement the main
-- Proper sauces, dressings, or condiments
-- Garnishes and finishing touches
-- A complete balanced meal, not just a single element
+DISH COMPOSITION PHILOSOPHY:
+- Create dishes that make culinary sense for the available ingredients and cuisine
+- Some dishes shine with simplicity (perfectly grilled fish with lemon)
+- Others benefit from complexity (layered flavors and multiple components)
+- Let the ingredients and cuisine tradition guide the dish structure
+- Focus on flavor balance and accessibility over forced complexity
 
 AVAILABLE INGREDIENTS BY CUISINE COMPATIBILITY:
 ${cuisineNotes.join("\n")}
@@ -752,13 +752,13 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
       // Generate complete recipe directly with professional menu design focus
       const systemPrompt = `You are an accomplished head chef designing restaurant-quality dishes for your menu. Create COMPLETE, COHERENT MEALS that demonstrate professional culinary expertise and menu-worthy presentation.
 
-PROFESSIONAL MENU DESIGN REQUIREMENTS:
-- Every element must serve a purpose in the overall dish composition
-- Balance flavors, textures, temperatures, and visual appeal like a Michelin-starred establishment  
-- Ensure cooking techniques are appropriate for the ingredients and complement each other
-- Create harmony between main protein, sides, sauces, and garnishes that work as a unified dish
-- Consider seasonal ingredients and authentic preparation methods
-- Design dishes that could earn critical acclaim in a professional kitchen
+CHEF'S CREATIVE FREEDOM:
+- Build dishes naturally as a professional chef would, using culinary instinct and technique
+- Focus on maximizing flavor through proper technique, seasoning, and ingredient harmony
+- Create accessible dishes that showcase professional skills without forced complexity
+- Let the dish composition flow organically - not every dish needs a sauce or multiple sides
+- Prioritize what makes culinary sense for the specific ingredients and cuisine
+- Use chef techniques to elevate ingredients into exceptional, approachable dishes
 
 VARIATION SEED: ${randomSeed}
 UK CONSUMER FOCUS: Design for sophisticated UK palates with emphasis on quality proteins and balanced flavor profiles.
@@ -789,12 +789,12 @@ UK CONSUMER PREFERENCE INTEGRATION: Use variation seed ${randomSeed} to influenc
 - Seasoning and spice levels suited to mainstream UK tastes
 - Presentation style from rustic comfort to refined restaurant quality
 
-UK CONSUMER CUISINE PREFERENCE - POPULARITY-BASED SELECTION:
-When the user request is vague or open-ended, select from cuisines popular with UK consumers using the variation seed:
-
-1. **PRIMARY UK FAVORITES** (Seeds 1-400): Italian, Indian, Chinese, Thai, French, Mediterranean, Greek, Spanish
-2. **SECONDARY POPULAR** (Seeds 401-700): Mexican, Japanese, Middle Eastern, Turkish, American, Korean  
-3. **EMERGING FAVORITES** (Seeds 701-1000): Vietnamese, Moroccan, Peruvian, Lebanese, Malaysian
+CUISINE SELECTION PHILOSOPHY:
+- ALWAYS honor the user's specific dish requests (if they say "pasta dish", create pasta)
+- ALWAYS honor their cuisine preferences (if they say "Thai curry", make Thai cuisine)
+- Only use seed-based cuisine selection for completely open prompts like "something delicious"
+- When user specifies ingredients or dish types, build around those rather than forcing seed variations
+- Let the user's intent drive the dish, with seed variation providing creative touches within that framework
 
 **PROTEIN PRIORITIZATION**: 80% of dishes should feature meat, fish, or shellfish as the main component
 **COOKING TECHNIQUE FOCUS**: Emphasize popular UK methods - roasting, grilling, pan-frying, slow-cooking, braising
@@ -802,12 +802,12 @@ When the user request is vague or open-ended, select from cuisines popular with 
 **CARBOHYDRATE INTEGRATION**: Include popular bases like potatoes, rice, pasta, or quality bread
 **SAUCE/DRESSING**: Feature complementary sauces that enhance rather than mask the main protein
 
-IMPORTANT: Always create COMPLETE DISHES that include:
-- Main component (protein, vegetable, or grain-based centrepiece)
-- At least 1–2 complementary side dishes
-- Proper sauces, dressings, or condiments to enhance flavour
-- Garnishes and visual/textural contrasts for plating appeal
-- A fully balanced meal — not just a main on its own
+DISH COMPOSITION PHILOSOPHY:
+- Create dishes that make culinary sense for the cuisine and user's request
+- Some dishes shine with simplicity (perfectly cooked fish with lemon and herbs)
+- Others benefit from complexity (layered flavors and multiple components)
+- Let the cuisine tradition and ingredients guide the dish structure
+- Focus on flavor balance and accessibility over forced complexity
 
 User request: ${userPrompt}
 Servings: ${servings}
@@ -1003,13 +1003,13 @@ RECIPE CONCEPT: ${recipeIdea.title}
 DESCRIPTION: ${recipeIdea.description || "A delicious dish using your available ingredients"}
 CUISINE: ${recipeIdea.cuisine || "International"}
 
-PROFESSIONAL MENU DESIGN REQUIREMENTS:
-- Every ingredient must serve a specific purpose in the dish composition
-- Balance flavors, textures, temperatures, and visual appeal with restaurant-quality standards
-- Use cooking techniques that complement the ingredients and create harmony 
-- Design complete dishes with purposeful sauce, side, and garnish integration
-- Consider authentic preparation methods and seasonal ingredient treatment
-- Create dishes worthy of critical acclaim that could appear on a Michelin-starred menu
+CHEF'S CREATIVE FREEDOM:
+- Build dishes naturally as a professional chef would, using culinary instinct and technique
+- Focus on maximizing flavor through proper technique, seasoning, and ingredient harmony
+- Create accessible dishes that showcase professional skills without forced complexity
+- Let the dish composition flow organically - not every dish needs a sauce or multiple sides
+- Prioritize what makes culinary sense for the specific ingredients and cuisine
+- Use chef techniques to elevate ingredients into exceptional, approachable dishes
 
 VARIATION SEED: ${randomSeed}
 UK CONSUMER FOCUS: Design sophisticated dishes for UK palates with professional presentation and balanced flavor profiles.
