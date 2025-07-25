@@ -51,6 +51,10 @@ export default function RecipeSelectionCards({ recipes, quizData, onBack }: Reci
             quizData: quizData
           }
         };
+        // Set imageLoading initially if no image
+        if (!fullRecipeData.recipe.image && !fullRecipeData.recipe.imageUrl) {
+          fullRecipeData.recipe.imageLoading = true;
+        }
         updateActiveRecipe(fullRecipeData.recipe, generationParams);
         navigate("/recipe");
       } else {

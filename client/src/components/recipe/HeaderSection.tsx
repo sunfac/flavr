@@ -32,6 +32,7 @@ export default function HeaderSection({
   const { toast } = useToast();
   const generationParams = useRecipeStore((state) => state.generationParams);
   const updateActiveRecipe = useRecipeStore((state) => state.updateActiveRecipe);
+  const setImageLoading = useRecipeStore((state) => state.setImageLoading);
   
   const fastFacts = useMemo(() => {
     return [
@@ -55,6 +56,7 @@ export default function HeaderSection({
     }
 
     setIsRerolling(true);
+    setImageLoading(true); // Set placeholder image during reroll
     try {
       const { mode, originalInputs } = generationParams;
       let response;
@@ -138,6 +140,7 @@ export default function HeaderSection({
       }
     } finally {
       setIsRerolling(false);
+      setImageLoading(false); // Clear loading state when done
     }
   };
 
@@ -149,7 +152,7 @@ export default function HeaderSection({
       {/* Hero Image - Mobile First Design */}
       <div className="relative w-full">
         {/* Main Image Display */}
-        {recipe.image ? (
+        {recipe.image && !recipe.imageLoading ? (
           <div className="relative w-full aspect-[16/10] sm:aspect-video bg-gradient-to-br from-orange-400 to-orange-600 rounded-t-xl overflow-hidden">
             <img 
               src={recipe.image} 
@@ -159,6 +162,7 @@ export default function HeaderSection({
               style={{ objectPosition: 'center' }}
               onLoad={() => {
                 console.log('✅ Image loaded successfully:', recipe.image);
+                setImageLoading(false); // Clear loading state when image loads
                 // Scroll to absolute top after image loads
                 window.scrollTo(0, 0);
                 document.documentElement.scrollTop = 0;
@@ -166,6 +170,7 @@ export default function HeaderSection({
               }}
               onError={(e) => {
                 console.log('❌ Image failed to load:', recipe.image);
+                setImageLoading(false); // Clear loading state on error
                 // Don't hide the image container, just show fallback
                 e.currentTarget.style.display = 'none';
                 // Show the fallback gradient container
@@ -227,8 +232,8 @@ export default function HeaderSection({
                 {recipe.title}
               </h1>
               <div className="mt-4 text-xs text-white/60 animate-pulse">
-                ✨ Generating beautiful food image...
-              </div>
+              {isRerolling ? "🔄 Creating new recipe image..." : "✨ Generating beautiful food image..."}
+            </div>
             </div>
             
             {/* Action Buttons - Top Right (for no image state) */}

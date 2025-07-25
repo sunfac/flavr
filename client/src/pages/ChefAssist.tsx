@@ -133,6 +133,10 @@ export default function ChefAssist() {
             cookingTime: 30
           }
         };
+        // Set imageLoading initially if no image
+        if (!data.recipe.image && !data.recipe.imageUrl) {
+          data.recipe.imageLoading = true;
+        }
         updateActiveRecipe(data.recipe, generationParams);
         navigate("/recipe");
       } else {

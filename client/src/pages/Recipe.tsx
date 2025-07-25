@@ -15,6 +15,7 @@ export default function Recipe() {
   
   // Check if we have recipe data in the store
   const hasRecipe = recipeStore.meta.title && recipeStore.ingredients.length > 0;
+  const shouldShowRecipe = hasRecipe && (!recipeStore.meta.imageLoading || recipeStore.meta.image);
   
   // Debug logging
   useEffect(() => {
@@ -49,6 +50,29 @@ export default function Recipe() {
     return null;
   }
 
+  // Show loading if recipe is present but image is still loading
+  if (!shouldShowRecipe) {
+    return (
+      <PageLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-pulse mb-4">
+              <div className="w-32 h-32 bg-orange-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <span className="text-4xl">🍽️</span>
+              </div>
+            </div>
+            <h2 className="text-xl font-semibold text-slate-700 mb-2">
+              Preparing your recipe...
+            </h2>
+            <p className="text-slate-500 text-sm">
+              Generating beautiful food image
+            </p>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
   // Try to fetch image if not already present
   const [recipeImage, setRecipeImage] = useState(recipeStore.meta.image || '');
   const [imageLoadAttempts, setImageLoadAttempts] = useState(0);
@@ -69,7 +93,8 @@ export default function Recipe() {
               recipeStore.patchRecipe({
                 meta: {
                   ...recipeStore.meta,
-                  image: data.imageUrl
+                  image: data.imageUrl,
+                  imageLoading: false
                 }
               });
               return; // Stop polling

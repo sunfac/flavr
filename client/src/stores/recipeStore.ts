@@ -25,6 +25,7 @@ export interface RecipeMeta {
   difficulty: string;
   cuisine?: string;
   image?: string;
+  imageLoading?: boolean;
 }
 
 export interface RecipeState {
@@ -55,6 +56,7 @@ interface RecipeStore extends RecipeState {
   markStepComplete: (stepIndex: number) => void;
   resetRecipe: () => void;
   getGenerationParams: () => any;
+  setImageLoading: (loading: boolean) => void;
 }
 
 type DeepPartial<T> = {
@@ -213,6 +215,17 @@ export const useRecipeStore = create<RecipeStore>()(
           ...initialState,
           lastUpdated: Date.now(),
         });
+      },
+
+      setImageLoading: (loading: boolean) => {
+        set((state) => ({
+          ...state,
+          meta: {
+            ...state.meta,
+            imageLoading: loading
+          },
+          lastUpdated: Date.now(),
+        }));
       },
     }),
     {
