@@ -840,40 +840,52 @@ SEED TRACE: ${randomSeed}`;
       
       const selectedVariationPrompt = isReroll ? rerollVariationPrompts[randomSeed % rerollVariationPrompts.length] : "";
 
-      // Generate complete recipe using refined prompt structure
-      const systemPrompt = `You are an expert chef. Create a complete dish with suitable accompaniments based on the selected recipe concept and the available ingredients.
+      // Generate complete recipe using enhanced prompt structure
+      const systemPrompt = `You are an expert chef. Create a complete, balanced meal based on the selected recipe concept and the user's available ingredients.
 
 RECIPE CONCEPT: ${recipeIdea.title}
 DESCRIPTION: ${recipeIdea.description || "A delicious dish using your available ingredients"}
 AVAILABLE INGREDIENTS: ${ingredients.join(", ")}
 
 VARIATION SEED: ${randomSeed}
-You must treat the variation seed as a chef's creative fingerprint. It must radically influence the cooking method, flavour profile, cuisine influence, and presentation style. Even with identical recipe concepts, different seeds must result in clearly different interpretations.
+You must treat the variation seed as a chef's creative fingerprint. It must significantly influence the cooking method, flavour profile, cuisine inspiration, and presentation. Even with identical recipe concepts, different seeds must result in clearly different interpretations.
 
-${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : ""}
+${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : "If this is a reroll, apply one of 5 unique internal variation styles. If not, ignore this instruction."}
+
+---
 
 CRITICAL INGREDIENT CONSTRAINTS:
-- Use ONLY the ingredients provided by the user above
-- ALLOWED ADDITIONS: Pantry staples only – salt, pepper, oil, water, plain flour, sugar, garlic, onion, lemon juice, butter, common dried herbs (thyme, oregano, parsley), basic spices (chilli flakes, paprika, cumin, turmeric, cinnamon)
-- DO NOT add non-listed items or expensive extras (e.g. prawns, parmesan, cream, exotic sauces or stock cubes)
 
-IMPORTANT: Always create COMPLETE DISHES that include:
-- A main component built from the available ingredients
-- At least 1 complementary side, dressing, or topping made from the same ingredient list
-- Proper seasoning, balanced flavours, and appropriate UK-based cooking techniques
-- A fully structured and satisfying meal
+- The user's provided ingredients must form the foundation of the dish. These should be the primary components of the main and sides.
+- Pantry staples may be used only to support structure, seasoning, or balance — never to dominate or determine the dish. Over-reliance on pantry items must be avoided, as it reduces variation and flavour specificity.
+- DO NOT include any ingredients not listed or assumed below.
 
-Recipe Requirements:
+Pantry Staples (assumed available unless dietary restrictions apply):
+- **Base Flavours**: salt, black pepper, vegetable oil, olive oil, garlic (fresh or granules), onions (brown or red), lemon juice, vinegar (white wine, malt, or distilled)
+- **Herbs & Spices**: oregano, thyme, parsley, basil, paprika, chilli flakes, cumin, turmeric, cinnamon, mixed herbs
+- **Dry Goods**: plain flour, self-raising flour, caster or granulated sugar, rice (white, basmati, long grain), pasta (penne, spaghetti, fusilli)
+- **Tinned Goods**: chopped tomatoes, tomato purée, tinned chickpeas, tinned kidney beans, stock cubes (veg/chicken/beef)
+- **Fridge Staples**: butter or margarine, eggs, semi-skimmed or whole milk
+
+You may NOT use: baked beans, couscous, parmesan, prawns, fresh herbs (unless listed), cream, yoghurt, soy sauce, or other non-listed additions.
+
+---
+
+RECIPE CONSTRAINTS:
+
 - Servings: ${servings}
-- Cook time: realistic and achievable
 - Budget per serving: £${(budget / servings).toFixed(2)}
 - Equipment: ${equipment.join(", ")}
 ${dietaryRestrictions.length > 0 ? `- Dietary restrictions: ${dietaryRestrictions.join(", ")}` : ""}
-- Use UK English for ingredients and spelling (e.g. 'courgette', 'aubergine', 'grams', 'colour', 'frying pan')
+- Assume UK supermarket availability
+- Use **UK English** for ingredient names and spelling (e.g. 'courgette', 'aubergine', 'grams', 'colour', 'frying pan')
 
-**Output must be formatted as valid JSON**. Do not include markdown, extra text, comments, or trailing commas.
+The tone should be precise and professional, like a modern UK cookbook recipe. Use clean culinary phrasing and structured, realistic cooking logic.
 
-Return ONLY the following JSON structure:
+---
+
+RETURN ONLY a valid JSON object in the following structure:
+(No markdown, no preamble, no commentary, no trailing commas)
 
 {
   "title": "${recipeIdea.title}",
