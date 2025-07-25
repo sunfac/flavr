@@ -47,302 +47,6 @@ if (!global.recipeImageCache) {
   global.recipeImageCache = new Map();
 }
 
-// Helper function to parse malformed JSON from OpenAI
-function parseRecipeJSON(content: string, fallbackTitle: string = "Custom Recipe"): any {
-  console.log('🔧 Attempting to parse recipe JSON...');
-  
-  try {
-    // First attempt: Direct parse
-    const parsed = JSON.parse(content);
-    console.log('✅ Direct JSON parse succeeded!');
-    return parsed;
-  } catch (firstError) {
-    console.log('⚠️ Direct parse failed, attempting cleanup...');
-  }
-  
-  try {
-    // Second attempt: Clean and parse
-    let cleaned = content
-      .replace(/```json\n?/g, '').replace(/\n?```/g, '')
-      .replace(/[\u2681\u26817]/g, '')
-      .replace(/\\u[0-9a-fA-F]{4}/g, '')
-      .replace(/[""]/g, '"')
-      .replace(/'([^']+)'/g, '"$1"')
-      .replace(/,(\s*[}\]])/g, '$1')
-      // Fix common JSON issues in instructions
-      .replace(/"\\"([^"]+)\\""/g, '"$1"') // Remove extra escaped quotes
-      .replace(/\\"/g, '"') // Replace escaped quotes with regular quotes
-      .replace(/"\s*:\s*"([^"]*)",\s*([^",}]+),/g, '": "$1$2",') // Fix split instruction text
-      .replace(/"\s*;\s*/g, '". ') // Replace semicolons with periods in strings
-      // Fix OpenAI's broken property names with spaces
-      .replace(/" ([a-zA-Z]+) "/g, '"$1"') // Fix quoted property names with spaces
-      .replace(/"\s+([a-zA-Z]+)\s+"/g, '"$1"') // More aggressive space removal
-      .replace(/" (step|instruction|name|amount|title|description|cuisine|difficulty|prepTime|cookTime|servings|ingredients|instructions|tips|nutritionalHighlights) "/g, '"$1"')
-      // Fix broken object syntax
-      .replace(/\}\s*,\s*\}/g, '}}') // Fix double closing braces
-      .replace(/\[\s*,/g, '[') // Fix array starting with comma
-      .replace(/,\s*,/g, ',') // Fix double commas
-      .replace(/"\s*,\s*\{/g, '",{') // Fix missing quote before object
-      .trim();
-    
-    const jsonStart = cleaned.indexOf('{');
-    const jsonEnd = cleaned.lastIndexOf('}');
-    if (jsonStart !== -1 && jsonEnd !== -1) {
-      cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
-    }
-    
-    const parsed = JSON.parse(cleaned);
-    console.log('✅ Cleaned JSON parse succeeded!');
-    return parsed;
-  } catch (secondError) {
-    console.log('⚠️ Cleaned parse failed, attempting reconstruction...');
-  }
-  
-  // Final attempt: Manual reconstruction
-  try {
-    const titleMatch = content.match(/"title"\s*:\s*"([^"]+)"/);
-    const descMatch = content.match(/"description"\s*:\s*"([^"]+)"/);
-    const cuisineMatch = content.match(/"cuisine"\s*:\s*"([^"]+)"/);
-    const difficultyMatch = content.match(/"difficulty"\s*:\s*"([^"]+)"/);
-    const prepTimeMatch = content.match(/"prepTime"\s*:\s*(\d+)/);
-    const cookTimeMatch = content.match(/"cookTime"\s*:\s*(\d+)/);
-    const servingsMatch = content.match(/"servings"\s*:\s*(\d+)/);
-    
-    // Extract ingredients - handle malformed JSON with better patterns
-    let ingredients: any[] = [];
-    
-    // Try different ingredient extraction patterns
-    const ingredientsPattern = /"ingredients"\s*:\s*\[(.*?)\]/s;
-    const ingredientsMatch = content.match(ingredientsPattern);
-    
-    if (ingredientsMatch) {
-      console.log('🥕 Found ingredients section');
-      const ingredientPattern = /\{\s*"name"\s*:\s*"([^"]+)"\s*,\s*"amount"\s*:\s*"([^"]+)"\s*\}/g;
-      const ingredientMatches = ingredientsMatch[1].match(ingredientPattern);
-      if (ingredientMatches) {
-        ingredients = ingredientMatches.map(match => {
-          const nameMatch = match.match(/"name"\s*:\s*"([^"]+)"/);
-          const amountMatch = match.match(/"amount"\s*:\s*"([^"]+)"/);
-          const name = nameMatch ? nameMatch[1] : "ingredient";
-          const amount = amountMatch ? amountMatch[1] : "to taste";
-          return { name, amount };
-        });
-        console.log('🥕 Extracted ingredients via pattern:', ingredients.length);
-      }
-    }
-    
-    // Fallback: Extract individual ingredient lines
-    if (ingredients.length === 0) {
-      console.log('🥕 Trying individual ingredient extraction...');
-      const individualIngredientPattern = /\{"name"\s*:\s*"([^"]+)"\s*,\s*"amount"\s*:\s*"([^"]+)"\}/g;
-      let match;
-      while ((match = individualIngredientPattern.exec(content)) !== null) {
-        ingredients.push({
-          name: match[1],
-          amount: match[2]
-        });
-      }
-      console.log('🥕 Extracted individual ingredients:', ingredients.length);
-    }
-    
-    // Final fallback: Try to extract ingredients from valid JSON portion before it becomes malformed
-    if (ingredients.length === 0) {
-      console.log('🥕 Trying early JSON ingredients extraction...');
-      // Look for the ingredients array at the beginning before JSON corruption
-      const earlyIngredientMatch = content.match(/"ingredients"\s*:\s*\[([\s\S]*?)\],?\s*"instructions"/);
-      if (earlyIngredientMatch) {
-        const ingredientSection = earlyIngredientMatch[1];
-        console.log('🥕 Found early ingredient section, length:', ingredientSection.length);
-        
-        // Extract all {name, amount} pairs from this section
-        const ingredientPairPattern = /\{\s*"name"\s*:\s*"([^"]+)"\s*,\s*"amount"\s*:\s*"([^"]+)"\s*\}/g;
-        let pairMatch;
-        while ((pairMatch = ingredientPairPattern.exec(ingredientSection)) !== null) {
-          ingredients.push({
-            name: pairMatch[1],
-            amount: pairMatch[2]
-          });
-        }
-        console.log('🥕 Extracted early JSON ingredients:', ingredients.length);
-      }
-    }
-    
-    // Ultra fallback: Extract from anywhere in the content
-    if (ingredients.length === 0) {
-      console.log('🥕 Trying ultra-wide ingredient search...');
-      // Look for any ingredient entries anywhere in the response
-      const globalIngredientPattern = /\{\s*"name"\s*:\s*"([^"]{2,50})"\s*,\s*"amount"\s*:\s*"([^"]{1,30})"\s*\}/g;
-      let globalMatch;
-      const foundIngredients = new Set(); // Prevent duplicates
-      
-      while ((globalMatch = globalIngredientPattern.exec(content)) !== null) {
-        const name = globalMatch[1];
-        const amount = globalMatch[2];
-        const key = `${name}:${amount}`;
-        
-        if (!foundIngredients.has(key) && name.length > 1 && !name.includes('step') && !name.includes('instruction')) {
-          foundIngredients.add(key);
-          ingredients.push({ name, amount });
-        }
-      }
-      console.log('🥕 Ultra-wide search found:', ingredients.length, 'ingredients');
-    }
-    
-    // Extract instructions - try multiple patterns
-    let instructions = [];
-    
-    // First try: Standard instruction format (handle escaped quotes)
-    let instructionMatches = content.match(/\{\s*"step"\s*:\s*(\d+)\s*,\s*"instruction"\s*:\s*"((?:[^"\\]|\\.)*)"\s*\}/g);
-    console.log('🔍 Standard instruction matches:', instructionMatches?.length || 0);
-    
-    // Second try: Look for instructions with broken quotes (OpenAI bug)
-    if (!instructionMatches || instructionMatches.length === 0) {
-      // Match patterns like {"step":1,"instruction":"text"} with various quote issues
-      instructionMatches = content.match(/\{\s*"*step"*\s*:\s*(\d+)\s*,\s*"*instruction"*\s*:\s*"([^}]+?)"\s*\}/g);
-      console.log('🔍 Broken quote instruction matches:', instructionMatches?.length || 0);
-    }
-    
-    // Third try: Extract any step+instruction pairs
-    if (!instructionMatches || instructionMatches.length === 0) {
-      // Try to find step numbers and instructions separately using exec pattern
-      const stepPattern = /"?\s*step\s*"?\s*:\s*(\d+)/gi;
-      const stepMatches: any[] = [];
-      let stepMatch;
-      while ((stepMatch = stepPattern.exec(content)) !== null) {
-        stepMatches.push(stepMatch);
-      }
-      
-      // Handle both quoted and unquoted instructions
-      const instructionPattern = /"?\s*instruction\s*"?\s*:\s*"([^"]+)"/gi;
-      let instructionMatchArray: any[] = [];
-      let instructionMatch;
-      while ((instructionMatch = instructionPattern.exec(content)) !== null) {
-        instructionMatchArray.push(instructionMatch);
-      }
-      
-      // If no quoted instructions found, try unquoted pattern
-      if (instructionMatchArray.length === 0) {
-        const altInstructionPattern = /"?\s*instruction\s*"?\s*:\s*'([^']+)'/gi;
-        while ((instructionMatch = altInstructionPattern.exec(content)) !== null) {
-          instructionMatchArray.push(instructionMatch);
-        }
-      }
-      
-      console.log('🔍 Step matches found:', stepMatches.length);
-      console.log('🔍 Instruction matches found:', instructionMatchArray.length);
-      
-      if (stepMatches.length > 0 && instructionMatchArray.length > 0) {
-        const count = Math.min(stepMatches.length, instructionMatchArray.length);
-        for (let i = 0; i < count; i++) {
-          instructions.push({
-            step: parseInt(stepMatches[i][1]),
-            instruction: instructionMatchArray[i][1].trim()
-          });
-        }
-        console.log('✅ Extracted instructions via separate matching:', instructions.length);
-      }
-    }
-    
-    if (instructionMatches && instructionMatches.length > 0 && instructions.length === 0) {
-      instructions = instructionMatches.map((match, index) => {
-        const stepMatch = match.match(/"*step"*\s*:\s*(\d+)/);
-        const instructionMatch = match.match(/"*instruction"*\s*:\s*"([^"]+)"/);
-        return { 
-          step: stepMatch ? parseInt(stepMatch[1]) : index + 1, 
-          instruction: instructionMatch?.[1] || `Step ${index + 1}` 
-        };
-      });
-    }
-    
-    if (instructions.length === 0) {
-      console.log('⚠️ No instructions found in content');
-      console.log('⚠️ Content sample:', content.substring(0, 1000));
-    } else {
-      console.log('✅ Extracted instructions:', instructions.length);
-    }
-    
-    const recipe = {
-      title: titleMatch?.[1] || fallbackTitle,
-      description: descMatch?.[1] || "A delicious dish created just for you",
-      cuisine: cuisineMatch?.[1] || "International",
-      difficulty: difficultyMatch?.[1] || "medium",
-      prepTime: prepTimeMatch ? parseInt(prepTimeMatch[1]) : 15,
-      cookTime: cookTimeMatch ? parseInt(cookTimeMatch[1]) : 30,
-      servings: servingsMatch ? parseInt(servingsMatch[1]) : 4,
-      ingredients: ingredients.length > 0 ? ingredients : [
-        { name: "See recipe description", amount: "As needed" }
-      ] as any[],
-      instructions: instructions.length > 0 ? instructions : [
-        { step: 1, instruction: "Please regenerate this recipe for complete instructions" }
-      ],
-      tips: ["Regenerate recipe if instructions are incomplete"],
-      nutritionalHighlights: ["Fresh ingredients", "Balanced nutrition"]
-    };
-    
-    console.log('✅ Manual reconstruction succeeded!', {
-      ingredients: ingredients.length,
-      instructions: instructions.length
-    });
-    
-    return recipe;
-  } catch (finalError) {
-    console.error('🔥 All parsing attempts failed:', finalError);
-    
-    // Absolute fallback
-    return {
-      title: fallbackTitle,
-      description: "A delicious dish created just for you",
-      cuisine: "International",
-      difficulty: "medium",
-      prepTime: 15,
-      cookTime: 30,
-      servings: 4,
-      ingredients: [{ name: "Various ingredients", amount: "As needed" }],
-      instructions: [{ step: 1, instruction: "Please try generating this recipe again" }],
-      tips: ["Recipe generation encountered an error"],
-      nutritionalHighlights: ["Nutritional information pending"]
-    };
-  }
-}
-
-// Helper function to generate seed variation profiles
-function defineSeed(seed: number): string {
-  const styles = [
-    "rustic", "elevated home-cooking", "modern gastropub", "street food-inspired",
-    "fusion", "heritage-style", "plant-forward fine dining", "farmhouse-style", "hyper-local", "playful comfort food"
-  ];
-
-  const cuisines = [
-    "Middle Eastern", "East Asian", "Southern European", "Nordic", "Caribbean", "South Asian",
-    "West African", "Mexican", "Modern British", "French Provincial"
-  ];
-
-  const techniques = [
-    "grilled and glazed", "braised and reduced", "pan-seared and layered",
-    "roasted and spiced", "charred and dressed", "steamed and seasoned",
-    "baked and stuffed", "flash-fried and drizzled", "slow-cooked and finished under the grill"
-  ];
-
-  const platingStyles = [
-    "minimalist", "family-style", "stacked", "scattered", "bowl-based", "layered",
-    "handheld", "drizzled and garnished", "elevated but comforting", "vibrant and rustic"
-  ];
-
-  // Use seed to deterministically select options
-  const style = styles[seed % styles.length];
-  const cuisine = cuisines[Math.floor(seed / 10) % cuisines.length];
-  const technique = techniques[Math.floor(seed / 100) % techniques.length];
-  const plating = platingStyles[Math.floor(seed / 1000) % platingStyles.length];
-
-  return `VARIATION SEED: ${seed}
-Style Modifier: ${style}
-Cuisine Influence: ${cuisine}
-Technique Focus: ${technique}
-Plating: ${plating}
-
-These seed attributes must strongly influence the recipe's structure, flavour profile, and presentation. They represent a chef's unique creative take and must result in a dish that feels distinct even with similar ingredients.`;
-}
-
 // Helper function to convert recipe text to UK English
 function convertRecipeToUKEnglish(recipe: any): any {
   if (!recipe) return recipe;
@@ -845,15 +549,21 @@ Return a JSON object with this structure:
       
       const selectedCuisine = specificCuisines[randomSeed % specificCuisines.length];
       
-      // Generate seed variation profile
-      const seedProfile = defineSeed(randomSeed);
-      
       // Combine approaches with seed variation
       const inspirationPrompt = `${complexityPrompt} ${simplePrompt}`;
       
-      const prompt = `${seedProfile}
+      const prompt = `VARIATION SEED: ${randomSeed}
       
 ${inspirationPrompt}
+
+SEED-BASED VARIATION REQUIREMENTS:
+Use seed ${randomSeed} to ensure maximum diversity. This number must influence:
+- Protein selection (seafood, poultry, beef, pork, lamb, game, legumes, grains, vegetables)
+- Cooking technique variation (grilled, braised, roasted, sautéed, steamed, fried, slow-cooked)
+- Regional authenticity within chosen cuisine
+- Ingredient complexity (simple pantry vs specialty ingredients)
+- Seasonal influence and ingredient selection
+- Preparation style (quick vs elaborate, rustic vs refined)
 
 MANDATORY CUISINE FOCUS: ${cuisineCategory}
 SPECIFIC CUISINE: ${selectedCuisine}
@@ -935,14 +645,9 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
         return res.status(403).json(limitCheck.error);
       }
 
-      // Enhanced random seed generation with better distribution and anti-repetition
-      const baseRandomSeed = Math.floor(Math.random() * 10000); // Larger range for better distribution
-      const timeComponent = Date.now() % 1000; // Add time component for additional variation
-      const randomSeed = (baseRandomSeed + timeComponent) % 10000;
+      // Add random seed for recipe variation with reroll-specific enhancement
+      const randomSeed = Math.floor(Math.random() * 1000);
       const isReroll = req.body.isReroll || false;
-      
-      // Generate seed variation profile
-      const seedProfile = defineSeed(randomSeed);
       
       // Enhanced variation prompts for rerolls to ensure completely different recipes
       const rerollVariationPrompts = [
@@ -955,57 +660,77 @@ Complexity #${complexityLevel} + Style #${simpleStyle}`;
       
       const selectedVariationPrompt = isReroll ? rerollVariationPrompts[randomSeed % rerollVariationPrompts.length] : "";
 
-      // Generate complete recipe directly using new cleaner prompt structure
-      const systemPrompt = `**CRITICAL JSON FORMATTING RULES:**
-1. Return ONLY valid JSON - no markdown, no comments, no extra text
-2. Use proper JSON syntax: "key": "value" with colons and quotes
-3. Instructions must be an array of objects like: {"step": 1, "instruction": "text"}
-4. NO trailing commas anywhere in the JSON
-5. Escape quotes inside strings with backslash: \"
+      // Generate complete recipe directly
+      const systemPrompt = `You are an expert chef. Create a complete dish with suitable accompaniments based on the user's request.
 
-You are an expert chef. Create a complete dish with suitable accompaniments based on the user's request.
-
-${seedProfile}
+VARIATION SEED: ${randomSeed}
 
 ${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : ""}
 
-IMPORTANT: Always create COMPLETE DISHES that include:
-- A main component (protein, vegetable, or grain-based centrepiece)
-- At least 1–2 side dishes or accompaniments that complement the main
-- Proper sauces, dressings, or condiments that enhance flavours
-- Garnishes and finishing touches for visual appeal
-- A complete, balanced meal — not just a single element
-- Deliver maximum flavour by balancing richness, acidity, heat, texture, and aromatics — using advanced techniques and ingredient synergy
+Use this number to vary the entire output. It must influence:
 
-Requirements:
+- Main ingredient selection (protein or veg)
+- Side dish pairing logic
+- Choice of cooking techniques (grilled, braised, roasted, sautéed, etc.)
+- Herb and spice selection
+- Whether the dish leans traditional or regional within the cuisine (e.g. Northern vs. Southern Italian)
+- Richness vs. freshness, spice level, and presentation style
+- A unique "chef's mood" which drives subtle intuitive variations in the dish (e.g., rustic vs. refined, bold vs. mellow)
+
+CUISINE DIVERSITY REQUIREMENT - HARD RULE:
+When the user request is vague or open-ended (e.g. "impressive dinner party dish", "chicken dinner", "something special"), you MUST:
+
+1. **FORBIDDEN DISHES**: NEVER generate coq au vin, beef bourguignon, ratatouille, bouillabaisse, or any classic French bistro dishes
+2. **MANDATORY GLOBAL SELECTION**: Randomly select from diverse global cuisines using the variation seed:
+   - Asian: Thai, Vietnamese, Korean, Japanese, Chinese, Indonesian, Malaysian
+   - Middle Eastern: Lebanese, Persian, Turkish, Moroccan, Egyptian
+   - European: Italian, Spanish, Greek, Portuguese, Hungarian
+   - Latin American: Peruvian, Mexican, Argentinian, Brazilian
+   - Indian Subcontinent: Indian, Sri Lankan
+3. **REGIONAL AUTHENTICITY**: Choose lesser-known regional dishes within the selected cuisine
+4. **VARIATION SEED ENFORCEMENT**: Use seed number to determine:
+   - Which global cuisine to select (1-200: Asian, 201-400: Middle Eastern, 401-600: European, 601-800: Latin American, 801-1000: Indian Subcontinent)
+   - Which regional variation within that cuisine
+   - Specific cooking techniques and ingredients authentic to that region
+
+IMPORTANT: Always create COMPLETE DISHES that include:
+- Main component (protein, vegetable, or grain-based centrepiece)
+- At least 1–2 complementary side dishes
+- Proper sauces, dressings, or condiments to enhance flavour
+- Garnishes and visual/textural contrasts for plating appeal
+- A fully balanced meal — not just a main on its own
+
+User request: ${userPrompt}
+Servings: ${servings}
+
+Create a complete recipe based on this request: "${userPrompt}"
+
+REQUIREMENTS:
 - Servings: ${servings}
-- Calculate realistic cooking time based on the actual recipe requirements
-- Use ingredients available at UK supermarkets
-- Do not constrain cuisines or suggest specific dishes unless requested
-- Do not repeat the same dish unless the same variation seed is used
-- The tone should be professional and culinary-precise, like a cookbook or restaurant recipe. Always use UK terms (e.g. 'courgette', 'aubergine', 'grams')
-- Where appropriate, subtly align the recipe's tone or comfort level with the emotional undertone implied by the user request (e.g. warming, refreshing, nostalgic, indulgent)
+- Calculate a realistic cooking time based on actual recipe steps
+- Use ingredients commonly available in UK supermarkets
+- UK measurement units ONLY (e.g. grams, ml, tbsp, tsp, litres) — DO NOT use cups or ounces
+- Make it achievable for a home cook
+- Stay completely authentic to ONE cuisine tradition (e.g., Italian, French, Thai, Indian, Mexican, Japanese, Chinese, etc.)
+  - No fusion or cross-cuisine blends
+  - Stay regionally consistent within that cuisine if appropriate
+- Ensure at least 3 clear differences in dish structure or flavour if the same prompt is used with different variation seeds
+- Include at least one visual or textural contrast element
 
 **CRITICAL: Use UK English throughout this recipe:**
 ${ukRecipePromptAdditions.ingredientGuidance}
 ${ukRecipePromptAdditions.measurementGuidance}
 ${ukRecipePromptAdditions.spellingsGuidance}
 
-Create a unique, chef-level meal based on the following user request:
-
-User Request: "${userPrompt}"
-Servings: ${servings}
-VARIATION SEED: ${randomSeed}
-
 Return ONLY a valid JSON object with this exact structure (NO markdown, no explanations, and no trailing commas):
 
 {
   "title": "Recipe Name",
-  "description": "Brief description explaining the inspiration and variation",
+  "description": "Brief description of the dish, including any regional focus and standout flavours",
   "cuisine": "Cuisine Type",
-  "difficulty": "easy | medium | hard",
+  "difficulty": "[easy | medium | hard] (determine based on actual complexity)",
   "prepTime": 15,
-  "cookTime": "[REALISTIC total cooking time in minutes]",
+  "cookTime": [REALISTIC total cooking time in minutes],
   "servings": ${servings},
   "ingredients": [
     {"name": "ingredient name only", "amount": "UK quantity (e.g. '2 tbsp', '400g', '250ml')"}
@@ -1020,56 +745,33 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
   "nutritionalHighlights": [
     "Nutritional benefit (e.g. 'High in fibre', 'Rich in omega-3')"
   ]
-}
-
-SEED TRACE: ${randomSeed}`;
-
-
+}`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4o", // Keep quality model but use async operations for speed
         messages: [
-          { role: "system", content: "You MUST return ONLY valid JSON. No markdown, no code blocks, no comments. Each instruction MUST be {\"step\": number, \"instruction\": \"text\"} with proper quotes and colons. CRITICAL: Validate your JSON syntax before responding." },
+          { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations." },
           { role: "user", content: systemPrompt }
         ],
-        temperature: 0.7,
-        top_p: 0.9,
-        presence_penalty: 0.6,
-        frequency_penalty: 0.3,
-        max_tokens: 1800
+        temperature: 0.8 // Increased temperature for more recipe variation
       });
 
       let recipe;
       try {
-        let content = completion.choices[0].message.content || "{}";
-        console.log('🔧 Raw OpenAI response length:', content.length);
-        console.log('🔧 Raw OpenAI response preview:', content.substring(0, 500) + '...');
-        console.log('🔧 Raw OpenAI full response:', content);
+        const content = completion.choices[0].message.content || "{}";
+        // Clean up any potential markdown, extra text, and trailing commas
+        let cleanContent = content.replace(/```json\n?/g, '').replace(/\n?```/g, '').trim();
         
-        // Use the parseRecipeJSON helper function
-        recipe = parseRecipeJSON(content, userPrompt || "Custom Recipe");
-        console.log('✅ Parsed recipe instructions count:', recipe.instructions?.length);
-      } catch (error) {
-        console.error('🔥 Unexpected error in Chef Assist:', error);
+        // Fix common JSON errors: trailing commas in arrays and objects
+        cleanContent = cleanContent.replace(/,(\s*[}\]])/g, '$1');
+        // Fix trailing commas specifically after object entries in arrays
+        cleanContent = cleanContent.replace(/},(\s*\])/g, '}$1');
         
-        // Ultimate fallback
-        recipe = {
-          title: userPrompt || "Custom Recipe",
-          description: "A delicious dish created just for you",
-          cuisine: "International",
-          difficulty: "medium",
-          prepTime: 15,
-          cookTime: 30,
-          servings: 4,
-          ingredients: [
-            { name: "ingredients as described", amount: "as needed" }
-          ],
-          instructions: [
-            { step: 1, instruction: "Please try generating this recipe again for complete instructions" }
-          ],
-          tips: ["Recipe generation encountered an error - please try again"],
-          nutritionalHighlights: ["Nutritional information will be available after successful generation"]
-        };
+        recipe = JSON.parse(cleanContent);
+      } catch (parseError) {
+        console.error('JSON parsing error:', parseError);
+        console.error('Raw content:', completion.choices[0].message.content);
+        throw new Error('Failed to parse recipe JSON from AI response');
       }
       
       // Apply UK English conversions to recipe text
@@ -1138,10 +840,7 @@ SEED TRACE: ${randomSeed}`;
 
       // Add reroll variation logic for shopping mode
       const isReroll = req.body.isReroll || false;
-      const randomSeed = Math.floor(Math.random() * 10000);
-      
-      // Generate seed variation profile
-      const seedProfile = defineSeed(randomSeed);
+      const randomSeed = Math.floor(Math.random() * 1000);
       
       // Enhanced variation prompts for rerolls 
       const rerollVariationPrompts = [
@@ -1154,117 +853,93 @@ SEED TRACE: ${randomSeed}`;
       
       const selectedVariationPrompt = isReroll ? rerollVariationPrompts[randomSeed % rerollVariationPrompts.length] : "";
 
-      // Generate complete recipe using enhanced prompt structure
-      const systemPrompt = `You are an expert chef. Create a complete, balanced meal based on the selected recipe concept and the user's available ingredients.
+      // Generate complete recipe from the idea
+      const systemPrompt = `You are an expert chef creating a complete recipe based on this recipe idea:
 
 RECIPE CONCEPT: ${recipeIdea.title}
 DESCRIPTION: ${recipeIdea.description || "A delicious dish using your available ingredients"}
-AVAILABLE INGREDIENTS: ${ingredients.join(", ")}
+CUISINE: ${recipeIdea.cuisine || "International"}
 
-${seedProfile}
+VARIATION SEED: ${randomSeed}
 
 ${selectedVariationPrompt ? `REROLL MANDATE: ${selectedVariationPrompt}` : ""}
 
----
-
-CRITICAL INGREDIENT CONSTRAINTS:
-
-- The user's provided ingredients must form the foundation of the dish. These should be the primary components of the main and sides.
-- Pantry staples may be used only to support structure, seasoning, or balance — never to dominate or determine the dish. Over-reliance on pantry items must be avoided, as it reduces variation and flavour specificity.
-- DO NOT include any ingredients not listed or assumed below.
-
-Pantry Staples (assumed available unless dietary restrictions apply):
-- **Base Flavours**: salt, black pepper, vegetable oil, olive oil, garlic (fresh or granules), onions (brown or red), lemon juice, vinegar (white wine, malt, or distilled)
-- **Herbs & Spices**: oregano, thyme, parsley, basil, paprika, chilli flakes, cumin, turmeric, cinnamon, mixed herbs
-- **Dry Goods**: plain flour, self-raising flour, caster or granulated sugar, rice (white, basmati, long grain), pasta (penne, spaghetti, fusilli)
-- **Tinned Goods**: chopped tomatoes, tomato purée, tinned chickpeas, tinned kidney beans, stock cubes (veg/chicken/beef)
-- **Fridge Staples**: butter or margarine, eggs, semi-skimmed or whole milk
-
-You may NOT use: baked beans, couscous, parmesan, prawns, fresh herbs (unless listed), cream, yoghurt, soy sauce, or other non-listed additions.
-
----
-
-RECIPE CONSTRAINTS:
-
+AVAILABLE INGREDIENTS: ${ingredients.join(", ")}
+CONSTRAINTS:
 - Servings: ${servings}
 - Budget per serving: £${(budget / servings).toFixed(2)}
 - Equipment: ${equipment.join(", ")}
 ${dietaryRestrictions.length > 0 ? `- Dietary restrictions: ${dietaryRestrictions.join(", ")}` : ""}
-- Assume UK supermarket availability
-- Use **UK English** for ingredient names and spelling (e.g. 'courgette', 'aubergine', 'grams', 'colour', 'frying pan')
 
-The tone should be precise and professional, like a modern UK cookbook recipe. Use clean culinary phrasing and structured, realistic cooking logic.
+STRICT INGREDIENT CONSTRAINTS:
+- **PRIMARY RULE**: Use ONLY the ingredients provided by the user above
+- **ALLOWED ADDITIONS**: Basic pantry staples only (salt, pepper, cooking oil, water, flour, sugar, common dried herbs/spices)
+- **FORBIDDEN**: Do NOT add expensive ingredients like prawns, specialty cheeses, exotic spices, or proteins not provided by the user
 
----
+Create a COMPLETE recipe that:
+1. Uses ONLY ingredients from the available list plus basic pantry staples
+2. Focus on making the best possible dish with what's actually available
+3. Substitute intelligently within the provided ingredients only (e.g., if pasta and tomatoes available, make pasta dish)
+4. Add only common pantry basics for proper seasoning and cooking
+5. Prioritize authentic preparation using the available ingredients
+6. Include exact measurements and clear instructions within the time and equipment constraints
 
-RETURN ONLY a valid JSON object in the following structure:
-(No markdown, no preamble, no commentary, no trailing commas)
+**CRITICAL: Use UK English throughout this recipe:**
+${ukRecipePromptAdditions.ingredientGuidance}
+${ukRecipePromptAdditions.measurementGuidance}
+${ukRecipePromptAdditions.spellingsGuidance}
 
+Return ONLY a valid JSON object with this exact structure (NO trailing commas):
 {
   "title": "${recipeIdea.title}",
-  "description": "Enhanced description explaining the variation and inspiration",
+  "description": "Enhanced description",
   "cuisine": "${recipeIdea.cuisine}",
-  "difficulty": "easy | medium | hard",
-  "prepTime": 15,
-  "cookTime": "[REALISTIC total cooking time in minutes]",
+  "difficulty": "${recipeIdea.difficulty}",
+  "prepTime": [Calculate realistic prep time based on recipe complexity],
+  "cookTime": [Calculate REALISTIC total cooking time in minutes based on all recipe steps including baking/braising/marinating],
   "servings": ${servings},
-  "ingredients": [
-    {"name": "ingredient name only", "amount": "UK quantity (e.g. '2 tbsp', '400g', '150ml')"}
-  ],
-  "instructions": [
-    {"step": 1, "instruction": "Use active verbs and include timings where possible"},
-    {"step": 2, "instruction": "Continue in the same format until complete"}
-  ],
-  "tips": [
-    "Helpful tip that improves flavour, speed, or presentation"
-  ],
-  "nutritionalHighlights": [
-    "Nutritional benefit (e.g. 'High in fibre', 'Rich in vitamin C')"
-  ]
+  "ingredients": [{"name": "ingredient name", "amount": "UK measurement"}],
+  "instructions": [{"step": 1, "instruction": "detailed step"}],
+  "tips": ["helpful cooking tip"],
+  "nutritionalHighlights": ["nutritional benefit"]
 }
 
-SEED TRACE: ${randomSeed}`;
+CRITICAL: Ensure NO trailing commas after the last item in any array or object. Return ONLY the JSON object, no markdown, no explanations.`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4o", // Keep quality model but use async operations for speed
         messages: [
-          { role: "system", content: "You are a JSON API that returns valid recipe data. Always return properly formatted JSON with no extra text, no markdown, and no unicode escape sequences." },
+          { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations." },
           { role: "user", content: systemPrompt }
         ],
-        temperature: 0.7,
-        top_p: 0.9,
-        presence_penalty: 0.6,
-        frequency_penalty: 0.3,
-        max_tokens: 1800
+        temperature: 0.7
       });
 
       // Clean and parse the JSON response for Fridge2Fork
       let recipe;
       try {
         let content = completion.choices[0].message.content || "{}";
-        console.log('🔧 Raw OpenAI response for Fridge2Fork:', content.substring(0, 200) + '...');
         
-        // Use the parseRecipeJSON helper function
-        recipe = parseRecipeJSON(content, recipeIdea.title || "Fridge2Fork Recipe");
-      } catch (error) {
-        console.error('🔥 Unexpected error in Fridge2Fork:', error);
+        // Remove any markdown code blocks
+        content = content.replace(/```json\n?/g, '').replace(/\n?```/g, '').trim();
         
-        // Ultimate fallback
-        recipe = {
-          title: recipeIdea.title || "Fridge2Fork Recipe",
-          description: recipeIdea.description || "A delicious dish using your available ingredients",
-          cuisine: recipeIdea.cuisine || "International",
-          difficulty: "medium",
-          prepTime: 15,
-          cookTime: 30,
-          servings: servings,
-          ingredients: ingredients.map(ing => ({ name: ing, amount: "as needed" })),
-          instructions: [
-            { step: 1, instruction: "Please try generating this recipe again for complete instructions" }
-          ],
-          tips: ["Recipe generation encountered an error - please try again"],
-          nutritionalHighlights: ["Nutritional information will be available after successful generation"]
-        };
+        // Remove any leading/trailing text that's not JSON
+        const jsonStart = content.indexOf('{');
+        const jsonEnd = content.lastIndexOf('}');
+        if (jsonStart !== -1 && jsonEnd !== -1) {
+          content = content.substring(jsonStart, jsonEnd + 1);
+        }
+        
+        // Fix common JSON errors
+        content = content.replace(/,(\s*[}\]])/g, '$1'); // trailing commas before closing brackets
+        content = content.replace(/},(\s*\])/g, '}$1'); // trailing commas in object arrays
+        content = content.replace(/,(\s*$)/g, ''); // trailing commas at end of string
+        
+        recipe = JSON.parse(content);
+      } catch (parseError) {
+        console.error('Fridge2Fork JSON parsing error:', parseError);
+        console.error('Raw content:', completion.choices[0].message.content);
+        throw new Error('Failed to parse AI recipe response. Please try again.');
       }
       
       // Apply UK English conversions to recipe text
@@ -1300,45 +975,6 @@ SEED TRACE: ${randomSeed}`;
       console.error('Chef assist generation error:', error);
       res.status(500).json({ error: error.message || "Failed to generate recipe" });
     }
-  });
-
-  // Test endpoint for recipe parsing
-  app.get("/api/test-recipe-parsing", async (req, res) => {
-    const testRecipe = {
-      title: "Test Recipe",
-      description: "Testing recipe parsing",
-      cuisine: "International",
-      difficulty: "medium",
-      prepTime: 15,
-      cookTime: 30,
-      servings: 4,
-      ingredients: [
-        { name: "test ingredient 1", amount: "100g" },
-        { name: "test ingredient 2", amount: "200ml" }
-      ],
-      instructions: [
-        { step: 1, instruction: "First step of the recipe" },
-        { step: 2, instruction: "Second step with some \"quoted text\" inside" },
-        { step: 3, instruction: "Third step of cooking" }
-      ],
-      tips: ["Test tip"],
-      nutritionalHighlights: ["Test nutrition"]
-    };
-    
-    const jsonString = JSON.stringify(testRecipe);
-    console.log('🧪 Test JSON:', jsonString);
-    
-    const parsed = parseRecipeJSON(jsonString, "Test Recipe");
-    console.log('🧪 Parsed result:', {
-      instructionCount: parsed.instructions?.length,
-      firstInstruction: parsed.instructions?.[0]
-    });
-    
-    res.json({ 
-      original: testRecipe,
-      parsed: parsed,
-      instructionsParsedCorrectly: parsed.instructions?.length === 3
-    });
   });
 
   // Recipe ideas generation (Shopping Mode)

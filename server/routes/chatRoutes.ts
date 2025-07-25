@@ -67,27 +67,14 @@ CRITICAL INTELLIGENCE RULES for Recipe Updates:
 
 Be warm, encouraging, and knowledgeable about cooking!`;
 
-      // Debug logging
-      console.log('💬 Raw conversation history:', conversationHistory);
-      
       const messages = [
         { role: "system" as const, content: systemPrompt },
-        ...conversationHistory
-          .filter((msg: any) => {
-            const hasContent = !!(msg.content || msg.text);
-            if (!hasContent) {
-              console.log('⚠️ Filtering out empty message:', msg);
-            }
-            return hasContent;
-          })
-          .map((msg: any) => ({
-            role: msg.role || (msg.sender === 'user' ? 'user' : 'assistant'),
-            content: String(msg.content || msg.text || '') // Force string conversion
-          })),
-        { role: "user" as const, content: String(message) } // Force string conversion
+        ...conversationHistory.map((msg: any) => ({
+          role: msg.role || (msg.sender === 'user' ? 'user' : 'assistant'),
+          content: msg.content || msg.text
+        })),
+        { role: "user" as const, content: message }
       ];
-      
-      console.log('💬 Processed messages:', messages.map(m => ({ role: m.role, contentLength: m.content?.length })));
 
       // Function definition for recipe updates
       const functions = [{

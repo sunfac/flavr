@@ -172,17 +172,6 @@ function EnhancedRecipeCard({
 
   const activeInstructions = useMemo(() => {
     const isStoreActive = recipeStore.id === recipe.id && recipeStore.steps.length > 0;
-    
-    console.log('🍳 activeInstructions calculation:', {
-      recipeId: recipe.id,
-      storeId: recipeStore.id,
-      isStoreActive,
-      storeStepsLength: recipeStore.steps.length,
-      recipeInstructionsLength: recipe.instructions?.length || 0,
-      firstStoreStep: recipeStore.steps[0]?.description,
-      firstRecipeInstruction: recipe.instructions?.[0]
-    });
-    
     if (isStoreActive) {
       return recipeStore.steps.map(step => step.description);
     }
@@ -206,8 +195,8 @@ function EnhancedRecipeCard({
 
   const activeImage = useMemo(() => {
     const isStoreActive = recipeStore.id === recipe.id && recipeStore.meta.image;
-    return isStoreActive ? recipeStore.meta.image : recipe.image;
-  }, [recipeStore.id, recipe.id, recipeStore.meta.image, recipe.image]);
+    return isStoreActive ? recipeStore.meta.image : (recipe.image || recipe.imageUrl);
+  }, [recipeStore.id, recipe.id, recipeStore.meta.image, recipe.image, recipe.imageUrl]);
 
 
 
@@ -235,18 +224,6 @@ function EnhancedRecipeCard({
     description: instruction,
     duration: extractDuration(instruction)
   }));
-  
-  // Debug logging for step creation
-  console.log('🔍 EnhancedRecipeCard Debug:', {
-    recipeId: recipe.id,
-    storeId: recipeStore.id,
-    isStoreActive: recipeStore.id === recipe.id,
-    storeStepsLength: recipeStore.steps.length,
-    activeInstructionsLength: activeInstructions.length,
-    finalStepsLength: steps.length,
-    firstInstruction: activeInstructions[0],
-    firstStep: steps[0]
-  });
 
   // Note: Removed Zustand store sync useEffect that was causing infinite loops
   // Voice commands and recipe updates are now handled through other mechanisms
