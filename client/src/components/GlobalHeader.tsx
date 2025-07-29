@@ -23,7 +23,7 @@ export default function GlobalHeader({
     retry: false,
   });
   
-  const user = userData?.user;
+  const user = userData;
 
   const handleSettingsClick = () => {
     console.log("Settings clicked");
@@ -75,7 +75,7 @@ export default function GlobalHeader({
         </div>
 
         {/* Right: Compact authentication/settings buttons pushed further right */}
-        <div className="flex items-center gap-1 ml-auto">
+        <div className="flex items-center gap-0.5 ml-auto md:gap-1">
           {user && onSettingsClick ? (
             // Authenticated user - show Settings only if onSettingsClick is provided
             <Button 
@@ -87,26 +87,26 @@ export default function GlobalHeader({
               <iconMap.settings className="w-4 h-4" />
             </Button>
           ) : !user ? (
-            // Not authenticated - show smaller Login and Sign Up buttons with text
+            // Not authenticated - show compact mobile-optimized Login and Sign Up buttons
             <>
               <Button 
                 variant="ghost"
                 size="sm"
                 onClick={handleLoginClick}
-                className="text-white hover:text-white hover:bg-white/10 font-medium px-1.5 py-0.5 text-xs relative z-10"
+                className="text-white hover:text-white hover:bg-white/10 font-medium px-1.5 py-0.5 text-xs relative z-10 md:px-3 md:py-1.5 md:text-sm min-h-0 h-auto"
               >
-                <iconMap.login className="w-3 h-3 mr-0.5" />
-                <span className="text-xs">Login</span>
+                <iconMap.login className="w-3 h-3 mr-0.5 md:w-4 md:h-4 md:mr-1" />
+                <span className="text-xs md:text-sm">Login</span>
               </Button>
               
               <Button 
                 variant="ghost"
                 size="sm"
                 onClick={handleSignUpClick}
-                className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1.5 py-0.5 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50"
+                className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1.5 py-0.5 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50 md:px-3 md:py-1.5 md:text-sm min-h-0 h-auto"
               >
-                <iconMap.userPlus className="w-3 h-3 mr-0.5" />
-                <span className="text-xs">Sign Up</span>
+                <iconMap.userPlus className="w-3 h-3 mr-0.5 md:w-4 md:h-4 md:mr-1" />
+                <span className="text-xs md:text-sm">Sign Up</span>
               </Button>
             </>
           ) : null}
