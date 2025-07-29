@@ -2504,6 +2504,85 @@ Response (number in minutes only):`;
     }
   });
 
+  // Get public shared recipe (no authentication required)
+  app.get("/api/recipes/shared/:shareId", async (req, res) => {
+    try {
+      const { shareId } = req.params;
+      
+      if (!shareId) {
+        return res.status(400).json({ error: "Share ID is required" });
+      }
+
+      const recipe = await storage.getRecipeByShareId(shareId);
+      
+      if (!recipe || !recipe.isShared) {
+        return res.status(404).json({ error: "Recipe not found or no longer shared" });
+      }
+
+      // Return only public fields (remove sensitive user information)
+      const publicRecipe = {
+        id: recipe.id,
+        title: recipe.title,
+        description: recipe.description,
+        cuisine: recipe.cuisine,
+        difficulty: recipe.difficulty,
+        cookTime: recipe.cookTime,
+        servings: recipe.servings,
+        ingredients: recipe.ingredients,
+        instructions: recipe.instructions,
+        tips: recipe.tips,
+        imageUrl: recipe.image,
+        shareId: recipe.shareId,
+        isShared: recipe.isShared
+      };
+
+      res.json(publicRecipe);
+    } catch (error) {
+      console.error("Error fetching shared recipe:", error);
+      res.status(500).json({ error: "Failed to fetch recipe" });
+    }
+  });
+
+  // Toggle recipe sharing status
+  app.post("/api/recipe/:id/share", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { isShared } = req.body;
+      const userId = req.session?.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Verify recipe belongs to user
+      const recipe = await storage.getRecipe(parseInt(id));
+      if (!recipe || recipe.userId !== userId) {
+        return res.status(404).json({ error: "Recipe not found" });
+      }
+
+      // Generate share ID if sharing is enabled and doesn't exist
+      let shareId = recipe.shareId;
+      if (isShared && !shareId) {
+        shareId = `share_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      }
+
+      const updatedRecipe = await storage.updateRecipeSharing(
+        parseInt(id), 
+        isShared, 
+        isShared ? shareId : undefined
+      );
+
+      res.json({
+        success: true,
+        recipe: updatedRecipe,
+        shareUrl: isShared ? `${req.protocol}://${req.get('host')}/share/${shareId}` : null
+      });
+    } catch (error) {
+      console.error("Error updating recipe sharing:", error);
+      res.status(500).json({ error: "Failed to update sharing settings" });
+    }
+  });
+
   // Ingredient substitution endpoint
   app.post("/api/ingredient-substitute", async (req, res) => {
     try {

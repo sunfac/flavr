@@ -31,6 +31,7 @@ import ChefAssist from "@/pages/ChefAssist";
 import Recipe from "@/pages/Recipe";
 import RecipeSelection from "@/pages/RecipeSelection";
 import LoadingPage from "@/pages/LoadingPage";
+import PublicRecipeView from "./pages/PublicRecipeView";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 
 function Router() {
@@ -63,6 +64,7 @@ function Router() {
       <Route path="/chef-assist" component={ChefAssist} />
       <Route path="/recipe" component={Recipe} />
       <Route path="/recipe-selection" component={RecipeSelection} />
+      <Route path="/share/:shareId" component={PublicRecipeView} />
       <Route path="/loading" component={() => <LoadingPage title="Loading..." subtitle="Please wait while we prepare your experience" />} />
       <Route component={NotFound} />
     </Switch>

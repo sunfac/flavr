@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { iconMap } from "@/lib/iconMap";
 import { QRCodeSVG as QRCode } from 'qrcode.react';
 // @ts-ignore
@@ -30,15 +32,58 @@ const RecipeShareTools: React.FC<RecipeShareToolsProps> = ({
   recipe
 }) => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const pdfRef = useRef<HTMLDivElement>(null);
   
-  const publicUrl = shareId ? `https://getflavr.ai/share/${shareId}` : `https://getflavr.ai/recipe/${id}`;
+  // Generate share URL - if no shareId exists, create one by toggling sharing
+  const getShareUrl = () => {
+    if (shareId) {
+      return `https://getflavr.ai/share/${shareId}`;
+    }
+    return `https://getflavr.ai/recipe/${id}`;
+  };
+  
+  const publicUrl = getShareUrl();
   const caption = `Just made this with Flavr AI:
 🔥 "${title}"
 ${description}
 
 #FlavrRecipe #AIChef #FlavorBombs #MoodFood
 ${publicUrl}`;
+
+  // Mutation to enable/disable sharing
+  const shareToggleMutation = useMutation({
+    mutationFn: ({ recipeId, shouldShare }: { recipeId: string; shouldShare: boolean }) =>
+      apiRequest("POST", `/api/recipe/${recipeId}/share`, { isShared: shouldShare }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/recipes/history"] });
+      
+      if (data.shareUrl) {
+        // Copy the new share URL immediately
+        navigator.clipboard.writeText(data.shareUrl).then(() => {
+          toast({
+            title: "Recipe shared!",
+            description: "Share link copied to clipboard - recipe is now public",
+          });
+        });
+      } else {
+        toast({
+          title: "Sharing disabled",
+          description: "Recipe is no longer publicly shared",
+        });
+      }
+      
+      if (onShareToggle) onShareToggle();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update sharing settings",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleCopy = async () => {
     try {
@@ -126,6 +171,36 @@ Servings: ${recipe?.servings || 4}`;
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleShare = async () => {
+    // If recipe isn't shared yet, enable sharing first
+    if (!isShared || !shareId) {
+      shareToggleMutation.mutate({ recipeId: id, shouldShare: true });
+      return;
+    }
+    
+    // If already shared, just copy the link
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+      toast({
+        title: "Share link copied!",
+        description: "Perfect for social media or messaging",
+      });
+    } catch (error) {
+      toast({
+        title: "Copy failed",
+        description: "Could not copy share link",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleToggleSharing = () => {
+    shareToggleMutation.mutate({ 
+      recipeId: id, 
+      shouldShare: !isShared 
+    });
   };
 
   const ensureShared = async () => {
