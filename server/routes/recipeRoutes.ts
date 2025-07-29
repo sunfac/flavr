@@ -856,9 +856,38 @@ Multi-Layer Seeds: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${s
       // Apply UK English conversions to the suggestion text
       suggestion = convertToUKIngredients(suggestion);
       
+      // Log the interaction for developer insights
+      logSimpleGPTInteraction({
+        endpoint: "chef-assist-inspire",
+        prompt: prompt,
+        response: suggestion,
+        model: "gpt-3.5-turbo",
+        duration: 0,
+        inputTokens: Math.ceil(prompt.length / 4),
+        outputTokens: Math.ceil(suggestion.length / 4),
+        cost: 0.0002, // Estimated cost for GPT-3.5 turbo
+        success: true,
+        userId: req.session?.userId?.toString() || 'anonymous'
+      }).catch(err => console.error('Background logging failed:', err));
+      
       res.json({ suggestion });
     } catch (error: any) {
       console.error('Inspire error:', error);
+      
+      // Log the failed interaction
+      logSimpleGPTInteraction({
+        endpoint: "chef-assist-inspire",
+        prompt: '',
+        response: error.message || 'Failed to generate inspiration',
+        model: "gpt-3.5-turbo",
+        duration: 0,
+        inputTokens: 0,
+        outputTokens: 0,
+        cost: 0,
+        success: false,
+        userId: req.session?.userId?.toString() || 'anonymous'
+      }).catch(err => console.error('Background logging failed:', err));
+      
       res.status(500).json({ error: "Failed to generate inspiration" });
     }
   });

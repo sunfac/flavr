@@ -121,24 +121,32 @@ export default function HeaderSection({
 
   const handleCopyIngredients = async () => {
     const ingredients = activeRecipe.ingredients?.map((ing: any) => ing.text || ing) || [];
+    const instructions = activeRecipe.steps?.map((step: any) => step.description || step) || [];
     
-    const ingredientsText = `${recipe.title} - Shopping List
+    const fullRecipeText = `${recipe.title}
 
-📝 Ingredients:
+${recipe.description ? `${recipe.description}\n\n` : ''}📝 Ingredients (serves ${currentServings || 4}):
 ${ingredients.map((ing: any) => `• ${ing}`).join('\n')}
 
-Servings: ${currentServings || 4}`;
+👨‍🍳 Instructions:
+${instructions.map((step: any, index: number) => `${index + 1}. ${step}`).join('\n\n')}
+
+Cook Time: ${recipe.cookTime} minutes
+Difficulty: ${recipe.difficulty}
+${recipe.cuisine ? `Cuisine: ${recipe.cuisine}` : ''}
+
+Created with Flavr AI`;
     
     try {
-      await navigator.clipboard.writeText(ingredientsText);
+      await navigator.clipboard.writeText(fullRecipeText);
       toast({
-        title: "Shopping list copied!",
-        description: "Ready to paste into your notes app",
+        title: "Recipe copied!",
+        description: "Full recipe with ingredients & steps copied",
       });
     } catch (error) {
       toast({
         title: "Copy failed",
-        description: "Could not copy shopping list",
+        description: "Could not copy recipe",
         variant: "destructive",
       });
     }
@@ -309,17 +317,7 @@ Servings: ${currentServings || 4}`;
                 className="bg-blue-600/90 hover:bg-blue-700/95 text-white border-blue-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
               >
                 <Copy className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
-                <span className="hidden sm:inline">List</span>
-              </Button>
-              <Button
-                onClick={handleSaveRecipe}
-                disabled={isSaved || saveMutation.isPending}
-                size="sm"
-                variant="secondary"
-                className="bg-green-600/90 hover:bg-green-700/95 text-white border-green-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
-              >
-                <Heart className={`w-3 h-3 sm:w-4 sm:h-4 sm:mr-1 ${isSaved ? 'fill-current' : ''}`} />
-                <span className="hidden sm:inline">{isSaved ? 'Saved' : 'Save'}</span>
+                <span className="hidden sm:inline">Copy</span>
               </Button>
               <Button
                 onClick={handleReroll}
@@ -366,17 +364,7 @@ Servings: ${currentServings || 4}`;
                 className="bg-blue-600/90 hover:bg-blue-700/95 text-white border-blue-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
               >
                 <Copy className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
-                <span className="hidden sm:inline">List</span>
-              </Button>
-              <Button
-                onClick={handleSaveRecipe}
-                disabled={isSaved || saveMutation.isPending}
-                size="sm"
-                variant="secondary"
-                className="bg-green-600/90 hover:bg-green-700/95 text-white border-green-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
-              >
-                <Heart className={`w-3 h-3 sm:w-4 sm:h-4 sm:mr-1 ${isSaved ? 'fill-current' : ''}`} />
-                <span className="hidden sm:inline">{isSaved ? 'Saved' : 'Save'}</span>
+                <span className="hidden sm:inline">Copy</span>
               </Button>
               <Button
                 onClick={handleReroll}
