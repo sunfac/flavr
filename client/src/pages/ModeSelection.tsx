@@ -38,7 +38,7 @@ const modes: ModeCard[] = [
   },
   {
     title: "Meal Planner",
-    description: "AI-powered weekly meal planning with shopping lists and prep schedules",
+    description: "Plan your week with AI-generated meal schedules and smart shopping lists",
     icon: <CalendarDays className="w-12 h-12" />,
     color: "text-purple-500 dark:text-purple-400",
     route: "/meal-planner",
@@ -78,7 +78,7 @@ export default function ModeSelection() {
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 mb-6 md:mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-6 md:mb-12 max-w-6xl mx-auto">
           {modes.map((mode, index) => (
             <motion.div
               key={mode.title}
@@ -89,37 +89,47 @@ export default function ModeSelection() {
               <Card 
                 className={cn(
                   "relative overflow-hidden transition-all duration-300 group h-full",
-                  mode.isComingSoon ? "cursor-not-allowed opacity-75" : "cursor-pointer hover:shadow-xl hover:scale-105",
+                  mode.isComingSoon 
+                    ? "cursor-not-allowed hover:shadow-lg hover:scale-[1.02] opacity-90" 
+                    : "cursor-pointer hover:shadow-xl hover:scale-105",
                   "dark:bg-gray-800/50 dark:border-gray-700"
                 )}
                 onClick={() => handleModeSelect(mode)}
               >
                 <div className={cn(
-                  "absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-300",
+                  "absolute inset-0 bg-gradient-to-br transition-opacity duration-300",
+                  mode.isComingSoon 
+                    ? "opacity-30" 
+                    : "opacity-0 group-hover:opacity-100",
                   mode.gradient
                 )} />
                 
                 <CardHeader className="relative text-center py-4 md:py-8">
-                  <div className={cn("p-3 md:p-4 rounded-full bg-background/80 backdrop-blur-sm inline-flex mx-auto mb-3 md:mb-4", mode.color)}>
+                  <div className={cn(
+                    "p-3 md:p-4 rounded-full bg-background/80 backdrop-blur-sm inline-flex mx-auto mb-3 md:mb-4 border-2 border-current/20", 
+                    mode.color
+                  )}>
                     <Refrigerator className={cn("w-8 h-8 md:w-12 md:h-12", mode.title === "Fridge2Fork" ? "" : "hidden")} />
                     <ChefHat className={cn("w-8 h-8 md:w-12 md:h-12", mode.title === "Chef Assist" ? "" : "hidden")} />
                     <CalendarDays className={cn("w-8 h-8 md:w-12 md:h-12", mode.title === "Meal Planner" ? "" : "hidden")} />
                   </div>
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <CardTitle className="text-xl md:text-2xl">{mode.title}</CardTitle>
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    <CardTitle className="text-xl md:text-2xl font-bold">{mode.title}</CardTitle>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 mb-3">
                     {mode.isPremium && (
-                      <Badge variant="outline" className="text-xs bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300">
+                      <Badge variant="outline" className="text-xs font-semibold bg-purple-50 dark:bg-purple-900/30 border-purple-300 dark:border-purple-600 text-purple-700 dark:text-purple-300">
                         <Lock className="w-3 h-3 mr-1" />
                         Flavr+
                       </Badge>
                     )}
                     {mode.isComingSoon && (
-                      <Badge variant="outline" className="text-xs bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300">
+                      <Badge variant="outline" className="text-xs font-semibold bg-amber-50 dark:bg-amber-900/30 border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-300">
                         Coming Soon
                       </Badge>
                     )}
                   </div>
-                  <CardDescription className="text-sm md:text-base">
+                  <CardDescription className="text-sm md:text-base leading-relaxed px-2">
                     {mode.description}
                   </CardDescription>
                 </CardHeader>
@@ -127,11 +137,13 @@ export default function ModeSelection() {
                 <CardContent className="relative pb-4 md:pb-8">
                   <Button
                     className={cn(
-                      "w-full transition-transform",
-                      mode.isComingSoon ? "cursor-not-allowed" : "group-hover:translate-y-[-2px]",
-                      mode.color === "text-green-500 dark:text-green-400" ? "bg-green-600 hover:bg-green-700" : 
-                      mode.color === "text-orange-500 dark:text-orange-400" ? "bg-orange-600 hover:bg-orange-700" :
-                      "bg-purple-600 hover:bg-purple-700"
+                      "w-full transition-all duration-200 font-semibold",
+                      mode.isComingSoon 
+                        ? "cursor-not-allowed bg-gray-400 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-600 text-white" 
+                        : "group-hover:translate-y-[-2px] shadow-lg hover:shadow-xl",
+                      !mode.isComingSoon && mode.color === "text-green-500 dark:text-green-400" ? "bg-green-600 hover:bg-green-700" : "",
+                      !mode.isComingSoon && mode.color === "text-orange-500 dark:text-orange-400" ? "bg-orange-600 hover:bg-orange-700" : "",
+                      !mode.isComingSoon && mode.color === "text-purple-500 dark:text-purple-400" ? "bg-purple-600 hover:bg-purple-700" : ""
                     )}
                     size="lg"
                     disabled={mode.isComingSoon}
