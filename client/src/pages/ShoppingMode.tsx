@@ -12,7 +12,7 @@ import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
 import AuthModal from "@/components/AuthModal";
 import ChatBot from "@/components/ChatBot";
-import UpgradeModal from "@/components/UpgradeModal";
+import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
 import { shoppingQuestions } from "@/config/shoppingQuestions";
 import { useQuery } from "@tanstack/react-query";
 import { checkQuotaBeforeGPT } from "@/lib/quotaManager";
@@ -366,11 +366,10 @@ export default function ShoppingMode() {
           />
         )}
         {showUpgradeModal && (
-          <UpgradeModal
+          <FlavrPlusUpgradeModal
             isOpen={showUpgradeModal}
             onClose={() => setShowUpgradeModal(false)}
             recipesUsed={usageData?.recipesUsed || 3}
-            recipesLimit={usageData?.recipesLimit || 3}
           />
         )}
       </div>
@@ -418,11 +417,10 @@ export default function ShoppingMode() {
         {showSettings && <SettingsPanel onClose={closeAllMenus} />}
         {showUserMenu && <UserMenu onClose={closeAllMenus} />}
         {showUpgradeModal && (
-          <UpgradeModal
+          <FlavrPlusUpgradeModal
             isOpen={showUpgradeModal}
             onClose={() => setShowUpgradeModal(false)}
             recipesUsed={usageData?.recipesUsed || 3}
-            recipesLimit={usageData?.recipesLimit || 3}
           />
         )}
       </div>

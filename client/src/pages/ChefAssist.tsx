@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { iconMap } from "@/lib/iconMap";
 import LoadingPage from "./LoadingPage";
+import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
 
 // Use the original chef assist examples
 const chefExamples = [
@@ -71,6 +72,7 @@ export default function ChefAssist() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentExampleIndex, setCurrentExampleIndex] = useState(0);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const { toast } = useToast();
   const { updateActiveRecipe } = useRecipeStore();
 
@@ -157,12 +159,20 @@ export default function ChefAssist() {
           const jsonPart = error.message.substring(error.message.indexOf(': ') + 2);
           const errorData = JSON.parse(jsonPart);
           if (errorData.error) {
+            // Show upgrade modal instead of toast for quota exceeded
+            if (errorData.error.includes("no free recipes") || errorData.error.includes("recipe limit")) {
+              setShowUpgradeModal(true);
+              setIsGenerating(false);
+              return;
+            }
             errorMessage = errorData.error;
             errorTitle = "Recipe limit reached";
           }
         } else if (error.message && error.message.includes("You have no free recipes")) {
-          errorMessage = error.message;
-          errorTitle = "Recipe limit reached";
+          // Show upgrade modal for quota errors
+          setShowUpgradeModal(true);
+          setIsGenerating(false);
+          return;
         }
       } catch (parseError) {
         console.log("Could not parse error, using default message");
@@ -275,6 +285,12 @@ export default function ChefAssist() {
           </Card>
         </motion.div>
       </div>
+      
+      <FlavrPlusUpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        recipesUsed={3}
+      />
     </PageLayout>
   );
 }

@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import LoadingPage from "./LoadingPage";
 import { useRecipeStore } from "@/stores/recipeStore";
 import RecipeSelectionCards from "@/components/RecipeSelectionCards";
+import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
 
 export default function Fridge2Fork() {
   const [, navigate] = useLocation();
@@ -24,6 +25,7 @@ export default function Fridge2Fork() {
   const [recipeOptions, setRecipeOptions] = useState<any[]>([]);
   const [showSelection, setShowSelection] = useState(false);
   const [savedQuizData, setSavedQuizData] = useState<any>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -175,12 +177,20 @@ export default function Fridge2Fork() {
           const jsonPart = error.message.substring(error.message.indexOf(': ') + 2);
           const errorData = JSON.parse(jsonPart);
           if (errorData.error) {
+            // Show upgrade modal instead of toast for quota exceeded
+            if (errorData.error.includes("no free recipes") || errorData.error.includes("recipe limit")) {
+              setShowUpgradeModal(true);
+              setIsGenerating(false);
+              return;
+            }
             errorMessage = errorData.error;
             errorTitle = "Recipe limit reached";
           }
         } else if (error.message && error.message.includes("You have no free recipes")) {
-          errorMessage = error.message;
-          errorTitle = "Recipe limit reached";
+          // Show upgrade modal for quota errors
+          setShowUpgradeModal(true);
+          setIsGenerating(false);
+          return;
         }
       } catch (parseError) {
         console.log("Could not parse error, using default message");
@@ -383,6 +393,12 @@ export default function Fridge2Fork() {
           </Card>
         </motion.div>
       </div>
+      
+      <FlavrPlusUpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        recipesUsed={3}
+      />
     </PageLayout>
   );
 }

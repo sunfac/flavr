@@ -16,7 +16,7 @@ import { checkQuotaBeforeGPT, getRemainingRecipes, canGenerateRecipe } from "@/l
 import { apiRequest } from "@/lib/queryClient";
 import AuthModal from "@/components/AuthModal";
 import FlavrPlusGate from "@/components/FlavrPlusGate";
-import UpgradeModal from "@/components/UpgradeModal";
+import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
 import { Clock } from "lucide-react";
 
 export default function FridgeMode() {
@@ -29,6 +29,7 @@ export default function FridgeMode() {
   const [hasGeneratedSecondBatch, setHasGeneratedSecondBatch] = useState(false);
   const [showGate, setShowGate] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showNavigation, setShowNavigation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -82,14 +83,21 @@ export default function FridgeMode() {
     console.log("Transformed data:", transformedData);
     setQuizData(transformedData);
 
-    // Check global quota before proceeding with GPT
+    // Check usage limit before generating (unified with ShoppingMode approach)
     console.log("Checking quota...");
-    const allowed = await checkQuotaBeforeGPT();
-    console.log("Quota check result:", allowed);
-    if (!allowed) {
-      console.log("Quota exceeded, showing auth modal");
-      setShowAuthModal(true);
-      return;
+    try {
+      const response = await apiRequest("GET", "/api/check-usage-limit");
+      const usageData = await response.json();
+      
+      // If user can't generate more recipes, show upgrade modal
+      if (!usageData.canGenerate && !usageData.hasFlavrPlus) {
+        console.log("Quota exceeded, showing upgrade modal");
+        setShowUpgradeModal(true);
+        return;
+      }
+    } catch (error) {
+      console.error("Usage check failed:", error);
+      // Allow generation if check fails
     }
 
     console.log("Quota approved, starting API call...");
@@ -378,6 +386,12 @@ export default function FridgeMode() {
         onSuccess={handleAuthSuccess}
         title="Your personalized recipes are ready!"
         description="Sign up to unlock your custom AI-generated recipes based on your preferences"
+      />
+
+      <FlavrPlusUpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        recipesUsed={3}
       />
     </div>
   );
