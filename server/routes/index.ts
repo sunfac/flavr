@@ -41,9 +41,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Additional utility routes
   
-  // Developer logs endpoint
+  // Developer logs endpoint (developer access only)
   app.get("/api/developer/logs", async (req, res) => {
     try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Check if user is developer
+      const user = await storage.getUser(req.session.userId);
+      if (user?.email !== "william@blycontracting.co.uk") {
+        return res.status(403).json({ error: "Developer access required" });
+      }
+
       const logs = await storage.getDeveloperLogs();
       res.json(logs);
     } catch (error) {

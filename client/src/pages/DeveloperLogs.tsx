@@ -46,10 +46,10 @@ export default function DeveloperLogs() {
     retry: false,
   });
 
-  const user = userData?.user;
+  const user = (userData as any)?.user;
 
   const { data: logsData, isLoading, error } = useQuery({
-    queryKey: ["/api/developer-logs"],
+    queryKey: ["/api/developer/logs"],
     enabled: user?.email === "william@blycontracting.co.uk",
   });
 

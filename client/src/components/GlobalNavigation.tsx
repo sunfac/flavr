@@ -126,11 +126,11 @@ export default function GlobalNavigation({ isOpen, onClose, onAuthRequired }: Gl
                 const isActive = location === item.href;
                 
                 // Hide developer logs if not developer email
-                if (item.developerOnly && user?.user?.email !== "william@blycontracting.co.uk") {
+                if (item.developerOnly && user?.email !== "william@blycontracting.co.uk") {
                   return null;
                 }
                 
-                if (item.requiresAuth && !user?.user?.id) {
+                if (item.requiresAuth && !user?.id) {
                   return (
                     <motion.div
                       key={`auth-${item.href}`}
