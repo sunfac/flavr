@@ -300,53 +300,49 @@ Servings: ${currentServings || 4}`;
               </h1>
             </div>
             
-            {/* Action Buttons - Top Right */}
-            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1.5 flex-wrap">
+            {/* Action Buttons - Top Right - Improved single row layout */}
+            <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex items-center gap-1 flex-nowrap">
               <Button
                 onClick={handleCopyIngredients}
                 size="sm"
                 variant="secondary"
-                className="bg-blue-500/80 hover:bg-blue-600/90 text-white border-blue-400/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 min-w-[80px] sm:min-w-[100px]"
+                className="bg-blue-600/90 hover:bg-blue-700/95 text-white border-blue-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
               >
-                <Copy className="w-4 h-4 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline">Copy List</span>
-                <span className="xs:hidden">Copy</span>
+                <Copy className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                <span className="hidden sm:inline">List</span>
               </Button>
               <Button
                 onClick={handleSaveRecipe}
                 disabled={isSaved || saveMutation.isPending}
                 size="sm"
                 variant="secondary"
-                className="bg-green-500/80 hover:bg-green-600/90 text-white border-green-400/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 min-w-[80px] sm:min-w-[100px]"
+                className="bg-green-600/90 hover:bg-green-700/95 text-white border-green-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
               >
-                <Heart className={`w-4 h-4 mr-1 sm:mr-2 ${isSaved ? 'fill-current' : ''}`} />
-                <span className="hidden xs:inline">{isSaved ? 'Saved' : 'Save'}</span>
-                <span className="xs:hidden">{isSaved ? '✓' : 'Save'}</span>
-              </Button>
-              <Button
-                onClick={handleStartAgain}
-                size="sm"
-                variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white border-white/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 min-w-[80px] sm:min-w-[100px]"
-              >
-                <RotateCcw className="w-4 h-4 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline">Start Again</span>
-                <span className="xs:hidden">Start</span>
+                <Heart className={`w-3 h-3 sm:w-4 sm:h-4 sm:mr-1 ${isSaved ? 'fill-current' : ''}`} />
+                <span className="hidden sm:inline">{isSaved ? 'Saved' : 'Save'}</span>
               </Button>
               <Button
                 onClick={handleReroll}
                 disabled={isRerolling || !generationParams}
                 size="sm"
                 variant="secondary"
-                className="bg-orange-500/80 hover:bg-orange-600/90 text-white border-orange-400/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:hover:bg-orange-500/80 min-w-[80px] sm:min-w-[100px]"
+                className="bg-orange-600/90 hover:bg-orange-700/95 text-white border-orange-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 disabled:hover:bg-orange-600/90 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
               >
                 {isRerolling ? (
-                  <Loader2 className="w-4 h-4 mr-1 sm:mr-2 animate-spin" />
+                  <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1 animate-spin" />
                 ) : (
-                  <RefreshCw className="w-4 h-4 mr-1 sm:mr-2" />
+                  <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
                 )}
-                <span className="hidden xs:inline">Reroll</span>
-                <span className="xs:hidden">Roll</span>
+                <span className="hidden sm:inline">Reroll</span>
+              </Button>
+              <Button
+                onClick={handleStartAgain}
+                size="sm"
+                variant="secondary"
+                className="bg-slate-700/90 hover:bg-slate-800/95 text-white border-slate-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
+              >
+                <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                <span className="hidden sm:inline">Start</span>
               </Button>
             </div>
           </div>
@@ -361,53 +357,49 @@ Servings: ${currentServings || 4}`;
             </div>
             </div>
             
-            {/* Action Buttons - Top Right (for no image state) */}
-            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1.5 flex-wrap">
+            {/* Action Buttons - Top Right (for no image state) - Improved single row layout */}
+            <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex items-center gap-1 flex-nowrap">
               <Button
                 onClick={handleCopyIngredients}
                 size="sm"
                 variant="secondary"
-                className="bg-blue-500/80 hover:bg-blue-600/90 text-white border-blue-400/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 min-w-[80px] sm:min-w-[100px]"
+                className="bg-blue-600/90 hover:bg-blue-700/95 text-white border-blue-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
               >
-                <Copy className="w-4 h-4 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline">Copy List</span>
-                <span className="xs:hidden">Copy</span>
+                <Copy className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                <span className="hidden sm:inline">List</span>
               </Button>
               <Button
                 onClick={handleSaveRecipe}
                 disabled={isSaved || saveMutation.isPending}
                 size="sm"
                 variant="secondary"
-                className="bg-green-500/80 hover:bg-green-600/90 text-white border-green-400/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 min-w-[80px] sm:min-w-[100px]"
+                className="bg-green-600/90 hover:bg-green-700/95 text-white border-green-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
               >
-                <Heart className={`w-4 h-4 mr-1 sm:mr-2 ${isSaved ? 'fill-current' : ''}`} />
-                <span className="hidden xs:inline">{isSaved ? 'Saved' : 'Save'}</span>
-                <span className="xs:hidden">{isSaved ? '✓' : 'Save'}</span>
-              </Button>
-              <Button
-                onClick={handleStartAgain}
-                size="sm"
-                variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white border-white/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 min-w-[80px] sm:min-w-[100px]"
-              >
-                <RotateCcw className="w-4 h-4 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline">Start Again</span>
-                <span className="xs:hidden">Start</span>
+                <Heart className={`w-3 h-3 sm:w-4 sm:h-4 sm:mr-1 ${isSaved ? 'fill-current' : ''}`} />
+                <span className="hidden sm:inline">{isSaved ? 'Saved' : 'Save'}</span>
               </Button>
               <Button
                 onClick={handleReroll}
                 disabled={isRerolling || !generationParams}
                 size="sm"
                 variant="secondary"
-                className="bg-orange-500/80 hover:bg-orange-600/90 text-white border-orange-400/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:hover:bg-orange-500/80 min-w-[80px] sm:min-w-[100px]"
+                className="bg-orange-600/90 hover:bg-orange-700/95 text-white border-orange-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 disabled:hover:bg-orange-600/90 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
               >
                 {isRerolling ? (
-                  <Loader2 className="w-4 h-4 mr-1 sm:mr-2 animate-spin" />
+                  <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1 animate-spin" />
                 ) : (
-                  <RefreshCw className="w-4 h-4 mr-1 sm:mr-2" />
+                  <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
                 )}
-                <span className="hidden xs:inline">Reroll</span>
-                <span className="xs:hidden">Roll</span>
+                <span className="hidden sm:inline">Reroll</span>
+              </Button>
+              <Button
+                onClick={handleStartAgain}
+                size="sm"
+                variant="secondary"
+                className="bg-slate-700/90 hover:bg-slate-800/95 text-white border-slate-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
+              >
+                <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                <span className="hidden sm:inline">Start</span>
               </Button>
             </div>
           </div>

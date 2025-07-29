@@ -53,8 +53,10 @@ ${publicUrl}`;
 
   // Mutation to enable/disable sharing
   const shareToggleMutation = useMutation({
-    mutationFn: ({ recipeId, shouldShare }: { recipeId: string; shouldShare: boolean }) =>
-      apiRequest("POST", `/api/recipe/${recipeId}/share`, { isShared: shouldShare }),
+    mutationFn: async ({ recipeId, shouldShare }: { recipeId: string; shouldShare: boolean }) => {
+      const response = await apiRequest("POST", `/api/recipe/${recipeId}/share`, { isShared: shouldShare });
+      return response.json();
+    },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
       queryClient.invalidateQueries({ queryKey: ["/api/recipes/history"] });
@@ -170,7 +172,49 @@ Servings: ${recipe?.servings || 4}`;
   };
 
   const handlePrint = () => {
-    window.print();
+    // Create a new window with the recipe content for printing
+    const printWindow = window.open('', '_blank');
+    if (printWindow && pdfRef.current) {
+      const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Print Recipe - ${title}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { color: #333; margin-bottom: 10px; }
+            .description { color: #666; font-size: 18px; margin-bottom: 20px; }
+            .meta { display: flex; gap: 20px; margin-bottom: 20px; }
+            .meta-item { background: #f5f5f5; padding: 8px 12px; border-radius: 6px; }
+            .ingredients { margin-bottom: 30px; }
+            .instructions { margin-bottom: 30px; }
+            .ingredients h2, .instructions h2 { color: #333; border-bottom: 2px solid #ff6b35; padding-bottom: 5px; }
+            .ingredients ul { list-style: none; padding: 0; }
+            .ingredients li { padding: 8px 0; border-bottom: 1px solid #eee; }
+            .instructions ol { padding-left: 20px; }
+            .instructions li { margin-bottom: 15px; line-height: 1.6; }
+            .tips { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-top: 20px; }
+            img { max-width: 100%; height: auto; margin: 20px 0; border-radius: 8px; }
+            @media print { body { margin: 0; } }
+          </style>
+        </head>
+        <body>
+          ${pdfRef.current.innerHTML}
+        </body>
+        </html>
+      `;
+      
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+      
+      toast({
+        title: "Recipe sent to printer",
+        description: "Print dialog should be open",
+      });
+    }
   };
 
   const handleShare = async () => {
@@ -436,7 +480,7 @@ Servings: ${recipe?.servings || 4}`;
               onClick={handlePrint}
               className="flex items-center gap-2 hover:bg-slate-500/10 hover:border-slate-500/50"
             >
-              <iconMap.share className="w-4 h-4" />
+              <iconMap.copy className="w-4 h-4" />
               Print
             </Button>
             
