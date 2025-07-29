@@ -822,6 +822,7 @@ export default function LandingPage() {
         }}
         title={authMode === "login" ? "Welcome back!" : "Join Flavr today!"}
         description={authMode === "login" ? "Sign in to continue your culinary journey" : "Create your account to unlock personalized AI-generated recipes"}
+        initialMode={authMode}
       />
 
       {/* Navigation Panel */}

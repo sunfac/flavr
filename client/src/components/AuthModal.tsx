@@ -16,6 +16,7 @@ interface AuthModalProps {
   onSuccess: () => void;
   title?: string;
   description?: string;
+  initialMode?: "login" | "signup";
 }
 
 export default function AuthModal({ 
@@ -23,7 +24,8 @@ export default function AuthModal({
   onClose, 
   onSuccess, 
   title = "Join Flavr today!",
-  description = "Create your account to unlock personalized AI-generated recipes"
+  description = "Create your account to unlock personalized AI-generated recipes",
+  initialMode = "signup"
 }: AuthModalProps) {
   console.log("AuthModal component rendered with isOpen:", isOpen);
   const { toast } = useToast();
@@ -118,7 +120,7 @@ export default function AuthModal({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="signup" className="w-full">
+        <Tabs defaultValue={initialMode} className="w-full">
           <TabsList className="grid w-full grid-cols-2 bg-slate-800/50 border border-slate-700">
             <TabsTrigger 
               value="signup" 
