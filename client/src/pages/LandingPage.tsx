@@ -232,6 +232,42 @@ export default function LandingPage() {
           </div>
         </motion.div>
 
+        {/* Login/Signup Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.0 }}
+          className="flex flex-col items-center mt-8 gap-4"
+        >
+          <p className="text-slate-400 text-sm font-medium">
+            Already have an account or want to save your recipes?
+          </p>
+          <div className="flex gap-4">
+            <Button
+              onClick={() => {
+                setAuthMode("login");
+                setShowAuthModal(true);
+              }}
+              variant="outline"
+              className="px-6 py-3 text-white border-white/30 hover:border-white/50 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-300"
+            >
+              <iconMap.login className="w-4 h-4 mr-2" />
+              Sign In
+            </Button>
+            <Button
+              onClick={() => {
+                setAuthMode("signup");
+                setShowAuthModal(true);
+              }}
+              variant="outline"
+              className="px-6 py-3 text-white border-orange-400/50 hover:border-orange-300/70 bg-orange-500/10 hover:bg-orange-500/20 backdrop-blur-sm transition-all duration-300"
+            >
+              <iconMap.userPlus className="w-4 h-4 mr-2" />
+              Sign Up
+            </Button>
+          </div>
+        </motion.div>
+
         {/* Ambient Background Elements */}
         <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-1/3 right-1/4 w-48 h-48 bg-amber-400/10 rounded-full blur-2xl animate-pulse"></div>
