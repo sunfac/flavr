@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, ChefHat, Clock, RotateCcw, Heart, RefreshCw, Loader2 } from 'lucide-react';
+import { Users, ChefHat, Clock, RotateCcw, Heart, RefreshCw, Loader2, Copy } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
@@ -8,6 +8,7 @@ import { animations, spacing } from '@/styles/tokens';
 import { useRecipeStore } from '@/stores/recipeStore';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface HeaderSectionProps {
   recipe: {
@@ -30,10 +31,32 @@ export default function HeaderSection({
 }: HeaderSectionProps) {
   const [location, navigate] = useLocation();
   const [isRerolling, setIsRerolling] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const generationParams = useRecipeStore((state) => state.generationParams);
   const updateActiveRecipe = useRecipeStore((state) => state.updateActiveRecipe);
   const setImageLoading = useRecipeStore((state) => state.setImageLoading);
+  const activeRecipe = useRecipeStore((state) => state);
+
+  // Check if recipe is already saved
+  const { data: savedRecipes } = useQuery({
+    queryKey: ['/api/recipes'],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/recipes");
+      if (!response.ok) return [];
+      return response.json();
+    }
+  });
+
+  useEffect(() => {
+    if (savedRecipes && recipe.title) {
+      const alreadySaved = savedRecipes.some((r: any) => 
+        r.title === recipe.title && r.description === recipe.description
+      );
+      setIsSaved(alreadySaved);
+    }
+  }, [savedRecipes, recipe]);
   
   const fastFacts = useMemo(() => {
     return [
@@ -44,6 +67,81 @@ export default function HeaderSection({
 
   const handleStartAgain = () => {
     navigate('/app');
+  };
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const recipeData = {
+        title: recipe.title,
+        description: recipe.description,
+        cuisine: recipe.cuisine || '',
+        difficulty: recipe.difficulty || 'Medium',
+        cookTime: recipe.cookTime || 30,
+        servings: currentServings || 4,
+        ingredients: activeRecipe.ingredients?.map((ing: any) => ing.text || ing) || [],
+        instructions: activeRecipe.steps?.map((step: any) => step.description || step) || [],
+        tips: (recipe as any).tips || '',
+        mode: 'recipe',
+        imageUrl: recipe.image || ''
+      };
+      
+      const response = await apiRequest("POST", "/api/save-recipe", recipeData);
+      if (!response.ok) {
+        throw new Error("Failed to save recipe");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      setIsSaved(true);
+      queryClient.invalidateQueries({ queryKey: ['/api/recipes'] });
+      toast({
+        title: "Recipe saved!",
+        description: "Added to your cookbook",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to save recipe",
+        description: error.message || "Please try again",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleSaveRecipe = () => {
+    if (isSaved) {
+      toast({
+        title: "Already saved",
+        description: "This recipe is in your cookbook",
+      });
+      return;
+    }
+    saveMutation.mutate();
+  };
+
+  const handleCopyIngredients = async () => {
+    const ingredients = activeRecipe.ingredients?.map((ing: any) => ing.text || ing) || [];
+    
+    const ingredientsText = `${recipe.title} - Shopping List
+
+📝 Ingredients:
+${ingredients.map((ing: any) => `• ${ing}`).join('\n')}
+
+Servings: ${currentServings || 4}`;
+    
+    try {
+      await navigator.clipboard.writeText(ingredientsText);
+      toast({
+        title: "Shopping list copied!",
+        description: "Ready to paste into your notes app",
+      });
+    } catch (error) {
+      toast({
+        title: "Copy failed",
+        description: "Could not copy shopping list",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleReroll = async () => {
@@ -203,29 +301,52 @@ export default function HeaderSection({
             </div>
             
             {/* Action Buttons - Top Right */}
-            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2">
+            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1.5 flex-wrap">
+              <Button
+                onClick={handleCopyIngredients}
+                size="sm"
+                variant="secondary"
+                className="bg-blue-500/80 hover:bg-blue-600/90 text-white border-blue-400/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 min-w-[80px] sm:min-w-[100px]"
+              >
+                <Copy className="w-4 h-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Copy List</span>
+                <span className="xs:hidden">Copy</span>
+              </Button>
+              <Button
+                onClick={handleSaveRecipe}
+                disabled={isSaved || saveMutation.isPending}
+                size="sm"
+                variant="secondary"
+                className="bg-green-500/80 hover:bg-green-600/90 text-white border-green-400/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 min-w-[80px] sm:min-w-[100px]"
+              >
+                <Heart className={`w-4 h-4 mr-1 sm:mr-2 ${isSaved ? 'fill-current' : ''}`} />
+                <span className="hidden xs:inline">{isSaved ? 'Saved' : 'Save'}</span>
+                <span className="xs:hidden">{isSaved ? '✓' : 'Save'}</span>
+              </Button>
               <Button
                 onClick={handleStartAgain}
                 size="sm"
                 variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white border-white/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200"
+                className="bg-black/40 hover:bg-black/60 text-white border-white/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 min-w-[80px] sm:min-w-[100px]"
               >
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Start Again
+                <RotateCcw className="w-4 h-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Start Again</span>
+                <span className="xs:hidden">Start</span>
               </Button>
               <Button
                 onClick={handleReroll}
                 disabled={isRerolling || !generationParams}
                 size="sm"
                 variant="secondary"
-                className="bg-orange-500/80 hover:bg-orange-600/90 text-white border-orange-400/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:hover:bg-orange-500/80"
+                className="bg-orange-500/80 hover:bg-orange-600/90 text-white border-orange-400/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:hover:bg-orange-500/80 min-w-[80px] sm:min-w-[100px]"
               >
                 {isRerolling ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 mr-1 sm:mr-2 animate-spin" />
                 ) : (
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                  <RefreshCw className="w-4 h-4 mr-1 sm:mr-2" />
                 )}
-                Reroll
+                <span className="hidden xs:inline">Reroll</span>
+                <span className="xs:hidden">Roll</span>
               </Button>
             </div>
           </div>
@@ -241,37 +362,52 @@ export default function HeaderSection({
             </div>
             
             {/* Action Buttons - Top Right (for no image state) */}
-            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2">
+            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1.5 flex-wrap">
+              <Button
+                onClick={handleCopyIngredients}
+                size="sm"
+                variant="secondary"
+                className="bg-blue-500/80 hover:bg-blue-600/90 text-white border-blue-400/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 min-w-[80px] sm:min-w-[100px]"
+              >
+                <Copy className="w-4 h-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Copy List</span>
+                <span className="xs:hidden">Copy</span>
+              </Button>
+              <Button
+                onClick={handleSaveRecipe}
+                disabled={isSaved || saveMutation.isPending}
+                size="sm"
+                variant="secondary"
+                className="bg-green-500/80 hover:bg-green-600/90 text-white border-green-400/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 min-w-[80px] sm:min-w-[100px]"
+              >
+                <Heart className={`w-4 h-4 mr-1 sm:mr-2 ${isSaved ? 'fill-current' : ''}`} />
+                <span className="hidden xs:inline">{isSaved ? 'Saved' : 'Save'}</span>
+                <span className="xs:hidden">{isSaved ? '✓' : 'Save'}</span>
+              </Button>
               <Button
                 onClick={handleStartAgain}
                 size="sm"
                 variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white border-white/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200"
+                className="bg-black/40 hover:bg-black/60 text-white border-white/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 min-w-[80px] sm:min-w-[100px]"
               >
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Start Again
+                <RotateCcw className="w-4 h-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Start Again</span>
+                <span className="xs:hidden">Start</span>
               </Button>
               <Button
                 onClick={handleReroll}
                 disabled={isRerolling || !generationParams}
                 size="sm"
                 variant="secondary"
-                className="bg-orange-500/80 hover:bg-orange-600/90 text-white border-orange-400/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:hover:bg-orange-500/80"
+                className="bg-orange-500/80 hover:bg-orange-600/90 text-white border-orange-400/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:hover:bg-orange-500/80 min-w-[80px] sm:min-w-[100px]"
               >
                 {isRerolling ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 mr-1 sm:mr-2 animate-spin" />
                 ) : (
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                  <RefreshCw className="w-4 h-4 mr-1 sm:mr-2" />
                 )}
-                Reroll
-              </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
-              >
-                <Heart className="w-4 h-4 mr-2" />
-                Save
+                <span className="hidden xs:inline">Reroll</span>
+                <span className="xs:hidden">Roll</span>
               </Button>
             </div>
           </div>
