@@ -163,7 +163,7 @@ export default function ModeSelection() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="text-center pb-4 md:pb-8"
+          className="text-center pb-16 md:pb-20"
         >
           <Button
             size="default"
