@@ -208,7 +208,7 @@ export default function HeaderSection({
                 onClick={handleStartAgain}
                 size="sm"
                 variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                className="bg-black/40 hover:bg-black/60 text-white border-white/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Start Again
@@ -218,7 +218,7 @@ export default function HeaderSection({
                 disabled={isRerolling || !generationParams}
                 size="sm"
                 variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm disabled:opacity-50"
+                className="bg-orange-500/80 hover:bg-orange-600/90 text-white border-orange-400/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:hover:bg-orange-500/80"
               >
                 {isRerolling ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -226,14 +226,6 @@ export default function HeaderSection({
                   <RefreshCw className="w-4 h-4 mr-2" />
                 )}
                 Reroll
-              </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
-              >
-                <Heart className="w-4 h-4 mr-2" />
-                Save
               </Button>
             </div>
           </div>
@@ -254,7 +246,7 @@ export default function HeaderSection({
                 onClick={handleStartAgain}
                 size="sm"
                 variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                className="bg-black/40 hover:bg-black/60 text-white border-white/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Start Again
@@ -264,7 +256,7 @@ export default function HeaderSection({
                 disabled={isRerolling || !generationParams}
                 size="sm"
                 variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm disabled:opacity-50"
+                className="bg-orange-500/80 hover:bg-orange-600/90 text-white border-orange-400/50 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:hover:bg-orange-500/80"
               >
                 {isRerolling ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
