@@ -126,16 +126,22 @@ async function checkAndEnforceUsageLimit(req: any): Promise<{ allowed: boolean; 
   try {
     if (userId) {
       const user = await storage.getUser(userId);
-      if (user && !user.hasFlavrPlus && (user.recipesThisMonth || 0) >= 3) {
-        return { 
-          allowed: false, 
-          error: { 
-            error: "You have no free recipes remaining this month. Sign up for Flavr+ to get unlimited recipes!", 
-            recipesUsed: user.recipesThisMonth || 0,
-            recipesLimit: 3,
-            hasFlavrPlus: false
-          }
-        };
+      if (user) {
+        // Check if this is the developer account - grant unlimited access
+        const isDeveloper = user.email === "william@blycontracting.co.uk";
+        const hasUnlimitedAccess = user.hasFlavrPlus || isDeveloper;
+        
+        if (!hasUnlimitedAccess && (user.recipesThisMonth || 0) >= 3) {
+          return { 
+            allowed: false, 
+            error: { 
+              error: "You have no free recipes remaining this month. Sign up for Flavr+ to get unlimited recipes!", 
+              recipesUsed: user.recipesThisMonth || 0,
+              recipesLimit: 3,
+              hasFlavrPlus: false
+            }
+          };
+        }
       }
       return { allowed: true };
     } else {
@@ -173,8 +179,14 @@ async function incrementUsageCounter(req: any): Promise<void> {
   try {
     if (userId) {
       const user = await storage.getUser(userId);
-      if (user && !user.hasFlavrPlus) {
-        await storage.updateUserUsage(userId, (user.recipesThisMonth || 0) + 1, user.imagesThisMonth || 0);
+      if (user) {
+        // Check if this is the developer account - don't increment for unlimited users
+        const isDeveloper = user.email === "william@blycontracting.co.uk";
+        const hasUnlimitedAccess = user.hasFlavrPlus || isDeveloper;
+        
+        if (!hasUnlimitedAccess) {
+          await storage.updateUserUsage(userId, (user.recipesThisMonth || 0) + 1, user.imagesThisMonth || 0);
+        }
       }
     } else {
       const pseudoUser = await storage.getPseudoUser(pseudoId);

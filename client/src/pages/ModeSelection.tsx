@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Refrigerator, ChefHat } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ChevronRight, Refrigerator, ChefHat, CalendarDays, Lock } from "lucide-react";
 import { useLocation } from "wouter";
 import { PageLayout } from "@/components/PageLayout";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,8 @@ interface ModeCard {
   color: string;
   route: string;
   gradient: string;
+  isPremium?: boolean;
+  isComingSoon?: boolean;
 }
 
 const modes: ModeCard[] = [
@@ -32,6 +35,16 @@ const modes: ModeCard[] = [
     color: "text-orange-500 dark:text-orange-400",
     route: "/chef-assist",
     gradient: "from-orange-500/10 to-orange-600/10 dark:from-orange-500/20 dark:to-orange-600/20"
+  },
+  {
+    title: "Meal Planner",
+    description: "AI-powered weekly meal planning with shopping lists and prep schedules",
+    icon: <CalendarDays className="w-12 h-12" />,
+    color: "text-purple-500 dark:text-purple-400",
+    route: "/meal-planner",
+    gradient: "from-purple-500/10 to-purple-600/10 dark:from-purple-500/20 dark:to-purple-600/20",
+    isPremium: true,
+    isComingSoon: true
   }
 ];
 
@@ -39,6 +52,9 @@ export default function ModeSelection() {
   const [, navigate] = useLocation();
 
   const handleModeSelect = (mode: ModeCard) => {
+    if (mode.isComingSoon) {
+      return; // Do nothing for coming soon modes
+    }
     navigate(mode.route);
   };
 
@@ -62,7 +78,7 @@ export default function ModeSelection() {
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 mb-6 md:mb-12">
           {modes.map((mode, index) => (
             <motion.div
               key={mode.title}
@@ -72,8 +88,8 @@ export default function ModeSelection() {
             >
               <Card 
                 className={cn(
-                  "relative overflow-hidden transition-all duration-300 cursor-pointer group h-full",
-                  "hover:shadow-xl hover:scale-105",
+                  "relative overflow-hidden transition-all duration-300 group h-full",
+                  mode.isComingSoon ? "cursor-not-allowed opacity-75" : "cursor-pointer hover:shadow-xl hover:scale-105",
                   "dark:bg-gray-800/50 dark:border-gray-700"
                 )}
                 onClick={() => handleModeSelect(mode)}
@@ -87,8 +103,22 @@ export default function ModeSelection() {
                   <div className={cn("p-3 md:p-4 rounded-full bg-background/80 backdrop-blur-sm inline-flex mx-auto mb-3 md:mb-4", mode.color)}>
                     <Refrigerator className={cn("w-8 h-8 md:w-12 md:h-12", mode.title === "Fridge2Fork" ? "" : "hidden")} />
                     <ChefHat className={cn("w-8 h-8 md:w-12 md:h-12", mode.title === "Chef Assist" ? "" : "hidden")} />
+                    <CalendarDays className={cn("w-8 h-8 md:w-12 md:h-12", mode.title === "Meal Planner" ? "" : "hidden")} />
                   </div>
-                  <CardTitle className="text-xl md:text-2xl mb-2">{mode.title}</CardTitle>
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <CardTitle className="text-xl md:text-2xl">{mode.title}</CardTitle>
+                    {mode.isPremium && (
+                      <Badge variant="outline" className="text-xs bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300">
+                        <Lock className="w-3 h-3 mr-1" />
+                        Flavr+
+                      </Badge>
+                    )}
+                    {mode.isComingSoon && (
+                      <Badge variant="outline" className="text-xs bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300">
+                        Coming Soon
+                      </Badge>
+                    )}
+                  </div>
                   <CardDescription className="text-sm md:text-base">
                     {mode.description}
                   </CardDescription>
@@ -97,13 +127,19 @@ export default function ModeSelection() {
                 <CardContent className="relative pb-4 md:pb-8">
                   <Button
                     className={cn(
-                      "w-full group-hover:translate-y-[-2px] transition-transform",
-                      mode.color === "text-green-500 dark:text-green-400" ? "bg-green-600 hover:bg-green-700" : "bg-orange-600 hover:bg-orange-700"
+                      "w-full transition-transform",
+                      mode.isComingSoon ? "cursor-not-allowed" : "group-hover:translate-y-[-2px]",
+                      mode.color === "text-green-500 dark:text-green-400" ? "bg-green-600 hover:bg-green-700" : 
+                      mode.color === "text-orange-500 dark:text-orange-400" ? "bg-orange-600 hover:bg-orange-700" :
+                      "bg-purple-600 hover:bg-purple-700"
                     )}
                     size="lg"
+                    disabled={mode.isComingSoon}
                   >
-                    Get Started
-                    <ChevronRight className="w-4 h-4 md:w-5 md:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                    {mode.isComingSoon ? "Coming Soon" : "Get Started"}
+                    {!mode.isComingSoon && (
+                      <ChevronRight className="w-4 h-4 md:w-5 md:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                    )}
                   </Button>
                 </CardContent>
               </Card>
