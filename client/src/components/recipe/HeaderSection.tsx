@@ -308,40 +308,61 @@ Created with Flavr AI`;
               </h1>
             </div>
             
-            {/* Action Buttons - Top Right - Improved single row layout */}
-            <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex items-center gap-1 flex-nowrap">
-              <Button
-                onClick={handleCopyIngredients}
-                size="sm"
-                variant="secondary"
-                className="bg-blue-600/90 hover:bg-blue-700/95 text-white border-blue-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
-              >
-                <Copy className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
-                <span className="hidden sm:inline">Copy</span>
-              </Button>
-              <Button
-                onClick={handleReroll}
-                disabled={isRerolling || !generationParams}
-                size="sm"
-                variant="secondary"
-                className="bg-orange-600/90 hover:bg-orange-700/95 text-white border-orange-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 disabled:hover:bg-orange-600/90 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
-              >
-                {isRerolling ? (
-                  <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1 animate-spin" />
-                ) : (
-                  <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
-                )}
-                <span className="hidden sm:inline">Reroll</span>
-              </Button>
-              <Button
-                onClick={handleStartAgain}
-                size="sm"
-                variant="secondary"
-                className="bg-slate-700/90 hover:bg-slate-800/95 text-white border-slate-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
-              >
-                <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
-                <span className="hidden sm:inline">Start</span>
-              </Button>
+            {/* Action Buttons with Labels - Centered at bottom */}
+            <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-2 sm:gap-4 bg-black/60 backdrop-blur-xl rounded-lg p-2">
+              <div className="flex flex-col items-center gap-1">
+                <Button
+                  onClick={handleCopyIngredients}
+                  size="sm"
+                  variant="secondary"
+                  className="bg-blue-600/90 hover:bg-blue-700/95 text-white border-blue-400/60 shadow-lg hover:shadow-xl transition-all duration-200 px-2 py-2 sm:px-3"
+                >
+                  <Copy className="w-3 h-3 sm:w-4 sm:h-4" />
+                </Button>
+                <span className="text-xs text-white/80 font-medium">Copy</span>
+              </div>
+              
+              <div className="flex flex-col items-center gap-1">
+                <Button
+                  onClick={handleSaveRecipe}
+                  disabled={isSaved || saveMutation.isPending}
+                  size="sm"
+                  variant="secondary"
+                  className="bg-green-600/90 hover:bg-green-700/95 text-white border-green-400/60 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-2 py-2 sm:px-3"
+                >
+                  <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${isSaved ? 'fill-current' : ''}`} />
+                </Button>
+                <span className="text-xs text-white/80 font-medium">{isSaved ? 'Saved' : 'Save'}</span>
+              </div>
+              
+              <div className="flex flex-col items-center gap-1">
+                <Button
+                  onClick={handleReroll}
+                  disabled={isRerolling || !generationParams}
+                  size="sm"
+                  variant="secondary"
+                  className="bg-orange-600/90 hover:bg-orange-700/95 text-white border-orange-400/60 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 disabled:hover:bg-orange-600/90 px-2 py-2 sm:px-3"
+                >
+                  {isRerolling ? (
+                    <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4" />
+                  )}
+                </Button>
+                <span className="text-xs text-white/80 font-medium">Reroll</span>
+              </div>
+              
+              <div className="flex flex-col items-center gap-1">
+                <Button
+                  onClick={handleStartAgain}
+                  size="sm"
+                  variant="secondary"
+                  className="bg-slate-700/90 hover:bg-slate-800/95 text-white border-slate-400/60 shadow-lg hover:shadow-xl transition-all duration-200 px-2 py-2 sm:px-3"
+                >
+                  <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4" />
+                </Button>
+                <span className="text-xs text-white/80 font-medium">Start</span>
+              </div>
             </div>
           </div>
         ) : (
@@ -355,40 +376,61 @@ Created with Flavr AI`;
             </div>
             </div>
             
-            {/* Action Buttons - Top Right (for no image state) - Improved single row layout */}
-            <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex items-center gap-1 flex-nowrap">
-              <Button
-                onClick={handleCopyIngredients}
-                size="sm"
-                variant="secondary"
-                className="bg-blue-600/90 hover:bg-blue-700/95 text-white border-blue-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
-              >
-                <Copy className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
-                <span className="hidden sm:inline">Copy</span>
-              </Button>
-              <Button
-                onClick={handleReroll}
-                disabled={isRerolling || !generationParams}
-                size="sm"
-                variant="secondary"
-                className="bg-orange-600/90 hover:bg-orange-700/95 text-white border-orange-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 disabled:hover:bg-orange-600/90 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
-              >
-                {isRerolling ? (
-                  <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1 animate-spin" />
-                ) : (
-                  <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
-                )}
-                <span className="hidden sm:inline">Reroll</span>
-              </Button>
-              <Button
-                onClick={handleStartAgain}
-                size="sm"
-                variant="secondary"
-                className="bg-slate-700/90 hover:bg-slate-800/95 text-white border-slate-400/60 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-200 px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
-              >
-                <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
-                <span className="hidden sm:inline">Start</span>
-              </Button>
+            {/* Action Buttons with Labels - Centered at bottom (for no image state) */}
+            <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-2 sm:gap-4 bg-black/60 backdrop-blur-xl rounded-lg p-2">
+              <div className="flex flex-col items-center gap-1">
+                <Button
+                  onClick={handleCopyIngredients}
+                  size="sm"
+                  variant="secondary"
+                  className="bg-blue-600/90 hover:bg-blue-700/95 text-white border-blue-400/60 shadow-lg hover:shadow-xl transition-all duration-200 px-2 py-2 sm:px-3"
+                >
+                  <Copy className="w-3 h-3 sm:w-4 sm:h-4" />
+                </Button>
+                <span className="text-xs text-white/80 font-medium">Copy</span>
+              </div>
+              
+              <div className="flex flex-col items-center gap-1">
+                <Button
+                  onClick={handleSaveRecipe}
+                  disabled={isSaved || saveMutation.isPending}
+                  size="sm"
+                  variant="secondary"
+                  className="bg-green-600/90 hover:bg-green-700/95 text-white border-green-400/60 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-2 py-2 sm:px-3"
+                >
+                  <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${isSaved ? 'fill-current' : ''}`} />
+                </Button>
+                <span className="text-xs text-white/80 font-medium">{isSaved ? 'Saved' : 'Save'}</span>
+              </div>
+              
+              <div className="flex flex-col items-center gap-1">
+                <Button
+                  onClick={handleReroll}
+                  disabled={isRerolling || !generationParams}
+                  size="sm"
+                  variant="secondary"
+                  className="bg-orange-600/90 hover:bg-orange-700/95 text-white border-orange-400/60 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 disabled:hover:bg-orange-600/90 px-2 py-2 sm:px-3"
+                >
+                  {isRerolling ? (
+                    <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4" />
+                  )}
+                </Button>
+                <span className="text-xs text-white/80 font-medium">Reroll</span>
+              </div>
+              
+              <div className="flex flex-col items-center gap-1">
+                <Button
+                  onClick={handleStartAgain}
+                  size="sm"
+                  variant="secondary"
+                  className="bg-slate-700/90 hover:bg-slate-800/95 text-white border-slate-400/60 shadow-lg hover:shadow-xl transition-all duration-200 px-2 py-2 sm:px-3"
+                >
+                  <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4" />
+                </Button>
+                <span className="text-xs text-white/80 font-medium">Start</span>
+              </div>
             </div>
           </div>
         )}
