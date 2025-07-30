@@ -105,7 +105,10 @@ export default function ChefAssist() {
   };
 
   const handleGenerateRecipe = async () => {
+    console.log('🚀 Chef Assist: Generate recipe clicked with prompt:', prompt);
+    
     if (!prompt || !prompt.trim()) {
+      console.log('❌ Chef Assist: Empty prompt, showing error toast');
       toast({
         title: "Please enter what you'd like to cook",
         description: "Tell us what you're craving!",
@@ -114,6 +117,7 @@ export default function ChefAssist() {
       return;
     }
 
+    console.log('🎯 Chef Assist: Starting recipe generation...');
     setIsGenerating(true);
     try {
       const response = await apiRequest("POST", "/api/chef-assist/generate", {
@@ -125,7 +129,14 @@ export default function ChefAssist() {
 
       // Store recipe in Zustand and navigate
       if (data.recipe) {
-        console.log("Chef Assist: Recipe generated successfully", data.recipe);
+        console.log("✅ Chef Assist: Recipe generated successfully", data.recipe.title);
+        console.log("🧪 Chef Assist: Recipe data structure:", {
+          title: data.recipe.title,
+          ingredients: data.recipe.ingredients?.length || 0,
+          instructions: data.recipe.instructions?.length || 0,
+          hasImage: !!(data.recipe.image || data.recipe.imageUrl)
+        });
+        
         // Store generation parameters for rerolling
         const generationParams = {
           mode: 'chef' as const,
@@ -135,13 +146,18 @@ export default function ChefAssist() {
             cookingTime: 30
           }
         };
+        
         // Set imageLoading initially if no image
         if (!data.recipe.image && !data.recipe.imageUrl) {
           data.recipe.imageLoading = true;
         }
+        
+        console.log("🔄 Chef Assist: Updating recipe store and navigating...");
         updateActiveRecipe(data.recipe, generationParams);
         navigate("/recipe");
+        console.log("🧭 Chef Assist: Navigation to /recipe completed");
       } else {
+        console.error("❌ Chef Assist: No recipe data in response");
         throw new Error("No recipe data received");
       }
       

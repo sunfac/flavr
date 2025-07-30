@@ -505,7 +505,7 @@ Return a JSON object with this structure:
         outputTokens: Math.ceil(JSON.stringify(response).length / 4),
         cost: 0.001,
         success: true,
-        userId: req.session?.userId || undefined
+        userId: req.session?.userId?.toString() || "anonymous"
       });
 
       console.log('🍽️ Fridge2Fork recipes generated:', response.recipes?.length || 0);
@@ -1396,7 +1396,7 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
         outputTokens: Math.ceil(JSON.stringify(recipe).length / 4),
         cost: 0.001,
         success: true,
-        userId: req.session?.userId || undefined
+        userId: req.session?.userId?.toString() || "anonymous"
       }).catch(err => console.error('Background logging failed:', err));
     } catch (error: any) {
       console.error('Chef assist generation error:', error);
@@ -1526,7 +1526,7 @@ Make each recipe distinctly different in style, technique, and flavor profile. F
       try {
         const userId = req.session?.userId?.toString() || 'anonymous';
         await logUserInteractionData(userId, {
-          mode,
+          mode: 'shopping',
           sessionId: req.session?.id,
           action: 'recipe_ideas_generated',
           quizData: req.body,
