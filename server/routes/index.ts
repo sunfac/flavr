@@ -11,6 +11,8 @@ import { registerSubscriptionRoutes } from "./subscriptionRoutes";
 import { registerStripeRoutes } from "./stripeRoutes";
 import { registerInteractionRoutes } from "./interactionRoutes";
 import { registerBudgetPlannerRoutes } from "./budgetPlannerRoutes";
+import { initializeOAuthStrategies } from "../oauthStrategies";
+import passport from "passport";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Add route debugging
@@ -29,6 +31,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       sameSite: 'lax' // Better compatibility
     }
   }));
+
+  // Initialize passport and OAuth strategies
+  app.use(passport.initialize());
+  app.use(passport.session());
+  initializeOAuthStrategies();
 
   // Register all route modules
   registerAuthRoutes(app);

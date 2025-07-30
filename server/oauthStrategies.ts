@@ -3,28 +3,34 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as AppleStrategy } from 'passport-apple';
 import { storage } from './storage';
 
-// Configure Google OAuth Strategy
-export function configureOAuthStrategies() {
+// Initialize OAuth strategies
+export function initializeOAuthStrategies() {
   // Google OAuth Strategy
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    passport.use(new GoogleStrategy({
+    passport.use('google', new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: '/api/auth/google/callback'
     }, async (accessToken, refreshToken, profile, done) => {
       try {
+        console.log('🔍 Google OAuth callback triggered for profile:', profile.id);
+        
         // Check if user exists by OAuth first, then by email
         let user = await storage.getUserByOAuth('google', profile.id);
         
         if (!user && profile.emails?.[0]?.value) {
           user = await storage.getUserByEmail(profile.emails[0].value);
+          if (user) {
+            console.log('📧 Found existing user by email, linking OAuth');
+          }
         }
         
         if (!user) {
+          console.log('👤 Creating new OAuth user');
           // Create new user
           user = await storage.createUser({
             email: profile.emails?.[0]?.value || '',
-            username: profile.displayName || profile.emails?.[0]?.value?.split('@')[0] || '',
+            username: profile.displayName || profile.emails?.[0]?.value?.split('@')[0] || `user_${profile.id}`,
             password: '', // OAuth users don't need passwords
             firstName: profile.name?.givenName || '',
             lastName: profile.name?.familyName || '',
@@ -35,49 +41,31 @@ export function configureOAuthStrategies() {
           });
         }
         
+        console.log('✅ Google OAuth authentication successful for user:', user.id);
         return done(null, user);
       } catch (error) {
-        return done(error, null);
+        console.error('❌ Google OAuth error:', error);
+        return done(error as Error, false);
       }
     }));
   }
 
-  // Apple OAuth Strategy
-  if (process.env.APPLE_CLIENT_ID && process.env.APPLE_TEAM_ID && process.env.APPLE_KEY_ID && process.env.APPLE_PRIVATE_KEY) {
-    passport.use(new AppleStrategy({
-      clientID: process.env.APPLE_CLIENT_ID,
-      teamID: process.env.APPLE_TEAM_ID,
-      keyID: process.env.APPLE_KEY_ID,
-      privateKey: process.env.APPLE_PRIVATE_KEY,
-      callbackURL: '/api/auth/apple/callback'
-    }, async (accessToken, refreshToken, idToken, profile, done) => {
-      try {
-        // Check if user exists by OAuth first, then by email
-        let user = await storage.getUserByOAuth('apple', profile.sub);
-        
-        if (!user && profile.email) {
-          user = await storage.getUserByEmail(profile.email);
-        }
-        
-        if (!user) {
-          // Create new user
-          user = await storage.createUser({
-            email: profile.email || '',
-            username: profile.name?.firstName || profile.email?.split('@')[0] || '',
-            password: '', // OAuth users don't need passwords
-            firstName: profile.name?.firstName || '',
-            lastName: profile.name?.lastName || '',
-            profileImage: '',
-            hasFlavrPlus: false,
-            oauthProvider: 'apple',
-            oauthId: profile.sub
-          });
-        }
-        
-        return done(null, user);
-      } catch (error) {
-        return done(error, null);
-      }
-    }));
-  }
+  // Apple OAuth Strategy (temporarily disabled - needs proper configuration)
+  // Note: Apple OAuth requires complex private key configuration
+  console.log('🍎 Apple OAuth temporarily disabled - configuration needed');
+
+  // Serialize user for session
+  passport.serializeUser((user: any, done) => {
+    done(null, user.id);
+  });
+
+  // Deserialize user from session
+  passport.deserializeUser(async (id: any, done) => {
+    try {
+      const user = await storage.getUser(id);
+      done(null, user);
+    } catch (error) {
+      done(error, null);
+    }
+  });
 }
