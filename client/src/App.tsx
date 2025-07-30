@@ -21,6 +21,7 @@ import RecipeView from "@/pages/RecipeView";
 import RecipeCardTest from "@/pages/RecipeCardTest";
 import DeveloperLogs from "@/pages/DeveloperLogs";
 import DeveloperRecipes from "@/pages/DeveloperRecipes";
+import ImageMigration from "@/pages/ImageMigration";
 import DiagnosticPage from "@/pages/DiagnosticPage";
 import NotFound from "@/pages/not-found";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
@@ -58,6 +59,7 @@ function Router() {
       <Route path="/subscribe" component={Subscribe} />
       <Route path="/developer-logs" component={DeveloperLogs} />
       <Route path="/developer-recipes" component={DeveloperRecipes} />
+      <Route path="/image-migration" component={ImageMigration} />
       <Route path="/diagnostic" component={DiagnosticPage} />
 
       <Route path="/cookbook" component={DigitalCookbook} />

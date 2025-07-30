@@ -11,6 +11,7 @@ import { registerSubscriptionRoutes } from "./subscriptionRoutes";
 import { registerStripeRoutes } from "./stripeRoutes";
 import { registerInteractionRoutes } from "./interactionRoutes";
 import { registerBudgetPlannerRoutes } from "./budgetPlannerRoutes";
+import { registerImageRoutes } from "./imageRoutes";
 import { initializeOAuthStrategies } from "../oauthStrategies";
 import passport from "passport";
 
@@ -45,6 +46,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerStripeRoutes(app);
   registerInteractionRoutes(app);
   registerBudgetPlannerRoutes(app);
+  registerImageRoutes(app);
 
   // Additional utility routes
   

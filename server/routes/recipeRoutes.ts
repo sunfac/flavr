@@ -32,6 +32,7 @@ import {
   PROFESSIONAL_TECHNIQUE_INTEGRATION,
   AUTHENTICITY_ENHANCEMENT 
 } from "../flavorMaximizationPrompts";
+import { ImageStorage } from "../imageStorage";
 
 // Configure multer for file uploads
 const upload = multer({ 
@@ -202,8 +203,8 @@ async function incrementUsageCounter(req: any): Promise<void> {
   }
 }
 
-// Generate recipe image using DALL-E 3
-async function generateRecipeImage(recipeTitle: string, cuisine: string): Promise<string | null> {
+// Generate recipe image using DALL-E 3 and store locally
+async function generateRecipeImage(recipeTitle: string, cuisine: string, recipeId?: number): Promise<string | null> {
   try {
     console.log('🎨 Generating recipe image with DALL-E 3...');
     
@@ -229,7 +230,25 @@ async function generateRecipeImage(recipeTitle: string, cuisine: string): Promis
 
     if (response.data && response.data[0] && response.data[0].url) {
       console.log('✅ Recipe image generated successfully');
-      return response.data[0].url;
+      const dalleUrl = response.data[0].url;
+      
+      // If we have a recipe ID, download and store the image locally
+      if (recipeId) {
+        console.log('📥 Downloading and storing image locally...');
+        const localImagePath = await ImageStorage.downloadAndStoreImage(dalleUrl, recipeId);
+        
+        if (localImagePath) {
+          console.log('✅ Image stored locally:', localImagePath);
+          // Update the recipe with the local image path
+          await storage.updateRecipeImage(recipeId, localImagePath);
+          return localImagePath;
+        } else {
+          console.log('⚠️ Failed to store image locally, using DALL-E URL');
+          return dalleUrl;
+        }
+      }
+      
+      return dalleUrl;
     }
     
     return null;
@@ -1168,7 +1187,7 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
       // Generate image first, then send complete response
       try {
         console.log('🎨 Generating image for:', recipe.title);
-        const imageUrl = await generateRecipeImage(recipe.title, recipe.cuisine);
+        const imageUrl = await generateRecipeImage(recipe.title, recipe.cuisine, recipe.id);
         if (imageUrl) {
           recipe.image = imageUrl;
           console.log('✅ Recipe image generated successfully');
@@ -1413,7 +1432,7 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
       incrementUsageCounter(req).catch(err => console.error('Failed to increment usage:', err));
 
       // Generate image and log in background (don't await)
-      generateRecipeImage(recipe.title, recipe.cuisine).then(imageUrl => {
+      generateRecipeImage(recipe.title, recipe.cuisine, recipe.id).then(imageUrl => {
         if (imageUrl) {
           console.log('🎨 Background image generated for Fridge2Fork:', recipe.title);
         }
@@ -2015,7 +2034,7 @@ Return valid JSON only:
       recipeData.createdAt = new Date().toISOString();
 
       // Start image generation in background (don't await)
-      generateRecipeImage(recipeData.title, recipeData.cuisine || 'international').then(imageUrl => {
+      generateRecipeImage(recipeData.title, recipeData.cuisine || 'international', Number(recipeData.id)).then(imageUrl => {
         if (imageUrl) {
           console.log('🎨 Background image generated for fridge mode:', recipeData.title);
           // Store in cache for retrieval
@@ -2238,7 +2257,7 @@ Return valid JSON only:
       recipeData.createdAt = new Date().toISOString();
 
       // Start image generation in background (don't await)
-      generateRecipeImage(recipeData.title, recipeData.cuisine || 'international').then(imageUrl => {
+      generateRecipeImage(recipeData.title, recipeData.cuisine || 'international', Number(recipeData.id)).then(imageUrl => {
         if (imageUrl) {
           console.log('🎨 Background image generated for shopping mode:', recipeData.title);
           // Store in cache for retrieval

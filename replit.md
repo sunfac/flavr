@@ -191,12 +191,42 @@ See `STRIPE_SETUP.md` for detailed setup instructions.
   - Fixed ChatBot component import (uses default export)
   - Maintained original styling with quiz cards and gradient buttons
 
+## Image Storage System
+
+### Overview
+Implemented comprehensive local image storage system to replace expired DALL-E URLs with permanent local storage:
+
+### Architecture
+- **ImageStorage Class**: Handles downloading and storing DALL-E images locally
+- **Local Storage**: Images stored in `server/public/recipe-images/` directory
+- **Database Integration**: Recipe imageUrl fields updated to point to local `/api/images/serve/` endpoints
+- **Migration System**: Developer UI to convert existing expired DALL-E URLs to local storage
+
+### Key Components
+- `server/imageStorage.ts`: Core image download and storage functionality
+- `server/routes/imageRoutes.ts`: Image serving and migration endpoints
+- `client/src/pages/ImageMigration.tsx`: Developer UI for image migration
+- Updated recipe generation to automatically store images locally
+
+### Migration Process
+1. Access `/image-migration` page (developer account only)
+2. Check migration status to see expired vs local images
+3. Run migration to download all DALL-E images locally
+4. Images served via `/api/images/serve/:filename` for permanent availability
+
+### Benefits
+- Eliminates 403 errors from expired DALL-E URLs
+- Permanent image storage independent of external services
+- Improved recipe display reliability across all cooking modes
+- Developer analytics for image storage usage
+
 ## Changelog
 
 ```
 Changelog:
 - January 30, 2025. **GOOGLE OAUTH AUTHENTICATION SYSTEM FULLY OPERATIONAL** - Google OAuth integration working with proper redirect to Google's authentication servers, fixed all initialization errors and route configuration issues, added oauth_provider and oauth_id columns to users table, enhanced AuthModal with working Google OAuth button, implemented OAuth user creation and session management, Google authentication ready for production use, Apple OAuth temporarily disabled pending proper configuration
 - January 30, 2025. **INSPIRE ME BUTTON QUOTA ENFORCEMENT IMPLEMENTED** - Added comprehensive quota checking to all "Inspire Me" buttons across Chef Assist and Fridge2Fork modes, buttons disabled and show "Upgrade for More" when users reach 3 recipe limit, Continue buttons also disabled with "Recipe limit reached - Upgrade to continue" message, implemented proper quota status checking with useQuery hook, enhanced UI feedback for quota limits across all cooking modes, ensures consistent enforcement of free tier limitations
+- January 30, 2025. **LOCAL IMAGE STORAGE SYSTEM IMPLEMENTATION COMPLETE** - Comprehensive solution to replace expired DALL-E URLs with permanent local storage, created ImageStorage class for downloading and storing images locally in server/public/recipe-images/ directory, implemented image serving endpoints at /api/images/serve/:filename, built developer migration UI at /image-migration page with status tracking and one-click migration, updated all recipe generation endpoints to automatically download and store DALL-E images locally during creation, enhanced database with updateRecipeImage method for migration, added image migration navigation to developer hamburger menu, eliminated 403 errors from expired DALL-E URLs with permanent local storage solution
 - January 30, 2025. **COMPREHENSIVE GOOGLE AND APPLE OAUTH AUTHENTICATION SYSTEM IMPLEMENTED** - Complete OAuth integration with passport strategies for Google and Apple Sign-In, updated users database schema with oauthProvider and oauthId fields, enhanced AuthModal with OAuth buttons and smooth login flows, implemented proper OAuth callback handling and session management, added OAuth-specific user creation and authentication methods in storage layer, OAuth users automatically created without passwords for seamless authentication experience, full database migration support with OAuth field additions
 - June 20, 2025. Initial setup
 - June 20, 2025. Enhanced RecipeCard refactor complete - structured sections with responsive CSS Grid layout

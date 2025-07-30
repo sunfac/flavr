@@ -45,6 +45,7 @@ export interface IStorage {
   getRecipeByShareId(shareId: string): Promise<Recipe | undefined>;
   updateRecipeSharing(id: number, isShared: boolean, shareId?: string): Promise<Recipe>;
   updateRecipe(id: number, updates: Partial<Recipe>): Promise<Recipe>;
+  updateRecipeImage(recipeId: number, imageUrl: string): Promise<void>;
   getUserRecipeHistory(userId: number, limit?: number): Promise<Recipe[]>;
   
   // Chat operations
@@ -356,6 +357,13 @@ export class DatabaseStorage implements IStorage {
 
   async getAllRecipes(): Promise<Recipe[]> {
     return await db.select().from(recipes).orderBy(desc(recipes.createdAt));
+  }
+
+  async updateRecipeImage(recipeId: number, imageUrl: string): Promise<void> {
+    await db
+      .update(recipes)
+      .set({ imageUrl })
+      .where(eq(recipes.id, recipeId));
   }
 
   async deleteRecipe(id: number, userId?: number): Promise<void> {

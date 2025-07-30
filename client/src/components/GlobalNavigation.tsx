@@ -11,7 +11,8 @@ import {
   Moon,
   Sun,
   Heart,
-  Database
+  Database,
+  Download
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useTheme } from "@/providers/ThemeProvider";
@@ -87,6 +88,14 @@ export default function GlobalNavigation({ isOpen, onClose, onAuthRequired }: Gl
       icon: Database,
       label: "All Recipes",
       href: "/developer-recipes",
+      requiresAuth: true,
+      adminOnly: true,
+      developerOnly: true
+    },
+    {
+      icon: Download,
+      label: "Image Migration",
+      href: "/image-migration",
       requiresAuth: true,
       adminOnly: true,
       developerOnly: true
