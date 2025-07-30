@@ -52,7 +52,19 @@ export default function LandingPage() {
     }
   };
 
-  // No authentication check on landing page to prevent loading issues
+  // Check user authentication status
+  const { data: user, isLoading: userLoading } = useQuery({
+    queryKey: ["/api/me"],
+    retry: false,
+    staleTime: 5 * 60 * 1000 // 5 minutes
+  });
+
+  // Check subscription status for authenticated users
+  const { data: subscriptionData } = useQuery({
+    queryKey: ["/api/subscription-status"],
+    enabled: !!user, // Only fetch if user is authenticated
+    retry: false
+  });
 
   const loginMutation = useMutation({
     mutationFn: (credentials: { username: string; password: string }) =>
@@ -243,41 +255,67 @@ export default function LandingPage() {
           </div>
         </motion.div>
 
-        {/* Login/Signup Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.0 }}
-          className="flex flex-col items-center mt-8 gap-4"
-        >
-          <p className="text-slate-400 text-sm font-medium">
-            Already have an account or want to save your recipes?
-          </p>
-          <div className="flex gap-4">
-            <Button
-              onClick={() => {
-                setAuthMode("login");
-                setShowAuthModal(true);
-              }}
-              variant="outline"
-              className="px-6 py-3 text-white border-white/30 hover:border-white/50 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-300"
-            >
-              <iconMap.login className="w-4 h-4 mr-2" />
-              Sign In
-            </Button>
-            <Button
-              onClick={() => {
-                setAuthMode("signup");
-                setShowAuthModal(true);
-              }}
-              variant="outline"
-              className="px-6 py-3 text-white border-orange-400/50 hover:border-orange-300/70 bg-orange-500/10 hover:bg-orange-500/20 backdrop-blur-sm transition-all duration-300"
-            >
-              <iconMap.userPlus className="w-4 h-4 mr-2" />
-              Sign Up
-            </Button>
-          </div>
-        </motion.div>
+        {/* Conditional Authentication/Upgrade Buttons */}
+        {!userLoading && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.0 }}
+            className="flex flex-col items-center mt-8 gap-4"
+          >
+            {!user ? (
+              // Not logged in - show login/signup buttons
+              <>
+                <p className="text-slate-400 text-sm font-medium">
+                  Already have an account or want to save your recipes?
+                </p>
+                <div className="flex gap-4">
+                  <Button
+                    onClick={() => {
+                      setAuthMode("login");
+                      setShowAuthModal(true);
+                    }}
+                    variant="outline"
+                    className="px-6 py-3 text-white border-white/30 hover:border-white/50 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-300"
+                  >
+                    <iconMap.login className="w-4 h-4 mr-2" />
+                    Sign In
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setAuthMode("signup");
+                      setShowAuthModal(true);
+                    }}
+                    variant="outline"
+                    className="px-6 py-3 text-white border-orange-400/50 hover:border-orange-300/70 bg-orange-500/10 hover:bg-orange-500/20 backdrop-blur-sm transition-all duration-300"
+                  >
+                    <iconMap.userPlus className="w-4 h-4 mr-2" />
+                    Sign Up
+                  </Button>
+                </div>
+              </>
+            ) : !(subscriptionData as any)?.hasFlavrPlus ? (
+              // Logged in but not Flavr+ user - show upgrade button
+              <>
+                <p className="text-slate-400 text-sm font-medium">
+                  Welcome back! Unlock unlimited recipes with Flavr+
+                </p>
+                <Button
+                  onClick={() => navigate("/subscribe")}
+                  className="px-8 py-4 text-lg font-bold bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-400 hover:via-orange-500 hover:to-amber-400 border-0 shadow-xl hover:shadow-orange-500/50 transition-all duration-300 text-white"
+                >
+                  <iconMap.crown className="w-5 h-5 mr-2" />
+                  Upgrade to Flavr+
+                </Button>
+              </>
+            ) : (
+              // Flavr+ user - show welcome message
+              <p className="text-orange-400 text-lg font-medium">
+                Welcome back, Flavr+ member! ✨
+              </p>
+            )}
+          </motion.div>
+        )}
 
         {/* Ambient Background Elements */}
         <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
