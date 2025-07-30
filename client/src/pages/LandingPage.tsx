@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -104,6 +104,17 @@ export default function LandingPage() {
     setAuthMode("login");
     setShowAuthModal(true);
   };
+
+  // Check for signup parameter in URL
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('signup') === 'true') {
+      setAuthMode("signup");
+      setShowAuthModal(true);
+      // Clean up the URL parameter
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   // Landing page always renders - authentication handled by app flow
 

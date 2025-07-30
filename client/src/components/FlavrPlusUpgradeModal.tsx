@@ -25,14 +25,14 @@ export default function FlavrPlusUpgradeModal({
 
   const handleSignUp = () => {
     onClose(); 
-    // This will trigger the auth modal in the parent component
-    window.dispatchEvent(new CustomEvent('show-auth-modal', { detail: { mode: 'signup' } }));
+    // Navigate to landing page with signup parameter
+    navigate("/?signup=true");
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg mx-auto bg-gradient-to-br from-slate-900 via-slate-800 to-black border border-orange-500/30 text-white backdrop-blur-xl">
-        <DialogHeader className="text-center pb-6">
+      <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto mx-auto bg-gradient-to-br from-slate-900 via-slate-800 to-black border border-orange-500/30 text-white backdrop-blur-xl">
+        <DialogHeader className="text-center pb-4 md:pb-6">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -50,7 +50,7 @@ export default function FlavrPlusUpgradeModal({
             </div>
           </motion.div>
           
-          <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent mb-2">
+          <DialogTitle className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent mb-2">
             Recipe Limit Reached!
           </DialogTitle>
           
@@ -65,8 +65,8 @@ export default function FlavrPlusUpgradeModal({
         </DialogHeader>
 
         {/* Features List */}
-        <div className="space-y-4 mb-6">
-          <h3 className="text-xl font-semibold text-center mb-4 text-orange-400">
+        <div className="space-y-3 md:space-y-4 mb-4 md:mb-6">
+          <h3 className="text-lg md:text-xl font-semibold text-center mb-3 md:mb-4 text-orange-400">
             Flavr+ Premium Features
           </h3>
           
@@ -96,7 +96,7 @@ export default function FlavrPlusUpgradeModal({
         </div>
 
         {/* Pricing */}
-        <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 rounded-xl p-4 mb-6 border border-orange-500/20">
+        <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 rounded-xl p-3 md:p-4 mb-4 md:mb-6 border border-orange-500/20">
           <div className="text-center">
             <div className="flex items-baseline justify-center space-x-2">
               <span className="text-3xl font-bold text-orange-400">£4.99</span>
@@ -109,10 +109,10 @@ export default function FlavrPlusUpgradeModal({
         </div>
 
         {/* Action Buttons */}
-        <div className="space-y-3">
+        <div className="space-y-2 md:space-y-3">
           <Button
             onClick={handleUpgrade}
-            className="w-full py-4 text-lg font-bold bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-400 hover:via-orange-500 hover:to-amber-400 border-0 shadow-xl hover:shadow-orange-500/50 transition-all duration-300 text-white"
+            className="w-full py-3 md:py-4 text-base md:text-lg font-bold bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-400 hover:via-orange-500 hover:to-amber-400 border-0 shadow-xl hover:shadow-orange-500/50 transition-all duration-300 text-white"
           >
             <iconMap.crown className="w-5 h-5 mr-2" />
             Upgrade to Flavr+ Now
@@ -121,7 +121,7 @@ export default function FlavrPlusUpgradeModal({
           <Button
             onClick={handleSignUp}
             variant="outline"
-            className="w-full py-3 text-white border-white/30 hover:border-white/50 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-300"
+            className="w-full py-2 md:py-3 text-sm md:text-base text-white border-white/30 hover:border-white/50 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-300"
           >
             <iconMap.userPlus className="w-4 h-4 mr-2" />
             Sign Up for Free Account
