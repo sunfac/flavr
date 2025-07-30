@@ -2468,6 +2468,45 @@ Return valid JSON only:
     }
   });
 
+  // Developer-only endpoint to get ALL recipes across all users
+  app.get("/api/developer/all-recipes", async (req, res) => {
+    try {
+      // Check if this is the developer account
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const user = await storage.getUser(req.session.userId);
+      if (user?.email !== 'william@blycontracting.co.uk') {
+        return res.status(403).json({ error: "Developer access required" });
+      }
+
+      // Get ALL recipes from ALL users with user information
+      const allRecipes = await storage.getAllRecipes();
+      
+      // Get user information for each recipe
+      const recipesWithUsers = await Promise.all(
+        allRecipes.map(async (recipe) => {
+          const recipeUser = await storage.getUser(recipe.userId);
+          return {
+            ...recipe,
+            userEmail: recipeUser?.email || 'unknown',
+            userName: recipeUser ? `${recipeUser.firstName || ''} ${recipeUser.lastName || ''}`.trim() : 'Unknown User'
+          };
+        })
+      );
+
+      res.json({
+        totalRecipes: recipesWithUsers.length,
+        uniqueUsers: [...new Set(recipesWithUsers.map(r => r.userId))].length,
+        recipes: recipesWithUsers
+      });
+    } catch (error) {
+      console.error('Failed to fetch all recipes:', error);
+      res.status(500).json({ error: 'Failed to fetch recipes' });
+    }
+  });
+
   // Get quota status for current user
   app.get("/api/quota-status", async (req, res) => {
     try {

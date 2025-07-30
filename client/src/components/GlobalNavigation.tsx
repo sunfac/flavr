@@ -82,6 +82,14 @@ export default function GlobalNavigation({ isOpen, onClose, onAuthRequired }: Gl
       requiresAuth: true,
       adminOnly: true,
       developerOnly: true
+    },
+    {
+      icon: Database,
+      label: "All Recipes",
+      href: "/developer-recipes",
+      requiresAuth: true,
+      adminOnly: true,
+      developerOnly: true
     }
   ];
 
