@@ -270,27 +270,19 @@ export default function ChefAssist() {
                   <Button
                     onClick={handleInspireMe}
                     variant="outline"
-                    disabled={isProcessing || (!hasFlavrPlus && hasReachedLimit)}
-                    className={`text-sm md:text-base ${
-                      !hasFlavrPlus && hasReachedLimit 
-                        ? 'border-slate-600 text-slate-500 opacity-50 cursor-not-allowed' 
-                        : 'border-orange-400 text-orange-400 hover:bg-orange-400/10'
-                    }`}
+                    disabled={isProcessing}
+                    className="text-sm md:text-base border-orange-400 text-orange-400 hover:bg-orange-400/10"
                   >
                     <Sparkles className="w-4 h-4 mr-2" />
-                    {!hasFlavrPlus && hasReachedLimit ? 'Upgrade for More' : 'Inspire Me'}
+                    Inspire Me
                   </Button>
                 </div>
 
                 {/* Continue button matching original quiz style */}
                 <Button
                   onClick={handleGenerateRecipe}
-                  disabled={!prompt.trim() || isProcessing || (!hasFlavrPlus && hasReachedLimit)}
-                  className={`w-full h-12 md:h-14 font-medium text-base md:text-lg rounded-xl shadow-lg ${
-                    !hasFlavrPlus && hasReachedLimit 
-                      ? 'bg-slate-600 hover:bg-slate-600 cursor-not-allowed opacity-50' 
-                      : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700'
-                  } text-white`}
+                  disabled={!prompt.trim() || isProcessing}
+                  className="w-full h-12 md:h-14 font-medium text-base md:text-lg rounded-xl shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
                   size="lg"
                 >
                   {isProcessing ? (
@@ -298,8 +290,6 @@ export default function ChefAssist() {
                       <Loader2 className="w-4 h-4 md:w-5 md:h-5 mr-2 animate-spin" />
                       Creating your recipe...
                     </>
-                  ) : (!hasFlavrPlus && hasReachedLimit) ? (
-                    'Recipe limit reached - Upgrade to continue'
                   ) : (
                     <>
                       Continue

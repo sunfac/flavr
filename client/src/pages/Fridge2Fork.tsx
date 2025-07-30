@@ -389,12 +389,8 @@ export default function Fridge2Fork() {
                 {/* Continue button matching original quiz style */}
                 <Button
                   onClick={handleGenerateRecipes}
-                  disabled={ingredients.length === 0 || isProcessing || hasReachedLimit}
-                  className={`w-full h-14 font-medium text-lg rounded-xl shadow-lg ${
-                    hasReachedLimit 
-                      ? 'bg-slate-600 hover:bg-slate-600 cursor-not-allowed opacity-50' 
-                      : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700'
-                  } text-white`}
+                  disabled={ingredients.length === 0 || isProcessing}
+                  className="w-full h-14 font-medium text-lg rounded-xl shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
                   size="lg"
                 >
                   {isProcessing ? (
@@ -402,8 +398,6 @@ export default function Fridge2Fork() {
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                       Generating recipes...
                     </>
-                  ) : hasReachedLimit ? (
-                    'Recipe limit reached - Upgrade to continue'
                   ) : (
                     <>
                       Continue
