@@ -172,18 +172,38 @@ export default function DeveloperRecipes() {
           >
             <Card className="h-full hover:shadow-lg transition-shadow">
               <CardHeader className="pb-2">
-                {recipe.imageUrl && (
-                  <div className="w-full h-48 bg-gray-100 rounded-lg mb-3 overflow-hidden">
-                    <img
-                      src={recipe.imageUrl}
-                      alt={recipe.title}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  </div>
-                )}
+                <div className="w-full h-48 bg-gray-100 rounded-lg mb-3 overflow-hidden relative">
+                  {recipe.imageUrl ? (
+                    <>
+                      <img
+                        src={recipe.imageUrl}
+                        alt={recipe.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                      />
+                      <div 
+                        className="absolute inset-0 flex items-center justify-center bg-gray-100"
+                        style={{ display: 'none' }}
+                      >
+                        <div className="text-center text-gray-500">
+                          <iconMap.chef className="h-12 w-12 mx-auto mb-2" />
+                          <p className="text-sm">Image expired</p>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                      <div className="text-center text-gray-500">
+                        <iconMap.chef className="h-12 w-12 mx-auto mb-2" />
+                        <p className="text-sm">No image</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <CardTitle className="text-lg leading-tight">{recipe.title}</CardTitle>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <iconMap.user className="h-4 w-4" />

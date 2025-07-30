@@ -309,12 +309,25 @@ export default function DigitalCookbook() {
                             src={recipe.imageUrl} 
                             alt={recipe.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
                           />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <iconMap.chef className="w-16 h-16 text-white/50" />
+                        ) : null}
+                        <div 
+                          className="w-full h-full flex items-center justify-center"
+                          style={{ display: recipe.imageUrl ? 'none' : 'flex' }}
+                        >
+                          <div className="text-center">
+                            <iconMap.chef className="w-16 h-16 text-white/50 mx-auto mb-2" />
+                            <p className="text-white/40 text-sm">Recipe Image</p>
+                            {recipe.imageUrl && (
+                              <p className="text-white/30 text-xs mt-1">Image expired</p>
+                            )}
                           </div>
-                        )}
+                        </div>
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                         
                         {/* Quick Actions */}
