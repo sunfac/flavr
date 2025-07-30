@@ -8,7 +8,7 @@ import { animations, spacing } from '@/styles/tokens';
 import { useRecipeStore } from '@/stores/recipeStore';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 
 interface HeaderSectionProps {
   recipe: {
@@ -31,32 +31,11 @@ export default function HeaderSection({
 }: HeaderSectionProps) {
   const [location, navigate] = useLocation();
   const [isRerolling, setIsRerolling] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const generationParams = useRecipeStore((state) => state.generationParams);
   const updateActiveRecipe = useRecipeStore((state) => state.updateActiveRecipe);
   const setImageLoading = useRecipeStore((state) => state.setImageLoading);
   const activeRecipe = useRecipeStore((state) => state);
-
-  // Check if recipe is already saved
-  const { data: savedRecipes } = useQuery({
-    queryKey: ['/api/recipes'],
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/recipes");
-      if (!response.ok) return [];
-      return response.json();
-    }
-  });
-
-  useEffect(() => {
-    if (savedRecipes && recipe.title) {
-      const alreadySaved = savedRecipes.some((r: any) => 
-        r.title === recipe.title && r.description === recipe.description
-      );
-      setIsSaved(alreadySaved);
-    }
-  }, [savedRecipes, recipe]);
   
   const fastFacts = useMemo(() => {
     return [
@@ -69,55 +48,7 @@ export default function HeaderSection({
     navigate('/app');
   };
 
-  const saveMutation = useMutation({
-    mutationFn: async () => {
-      const recipeData = {
-        title: recipe.title,
-        description: recipe.description,
-        cuisine: recipe.cuisine || '',
-        difficulty: recipe.difficulty || 'Medium',
-        cookTime: recipe.cookTime || 30,
-        servings: currentServings || 4,
-        ingredients: activeRecipe.ingredients?.map((ing: any) => ing.text || ing) || [],
-        instructions: activeRecipe.steps?.map((step: any) => step.description || step) || [],
-        tips: (recipe as any).tips || '',
-        mode: 'recipe',
-        imageUrl: recipe.image || ''
-      };
-      
-      const response = await apiRequest("POST", "/api/save-recipe", recipeData);
-      if (!response.ok) {
-        throw new Error("Failed to save recipe");
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      setIsSaved(true);
-      queryClient.invalidateQueries({ queryKey: ['/api/recipes'] });
-      toast({
-        title: "Recipe saved!",
-        description: "Added to your cookbook",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Failed to save recipe",
-        description: error.message || "Please try again",
-        variant: "destructive",
-      });
-    }
-  });
 
-  const handleSaveRecipe = () => {
-    if (isSaved) {
-      toast({
-        title: "Already saved",
-        description: "This recipe is in your cookbook",
-      });
-      return;
-    }
-    saveMutation.mutate();
-  };
 
   const handleCopyIngredients = async () => {
     const ingredients = activeRecipe.ingredients?.map((ing: any) => ing.text || ing) || [];
@@ -314,21 +245,10 @@ Created with Flavr AI`;
                 onClick={handleCopyIngredients}
                 size="sm"
                 variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 p-2"
-                title="Copy Recipe"
+                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-3 py-2"
               >
-                <Copy className="w-4 h-4" />
-              </Button>
-              
-              <Button
-                onClick={handleSaveRecipe}
-                disabled={isSaved || saveMutation.isPending}
-                size="sm"
-                variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 p-2"
-                title={isSaved ? 'Already Saved' : 'Save to Cookbook'}
-              >
-                <Heart className={`w-4 h-4 ${isSaved ? 'fill-current text-red-400' : ''}`} />
+                <Copy className="w-4 h-4 mr-1.5" />
+                <span className="text-xs font-medium">Copy</span>
               </Button>
               
               <Button
@@ -336,24 +256,24 @@ Created with Flavr AI`;
                 disabled={isRerolling || !generationParams}
                 size="sm"
                 variant="secondary"
-                className="bg-orange-500/80 hover:bg-orange-500/90 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 p-2"
-                title="Generate New Recipe"
+                className="bg-orange-500/80 hover:bg-orange-500/90 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-3 py-2"
               >
                 {isRerolling ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
                 ) : (
-                  <RefreshCw className="w-4 h-4" />
+                  <RefreshCw className="w-4 h-4 mr-1.5" />
                 )}
+                <span className="text-xs font-medium">Reroll</span>
               </Button>
               
               <Button
                 onClick={handleStartAgain}
                 size="sm"
                 variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 p-2"
-                title="Start Over"
+                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-3 py-2"
               >
-                <RotateCcw className="w-4 h-4" />
+                <RotateCcw className="w-4 h-4 mr-1.5" />
+                <span className="text-xs font-medium">Start Over</span>
               </Button>
             </div>
           </div>
@@ -374,21 +294,10 @@ Created with Flavr AI`;
                 onClick={handleCopyIngredients}
                 size="sm"
                 variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 p-2"
-                title="Copy Recipe"
+                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-3 py-2"
               >
-                <Copy className="w-4 h-4" />
-              </Button>
-              
-              <Button
-                onClick={handleSaveRecipe}
-                disabled={isSaved || saveMutation.isPending}
-                size="sm"
-                variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 p-2"
-                title={isSaved ? 'Already Saved' : 'Save to Cookbook'}
-              >
-                <Heart className={`w-4 h-4 ${isSaved ? 'fill-current text-red-400' : ''}`} />
+                <Copy className="w-4 h-4 mr-1.5" />
+                <span className="text-xs font-medium">Copy</span>
               </Button>
               
               <Button
@@ -396,24 +305,24 @@ Created with Flavr AI`;
                 disabled={isRerolling || !generationParams}
                 size="sm"
                 variant="secondary"
-                className="bg-orange-500/80 hover:bg-orange-500/90 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 p-2"
-                title="Generate New Recipe"
+                className="bg-orange-500/80 hover:bg-orange-500/90 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-3 py-2"
               >
                 {isRerolling ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
                 ) : (
-                  <RefreshCw className="w-4 h-4" />
+                  <RefreshCw className="w-4 h-4 mr-1.5" />
                 )}
+                <span className="text-xs font-medium">Reroll</span>
               </Button>
               
               <Button
                 onClick={handleStartAgain}
                 size="sm"
                 variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 p-2"
-                title="Start Over"
+                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-3 py-2"
               >
-                <RotateCcw className="w-4 h-4" />
+                <RotateCcw className="w-4 h-4 mr-1.5" />
+                <span className="text-xs font-medium">Start Over</span>
               </Button>
             </div>
           </div>
