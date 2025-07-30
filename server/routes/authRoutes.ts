@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { storage } from "../storage";
 import bcrypt from "bcrypt";
 import passport from "passport";
-import { configureOAuthStrategies } from "../oauthStrategies";
+// OAuth strategies are now initialized in routes/index.ts
 
 // Session type extension
 declare module 'express-session' {
@@ -22,26 +22,7 @@ export const requireAuth = (req: any, res: any, next: any) => {
 };
 
 export function registerAuthRoutes(app: Express) {
-  // Configure OAuth strategies
-  configureOAuthStrategies();
-  
-  // Passport configuration
-  passport.serializeUser((user: any, done) => {
-    done(null, user.id);
-  });
-  
-  passport.deserializeUser(async (id: number, done) => {
-    try {
-      const user = await storage.getUser(id);
-      done(null, user);
-    } catch (error) {
-      done(error, null);
-    }
-  });
-  
-  // Initialize Passport
-  app.use(passport.initialize());
-  app.use(passport.session());
+  // OAuth strategies are configured in routes/index.ts
   // Register endpoint
   app.post("/api/register", async (req, res) => {
     try {
