@@ -8,7 +8,7 @@ import { animations, spacing } from '@/styles/tokens';
 import { useRecipeStore } from '@/stores/recipeStore';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface HeaderSectionProps {
   recipe: {
@@ -23,6 +23,97 @@ interface HeaderSectionProps {
   };
   currentServings: number;
   onServingsChange?: (servings: number) => void;
+}
+
+// Save Button Component for Header Section
+function SaveButton() {
+  const queryClient = useQueryClient();
+  const [isSaved, setIsSaved] = useState(false);
+  const { toast } = useToast();
+  const activeRecipe = useRecipeStore((state) => state);
+  
+  // Check if recipe is already saved in user's cookbook
+  const { data: savedRecipes } = useQuery({
+    queryKey: ['/api/recipes'],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/recipes");
+      if (!response.ok) return [];
+      return response.json();
+    }
+  });
+  
+  useEffect(() => {
+    if (savedRecipes && activeRecipe.meta.title) {
+      const alreadySaved = savedRecipes.some((r: any) => 
+        r.title === activeRecipe.meta.title && r.description === activeRecipe.meta.description
+      );
+      setIsSaved(alreadySaved);
+    }
+  }, [savedRecipes, activeRecipe.meta.title, activeRecipe.meta.description]);
+  
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const recipeData = {
+        title: activeRecipe.meta.title,
+        description: activeRecipe.meta.description,
+        cuisine: activeRecipe.meta.cuisine || '',
+        difficulty: activeRecipe.meta.difficulty || 'Medium',
+        cookTime: activeRecipe.meta.cookTime || 30,
+        servings: activeRecipe.servings || 4,
+        ingredients: activeRecipe.ingredients.map((ing: any) => ing.text || ing),
+        instructions: activeRecipe.steps.map((step: any) => step.description || step),
+        tips: '',
+        mode: 'shopping',
+        imageUrl: activeRecipe.meta.image || ''
+      };
+      
+      const response = await apiRequest("POST", "/api/save-recipe", recipeData);
+      if (!response.ok) {
+        throw new Error('Failed to save recipe');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      setIsSaved(true);
+      queryClient.invalidateQueries({ queryKey: ['/api/recipes'] });
+      toast({
+        title: "Recipe saved!",
+        description: "Recipe added to My Cookbook",
+      });
+    },
+    onError: (error: any) => {
+      if (error.message.includes('401')) {
+        toast({
+          title: "Sign in required",
+          description: "Please sign in to save recipes to My Cookbook",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Failed to save",
+          description: "Could not save recipe. Please try again.",
+          variant: "destructive"
+        });
+      }
+    }
+  });
+  
+  return (
+    <Button
+      onClick={() => !isSaved && saveMutation.mutate()}
+      disabled={isSaved || saveMutation.isPending}
+      size="sm"
+      variant="secondary"
+      className={`${
+        isSaved 
+          ? 'bg-red-500/20 border-red-500 text-red-300 hover:bg-red-500/30' 
+          : 'bg-black/40 hover:bg-black/60 text-white'
+      } backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-3 py-2`}
+    >
+      <Heart className={`w-4 h-4 mr-1.5 ${isSaved ? 'fill-current' : ''}`} />
+      <span className="text-xs font-medium">{isSaved ? 'Saved' : 'Save'}</span>
+    </Button>
+  );
 }
 
 export default function HeaderSection({ 
@@ -241,6 +332,8 @@ Created with Flavr AI`;
             
             {/* Action Buttons - Top Right Corner */}
             <div className="absolute top-3 right-3 flex items-center gap-1 sm:gap-2">
+              <SaveButton />
+              
               <Button
                 onClick={handleCopyIngredients}
                 size="sm"
@@ -290,6 +383,8 @@ Created with Flavr AI`;
             
             {/* Action Buttons - Top Right Corner (for no image state) */}
             <div className="absolute top-3 right-3 flex items-center gap-1 sm:gap-2">
+              <SaveButton />
+              
               <Button
                 onClick={handleCopyIngredients}
                 size="sm"

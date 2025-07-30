@@ -454,9 +454,9 @@ function EnhancedRecipeCard({
         completedSteps={[]}
       />
 
-      {/* Header Controls */}
-      <div className="flex items-center justify-between p-4 md:p-6 relative z-30">
-        {onBack && (
+      {/* Header Controls - Only show back button if needed */}
+      {onBack && (
+        <div className="flex items-center justify-between p-4 md:p-6 relative z-30">
           <Button
             onClick={onBack}
             variant="outline"
@@ -466,33 +466,22 @@ function EnhancedRecipeCard({
             <ArrowLeft className="w-4 h-4 mr-1" />
             Back
           </Button>
-        )}
-        
-        <div className="flex gap-2 ml-auto">
-          <FavoriteButton recipe={{
-            ...recipe,
-            title: activeTitle,
-            ingredients: activeIngredients,
-            instructions: activeInstructions,
-            servings: activeServings,
-            cookTime: activeCookTime,
-            difficulty: activeDifficulty,
-            image: activeImage,
-            imageUrl: activeImage
-          }} />
+          
           {onShare && (
-            <Button
-              onClick={onShare}
-              variant="outline"
-              size="sm"
-              className="bg-slate-800/80 border-slate-600 text-slate-200 hover:bg-slate-700/80 backdrop-blur-sm"
-            >
-              <Share2 className="w-4 h-4 mr-1" />
-              Share
-            </Button>
+            <div className="flex gap-2 ml-auto">
+              <Button
+                onClick={onShare}
+                variant="outline"
+                size="sm"
+                className="bg-slate-800/80 border-slate-600 text-slate-200 hover:bg-slate-700/80 backdrop-blur-sm"
+              >
+                <Share2 className="w-4 h-4 mr-1" />
+                Share
+              </Button>
+            </div>
           )}
         </div>
-      </div>
+      )}
 
 
 
