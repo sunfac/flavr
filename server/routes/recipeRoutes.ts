@@ -132,14 +132,7 @@ async function checkAndEnforceUsageLimit(req: any): Promise<{ allowed: boolean; 
         const isDeveloper = user.email === "william@blycontracting.co.uk";
         const hasUnlimitedAccess = user.hasFlavrPlus || isDeveloper;
         
-        console.log('🔍 QUOTA CHECK:', {
-          userId,
-          email: user.email,
-          hasFlavrPlus: user.hasFlavrPlus,
-          isDeveloper,
-          hasUnlimitedAccess,
-          recipesThisMonth: user.recipesThisMonth
-        });
+
         
         if (!hasUnlimitedAccess && (user.recipesThisMonth || 0) >= 3) {
           return { 
