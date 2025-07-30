@@ -111,7 +111,7 @@ function SaveButton() {
       } backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs`}
     >
       <Heart className={`w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1 ${isSaved ? 'fill-current' : ''}`} />
-      <span className="hidden sm:inline text-xs font-medium">{isSaved ? 'Saved' : 'Save'}</span>
+      <span className="text-xs font-medium">{isSaved ? 'Saved' : 'Save'}</span>
     </Button>
   );
 }
@@ -341,7 +341,7 @@ Created with Flavr AI`;
                 className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs"
               >
                 <Copy className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
-                <span className="hidden sm:inline text-xs font-medium">Copy</span>
+                <span className="text-xs font-medium">Copy</span>
               </Button>
               
               <Button
@@ -356,7 +356,7 @@ Created with Flavr AI`;
                 ) : (
                   <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
                 )}
-                <span className="hidden sm:inline text-xs font-medium">Reroll</span>
+                <span className="text-xs font-medium">Reroll</span>
               </Button>
               
               <Button
@@ -366,7 +366,7 @@ Created with Flavr AI`;
                 className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs"
               >
                 <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
-                <span className="hidden sm:inline text-xs font-medium">Start Over</span>
+                <span className="text-xs font-medium">Start Over</span>
               </Button>
             </div>
           </div>
@@ -392,7 +392,7 @@ Created with Flavr AI`;
                 className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs"
               >
                 <Copy className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
-                <span className="hidden sm:inline text-xs font-medium">Copy</span>
+                <span className="text-xs font-medium">Copy</span>
               </Button>
               
               <Button
@@ -407,7 +407,7 @@ Created with Flavr AI`;
                 ) : (
                   <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
                 )}
-                <span className="hidden sm:inline text-xs font-medium">Reroll</span>
+                <span className="text-xs font-medium">Reroll</span>
               </Button>
               
               <Button
@@ -417,7 +417,7 @@ Created with Flavr AI`;
                 className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs"
               >
                 <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
-                <span className="hidden sm:inline text-xs font-medium">Start Over</span>
+                <span className="text-xs font-medium">Start Over</span>
               </Button>
             </div>
           </div>
