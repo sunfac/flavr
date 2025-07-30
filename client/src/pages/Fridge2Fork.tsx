@@ -44,7 +44,8 @@ export default function Fridge2Fork() {
     retry: false,
   });
 
-  const hasFlavrPlus = subscriptionData && (subscriptionData as any).hasFlavrPlus;
+  // Check if user has Flavr+ subscription OR is unlimited (developer account)
+  const hasFlavrPlus = (subscriptionData && (subscriptionData as any).hasFlavrPlus) || (quotaData && (quotaData as any).isUnlimited);
   const hasReachedLimit = quotaData && (quotaData as any).remainingRecipes === 0 && !(quotaData as any).isUnlimited;
 
   const handleImageUpload = async (file: File) => {

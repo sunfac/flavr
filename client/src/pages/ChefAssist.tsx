@@ -89,7 +89,8 @@ export default function ChefAssist() {
     retry: false,
   });
 
-  const hasFlavrPlus = subscriptionData && (subscriptionData as any).hasFlavrPlus;
+  // Check if user has Flavr+ subscription OR is unlimited (developer account)
+  const hasFlavrPlus = (subscriptionData && (subscriptionData as any).hasFlavrPlus) || (quotaData && (quotaData as any).isUnlimited);
   const hasReachedLimit = quotaData && (quotaData as any).remainingRecipes === 0 && !(quotaData as any).isUnlimited;
 
   // Generate 9 random examples on component mount to show 3 different sets
