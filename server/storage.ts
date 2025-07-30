@@ -10,6 +10,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByEmailOrUsername(emailOrUsername: string): Promise<User | undefined>;
+  getUserByOAuth(provider: string, oauthId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserUsage(id: number, recipes: number, images: number): Promise<User>;
   updateUserStripeInfo(id: number, customerId: string, subscriptionId?: string): Promise<User>;
@@ -101,17 +102,27 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
+  async getUserByOAuth(provider: string, oauthId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(
+      and(
+        eq(users.oauthProvider, provider),
+        eq(users.oauthId, oauthId)
+      )
+    );
+    return user || undefined;
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
-    // Hash the password before storing
-    const saltRounds = 12;
-    const hashedPassword = await bcrypt.hash(insertUser.password, saltRounds);
+    // Only hash password if it's provided (not for OAuth users)
+    let userWithPassword = { ...insertUser };
     
-    const userWithHashedPassword = {
-      ...insertUser,
-      password: hashedPassword
-    };
+    if (insertUser.password) {
+      const saltRounds = 12;
+      const hashedPassword = await bcrypt.hash(insertUser.password, saltRounds);
+      userWithPassword.password = hashedPassword;
+    }
     
-    const [user] = await db.insert(users).values(userWithHashedPassword).returning();
+    const [user] = await db.insert(users).values(userWithPassword).returning();
     return user;
   }
 

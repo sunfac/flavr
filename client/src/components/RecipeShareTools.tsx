@@ -299,25 +299,56 @@ Servings: ${recipe?.servings || 4}`;
 
   const downloadPDF = () => {
     if (pdfRef.current) {
+      // Temporarily make the element visible for PDF generation
+      const element = pdfRef.current;
+      const originalPosition = element.style.position;
+      const originalTop = element.style.top;
+      const originalLeft = element.style.left;
+      const originalZIndex = element.style.zIndex;
+      
+      // Position element in visible area temporarily
+      element.style.position = 'absolute';
+      element.style.top = '0px';
+      element.style.left = '0px';
+      element.style.zIndex = '10000';
+      
       const options = {
         margin: 0.5,
         filename: `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-flavr-recipe.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff'
+        },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
       
       html2pdf()
         .set(options)
-        .from(pdfRef.current)
+        .from(element)
         .save()
         .then(() => {
+          // Restore original positioning
+          element.style.position = originalPosition;
+          element.style.top = originalTop;
+          element.style.left = originalLeft;
+          element.style.zIndex = originalZIndex;
+          
           toast({
             title: "PDF downloaded!",
             description: "Your recipe is ready to print or share",
           });
         })
-        .catch(() => {
+        .catch((error) => {
+          // Restore original positioning on error
+          element.style.position = originalPosition;
+          element.style.top = originalTop;
+          element.style.left = originalLeft;
+          element.style.zIndex = originalZIndex;
+          
+          console.error('PDF generation error:', error);
           toast({
             title: "Download failed",
             description: "Could not generate PDF",
@@ -329,8 +360,8 @@ Servings: ${recipe?.servings || 4}`;
 
   return (
     <div className="space-y-6">
-      {/* PDF Content - positioned off screen but visible for PDF generation */}
-      <div ref={pdfRef} className="fixed -top-[9999px] left-0 bg-white text-black p-8 font-sans w-[8.5in]">
+      {/* PDF Content - hidden but properly structured for generation */}
+      <div ref={pdfRef} className="opacity-0 pointer-events-none absolute -z-10 bg-white text-black p-8 font-sans w-[8.5in]">
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
           <p className="text-gray-600 text-lg">{description}</p>

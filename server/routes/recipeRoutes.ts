@@ -204,7 +204,17 @@ async function generateRecipeImage(recipeTitle: string, cuisine: string): Promis
   try {
     console.log('🎨 Generating recipe image with DALL-E 3...');
     
-    const imagePrompt = `A realistic photograph of ${recipeTitle} as it would be expertly plated and served by an accomplished chef. Show the complete dish with all components mentioned in the title, beautifully presented with professional plating techniques. ${cuisine} cuisine style. The food should display excellent knife skills, proper cooking techniques, and thoughtful garnishing - the work of someone with culinary training. Professional presentation with attention to color, texture, and composition. Include any sides, sauces, or accompaniments mentioned in the dish name, artfully arranged. Natural lighting, 45-degree angle view showing restaurant-quality execution while remaining true to the actual dish described.`;
+    // Enhanced prompt to avoid whole animals unless specifically mentioned
+    const shouldShowWholeAnimal = recipeTitle.toLowerCase().includes('whole') || 
+                                  recipeTitle.toLowerCase().includes('roast chicken') ||
+                                  recipeTitle.toLowerCase().includes('whole fish') ||
+                                  recipeTitle.toLowerCase().includes('roasted duck');
+    
+    const animalGuidance = shouldShowWholeAnimal ? 
+      '' : 
+      'Show prepared, portioned pieces (fillets, cuts, portions) rather than whole animals. Focus on the cooked, plated dish as served.';
+    
+    const imagePrompt = `A realistic photograph of ${recipeTitle} as it would be expertly plated and served by an accomplished chef. Show the complete dish with all components mentioned in the title, beautifully presented with professional plating techniques. ${cuisine} cuisine style. ${animalGuidance} The food should display excellent knife skills, proper cooking techniques, and thoughtful garnishing - the work of someone with culinary training. Professional presentation with attention to color, texture, and composition. Include any sides, sauces, or accompaniments mentioned in the dish name, artfully arranged. Natural lighting, 45-degree angle view showing restaurant-quality execution while remaining true to the actual dish described.`;
     
     const response = await openai.images.generate({
       model: "dall-e-3",

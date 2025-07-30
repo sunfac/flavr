@@ -27,6 +27,12 @@ export const users = pgTable("users", {
   googlePurchaseToken: text("google_purchase_token"),
   googleOrderId: text("google_order_id"),
   googleProductId: text("google_product_id"),
+  // OAuth authentication fields
+  oauthProvider: text("oauth_provider"), // 'google', 'apple', null for email
+  oauthId: text("oauth_id"), // OAuth provider's user ID
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  profileImage: text("profile_image"),
   // Universal subscription tracking
   subscriptionStartDate: timestamp("subscription_start_date"),
   subscriptionEndDate: timestamp("subscription_end_date"),

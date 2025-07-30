@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import { storage } from "../storage";
 import bcrypt from "bcrypt";
+import passport from "passport";
+import { configureOAuthStrategies } from "../oauthStrategies";
 
 // Session type extension
 declare module 'express-session' {
@@ -20,6 +22,26 @@ export const requireAuth = (req: any, res: any, next: any) => {
 };
 
 export function registerAuthRoutes(app: Express) {
+  // Configure OAuth strategies
+  configureOAuthStrategies();
+  
+  // Passport configuration
+  passport.serializeUser((user: any, done) => {
+    done(null, user.id);
+  });
+  
+  passport.deserializeUser(async (id: number, done) => {
+    try {
+      const user = await storage.getUser(id);
+      done(null, user);
+    } catch (error) {
+      done(error, null);
+    }
+  });
+  
+  // Initialize Passport
+  app.use(passport.initialize());
+  app.use(passport.session());
   // Register endpoint
   app.post("/api/register", async (req, res) => {
     try {
@@ -126,11 +148,79 @@ export function registerAuthRoutes(app: Express) {
     }
   });
 
+  // OAuth Routes
+  
+  // Google OAuth
+  app.get('/api/auth/google', passport.authenticate('google', { 
+    scope: ['profile', 'email'] 
+  }));
+  
+  app.get('/api/auth/google/callback', 
+    passport.authenticate('google', { failureRedirect: '/login?error=google' }),
+    async (req, res) => {
+      try {
+        // Set session data
+        const user = req.user as any;
+        req.session.userId = user.id;
+        req.session.isPlus = user.hasFlavrPlus;
+        
+        console.log(`Google OAuth login successful for user ${user.email}`);
+        
+        // Save session and redirect
+        req.session.save((err) => {
+          if (err) {
+            console.error('Session save error:', err);
+            return res.redirect('/login?error=session');
+          }
+          res.redirect('/'); // Redirect to home page
+        });
+      } catch (error) {
+        console.error('Google OAuth callback error:', error);
+        res.redirect('/login?error=callback');
+      }
+    }
+  );
+  
+  // Apple OAuth
+  app.get('/api/auth/apple', passport.authenticate('apple'));
+  
+  app.post('/api/auth/apple/callback',
+    passport.authenticate('apple', { failureRedirect: '/login?error=apple' }),
+    async (req, res) => {
+      try {
+        // Set session data
+        const user = req.user as any;
+        req.session.userId = user.id;
+        req.session.isPlus = user.hasFlavrPlus;
+        
+        console.log(`Apple OAuth login successful for user ${user.email}`);
+        
+        // Save session and redirect
+        req.session.save((err) => {
+          if (err) {
+            console.error('Session save error:', err);
+            return res.redirect('/login?error=session');
+          }
+          res.redirect('/'); // Redirect to home page
+        });
+      } catch (error) {
+        console.error('Apple OAuth callback error:', error);
+        res.redirect('/login?error=callback');
+      }
+    }
+  );
+
   // Logout endpoint  
   app.post("/api/logout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) console.error("Logout error:", err);
-      res.json({ message: "Logged out successfully" });
+    req.logout((err) => {
+      if (err) {
+        console.error('Logout error:', err);
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      req.session.destroy((err) => {
+        if (err) console.error("Session destroy error:", err);
+        res.json({ message: "Logged out successfully" });
+      });
     });
   });
 

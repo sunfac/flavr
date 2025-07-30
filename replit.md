@@ -195,6 +195,7 @@ See `STRIPE_SETUP.md` for detailed setup instructions.
 
 ```
 Changelog:
+- January 30, 2025. **COMPREHENSIVE GOOGLE AND APPLE OAUTH AUTHENTICATION SYSTEM IMPLEMENTED** - Complete OAuth integration with passport strategies for Google and Apple Sign-In, updated users database schema with oauthProvider and oauthId fields, enhanced AuthModal with OAuth buttons and smooth login flows, implemented proper OAuth callback handling and session management, added OAuth-specific user creation and authentication methods in storage layer, OAuth users automatically created without passwords for seamless authentication experience, full database migration support with OAuth field additions
 - June 20, 2025. Initial setup
 - June 20, 2025. Enhanced RecipeCard refactor complete - structured sections with responsive CSS Grid layout
 - June 20, 2025. Chatbot upgrade complete - OpenAI function calling for live recipe updates without page refreshes
