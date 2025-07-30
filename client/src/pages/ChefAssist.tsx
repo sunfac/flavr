@@ -12,6 +12,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { iconMap } from "@/lib/iconMap";
 import LoadingPage from "./LoadingPage";
 import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
+import { useQuery } from "@tanstack/react-query";
 
 // Use the original chef assist examples
 const chefExamples = [
@@ -76,6 +77,14 @@ export default function ChefAssist() {
   const { toast } = useToast();
   const { updateActiveRecipe } = useRecipeStore();
 
+  // Check quota status
+  const { data: quotaData } = useQuery({
+    queryKey: ['/api/quota-status'],
+    refetchInterval: 10000, // Refetch every 10 seconds
+  });
+
+  const hasReachedLimit = quotaData && (quotaData as any).remainingRecipes === 0 && !(quotaData as any).isUnlimited;
+
   // Generate 9 random examples on component mount to show 3 different sets
   const randomExamples = useMemo(() => getRandomSelection(chefExamples, 9), []);
 
@@ -88,6 +97,12 @@ export default function ChefAssist() {
   }, [randomExamples.length]);
 
   const handleInspireMe = async () => {
+    // Check quota limit
+    if (hasReachedLimit) {
+      setShowUpgradeModal(true);
+      return;
+    }
+
     setIsProcessing(true);
     try {
       // Get AI-generated unique suggestion
@@ -114,6 +129,12 @@ export default function ChefAssist() {
         description: "Tell us what you're craving!",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Check quota limit
+    if (hasReachedLimit) {
+      setShowUpgradeModal(true);
       return;
     }
 
@@ -242,19 +263,27 @@ export default function ChefAssist() {
                   <Button
                     onClick={handleInspireMe}
                     variant="outline"
-                    disabled={isProcessing}
-                    className="border-orange-400 text-orange-400 hover:bg-orange-400/10 text-sm md:text-base"
+                    disabled={isProcessing || hasReachedLimit}
+                    className={`text-sm md:text-base ${
+                      hasReachedLimit 
+                        ? 'border-slate-600 text-slate-500 opacity-50 cursor-not-allowed' 
+                        : 'border-orange-400 text-orange-400 hover:bg-orange-400/10'
+                    }`}
                   >
                     <Sparkles className="w-4 h-4 mr-2" />
-                    Inspire Me
+                    {hasReachedLimit ? 'Upgrade for More' : 'Inspire Me'}
                   </Button>
                 </div>
 
                 {/* Continue button matching original quiz style */}
                 <Button
                   onClick={handleGenerateRecipe}
-                  disabled={!prompt.trim() || isProcessing}
-                  className="w-full h-12 md:h-14 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium text-base md:text-lg rounded-xl shadow-lg"
+                  disabled={!prompt.trim() || isProcessing || hasReachedLimit}
+                  className={`w-full h-12 md:h-14 font-medium text-base md:text-lg rounded-xl shadow-lg ${
+                    hasReachedLimit 
+                      ? 'bg-slate-600 hover:bg-slate-600 cursor-not-allowed opacity-50' 
+                      : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700'
+                  } text-white`}
                   size="lg"
                 >
                   {isProcessing ? (
@@ -262,6 +291,8 @@ export default function ChefAssist() {
                       <Loader2 className="w-4 h-4 md:w-5 md:h-5 mr-2 animate-spin" />
                       Creating your recipe...
                     </>
+                  ) : hasReachedLimit ? (
+                    'Recipe limit reached - Upgrade to continue'
                   ) : (
                     <>
                       Continue

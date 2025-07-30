@@ -13,6 +13,7 @@ import LoadingPage from "./LoadingPage";
 import { useRecipeStore } from "@/stores/recipeStore";
 import RecipeSelectionCards from "@/components/RecipeSelectionCards";
 import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Fridge2Fork() {
   const [, navigate] = useLocation();
@@ -30,6 +31,14 @@ export default function Fridge2Fork() {
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { updateActiveRecipe } = useRecipeStore();
+
+  // Check quota status
+  const { data: quotaData } = useQuery({
+    queryKey: ['/api/quota-status'],
+    refetchInterval: 10000, // Refetch every 10 seconds
+  });
+
+  const hasReachedLimit = quotaData && (quotaData as any).remainingRecipes === 0 && !(quotaData as any).isUnlimited;
 
   const handleImageUpload = async (file: File) => {
     if (!file) return;
@@ -134,6 +143,12 @@ export default function Fridge2Fork() {
         description: "Please add some ingredients first",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Check quota limit
+    if (hasReachedLimit) {
+      setShowUpgradeModal(true);
       return;
     }
 
@@ -367,8 +382,12 @@ export default function Fridge2Fork() {
                 {/* Continue button matching original quiz style */}
                 <Button
                   onClick={handleGenerateRecipes}
-                  disabled={ingredients.length === 0 || isProcessing}
-                  className="w-full h-14 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium text-lg rounded-xl shadow-lg"
+                  disabled={ingredients.length === 0 || isProcessing || hasReachedLimit}
+                  className={`w-full h-14 font-medium text-lg rounded-xl shadow-lg ${
+                    hasReachedLimit 
+                      ? 'bg-slate-600 hover:bg-slate-600 cursor-not-allowed opacity-50' 
+                      : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700'
+                  } text-white`}
                   size="lg"
                 >
                   {isProcessing ? (
@@ -376,6 +395,8 @@ export default function Fridge2Fork() {
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                       Generating recipes...
                     </>
+                  ) : hasReachedLimit ? (
+                    'Recipe limit reached - Upgrade to continue'
                   ) : (
                     <>
                       Continue
