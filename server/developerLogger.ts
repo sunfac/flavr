@@ -122,11 +122,35 @@ export async function logSimpleGPTInteraction(params: {
   sessionId?: string;
 }): Promise<void> {
   try {
-    // Only log essential information to avoid database issues
+    // Log to console for immediate feedback
     console.log(`🔍 API LOG - ${params.endpoint}: ${params.success ? '✅' : '❌'} | Cost: $${params.cost.toFixed(4)} | Tokens: ${params.inputTokens}→${params.outputTokens} | Duration: ${params.duration}ms`);
     
-    // For now, just log to console to avoid database field mismatches
-    // Could be enhanced later with a dedicated API logs table
+    // Also save to database for session persistence if we have a userId
+    if (params.userId && params.success) {
+      const userIdNumber = parseInt(params.userId);
+      if (!isNaN(userIdNumber)) {
+        const logEntry: InsertDeveloperLog = {
+          userId: userIdNumber,
+          mode: params.endpoint,
+          quizInputs: {}, // Simple interactions don't have quiz inputs
+          promptSent: params.prompt.length > 5000 ? params.prompt.substring(0, 5000) + '...[truncated]' : params.prompt,
+          gptResponse: params.response.length > 5000 ? params.response.substring(0, 5000) + '...[truncated]' : params.response,
+          expectedOutput: {}, // Simple interactions don't have expected output analysis
+          actualOutput: { response: params.response },
+          inputTokens: params.inputTokens,
+          outputTokens: params.outputTokens,
+          estimatedCost: `$${params.cost.toFixed(4)}`,
+          matchStatus: true, // Simple interactions are considered successful if they complete
+          discrepancies: null,
+          imagePrompt: null,
+          imageGenerated: false,
+          imageUrl: null,
+          imageCost: null,
+        };
+        
+        await storage.createDeveloperLog(logEntry);
+      }
+    }
   } catch (error) {
     console.error('Failed to log GPT interaction:', error);
   }
