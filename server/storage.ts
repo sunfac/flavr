@@ -179,19 +179,14 @@ export class DatabaseStorage implements IStorage {
     return updatedUser;
   }
 
-  async resetMonthlyUsage(userId: number): Promise<void> {
-    await db.update(users)
+  async resetMonthlyUsage(userId: number): Promise<User> {
+    const [user] = await db.update(users)
       .set({ 
         recipesThisMonth: 0,
+        imagesThisMonth: 0,
         lastMonthlyReset: new Date()
       })
-      .where(eq(users.id, userId));
-  }
-
-  async resetMonthlyUsage(id: number): Promise<User> {
-    const [user] = await db.update(users)
-      .set({ recipesThisMonth: 0, imagesThisMonth: 0 })
-      .where(eq(users.id, id))
+      .where(eq(users.id, userId))
       .returning();
     return user;
   }
