@@ -108,10 +108,10 @@ function SaveButton() {
         isSaved 
           ? 'bg-red-500/20 border-red-500 text-red-300 hover:bg-red-500/30' 
           : 'bg-black/40 hover:bg-black/60 text-white'
-      } backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-3 py-2`}
+      } backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs`}
     >
-      <Heart className={`w-4 h-4 mr-1.5 ${isSaved ? 'fill-current' : ''}`} />
-      <span className="text-xs font-medium">{isSaved ? 'Saved' : 'Save'}</span>
+      <Heart className={`w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1 ${isSaved ? 'fill-current' : ''}`} />
+      <span className="hidden sm:inline text-xs font-medium">{isSaved ? 'Saved' : 'Save'}</span>
     </Button>
   );
 }
@@ -331,17 +331,17 @@ Created with Flavr AI`;
             </div>
             
             {/* Action Buttons - Top Right Corner */}
-            <div className="absolute top-3 right-3 flex items-center gap-1 sm:gap-2">
+            <div className="absolute top-2 right-2 flex items-center gap-0.5 sm:gap-1 md:gap-2 flex-wrap">
               <SaveButton />
               
               <Button
                 onClick={handleCopyIngredients}
                 size="sm"
                 variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-3 py-2"
+                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs"
               >
-                <Copy className="w-4 h-4 mr-1.5" />
-                <span className="text-xs font-medium">Copy</span>
+                <Copy className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+                <span className="hidden sm:inline text-xs font-medium">Copy</span>
               </Button>
               
               <Button
@@ -349,24 +349,24 @@ Created with Flavr AI`;
                 disabled={isRerolling || !generationParams}
                 size="sm"
                 variant="secondary"
-                className="bg-orange-500/80 hover:bg-orange-500/90 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-3 py-2"
+                className="bg-orange-500/80 hover:bg-orange-500/90 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs"
               >
                 {isRerolling ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                  <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin mr-0.5 sm:mr-1" />
                 ) : (
-                  <RefreshCw className="w-4 h-4 mr-1.5" />
+                  <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
                 )}
-                <span className="text-xs font-medium">Reroll</span>
+                <span className="hidden sm:inline text-xs font-medium">Reroll</span>
               </Button>
               
               <Button
                 onClick={handleStartAgain}
                 size="sm"
                 variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-3 py-2"
+                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs"
               >
-                <RotateCcw className="w-4 h-4 mr-1.5" />
-                <span className="text-xs font-medium">Start Over</span>
+                <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+                <span className="hidden sm:inline text-xs font-medium">Start Over</span>
               </Button>
             </div>
           </div>
@@ -382,17 +382,17 @@ Created with Flavr AI`;
             </div>
             
             {/* Action Buttons - Top Right Corner (for no image state) */}
-            <div className="absolute top-3 right-3 flex items-center gap-1 sm:gap-2">
+            <div className="absolute top-2 right-2 flex items-center gap-0.5 sm:gap-1 md:gap-2 flex-wrap">
               <SaveButton />
               
               <Button
                 onClick={handleCopyIngredients}
                 size="sm"
                 variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-3 py-2"
+                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs"
               >
-                <Copy className="w-4 h-4 mr-1.5" />
-                <span className="text-xs font-medium">Copy</span>
+                <Copy className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+                <span className="hidden sm:inline text-xs font-medium">Copy</span>
               </Button>
               
               <Button
@@ -400,24 +400,24 @@ Created with Flavr AI`;
                 disabled={isRerolling || !generationParams}
                 size="sm"
                 variant="secondary"
-                className="bg-orange-500/80 hover:bg-orange-500/90 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-3 py-2"
+                className="bg-orange-500/80 hover:bg-orange-500/90 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs"
               >
                 {isRerolling ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                  <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin mr-0.5 sm:mr-1" />
                 ) : (
-                  <RefreshCw className="w-4 h-4 mr-1.5" />
+                  <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
                 )}
-                <span className="text-xs font-medium">Reroll</span>
+                <span className="hidden sm:inline text-xs font-medium">Reroll</span>
               </Button>
               
               <Button
                 onClick={handleStartAgain}
                 size="sm"
                 variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-3 py-2"
+                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs"
               >
-                <RotateCcw className="w-4 h-4 mr-1.5" />
-                <span className="text-xs font-medium">Start Over</span>
+                <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+                <span className="hidden sm:inline text-xs font-medium">Start Over</span>
               </Button>
             </div>
           </div>
