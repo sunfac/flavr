@@ -1,6 +1,36 @@
 // Comprehensive flavor maximization prompts for recipe generation
 // These prompts ensure recipes use proper culinary techniques to achieve maximum flavor
 
+// Enhanced authenticity requirements for traditional dishes
+export const AUTHENTICITY_ENHANCEMENT = `
+**MANDATORY AUTHENTICITY AND FLAVOR COMPLETENESS:**
+
+When creating ANY traditional or named dish, you MUST include all essential authentic ingredients that define that dish's flavor profile. Missing traditional components undermines both authenticity and flavor maximization.
+
+**SPECIFIC DISH REQUIREMENTS:**
+- Thai Papaya Salad: green papaya, fish sauce, palm sugar, lime juice, peanuts, dried shrimp, tomatoes, shallots, bird's eye chillies
+- Stir-fries: bean sprouts, spring onions, ginger, garlic, soy sauce, sesame oil, appropriate vegetables
+- Thai Curries: curry paste, coconut milk, fish sauce, palm sugar, thai basil, galangal, lime leaves
+- Italian Pasta: quality olive oil, garlic, fresh herbs, parmesan (where appropriate)
+- Mexican Dishes: lime, cilantro, onions, appropriate chillies
+- Indian Curries: whole spices, ginger-garlic paste, onions, appropriate aromatics
+- Middle Eastern: sumac, za'atar, pomegranate molasses, tahini (where appropriate)
+
+**STIR-FRY COMPLETENESS MANDATE:**
+Every stir-fry MUST include: bean sprouts (texture), spring onions (freshness), aromatics (ginger/garlic), umami (soy sauce), finish (sesame oil), seasonal vegetables
+
+**SALAD COMPLETENESS MANDATE:**
+Every traditional salad MUST balance: acid (lime/vinegar), sweet (palm sugar/honey), salty/umami (fish sauce/cheese), herbs, textural variety, aromatics (shallots where appropriate)
+
+**CUISINE-SPECIFIC ESSENTIALS:**
+- Asian dishes: Include appropriate balance of sweet, sour, salty, umami, and spice
+- Mediterranean: Olive oil, herbs, acid balance (lemon/vinegar)
+- Latin American: Lime, cilantro, appropriate heat level
+- European: Proper aromatic bases (mirepoix, soffritto, etc.)
+
+This ensures every dish achieves maximum authentic flavor rather than simplified versions missing key components.
+`;
+
 export const FLAVOR_MAXIMIZATION_CORE = `
 CHEF-DRIVEN CREATIVE FREEDOM WITH FLAVOR MAXIMIZATION:
 
@@ -52,6 +82,78 @@ CHEF-DRIVEN CREATIVE FREEDOM WITH FLAVOR MAXIMIZATION:
 - Use fresh herbs at finish, dried herbs during cooking
 - Select cooking methods that enhance rather than mask ingredient flavors
 - Prefer ingredients with natural flavor intensity over bland alternatives
+
+**AUTHENTIC CUISINE INGREDIENT COMPLETENESS:**
+When creating specific traditional dishes, ALWAYS include their essential flavor components:
+
+**Asian Cuisine Essentials:**
+- Thai dishes: fish sauce, palm sugar, lime juice, shallots, bird's eye chillies, galangal
+- Thai salads (som tam): green papaya, palm sugar, fish sauce, lime juice, peanuts, dried shrimp, tomatoes
+- Chinese stir-fries: garlic, ginger, spring onions, soy sauce, rice wine, sesame oil
+- Japanese dishes: mirin, sake, miso, dashi, miso paste, rice vinegar
+- Korean dishes: gochujang, sesame oil, garlic, ginger, soy sauce, rice vinegar
+- Vietnamese dishes: fish sauce, lime, herbs (mint, coriander, Thai basil), bean sprouts
+
+**European Cuisine Essentials:**
+- Italian dishes: garlic, good olive oil, fresh herbs (basil, oregano, parsley), parmesan
+- French dishes: shallots, butter, wine, fresh herbs, cream, proper stocks
+- Spanish dishes: saffron, paprika, olive oil, garlic, sherry vinegar
+- Greek dishes: olive oil, lemon, oregano, feta, olives
+
+**Middle Eastern/Mediterranean:**
+- Sumac, za'atar, pomegranate molasses, tahini, preserved lemons, harissa
+
+**Indian Subcontinent:**
+- Whole spices (cumin, coriander, cardamom), garam masala, ginger-garlic paste, curry leaves
+
+**Latin American:**
+- Lime juice, cilantro, chillies, cumin, garlic, onions
+
+**Essential Aromatic Bases by Cuisine:**
+- French: mirepoix (onion, carrot, celery)
+- Italian: soffritto (onion, carrot, celery, garlic)
+- Spanish: sofrito (onion, garlic, tomato, peppers)
+- Cajun/Creole: holy trinity (onion, celery, bell pepper)
+- Thai: garlic, shallots, chillies, galangal/ginger
+- Chinese: ginger, garlic, spring onions
+- Indian: onion, ginger, garlic (sometimes tomato)
+
+**DISH-SPECIFIC AUTHENTICITY REQUIREMENTS:**
+When generating ANY traditional dish, MANDATORY inclusion of authentic ingredients:
+
+**Thai Papaya Salad (Som Tam):** green papaya, fish sauce, palm sugar, lime juice, peanuts, dried shrimp, cherry tomatoes, long beans, bird's eye chillies, garlic, shallots
+**Thai Green Curry:** green curry paste, coconut milk, thai basil, fish sauce, palm sugar, galangal, lime leaves, thai aubergines
+**Pad Thai:** rice noodles, fish sauce, tamarind paste, palm sugar, dried shrimp, peanuts, bean sprouts, garlic chives, lime
+**Chinese Stir-fries:** soy sauce, rice wine, sesame oil, ginger, garlic, spring onions, plus appropriate vegetables (bean sprouts, pak choi, etc.)
+**Japanese Ramen:** dashi, miso/soy/tonkotsu base, nori, spring onions, bamboo shoots, soft-boiled egg, chashu
+**Indian Curry:** whole spices (cumin, coriander, cardamom), onions, ginger-garlic paste, tomatoes, garam masala
+**Italian Carbonara:** eggs, pecorino romano, guanciale/pancetta, black pepper (NO cream)
+**French Coq au Vin:** chicken, red wine, pearl onions, mushrooms, bacon, herbs de provence
+**Mexican Tacos:** corn tortillas, onions, cilantro, lime, salsa verde/roja
+**Greek Moussaka:** aubergine, béchamel, lamb mince, tomatoes, onions, oregano, olive oil
+
+**CRITICAL AUTHENTICITY RULE:**
+If generating a named traditional dish, research and include ALL essential traditional ingredients that define that dish's authentic flavor profile. Missing key ingredients compromises authenticity and flavor maximization.
+
+**STIR-FRY ENHANCEMENT REQUIREMENTS:**
+For ANY stir-fry dish, ALWAYS include these flavor and texture essentials:
+- Bean sprouts (for crunch and freshness)
+- Spring onions/scallions (for sharp freshness) 
+- Fresh ginger and garlic (aromatic base)
+- Soy sauce (umami depth)
+- Sesame oil (finish for nuttiness)
+- Appropriate protein (chicken, beef, prawns, tofu)
+- Seasonal vegetables (pak choi, bell peppers, carrots, mushrooms)
+- Rice wine or mirin (sweetness and depth)
+
+**SALAD ENHANCEMENT REQUIREMENTS:**
+For traditional salads, ensure proper flavor balance:
+- Acid component (citrus, vinegar, fermented elements)
+- Sweet component (palm sugar, honey, fruit)
+- Salty/umami component (fish sauce, cheese, olives, anchovies)
+- Fresh herbs (basil, mint, coriander, parsley)
+- Textural variety (nuts, seeds, croutons, crispy elements)
+- Aromatics (shallots, garlic, ginger where appropriate)
 
 **PROFESSIONAL FINISHING TECHNIQUES:**
 - Taste and adjust seasoning before serving

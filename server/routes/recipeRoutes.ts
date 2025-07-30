@@ -29,7 +29,8 @@ import {
   FLAVOR_MAXIMIZATION_CORE, 
   FLAVOR_BALANCE_REQUIREMENTS, 
   UK_CONSUMER_FLAVOR_PREFERENCES, 
-  PROFESSIONAL_TECHNIQUE_INTEGRATION 
+  PROFESSIONAL_TECHNIQUE_INTEGRATION,
+  AUTHENTICITY_ENHANCEMENT 
 } from "../flavorMaximizationPrompts";
 
 // Configure multer for file uploads
@@ -413,6 +414,8 @@ DISH COMPOSITION PHILOSOPHY:
 
 AVAILABLE INGREDIENTS BY CUISINE COMPATIBILITY:
 ${cuisineNotes.join("\n")}
+
+${AUTHENTICITY_ENHANCEMENT}
 
 RECIPE CREATION RULES - STRICT INGREDIENT RESTRICTIONS:
 - **PRIMARY RULE**: Use ONLY the ingredients provided by the user above
@@ -1071,6 +1074,8 @@ Create a complete recipe that EXACTLY matches what the user asked for: "${userPr
 - Seed variations should only add creative flair, not change the fundamental request
 - If user says "pasta", don't make rice. If user says "chicken", don't use beef.
 
+${AUTHENTICITY_ENHANCEMENT}
+
 REQUIREMENTS:
 - Servings: ${servings}
 - Calculate a realistic cooking time based on actual recipe steps
@@ -1302,6 +1307,9 @@ FLAVOR BALANCE MANDATE: Every dish must achieve harmony between:
 - FAT: Richness from oils, butter, nuts, or naturally fatty proteins for mouthfeel and satisfaction
 
 AVAILABLE INGREDIENTS: ${ingredients.join(", ")}
+
+${AUTHENTICITY_ENHANCEMENT}
+
 CONSTRAINTS:
 - Servings: ${servings}
 - Budget per serving: £${(budget / servings).toFixed(2)}
@@ -1909,6 +1917,8 @@ SELECTED RECIPE CONCEPT:
 • Cuisine: ${selectedRecipe.cuisine}
 
 ${strictDietaryInstruction}
+
+${AUTHENTICITY_ENHANCEMENT}
 
 REQUIREMENTS:
 - Create a complete recipe with precise measurements for ${portions} servings
