@@ -890,13 +890,13 @@ These should be BESTSELLER dishes that restaurants are famous for. ABSOLUTE RULE
         endpoint: "chef-assist-inspire",
         prompt: prompt,
         response: suggestion,
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o",
         duration: 0,
         inputTokens: Math.ceil(prompt.length / 4),
         outputTokens: Math.ceil(suggestion.length / 4),
-        cost: 0.0002, // Estimated cost for GPT-3.5 turbo
+        cost: 0.0002, // Estimated cost for GPT-4o
         success: true,
-        userId: req.session?.userId?.toString() || 'anonymous'
+        userId: req.session?.userId?.toString()
       }).catch(err => console.error('Background logging failed:', err));
       
       res.json({ suggestion });
@@ -908,13 +908,13 @@ These should be BESTSELLER dishes that restaurants are famous for. ABSOLUTE RULE
         endpoint: "chef-assist-inspire",
         prompt: '',
         response: error.message || 'Failed to generate inspiration',
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o",
         duration: 0,
         inputTokens: 0,
         outputTokens: 0,
         cost: 0,
         success: false,
-        userId: req.session?.userId?.toString() || 'anonymous'
+        userId: req.session?.userId?.toString()
       }).catch(err => console.error('Background logging failed:', err));
       
       res.status(500).json({ error: "Failed to generate inspiration" });
