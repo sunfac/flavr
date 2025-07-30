@@ -842,13 +842,27 @@ MENU BESTSELLER REQUIREMENTS:
 
 DO NOT mix cuisines or create fusion dishes. Stay authentic to ONE cuisine tradition.
 
+COMPLETE DISH AUTHENTICITY:
+- Traditional dishes must include their authentic accompaniments (curry with rice, fish with chips, steak with proper sauce)
+- Respect cuisine-specific ingredient combinations and cooking methods
+- Suggest dishes that represent the complete dining experience, not just isolated components
+- Focus on dishes that are culturally complete and satisfying as full meals
+
 Return only the recipe name in 4-8 words. Be wildly creative and diverse using ALL variation parameters.
 Multi-Layer Seeds: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: `You are creating THE dish that everyone orders - the absolute menu standout that makes people's mouths water just reading it. Think "Crispy Chicken with Honey Glaze", "Tender Beef with Peppercorn Sauce", "Pan-Fried Salmon with Garlic Butter" - names that make you hungry instantly. These should be BESTSELLER dishes that restaurants are famous for. ABSOLUTE RULE: Only common UK supermarket ingredients, but make them sound irresistible. Think of the dish that sells out first, that people recommend to friends, that makes the restaurant's reputation. Return ONLY the recipe name in 4-8 words using UK English terminology. Make it the kind of dish people crave and come back for. MULTI-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
+          { role: "system", content: `You are creating THE dish that everyone orders - the absolute menu standout that makes people's mouths water just reading it. Think "Crispy Chicken with Honey Glaze", "Tender Beef with Peppercorn Sauce", "Pan-Fried Salmon with Garlic Butter" - names that make you hungry instantly. 
+
+AUTHENTICITY & COMPLETENESS REQUIREMENTS:
+- Suggest COMPLETE DISHES only (main + sides + sauces when traditional)
+- Respect traditional cuisine authenticity (Thai dishes include proper herbs/spices, Italian uses authentic techniques)
+- Focus on dishes that represent their cuisine properly and completely
+- Example complete suggestions: "Thai Green Curry with Jasmine Rice and Pickled Vegetables", "Fish and Chips with Mushy Peas and Tartare Sauce", "Beef Wellington with Roasted Root Vegetables"
+
+These should be BESTSELLER dishes that restaurants are famous for. ABSOLUTE RULE: Only common UK supermarket ingredients, but make them sound irresistible. Think of the dish that sells out first, that people recommend to friends, that makes the restaurant's reputation. Return ONLY the recipe name in 4-8 words using UK English terminology. Make it the kind of dish people crave and come back for. MULTI-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
           { role: "user", content: prompt }
         ],
         temperature: 1.2,

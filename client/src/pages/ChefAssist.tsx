@@ -83,6 +83,13 @@ export default function ChefAssist() {
     refetchInterval: 10000, // Refetch every 10 seconds
   });
 
+  // Check subscription status
+  const { data: subscriptionData } = useQuery({
+    queryKey: ['/api/subscription-status'],
+    retry: false,
+  });
+
+  const hasFlavrPlus = subscriptionData && (subscriptionData as any).hasFlavrPlus;
   const hasReachedLimit = quotaData && (quotaData as any).remainingRecipes === 0 && !(quotaData as any).isUnlimited;
 
   // Generate 9 random examples on component mount to show 3 different sets
@@ -97,8 +104,8 @@ export default function ChefAssist() {
   }, [randomExamples.length]);
 
   const handleInspireMe = async () => {
-    // Check quota limit
-    if (hasReachedLimit) {
+    // Only check quota limit for non-subscribers
+    if (!hasFlavrPlus && hasReachedLimit) {
       setShowUpgradeModal(true);
       return;
     }
@@ -132,8 +139,8 @@ export default function ChefAssist() {
       return;
     }
 
-    // Check quota limit
-    if (hasReachedLimit) {
+    // Only check quota limit for non-subscribers
+    if (!hasFlavrPlus && hasReachedLimit) {
       setShowUpgradeModal(true);
       return;
     }
@@ -263,24 +270,24 @@ export default function ChefAssist() {
                   <Button
                     onClick={handleInspireMe}
                     variant="outline"
-                    disabled={isProcessing || hasReachedLimit}
+                    disabled={isProcessing || (!hasFlavrPlus && hasReachedLimit)}
                     className={`text-sm md:text-base ${
-                      hasReachedLimit 
+                      !hasFlavrPlus && hasReachedLimit 
                         ? 'border-slate-600 text-slate-500 opacity-50 cursor-not-allowed' 
                         : 'border-orange-400 text-orange-400 hover:bg-orange-400/10'
                     }`}
                   >
                     <Sparkles className="w-4 h-4 mr-2" />
-                    {hasReachedLimit ? 'Upgrade for More' : 'Inspire Me'}
+                    {!hasFlavrPlus && hasReachedLimit ? 'Upgrade for More' : 'Inspire Me'}
                   </Button>
                 </div>
 
                 {/* Continue button matching original quiz style */}
                 <Button
                   onClick={handleGenerateRecipe}
-                  disabled={!prompt.trim() || isProcessing || hasReachedLimit}
+                  disabled={!prompt.trim() || isProcessing || (!hasFlavrPlus && hasReachedLimit)}
                   className={`w-full h-12 md:h-14 font-medium text-base md:text-lg rounded-xl shadow-lg ${
-                    hasReachedLimit 
+                    !hasFlavrPlus && hasReachedLimit 
                       ? 'bg-slate-600 hover:bg-slate-600 cursor-not-allowed opacity-50' 
                       : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700'
                   } text-white`}
@@ -291,7 +298,7 @@ export default function ChefAssist() {
                       <Loader2 className="w-4 h-4 md:w-5 md:h-5 mr-2 animate-spin" />
                       Creating your recipe...
                     </>
-                  ) : hasReachedLimit ? (
+                  ) : (!hasFlavrPlus && hasReachedLimit) ? (
                     'Recipe limit reached - Upgrade to continue'
                   ) : (
                     <>

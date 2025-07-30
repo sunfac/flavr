@@ -38,6 +38,13 @@ export default function Fridge2Fork() {
     refetchInterval: 10000, // Refetch every 10 seconds
   });
 
+  // Check subscription status
+  const { data: subscriptionData } = useQuery({
+    queryKey: ['/api/subscription-status'],
+    retry: false,
+  });
+
+  const hasFlavrPlus = subscriptionData && (subscriptionData as any).hasFlavrPlus;
   const hasReachedLimit = quotaData && (quotaData as any).remainingRecipes === 0 && !(quotaData as any).isUnlimited;
 
   const handleImageUpload = async (file: File) => {
@@ -146,8 +153,8 @@ export default function Fridge2Fork() {
       return;
     }
 
-    // Check quota limit
-    if (hasReachedLimit) {
+    // Only check quota limit for non-subscribers
+    if (!hasFlavrPlus && hasReachedLimit) {
       setShowUpgradeModal(true);
       return;
     }
