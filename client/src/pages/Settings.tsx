@@ -81,14 +81,15 @@ export default function Settings() {
     },
   });
 
+  // Extract data before any conditional returns
+  const user = userData?.user;
+  const hasFlavrPlus = (subscriptionData as any)?.hasFlavrPlus || (user as any)?.hasFlavrPlus;
+  const cancelAtPeriodEnd = (subscriptionData as any)?.cancelAtPeriodEnd;
+  const currentPeriodEnd = (subscriptionData as any)?.currentPeriodEnd;
+
   if (userLoading || subLoading) {
     return <Loading message="Loading settings..." />;
   }
-
-  const user = userData?.user;
-  const hasFlavrPlus = subscriptionData?.hasFlavrPlus || user?.hasFlavrPlus;
-  const cancelAtPeriodEnd = subscriptionData?.cancelAtPeriodEnd;
-  const currentPeriodEnd = subscriptionData?.currentPeriodEnd;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black">
