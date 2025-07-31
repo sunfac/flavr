@@ -18,7 +18,9 @@ import {
   Heart,
   Smile,
   Zap,
-  Coffee
+  Coffee,
+  Camera,
+  Plus
 } from "lucide-react";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalNavigation from "@/components/GlobalNavigation";
@@ -185,9 +187,19 @@ export default function MyRecipes() {
       <main className="container mx-auto px-6 py-8 relative z-10 pb-24 pt-24">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold leading-tight mb-3 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
-            My Recipes
-          </h1>
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <h1 className="text-3xl md:text-4xl font-bold leading-tight bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
+              My Recipes
+            </h1>
+            <Button
+              onClick={() => navigate('/photo-to-recipe')}
+              className="bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-2"
+              size="sm"
+            >
+              <Camera className="w-4 h-4" />
+              <span className="hidden sm:inline">Photo to Recipe</span>
+            </Button>
+          </div>
           <p className="text-lg text-slate-400 max-w-lg mx-auto leading-relaxed">
             Your personal collection of AI-generated recipes
           </p>
@@ -216,10 +228,21 @@ export default function MyRecipes() {
               <ChefHat className="w-12 h-12 text-orange-400" />
             </div>
             <h3 className="text-xl font-semibold text-foreground mb-2">No recipes yet</h3>
-            <p className="text-muted-foreground mb-6">Start creating delicious recipes with AI</p>
-            <Button onClick={() => navigate("/app")} className="bg-orange-500 hover:bg-orange-600">
-              Create Your First Recipe
-            </Button>
+            <p className="text-muted-foreground mb-6">Start creating delicious recipes with AI or photograph your cookbook pages</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button onClick={() => navigate("/app")} className="bg-orange-500 hover:bg-orange-600">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Recipe
+              </Button>
+              <Button 
+                onClick={() => navigate("/photo-to-recipe")} 
+                variant="outline"
+                className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white"
+              >
+                <Camera className="w-4 h-4 mr-2" />
+                Photo to Recipe
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
