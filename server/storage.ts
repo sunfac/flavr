@@ -132,7 +132,7 @@ export class DatabaseStorage implements IStorage {
     console.log(`📝 Updating user ${id} with:`, updates);
     const [updatedUser] = await db
       .update(users)
-      .set({ ...updates, updatedAt: new Date() })
+      .set(updates)
       .where(eq(users.id, id))
       .returning();
     return updatedUser;
@@ -180,6 +180,12 @@ export class DatabaseStorage implements IStorage {
   async incrementUsage(userId: number): Promise<User> {
     const user = await this.getUser(userId);
     if (!user) throw new Error('User not found');
+    
+    // Developer account doesn't increment usage
+    const isDeveloper = user.email === 'william@blycontracting.co.uk';
+    if (isDeveloper || user.hasFlavrPlus) {
+      return user; // Don't increment for unlimited users
+    }
     
     const [updatedUser] = await db.update(users)
       .set({ 
@@ -241,11 +247,15 @@ export class DatabaseStorage implements IStorage {
         throw new Error('User not found');
       }
 
+      // Developer account gets unlimited access
+      const isDeveloper = user.email === 'william@blycontracting.co.uk';
+      const hasAccess = user.hasFlavrPlus || isDeveloper;
+      
       return {
-        canGenerate: user.hasFlavrPlus || (user.recipesThisMonth || 0) < (user.monthlyRecipeLimit || 3),
-        recipesUsed: user.recipesThisMonth || 0,
-        recipesLimit: user.hasFlavrPlus ? 999 : (user.monthlyRecipeLimit || 3),
-        hasFlavrPlus: user.hasFlavrPlus || false
+        canGenerate: hasAccess || (user.recipesThisMonth || 0) < (user.monthlyRecipeLimit || 3),
+        recipesUsed: hasAccess ? -1 : (user.recipesThisMonth || 0), // -1 indicates unlimited
+        recipesLimit: hasAccess ? 999 : (user.monthlyRecipeLimit || 3),
+        hasFlavrPlus: hasAccess
       };
     } else {
       const pseudoUser = await this.getPseudoUser(userIdOrPseudoId as string);

@@ -43,9 +43,12 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      // Check Flavr+ subscription
+      // Check Flavr+ subscription or developer access
       const user = await storage.getUser(req.session.userId);
-      const hasFlavrPlus = user?.hasFlavrPlus || user?.email === 'william@blycontracting.co.uk';
+      const isDeveloper = user?.email === 'william@blycontracting.co.uk';
+      const hasFlavrPlus = user?.hasFlavrPlus || isDeveloper;
+      
+      console.log(`🔐 Photo-to-recipe access check: user=${user?.email}, hasFlavrPlus=${user?.hasFlavrPlus}, isDeveloper=${isDeveloper}, hasAccess=${hasFlavrPlus}`);
       
       if (!hasFlavrPlus) {
         return res.status(403).json({ 
