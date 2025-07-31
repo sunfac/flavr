@@ -11,7 +11,7 @@ import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
 import GlobalNavigation from "@/components/GlobalNavigation";
 import Loading from "@/components/Loading";
-import BiometricAuth from "@/components/BiometricAuth";
+
 
 export default function Settings() {
   const [, navigate] = useLocation();
@@ -199,40 +199,7 @@ export default function Settings() {
           </CardContent>
         </Card>
 
-        {/* Security Settings */}
-        <Card className="bg-slate-800/50 border-slate-600">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <iconMap.shield className="w-5 h-5" />
-              Security Settings
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <h4 className="text-lg font-semibold text-gray-200">Face ID Authentication</h4>
-              <p className="text-sm text-gray-400">
-                Enhance your account security with biometric authentication
-              </p>
-            </div>
-            
-            <BiometricAuth 
-              mode="register"
-              onSuccess={() => {
-                toast({
-                  title: "Face ID Enabled Successfully!",
-                  description: "You can now use Face ID to sign in securely",
-                });
-              }}
-              onError={(error: string) => {
-                toast({
-                  title: "Face ID Setup Failed",
-                  description: error,
-                  variant: "destructive",
-                });
-              }}
-            />
-          </CardContent>
-        </Card>
+
 
         {/* Danger Zone */}
         <Card className="bg-slate-800/50 border-red-500/20">

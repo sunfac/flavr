@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { motion, AnimatePresence } from "framer-motion";
 import { iconMap } from "@/lib/iconMap";
-import BiometricAuth from "@/components/BiometricAuth";
+
 import FlavrIcon from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 
 interface AuthModalProps {
@@ -34,12 +34,7 @@ export default function AuthModal({
   const [registerData, setRegisterData] = useState({ username: "", email: "", password: "" });
   const [activeTab, setActiveTab] = useState(initialMode);
   
-  // Detect iOS device for Face ID autofill optimization
-  const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  
-  if (isIOSDevice) {
-    console.log("iOS device detected - Face ID/Touch ID likely available");
-  }
+
 
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
@@ -103,25 +98,7 @@ export default function AuthModal({
     registerMutation.mutate(registerData);
   };
 
-  const handleBiometricSuccess = (user?: any) => {
-    if (user) {
-      toast({
-        title: "Welcome back! 👋",
-        description: "Successfully signed in with Face ID",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
-      onSuccess();
-      onClose();
-    }
-  };
 
-  const handleBiometricError = (error: string) => {
-    toast({
-      title: "Biometric Authentication Failed",
-      description: error,
-      variant: "destructive",
-    });
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -222,19 +199,7 @@ export default function AuthModal({
               </Button>
             </form>
 
-            {/* Face ID Setup Option for new users */}
-            <div className="mt-4 p-4 bg-slate-800/30 border border-slate-600/50 rounded-lg">
-              <BiometricAuth 
-                mode="register" 
-                onSuccess={() => {
-                  toast({
-                    title: "Face ID Enabled! 🎉",
-                    description: "You can now use Face ID to sign in quickly and securely.",
-                  });
-                }}
-                onError={handleBiometricError}
-              />
-            </div>
+
             
             {/* OAuth Divider */}
             <div className="relative my-6">
@@ -278,51 +243,18 @@ export default function AuthModal({
           </TabsContent>
 
           <TabsContent value="login" className="space-y-4 mt-6">
-            {/* Face ID Authentication Option */}
-            <BiometricAuth 
-              mode="authenticate" 
-              email={loginData.email}
-              onSuccess={handleBiometricSuccess}
-              onError={handleBiometricError}
-            />
-            
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-slate-600" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-slate-900 px-2 text-slate-400">Or continue with email</span>
-              </div>
-            </div>
 
-            {/* iOS Face ID hint */}
-            {isIOSDevice && (
-              <div className="text-center mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                <div className="flex items-center justify-center gap-2 text-blue-400 text-sm">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-.257-.257A6 6 0 0118 8zM2 8a6 6 0 107.743 5.743L10 14l.257-.257A6 6 0 012 8zm8-2a2 2 0 100 4 2 2 0 000-4z" clipRule="evenodd" />
-                  </svg>
-                  Use Face ID to autofill saved passwords
-                </div>
-              </div>
-            )}
-
-            <form onSubmit={handleLogin} className="space-y-4" autoComplete="on" id="login-form">
+            <form onSubmit={handleLogin} className="space-y-4">
               <div className="relative">
                 <iconMap.mail className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                 <Input
                   type="email"
                   name="email"
-                  id="email"
                   placeholder="Email or Username"
                   value={loginData.email}
                   onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                   className="pl-10 bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-orange-400"
-                  autoComplete="email username"
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                  spellCheck="false"
-                  data-form-type="login"
+                  autoComplete="email"
                   required
                 />
               </div>
@@ -331,13 +263,11 @@ export default function AuthModal({
                 <Input
                   type="password"
                   name="password"
-                  id="password"
-                  placeholder={isIOSDevice ? "Password (Face ID may autofill)" : "Password"}
+                  placeholder="Password"
                   value={loginData.password}
                   onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                   className="pl-10 bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-orange-400"
                   autoComplete="current-password"
-                  data-form-type="login"
                   required
                 />
               </div>
