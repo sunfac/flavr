@@ -42,7 +42,7 @@ export default function PhotoToRecipe() {
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   // Check if user has Flavr+ subscription
-  const hasFlavrPlus = user?.hasFlavrPlus || user?.email === 'william@blycontracting.co.uk';
+  const hasFlavrPlus = (user as any)?.hasFlavrPlus || (user as any)?.email === 'william@blycontracting.co.uk';
 
   const extractRecipeMutation = useMutation({
     mutationFn: async (photoFiles: File[]) => {
