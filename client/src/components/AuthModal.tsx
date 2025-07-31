@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { motion, AnimatePresence } from "framer-motion";
 import { iconMap } from "@/lib/iconMap";
+import BiometricAuth from "@/components/BiometricAuth";
 import FlavrIcon from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 
 interface AuthModalProps {
@@ -31,6 +32,7 @@ export default function AuthModal({
   const { toast } = useToast();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [registerData, setRegisterData] = useState({ username: "", email: "", password: "" });
+  const [activeTab, setActiveTab] = useState(initialMode);
 
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
@@ -92,6 +94,26 @@ export default function AuthModal({
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     registerMutation.mutate(registerData);
+  };
+
+  const handleBiometricSuccess = (user?: any) => {
+    if (user) {
+      toast({
+        title: "Welcome back! 👋",
+        description: "Successfully signed in with Face ID",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+      onSuccess();
+      onClose();
+    }
+  };
+
+  const handleBiometricError = (error: string) => {
+    toast({
+      title: "Biometric Authentication Failed",
+      description: error,
+      variant: "destructive",
+    });
   };
 
   return (
@@ -192,6 +214,20 @@ export default function AuthModal({
                 )}
               </Button>
             </form>
+
+            {/* Face ID Setup Option for new users */}
+            <div className="mt-4 p-4 bg-slate-800/30 border border-slate-600/50 rounded-lg">
+              <BiometricAuth 
+                mode="register" 
+                onSuccess={() => {
+                  toast({
+                    title: "Face ID Enabled! 🎉",
+                    description: "You can now use Face ID to sign in quickly and securely.",
+                  });
+                }}
+                onError={handleBiometricError}
+              />
+            </div>
             
             {/* OAuth Divider */}
             <div className="relative my-6">
@@ -235,6 +271,23 @@ export default function AuthModal({
           </TabsContent>
 
           <TabsContent value="login" className="space-y-4 mt-6">
+            {/* Face ID Authentication Option */}
+            <BiometricAuth 
+              mode="authenticate" 
+              email={loginData.email}
+              onSuccess={handleBiometricSuccess}
+              onError={handleBiometricError}
+            />
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-slate-600" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-slate-900 px-2 text-slate-400">Or continue with email</span>
+              </div>
+            </div>
+
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="relative">
                 <iconMap.mail className="absolute left-3 top-3 w-5 h-5 text-slate-400" />

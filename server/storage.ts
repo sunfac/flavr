@@ -12,6 +12,7 @@ export interface IStorage {
   getUserByEmailOrUsername(emailOrUsername: string): Promise<User | undefined>;
   getUserByOAuth(provider: string, oauthId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, updates: Partial<User>): Promise<User>;
   updateUserUsage(id: number, recipes: number, images: number): Promise<User>;
   updateUserStripeInfo(id: number, customerId: string, subscriptionId?: string): Promise<User>;
   updateUserSubscription(id: number, updates: Partial<User>): Promise<User>;
@@ -125,6 +126,16 @@ export class DatabaseStorage implements IStorage {
     
     const [user] = await db.insert(users).values(userWithPassword).returning();
     return user;
+  }
+
+  async updateUser(id: number, updates: Partial<User>): Promise<User> {
+    console.log(`📝 Updating user ${id} with:`, updates);
+    const [updatedUser] = await db
+      .update(users)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
   }
 
   async updateUserUsage(id: number, recipesUsed: number, imagesUsed: number): Promise<User> {

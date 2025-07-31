@@ -33,6 +33,9 @@ export const users = pgTable("users", {
   firstName: text("first_name"),
   lastName: text("last_name"),
   profileImage: text("profile_image"),
+  // Biometric authentication fields
+  biometricEnabled: boolean("biometric_enabled").default(false),
+  biometricCredentialId: text("biometric_credential_id"),
   // Universal subscription tracking
   subscriptionStartDate: timestamp("subscription_start_date"),
   subscriptionEndDate: timestamp("subscription_end_date"),
