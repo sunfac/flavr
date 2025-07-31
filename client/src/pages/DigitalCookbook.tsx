@@ -176,32 +176,54 @@ export default function DigitalCookbook() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4 md:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
+        <div className="mb-6 md:mb-8">
+          <div className="flex items-center justify-between mb-4">
             <Button
               variant="ghost"
               onClick={() => navigate("/app")}
-              className="text-white hover:bg-white/10"
+              className="text-white hover:bg-white/10 p-2 md:px-4"
             >
-              <iconMap.arrowLeft className="w-5 h-5 mr-2" />
-              Back to Flavr
+              <iconMap.arrowLeft className="w-5 h-5 mr-1 md:mr-2" />
+              <span className="hidden sm:inline">Back to Flavr</span>
             </Button>
+            <div className="flex items-center space-x-2">
+              <iconMap.book className="w-6 h-6 md:w-8 md:h-8 text-orange-400" />
+            </div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-white">My Cookbook</h1>
-              <p className="text-gray-400">
+              <h1 className="text-2xl md:text-3xl font-bold text-white">My Cookbook</h1>
+              <p className="text-gray-400 text-sm md:text-base">
                 {filteredRecipes.length} recipe{filteredRecipes.length !== 1 ? 's' : ''} saved
               </p>
             </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <iconMap.book className="w-8 h-8 text-orange-400" />
+            
+            {/* Add Recipe Buttons */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <Button 
+                onClick={() => navigate("/app")} 
+                className="bg-orange-500 hover:bg-orange-600 text-sm md:text-base px-3 md:px-4 py-2"
+              >
+                <iconMap.plus className="w-4 h-4 mr-2" />
+                Create Recipe
+              </Button>
+              <Button 
+                onClick={() => navigate("/photo-to-recipe")} 
+                variant="outline"
+                className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white text-sm md:text-base px-3 md:px-4 py-2"
+              >
+                <iconMap.camera className="w-4 h-4 mr-2" />
+                Photo to Recipe
+              </Button>
+            </div>
           </div>
         </div>
 
         {/* Search and Filter Bar */}
-        <div className="mb-8 space-y-4">
+        <div className="mb-6 md:mb-8 space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
               <iconMap.search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -209,7 +231,7 @@ export default function DigitalCookbook() {
                 placeholder="Search your recipes..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400 text-sm md:text-base h-10 md:h-11"
               />
             </div>
           </div>
@@ -222,7 +244,7 @@ export default function DigitalCookbook() {
                 variant={selectedFilter === option.value ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedFilter(option.value)}
-                className={`${
+                className={`text-xs md:text-sm px-2 md:px-3 py-1 md:py-2 ${
                   selectedFilter === option.value 
                     ? "bg-orange-500 text-white" 
                     : "bg-white/10 border-white/20 text-white hover:bg-white/20"
@@ -236,13 +258,13 @@ export default function DigitalCookbook() {
 
         {/* Loading State */}
         {isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="animate-pulse">
-                <Card className="bg-white/5 border-white/10 backdrop-blur-sm h-80">
+                <Card className="bg-white/5 border-white/10 backdrop-blur-sm h-72 md:h-80">
                   <CardContent className="p-0">
-                    <div className="h-48 bg-white/10 rounded-t-lg"></div>
-                    <div className="p-4 space-y-3">
+                    <div className="h-40 md:h-48 bg-white/10 rounded-t-lg"></div>
+                    <div className="p-3 md:p-4 space-y-2 md:space-y-3">
                       <div className="h-4 bg-white/10 rounded w-3/4"></div>
                       <div className="h-3 bg-white/10 rounded w-1/2"></div>
                       <div className="flex space-x-2">
@@ -259,36 +281,43 @@ export default function DigitalCookbook() {
 
         {/* Empty State */}
         {!isLoading && filteredRecipes.length === 0 && (
-          <div className="text-center py-16">
+          <div className="text-center py-8 md:py-16 px-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="max-w-md mx-auto"
             >
-              <iconMap.book className="w-20 h-20 text-gray-500 mx-auto mb-6" />
-              <h2 className="text-2xl font-semibold text-white mb-4">
+              <iconMap.book className="w-16 h-16 md:w-20 md:h-20 text-gray-500 mx-auto mb-4 md:mb-6" />
+              <h2 className="text-xl md:text-2xl font-semibold text-white mb-3 md:mb-4">
                 {searchTerm || selectedFilter !== "all" ? "No recipes found" : "Your cookbook is empty"}
               </h2>
-              <p className="text-gray-400 mb-8">
+              <p className="text-gray-400 mb-6 md:mb-8 text-sm md:text-base">
                 {searchTerm || selectedFilter !== "all" 
                   ? "Try adjusting your search or filter criteria"
                   : "Start cooking with Flavr to save your first recipe"
                 }
               </p>
-              <Button 
-                onClick={() => navigate("/app")}
-                className="bg-orange-500 hover:bg-orange-600 text-white"
-              >
-                <iconMap.plus className="w-4 h-4 mr-2" />
-                Create Your First Recipe
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button onClick={() => navigate("/app")} className="bg-orange-500 hover:bg-orange-600">
+                  <iconMap.plus className="w-4 h-4 mr-2" />
+                  Create Your First Recipe
+                </Button>
+                <Button 
+                  onClick={() => navigate("/photo-to-recipe")} 
+                  variant="outline"
+                  className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white"
+                >
+                  <iconMap.camera className="w-4 h-4 mr-2" />
+                  Photo to Recipe
+                </Button>
+              </div>
             </motion.div>
           </div>
         )}
 
         {/* Recipe Grid */}
         {!isLoading && filteredRecipes.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 pb-8">
             <AnimatePresence>
               {filteredRecipes.map((recipe: SavedRecipe, index: number) => (
                 <motion.div
@@ -300,10 +329,10 @@ export default function DigitalCookbook() {
                   className="group cursor-pointer"
                   onClick={() => handleRecipeClick(recipe)}
                 >
-                  <Card className="bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 overflow-hidden h-full">
+                  <Card className="bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 overflow-hidden h-full shadow-lg hover:shadow-xl">
                     <CardContent className="p-0">
                       {/* Recipe Image */}
-                      <div className="relative h-48 bg-gradient-to-br from-orange-500/20 to-purple-500/20 overflow-hidden">
+                      <div className="relative h-40 md:h-48 bg-gradient-to-br from-orange-500/20 to-purple-500/20 overflow-hidden">
                         {recipe.imageUrl ? (
                           <img 
                             src={recipe.imageUrl} 
@@ -347,22 +376,22 @@ export default function DigitalCookbook() {
                       </div>
 
                       {/* Recipe Details */}
-                      <div className="p-4 space-y-3">
+                      <div className="p-3 md:p-4 space-y-2 md:space-y-3">
                         <div>
-                          <h3 className="font-semibold text-white text-lg line-clamp-2 group-hover:text-orange-300 transition-colors">
+                          <h3 className="font-semibold text-white text-base md:text-lg line-clamp-2 group-hover:text-orange-300 transition-colors">
                             {recipe.title}
                           </h3>
                           {recipe.description && (
-                            <p className="text-gray-400 text-sm line-clamp-2 mt-1">
+                            <p className="text-gray-400 text-xs md:text-sm line-clamp-2 mt-1">
                               {recipe.description}
                             </p>
                           )}
                         </div>
 
                         {/* Recipe Metadata */}
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-1 md:gap-2">
                           {recipe.cuisine && (
-                            <Badge variant="outline" className="text-white border-white/20">
+                            <Badge variant="outline" className="text-white border-white/20 text-xs">
                               {recipe.cuisine}
                             </Badge>
                           )}
