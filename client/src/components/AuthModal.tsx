@@ -33,6 +33,13 @@ export default function AuthModal({
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [registerData, setRegisterData] = useState({ username: "", email: "", password: "" });
   const [activeTab, setActiveTab] = useState(initialMode);
+  
+  // Detect iOS device for Face ID autofill optimization
+  const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  
+  if (isIOSDevice) {
+    console.log("iOS device detected - Face ID/Touch ID likely available");
+  }
 
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
@@ -288,15 +295,34 @@ export default function AuthModal({
               </div>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-4">
+            {/* iOS Face ID hint */}
+            {isIOSDevice && (
+              <div className="text-center mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                <div className="flex items-center justify-center gap-2 text-blue-400 text-sm">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-.257-.257A6 6 0 0118 8zM2 8a6 6 0 107.743 5.743L10 14l.257-.257A6 6 0 012 8zm8-2a2 2 0 100 4 2 2 0 000-4z" clipRule="evenodd" />
+                  </svg>
+                  Use Face ID to autofill saved passwords
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleLogin} className="space-y-4" autoComplete="on" id="login-form">
               <div className="relative">
                 <iconMap.mail className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                 <Input
-                  type="text"
+                  type="email"
+                  name="email"
+                  id="email"
                   placeholder="Email or Username"
                   value={loginData.email}
                   onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                   className="pl-10 bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-orange-400"
+                  autoComplete="email username"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                  data-form-type="login"
                   required
                 />
               </div>
@@ -304,10 +330,14 @@ export default function AuthModal({
                 <iconMap.lock className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                 <Input
                   type="password"
-                  placeholder="Password"
+                  name="password"
+                  id="password"
+                  placeholder={isIOSDevice ? "Password (Face ID may autofill)" : "Password"}
                   value={loginData.password}
                   onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                   className="pl-10 bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-orange-400"
+                  autoComplete="current-password"
+                  data-form-type="login"
                   required
                 />
               </div>

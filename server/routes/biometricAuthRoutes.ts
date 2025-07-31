@@ -233,12 +233,13 @@ export function registerBiometricAuthRoutes(app: Express): void {
     try {
       const { email } = req.params;
       
-      const user = await storage.getUserByEmail(email);
+      // Use case-insensitive email lookup
+      const user = await storage.getUserByEmail(email.toLowerCase());
       const hasBiometric = !!(user?.biometricEnabled && user?.biometricCredentialId);
 
       res.json({ 
         hasBiometric,
-        email 
+        email: email.toLowerCase()
       });
 
     } catch (error: any) {
