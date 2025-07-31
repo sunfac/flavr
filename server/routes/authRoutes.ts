@@ -229,6 +229,28 @@ export function registerAuthRoutes(app: Express) {
     }
   });
 
+  // Frontend expects this endpoint
+  app.get('/api/auth/user', requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const isDeveloper = user.email === "william@blycontracting.co.uk";
+      
+      res.json({ 
+        id: user.id, 
+        email: user.email, 
+        username: user.username, 
+        hasFlavrPlus: user.hasFlavrPlus || isDeveloper 
+      });
+    } catch (error) {
+      console.error("Get auth user error:", error);
+      res.status(500).json({ message: "Failed to get user" });
+    }
+  });
+
   // Check usage limit endpoint
   app.get("/api/check-usage-limit", async (req, res) => {
     try {

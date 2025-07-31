@@ -29,10 +29,11 @@ interface ExtractedRecipe {
 }
 
 export default function PhotoToRecipe() {
-  const { data: user, isLoading } = useQuery({
-    queryKey: ["/api/auth/user"],
+  const { data: userResponse, isLoading } = useQuery({
+    queryKey: ["/api/me"],
     retry: false,
   });
+  const user = userResponse?.user;
   const isAuthenticated = !!user;
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -41,8 +42,8 @@ export default function PhotoToRecipe() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  // Check if user has Flavr+ subscription
-  const hasFlavrPlus = (user as any)?.hasFlavrPlus || (user as any)?.email === 'william@blycontracting.co.uk';
+  // Check if user has Flavr+ subscription or is developer
+  const hasFlavrPlus = user?.hasFlavrPlus || user?.email === 'william@blycontracting.co.uk';
 
   const extractRecipeMutation = useMutation({
     mutationFn: async (photoFiles: File[]) => {
