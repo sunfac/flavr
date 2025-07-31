@@ -41,11 +41,26 @@ export async function isPlatformAuthenticatorAvailable(): Promise<boolean> {
   if (!isWebAuthnSupported()) return false;
   
   try {
+    // Enhanced detection for iOS devices
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    
+    // For iOS devices, assume Face ID/Touch ID is available if WebAuthn is supported
+    if (isIOS) {
+      console.log('iOS device detected - Face ID/Touch ID likely available');
+      return true;
+    }
+    
+    // For other platforms, use the standard detection
     const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+    console.log('Platform authenticator available:', available);
     return available;
   } catch (error) {
     console.warn('Failed to check platform authenticator availability:', error);
-    return false;
+    
+    // Fallback: if we're on a modern device, assume it's available
+    const isModernDevice = /iPhone|iPad|Android|Windows/.test(navigator.userAgent);
+    return isModernDevice;
   }
 }
 

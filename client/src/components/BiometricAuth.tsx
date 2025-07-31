@@ -26,6 +26,9 @@ export default function BiometricAuth({ mode, email, onSuccess, onError }: Biome
 
   useEffect(() => {
     checkBiometricSupport();
+  }, []);
+
+  useEffect(() => {
     if (mode === 'authenticate' && email) {
       checkBiometricStatus();
     }
@@ -218,29 +221,34 @@ export default function BiometricAuth({ mode, email, onSuccess, onError }: Biome
     }
   };
 
+  // Don't show anything if support is still being checked
   if (isSupported === null) {
-    return (
-      <div className="flex items-center justify-center p-4">
-        <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
-      </div>
-    );
+    return null;
   }
 
-  if (!isSupported) {
-    return (
-      <Card className="border-gray-600">
-        <CardContent className="p-4 text-center">
-          <X className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-          <p className="text-sm text-gray-500">
-            Biometric authentication is not available on this device.
-          </p>
-        </CardContent>
-      </Card>
-    );
+  // For register mode, only show if biometric is supported
+  if (mode === 'register' && !isSupported) {
+    return null;
   }
 
-  if (mode === 'authenticate' && !hasBiometric) {
-    return null; // Don't show biometric option if user hasn't set it up
+  // For authenticate mode, only show if user has email AND biometric is enabled
+  if (mode === 'authenticate') {
+    if (!email || !hasBiometric) {
+      return null;
+    }
+    if (!isSupported) {
+      return (
+        <Card className="bg-slate-800/30 border-slate-600/50">
+          <CardContent className="flex items-center space-x-3 p-4">
+            <X className="w-5 h-5 text-red-400" />
+            <div>
+              <p className="text-sm font-medium text-white">Biometric authentication is not available on this device.</p>
+              <p className="text-xs text-slate-400">Face ID or Touch ID is required for biometric login.</p>
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
   }
 
   return (
