@@ -6,8 +6,8 @@ const openai = new OpenAI({
 
 // GPT-5 integration for Michelin-star quality recipe generation
 export class MichelinChefAI {
-  private static readonly MODEL = "gpt-4o"; // Latest available model for premium recipe generation (GPT-5 when available)
-  private static readonly TEMPERATURE = 0.8; // Balanced creativity for culinary excellence
+  private static readonly MODEL = "gpt-4o"; // Using GPT-4o while GPT-5 stabilizes for production use
+  // Note: GPT-5 only supports default temperature (1), custom temperature not supported
 
   /**
    * Generate recipe ideas with Michelin-star quality and maximum flavor focus
@@ -23,8 +23,8 @@ export class MichelinChefAI {
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        temperature: this.TEMPERATURE,
-        max_tokens: 2000
+        temperature: 0.8, // Restored for GPT-4o
+        max_completion_tokens: 2000
       });
 
       const content = completion.choices[0].message.content || "{}";
@@ -49,8 +49,8 @@ export class MichelinChefAI {
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        temperature: this.TEMPERATURE,
-        max_tokens: 3500
+        temperature: 0.8, // Restored for GPT-4o
+        max_completion_tokens: 3500
       });
 
       const content = completion.choices[0].message.content || "{}";

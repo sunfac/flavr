@@ -22,10 +22,10 @@ Preferred communication style: Simple, everyday language.
 - **Framework**: Express.js
 - **Database**: PostgreSQL with Drizzle ORM
 - **Authentication**: Session-based authentication (express-session), Google OAuth
-- **AI Integration**: OpenAI GPT models for recipe generation; Google Gemini for conversational AI.
-- **Image Generation**: Replicate API (Stable Diffusion).
+- **AI Integration**: MichelinChefAI system using GPT-4o for premium recipe generation; Google Gemini for conversational AI. GPT-5 integration available but currently using GPT-4o for production stability.
+- **Image Generation**: Replicate API (Stable Diffusion), DALL-E 3 for recipe images.
 - **Payment Processing**: Stripe for subscription management.
-- **Core Logic**: Sophisticated prompt engineering for AI; server-side quota enforcement; comprehensive flavor maximization (Maillard reaction, layered seasoning, umami depth, acid balance, fat for flavor transport); UK English ingredient terminology mappings; AI-powered step timing; server-side image storage and serving.
+- **Core Logic**: Advanced MichelinChefAI prompting system with Michelin-star quality recipes for home cooks; sophisticated flavor maximization (Maillard reaction optimization, umami layering, acid architecture, fat as flavor vehicle, aromatic timing, texture dynamics, temperature mastery); UK English ingredient terminology mappings; AI-powered step timing; server-side image storage and serving.
 
 ### Core Cooking Modes
 - **Shopping Mode**: Generates recipes with shopping lists.
@@ -54,7 +54,7 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### AI Services
-- **OpenAI**: GPT-3.5/4/4o for recipe generation, chat assistance, ingredient substitution, and AI-powered step timing.
+- **OpenAI**: MichelinChefAI system using GPT-4o for premium Michelin-star quality recipe generation, with GPT-5 integration ready for deployment. DALL-E 3 for recipe images.
 - **Google Gemini**: Conversational AI (primary chatbot), Google Vision API for ingredient detection (Photo-to-Recipe).
 - **Replicate**: Stable Diffusion for food image generation.
 

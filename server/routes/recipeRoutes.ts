@@ -507,7 +507,7 @@ Return a JSON object with this structure:
         endpoint: "generate-fridge-recipe",
         prompt: "GPT-5 MichelinChefAI Fridge Mode",
         response: JSON.stringify(response),
-        model: "gpt-5", // Upgraded to GPT-5
+        model: "gpt-4o", // Using GPT-4o while GPT-5 stabilizes
         duration: 0,
         inputTokens: 500, // Estimated for GPT-5
         outputTokens: Math.ceil(JSON.stringify(response).length / 4),
@@ -846,7 +846,7 @@ Return only the recipe name in 4-8 words. Be wildly creative and diverse using A
 Multi-Layer Seeds: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-5",
         messages: [
           { role: "system", content: `You are creating THE dish that everyone orders - the absolute menu standout that makes people's mouths water just reading it. Think "Crispy Chicken with Honey Glaze", "Tender Beef with Peppercorn Sauce", "Pan-Fried Salmon with Garlic Butter" - names that make you hungry instantly. 
 
@@ -859,8 +859,8 @@ AUTHENTICITY & COMPLETENESS REQUIREMENTS:
 These should be BESTSELLER dishes that restaurants are famous for. ABSOLUTE RULE: Only common UK supermarket ingredients, but make them sound irresistible. Think of the dish that sells out first, that people recommend to friends, that makes the restaurant's reputation. Return ONLY the recipe name in 4-8 words using UK English terminology. Make it the kind of dish people crave and come back for. MULTI-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
           { role: "user", content: prompt }
         ],
-        temperature: 1.2,
-        max_tokens: 25
+        temperature: 1.2, // High temperature for creativity
+        max_completion_tokens: 25
       });
 
       let suggestion = completion.choices[0].message.content?.trim().replace(/"/g, '') || "Creative fusion surprise";
@@ -1128,12 +1128,13 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
 }`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o", // Keep quality model but use async operations for speed
+        model: "gpt-4o", // Using GPT-4o while GPT-5 stabilizes
         messages: [
           { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations. CRITICAL: Always prioritize what the user asked for - if they specify ingredients, cuisines, or dishes, create exactly what they requested." },
           { role: "user", content: systemPrompt }
         ],
-        temperature: 0.8 // Increased temperature for more recipe variation
+        temperature: 0.8, // Restored for GPT-4o
+        max_completion_tokens: 3500
       });
 
       let recipe;
