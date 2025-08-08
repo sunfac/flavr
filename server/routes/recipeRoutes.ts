@@ -848,19 +848,30 @@ Multi-Layer Seeds: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${s
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: `You are creating THE dish that everyone orders - the absolute menu standout that makes people's mouths water just reading it. Think "Crispy Chicken with Honey Glaze", "Tender Beef with Peppercorn Sauce", "Pan-Fried Salmon with Garlic Butter" - names that make you hungry instantly. 
+          { role: "system", content: `You are a Michelin-starred executive chef with 25+ years of culinary excellence, creating irresistible dish names that showcase maximum flavor potential. Your expertise spans classical French techniques, modern molecular gastronomy, and global flavor mastery.
+
+CULINARY PHILOSOPHY FOR DISH NAMING:
+- Every dish name must convey the sophisticated flavor development techniques used
+- Suggest names that instantly communicate the Maillard reaction mastery, umami layering, and flavor balance
+- Apply professional terminology adapted for passionate home cooks
+- Focus on dishes that deliver restaurant-quality results with accessible methods
+
+MICHELIN-STAR DISH NAME REQUIREMENTS:
+- Use sophisticated culinary descriptors: "Pan-Seared", "Herb-Crusted", "Slow-Braised", "Caramelized"
+- Include flavor technique indicators: "Maillard-Glazed", "Umami-Rich", "Acid-Brightened"
+- Showcase authentic cuisine mastery with proper traditional accompaniments
+- Example Michelin-style names: "Pan-Seared Duck Breast with Cherry Gastrique", "Herb-Crusted Lamb with Rosemary Jus", "Miso-Glazed Cod with Sesame Vegetables"
 
 AUTHENTICITY & COMPLETENESS REQUIREMENTS:
-- Suggest COMPLETE DISHES only (main + sides + sauces when traditional)
-- Respect traditional cuisine authenticity (Thai dishes include proper herbs/spices, Italian uses authentic techniques)
-- Focus on dishes that represent their cuisine properly and completely
-- Example complete suggestions: "Thai Green Curry with Jasmine Rice and Pickled Vegetables", "Fish and Chips with Mushy Peas and Tartare Sauce", "Beef Wellington with Roasted Root Vegetables"
+- Suggest COMPLETE DISHES with traditional accompaniments (curry with rice, steak with proper sauce)
+- Respect cuisine-specific ingredient combinations and cooking methods
+- Focus on dishes that represent complete dining experiences worthy of fine dining
 
-These should be BESTSELLER dishes that restaurants are famous for. ABSOLUTE RULE: Only common UK supermarket ingredients, but make them sound irresistible. Think of the dish that sells out first, that people recommend to friends, that makes the restaurant's reputation. Return ONLY the recipe name in 4-8 words using UK English terminology. Make it the kind of dish people crave and come back for. MULTI-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
+These should be SIGNATURE DISHES that demonstrate culinary mastery while using UK supermarket ingredients. Think restaurant-quality techniques with home-accessible ingredients. Return ONLY the recipe name in 4-8 words using sophisticated culinary terminology. Make it sound like a dish from a Michelin-starred restaurant menu. COMPLEXITY-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
           { role: "user", content: prompt }
         ],
-        temperature: 0.9, // High creativity for GPT-4o
-        max_completion_tokens: 25
+        temperature: 0.8, // Michelin-level precision with creativity
+        max_completion_tokens: 35
       });
 
       let suggestion = completion.choices[0].message.content?.trim().replace(/"/g, '') || "Creative fusion surprise";
