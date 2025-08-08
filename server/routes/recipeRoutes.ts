@@ -8,6 +8,7 @@ import { insertRecipeSchema } from "@shared/schema";
 import { logGPTInteraction, logSimpleGPTInteraction } from "../developerLogger";
 import { processFridgeImage } from "../vision";
 import { getCreativeGuidanceBlock } from "../shoppingPromptBlocks";
+import { MichelinChefAI } from "../openaiService";
 import { 
   difficultyMap, 
   getCookTime, 
@@ -487,62 +488,34 @@ Return a JSON object with this structure:
   ]
 }`;
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-        messages: [
-          { 
-            role: "system", 
-            content: "You are a culinary expert specializing in ingredient compatibility. Group ingredients by cuisine style and create harmonious flavor combinations. Return only valid JSON, no explanations." 
-          },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.9 // Increased temperature for more creative variation
-      });
+      // Use GPT-5 with MichelinChefAI for enhanced recipe generation
+      const response = await MichelinChefAI.generateRecipeIdeas({
+        ingredients,
+        servings,
+        cookingTime,
+        budget,
+        equipment,
+        dietary: dietaryRestrictions,
+        ingredientFlexibility
+      }, "Fridge Mode");
 
-      let response;
-      try {
-        const content = completion.choices[0].message.content || "{}";
-        // Clean up any potential markdown or extra text
-        let cleanContent = content.replace(/```json\n?/g, '').replace(/\n?```/g, '').trim();
-        
-        // Fix common JSON errors: trailing commas
-        cleanContent = cleanContent.replace(/,(\s*[}\]])/g, '$1');
-        
-        response = JSON.parse(cleanContent);
-      } catch (parseError) {
-        console.error('JSON parsing error for Fridge2Fork:', parseError);
-        console.error('Raw content:', completion.choices[0].message.content);
-        
-        // Create fallback response
-        response = {
-          recipes: [
-            {
-              title: "Quick Ingredient Sauté",
-              description: "A simple dish using your available ingredients.",
-              cuisine: "International",
-              cookTime: "20 minutes",
-              difficulty: "easy",
-              keyIngredients: ingredients.slice(0, 3)
-            }
-          ]
-        };
-      }
+      // GPT-5 response is already parsed JSON
+      console.log('🍽️ Fridge2Fork recipes generated via GPT-5:', response.recipes?.length || 0);
       
       // Log the interaction using simplified logging
       await logSimpleGPTInteraction({
         endpoint: "generate-fridge-recipe",
-        prompt: prompt,
+        prompt: "GPT-5 MichelinChefAI Fridge Mode",
         response: JSON.stringify(response),
-        model: "gpt-3.5-turbo",
+        model: "gpt-5", // Upgraded to GPT-5
         duration: 0,
-        inputTokens: Math.ceil(prompt.length / 4),
+        inputTokens: 500, // Estimated for GPT-5
         outputTokens: Math.ceil(JSON.stringify(response).length / 4),
-        cost: 0.001,
+        cost: 0.002, // Higher cost for GPT-5
         success: true,
         userId: req.session?.userId?.toString() || "anonymous"
       });
 
-      console.log('🍽️ Fridge2Fork recipes generated:', response.recipes?.length || 0);
       res.json({ recipes: response.recipes || [] });
 
       // Increment usage counter after successful generation
@@ -1386,41 +1359,19 @@ Return ONLY a valid JSON object with this exact structure (NO trailing commas):
 
 CRITICAL: Ensure NO trailing commas after the last item in any array or object. Return ONLY the JSON object, no markdown, no explanations.`;
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o", // Keep quality model but use async operations for speed
-        messages: [
-          { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations." },
-          { role: "user", content: systemPrompt }
-        ],
-        temperature: 0.7
-      });
-
-      // Clean and parse the JSON response for Fridge2Fork
-      let recipe;
-      try {
-        let content = completion.choices[0].message.content || "{}";
-        
-        // Remove any markdown code blocks
-        content = content.replace(/```json\n?/g, '').replace(/\n?```/g, '').trim();
-        
-        // Remove any leading/trailing text that's not JSON
-        const jsonStart = content.indexOf('{');
-        const jsonEnd = content.lastIndexOf('}');
-        if (jsonStart !== -1 && jsonEnd !== -1) {
-          content = content.substring(jsonStart, jsonEnd + 1);
-        }
-        
-        // Fix common JSON errors
-        content = content.replace(/,(\s*[}\]])/g, '$1'); // trailing commas before closing brackets
-        content = content.replace(/},(\s*\])/g, '}$1'); // trailing commas in object arrays
-        content = content.replace(/,(\s*$)/g, ''); // trailing commas at end of string
-        
-        recipe = JSON.parse(content);
-      } catch (parseError) {
-        console.error('Fridge2Fork JSON parsing error:', parseError);
-        console.error('Raw content:', completion.choices[0].message.content);
-        throw new Error('Failed to parse AI recipe response. Please try again.');
-      }
+      // Use GPT-5 with MichelinChefAI for enhanced full recipe generation
+      const recipe = await MichelinChefAI.generateFullRecipe(
+        recipeIdea,
+        {
+          ingredients,
+          servings,
+          cookingTime,
+          budget,
+          equipment,
+          dietary: dietaryRestrictions
+        },
+        "Fridge Mode"
+      );
       
       // Apply UK English conversions to recipe text
       recipe = convertRecipeToUKEnglish(recipe);
@@ -1438,16 +1389,16 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
         }
       }).catch(err => console.error('Background image generation failed:', err));
 
-      // Log in background
+      // Log in background with GPT-5
       logSimpleGPTInteraction({
         endpoint: "generate-full-recipe",
-        prompt: systemPrompt,
+        prompt: "GPT-5 MichelinChefAI Full Recipe",
         response: JSON.stringify(recipe),
-        model: "gpt-4o", 
+        model: "gpt-5", // Upgraded to GPT-5
         duration: 0,
-        inputTokens: Math.ceil(systemPrompt.length / 4),
+        inputTokens: 1200, // Estimated for GPT-5
         outputTokens: Math.ceil(JSON.stringify(recipe).length / 4),
-        cost: 0.001,
+        cost: 0.006, // Higher cost for GPT-5
         success: true,
         userId: req.session?.userId?.toString() || "anonymous"
       }).catch(err => console.error('Background logging failed:', err));
@@ -1538,38 +1489,31 @@ Return a JSON object with a "recipes" array containing 4-6 recipe objects. Each 
 
 Make each recipe distinctly different in style, technique, and flavor profile. Focus on what makes each dish special and craveable.`;
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [{ role: "user", content: basePrompt }],
-        temperature: 0.8,
-        max_tokens: 2000,
-      });
-
-      const responseContent = completion.choices[0]?.message?.content;
-      if (!responseContent) {
-        throw new Error("No response from OpenAI");
-      }
-
-      let recipeData;
-      try {
-        recipeData = JSON.parse(responseContent);
-      } catch (parseError) {
-        console.error("JSON parsing error:", parseError);
-        throw new Error("Invalid JSON response from AI");
-      }
+      // Use GPT-5 with MichelinChefAI for enhanced recipe ideas
+      const recipeData = await MichelinChefAI.generateRecipeIdeas({
+        mood,
+        cuisine: cuisines,
+        cookingTime: timeAvailable,
+        budget,
+        diet: dietaryRestrictions,
+        equipment,
+        ambition,
+        servings: portions,
+        supermarket
+      }, "Shopping Mode");
 
       const duration = Date.now() - startTime;
       
-      // Log the interaction
+      // Log the interaction with GPT-5
       await logSimpleGPTInteraction({
         endpoint: 'recipe-ideas',
-        prompt: basePrompt,
-        response: responseContent,
-        model: 'gpt-4o',
+        prompt: "GPT-5 MichelinChefAI Shopping Mode",
+        response: JSON.stringify(recipeData),
+        model: 'gpt-5', // Upgraded to GPT-5
         duration,
-        inputTokens: completion.usage?.prompt_tokens || 0,
-        outputTokens: completion.usage?.completion_tokens || 0,
-        cost: ((completion.usage?.prompt_tokens || 0) * 0.03 + (completion.usage?.completion_tokens || 0) * 0.06) / 1000,
+        inputTokens: 800, // Estimated for GPT-5
+        outputTokens: Math.ceil(JSON.stringify(recipeData).length / 4),
+        cost: 0.004, // Higher cost for GPT-5
         success: true,
         userId: req.session?.userId?.toString() || 'anonymous',
         sessionId: req.session?.id || 'no-session'
@@ -2224,33 +2168,19 @@ Return valid JSON only:
 
       console.log('🤖 Sending prompt to OpenAI for chef assist recipe...');
       
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.8,
-        max_tokens: 2000
-      });
+      // Use GPT-5 with MichelinChefAI for chef assist recipe generation
+      const recipeData = await MichelinChefAI.generateFullRecipe(
+        intent,
+        {
+          servings: parseInt(servings) || 4,
+          cookingTime: time || 60,
+          equipment: equipment || [],
+          dietary: dietary || []
+        },
+        "Chef Assist Mode"
+      );
 
-      const recipeContent = completion.choices[0]?.message?.content;
-      if (!recipeContent) {
-        throw new Error("No recipe content received from OpenAI");
-      }
-
-      console.log('📋 Raw OpenAI response for chef assist:', recipeContent.substring(0, 200));
-
-      let recipeData;
-      try {
-        // Try to parse the JSON response
-        const jsonMatch = recipeContent.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          recipeData = JSON.parse(jsonMatch[0]);
-        } else {
-          throw new Error("No JSON found in response");
-        }
-      } catch (parseError) {
-        console.error('JSON parse error for chef assist:', parseError);
-        throw new Error("Failed to parse recipe JSON from OpenAI response");
-      }
+      console.log('📋 GPT-5 Chef Assist recipe generated:', recipeData.title);
 
       // Add unique ID and timestamp
       recipeData.id = Date.now().toString();

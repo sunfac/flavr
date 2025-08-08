@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { MichelinChefAI } from "./openaiService";
 
 interface ConversationData {
   intent?: 'shopping' | 'ingredients' | 'idea' | 'general';
@@ -210,40 +211,18 @@ async function generateRecipeWithPrompt(prompt: string, mode: string, data: Conv
   // For now, return a structured recipe format
   
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-      messages: [
-        {
-          role: "system",
-          content: "You are an expert chef. Generate detailed recipes in JSON format based on user requirements."
-        },
-        {
-          role: "user",
-          content: `${prompt}
-
-Create a detailed recipe following this exact JSON structure:
-{
-  "title": "string",
-  "description": "string", 
-  "cuisine": "string",
-  "servings": number,
-  "cookTime": "string",
-  "difficulty": "string",
-  "ingredients": ["array of strings"],
-  "instructions": ["array of strings"],
-  "tips": ["array of strings"],
-  "nutritionHighlights": ["array of strings"]
-}
-
-Make sure all fields are properly filled out with practical, actionable content.`
-        }
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: 2000,
-      temperature: 0.7
-    });
-
-    const recipe = JSON.parse(response.choices[0]?.message?.content || '{}');
+    // Use GPT-5 with MichelinChefAI for conversational recipe generation
+    const recipe = await MichelinChefAI.generateFullRecipe(
+      data.specificDish || "Custom conversational recipe",
+      {
+        servings: data.portions || 4,
+        cookingTime: data.timeAvailable ? parseInt(data.timeAvailable) : 60,
+        equipment: data.equipment || [],
+        dietary: data.dietaryRestrictions || [],
+        budget: data.budget || "moderate"
+      },
+      "Conversational Mode"
+    );
     
     // Add metadata from conversation
     recipe.mode = mode;
