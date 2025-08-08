@@ -846,7 +846,7 @@ Return only the recipe name in 4-8 words. Be wildly creative and diverse using A
 Multi-Layer Seeds: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-5",
+        model: "gpt-4o",
         messages: [
           { role: "system", content: `You are creating THE dish that everyone orders - the absolute menu standout that makes people's mouths water just reading it. Think "Crispy Chicken with Honey Glaze", "Tender Beef with Peppercorn Sauce", "Pan-Fried Salmon with Garlic Butter" - names that make you hungry instantly. 
 
@@ -859,7 +859,7 @@ AUTHENTICITY & COMPLETENESS REQUIREMENTS:
 These should be BESTSELLER dishes that restaurants are famous for. ABSOLUTE RULE: Only common UK supermarket ingredients, but make them sound irresistible. Think of the dish that sells out first, that people recommend to friends, that makes the restaurant's reputation. Return ONLY the recipe name in 4-8 words using UK English terminology. Make it the kind of dish people crave and come back for. MULTI-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
           { role: "user", content: prompt }
         ],
-        temperature: 1.2, // High temperature for creativity
+        temperature: 0.9, // High creativity for GPT-4o
         max_completion_tokens: 25
       });
 
