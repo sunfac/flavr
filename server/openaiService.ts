@@ -6,7 +6,7 @@ const openai = new OpenAI({
 
 // GPT-5 integration for Michelin-star quality recipe generation
 export class MichelinChefAI {
-  private static readonly MODEL = "gpt-5"; // Latest GPT-5 model for premium recipe generation
+  private static readonly MODEL = "gpt-4o"; // Latest available model for premium recipe generation (GPT-5 when available)
   private static readonly TEMPERATURE = 0.8; // Balanced creativity for culinary excellence
 
   /**

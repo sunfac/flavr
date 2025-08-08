@@ -1374,31 +1374,31 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
       );
       
       // Apply UK English conversions to recipe text
-      recipe = convertRecipeToUKEnglish(recipe);
+      const ukRecipe = convertRecipeToUKEnglish(recipe);
       
       // Send recipe immediately to user for faster response
-      res.json({ recipe });
+      res.json({ recipe: ukRecipe });
 
       // Increment usage counter after successful generation
       incrementUsageCounter(req).catch(err => console.error('Failed to increment usage:', err));
 
       // Generate image and log in background (don't await)
-      generateRecipeImage(recipe.title, recipe.cuisine, recipe.id).then(imageUrl => {
+      generateRecipeImage(ukRecipe.title, ukRecipe.cuisine, ukRecipe.id).then(imageUrl => {
         if (imageUrl) {
-          console.log('🎨 Background image generated for Fridge2Fork:', recipe.title);
+          console.log('🎨 Background image generated for MichelinChefAI:', ukRecipe.title);
         }
       }).catch(err => console.error('Background image generation failed:', err));
 
-      // Log in background with GPT-5
+      // Log in background with MichelinChefAI
       logSimpleGPTInteraction({
         endpoint: "generate-full-recipe",
-        prompt: "GPT-5 MichelinChefAI Full Recipe",
-        response: JSON.stringify(recipe),
-        model: "gpt-5", // Upgraded to GPT-5
+        prompt: "MichelinChefAI Full Recipe Generation",
+        response: JSON.stringify(ukRecipe),
+        model: "gpt-4o", // MichelinChefAI system using GPT-4o
         duration: 0,
-        inputTokens: 1200, // Estimated for GPT-5
-        outputTokens: Math.ceil(JSON.stringify(recipe).length / 4),
-        cost: 0.006, // Higher cost for GPT-5
+        inputTokens: 1200, // Estimated for enhanced system
+        outputTokens: Math.ceil(JSON.stringify(ukRecipe).length / 4),
+        cost: 0.006, // Enhanced system cost
         success: true,
         userId: req.session?.userId?.toString() || "anonymous"
       }).catch(err => console.error('Background logging failed:', err));
