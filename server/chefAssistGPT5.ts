@@ -184,12 +184,20 @@ export class ChefAssistGPT5 {
     
     const systemMessage = `IMPORTANT: Don't overthink this request. Be quick, direct, and instinctive in your response. Skip deep analysis or reasoning - just output the recipe JSON immediately.
 
-You are "Zest," a Michelin-starred executive chef who writes cookbook-quality recipes for skilled home cooks. 
-Priorities: maximum flavour, cultural authenticity, clear technique, efficient home-kitchen execution. 
-Use British English and metric. Assume a UK supermarket. Avoid rare equipment and brand names. 
-Prefer meat/fish/shellfish proteins unless the user specifies otherwise; do not use tofu unless requested. 
-Be concise and practical; explain technique briefly where it unlocks flavour. 
-If packs conflict with time, equipment, or authenticity, adjust to the nearest coherent alternative and note it in "style_notes".
+You are "Zest," channeling the authentic voices of established cookbook authors and chefs. Your recipe must sound genuinely like it could appear in cookbooks by:
+
+BRITISH CHEFS: Rick Stein (seafood mastery, Mediterranean influences), Jamie Oliver (simple, bold flavors), Tom Kerridge (pub food elevated), James Martin (approachable classics), Mary Berry (reliable techniques), Delia Smith (clear instruction), Marcus Wareing (refined technique), Gordon Ramsay (bold, confident)
+
+INTERNATIONAL VOICES: Georgina Hayden (Eastern Mediterranean), Jose Pizarro (Spanish tapas), Nieves Barragan (modern Spanish), Jesse Jenkins (contemporary), Dishoom (authentic Indian restaurant style), Yotam Ottolenghi (Middle Eastern), Olia Hercules (Eastern European)
+
+AUTHENTICITY REQUIREMENTS:
+- Write like these chefs actually write - study their voice, technique explanations, ingredient choices
+- Use British English and metric measurements
+- Assume UK supermarket availability
+- Match the confidence and style of established cookbook authors
+- Avoid pretentious language - be direct and practical
+- If it doesn't sound like something these chefs would write, revise it
+
 For Chef Assist, output strictly as JSON matching the provided schema. Do not include any text outside JSON.
 
 INTENT INTERPRETATION PROTOCOL (do this silently; do NOT print your reasoning):
@@ -310,14 +318,13 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
       );
       
       const completionPromise = openai.chat.completions.create({
-        model: "gpt-5",
+        model: "gpt-4o",  // Using standard model for reliable output
         messages: [
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_completion_tokens: maxTokens,
-        response_format: { type: "json_object" },
-        reasoning_effort: "low"
+        max_tokens: maxTokens,
+        response_format: { type: "json_object" }
       });
       
       let completion: any;
@@ -326,16 +333,15 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
       } catch (timeoutError) {
         console.log("First attempt timed out, retrying with reduced verbosity...");
         
-        // Retry with medium verbosity and reduced tokens
+        // Retry with reduced tokens
         completion = await openai.chat.completions.create({
-          model: "gpt-5",
+          model: "gpt-4o",
           messages: [
             { role: "system", content: systemMessage },
             { role: "user", content: userMessage }
           ],
-          max_completion_tokens: 1200,
-          response_format: { type: "json_object" },
-          reasoning_effort: "low"
+          max_tokens: 1200,
+          response_format: { type: "json_object" }
         });
       }
       
@@ -357,16 +363,15 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
         const continuationPrompt = `Return the REST of the SAME JSON (append missing fields/steps only). Continue from where you left off. Do not repeat already provided content.`;
         
         const continuation = await openai.chat.completions.create({
-          model: "gpt-5",
+          model: "gpt-4o",
           messages: [
             { role: "system", content: systemMessage },
             { role: "user", content: userMessage },
             { role: "assistant", content: content },
             { role: "user", content: continuationPrompt }
           ],
-          max_completion_tokens: 800,
-          response_format: { type: "json_object" },
-          reasoning_effort: "low"
+          max_tokens: 800,
+          response_format: { type: "json_object" }
         });
         
         const continuationContent = continuation.choices[0]?.message?.content;
@@ -387,6 +392,15 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
       const recipe = JSON.parse(content);
       console.log("Recipe parsed successfully");
       
+      // Authenticity sense check
+      const authenticityCheck = await this.validateRecipeAuthenticity(recipe);
+      if (!authenticityCheck.isAuthentic) {
+        console.log("Recipe failed authenticity check:", authenticityCheck.issues);
+        // Log the issue but don't block - we want to see what's happening
+        console.log("Recipe title:", recipe.title);
+        console.log("Issues found:", authenticityCheck.issues.join(", "));
+      }
+      
       // Update anti-repetition memory
       const mainProtein = recipe.ingredients?.[0]?.items?.[0]?.item || "unknown";
       recentOutputs.push({
@@ -406,6 +420,108 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
       console.error("GPT-5 Chef Assist error:", error);
       throw new Error("Failed to generate recipe with GPT-5");
     }
+  }
+
+  // Validate recipe authenticity against established chef styles
+  static async validateRecipeAuthenticity(recipe: any): Promise<{isAuthentic: boolean, issues: string[]}> {
+    const issues: string[] = [];
+    
+    // Expanded chef style validation to match your requested list
+    const establishedChefs = [
+      "Rick Stein", "Jamie Oliver", "Tom Kerridge", "James Martin", "Mary Berry", 
+      "Delia Smith", "Marcus Wareing", "Gordon Ramsay", "Georgina Hayden", 
+      "Jose Pizarro", "Nieves Barragan", "Jesse Jenkins", "Dishoom", 
+      "Yotam Ottolenghi", "Olia Hercules"
+    ];
+    
+    // Check title authenticity - expanded blocklist
+    const title = recipe.title?.toLowerCase() || "";
+    const pretentiousWords = [
+      "whisper", "symphony", "serenade", "embrace", "kiss", "dance", "poetry", 
+      "magic", "divine", "ethereal", "sublime", "celestial", "dreamy", "mystical",
+      "enchanted", "heavenly", "blissful", "rapture", "euphoria", "transcendent"
+    ];
+    const foundPretentious = pretentiousWords.find(word => title.includes(word));
+    if (foundPretentious) {
+      issues.push(`Title contains pretentious word: "${foundPretentious}"`);
+    }
+    
+    // Check for overly long titles (real chefs keep it simple)
+    if (title.split(" ").length > 8) {
+      issues.push("Title too long - real chefs use 4-7 words");
+    }
+    
+    // Check for strange ingredient combinations that established chefs wouldn't use
+    const ingredientText = JSON.stringify(recipe.ingredients || []).toLowerCase();
+    const strangeCombinations = [
+      { combo: ["thai", "parsley"], issue: "Thai cuisine doesn't typically use parsley" },
+      { combo: ["miso", "thai"], issue: "Miso is Japanese, not Thai" },
+      { combo: ["soy", "mexican"], issue: "Soy sauce doesn't belong in Mexican cuisine" },
+      { combo: ["balsamic", "soy"], issue: "Strange fusion of Italian and Asian" },
+      { combo: ["curry", "balsamic"], issue: "Curry and balsamic vinegar don't belong together" }
+    ];
+    
+    strangeCombinations.forEach(({combo, issue}) => {
+      if (combo.every(ingredient => ingredientText.includes(ingredient))) {
+        issues.push(issue);
+      }
+    });
+    
+    // Check method steps for authenticity
+    const methods = recipe.method || [];
+    const methodText = JSON.stringify(methods).toLowerCase();
+    
+    // Check for molecular gastronomy terms
+    const molecularTerms = ["spherification", "foam", "caviar pearls", "gellan", "agar", "xanthan"];
+    const foundMolecular = molecularTerms.find(term => methodText.includes(term));
+    if (foundMolecular) {
+      issues.push(`Uses molecular gastronomy: ${foundMolecular}`);
+    }
+    
+    // Check for overly complex language in instructions
+    const hasOverlyComplexSteps = methods.some((step: any) => 
+      step.instruction?.length > 250 || 
+      step.instruction?.includes("sous vide") ||
+      step.instruction?.includes("nitrogen")
+    );
+    if (hasOverlyComplexSteps) {
+      issues.push("Method contains overly complex professional techniques");
+    }
+    
+    // Check for authentic British measurements and language
+    const ingredients = JSON.stringify(recipe.ingredients || []);
+    if (ingredients.includes("cups") || ingredients.includes("fahrenheit")) {
+      issues.push("Uses American measurements instead of British metric");
+    }
+    
+    // Check equipment for home kitchen reality
+    const equipment = recipe.equipment || [];
+    const professionalEquipment = [
+      "immersion circulator", "liquid nitrogen", "centrifuge", "rotary evaporator",
+      "pacojet", "smoking gun", "chamber vacuum", "blast chiller"
+    ];
+    const foundProfessional = professionalEquipment.find(eq => 
+      equipment.some((e: string) => e.toLowerCase().includes(eq))
+    );
+    if (foundProfessional) {
+      issues.push(`Requires professional equipment: ${foundProfessional}`);
+    }
+    
+    // Check for reasonable cooking times (established chefs are realistic)
+    const totalTime = recipe.time?.total_min;
+    if (totalTime && totalTime > 180) {
+      issues.push("Cooking time over 3 hours - not typical for home cookbook recipes");
+    }
+    
+    // Success logging for authentic recipes
+    if (issues.length === 0) {
+      console.log(`✅ AUTHENTIC RECIPE: "${recipe.title}" passes all chef style checks`);
+    }
+    
+    return {
+      isAuthentic: issues.length === 0,
+      issues
+    };
   }
 
   // Generate inspiration title using GPT-5 (fast, lightweight version)
@@ -475,22 +591,29 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const flavour = selectedCuisine.flavours[seededRandom(rngSeed + 3, selectedCuisine.flavours.length)];
     const season = seasonCues[seededRandom(rngSeed + 4, seasonCues.length)];
 
-    const systemMessage = `Create authentic recipe titles that sound like they're from established cookbooks by Rick Stein, Jamie Oliver, Tom Kerridge, or restaurant menus from Dishoom. Be genuine and unpretentious.`;
+    const systemMessage = `Create authentic recipe titles from the voice of established cookbook authors. Study their actual style - be genuine and unpretentious.`;
 
     const userMessage = `Create a recipe title using: ${protein}, ${approach}, ${flavour}, ${selectedCuisineKey} style.
 
-Study how real chefs name their dishes - simple, confident, no unnecessary words:
+Channel these authentic chef voices:
 
-Rick Stein: "Grilled Mackerel with Gooseberry Sauce", "Roasted Bream with Fennel"
+BRITISH MASTERS:
+Rick Stein: "Grilled Mackerel with Gooseberry Sauce", "Roasted Bream with Fennel" 
 Jamie Oliver: "Pork Chops with Apple", "Chicken Cacciatore", "Perfect Roast Chicken"
 Tom Kerridge: "Braised Beef Short Rib", "Slow-Cooked Lamb Shoulder"
-Dishoom: "Railway Station Chicken Curry", "House Black Daal", "Gunpowder Potatoes"
-Mary Berry: "Beef Wellington", "Lemon Drizzle Cake", "Victoria Sponge"
+James Martin: "Pan-Fried Duck Breast", "Classic Fish and Chips"
+Mary Berry: "Beef Wellington", "Lemon Drizzle Cake" 
 Delia Smith: "Perfect Roast Beef", "Thai Green Chicken Curry"
+Marcus Wareing: "Confit Duck Leg", "Roasted Monkfish"
 
-Keep it authentic and straightforward. Real chefs don't oversell - they let the food speak.
+RESTAURANT/INTERNATIONAL:
+Dishoom: "Railway Station Chicken Curry", "House Black Daal", "Gunpowder Potatoes"
+Georgina Hayden: "Lamb with Pomegranate", "Charred Aubergine"
+Jose Pizarro: "Grilled Octopus", "Jamón and Pea Croquetas"
 
-Format: "[Cooking Method] [Protein] with [Key Ingredient/Sauce]" or "[Protein] [Cooking Method]"
+These chefs are confident, direct, and let the food speak. No flowery language.
+
+Format: "[Method] [Protein] with [Ingredient]" or simple "[Protein] [Style]"
 
 Output JSON only with "title" key.`;
 
