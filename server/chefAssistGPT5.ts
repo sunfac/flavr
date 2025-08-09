@@ -470,13 +470,12 @@ Output JSON only with a single key "title".`;
 
     try {
       const completion = await openai.chat.completions.create({
-        model: "gpt-5-mini",
+        model: "gpt-4o",
         messages: [
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_completion_tokens: 600,
-        reasoning_effort: "low",
+        max_tokens: 150,
         response_format: { type: "json_object" }
       });
 
@@ -497,16 +496,15 @@ Output JSON only with a single key "title".`;
     } catch (error) {
       console.error("GPT-5 Inspire error:", error);
       
-      // Failover: single retry with same exact prompt structure and low verbosity
+      // Failover: single retry with same exact prompt structure 
       try {
         const retryCompletion = await openai.chat.completions.create({
-          model: "gpt-5-mini",
+          model: "gpt-4o",
           messages: [
             { role: "system", content: systemMessage },
             { role: "user", content: userMessage }
           ],
-          max_completion_tokens: 600,
-          reasoning_effort: "low",
+          max_tokens: 150,
           response_format: { type: "json_object" }
         });
         
