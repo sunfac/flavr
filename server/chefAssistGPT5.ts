@@ -456,22 +456,22 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const proteins = proteinPool[dietaryMode];
     const protein = proteins[seededRandom(rngSeed + 4, proteins.length)];
 
-    const systemMessage = `Create simple, relatable recipe titles that sound delicious and approachable. No fancy words or pretentious language.`;
+    const systemMessage = `Create authentic recipe titles that sound like they're from established cookbooks by Rick Stein, Jamie Oliver, Tom Kerridge, or restaurant menus from Dishoom. Be genuine and unpretentious.`;
 
-    const userMessage = `Create a complete recipe title using: ${protein}, ${approach}, ${flavour}, ${cuisine} style.
+    const userMessage = `Create a recipe title using: ${protein}, ${approach}, ${flavour}, ${cuisine} style.
 
-User wants: "${data.userIntent}"
+Study how real chefs name their dishes - simple, confident, no unnecessary words:
 
-Make it sound like a real recipe from a cookbook. Include:
-- The cooking method
-- Key ingredients/flavors 
-- Style/cuisine
-- Context (weeknight, family, etc.)
+Rick Stein: "Grilled Mackerel with Gooseberry Sauce", "Roasted Bream with Fennel"
+Jamie Oliver: "Pork Chops with Apple", "Chicken Cacciatore", "Perfect Roast Chicken"
+Tom Kerridge: "Braised Beef Short Rib", "Slow-Cooked Lamb Shoulder"
+Dishoom: "Railway Station Chicken Curry", "House Black Daal", "Gunpowder Potatoes"
+Mary Berry: "Beef Wellington", "Lemon Drizzle Cake", "Victoria Sponge"
+Delia Smith: "Perfect Roast Beef", "Thai Green Chicken Curry"
 
-Good examples:
-"Slow-Braised Beef with Red Wine and Herbs", "Pan-Seared Salmon with Garlic Butter Sauce", "One-Pot Thai Chicken Curry with Coconut", "Roasted Lamb Shoulder with Mediterranean Herbs", "Quick Weeknight Pasta with Lemon and Parmesan"
+Keep it authentic and straightforward. Real chefs don't oversell - they let the food speak.
 
-Keep it straightforward and descriptive. No flowery language.
+Format: "[Cooking Method] [Protein] with [Key Ingredient/Sauce]" or "[Protein] [Cooking Method]"
 
 Output JSON only with "title" key.`;
 
