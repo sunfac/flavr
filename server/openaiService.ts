@@ -6,8 +6,7 @@ const openai = new OpenAI({
 
 // GPT-5 integration for Michelin-star quality recipe generation
 export class MichelinChefAI {
-  private static readonly MODEL_SIMPLE = "gpt-5"; // GPT-5 for simple tasks
-  private static readonly MODEL_COMPLEX = "gpt-4o"; // GPT-4o for complex recipe generation for production use
+  private static readonly MODEL = "gpt-5"; // Using GPT-5 as primary model for production use
   // Note: GPT-5 only supports default temperature (1), custom temperature not supported
 
   /**
@@ -19,13 +18,12 @@ export class MichelinChefAI {
 
     try {
       const completion = await openai.chat.completions.create({
-        model: this.MODEL_COMPLEX, // Use GPT-4o for complex recipe generation
+        model: this.MODEL,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        temperature: 0.8, // GPT-4o supports temperature
-        max_completion_tokens: 4000
+        max_completion_tokens: 8000 // Increased significantly for GPT-5 reasoning
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -49,13 +47,12 @@ export class MichelinChefAI {
 
     try {
       const completion = await openai.chat.completions.create({
-        model: this.MODEL_COMPLEX, // Use GPT-4o for complex recipe generation
+        model: this.MODEL,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        temperature: 0.8, // GPT-4o supports temperature
-        max_completion_tokens: 5000
+        max_completion_tokens: 10000 // Increased significantly for GPT-5 reasoning
       });
 
       const content = completion.choices[0]?.message?.content;
