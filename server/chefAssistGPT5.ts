@@ -417,23 +417,41 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     clientId?: string;
   }): Promise<{ title: string }> {
     
-    // Resolve seeds to short cues before API call
-    const cuisineCues = ["Italian", "Mexican", "Japanese", "Middle Eastern", "Modern British", "French", "Thai", "Indian", "Mediterranean"];
-    const proteinPool = {
-      omnivore: ["chicken thighs", "salmon fillets", "cod fillets", "king prawns", "beef sirloin", "pork tenderloin", "lamb shoulder"],
-      vegetarian: ["portobello mushrooms", "aubergine", "halloumi", "cauliflower", "chickpeas"],
-      vegan: ["king oyster mushrooms", "aubergine", "cauliflower steaks", "chickpeas", "butternut squash"]
+    // Authentic cuisine-specific combinations to avoid strange fusions
+    const cuisineStyles = {
+      "British": {
+        proteins: ["chicken thighs", "salmon fillets", "cod fillets", "beef sirloin", "lamb shoulder"],
+        approaches: ["roasted", "grilled", "braised", "pan-fried", "slow-cooked"],
+        flavours: ["herbs", "lemon", "garlic", "butter", "rosemary", "thyme", "parsley", "sage", "mustard"]
+      },
+      "Italian": {
+        proteins: ["chicken thighs", "salmon fillets", "king prawns", "beef sirloin"],
+        approaches: ["roasted", "grilled", "pan-fried", "braised"],
+        flavours: ["garlic", "tomato", "basil", "lemon", "olive oil", "wine", "parsley", "balsamic"]
+      },
+      "French": {
+        proteins: ["chicken thighs", "salmon fillets", "cod fillets", "beef sirloin", "lamb shoulder"],
+        approaches: ["roasted", "braised", "poached", "pan-fried", "slow-cooked"],
+        flavours: ["herbs", "butter", "cream", "wine", "garlic", "thyme", "tarragon", "shallots"]
+      },
+      "Mediterranean": {
+        proteins: ["chicken thighs", "salmon fillets", "king prawns", "lamb shoulder"],
+        approaches: ["grilled", "roasted", "baked", "charred"],
+        flavours: ["olive oil", "lemon", "herbs", "garlic", "tomato", "rosemary", "oregano", "fennel"]
+      },
+      "Japanese": {
+        proteins: ["salmon fillets", "cod fillets", "king prawns", "chicken thighs"],
+        approaches: ["grilled", "steamed", "pan-fried", "teriyaki"],
+        flavours: ["miso", "soy", "ginger", "sake", "mirin", "sesame"]
+      },
+      "Thai": {
+        proteins: ["chicken thighs", "king prawns", "salmon fillets", "pork tenderloin"],
+        approaches: ["stir-fried", "grilled", "steamed", "braised"],
+        flavours: ["lime", "chilli", "coconut", "lemongrass", "fish sauce", "basil"]
+      }
     };
-    // Much more varied approaches - not just techniques
-    const approachCues = [
-      "roasted", "grilled", "braised", "pan-fried", "baked", "steamed", "poached", "seared", "smoked", "stewed",
-      "spiced", "marinated", "stuffed", "wrapped", "crusted", "glazed", "caramelized", "charred", "slow-cooked", "crispy"
-    ];
-    const flavourCues = [
-      "garlic", "lemon", "herb", "tomato", "wine", "coconut", "ginger", "chilli", "honey", "mustard", 
-      "olive", "butter", "cream", "soy", "miso", "lime", "orange", "rosemary", "thyme", "basil",
-      "paprika", "cumin", "coriander", "mint", "parsley", "sage", "balsamic", "citrus"
-    ];
+    
+    const cuisineKeys = Object.keys(cuisineStyles);
     const seasonCues = ["", "summer", "winter", "spring", "autumn"];
     
     // Deterministic selection based on seeds
@@ -445,20 +463,21 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     // Select cues based on seeded randomness
     const seededRandom = (seed: number, max: number) => Math.abs((seed * 9301 + 49297) % 233280) % max;
     
-    const cuisine = data.cuisinePreference || cuisineCues[seededRandom(rngSeed, cuisineCues.length)];
-    const approach = approachCues[seededRandom(rngSeed + 1, approachCues.length)];
-    const flavour = flavourCues[seededRandom(rngSeed + 2, flavourCues.length)];
-    const season = seasonCues[seededRandom(rngSeed + 3, seasonCues.length)];
+    // First select cuisine, then pick coherent combinations within that cuisine
+    const selectedCuisineKey = data.cuisinePreference ? 
+      (Object.keys(cuisineStyles).find(k => k.toLowerCase().includes(data.cuisinePreference!.toLowerCase())) || "British") :
+      cuisineKeys[seededRandom(rngSeed, cuisineKeys.length)];
     
-    // Determine dietary mode and select protein
-    const dietaryMode = data.avoid?.includes("meat") ? "vegetarian" : 
-                       data.avoid?.includes("dairy") ? "vegan" : "omnivore";
-    const proteins = proteinPool[dietaryMode];
-    const protein = proteins[seededRandom(rngSeed + 4, proteins.length)];
+    const selectedCuisine = cuisineStyles[selectedCuisineKey as keyof typeof cuisineStyles];
+    
+    const protein = selectedCuisine.proteins[seededRandom(rngSeed + 1, selectedCuisine.proteins.length)];
+    const approach = selectedCuisine.approaches[seededRandom(rngSeed + 2, selectedCuisine.approaches.length)];
+    const flavour = selectedCuisine.flavours[seededRandom(rngSeed + 3, selectedCuisine.flavours.length)];
+    const season = seasonCues[seededRandom(rngSeed + 4, seasonCues.length)];
 
     const systemMessage = `Create authentic recipe titles that sound like they're from established cookbooks by Rick Stein, Jamie Oliver, Tom Kerridge, or restaurant menus from Dishoom. Be genuine and unpretentious.`;
 
-    const userMessage = `Create a recipe title using: ${protein}, ${approach}, ${flavour}, ${cuisine} style.
+    const userMessage = `Create a recipe title using: ${protein}, ${approach}, ${flavour}, ${selectedCuisineKey} style.
 
 Study how real chefs name their dishes - simple, confident, no unnecessary words:
 
