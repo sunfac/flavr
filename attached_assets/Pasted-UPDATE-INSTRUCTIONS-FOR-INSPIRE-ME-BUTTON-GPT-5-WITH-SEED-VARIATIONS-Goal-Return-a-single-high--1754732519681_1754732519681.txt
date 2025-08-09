@@ -1,0 +1,102 @@
+UPDATE INSTRUCTIONS FOR INSPIRE ME BUTTON (GPT-5, WITH SEED VARIATIONS)
+
+Goal
+Return a single, high-quality, cookbook-style title in ~1–3 seconds that STILL reflects our seed variation system. This only updates Inspire Me. Chef Assist remains unchanged.
+
+────────────────────────────────────────────────────────────────────────
+1) RUNTIME (FAST PATH)
+• model: "gpt-5"
+• randomness: 0.95        // replaces temperature in GPT-5
+• top_p: 0.95
+• verbosity: "low"
+• max_output_tokens: 30–40
+• Always send a fresh system + user message (no chat backlog).
+
+────────────────────────────────────────────────────────────────────────
+2) SEED VARIATION (LIGHTWEIGHT, DETERMINISTIC)
+Use the SAME seed inputs as Chef Assist, but map them to title-friendly cues (no jargon, no heavy reasoning).
+
+Inputs available:
+  randomSeed:int, complexityLevel:1–15, simpleStyle:1–15, creativityMode:1–8,
+  seasonalFocus:1–6, textureTheme:1–10, flavorProfile:1–12
+Optional inputs (if present): dietaryMode ("omnivore" default | "vegetarian" | "vegan")
+
+Deterministic selection:
+  userIntentHash = hash(lowercase(user_intent_or_dish || ""))
+  sessionSalt    = hash(clientId||deviceId||userId) XOR hash(epochDay)
+  rngSeed        = randomSeed XOR userIntentHash XOR sessionSalt
+  idx = PRNG(rngSeed) % length
+
+Title cue pools (plain-English, title-safe, no chef jargon):
+
+A) techniqueCue[15]  // pick 1 (mapped from complexityLevel)
+["slow-braised","pan-seared","oven-roasted","grilled","crispy-fried",
+ "steam-kissed","gently poached","buttery","sheet-pan","pressure-braised",
+ "confited","low-and-slow","smoky-rubbed","hand-tossed","quick-cured"] 
+// If simplicity == "≤30-min", force techniqueCue ∈ {"pan-seared","oven-roasted","sheet-pan","grilled"}
+
+B) seasonCue[6]      // pick 0–1 (mapped from seasonalFocus)
+["spring herb","summer","autumn","winter","light roast","all-season"]
+// If "all-season", omit from title.
+
+C) textureCue[10]    // pick 0–1 (mapped from textureTheme)
+["crispy","silky","tender","crackling","sticky-glaze","char-edged",
+ "crumb-crusted","brothy","airy","flaky"]
+
+D) flavourCue[12]    // pick 1 (mapped from flavorProfile)
+["umami-rich","citrus-bright","herb-lifted","nutty","aromatic-spiced",
+ "garlicky","sweet-savory","smoky","pickled-accent","fermented-note",
+ "peppery","chilli-warm"]
+// If dietaryMode is child-friendly, avoid “chilli-warm”; use “herb-lifted” instead.
+
+E) proteinPool (choose 1 deterministically; override with user intent if provided)
+omnivore: ["chicken","salmon","cod","prawns","beef","pork","lamb"]
+vegetarian: ["mushrooms","aubergine","halloumi","cauliflower","chickpeas"]
+vegan: ["mushrooms","aubergine","cauliflower","chickpeas","butternut squash"]
+
+Composition rule:
+• Title = [optional seasonCue] [techniqueCue] [protein] with [flavourCue or textureCue]
+• Keep to 4–10 words. Don’t include more than one optional cue beyond flavour/technique.
+
+────────────────────────────────────────────────────────────────────────
+3) TITLE POLICY (STRICT)
+• 4–10 words, appetising, believable for a cookbook/restaurant.
+• Must name the main protein/hero ingredient.
+• EXACTLY ONE playful descriptor is allowed, but it must be plain-English and non-technical (e.g., “char-kissed”, “golden”, “smoky”, “crisped”, “velvet” style words). 
+• BLOCKLIST (never use): ["Maillard","sous-vide","gastrique","espuma","spherification","nitro","transglutaminase","molecular"]
+• No emoji, brand names, or slashes. No chef-science jargon.
+
+────────────────────────────────────────────────────────────────────────
+4) PROMPT USED FOR GPT-5 (LIGHTWEIGHT)
+
+SYSTEM:
+"You create memorable, cookbook-style recipe titles for home cooks. Titles are short, plain-English, appetising, and reflect the given cues. Avoid chef-science terms and banned words. Output exactly one title, no extra text."
+
+USER (fill placeholders from Section 2 after applying the quick guardrails):
+"Generate ONE unique recipe title that matches these cues:
+• technique: {{techniqueCue}}
+• flavour: {{flavourCue}}
+• protein: {{protein}}
+• optional season cue (use only if not 'all-season'): {{seasonCue_or_empty}}
+• optional texture cue (use at most one): {{textureCue_or_empty}}
+Rules:
+• 4–10 words, cookbook/restaurant tone.
+• Include the protein clearly.
+• Use only plain-English descriptors; avoid technical or chef-science words.
+• Do not use: Maillard, sous-vide, gastrique, espuma, spherification, nitro, transglutaminase, molecular.
+Output: the title only (no quotes, no punctuation at the start or end, no explanations)."
+
+────────────────────────────────────────────────────────────────────────
+5) OUTPUT & WIRING
+• Return a single line of plain text (the title). 
+• Immediately place it into the Chef Assist input box.
+• If parsing adds quotes or trailing punctuation, strip them.
+
+────────────────────────────────────────────────────────────────────────
+6) SPEED NOTES
+• Keep max_output_tokens at 30–40 and verbosity "low".
+• Do not include previous chat history.
+• Do not send seed arrays or long explanations—only the resolved cues.
+• If latency >3s in production, drop flavourCue synonyms that are long; prefer shorter ones (e.g., “herb-lifted” → “herby”).
+
+This preserves seed-driven variety, blocks chef jargon (no “Maillard”), and keeps Inspire Me fast and cookbook-realistic.

@@ -291,7 +291,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     }
   }
 
-  // Generate inspiration title using GPT-5
+  // Generate inspiration title using GPT-5 (fast, lightweight version)
   static async generateInspireTitle(data: {
     seeds: SeedPacks;
     userIntent?: string;
@@ -300,32 +300,72 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     clientId?: string;
   }): Promise<{ title: string }> {
     
-    const stylePacks = selectStylePacks(data.seeds, data.userIntent || "", data.clientId || "");
-    const { packs: adjustedPacks } = applyCoherenceGuardrails(stylePacks, null);
+    // Lightweight title cue pools (no chef jargon)
+    const techniqueCues = [
+      "slow-braised", "pan-seared", "oven-roasted", "grilled", "crispy-fried",
+      "steam-kissed", "gently poached", "buttery", "sheet-pan", "pressure-braised",
+      "confited", "low-and-slow", "smoky-rubbed", "hand-tossed", "quick-cured"
+    ];
     
-    const systemMessage = `You are "Zest," a Michelin-starred executive chef who writes cookbook-quality recipes for skilled home cooks. 
-Priorities: maximum flavour, cultural authenticity, clear technique, efficient home-kitchen execution. 
-Use British English and metric. Assume a UK supermarket. Avoid rare equipment and brand names. 
-Prefer meat/fish/shellfish proteins unless the user specifies otherwise; do not use tofu unless requested. 
-Be concise and practical; explain technique briefly where it unlocks flavour. 
-If packs conflict with time, equipment, or authenticity, adjust to the nearest coherent alternative and note it in "style_notes".
-For Chef Assist, output strictly as JSON matching the provided schema. Do not include any text outside JSON.`;
+    const seasonCues = [
+      "spring herb", "summer", "autumn", "winter", "light roast", "all-season"
+    ];
+    
+    const textureCues = [
+      "crispy", "silky", "tender", "crackling", "sticky-glaze", "char-edged",
+      "crumb-crusted", "brothy", "airy", "flaky"
+    ];
+    
+    const flavourCues = [
+      "umami-rich", "citrus-bright", "herb-lifted", "nutty", "aromatic-spiced",
+      "garlicky", "sweet-savory", "smoky", "pickled-accent", "fermented-note",
+      "peppery", "chilli-warm"
+    ];
+    
+    const proteinPool = {
+      omnivore: ["chicken", "salmon", "cod", "prawns", "beef", "pork", "lamb"],
+      vegetarian: ["mushrooms", "aubergine", "halloumi", "cauliflower", "chickpeas"],
+      vegan: ["mushrooms", "aubergine", "cauliflower", "chickpeas", "butternut squash"]
+    };
+    
+    // Deterministic selection based on seeds
+    const hashCode = (s: string) => s.split('').reduce((a, b) => (((a << 5) - a) + b.charCodeAt(0)) | 0, 0);
+    const userIntentHash = hashCode((data.userIntent || "").toLowerCase());
+    const sessionSalt = hashCode(data.clientId || "") ^ hashCode(new Date().toDateString());
+    const rngSeed = data.seeds.randomSeed ^ userIntentHash ^ sessionSalt;
+    
+    // Select cues based on seeded randomness
+    const seededRandom = (seed: number, max: number) => Math.abs((seed * 9301 + 49297) % 233280) % max;
+    
+    const techniqueCue = techniqueCues[seededRandom(rngSeed, techniqueCues.length)];
+    const seasonCue = seasonCues[seededRandom(rngSeed + 1, seasonCues.length)];
+    const textureCue = textureCues[seededRandom(rngSeed + 2, textureCues.length)];
+    const flavourCue = flavourCues[seededRandom(rngSeed + 3, flavourCues.length)];
+    
+    // Determine dietary mode (default to omnivore)
+    const dietaryMode = data.avoid?.includes("meat") ? "vegetarian" : 
+                       data.avoid?.includes("dairy") ? "vegan" : "omnivore";
+    const proteins = proteinPool[dietaryMode];
+    const protein = proteins[seededRandom(rngSeed + 4, proteins.length)];
+    
+    // Skip season if "all-season", use sparingly
+    const includeSeasonCue = seasonCue !== "all-season" && seededRandom(rngSeed + 5, 3) === 0;
+    const includeTextureCue = seededRandom(rngSeed + 6, 2) === 0;
+    
+    const systemMessage = `You create memorable, cookbook-style recipe titles for home cooks. Titles are short, plain-English, appetising, and reflect the given cues. Avoid chef-science terms and banned words. Output exactly one title, no extra text.`;
 
-    const userMessage = `Generate one appetising recipe title (4–10 words) that reflects the packs below and suits a UK home cook using supermarket ingredients. Include exactly one unexpected/cheffy term (e.g., "Maillard" or playful "Mallard") but keep the title clear about the main ingredient/flavour. Return JSON only with "title".
-
-ULTRA-SEED PACKS (post-guardrail):
-- randomSeed: ${data.seeds.randomSeed}
-- techniquePack: ${adjustedPacks.techniquePack}
-- simplicityPack: ${adjustedPacks.simplicityPack}
-- creativityPack: ${adjustedPacks.creativityPack}
-- seasonPack: ${adjustedPacks.seasonPack}
-- texturePack: ${adjustedPacks.texturePack}
-- flavourPack: ${adjustedPacks.flavourPack}
-
-USER CONTEXT (optional): ${data.userIntent || "flexible"}, ${data.cuisinePreference || "any"}, avoid: ${data.avoid?.join(", ") || "none"}
-
-INSPIRE ME JSON SCHEMA (return ONLY this):
-{ "title": "string (4–10 words; quirky-but-clear)" }`;
+    const userMessage = `Generate ONE unique recipe title that matches these cues:
+• technique: ${techniqueCue}
+• flavour: ${flavourCue}
+• protein: ${protein}
+${includeSeasonCue ? `• season: ${seasonCue}` : ''}
+${includeTextureCue ? `• texture: ${textureCue}` : ''}
+Rules:
+• 4–10 words, cookbook/restaurant tone.
+• Include the protein clearly.
+• Use only plain-English descriptors; avoid technical or chef-science words.
+• Do not use: Maillard, sous-vide, gastrique, espuma, spherification, nitro, transglutaminase, molecular.
+Return JSON with exactly one field "title" containing the recipe title.`;
 
     try {
       const completion = await openai.chat.completions.create({
@@ -334,11 +374,11 @@ INSPIRE ME JSON SCHEMA (return ONLY this):
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_completion_tokens: 10000, // GPT-5 needs extra for reasoning phase  
-        response_format: { type: "json_object" }
+        max_completion_tokens: 2000, // GPT-5 needs much more for reasoning
+        response_format: { type: "json_object" } // Back to JSON for GPT-5 compatibility
       });
 
-      const content = completion.choices[0]?.message?.content;
+      const content = completion.choices[0]?.message?.content?.trim();
       console.log("Raw GPT-5 inspire response:", content);
       
       if (!content) {
@@ -347,17 +387,19 @@ INSPIRE ME JSON SCHEMA (return ONLY this):
       }
 
       try {
-        return JSON.parse(content);
+        const parsed = JSON.parse(content);
+        return { title: parsed.title };
       } catch (parseError) {
-        console.error("JSON parse error:", parseError);
-        console.error("Content that failed to parse:", content);
-        // Fallback response
-        return { title: "Pan-Seared Chicken with Italian Herbs" };
+        // If JSON parsing fails, try to extract title from text
+        const cleanTitle = content.replace(/^["']|["']$/g, '').replace(/\.$/, '').trim();
+        return { title: cleanTitle };
       }
       
     } catch (error) {
       console.error("GPT-5 Inspire error:", error);
-      throw new Error("Failed to generate inspiration with GPT-5");
+      // Fallback with deterministic title based on cues
+      const fallbackTitle = `${techniqueCue.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} ${protein.charAt(0).toUpperCase() + protein.slice(1)} with ${flavourCue.split('-').join(' ')} Notes`;
+      return { title: fallbackTitle };
     }
   }
 }
