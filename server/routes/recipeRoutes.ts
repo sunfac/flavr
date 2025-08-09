@@ -576,22 +576,7 @@ Return a JSON object with this structure:
       res.json({ suggestion: result.title });
     } catch (error: any) {
       console.error('Inspire error:', error);
-      
-      // Log the failed interaction
-      logSimpleGPTInteraction({
-        endpoint: "chef-assist-inspire",
-        prompt: "",
-        response: "",
-        model: "gpt-5",
-        duration: 0,
-        inputTokens: 0,
-        outputTokens: 0,
-        cost: 0,
-        success: false,
-        userId: req.session?.userId?.toString()
-      }).catch(err => console.error('Background logging failed:', err));
-      
-      res.status(500).json({ error: 'Failed to generate inspiration' });
+      res.status(500).json({ error: "Failed to generate recipe title" });
     }
   });
 

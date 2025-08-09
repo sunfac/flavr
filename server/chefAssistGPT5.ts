@@ -462,16 +462,9 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const includeSeasonCue = seasonCue !== "all-season" && seededRandom(rngSeed + 5, 3) === 0;
     const includeTextureCue = seededRandom(rngSeed + 6, 2) === 0;
     
-    const systemMessage = `You are a professional cookbook title writer creating short, mouth-watering recipe names for home cooks. Titles must sound appealing and unique, like dishes you'd find in a best-selling recipe book. No chef-science or obscure culinary jargon. No repetitive phrasing patterns. Titles should vary in rhythm, word order, and style. Use plain English with a touch of personality. Avoid rigid formats like 'Adjective Protein with X'. Return your response as JSON.`;
+    const systemMessage = `You must output ONLY valid JSON with a "title" field containing a recipe name. No other text.`;
 
-    const userMessage = `Using these seed cues: technique=${techniqueCue}; flavour=${flavourCue}; protein=${protein}; season=${seasonCue}, create ONE short, memorable recipe title. Rules:
-- 4–10 words.
-- Always include the protein.
-- Use exactly one flavour or seasonal hint.
-- Vary title structure every time — sometimes lead with protein, sometimes with flavour, sometimes with action or mood.
-- Do NOT use: Maillard, sous-vide, gastrique, espuma, spherification, nitro, transglutaminase, molecular.
-- Avoid repeating any structure used in the last 5 Inspire Me calls for this user.
-Return as JSON with a 'title' field.`;
+    const userMessage = `Create a recipe title with ${protein}, ${techniqueCue} technique, ${flavourCue} flavor. Output JSON: {"title": "..."}`;
 
     try {
       const completion = await openai.chat.completions.create({
@@ -480,8 +473,8 @@ Return as JSON with a 'title' field.`;
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_completion_tokens: 48, // Ultra-minimal for instant response
-        response_format: { type: "json_object" }
+        max_completion_tokens: 800 // Give plenty of space for GPT-5's reasoning phase
+        // Removed response_format to allow natural output
       });
 
       const content = completion.choices[0]?.message?.content?.trim();
@@ -492,43 +485,15 @@ Return as JSON with a 'title' field.`;
         throw new Error("Empty response from GPT-5");
       }
 
-      try {
-        const parsed = JSON.parse(content);
-        return { title: parsed.title };
-      } catch (parseError) {
-        console.error("JSON parse error, retrying with simpler prompt:", parseError);
-        
-        // Retry with simpler fallback prompt
-        try {
-          const fallbackCompletion = await openai.chat.completions.create({
-            model: "gpt-5",
-            messages: [
-              { role: "system", content: "Create one recipe title. Return JSON with 'title' field only." },
-              { role: "user", content: `Title for ${protein} with ${flavourCue} flavour. 4-10 words, cookbook-style.` }
-            ],
-            max_completion_tokens: 48,
-            response_format: { type: "json_object" }
-          });
-          
-          const fallbackContent = fallbackCompletion.choices[0]?.message?.content?.trim();
-          if (fallbackContent) {
-            const fallbackParsed = JSON.parse(fallbackContent);
-            return { title: fallbackParsed.title };
-          }
-        } catch (retryError) {
-          console.error("Fallback also failed:", retryError);
-        }
-        
-        // Final fallback with deterministic title
-        const cleanTitle = content.replace(/^["']|["']$/g, '').replace(/\.$/, '').trim();
-        return { title: cleanTitle || `${techniqueCue.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} ${protein.charAt(0).toUpperCase() + protein.slice(1)}` };
+      const parsed = JSON.parse(content);
+      if (!parsed.title) {
+        throw new Error("GPT-5 response missing 'title' field");
       }
+      return { title: parsed.title };
       
     } catch (error) {
       console.error("GPT-5 Inspire error:", error);
-      // Fallback with deterministic title based on cues
-      const fallbackTitle = `${techniqueCue.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} ${protein.charAt(0).toUpperCase() + protein.slice(1)} with ${flavourCue.split('-').join(' ')} Notes`;
-      return { title: fallbackTitle };
+      throw error; // No fallback - let it fail properly
     }
   }
 }
