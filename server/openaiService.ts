@@ -6,7 +6,7 @@ const openai = new OpenAI({
 
 // GPT-5 integration for Michelin-star quality recipe generation
 export class MichelinChefAI {
-  private static readonly MODEL = "gpt-4o"; // Using GPT-4o while GPT-5 stabilizes for production use
+  private static readonly MODEL = "gpt-4o"; // Using GPT-4o for stability (GPT-5 returning empty responses) for production use
   // Note: GPT-5 only supports default temperature (1), custom temperature not supported
 
   /**
@@ -23,7 +23,7 @@ export class MichelinChefAI {
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        temperature: 0.8, // Restored for GPT-4o
+        temperature: 0.8, // Restored for GPT-4o stability
         max_completion_tokens: 2000
       });
 
@@ -49,7 +49,7 @@ export class MichelinChefAI {
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        temperature: 0.8, // Restored for GPT-4o
+        temperature: 0.8, // Restored for GPT-4o stability
         max_completion_tokens: 3500
       });
 

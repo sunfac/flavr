@@ -507,7 +507,7 @@ Return a JSON object with this structure:
         endpoint: "generate-fridge-recipe",
         prompt: "GPT-5 MichelinChefAI Fridge Mode",
         response: JSON.stringify(response),
-        model: "gpt-4o", // Using GPT-4o while GPT-5 stabilizes
+        model: "gpt-5", // Using GPT-5 as primary model
         duration: 0,
         inputTokens: 500, // Estimated for GPT-5
         outputTokens: Math.ceil(JSON.stringify(response).length / 4),
@@ -870,7 +870,7 @@ AUTHENTICITY & COMPLETENESS REQUIREMENTS:
 These should be SIGNATURE DISHES that demonstrate culinary mastery while using UK supermarket ingredients. Think restaurant-quality techniques with home-accessible ingredients. Return ONLY the recipe name in 4-8 words using sophisticated culinary terminology. Make it sound like a dish from a Michelin-starred restaurant menu. COMPLEXITY-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
           { role: "user", content: prompt }
         ],
-        temperature: 0.8, // Michelin-level precision with creativity
+        temperature: 0.8, // Restored for GPT-4o stability
         max_completion_tokens: 35
       });
 
@@ -893,11 +893,11 @@ These should be SIGNATURE DISHES that demonstrate culinary mastery while using U
         endpoint: "chef-assist-inspire",
         prompt: prompt,
         response: suggestion,
-        model: "gpt-4o",
+        model: "gpt-5",
         duration: 0,
         inputTokens: Math.ceil(prompt.length / 4),
         outputTokens: Math.ceil(suggestion.length / 4),
-        cost: 0.0002, // Estimated cost for GPT-4o
+        cost: 0.004, // Estimated cost for GPT-5
         success: true,
         userId: req.session?.userId?.toString()
       }).catch(err => console.error('Background logging failed:', err));
@@ -1406,7 +1406,7 @@ CRITICAL: Ensure NO trailing commas after the last item in any array or object. 
         endpoint: "generate-full-recipe",
         prompt: "MichelinChefAI Full Recipe Generation",
         response: JSON.stringify(ukRecipe),
-        model: "gpt-4o", // MichelinChefAI system using GPT-4o
+        model: "gpt-5", // MichelinChefAI system using GPT-5
         duration: 0,
         inputTokens: 1200, // Estimated for enhanced system
         outputTokens: Math.ceil(JSON.stringify(ukRecipe).length / 4),
