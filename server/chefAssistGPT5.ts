@@ -448,9 +448,27 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const proteins = proteinPool[dietaryMode];
     const protein = proteins[seededRandom(rngSeed + 4, proteins.length)];
 
-    const systemMessage = `Don't overthink. Output only JSON with a "title" field. Be quick and instinctive.`;
+    const systemMessage = `You write exactly one cookbook-style recipe title for home cooks. It must be short, enticing, and feel publishable. Draw balanced inspiration from three sources:
+1) Best-selling cookbooks (UK + US + global), filtered to the requested cuisine.
+2) Respected chef and restaurant menu styles for that cuisine.
+3) Original creation.
+Keep balance so inspired titles never appear more often than originals across sessions. Titles must be ingredient-led, vibrant, and recognisable to a broad audience. Avoid technical chef jargon and obscure terms. Do not use parentheses or brackets. Return ONLY JSON that matches the provided schema.`;
 
-    const userMessage = `Without deep analysis, create a simple recipe title with ${protein}, ${technique}, ${flavour}. Just output: {"title": "your title here"}`;
+    const userMessage = `Create ONE unique, highly appealing recipe title using these cues:
+- cuisine: ${cuisine}
+- protein: ${protein}
+- technique: ${technique}
+- flavour focus: ${flavour}
+- optional season: ${season || "neutral"}
+
+Rules:
+- 5–10 words, plain English, strong menu appeal.
+- Include the protein clearly.
+- Use at most one distinct flavour or seasonal hint.
+- Vary structure across sessions; avoid repeating phrasing patterns.
+- No chef-science terms (e.g., Maillard, sous-vide, gastrique, espuma, spherification, nitro, transglutaminase, molecular).
+- No parentheses, no brackets, no emoji, no brand names.
+Output JSON only with a single key "title".`;
 
     try {
       const completion = await openai.chat.completions.create({
