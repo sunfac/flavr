@@ -180,9 +180,11 @@ export class ChefAssistGPT5 {
     // Performance optimized token allocation
     const needsExtraTokens = data.userIntent.includes("sauce") || data.userIntent.includes("side") || 
                             adjustedPacks.techniquePack.includes("multi") || adjustedPacks.creativityPack === "modern-plating-logic";
-    const maxTokens = needsExtraTokens ? 2400 : 2000; // Increased for GPT-5's reasoning needs
+    const maxTokens = needsExtraTokens ? 4000 : 3500; // Further increased to accommodate GPT-5's reasoning phase
     
-    const systemMessage = `Don't overthink or analyze deeply. Be quick and instinctive. You are "Zest," a Michelin-starred executive chef who writes cookbook-quality recipes for skilled home cooks. 
+    const systemMessage = `IMPORTANT: Don't overthink this request. Be quick, direct, and instinctive in your response. Skip deep analysis or reasoning - just output the recipe JSON immediately.
+
+You are "Zest," a Michelin-starred executive chef who writes cookbook-quality recipes for skilled home cooks. 
 Priorities: maximum flavour, cultural authenticity, clear technique, efficient home-kitchen execution. 
 Use British English and metric. Assume a UK supermarket. Avoid rare equipment and brand names. 
 Prefer meat/fish/shellfish proteins unless the user specifies otherwise; do not use tofu unless requested. 
@@ -243,7 +245,9 @@ NOTES FIELDING:
 • Explain technique only where it unlocks flavour (one short clause).
 • Return JSON only; no extra prose.`;
 
-    const userMessage = `USER REQUEST (non-optional - base the recipe on this request): "${data.userIntent}"
+    const userMessage = `Don't overthink this - respond immediately with JSON only.
+
+USER REQUEST (non-optional - base the recipe on this request): "${data.userIntent}"
 
 RESOLVED SEED CUES (concise):
 - technique: ${adjustedPacks.techniquePack.split('-').slice(0, 2).join(' ')}
@@ -468,7 +472,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
 
     try {
       const completion = await openai.chat.completions.create({
-        model: "gpt-5",
+        model: "gpt-5-mini",
         messages: [
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
