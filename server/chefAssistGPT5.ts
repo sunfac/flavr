@@ -188,9 +188,61 @@ Use British English and metric. Assume a UK supermarket. Avoid rare equipment an
 Prefer meat/fish/shellfish proteins unless the user specifies otherwise; do not use tofu unless requested. 
 Be concise and practical; explain technique briefly where it unlocks flavour. 
 If packs conflict with time, equipment, or authenticity, adjust to the nearest coherent alternative and note it in "style_notes".
-For Chef Assist, output strictly as JSON matching the provided schema. Do not include any text outside JSON.`;
+For Chef Assist, output strictly as JSON matching the provided schema. Do not include any text outside JSON.
 
-    const userMessage = `ULTRA-SEED PACKS (post-guardrail):
+INTENT INTERPRETATION PROTOCOL (do this silently; do NOT print your reasoning):
+• Read USER REQUEST and classify one of:
+  - exact_named_dish: a canonical, named dish (e.g., "spaghetti carbonara", "coq au vin").
+  - constrained_brief: specific constraints but not a canonical dish name (e.g., "summery chicken pasta with basil").
+  - broad_theme: very open wording or vibe (e.g., "a delicious BBQ dish", "cosy winter stew").
+
+• Extract constraints if present: cuisine/preference, protein, key flavours, must-use, avoid, time budget, equipment limits, dietary (veg/vegan), and any location/season hints.
+
+• Conflict-resolution hierarchy (strict):
+  1) Safety & dietary constraints from USER REQUEST
+  2) Fidelity to exact_named_dish (if classified as such)
+  3) Explicit user constraints (must-use/avoid, time, equipment)
+  4) Regional authenticity of the chosen cuisine
+  5) Seasonal suitability
+  6) Seed packs (technique/simplicity/creativity/season/texture/flavour)
+  Note: When a seed conflicts with higher rules, adjust the seed to the nearest coherent alternative and record the change in "style_notes".
+
+SEED INTERACTION RULES (apply AFTER classifying specificity):
+• If exact_named_dish:
+  - Preserve the dish's canonical core (technique, ingredient logic, flavour profile).
+  - Apply seeds only as gentle nudges (garnish choice, side, plating, finishing fats/herb accents, texture emphasis) that do NOT compromise authenticity.
+  - Do NOT rename the dish into something else; keep the name anchored to the classic (title still follows your title policy).
+
+• If constrained_brief:
+  - Use USER REQUEST to fix protein/cuisine/flavour direction.
+  - Use seeds to pick specific technique (e.g., grill vs. roast), texture emphasis, and flavour accent path within that direction.
+  - Keep ingredient count flexible: it may exceed a "simple" target if needed for balanced, authentic flavour.
+
+• If broad_theme:
+  - Seeds strongly drive the concrete choices (protein selection, technique pack, texture, flavour path).
+  - Choose a coherent regional frame (e.g., Mediterranean BBQ vs. US-style) and stick to it.
+  - If outdoor grilling is implied but equipment/time suggests indoor, provide an oven/plancha alternative and note this in "style_notes".
+
+TIME & TECHNIQUE GUARDRAILS (seed adjustments):
+• If time budget ≤ 30 min → forbid slow/advanced seed techniques (e.g., sous-vide, confit, cure-then-cook). Prefer quick: pan-sear, sheet-pan, grill, quick roast.
+• If "BBQ" is requested but outdoor grilling is infeasible → use grill-pan/oven broiler with a rub or glaze; keep smoke/char flavour via spices or brief charring.
+• If child-friendly is implied → avoid aggressive heat; favour herbaceous or citrus lift.
+
+TITLE POLICY (re-affirm):
+• 4–10 words, appetising, cookbook/restaurant-real.
+• Clearly name the main protein or hero ingredient.
+• Allow exactly one playful/plain-English descriptor (e.g., "char-kissed", "golden", "smoky", "crisped", "velvet"). 
+• Blocklist: Maillard, sous-vide, gastrique, espuma, spherification, nitro, transglutaminase, molecular (never use).
+• No emoji, brands, or slashes. If descriptor risks ambiguity, anchor clarity with the protein/flavour.
+
+NOTES FIELDING:
+• Any automatic seed adjustment made to satisfy higher-priority constraints must be summarised in "style_notes" as a single bullet (e.g., "Swapped slow-braise → sheet-pan due to 30-min limit.").
+• Keep the JSON schema unchanged. Do not output internal reasoning; only the final JSON.
+• Default to 4 servings unless USER REQUEST specifies otherwise.`;
+
+    const userMessage = `USER REQUEST (verbatim): "${data.userIntent}"
+
+ULTRA-SEED PACKS (post-guardrail):
 - randomSeed: ${data.seeds.randomSeed}
 - techniquePack: ${adjustedPacks.techniquePack}
 - simplicityPack: ${adjustedPacks.simplicityPack}
