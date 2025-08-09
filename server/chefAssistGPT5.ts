@@ -475,8 +475,8 @@ Output JSON only with a single key "title".`;
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_completion_tokens: 800,
-        verbosity: "low",
+        max_completion_tokens: 600,
+        reasoning_effort: "low",
         response_format: { type: "json_object" }
       });
 
@@ -497,15 +497,16 @@ Output JSON only with a single key "title".`;
     } catch (error) {
       console.error("GPT-5 Inspire error:", error);
       
-      // Failover: single retry with trimmed prompt
+      // Failover: single retry with same exact prompt structure and low verbosity
       try {
         const retryCompletion = await openai.chat.completions.create({
           model: "gpt-5-mini",
           messages: [
             { role: "system", content: systemMessage },
-            { role: "user", content: `Create recipe title: ${cuisine} ${protein} ${technique}. JSON only with "title" key.` }
+            { role: "user", content: userMessage }
           ],
-          max_completion_tokens: 150,
+          max_completion_tokens: 600,
+          reasoning_effort: "low",
           response_format: { type: "json_object" }
         });
         
