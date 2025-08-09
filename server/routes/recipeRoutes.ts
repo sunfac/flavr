@@ -846,7 +846,7 @@ Return only the recipe name in 4-8 words. Be wildly creative and diverse using A
 Multi-Layer Seeds: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-5",
         messages: [
           { role: "system", content: `You are a Michelin-starred executive chef with 25+ years of culinary excellence, creating irresistible dish names that showcase maximum flavor potential. Your expertise spans classical French techniques, modern molecular gastronomy, and global flavor mastery.
 
@@ -870,7 +870,7 @@ AUTHENTICITY & COMPLETENESS REQUIREMENTS:
 These should be SIGNATURE DISHES that demonstrate culinary mastery while using UK supermarket ingredients. Think restaurant-quality techniques with home-accessible ingredients. Return ONLY the recipe name in 4-8 words using sophisticated culinary terminology. Make it sound like a dish from a Michelin-starred restaurant menu. COMPLEXITY-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
           { role: "user", content: prompt }
         ],
-        temperature: 0.8, // Restored for GPT-4o stability
+        // temperature removed - GPT-5 only supports default (1)
         max_completion_tokens: 35
       });
 
@@ -916,7 +916,7 @@ These should be SIGNATURE DISHES that demonstrate culinary mastery while using U
         endpoint: "chef-assist-inspire",
         prompt: '',
         response: error.message || 'Failed to generate inspiration',
-        model: "gpt-4o",
+        model: "gpt-5",
         duration: 0,
         inputTokens: 0,
         outputTokens: 0,
@@ -1144,7 +1144,7 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
 }`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o", // Using GPT-4o while GPT-5 stabilizes
+        model: "gpt-5", // Using GPT-4o while GPT-5 stabilizes
         messages: [
           { role: "system", content: "You are a JSON API. Return only valid JSON, no explanations. CRITICAL: Always prioritize what the user asked for - if they specify ingredients, cuisines, or dishes, create exactly what they requested." },
           { role: "user", content: systemPrompt }
@@ -1203,7 +1203,7 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
         endpoint: "chef-assist-generate", 
         prompt: systemPrompt,
         response: JSON.stringify(recipe),
-        model: "gpt-4o",
+        model: "gpt-5",
         duration: 0,
         inputTokens: Math.ceil(systemPrompt.length / 4),
         outputTokens: Math.ceil(JSON.stringify(recipe).length / 4),
@@ -1715,7 +1715,7 @@ Return JSON with this exact structure:
       console.log('📋 Final prompt being sent:', finalPrompt.substring(0, 500) + '...');
       
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-5",
         messages: [
           { role: "system", content: "You are a JSON API. Respond ONLY with valid JSON - no explanations, no markdown, no text outside the JSON object." },
           { role: "user", content: finalPrompt + "\n\nIMPORTANT: Return ONLY the JSON object, nothing else." }
@@ -1757,7 +1757,7 @@ Return JSON with this exact structure:
         endpoint: 'generate-recipe-ideas',
         prompt: finalPrompt,
         response: responseContent,
-        model: 'gpt-4o',
+        model: 'gpt-5',
         duration,
         inputTokens: completion.usage?.prompt_tokens || 0,
         outputTokens: completion.usage?.completion_tokens || 0,
@@ -1821,7 +1821,7 @@ Return JSON with this exact structure:
         endpoint: 'generate-recipe-ideas',
         prompt: 'Error occurred before prompt completion',
         response: '',
-        model: 'gpt-4o',
+        model: 'gpt-5',
         duration: 0,
         inputTokens: 0,
         outputTokens: 0,
@@ -1957,7 +1957,7 @@ Return valid JSON only:
       console.log('📝 Generating full recipe with OpenAI...');
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-5",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.7,
         max_tokens: 3000,
@@ -2028,7 +2028,7 @@ Return valid JSON only:
         endpoint: 'generate-full-recipe',
         prompt,
         response: responseContent,
-        model: 'gpt-4o',
+        model: 'gpt-5',
         duration,
         inputTokens: completion.usage?.prompt_tokens || 0,
         outputTokens: completion.usage?.completion_tokens || 0,

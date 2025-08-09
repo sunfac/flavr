@@ -6,7 +6,8 @@ const openai = new OpenAI({
 
 // GPT-5 integration for Michelin-star quality recipe generation
 export class MichelinChefAI {
-  private static readonly MODEL = "gpt-4o"; // Using GPT-4o for stability (GPT-5 returning empty responses) for production use
+  private static readonly MODEL_SIMPLE = "gpt-5"; // GPT-5 for simple tasks
+  private static readonly MODEL_COMPLEX = "gpt-4o"; // GPT-4o for complex recipe generation for production use
   // Note: GPT-5 only supports default temperature (1), custom temperature not supported
 
   /**
@@ -18,13 +19,13 @@ export class MichelinChefAI {
 
     try {
       const completion = await openai.chat.completions.create({
-        model: this.MODEL,
+        model: this.MODEL_COMPLEX, // Use GPT-4o for complex recipe generation
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        temperature: 0.8, // Restored for GPT-4o stability
-        max_completion_tokens: 2000
+        temperature: 0.8, // GPT-4o supports temperature
+        max_completion_tokens: 4000
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -34,7 +35,7 @@ export class MichelinChefAI {
       }
       return JSON.parse(this.cleanJsonResponse(content));
     } catch (error) {
-      console.error("GPT-4o recipe ideas generation error:", error);
+      console.error("GPT-5 recipe ideas generation error:", error);
       throw new Error("Failed to generate recipe ideas with GPT-5");
     }
   }
@@ -48,13 +49,13 @@ export class MichelinChefAI {
 
     try {
       const completion = await openai.chat.completions.create({
-        model: this.MODEL,
+        model: this.MODEL_COMPLEX, // Use GPT-4o for complex recipe generation
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        temperature: 0.8, // Restored for GPT-4o stability
-        max_completion_tokens: 3500
+        temperature: 0.8, // GPT-4o supports temperature
+        max_completion_tokens: 5000
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -64,7 +65,7 @@ export class MichelinChefAI {
       }
       return JSON.parse(this.cleanJsonResponse(content));
     } catch (error) {
-      console.error("GPT-4o full recipe generation error:", error);
+      console.error("GPT-5 full recipe generation error:", error);
       throw new Error("Failed to generate full recipe with GPT-5");
     }
   }
