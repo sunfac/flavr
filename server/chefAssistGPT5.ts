@@ -177,10 +177,10 @@ export class ChefAssistGPT5 {
     
     const dynamicTargetRange = getDynamicTargetRange(adjustedPacks.simplicityPack);
     
-    // Token headroom rule - GPT-5 needs more tokens for reasoning phase
+    // Set sensible max_output_tokens for GPT-5 (not too high to avoid unnecessary wait)
     const needsExtraTokens = data.userIntent.includes("sauce") || data.userIntent.includes("side") || 
                             adjustedPacks.techniquePack.includes("multi") || adjustedPacks.creativityPack === "modern-plating-logic";
-    const maxTokens = needsExtraTokens ? 16000 : 12000; // Much higher for GPT-5's reasoning phase
+    const maxTokens = needsExtraTokens ? 2000 : 1800; // Sensible limits for faster response
     
     const systemMessage = `You are "Zest," a Michelin-starred executive chef who writes cookbook-quality recipes for skilled home cooks. 
 Priorities: maximum flavour, cultural authenticity, clear technique, efficient home-kitchen execution. 
@@ -404,20 +404,9 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const includeSeasonCue = seasonCue !== "all-season" && seededRandom(rngSeed + 5, 3) === 0;
     const includeTextureCue = seededRandom(rngSeed + 6, 2) === 0;
     
-    const systemMessage = `You create memorable, cookbook-style recipe titles for home cooks. Titles are short, plain-English, appetising, and reflect the given cues. Avoid chef-science terms and banned words. Output exactly one title, no extra text.`;
+    const systemMessage = `You write one cookbook-style recipe title for home cooks. Short, plain-English, appetising. No chef-science or molecular gastronomy terms. Return ONLY JSON for the given schema.`;
 
-    const userMessage = `Generate ONE unique recipe title that matches these cues:
-• technique: ${techniqueCue}
-• flavour: ${flavourCue}
-• protein: ${protein}
-${includeSeasonCue ? `• season: ${seasonCue}` : ''}
-${includeTextureCue ? `• texture: ${textureCue}` : ''}
-Rules:
-• 4–10 words, cookbook/restaurant tone.
-• Include the protein clearly.
-• Use only plain-English descriptors; avoid technical or chef-science words.
-• Do not use: Maillard, sous-vide, gastrique, espuma, spherification, nitro, transglutaminase, molecular.
-Return JSON with exactly one field "title" containing the recipe title.`;
+    const userMessage = `Make ONE title using these cues: technique=${techniqueCue}; flavour=${flavourCue}; protein=${protein}${includeSeasonCue ? `; season=${seasonCue}` : ''}${includeTextureCue ? `; texture=${textureCue}` : ''}. Rules: 4–10 words; include the protein; exactly one playful descriptor (plain English). Never use: Maillard, sous-vide, gastrique, espuma, spherification, nitro, transglutaminase, molecular.`;
 
     try {
       const completion = await openai.chat.completions.create({
@@ -426,8 +415,8 @@ Return JSON with exactly one field "title" containing the recipe title.`;
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_completion_tokens: 2000, // GPT-5 needs much more for reasoning
-        response_format: { type: "json_object" } // Back to JSON for GPT-5 compatibility
+        max_completion_tokens: 100, // Minimal for fast response (includes reasoning)
+        response_format: { type: "json_object" }
       });
 
       const content = completion.choices[0]?.message?.content?.trim();
@@ -442,9 +431,32 @@ Return JSON with exactly one field "title" containing the recipe title.`;
         const parsed = JSON.parse(content);
         return { title: parsed.title };
       } catch (parseError) {
-        // If JSON parsing fails, try to extract title from text
+        console.error("JSON parse error, retrying with simpler prompt:", parseError);
+        
+        // Retry with simpler fallback prompt
+        try {
+          const fallbackCompletion = await openai.chat.completions.create({
+            model: "gpt-5",
+            messages: [
+              { role: "system", content: "Create one recipe title. Return JSON with 'title' field only." },
+              { role: "user", content: `Title for ${protein} with ${flavourCue} flavour. 4-10 words, cookbook-style.` }
+            ],
+            max_completion_tokens: 100,
+            response_format: { type: "json_object" }
+          } as any);
+          
+          const fallbackContent = fallbackCompletion.choices[0]?.message?.content?.trim();
+          if (fallbackContent) {
+            const fallbackParsed = JSON.parse(fallbackContent);
+            return { title: fallbackParsed.title };
+          }
+        } catch (retryError) {
+          console.error("Fallback also failed:", retryError);
+        }
+        
+        // Final fallback with deterministic title
         const cleanTitle = content.replace(/^["']|["']$/g, '').replace(/\.$/, '').trim();
-        return { title: cleanTitle };
+        return { title: cleanTitle || `${techniqueCue.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} ${protein.charAt(0).toUpperCase() + protein.slice(1)}` };
       }
       
     } catch (error) {

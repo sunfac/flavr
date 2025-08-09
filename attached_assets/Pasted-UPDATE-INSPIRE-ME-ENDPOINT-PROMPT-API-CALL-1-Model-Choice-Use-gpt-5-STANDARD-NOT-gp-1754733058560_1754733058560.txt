@@ -1,0 +1,43 @@
+UPDATE INSPIRE ME ENDPOINT PROMPT + API CALL:
+
+1. Model Choice:
+   - Use "gpt-5" (STANDARD), NOT "gpt-5-reasoning" for Inspire Me.  
+   - This avoids long reasoning delays and 80–90 second waits.
+
+2. Seed Variation Use:
+   - Keep using our seed variation logic to pre-resolve 3–4 SHORT cues client-side BEFORE calling OpenAI.
+   - Example cues: technique, flavour, protein, season.
+   - Resolve them into short, human-readable descriptors (e.g., "grilled", "herby", "salmon", "summer") — no long explanations.
+
+3. Prompt Structure:
+   - SYSTEM: "You write one cookbook-style recipe title for home cooks. Short, plain-English, appetising. No chef-science or molecular gastronomy terms. Return ONLY JSON for the given schema."
+   - USER: "Make ONE title using these cues: technique={technique}; flavour={flavour}; protein={protein}; season={season}. Rules: 4–10 words; include the protein; exactly one playful descriptor (plain English). Never use: Maillard, sous-vide, gastrique, espuma, spherification, nitro, transglutaminase, molecular."
+
+4. API Call Parameters:
+   - `model: "gpt-5"`
+   - `randomness: 0.95` (replaces temperature)
+   - `top_p: 0.95`
+   - `verbosity: "low"` to reduce reasoning token overhead.
+   - `max_output_tokens: 48` (enough for JSON output, stops waste).
+   - `response_format: {
+       type: "json_object",
+       schema: {
+         type: "object",
+         properties: { title: { type: "string", minLength: 4, maxLength: 60 } },
+         required: ["title"],
+         additionalProperties: false
+       }
+     }`
+
+5. Output Handling:
+   - Parse `response.output_text` (Responses API) or equivalent JSON parse from output array.
+   - Inject the returned title directly into the Chef Assist text input box.
+   - If output is missing or invalid, retry ONCE with an even shorter fallback prompt that removes cues except protein and flavour, keeping all other rules.
+
+6. Performance Goal:
+   - Inspire Me must respond in ~1–3 seconds.
+   - No chef jargon or obscure science terms.
+   - Titles must be appetising, cookbook-style, and usable without edits.
+
+7. Main Recipe Output:
+   - Keep using GPT-5 for full Chef Assist recipes with reasoning as needed — but set a sensible `max_output_tokens` (e.g., 1800–2000) so users aren’t waiting unnecessarily.
