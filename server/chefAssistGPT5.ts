@@ -420,12 +420,12 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     // Resolve seeds to short cues before API call
     const cuisineCues = ["Italian", "Mexican", "Japanese", "Middle Eastern", "Modern British", "French", "Thai", "Indian", "Mediterranean"];
     const proteinPool = {
-      omnivore: ["chicken", "salmon", "cod", "prawns", "beef", "pork", "lamb"],
-      vegetarian: ["mushrooms", "aubergine", "halloumi", "cauliflower", "chickpeas"],
-      vegan: ["mushrooms", "aubergine", "cauliflower", "chickpeas", "butternut squash"]
+      omnivore: ["chicken thighs", "salmon fillets", "cod fillets", "king prawns", "beef sirloin", "pork tenderloin", "lamb shoulder"],
+      vegetarian: ["portobello mushrooms", "aubergine", "halloumi", "cauliflower", "chickpeas"],
+      vegan: ["king oyster mushrooms", "aubergine", "cauliflower steaks", "chickpeas", "butternut squash"]
     };
-    const techniqueCues = ["grilled", "roasted", "pan-seared", "slow-cooked", "crispy"];
-    const flavourCues = ["herby", "smoky", "citrus-bright", "peppery", "spiced"];
+    const techniqueCues = ["honey-glazed", "herb-crusted", "pan-seared", "slow-braised", "crispy-skinned", "butter-basted", "wine-braised"];
+    const flavourCues = ["lemon-herb", "garlic-rosemary", "citrus-butter", "red wine", "herb-butter", "balsamic-glazed", "chilli-lime"];
     const seasonCues = ["", "summer", "winter", "spring", "autumn"];
     
     // Deterministic selection based on seeds
@@ -448,27 +448,9 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const proteins = proteinPool[dietaryMode];
     const protein = proteins[seededRandom(rngSeed + 4, proteins.length)];
 
-    const systemMessage = `You write exactly one cookbook-style recipe title for home cooks. It must be short, enticing, and feel publishable. Draw balanced inspiration from three sources:
-1) Best-selling cookbooks (UK + US + global), filtered to the requested cuisine.
-2) Respected chef and restaurant menu styles for that cuisine.
-3) Original creation.
-Keep balance so inspired titles never appear more often than originals across sessions. Titles must be ingredient-led, vibrant, and recognisable to a broad audience. Avoid technical chef jargon and obscure terms. Do not use parentheses or brackets. Return ONLY JSON that matches the provided schema.`;
+    const systemMessage = `Don't overthink. Output only JSON with a "title" field. Be quick and instinctive.`;
 
-    const userMessage = `Create ONE unique, highly appealing recipe title using these cues:
-- cuisine: ${cuisine}
-- protein: ${protein}
-- technique: ${technique}
-- flavour focus: ${flavour}
-- optional season: ${season || "neutral"}
-
-Rules:
-- 5–10 words, plain English, strong menu appeal.
-- Include the protein clearly.
-- Use at most one distinct flavour or seasonal hint.
-- Vary structure across sessions; avoid repeating phrasing patterns.
-- No chef-science terms (e.g., Maillard, sous-vide, gastrique, espuma, spherification, nitro, transglutaminase, molecular).
-- No parentheses, no brackets, no emoji, no brand names.
-Output JSON only with a single key "title".`;
+    const userMessage = `Create a cookbook-style recipe title with ${protein}, ${technique}, ${flavour}. Make it sound appetizing like: "Honey-Glazed Chicken with Rosemary" or "Pan-Seared Salmon with Citrus Butter". Include a sauce or herb. Output: {"title": "your title"}`;
 
     try {
       const completion = await openai.chat.completions.create({
