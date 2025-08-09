@@ -316,7 +316,8 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
           { role: "user", content: userMessage }
         ],
         max_completion_tokens: maxTokens,
-        response_format: { type: "json_object" }
+        response_format: { type: "json_object" },
+        reasoning_effort: "medium"
       });
       
       let completion: any;
@@ -333,7 +334,8 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
             { role: "user", content: userMessage }
           ],
           max_completion_tokens: 1200,
-          response_format: { type: "json_object" }
+          response_format: { type: "json_object" },
+          reasoning_effort: "medium"
         });
       }
       
@@ -363,7 +365,8 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
             { role: "user", content: continuationPrompt }
           ],
           max_completion_tokens: 800,
-          response_format: { type: "json_object" }
+          response_format: { type: "json_object" },
+          reasoning_effort: "medium"
         });
         
         const continuationContent = continuation.choices[0]?.message?.content;
