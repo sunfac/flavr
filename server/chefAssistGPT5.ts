@@ -533,41 +533,59 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     clientId?: string;
   }): Promise<{ title: string }> {
     
-    // Authentic cuisine-specific combinations to avoid strange fusions
-    const cuisineStyles = {
-      "British": {
-        proteins: ["chicken thighs", "salmon fillets", "cod fillets", "beef sirloin", "lamb shoulder"],
-        approaches: ["roasted", "grilled", "braised", "pan-fried", "slow-cooked"],
-        flavours: ["herbs", "lemon", "garlic", "butter", "rosemary", "thyme", "parsley", "sage", "mustard"]
-      },
-      "Italian": {
-        proteins: ["chicken thighs", "salmon fillets", "king prawns", "beef sirloin"],
-        approaches: ["roasted", "grilled", "pan-fried", "braised"],
-        flavours: ["garlic", "tomato", "basil", "lemon", "olive oil", "wine", "parsley", "balsamic"]
-      },
-      "French": {
-        proteins: ["chicken thighs", "salmon fillets", "cod fillets", "beef sirloin", "lamb shoulder"],
-        approaches: ["roasted", "braised", "poached", "pan-fried", "slow-cooked"],
-        flavours: ["herbs", "butter", "cream", "wine", "garlic", "thyme", "tarragon", "shallots"]
-      },
-      "Mediterranean": {
-        proteins: ["chicken thighs", "salmon fillets", "king prawns", "lamb shoulder"],
-        approaches: ["grilled", "roasted", "baked", "charred"],
-        flavours: ["olive oil", "lemon", "herbs", "garlic", "tomato", "rosemary", "oregano", "fennel"]
-      },
-      "Japanese": {
-        proteins: ["salmon fillets", "cod fillets", "king prawns", "chicken thighs"],
-        approaches: ["grilled", "steamed", "pan-fried", "teriyaki"],
-        flavours: ["miso", "soy", "ginger", "sake", "mirin", "sesame"]
-      },
-      "Thai": {
-        proteins: ["chicken thighs", "king prawns", "salmon fillets", "pork tenderloin"],
-        approaches: ["stir-fried", "grilled", "steamed", "braised"],
-        flavours: ["lime", "chilli", "coconut", "lemongrass", "fish sauce", "basil"]
-      }
+    // Authentic cuisine-specific dishes with detailed flavor-boosting elements
+    const authenticDishes = {
+      "British": [
+        { name: "Slow-Braised Beef Short Rib", details: "with horseradish mash and red wine jus, 3-hour braise for melting texture" },
+        { name: "Pan-Fried Dover Sole", details: "with brown butter, lemon and capers, 4-minute cooking for perfect flake" },
+        { name: "Roast Lamb Shoulder", details: "with rosemary, garlic and anchovy, slow-roasted 2.5 hours for falling-apart tenderness" },
+        { name: "Fish and Chips", details: "authentic beer batter with triple-cooked chips, proper mushy peas" },
+        { name: "Shepherd's Pie", details: "with proper lamb mince, Worcestershire sauce depth, fluffy potato topping" }
+      ],
+      "Italian": [
+        { name: "Osso Buco alla Milanese", details: "with saffron risotto, authentic 2.5-hour braise, bright gremolata finish" },
+        { name: "Cacio e Pepe", details: "authentic Roman technique, proper pecorino emulsion, cracked black pepper heat" },
+        { name: "Bistecca alla Fiorentina", details: "thick T-bone, charcoal-grilled 15 minutes, rosemary oil finish" },
+        { name: "Risotto ai Porcini", details: "Carnaroli rice, dried porcini depth, proper mantecatura technique" },
+        { name: "Pasta all'Amatriciana", details: "guanciale fat rendering, San Marzano tomatoes, pecorino sharpness" }
+      ],
+      "French": [
+        { name: "Coq au Vin", details: "authentic Burgundy wine braising, lardons and pearl onions, 1.5-hour simmer" },
+        { name: "Duck Confit", details: "traditional 6-hour slow cooking in duck fat, crispy skin finish" },
+        { name: "Bouillabaisse", details: "authentic Marseille technique, proper rouille, saffron essence" },
+        { name: "Beef Bourguignon", details: "2.5-hour braise, burgundy wine reduction, mirepoix foundation" },
+        { name: "Cassoulet", details: "authentic Toulouse style, 4-hour slow cooking, duck fat richness" }
+      ],
+      "Thai": [
+        { name: "Authentic Thai Laab", details: "toasted rice powder texture, fish sauce funk, lime acid balance, fresh herbs brightness" },
+        { name: "Green Curry", details: "fresh curry paste, coconut cream splitting, Thai basil finish, proper heat balance" },
+        { name: "Pad Thai", details: "tamarind paste sourness, palm sugar caramel, fish sauce umami, wok hei smokiness" },
+        { name: "Som Tam", details: "green papaya crunch, lime-fish sauce dressing, dried shrimp depth, chilli heat" },
+        { name: "Massaman Curry", details: "authentic Persian spices, coconut richness, slow-braised beef, potato sweetness" }
+      ],
+      "Greek": [
+        { name: "Authentic Yuvetsi", details: "lamb shoulder 2-hour braise, orzo absorption cooking, tomato-wine base, kasseri cheese finish" },
+        { name: "Moussaka", details: "proper bechamel topping, salted aubergine layers, lamb mince depth, nutmeg warmth" },
+        { name: "Kleftiko", details: "parchment-wrapped lamb, 3-hour slow roasting, lemon-oregano marinade, falling-off-bone texture" },
+        { name: "Avgolemono", details: "egg-lemon emulsion technique, chicken stock base, rice comfort, fresh dill brightness" },
+        { name: "Spanakopita", details: "crispy phyllo layers, spinach-feta filling, proper butter brushing technique" }
+      ],
+      "Japanese": [
+        { name: "Authentic Ramen", details: "20-hour tonkotsu broth, proper tare balance, handmade noodles, chashu belly technique" },
+        { name: "Teriyaki Chicken", details: "authentic mirin-soy glaze, charcoal grilling, skin crisping technique" },
+        { name: "Chirashi Bowl", details: "sushi-grade fish, proper rice seasoning, wasabi heat, pickled vegetables contrast" },
+        { name: "Katsu Curry", details: "panko coating crunch, curry roux depth, cabbage freshness, proper frying technique" },
+        { name: "Miso Glazed Cod", details: "48-hour miso marinade, sake sweetness, mirin gloss, delicate flaking" }
+      ],
+      "Indian": [
+        { name: "Butter Chicken", details: "authentic tandoor char simulation, tomato-cream richness, garam masala warmth, kasoori methi aroma" },
+        { name: "Biryani", details: "dum cooking technique, saffron-milk infusion, layered rice, meat tenderness" },
+        { name: "Dal Makhani", details: "24-hour slow cooking, black lentil creaminess, butter richness, smokiness" },
+        { name: "Lamb Rogan Josh", details: "Kashmiri chilli color, yogurt tenderizing, whole spice tempering, slow braising" },
+        { name: "Fish Curry", details: "coconut milk base, curry leaf tempering, tamarind sourness, turmeric earthiness" }
+      ]
     };
     
-    const cuisineKeys = Object.keys(cuisineStyles);
     const seasonCues = ["", "summer", "winter", "spring", "autumn"];
     
     // Deterministic selection based on seeds
@@ -579,43 +597,42 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     // Select cues based on seeded randomness
     const seededRandom = (seed: number, max: number) => Math.abs((seed * 9301 + 49297) % 233280) % max;
     
-    // First select cuisine, then pick coherent combinations within that cuisine
+    const cuisineKeys = Object.keys(authenticDishes);
+    
+    // First select cuisine, then pick authentic dish
     const selectedCuisineKey = data.cuisinePreference ? 
-      (Object.keys(cuisineStyles).find(k => k.toLowerCase().includes(data.cuisinePreference!.toLowerCase())) || "British") :
+      (cuisineKeys.find(k => k.toLowerCase().includes(data.cuisinePreference!.toLowerCase())) || "British") :
       cuisineKeys[seededRandom(rngSeed, cuisineKeys.length)];
     
-    const selectedCuisine = cuisineStyles[selectedCuisineKey as keyof typeof cuisineStyles];
-    
-    const protein = selectedCuisine.proteins[seededRandom(rngSeed + 1, selectedCuisine.proteins.length)];
-    const approach = selectedCuisine.approaches[seededRandom(rngSeed + 2, selectedCuisine.approaches.length)];
-    const flavour = selectedCuisine.flavours[seededRandom(rngSeed + 3, selectedCuisine.flavours.length)];
-    const season = seasonCues[seededRandom(rngSeed + 4, seasonCues.length)];
+    const selectedCuisineDishes = authenticDishes[selectedCuisineKey as keyof typeof authenticDishes];
+    const selectedDish = selectedCuisineDishes[seededRandom(rngSeed + 1, selectedCuisineDishes.length)];
 
-    const systemMessage = `Create authentic recipe titles from the voice of established cookbook authors. Study their actual style - be genuine and unpretentious.`;
+    const systemMessage = `You are a culinary expert creating authentic dish suggestions that will guide recipe generation. Focus on genuine dishes with proper technique details and timing that will lead to maximum flavor.`;
 
-    const userMessage = `Create a recipe title using: ${protein}, ${approach}, ${flavour}, ${selectedCuisineKey} style.
+    const userMessage = `Create an authentic recipe suggestion based on: ${selectedDish.name}
 
-Channel these authentic chef voices:
+Key Details: ${selectedDish.details}
+Cuisine: ${selectedCuisineKey}
+User Intent: ${data.userIntent || "delicious cooking"}
 
-BRITISH MASTERS:
-Rick Stein: "Grilled Mackerel with Gooseberry Sauce", "Roasted Bream with Fennel" 
-Jamie Oliver: "Pork Chops with Apple", "Chicken Cacciatore", "Perfect Roast Chicken"
-Tom Kerridge: "Braised Beef Short Rib", "Slow-Cooked Lamb Shoulder"
-James Martin: "Pan-Fried Duck Breast", "Classic Fish and Chips"
-Mary Berry: "Beef Wellington", "Lemon Drizzle Cake" 
-Delia Smith: "Perfect Roast Beef", "Thai Green Chicken Curry"
-Marcus Wareing: "Confit Duck Leg", "Roasted Monkfish"
+Your suggestion should be a detailed, authentic dish description that includes:
+- The authentic dish name 
+- Key flavor-boosting elements
+- Critical technique notes
+- Proper timing expectations
+- Cultural authenticity markers
 
-RESTAURANT/INTERNATIONAL:
-Dishoom: "Railway Station Chicken Curry", "House Black Daal", "Gunpowder Potatoes"
-Georgina Hayden: "Lamb with Pomegranate", "Charred Aubergine"
-Jose Pizarro: "Grilled Octopus", "Jamón and Pea Croquetas"
+This suggestion will be fed into recipe generation, so include specific details about what makes this dish exceptional and authentic.
 
-These chefs are confident, direct, and let the food speak. No flowery language.
+Examples of the detailed style needed:
 
-Format: "[Method] [Protein] with [Ingredient]" or simple "[Protein] [Style]"
+"Authentic Thai Laab with toasted rice powder texture, fish sauce depth, lime brightness, and fresh herb punch - proper 20-minute technique for authentic northeastern Thai flavors"
 
-Output JSON only with "title" key.`;
+"Traditional Greek Yuvetsi - lamb shoulder braised 2 hours until falling apart, orzo cooked in rich tomato-wine sauce, finished with kasseri cheese for authentic taverna flavor"
+
+"Classic French Coq au Vin - authentic Burgundy wine braising with lardons and pearl onions, 90-minute simmer for wine-drunk chicken and silky sauce"
+
+Output JSON with "title" key containing the detailed authentic dish description.`;
 
     try {
       const completion = await openai.chat.completions.create({

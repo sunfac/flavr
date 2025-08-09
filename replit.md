@@ -22,10 +22,10 @@ Preferred communication style: Simple, everyday language.
 - **Framework**: Express.js
 - **Database**: PostgreSQL with Drizzle ORM
 - **Authentication**: Session-based authentication (express-session), Google OAuth
-- **AI Integration**: MichelinChefAI system using GPT-5 for premium recipe generation; Google Gemini for conversational AI. Optimized GPT-5 with low verbosity, explicit token allocation (80% of 2000 tokens for output), and 35s timeout with retry logic. GPT-5 Mini for Inspire Me button.
+- **AI Integration**: MichelinChefAI system using GPT-4o for reliable recipe generation (switched from GPT-5 reasoning model); Google Gemini for conversational AI. Enhanced Inspire Me system with authentic cuisine-specific dishes including detailed flavor-boosting elements, proper timing, and cultural authenticity markers. Comprehensive authenticity validation against 15+ established chefs.
 - **Image Generation**: Replicate API (Stable Diffusion), DALL-E 3 for recipe images.
 - **Payment Processing**: Stripe for subscription management.
-- **Core Logic**: Advanced MichelinChefAI prompting system with cookbook-quality recipes for home cooks; sophisticated flavor maximization (pan-searing, umami layering, acid architecture, fat as flavor vehicle, aromatic timing, texture dynamics, temperature mastery); UK English ingredient terminology mappings; AI-powered step timing; server-side image storage and serving; User input priority system with seed-based deterministic variation; Performance optimizations: concise seed cues (3-5 short terms), 8-12 step method limits, continuation logic for truncated responses.
+- **Core Logic**: Advanced MichelinChefAI prompting system with cookbook-quality recipes matching established chef voices (Rick Stein, Jamie Oliver, Tom Kerridge, Mary Berry, Delia Smith, Marcus Wareing, Georgina Hayden, Jose Pizarro, Dishoom, etc.); sophisticated flavor maximization; UK English ingredient terminology mappings; Enhanced Inspire Me with authentic dishes (Thai Laab, Greek Yuvetsi, French Coq au Vin, etc.) including proper timing and technique details; Comprehensive authenticity validation system blocking pretentious language, strange fusion combinations, and molecular gastronomy; AI-powered step timing; server-side image storage and serving.
 
 ### Core Cooking Modes
 - **Shopping Mode**: Generates recipes with shopping lists.
