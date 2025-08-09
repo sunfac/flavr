@@ -456,26 +456,29 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const proteins = proteinPool[dietaryMode];
     const protein = proteins[seededRandom(rngSeed + 4, proteins.length)];
 
-    const systemMessage = `Create a simple, natural cookbook recipe title. Make it sound like something from a real cookbook - not marketing copy. Be direct and appetizing.`;
+    const systemMessage = `Create evocative, poetic, completely uninhibited recipe titles. Break every convention. Be wildly creative.`;
 
-    const titlePatterns = [
-      `${cuisine} ${protein}`,
-      `${protein} and ${flavour}`, 
-      `${approach} ${protein}`,
-      `${protein} with ${flavour}`,
-      `${protein} ${cuisine} Style`,
-      `${season ? season + ' ' : ''}${protein}`,
-      `${flavour} ${protein}`
+    const inspirationalMoods = [
+      "sunset memories", "moonlit kitchen", "grandmother's secrets", "wild adventures", 
+      "cozy rainstorms", "summer romance", "midnight cravings", "childhood dreams",
+      "forgotten travels", "secret gardens", "fireplace evenings", "ocean breezes"
     ];
     
-    const selectedPattern = titlePatterns[seededRandom(rngSeed + 5, titlePatterns.length)];
+    const randomMood = inspirationalMoods[seededRandom(rngSeed + 6, inspirationalMoods.length)];
 
-    const userMessage = `Create a natural cookbook recipe title using: ${protein} (${approach}, ${flavour} flavor, ${cuisine} style)
+    const userMessage = `Create a beautiful, evocative recipe title inspired by "${data.userIntent || randomMood}".
 
-Make it sound authentic like real cookbook titles:
-"Roast Chicken", "Beef Bourguignon", "Thai Green Curry", "Lemon Chicken", "Fish and Chips", "Lamb Tagine", "Chicken Tikka", "Beef Stew"
+Use these as loose inspiration (don't be literal): ${protein}, ${flavour}, ${cuisine}, ${approach}
 
-Be direct and simple. No fancy words like "essence", "medley", "infusion", "burst", "delight".
+Be completely free and creative. Examples of the creative spirit:
+"Whispered Secrets from Nonna's Kitchen"
+"Dancing Flames and Tender Dreams" 
+"Midnight Ocean, Golden Spice"
+"The Last Bite of Summer"
+"Stories My Grandmother Never Told"
+"Fire, Salt, and Stolen Moments"
+
+Create something memorable and poetic. Break all the rules.
 
 Output JSON only with "title" key.`;
 
