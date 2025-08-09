@@ -22,10 +22,10 @@ Preferred communication style: Simple, everyday language.
 - **Framework**: Express.js
 - **Database**: PostgreSQL with Drizzle ORM
 - **Authentication**: Session-based authentication (express-session), Google OAuth
-- **AI Integration**: MichelinChefAI system using GPT-5 for premium recipe generation; Google Gemini for conversational AI. Full GPT-5 deployment with increased token limits (25K for recipes, 2K for inspire) to handle reasoning phase.
+- **AI Integration**: MichelinChefAI system using GPT-5 for premium recipe generation; Google Gemini for conversational AI. Optimized GPT-5 with performance-focused token limits (1200 default, 1600 for complex recipes, 1800 ceiling) and 35s timeout with retry logic.
 - **Image Generation**: Replicate API (Stable Diffusion), DALL-E 3 for recipe images.
 - **Payment Processing**: Stripe for subscription management.
-- **Core Logic**: Advanced MichelinChefAI prompting system with cookbook-quality recipes for home cooks; sophisticated flavor maximization (pan-searing, umami layering, acid architecture, fat as flavor vehicle, aromatic timing, texture dynamics, temperature mastery); UK English ingredient terminology mappings; AI-powered step timing; server-side image storage and serving; User input priority system with seed-based deterministic variation.
+- **Core Logic**: Advanced MichelinChefAI prompting system with cookbook-quality recipes for home cooks; sophisticated flavor maximization (pan-searing, umami layering, acid architecture, fat as flavor vehicle, aromatic timing, texture dynamics, temperature mastery); UK English ingredient terminology mappings; AI-powered step timing; server-side image storage and serving; User input priority system with seed-based deterministic variation; Performance optimizations: concise seed cues (3-5 short terms), 8-12 step method limits, continuation logic for truncated responses.
 
 ### Core Cooking Modes
 - **Shopping Mode**: Generates recipes with shopping lists.
@@ -54,7 +54,7 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### AI Services
-- **OpenAI**: MichelinChefAI system using GPT-5 for premium cookbook-quality recipe generation (no chef-science jargon). DALL-E 3 for recipe images. User input priority with intent classification (exact_named_dish, constrained_brief, broad_theme).
+- **OpenAI**: MichelinChefAI system using GPT-5 standard model (not reasoning variant) with temperature 0.8, top_p 0.9 for cookbook-quality recipe generation (no chef-science jargon). DALL-E 3 for recipe images. User input priority with intent classification (exact_named_dish, constrained_brief, broad_theme). Performance targets: 12-30s typical, ≤45s complex recipes.
 - **Google Gemini**: Conversational AI (primary chatbot), Google Vision API for ingredient detection (Photo-to-Recipe).
 - **Replicate**: Stable Diffusion for food image generation.
 

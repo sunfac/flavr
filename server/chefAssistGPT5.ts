@@ -177,10 +177,10 @@ export class ChefAssistGPT5 {
     
     const dynamicTargetRange = getDynamicTargetRange(adjustedPacks.simplicityPack);
     
-    // Set sensible max_output_tokens for GPT-5 (not too high to avoid unnecessary wait)
+    // Performance optimized token allocation
     const needsExtraTokens = data.userIntent.includes("sauce") || data.userIntent.includes("side") || 
                             adjustedPacks.techniquePack.includes("multi") || adjustedPacks.creativityPack === "modern-plating-logic";
-    const maxTokens = needsExtraTokens ? 2000 : 1800; // Sensible limits for faster response
+    const maxTokens = needsExtraTokens ? 1600 : 1200; // Optimized for speed, max 1800 hard ceiling
     
     const systemMessage = `You are "Zest," a Michelin-starred executive chef who writes cookbook-quality recipes for skilled home cooks. 
 Priorities: maximum flavour, cultural authenticity, clear technique, efficient home-kitchen execution. 
@@ -238,18 +238,19 @@ TITLE POLICY (re-affirm):
 NOTES FIELDING:
 • Any automatic seed adjustment made to satisfy higher-priority constraints must be summarised in "style_notes" as a single bullet (e.g., "Swapped slow-braise → sheet-pan due to 30-min limit.").
 • Keep the JSON schema unchanged. Do not output internal reasoning; only the final JSON.
-• Default to 4 servings unless USER REQUEST specifies otherwise.`;
+• Default to 4 servings unless USER REQUEST specifies otherwise.
+• Method steps should be concise; 8–12 steps total unless technique demands more.
+• Explain technique only where it unlocks flavour (one short clause).
+• Return JSON only; no extra prose.`;
 
-    const userMessage = `USER REQUEST (verbatim): "${data.userIntent}"
+    const userMessage = `USER REQUEST (non-optional - base the recipe on this request): "${data.userIntent}"
 
-ULTRA-SEED PACKS (post-guardrail):
-- randomSeed: ${data.seeds.randomSeed}
-- techniquePack: ${adjustedPacks.techniquePack}
-- simplicityPack: ${adjustedPacks.simplicityPack}
-- creativityPack: ${adjustedPacks.creativityPack}
-- seasonPack: ${adjustedPacks.seasonPack}
-- texturePack: ${adjustedPacks.texturePack}
-- flavourPack: ${adjustedPacks.flavourPack}
+RESOLVED SEED CUES (concise):
+- technique: ${adjustedPacks.techniquePack.split('-').slice(0, 2).join(' ')}
+- flavour: ${adjustedPacks.flavourPack.split('-').slice(0, 2).join(' ')}
+- texture: ${adjustedPacks.texturePack.split('-').slice(0, 2).join(' ')}
+- season: ${adjustedPacks.seasonPack.split('-')[0]}
+- simplicity: ${adjustedPacks.simplicityPack.includes('simple') ? 'simple' : 'layered'}
 
 USER CONTEXT:
 - Requested dish or intent: ${data.userIntent}
@@ -269,7 +270,7 @@ RECIPE REQUIREMENTS:
 - Steps must be short, imperative, and test-kitchen clear.
 - Provide finishing_touches and 2–4 flavour_boosts aligned to the packs.
 - Respect must-use and avoid strictly. Honour time_budget; if impossible, set realistic total and note it in style_notes.
-- Title must follow the QUIRKY-BUT-CLEAR TITLE RULE: 4–10 words with exactly one unexpected/cheffy term (e.g., "Maillard", "ash-smoked", "char-kissed", "fermented", "pickled", "umami-rich", or playful "Mallard").
+- Title must be cookbook-style: 4–10 words with plain-English descriptors (e.g., "pan-seared", "crispy", "herb-lifted"). No chef-science jargon.
 - Return JSON only, matching the schema exactly.
 
 CHEF ASSIST JSON SCHEMA (return ONLY this):
@@ -299,7 +300,12 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
       console.log(`Calling GPT-5 for full recipe with max_completion_tokens: ${maxTokens}`);
       const startTime = Date.now();
       
-      const completion = await openai.chat.completions.create({
+      // Add timeout wrapper for 35 seconds
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('GPT-5 timeout after 35s')), 35000)
+      );
+      
+      const completionPromise = openai.chat.completions.create({
         model: "gpt-5",
         messages: [
           { role: "system", content: systemMessage },
@@ -309,13 +315,65 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
         response_format: { type: "json_object" }
       });
       
+      let completion;
+      try {
+        completion = await Promise.race([completionPromise, timeoutPromise]);
+      } catch (timeoutError) {
+        console.log("First attempt timed out, retrying with reduced verbosity...");
+        
+        // Retry with medium verbosity and reduced tokens
+        completion = await openai.chat.completions.create({
+          model: "gpt-5",
+          messages: [
+            { role: "system", content: systemMessage },
+            { role: "user", content: userMessage }
+          ],
+          max_completion_tokens: 1200,
+          response_format: { type: "json_object" }
+        });
+      }
+      
       console.log(`GPT-5 response received in ${Date.now() - startTime}ms`);
 
       console.log("GPT-5 full recipe response received, parsing...");
-      const content = completion.choices[0]?.message?.content;
+      let content = completion.choices[0]?.message?.content;
+      const finishReason = completion.choices[0]?.finish_reason;
+      
       if (!content) {
         console.error("GPT-5 completion structure:", JSON.stringify(completion, null, 2));
         throw new Error("Empty response from GPT-5");
+      }
+
+      // Handle length-based truncation
+      if (finishReason === "length") {
+        console.log("Recipe truncated due to length, requesting continuation...");
+        
+        const continuationPrompt = `Return the REST of the SAME JSON (append missing fields/steps only). Continue from where you left off. Do not repeat already provided content.`;
+        
+        const continuation = await openai.chat.completions.create({
+          model: "gpt-5",
+          messages: [
+            { role: "system", content: systemMessage },
+            { role: "user", content: userMessage },
+            { role: "assistant", content: content },
+            { role: "user", content: continuationPrompt }
+          ],
+          max_completion_tokens: 800,
+          response_format: { type: "json_object" }
+        });
+        
+        const continuationContent = continuation.choices[0]?.message?.content;
+        if (continuationContent) {
+          // Try to merge JSON intelligently
+          try {
+            const partialRecipe = JSON.parse(content);
+            const restOfRecipe = JSON.parse(continuationContent);
+            content = JSON.stringify({...partialRecipe, ...restOfRecipe});
+          } catch {
+            // If parsing fails, concatenate strings and hope for the best
+            content = content.replace(/\}\s*$/, ',') + continuationContent.replace(/^\s*\{/, '');
+          }
+        }
       }
 
       console.log("Content length:", content.length);
@@ -443,7 +501,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
             ],
             max_completion_tokens: 100,
             response_format: { type: "json_object" }
-          } as any);
+          });
           
           const fallbackContent = fallbackCompletion.choices[0]?.message?.content?.trim();
           if (fallbackContent) {
