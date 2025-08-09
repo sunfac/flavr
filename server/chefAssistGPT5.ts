@@ -424,8 +424,16 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
       vegetarian: ["portobello mushrooms", "aubergine", "halloumi", "cauliflower", "chickpeas"],
       vegan: ["king oyster mushrooms", "aubergine", "cauliflower steaks", "chickpeas", "butternut squash"]
     };
-    const techniqueCues = ["honey-glazed", "herb-crusted", "pan-seared", "slow-braised", "crispy-skinned", "butter-basted", "wine-braised"];
-    const flavourCues = ["lemon-herb", "garlic-rosemary", "citrus-butter", "red wine", "herb-butter", "balsamic-glazed", "chilli-lime"];
+    // Much more varied approaches - not just techniques
+    const approachCues = [
+      "roasted", "grilled", "braised", "pan-fried", "baked", "steamed", "poached", "seared", "smoked", "stewed",
+      "spiced", "marinated", "stuffed", "wrapped", "crusted", "glazed", "caramelized", "charred", "slow-cooked", "crispy"
+    ];
+    const flavourCues = [
+      "garlic", "lemon", "herb", "tomato", "wine", "coconut", "ginger", "chilli", "honey", "mustard", 
+      "olive", "butter", "cream", "soy", "miso", "lime", "orange", "rosemary", "thyme", "basil",
+      "paprika", "cumin", "coriander", "mint", "parsley", "sage", "balsamic", "citrus"
+    ];
     const seasonCues = ["", "summer", "winter", "spring", "autumn"];
     
     // Deterministic selection based on seeds
@@ -438,7 +446,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const seededRandom = (seed: number, max: number) => Math.abs((seed * 9301 + 49297) % 233280) % max;
     
     const cuisine = data.cuisinePreference || cuisineCues[seededRandom(rngSeed, cuisineCues.length)];
-    const technique = techniqueCues[seededRandom(rngSeed + 1, techniqueCues.length)];
+    const approach = approachCues[seededRandom(rngSeed + 1, approachCues.length)];
     const flavour = flavourCues[seededRandom(rngSeed + 2, flavourCues.length)];
     const season = seasonCues[seededRandom(rngSeed + 3, seasonCues.length)];
     
@@ -448,39 +456,26 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const proteins = proteinPool[dietaryMode];
     const protein = proteins[seededRandom(rngSeed + 4, proteins.length)];
 
-    const systemMessage = `You write exactly one cookbook-style recipe title for home cooks. It must be short, enticing, and feel publishable. Draw balanced inspiration from: (1) best-selling cookbooks (UK + US + global), filtered to the requested cuisine; (2) respected chef and restaurant menu styles for that cuisine; (3) original creation. Keep balance so inspired titles never appear more often than originals across sessions. Titles must be ingredient-led, vibrant, and recognisable to a broad audience. Avoid technical chef jargon and obscure terms. Do not overthink — choose a strong, appealing title quickly without excessive reasoning. Do not use parentheses or brackets. Return ONLY JSON that matches the provided schema.`;
+    const systemMessage = `Create a simple, natural cookbook recipe title. Make it sound like something from a real cookbook - not marketing copy. Be direct and appetizing.`;
 
-    // Add more variability in structure and chef inspiration
-    const chefStyles = [
-      "Jamie Oliver style: simple, rustic, approachable",
-      "Ottolenghi style: exotic spices, Middle Eastern influences", 
-      "Gordon Ramsay style: restaurant-quality, precise techniques",
-      "Nigella Lawson style: comforting, indulgent, homely",
-      "Rick Stein style: fresh seafood, Mediterranean flavors",
-      "Mary Berry style: classic British, reliable favorites"
+    const titlePatterns = [
+      `${cuisine} ${protein}`,
+      `${protein} and ${flavour}`, 
+      `${approach} ${protein}`,
+      `${protein} with ${flavour}`,
+      `${protein} ${cuisine} Style`,
+      `${season ? season + ' ' : ''}${protein}`,
+      `${flavour} ${protein}`
     ];
     
-    const structureVariations = [
-      "Lead with technique: [Technique] [Protein] with [Flavor]",
-      "Lead with flavor: [Flavor] [Protein] [Technique]", 
-      "Lead with protein: [Protein] [Technique] in [Flavor] Style",
-      "Seasonal focus: [Season] [Protein] with [Technique] and [Flavor]",
-      "Simple naming: [Protein] and [Flavor]"
-    ];
-    
-    const selectedChef = chefStyles[seededRandom(rngSeed + 5, chefStyles.length)];
-    const selectedStructure = structureVariations[seededRandom(rngSeed + 6, structureVariations.length)];
+    const selectedPattern = titlePatterns[seededRandom(rngSeed + 5, titlePatterns.length)];
 
-    const userMessage = `Create a cookbook recipe title using this inspiration:
+    const userMessage = `Create a natural cookbook recipe title using: ${protein} (${approach}, ${flavour} flavor, ${cuisine} style)
 
-Chef Style: ${selectedChef}
-Structure Guide: ${selectedStructure}
-Ingredients: ${cuisine} ${protein}, ${technique}, ${flavour}${season ? `, ${season} season` : ''}
+Make it sound authentic like real cookbook titles:
+"Roast Chicken", "Beef Bourguignon", "Thai Green Curry", "Lemon Chicken", "Fish and Chips", "Lamb Tagine", "Chicken Tikka", "Beef Stew"
 
-Make it sound like it belongs in this chef's cookbook. Examples of good titles:
-- "Sticky Lamb Shanks with Pomegranate Glaze" (Ottolenghi style)
-- "Perfect Pan-Seared Salmon" (Jamie Oliver style)  
-- "Rich Chocolate Beef Bourguignon" (Nigella style)
+Be direct and simple. No fancy words like "essence", "medley", "infusion", "burst", "delight".
 
 Output JSON only with "title" key.`;
 
