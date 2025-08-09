@@ -448,9 +448,28 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const proteins = proteinPool[dietaryMode];
     const protein = proteins[seededRandom(rngSeed + 4, proteins.length)];
 
-    const systemMessage = `Don't overthink. Output only JSON with a "title" field. Be quick and instinctive.`;
+    const systemMessage = `You write exactly one cookbook-style recipe title for home cooks. It must be short, enticing, and feel publishable. Draw balanced inspiration from three sources:
+1) Best-selling cookbooks (UK + US + global), filtered to the requested cuisine.
+2) Respected chef and restaurant menu styles for that cuisine.
+3) Original creation.
+Keep balance so inspired titles never appear more often than originals across sessions. Titles must be ingredient-led, vibrant, and recognisable to a broad audience. Avoid technical chef jargon and obscure terms. Do not use parentheses or brackets. Return ONLY JSON that matches the provided schema.`;
 
-    const userMessage = `Create a cookbook-style recipe title with ${protein}, ${technique}, ${flavour}. Make it sound appetizing like: "Honey-Glazed Chicken with Rosemary" or "Pan-Seared Salmon with Citrus Butter". Include a sauce or herb. Output: {"title": "your title"}`;
+    const userMessage = `Create ONE unique, highly appealing recipe title using these cues:
+- cuisine: ${cuisine}
+- protein: ${protein}
+- technique: ${technique}
+- flavour focus: ${flavour}
+- optional season: ${season || "neutral"}
+
+Think of specific cookbook authors and chefs for ${cuisine} cuisine - like Jamie Oliver, Gordon Ramsay, Ottolenghi, Nigella Lawson for British; Mario Batali, Lidia Bastianich for Italian; Rick Bayless for Mexican; etc. Create a title that could appear in their cookbooks.
+
+Rules:
+- 6–10 words, plain English, strong menu appeal
+- Include the protein clearly
+- Use restaurant-quality descriptive language
+- Make it sound both sophisticated and achievable
+- No chef-science terms, no parentheses, no brackets
+Output JSON only with "title" key.`;
 
     try {
       const completion = await openai.chat.completions.create({
