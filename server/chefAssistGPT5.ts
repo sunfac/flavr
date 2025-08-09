@@ -417,33 +417,16 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     clientId?: string;
   }): Promise<{ title: string }> {
     
-    // Lightweight title cue pools (no chef jargon)
-    const techniqueCues = [
-      "slow-braised", "pan-seared", "oven-roasted", "grilled", "crispy-fried",
-      "steam-kissed", "gently poached", "buttery", "sheet-pan", "pressure-braised",
-      "confited", "low-and-slow", "smoky-rubbed", "hand-tossed", "quick-cured"
-    ];
-    
-    const seasonCues = [
-      "spring herb", "summer", "autumn", "winter", "light roast", "all-season"
-    ];
-    
-    const textureCues = [
-      "crispy", "silky", "tender", "crackling", "sticky-glaze", "char-edged",
-      "crumb-crusted", "brothy", "airy", "flaky"
-    ];
-    
-    const flavourCues = [
-      "umami-rich", "citrus-bright", "herb-lifted", "nutty", "aromatic-spiced",
-      "garlicky", "sweet-savory", "smoky", "pickled-accent", "fermented-note",
-      "peppery", "chilli-warm"
-    ];
-    
+    // Resolve seeds to short cues before API call
+    const cuisineCues = ["Italian", "Mexican", "Japanese", "Middle Eastern", "Modern British", "French", "Thai", "Indian", "Mediterranean"];
     const proteinPool = {
       omnivore: ["chicken", "salmon", "cod", "prawns", "beef", "pork", "lamb"],
       vegetarian: ["mushrooms", "aubergine", "halloumi", "cauliflower", "chickpeas"],
       vegan: ["mushrooms", "aubergine", "cauliflower", "chickpeas", "butternut squash"]
     };
+    const techniqueCues = ["grilled", "roasted", "pan-seared", "slow-cooked", "crispy"];
+    const flavourCues = ["herby", "smoky", "citrus-bright", "peppery", "spiced"];
+    const seasonCues = ["", "summer", "winter", "spring", "autumn"];
     
     // Deterministic selection based on seeds
     const hashCode = (s: string) => s.split('').reduce((a, b) => (((a << 5) - a) + b.charCodeAt(0)) | 0, 0);
@@ -454,24 +437,20 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     // Select cues based on seeded randomness
     const seededRandom = (seed: number, max: number) => Math.abs((seed * 9301 + 49297) % 233280) % max;
     
-    const techniqueCue = techniqueCues[seededRandom(rngSeed, techniqueCues.length)];
-    const seasonCue = seasonCues[seededRandom(rngSeed + 1, seasonCues.length)];
-    const textureCue = textureCues[seededRandom(rngSeed + 2, textureCues.length)];
-    const flavourCue = flavourCues[seededRandom(rngSeed + 3, flavourCues.length)];
+    const cuisine = data.cuisinePreference || cuisineCues[seededRandom(rngSeed, cuisineCues.length)];
+    const technique = techniqueCues[seededRandom(rngSeed + 1, techniqueCues.length)];
+    const flavour = flavourCues[seededRandom(rngSeed + 2, flavourCues.length)];
+    const season = seasonCues[seededRandom(rngSeed + 3, seasonCues.length)];
     
-    // Determine dietary mode (default to omnivore)
+    // Determine dietary mode and select protein
     const dietaryMode = data.avoid?.includes("meat") ? "vegetarian" : 
                        data.avoid?.includes("dairy") ? "vegan" : "omnivore";
     const proteins = proteinPool[dietaryMode];
     const protein = proteins[seededRandom(rngSeed + 4, proteins.length)];
-    
-    // Skip season if "all-season", use sparingly
-    const includeSeasonCue = seasonCue !== "all-season" && seededRandom(rngSeed + 5, 3) === 0;
-    const includeTextureCue = seededRandom(rngSeed + 6, 2) === 0;
-    
+
     const systemMessage = `Don't overthink. Output only JSON with a "title" field. Be quick and instinctive.`;
 
-    const userMessage = `Without deep analysis, create a simple recipe title with ${protein}, ${techniqueCue}, ${flavourCue}. Just output: {"title": "your title here"}`;
+    const userMessage = `Without deep analysis, create a simple recipe title with ${protein}, ${technique}, ${flavour}. Just output: {"title": "your title here"}`;
 
     try {
       const completion = await openai.chat.completions.create({
@@ -480,8 +459,8 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_completion_tokens: 800 // Give plenty of space for GPT-5's reasoning phase
-        // Removed response_format to allow natural output
+        max_completion_tokens: 800,
+        response_format: { type: "json_object" }
       });
 
       const content = completion.choices[0]?.message?.content?.trim();
@@ -500,7 +479,31 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
       
     } catch (error) {
       console.error("GPT-5 Inspire error:", error);
-      throw error; // No fallback - let it fail properly
+      
+      // Failover: single retry with trimmed prompt
+      try {
+        const retryCompletion = await openai.chat.completions.create({
+          model: "gpt-5-mini",
+          messages: [
+            { role: "system", content: systemMessage },
+            { role: "user", content: `Create recipe title: ${cuisine} ${protein} ${technique}. JSON only with "title" key.` }
+          ],
+          max_completion_tokens: 150,
+          response_format: { type: "json_object" }
+        });
+        
+        const retryContent = retryCompletion.choices[0]?.message?.content?.trim();
+        if (retryContent) {
+          const retryParsed = JSON.parse(retryContent);
+          if (retryParsed.title) {
+            return { title: retryParsed.title };
+          }
+        }
+      } catch (retryError) {
+        console.error("GPT-5 Inspire retry failed:", retryError);
+      }
+      
+      throw error;
     }
   }
 }
