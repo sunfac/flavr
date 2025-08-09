@@ -315,7 +315,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
         response_format: { type: "json_object" }
       });
       
-      let completion;
+      let completion: any;
       try {
         completion = await Promise.race([completionPromise, timeoutPromise]);
       } catch (timeoutError) {
@@ -462,9 +462,16 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const includeSeasonCue = seasonCue !== "all-season" && seededRandom(rngSeed + 5, 3) === 0;
     const includeTextureCue = seededRandom(rngSeed + 6, 2) === 0;
     
-    const systemMessage = `You write one cookbook-style recipe title for home cooks. Short, plain-English, appetising. No chef-science or molecular gastronomy terms. Return ONLY JSON for the given schema.`;
+    const systemMessage = `You are a professional cookbook title writer creating short, mouth-watering recipe names for home cooks. Titles must sound appealing and unique, like dishes you'd find in a best-selling recipe book. No chef-science or obscure culinary jargon. No repetitive phrasing patterns. Titles should vary in rhythm, word order, and style. Use plain English with a touch of personality. Avoid rigid formats like 'Adjective Protein with X'. Return your response as JSON.`;
 
-    const userMessage = `Make ONE title using these cues: technique=${techniqueCue}; flavour=${flavourCue}; protein=${protein}${includeSeasonCue ? `; season=${seasonCue}` : ''}${includeTextureCue ? `; texture=${textureCue}` : ''}. Rules: 4–10 words; include the protein; exactly one playful descriptor (plain English). Never use: Maillard, sous-vide, gastrique, espuma, spherification, nitro, transglutaminase, molecular.`;
+    const userMessage = `Using these seed cues: technique=${techniqueCue}; flavour=${flavourCue}; protein=${protein}; season=${seasonCue}, create ONE short, memorable recipe title. Rules:
+- 4–10 words.
+- Always include the protein.
+- Use exactly one flavour or seasonal hint.
+- Vary title structure every time — sometimes lead with protein, sometimes with flavour, sometimes with action or mood.
+- Do NOT use: Maillard, sous-vide, gastrique, espuma, spherification, nitro, transglutaminase, molecular.
+- Avoid repeating any structure used in the last 5 Inspire Me calls for this user.
+Return as JSON with a 'title' field.`;
 
     try {
       const completion = await openai.chat.completions.create({
@@ -473,7 +480,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_completion_tokens: 100, // Minimal for fast response (includes reasoning)
+        max_completion_tokens: 48, // Ultra-minimal for instant response
         response_format: { type: "json_object" }
       });
 
@@ -499,7 +506,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
               { role: "system", content: "Create one recipe title. Return JSON with 'title' field only." },
               { role: "user", content: `Title for ${protein} with ${flavourCue} flavour. 4-10 words, cookbook-style.` }
             ],
-            max_completion_tokens: 100,
+            max_completion_tokens: 48,
             response_format: { type: "json_object" }
           });
           

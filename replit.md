@@ -54,7 +54,7 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### AI Services
-- **OpenAI**: MichelinChefAI system using GPT-5 standard model (not reasoning variant) with temperature 0.8, top_p 0.9 for cookbook-quality recipe generation (no chef-science jargon). DALL-E 3 for recipe images. User input priority with intent classification (exact_named_dish, constrained_brief, broad_theme). Performance targets: 12-30s typical, ≤45s complex recipes.
+- **OpenAI**: MichelinChefAI system using GPT-5 standard model (not reasoning variant) for cookbook-quality recipe generation (no chef-science jargon). DALL-E 3 for recipe images. User input priority with intent classification (exact_named_dish, constrained_brief, broad_theme). Performance targets: 12-30s typical, ≤45s complex recipes, 1-3s for Inspire Me titles with varied structure.
 - **Google Gemini**: Conversational AI (primary chatbot), Google Vision API for ingredient detection (Photo-to-Recipe).
 - **Replicate**: Stable Diffusion for food image generation.
 
