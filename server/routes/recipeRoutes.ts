@@ -874,7 +874,12 @@ These should be SIGNATURE DISHES that demonstrate culinary mastery while using U
         max_completion_tokens: 35
       });
 
-      let suggestion = completion.choices[0].message.content?.trim().replace(/"/g, '') || "Creative fusion surprise";
+      const content = completion.choices[0]?.message?.content;
+      if (!content) {
+        console.error("No content in OpenAI inspire response:", JSON.stringify(completion, null, 2));
+        throw new Error("Empty response from OpenAI");
+      }
+      let suggestion = content.trim().replace(/"/g, '') || "Creative fusion surprise";
       
       // Strip out any difficulty level references
       suggestion = suggestion

@@ -27,10 +27,14 @@ export class MichelinChefAI {
         max_completion_tokens: 2000
       });
 
-      const content = completion.choices[0].message.content || "{}";
+      const content = completion.choices[0]?.message?.content;
+      if (!content) {
+        console.error("No content in OpenAI response:", JSON.stringify(completion, null, 2));
+        throw new Error("Empty response from OpenAI");
+      }
       return JSON.parse(this.cleanJsonResponse(content));
     } catch (error) {
-      console.error("GPT-5 recipe ideas generation error:", error);
+      console.error("GPT-4o recipe ideas generation error:", error);
       throw new Error("Failed to generate recipe ideas with GPT-5");
     }
   }
@@ -53,10 +57,14 @@ export class MichelinChefAI {
         max_completion_tokens: 3500
       });
 
-      const content = completion.choices[0].message.content || "{}";
+      const content = completion.choices[0]?.message?.content;
+      if (!content) {
+        console.error("No content in OpenAI response:", JSON.stringify(completion, null, 2));
+        throw new Error("Empty response from OpenAI");
+      }
       return JSON.parse(this.cleanJsonResponse(content));
     } catch (error) {
-      console.error("GPT-5 full recipe generation error:", error);
+      console.error("GPT-4o full recipe generation error:", error);
       throw new Error("Failed to generate full recipe with GPT-5");
     }
   }
