@@ -1,0 +1,245 @@
+INSTRUCTION TO IMPLEMENT (PASTE THIS INTO REPLIT)
+Finalise Chef Assist + Inspire Me for GPT-5 with seeded variation, coherence guardrails, quirky-but-clear titles (including unexpected terms like “Maillard/Mallard”), ample tokens, and an unchanged front-end JSON schema. Follow exactly.
+
+────────────────────────────────────────────────────────────────────────
+0) DO NOT BREAK THE UI
+• Keep the Chef Assist recipe JSON keys/shape EXACTLY as defined in §6.
+• Use OpenAI Responses API with response_format: { type: "json_object" } (or SDK equivalent).
+• Parse with resp.output_text when available; otherwise assemble from resp.output[]. Then JSON.parse.
+
+────────────────────────────────────────────────────────────────────────
+1) MODEL & GLOBAL PARAMS (WITH VERBOSITY)
+• model: gpt-5
+• Context hygiene: send ONLY a fresh system + user message per call (no chat backlog).
+• Chef Assist (full recipe):
+  temperature: 0.8
+  top_p: 0.9
+  presence_penalty: 0.3
+  frequency_penalty: 0.2
+  max_output_tokens: 1500  ← headroom for full method & notes
+  verbosity: "high"
+• Inspire Me (title only):
+  temperature: 0.9
+  top_p: 0.95
+  presence_penalty: 0.4
+  frequency_penalty: 0.2
+  max_output_tokens: 120
+  verbosity: "low"
+• Token headroom rule (app-side): if method needs ≥10 steps or multiple subcomponents (sauce + side), bump Chef Assist max_output_tokens to 1800 for that call.
+
+────────────────────────────────────────────────────────────────────────
+2) STABLE VARIATION ACROSS SESSIONS (WITHOUT INCOHERENCE)
+We retain 7 seeds but map to abstract “style packs”. Selection is deterministic and varied across sessions.
+
+Seeds provided:
+  randomSeed:int, complexityLevel:1–15, simpleStyle:1–15, creativityMode:1–8,
+  seasonalFocus:1–6, textureTheme:1–10, flavorProfile:1–12
+
+Pack arrays (define once; abstract, no example dishes):
+• techniquePack[15]:
+  ["rustic-braise","quick-sear-roast","pan-sauce-reduction","grill-marinade",
+   "shallow-fry-crisp","steam-then-sear","gentle-poach","emulsion-building",
+   "sheet-pan-oven","pressure-cooker","confit-style-fat","sous-vide-then-sear",
+   "smoker-style-rub(oven-alt)","dough/lamination","cure-then-cook(fast)"]
+
+• simplicityPack[15]:
+  ["one-pan","≤30-min-target","6–10-ingredients-prefer","batch-friendly","minimal-chop",
+   "low-mess","child-friendly-heat","make-ahead-marinade","freezer-friendly",
+   "salad-plus-protein","carb-base-rotation","sauce-led","broth-led",
+   "grilling-bias","sheet-tray-bias"]
+
+• creativityPack[8]:
+  ["strictly-classic","classic-with-garnish-twist","classic-with-sauce-twist","herb/aroma-experimentation",
+   "spice-driven","acidity-forward","smoke/char-emphasis","modern-plating-logic"]
+
+• seasonPack[6]:
+  ["spring-greens/herbs","summer-grill/fresh-veg","early-autumn-roasts","winter-braise/roots",
+   "shoulder-season-light-roast","year-round-neutral"]
+
+• texturePack[10]:
+  ["crisp-vs-tender","creamy-vs-crunchy","layered-crisp+silky","juicy-with-crackling",
+   "glazed-sticky+fresh-bite","charred-edges+soft-centre","crumbed-crust+smooth-puréé",
+   "brothy+crunchy-topping","light/aerated","pastry/flaky-emphasis"]
+
+• flavourPack[12]:
+  ["umami-layering","heat-ladder(mild→med)","citrus-acid-balance","herbaceous-lift",
+   "nutty-browning","aromatic-spice-base","garlicky-comfort","sweet-salty-contrast",
+   "smoke&char","pickled-accent","fermented-depth","peppery-bite"]
+
+Deterministic selection:
+• Compute userIntentHash = hash(lowercase(user_intent_or_dish || "")).
+• Compute sessionSalt = hash(clientId || deviceId || userId) XOR hash(epochDay).  // epochDay ensures day-to-day variety
+• seededIndex = PRNG(randomSeed XOR userIntentHash XOR sessionSalt) % packLength
+• Use seededIndex to pick each pack value.
+
+Anti-repetition memory:
+• Keep a rolling window of last 5 Chef Assist outputs (store protein + technique + flavour). If a new pick matches any, rotate flavourPack to the nearest unused option before prompt build.
+
+────────────────────────────────────────────────────────────────────────
+3) COHERENCE GUARDRAILS (APPLY BEFORE USER MESSAGE)
+A. Technique/time compatibility
+  • If simplicityPack == "≤30-min-target" → forbid techniquePack ∈ {"sous-vide-then-sear","cure-then-cook(fast)","confit-style-fat","pressure-cooker"}; auto-downgrade to {"quick-sear-roast","one-pan","sheet-pan-oven"}.
+  • If techniquePack ∈ {"sous-vide-then-sear","cure-then-cook(fast)"} AND time_budget < 75 → swap to "gentle-poach" or "quick-sear-roast".
+  • If seasonPack == "winter-braise/roots" AND simplicityPack == "one-pan" → prefer oven/covered braise (single vessel).
+
+B. Ingredient flexibility (flavour/authenticity first)
+  • Default target: 8–16 items total.
+  • If simplicityPack ∈ {"one-pan","≤30-min-target","6–10-ingredients-prefer"} → target 6–10 items, BUT MAY EXCEED if needed for authenticity/balance. Never degrade flavour to hit a number.
+  • Pantry items (oil, salt, pepper, etc.) allowed but not dominant.
+
+C. Protein policy & dietary
+  • Default to meat/fish/shellfish unless the user explicitly requests vegetarian/vegan. Avoid tofu unless requested.
+  • Honour must-use and avoid lists strictly.
+
+D. Authenticity priority
+  • If a specific regional cuisine is requested, prefer classic-compatible techniques/flavours. When a pack conflicts, adjust to the closest authentic alternative.
+
+E. Adjustment note
+  • Any automatic swap due to guardrails must add a one-liner into style_notes (e.g., "Adjusted sous-vide to quick sear due to 30-min target").
+
+────────────────────────────────────────────────────────────────────────
+4) QUIRKY-BUT-CLEAR TITLE RULE (APPLIES TO BOTH MODES)
+• Titles must be appetising, 4–10 words, no brand names, no emoji.
+• Include EXACTLY ONE unexpected/cheffy term to spark curiosity (e.g., "Maillard", "ash-smoked", "char-kissed", "fermented", "pickled", "umami-rich"). 
+• If “Mallard” is chosen as the quirky term (user’s playful preference), it is treated as a whimsical descriptor and MUST NOT imply duck unless the recipe is duck. The rest of the title must anchor clarity (main ingredient + flavour cue). 
+• Examples: 
+  – “Maillard-Kissed Steak with Herb Butter”
+  – “Mallard-Whispered Roast Chicken & Lemon Potatoes” (whimsical term anchored by clear main)
+• Chef Assist’s JSON "title" and Inspire Me’s single title MUST follow this rule.
+
+────────────────────────────────────────────────────────────────────────
+5) SYSTEM MESSAGE (USE VERBATIM FOR BOTH CALL TYPES)
+You are “Zest,” a Michelin-starred executive chef who writes cookbook-quality recipes for skilled home cooks. 
+Priorities: maximum flavour, cultural authenticity, clear technique, efficient home-kitchen execution. 
+Use British English and metric. Assume a UK supermarket. Avoid rare equipment and brand names. 
+Prefer meat/fish/shellfish proteins unless the user specifies otherwise; do not use tofu unless requested. 
+Be concise and practical; explain technique briefly where it unlocks flavour. 
+If packs conflict with time, equipment, or authenticity, adjust to the nearest coherent alternative and note it in "style_notes".
+For Chef Assist, output strictly as JSON matching the provided schema. Do not include any text outside JSON.
+
+────────────────────────────────────────────────────────────────────────
+6) CHEF ASSIST — USER MESSAGE BUILDER (FULL RECIPE)
+After guardrails, build:
+
+ULTRA-SEED PACKS (post-guardrail):
+- randomSeed: {{randomSeed}}
+- techniquePack: {{techniquePack}}
+- simplicityPack: {{simplicityPack}}
+- creativityPack: {{creativityPack}}
+- seasonPack: {{seasonPack}}
+- texturePack: {{texturePack}}
+- flavourPack: {{flavourPack}}
+
+USER CONTEXT:
+- Requested dish or intent: {{user_intent_or_dish}}
+- Servings: {{servings}}
+- Time budget (mins, optional): {{time_budget_or_null}}
+- Dietary needs: {{dietary_needs_or_none}}
+- Must-use ingredients: {{must_use_list}}
+- Avoid ingredients: {{avoid_list}}
+- Equipment available: {{equipment_list}}
+- Budget note (optional): {{budget_note_or_null}}
+- Cuisine preference (optional): {{cuisine_pref_or_null}}
+
+RECIPE REQUIREMENTS:
+- Create ONE original recipe fully reflecting the packs and authenticity constraints.
+- Use supermarket-available ingredients; pantry items allowed but not dominant.
+- Ingredient-count policy: target {{dynamic_target_range_from_policy}}, but exceed if needed for flavour/authenticity.
+- Steps must be short, imperative, and test-kitchen clear.
+- Provide finishing_touches and 2–4 flavour_boosts aligned to the packs.
+- Respect must-use and avoid strictly. Honour time_budget; if impossible, set realistic total and note it in style_notes.
+- Title must follow the QUIRKY-BUT-CLEAR TITLE RULE.
+- Return JSON only, matching the schema exactly.
+
+CHEF ASSIST JSON SCHEMA (return ONLY this):
+{
+  "title": "string (4–10 words; quirky-but-clear)",
+  "servings": 2,
+  "time": { "prep_min": 15, "cook_min": 25, "total_min": 40 },
+  "cuisine": "string",
+  "style_notes": ["short bullets noting technique/season/texture/flavour and any guardrail adjustments"],
+  "equipment": ["pan","oven","tray"],
+  "ingredients": [
+    { "section": "Main", "items": [ { "item": "…", "qty": 0, "unit": "g|ml|tbsp|tsp|x", "notes": "" } ] },
+    { "section": "Pantry & seasoning", "items": [ { "item": "…", "qty": 0, "unit": "…", "notes": "" } ] }
+  ],
+  "method": [
+    { "step": 1, "instruction": "Concise imperative step.", "why_it_matters": "Optional 1-line rationale." }
+  ],
+  "finishing_touches": ["…"],
+  "flavour_boosts": ["…"],
+  "make_ahead_leftovers": "1–2 sentences",
+  "allergens": ["…"],
+  "nutrition_note": "Optional 1–2 sentences",
+  "shopping_list": [ { "item": "…", "qty": 0, "unit": "…" } ]
+}
+
+────────────────────────────────────────────────────────────────────────
+7) INSPIRE ME — SINGLE TITLE (POPULATES CHEF ASSIST INPUT)
+Apply the same seed→pack logic + guardrails + QUIRKY-BUT-CLEAR TITLE RULE. Output exactly one title as JSON.
+
+INSPIRE ME USER MESSAGE:
+Generate one appetising recipe title (4–10 words) that reflects the packs below and suits a UK home cook using supermarket ingredients. Include exactly one unexpected/cheffy term (e.g., “Maillard” or playful “Mallard”) but keep the title clear about the main ingredient/flavour. Return JSON only with "title".
+ULTRA-SEED PACKS (post-guardrail):
+- randomSeed: {{randomSeed}}
+- techniquePack: {{techniquePack}}
+- simplicityPack: {{simplicityPack}}
+- creativityPack: {{creativityPack}}
+- seasonPack: {{seasonPack}}
+- texturePack: {{texturePack}}
+- flavourPack: {{flavourPack}}
+USER CONTEXT (optional): {{user_intent_or_dish}}, {{cuisine_pref_or_null}}, {{avoid_list}}
+
+INSPIRE ME JSON SCHEMA (return ONLY this):
+{ "title": "string (4–10 words; quirky-but-clear)" }
+
+Front-end wiring:
+• On Inspire Me click → call API with the Inspire Me prompt → parse JSON → set Chef Assist text input = data.title (exact string).
+• When the user hits Generate, pass that title as {{user_intent_or_dish}} into Chef Assist.
+
+────────────────────────────────────────────────────────────────────────
+8) ANTI-REPETITION & QUALITY CONTROLS (APP-SIDE)
+• Rolling memory of last 5 Chef Assist outputs; if (protein + technique + flavour) repeats, rotate flavourPack to an unused option before prompting.
+• If finish_reason === "length", immediately resume with: “Continue from step X, same JSON schema.” Merge arrays in place.
+• Validate JSON before render; on parse failure, reprompt: “Return the same content as valid JSON only.”
+• Respect vegetarian/vegan strictly when requested; otherwise default to meat/fish/shellfish.
+• If time_budget is tight, auto-prefer fast packs and forbid contradictory techniques (e.g., sous-vide).
+• Keep titles free of emoji and brand names; exactly one quirky term per title.
+
+────────────────────────────────────────────────────────────────────────
+9) CALL PATTERNS (PSEUDO)
+Chef Assist:
+client.responses.create({
+  model: "gpt-5",
+  temperature: 0.8, top_p: 0.9, presence_penalty: 0.3, frequency_penalty: 0.2,
+  max_output_tokens: 1500, verbosity: "high",
+  response_format: { type: "json_object" },
+  input: [
+    { role: "system", content: SYSTEM_STRING },
+    { role: "user", content: USER_STRING_FROM_SECTION_6 }
+  ]
+})
+
+Inspire Me:
+client.responses.create({
+  model: "gpt-5",
+  temperature: 0.9, top_p: 0.95, presence_penalty: 0.4, frequency_penalty: 0.2,
+  max_output_tokens: 120, verbosity: "low",
+  response_format: { type: "json_object" },
+  input: [
+    { role: "system", content: SYSTEM_STRING },
+    { role: "user", content: INSPIRE_ME_USER_STRING_FROM_SECTION_7 }
+  ]
+})
+
+Parsing:
+const out = resp.output_text ?? collectFromOutputArray(resp.output);
+const data = JSON.parse(out);
+
+────────────────────────────────────────────────────────────────────────
+10) SUCCESS CRITERIA
+• Titles: always appetising and clear, with exactly one unexpected/cheffy term (e.g., “Maillard/Mallard”), used playfully but not misleading.
+• Chef Assist: valid JSON, rich detail (verbosity:high), no truncation of ingredients/method.
+• Inspire Me: returns a single JSON title that plugs straight into the Chef Assist input.
+• Seeds deliver meaningful variety across sessions (sessionSalt/epochDay) without incoherent combos.
+• Authenticity, flavour balance, and home-cook accessibility are preserved by guardrails.
