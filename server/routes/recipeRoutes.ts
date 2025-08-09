@@ -645,16 +645,19 @@ Return a JSON object with this structure:
         clientId
       });
 
+      // GPT-5 returns the recipe directly, not wrapped
+      const recipe = result;
+      
       // Send recipe immediately to user for faster response
-      res.json({ recipe: result.recipe });
+      res.json({ recipe });
 
       // Increment usage counter after successful generation
       incrementUsageCounter(req).catch(err => console.error('Failed to increment usage:', err));
 
       // Generate image and log in background (don't await)
-      generateRecipeImage(result.recipe.title, result.recipe.cuisine, result.recipe.id).then(imageUrl => {
+      generateRecipeImage(recipe.title, recipe.cuisine, recipe.id).then(imageUrl => {
         if (imageUrl) {
-          console.log('🎨 Background image generated for GPT-5 Chef Assist:', result.recipe.title);
+          console.log('🎨 Background image generated for GPT-5 Chef Assist:', recipe.title);
         }
       }).catch(err => console.error('Background image generation failed:', err));
 
@@ -662,11 +665,11 @@ Return a JSON object with this structure:
       logSimpleGPTInteraction({
         endpoint: "chef-assist-generate",
         prompt: "GPT-5 full recipe generation",
-        response: JSON.stringify(result.recipe),
+        response: JSON.stringify(recipe),
         model: "gpt-5",
         duration: 0,
         inputTokens: 1500, // Estimated for full recipe generation
-        outputTokens: Math.ceil(JSON.stringify(result.recipe).length / 4),
+        outputTokens: Math.ceil(JSON.stringify(recipe).length / 4),
         cost: 0.008,
         success: true,
         userId: req.session?.userId?.toString()

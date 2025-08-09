@@ -177,10 +177,10 @@ export class ChefAssistGPT5 {
     
     const dynamicTargetRange = getDynamicTargetRange(adjustedPacks.simplicityPack);
     
-    // Determine if we need extra tokens for complex recipes - GPT-5 needs much more for reasoning
+    // Token headroom rule - GPT-5 needs more tokens for reasoning phase
     const needsExtraTokens = data.userIntent.includes("sauce") || data.userIntent.includes("side") || 
                             adjustedPacks.techniquePack.includes("multi") || adjustedPacks.creativityPack === "modern-plating-logic";
-    const maxTokens = needsExtraTokens ? 20000 : 16000; // Much higher for GPT-5 reasoning
+    const maxTokens = needsExtraTokens ? 16000 : 12000; // Much higher for GPT-5's reasoning phase
     
     const systemMessage = `You are "Zest," a Michelin-starred executive chef who writes cookbook-quality recipes for skilled home cooks. 
 Priorities: maximum flavour, cultural authenticity, clear technique, efficient home-kitchen execution. 
@@ -244,6 +244,9 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
 }`;
 
     try {
+      console.log(`Calling GPT-5 for full recipe with max_completion_tokens: ${maxTokens}`);
+      const startTime = Date.now();
+      
       const completion = await openai.chat.completions.create({
         model: "gpt-5",
         messages: [
@@ -253,13 +256,19 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
         max_completion_tokens: maxTokens,
         response_format: { type: "json_object" }
       });
+      
+      console.log(`GPT-5 response received in ${Date.now() - startTime}ms`);
 
+      console.log("GPT-5 full recipe response received, parsing...");
       const content = completion.choices[0]?.message?.content;
       if (!content) {
+        console.error("GPT-5 completion structure:", JSON.stringify(completion, null, 2));
         throw new Error("Empty response from GPT-5");
       }
 
+      console.log("Content length:", content.length);
       const recipe = JSON.parse(content);
+      console.log("Recipe parsed successfully");
       
       // Update anti-repetition memory
       const mainProtein = recipe.ingredients?.[0]?.items?.[0]?.item || "unknown";
@@ -302,7 +311,7 @@ Be concise and practical; explain technique briefly where it unlocks flavour.
 If packs conflict with time, equipment, or authenticity, adjust to the nearest coherent alternative and note it in "style_notes".
 For Chef Assist, output strictly as JSON matching the provided schema. Do not include any text outside JSON.`;
 
-    const userMessage = `Generate one appetising recipe title (4–10 words) that reflects the packs below and suits a UK home cook using supermarket ingredients. Include exactly one unexpected/cheffy term (e.g., "Maillard" or playful "Mallard") but keep the title clear about the main ingredient/flavour.
+    const userMessage = `Generate one appetising recipe title (4–10 words) that reflects the packs below and suits a UK home cook using supermarket ingredients. Include exactly one unexpected/cheffy term (e.g., "Maillard" or playful "Mallard") but keep the title clear about the main ingredient/flavour. Return JSON only with "title".
 
 ULTRA-SEED PACKS (post-guardrail):
 - randomSeed: ${data.seeds.randomSeed}
@@ -315,7 +324,8 @@ ULTRA-SEED PACKS (post-guardrail):
 
 USER CONTEXT (optional): ${data.userIntent || "flexible"}, ${data.cuisinePreference || "any"}, avoid: ${data.avoid?.join(", ") || "none"}
 
-Return only the recipe title, nothing else.`;
+INSPIRE ME JSON SCHEMA (return ONLY this):
+{ "title": "string (4–10 words; quirky-but-clear)" }`;
 
     try {
       const completion = await openai.chat.completions.create({
@@ -324,7 +334,7 @@ Return only the recipe title, nothing else.`;
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_completion_tokens: 10000, // GPT-5 needs extra tokens for reasoning
+        max_completion_tokens: 10000, // GPT-5 needs extra for reasoning phase  
         response_format: { type: "json_object" }
       });
 
