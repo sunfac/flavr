@@ -870,7 +870,7 @@ AUTHENTICITY & COMPLETENESS REQUIREMENTS:
 These should be SIGNATURE DISHES that demonstrate culinary mastery while using UK supermarket ingredients. Think restaurant-quality techniques with home-accessible ingredients. Return ONLY the recipe name in 4-8 words using sophisticated culinary terminology. Make it sound like a dish from a Michelin-starred restaurant menu. COMPLEXITY-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
           { role: "user", content: prompt }
         ],
-        max_completion_tokens: 5000 // Maximum for GPT-5 reasoning + dish name
+        max_completion_tokens: 10000 // Extra large allocation for GPT-5 complex reasoning + content
       });
 
       const content = completion.choices[0]?.message?.content;
