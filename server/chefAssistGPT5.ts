@@ -450,23 +450,39 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
 
     const systemMessage = `You write exactly one cookbook-style recipe title for home cooks. It must be short, enticing, and feel publishable. Draw balanced inspiration from: (1) best-selling cookbooks (UK + US + global), filtered to the requested cuisine; (2) respected chef and restaurant menu styles for that cuisine; (3) original creation. Keep balance so inspired titles never appear more often than originals across sessions. Titles must be ingredient-led, vibrant, and recognisable to a broad audience. Avoid technical chef jargon and obscure terms. Do not overthink — choose a strong, appealing title quickly without excessive reasoning. Do not use parentheses or brackets. Return ONLY JSON that matches the provided schema.`;
 
-    const userMessage = `Create ONE unique, highly appealing recipe title using these cues:
-- cuisine: ${cuisine}
-- protein: ${protein}
-- technique: ${technique}
-- flavour focus: ${flavour}
-- optional season: ${season || "neutral"}
+    // Add more variability in structure and chef inspiration
+    const chefStyles = [
+      "Jamie Oliver style: simple, rustic, approachable",
+      "Ottolenghi style: exotic spices, Middle Eastern influences", 
+      "Gordon Ramsay style: restaurant-quality, precise techniques",
+      "Nigella Lawson style: comforting, indulgent, homely",
+      "Rick Stein style: fresh seafood, Mediterranean flavors",
+      "Mary Berry style: classic British, reliable favorites"
+    ];
+    
+    const structureVariations = [
+      "Lead with technique: [Technique] [Protein] with [Flavor]",
+      "Lead with flavor: [Flavor] [Protein] [Technique]", 
+      "Lead with protein: [Protein] [Technique] in [Flavor] Style",
+      "Seasonal focus: [Season] [Protein] with [Technique] and [Flavor]",
+      "Simple naming: [Protein] and [Flavor]"
+    ];
+    
+    const selectedChef = chefStyles[seededRandom(rngSeed + 5, chefStyles.length)];
+    const selectedStructure = structureVariations[seededRandom(rngSeed + 6, structureVariations.length)];
 
-Rules:
-- 5–10 words, plain English, strong menu appeal.
-- Include the protein clearly.
-- Use at most one distinct flavour or seasonal hint.
-- Vary structure across sessions; avoid repeating phrasing patterns.
-- No chef-science terms (e.g., Maillard, sous-vide, gastrique, espuma, spherification, nitro, transglutaminase, molecular).
-- No parentheses, no brackets, no emoji, no brand names.
-- Do not overthink — select the best title that comes naturally and output it immediately.
+    const userMessage = `Create a cookbook recipe title using this inspiration:
 
-Output JSON only with a single key "title".`;
+Chef Style: ${selectedChef}
+Structure Guide: ${selectedStructure}
+Ingredients: ${cuisine} ${protein}, ${technique}, ${flavour}${season ? `, ${season} season` : ''}
+
+Make it sound like it belongs in this chef's cookbook. Examples of good titles:
+- "Sticky Lamb Shanks with Pomegranate Glaze" (Ottolenghi style)
+- "Perfect Pan-Seared Salmon" (Jamie Oliver style)  
+- "Rich Chocolate Beef Bourguignon" (Nigella style)
+
+Output JSON only with "title" key.`;
 
     try {
       const completion = await openai.chat.completions.create({
@@ -475,7 +491,7 @@ Output JSON only with a single key "title".`;
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_tokens: 150,
+        max_tokens: 400,
         response_format: { type: "json_object" }
       });
 
@@ -504,7 +520,7 @@ Output JSON only with a single key "title".`;
             { role: "system", content: systemMessage },
             { role: "user", content: userMessage }
           ],
-          max_tokens: 150,
+          max_tokens: 400,
           response_format: { type: "json_object" }
         });
         
