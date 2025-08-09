@@ -456,29 +456,19 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const proteins = proteinPool[dietaryMode];
     const protein = proteins[seededRandom(rngSeed + 4, proteins.length)];
 
-    const systemMessage = `Create evocative, poetic, completely uninhibited recipe titles. Break every convention. Be wildly creative.`;
+    const systemMessage = `Create simple, relatable recipe titles that sound delicious and approachable. No fancy words or pretentious language.`;
 
-    const inspirationalMoods = [
-      "sunset memories", "moonlit kitchen", "grandmother's secrets", "wild adventures", 
-      "cozy rainstorms", "summer romance", "midnight cravings", "childhood dreams",
-      "forgotten travels", "secret gardens", "fireplace evenings", "ocean breezes"
-    ];
-    
-    const randomMood = inspirationalMoods[seededRandom(rngSeed + 6, inspirationalMoods.length)];
+    const userMessage = `Create a recipe title using: ${protein}, ${approach}, ${flavour}, ${cuisine} style.
 
-    const userMessage = `Create a beautiful, evocative recipe title inspired by "${data.userIntent || randomMood}".
+User wants: "${data.userIntent}"
 
-Use these as loose inspiration (don't be literal): ${protein}, ${flavour}, ${cuisine}, ${approach}
+Keep it simple, friendly, and natural. Good examples:
+"Weekend Chicken", "Dad's Famous Salmon", "Quick Garlic Prawns", "Sunday Roast", "Easy Thai Beef", "Cozy Lamb Stew"
 
-Be completely free and creative. Examples of the creative spirit:
-"Whispered Secrets from Nonna's Kitchen"
-"Dancing Flames and Tender Dreams" 
-"Midnight Ocean, Golden Spice"
-"The Last Bite of Summer"
-"Stories My Grandmother Never Told"
-"Fire, Salt, and Stolen Moments"
+AVOID these fancy words:
+"bliss", "perfection", "delight", "symphony", "serenade", "whispered", "divine", "sublime", "heavenly", "ethereal"
 
-Create something memorable and poetic. Break all the rules.
+Make it sound like a real recipe someone would actually make at home.
 
 Output JSON only with "title" key.`;
 
