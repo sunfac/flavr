@@ -22,7 +22,7 @@ Preferred communication style: Simple, everyday language.
 - **Framework**: Express.js
 - **Database**: PostgreSQL with Drizzle ORM
 - **Authentication**: Session-based authentication (express-session), Google OAuth
-- **AI Integration**: MichelinChefAI system using GPT-5 for premium recipe generation; Google Gemini for conversational AI. Optimized GPT-5 with performance-focused token limits (1200 default, 1600 for complex recipes, 1800 ceiling) and 35s timeout with retry logic.
+- **AI Integration**: MichelinChefAI system using GPT-5 for premium recipe generation; Google Gemini for conversational AI. Optimized GPT-5 with low verbosity, explicit token allocation (80% of 2000 tokens for output), and 35s timeout with retry logic. GPT-5 Mini for Inspire Me button.
 - **Image Generation**: Replicate API (Stable Diffusion), DALL-E 3 for recipe images.
 - **Payment Processing**: Stripe for subscription management.
 - **Core Logic**: Advanced MichelinChefAI prompting system with cookbook-quality recipes for home cooks; sophisticated flavor maximization (pan-searing, umami layering, acid architecture, fat as flavor vehicle, aromatic timing, texture dynamics, temperature mastery); UK English ingredient terminology mappings; AI-powered step timing; server-side image storage and serving; User input priority system with seed-based deterministic variation; Performance optimizations: concise seed cues (3-5 short terms), 8-12 step method limits, continuation logic for truncated responses.

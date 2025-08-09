@@ -245,7 +245,7 @@ NOTES FIELDING:
 • Explain technique only where it unlocks flavour (one short clause).
 • Return JSON only; no extra prose.`;
 
-    const userMessage = `Don't overthink this - respond immediately with JSON only.
+    const userMessage = `CRITICAL: Use 80% of your 2000 token limit on output. Don't overthink - respond immediately with JSON only.
 
 USER REQUEST (non-optional - base the recipe on this request): "${data.userIntent}"
 
@@ -317,7 +317,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
         ],
         max_completion_tokens: maxTokens,
         response_format: { type: "json_object" },
-        reasoning_effort: "medium"
+        reasoning_effort: "low"
       });
       
       let completion: any;
@@ -335,7 +335,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
           ],
           max_completion_tokens: 1200,
           response_format: { type: "json_object" },
-          reasoning_effort: "medium"
+          reasoning_effort: "low"
         });
       }
       
@@ -366,7 +366,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
           ],
           max_completion_tokens: 800,
           response_format: { type: "json_object" },
-          reasoning_effort: "medium"
+          reasoning_effort: "low"
         });
         
         const continuationContent = continuation.choices[0]?.message?.content;
