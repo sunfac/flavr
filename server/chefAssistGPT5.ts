@@ -448,9 +448,25 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const proteins = proteinPool[dietaryMode];
     const protein = proteins[seededRandom(rngSeed + 4, proteins.length)];
 
-    const systemMessage = `Write one cookbook-style recipe title. Draw inspiration from bestselling cookbooks and chef menus. Be ingredient-led, vibrant, recognizable. Avoid chef jargon. Don't overthink - choose quickly. Output only JSON with "title" key.`;
+    const systemMessage = `You write exactly one cookbook-style recipe title for home cooks. It must be short, enticing, and feel publishable. Draw balanced inspiration from: (1) best-selling cookbooks (UK + US + global), filtered to the requested cuisine; (2) respected chef and restaurant menu styles for that cuisine; (3) original creation. Keep balance so inspired titles never appear more often than originals across sessions. Titles must be ingredient-led, vibrant, and recognisable to a broad audience. Avoid technical chef jargon and obscure terms. Do not overthink — choose a strong, appealing title quickly without excessive reasoning. Do not use parentheses or brackets. Return ONLY JSON that matches the provided schema.`;
 
-    const userMessage = `Create cookbook title using: ${cuisine} ${protein}, ${technique}, ${flavour} flavor. Make it sound like Jamie Oliver, Gordon Ramsay, or Ottolenghi. 5-10 words, include protein, plain English. No parentheses, brackets, chef-science terms. Examples: "Honey-Glazed Chicken with Rosemary", "Pan-Seared Salmon with Lemon Butter". Output: {"title": "your title"}`;
+    const userMessage = `Create ONE unique, highly appealing recipe title using these cues:
+- cuisine: ${cuisine}
+- protein: ${protein}
+- technique: ${technique}
+- flavour focus: ${flavour}
+- optional season: ${season || "neutral"}
+
+Rules:
+- 5–10 words, plain English, strong menu appeal.
+- Include the protein clearly.
+- Use at most one distinct flavour or seasonal hint.
+- Vary structure across sessions; avoid repeating phrasing patterns.
+- No chef-science terms (e.g., Maillard, sous-vide, gastrique, espuma, spherification, nitro, transglutaminase, molecular).
+- No parentheses, no brackets, no emoji, no brand names.
+- Do not overthink — select the best title that comes naturally and output it immediately.
+
+Output JSON only with a single key "title".`;
 
     try {
       const completion = await openai.chat.completions.create({
@@ -460,6 +476,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
           { role: "user", content: userMessage }
         ],
         max_completion_tokens: 800,
+        verbosity: "low",
         response_format: { type: "json_object" }
       });
 
