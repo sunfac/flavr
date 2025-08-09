@@ -458,17 +458,20 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
 
     const systemMessage = `Create simple, relatable recipe titles that sound delicious and approachable. No fancy words or pretentious language.`;
 
-    const userMessage = `Create a recipe title using: ${protein}, ${approach}, ${flavour}, ${cuisine} style.
+    const userMessage = `Create a complete recipe title using: ${protein}, ${approach}, ${flavour}, ${cuisine} style.
 
 User wants: "${data.userIntent}"
 
-Keep it simple, friendly, and natural. Good examples:
-"Weekend Chicken", "Dad's Famous Salmon", "Quick Garlic Prawns", "Sunday Roast", "Easy Thai Beef", "Cozy Lamb Stew"
+Make it sound like a real recipe from a cookbook. Include:
+- The cooking method
+- Key ingredients/flavors 
+- Style/cuisine
+- Context (weeknight, family, etc.)
 
-AVOID these fancy words:
-"bliss", "perfection", "delight", "symphony", "serenade", "whispered", "divine", "sublime", "heavenly", "ethereal"
+Good examples:
+"Slow-Braised Beef with Red Wine and Herbs", "Pan-Seared Salmon with Garlic Butter Sauce", "One-Pot Thai Chicken Curry with Coconut", "Roasted Lamb Shoulder with Mediterranean Herbs", "Quick Weeknight Pasta with Lemon and Parmesan"
 
-Make it sound like a real recipe someone would actually make at home.
+Keep it straightforward and descriptive. No flowery language.
 
 Output JSON only with "title" key.`;
 
