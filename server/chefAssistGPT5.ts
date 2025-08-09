@@ -180,9 +180,9 @@ export class ChefAssistGPT5 {
     // Performance optimized token allocation
     const needsExtraTokens = data.userIntent.includes("sauce") || data.userIntent.includes("side") || 
                             adjustedPacks.techniquePack.includes("multi") || adjustedPacks.creativityPack === "modern-plating-logic";
-    const maxTokens = needsExtraTokens ? 1600 : 1200; // Optimized for speed, max 1800 hard ceiling
+    const maxTokens = needsExtraTokens ? 2400 : 2000; // Increased for GPT-5's reasoning needs
     
-    const systemMessage = `You are "Zest," a Michelin-starred executive chef who writes cookbook-quality recipes for skilled home cooks. 
+    const systemMessage = `Don't overthink or analyze deeply. Be quick and instinctive. You are "Zest," a Michelin-starred executive chef who writes cookbook-quality recipes for skilled home cooks. 
 Priorities: maximum flavour, cultural authenticity, clear technique, efficient home-kitchen execution. 
 Use British English and metric. Assume a UK supermarket. Avoid rare equipment and brand names. 
 Prefer meat/fish/shellfish proteins unless the user specifies otherwise; do not use tofu unless requested. 
@@ -462,9 +462,9 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const includeSeasonCue = seasonCue !== "all-season" && seededRandom(rngSeed + 5, 3) === 0;
     const includeTextureCue = seededRandom(rngSeed + 6, 2) === 0;
     
-    const systemMessage = `You must output ONLY valid JSON with a "title" field containing a recipe name. No other text.`;
+    const systemMessage = `Don't overthink. Output only JSON with a "title" field. Be quick and instinctive.`;
 
-    const userMessage = `Create a recipe title with ${protein}, ${techniqueCue} technique, ${flavourCue} flavor. Output JSON: {"title": "..."}`;
+    const userMessage = `Without deep analysis, create a simple recipe title with ${protein}, ${techniqueCue}, ${flavourCue}. Just output: {"title": "your title here"}`;
 
     try {
       const completion = await openai.chat.completions.create({
