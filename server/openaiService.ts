@@ -23,7 +23,7 @@ export class MichelinChefAI {
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        max_completion_tokens: 8000 // Increased significantly for GPT-5 reasoning
+        max_completion_tokens: 16000 // Maximum allocation for GPT-5 reasoning + full content
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -52,7 +52,7 @@ export class MichelinChefAI {
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        max_completion_tokens: 10000 // Increased significantly for GPT-5 reasoning
+        max_completion_tokens: 20000 // Maximum allocation for GPT-5 reasoning + detailed recipe
       });
 
       const content = completion.choices[0]?.message?.content;

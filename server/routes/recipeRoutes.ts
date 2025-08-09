@@ -870,7 +870,7 @@ AUTHENTICITY & COMPLETENESS REQUIREMENTS:
 These should be SIGNATURE DISHES that demonstrate culinary mastery while using UK supermarket ingredients. Think restaurant-quality techniques with home-accessible ingredients. Return ONLY the recipe name in 4-8 words using sophisticated culinary terminology. Make it sound like a dish from a Michelin-starred restaurant menu. COMPLEXITY-SEEDS: C${complexityLevel}|S${simpleStyle}|Cr${creativityMode}|Se${seasonalFocus}|T${textureTheme}|F${flavorProfile}` },
           { role: "user", content: prompt }
         ],
-        max_completion_tokens: 2000 // Large allocation for GPT-5 reasoning + content
+        max_completion_tokens: 5000 // Maximum for GPT-5 reasoning + dish name
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -1149,7 +1149,7 @@ Return ONLY a valid JSON object with this exact structure (NO markdown, no expla
           { role: "user", content: systemPrompt }
         ],
         temperature: 0.8, // Restored for GPT-4o
-        max_completion_tokens: 3500
+        max_completion_tokens: 10000 // Increased for GPT-5 reasoning + detailed conversational response
       });
 
       let recipe;
