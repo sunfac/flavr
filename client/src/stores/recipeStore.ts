@@ -173,40 +173,81 @@ export const useRecipeStore = create<RecipeStore>()(
         // Get current state to preserve existing data
         const currentState = get();
         
-        // Handle both API response format and internal format
-        const ingredients = recipe.ingredients?.map((ing: any, index: number) => ({
-          id: `ingredient-${index}`,
-          text: typeof ing === 'string' ? ing : `${ing.amount || ''} ${ing.name || ing}`.trim(),
-          amount: typeof ing === 'object' ? ing.amount : undefined,
-          checked: false
-        })) || currentState.ingredients; // Fallback to existing ingredients
-
-        const instructions = recipe.instructions?.map((instruction: any, index: number) => ({
-          id: `step-${index}`,
-          title: `Step ${index + 1}`,
-          description: typeof instruction === 'string' ? instruction : instruction.instruction,
-          duration: 0
-        })) || currentState.steps; // Fallback to existing steps
+        // Transform complex API response structure to simple format
+        let ingredients: Ingredient[] = [];
+        if (recipe.ingredients) {
+          if (Array.isArray(recipe.ingredients)) {
+            // Handle complex API structure with sections
+            recipe.ingredients.forEach((section: any) => {
+              if (section.items && Array.isArray(section.items)) {
+                section.items.forEach((item: any, index: number) => {
+                  const qty = item.qty > 0 ? `${item.qty}${item.unit ? ' ' + item.unit : ''}` : '';
+                  const notes = item.notes ? ` (${item.notes})` : '';
+                  const text = `${qty} ${item.item}${notes}`.trim();
+                  
+                  ingredients.push({
+                    id: `ingredient-${ingredients.length}`,
+                    text: text,
+                    checked: false
+                  });
+                });
+              }
+            });
+          } else {
+            // Handle simple string array format (fallback)
+            ingredients = recipe.ingredients.map((ing: any, index: number) => ({
+              id: `ingredient-${index}`,
+              text: typeof ing === 'string' ? ing : `${ing.amount || ''} ${ing.name || ing}`.trim(),
+              checked: false
+            }));
+          }
+        }
+        
+        // Transform instructions from method array  
+        let instructions: Step[] = [];
+        if (recipe.method && Array.isArray(recipe.method)) {
+          instructions = recipe.method.map((step: any, index: number) => ({
+            id: `step-${index}`,
+            title: `Step ${index + 1}`,
+            description: typeof step === 'string' ? step : step.instruction || step.description || '',
+            duration: 0
+          }));
+        } else if (recipe.instructions && Array.isArray(recipe.instructions)) {
+          // Handle alternative instructions format
+          instructions = recipe.instructions.map((step: any, index: number) => ({
+            id: `step-${index}`,
+            title: `Step ${index + 1}`,
+            description: typeof step === 'string' ? step : step.instruction || step.description || '',
+            duration: 0
+          }));
+        } else {
+          // Fallback to existing steps
+          instructions = currentState.steps;
+        }
 
         const updatedState: RecipeState = {
           id: recipe.id || currentState.id || Date.now().toString(),
           servings: recipe.servings || currentState.servings || 4,
-          ingredients: ingredients,
-          steps: instructions,
+          ingredients: ingredients.length > 0 ? ingredients : currentState.ingredients,
+          steps: instructions.length > 0 ? instructions : currentState.steps,
           meta: {
             title: recipe.title || currentState.meta.title || 'Updated Recipe',
             description: recipe.description !== undefined ? recipe.description : currentState.meta.description,
-            cookTime: recipe.cookTime || currentState.meta.cookTime || 30,
+            cookTime: recipe.time?.total_min || recipe.cookTime || currentState.meta.cookTime || 30,
             difficulty: recipe.difficulty || currentState.meta.difficulty || 'Medium',
             cuisine: recipe.cuisine || currentState.meta.cuisine,
-            image: recipe.image || recipe.imageUrl || recipe.imageSrc || currentState.meta.image, // Preserve existing image
-            imageLoading: false // Since we're updating an existing recipe, not loading
+            image: recipe.image || recipe.imageUrl || recipe.imageSrc || currentState.meta.image,
+            imageLoading: false
           },
           currentStep: currentState.currentStep,
           completedSteps: currentState.completedSteps,
           lastUpdated: Date.now(),
           generationParams: generationParams || currentState.generationParams
         };
+        
+        console.log('🔍 Transformed ingredients:', ingredients.slice(0, 3));
+        console.log('🔍 Transformed steps:', instructions.slice(0, 2));
+        
         set(updatedState);
       },
 
