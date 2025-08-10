@@ -588,27 +588,33 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     
     const seasonCues = ["", "summer", "winter", "spring", "autumn"];
     
-    // Maximum randomization to prevent repetition
+    // Ultra-random selection with heavy entropy mixing
     const hashCode = (s: string) => s.split('').reduce((a, b) => (((a << 5) - a) + b.charCodeAt(0)) | 0, 0);
     const userIntentHash = hashCode((data.userIntent || "").toLowerCase());
     const sessionSalt = hashCode(data.clientId || "") ^ hashCode(new Date().toDateString());
-    const timeEntropy = Math.floor(Date.now() / 10); // Changes every 10ms for maximum variation
-    const randomBoost = Math.floor(Math.random() * 100000); // Large random component
-    const extraEntropy = Math.floor(Math.random() * Date.now()); // Additional time-based entropy
-    const rngSeed = data.seeds.randomSeed ^ userIntentHash ^ sessionSalt ^ timeEntropy ^ randomBoost ^ extraEntropy;
+    
+    // Multiple entropy sources for maximum randomness
+    const nanoTime = Date.now() * 1000 + Math.floor(Math.random() * 1000);
+    const mathRandom1 = Math.floor(Math.random() * 999999);
+    const mathRandom2 = Math.floor(Math.random() * 888888);
+    const mathRandom3 = Math.floor(Math.random() * 777777);
+    
+    const rngSeed = data.seeds.randomSeed ^ userIntentHash ^ sessionSalt ^ nanoTime ^ mathRandom1 ^ mathRandom2 ^ mathRandom3;
     
     // Select cues based on seeded randomness
     const seededRandom = (seed: number, max: number) => Math.abs((seed * 9301 + 49297) % 233280) % max;
     
     const cuisineKeys = Object.keys(authenticDishes);
     
-    // First select cuisine, then pick authentic dish
+    // Ultra-random cuisine and dish selection
     const selectedCuisineKey = data.cuisinePreference ? 
       (cuisineKeys.find(k => k.toLowerCase().includes(data.cuisinePreference!.toLowerCase())) || "British") :
-      cuisineKeys[seededRandom(rngSeed, cuisineKeys.length)];
+      cuisineKeys[seededRandom(rngSeed + mathRandom1, cuisineKeys.length)];
     
     const selectedCuisineDishes = authenticDishes[selectedCuisineKey as keyof typeof authenticDishes];
-    const selectedDish = selectedCuisineDishes[seededRandom(rngSeed + 1, selectedCuisineDishes.length)];
+    // Use different entropy sources for dish selection
+    const dishSeed = rngSeed + mathRandom2 + mathRandom3 + nanoTime;
+    const selectedDish = selectedCuisineDishes[seededRandom(dishSeed, selectedCuisineDishes.length)];
 
     const systemMessage = `Create authentic restaurant-quality recipe titles like professional chefs do. Each title must be unique and restaurant menu-worthy. Use descriptive, appetizing language.`;
 
