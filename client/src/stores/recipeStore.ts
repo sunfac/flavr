@@ -175,12 +175,13 @@ export const useRecipeStore = create<RecipeStore>()(
         
         // Transform complex API response structure to simple format
         let ingredients: Ingredient[] = [];
-        if (recipe.ingredients) {
-          if (Array.isArray(recipe.ingredients)) {
+        if (recipe.ingredients && Array.isArray(recipe.ingredients)) {
+          // Check if first element has sections structure (complex API format)
+          if (recipe.ingredients.length > 0 && recipe.ingredients[0] && typeof recipe.ingredients[0] === 'object' && recipe.ingredients[0].section) {
             // Handle complex API structure with sections
             recipe.ingredients.forEach((section: any) => {
               if (section.items && Array.isArray(section.items)) {
-                section.items.forEach((item: any, index: number) => {
+                section.items.forEach((item: any) => {
                   const qty = item.qty > 0 ? `${item.qty}${item.unit ? ' ' + item.unit : ''}` : '';
                   const notes = item.notes ? ` (${item.notes})` : '';
                   const text = `${qty} ${item.item}${notes}`.trim();
@@ -194,7 +195,7 @@ export const useRecipeStore = create<RecipeStore>()(
               }
             });
           } else {
-            // Handle simple string array format (fallback)
+            // Handle simple string array format from chat updates
             ingredients = recipe.ingredients.map((ing: any, index: number) => ({
               id: `ingredient-${index}`,
               text: typeof ing === 'string' ? ing : `${ing.amount || ''} ${ing.name || ing}`.trim(),
@@ -247,6 +248,13 @@ export const useRecipeStore = create<RecipeStore>()(
         
         console.log('🔍 Transformed ingredients:', ingredients.slice(0, 3));
         console.log('🔍 Transformed steps:', instructions.slice(0, 2));
+        console.log('🔍 INGREDIENT DETECTION:', {
+          hasIngredients: !!recipe.ingredients,
+          isArray: Array.isArray(recipe.ingredients),
+          firstElementType: recipe.ingredients?.[0] ? typeof recipe.ingredients[0] : 'none',
+          hasSection: recipe.ingredients?.[0]?.section ? 'yes' : 'no',
+          sampleData: recipe.ingredients?.slice(0, 2)
+        });
         
         set(updatedState);
       },
