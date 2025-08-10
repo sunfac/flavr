@@ -633,10 +633,11 @@ NATURAL VARIATIONS:
 - "30 Garlic Clove Lamb" (ingredient count is appealing)
 - Only use "with" when it genuinely improves the title
 
-AVOID TECHNICAL JARGON AND FLOWERY WORDS:
-- Don't use: emulsion, gastrique, spherification, jus, ravishing, silky, genuine
-- Keep it simple, direct, and appealing to home cooks
-- Use everyday cooking words that sound delicious but not pretentious
+KEEP IT SIMPLE - NO CHEF JARGON:
+- BANNED WORDS: emulsion, gastrique, jus, mirepoix, roux, confit, rouille, aioli, reduction, essence, medley
+- USE SIMPLE WORDS: "sauce" not "reduction", "herbs" not "medley", "garlic sauce" not "aioli"
+- Sound delicious but approachable to home cooks
+- Examples: "Rich Beef Stew" not "Beef with Wine Reduction"
 
 VARY YOUR LANGUAGE:
 - Instead of always "Classic": Slow-Braised, Pan-Fried, Grilled, Roasted, Spicy, etc.
