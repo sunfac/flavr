@@ -23,23 +23,39 @@ export default function Recipe() {
   const shouldShowRecipe = hasRecipe;
   
   // Create activeRecipe object from store data for EnhancedRecipeCard
-  const activeRecipe = useMemo(() => ({
-    id: recipeStore.id || '1',
-    title: recipeStore.meta.title,
-    description: recipeStore.meta.description || '',
-    cuisine: recipeStore.meta.cuisine || '',
-    difficulty: recipeStore.meta.difficulty,
-    cookTime: recipeStore.meta.cookTime,
-    prepTime: 15, // Default prep time
-    servings: recipeStore.servings,
-    image: recipeImage || recipeStore.meta.image || '',
-    ingredients: recipeStore.ingredients.map(ing => ing.text || ''), // Convert to string array
-    instructions: recipeStore.steps.map(step => step.description || ''), // Convert to string array
-    tips: "Try garnishing with fresh herbs for extra flavor!" // Default tip
-  }), [
+  const activeRecipe = useMemo(() => {
+    console.log('🔍 Building activeRecipe from store:', {
+      storeId: recipeStore.id,
+      title: recipeStore.meta.title,
+      ingredientsCount: recipeStore.ingredients.length,
+      stepsCount: recipeStore.steps.length,
+      rawIngredients: recipeStore.ingredients.slice(0, 2), // First 2 for debugging
+      rawSteps: recipeStore.steps.slice(0, 2) // First 2 for debugging
+    });
+    
+    return {
+      id: recipeStore.id || '1',
+      title: recipeStore.meta.title,
+      description: recipeStore.meta.description || '',
+      cuisine: recipeStore.meta.cuisine || '',
+      difficulty: recipeStore.meta.difficulty,
+      cookTime: recipeStore.meta.cookTime,
+      prepTime: 15, // Default prep time
+      servings: recipeStore.servings,
+      image: recipeImage || recipeStore.meta.image || '',
+      ingredients: recipeStore.ingredients.map(ing => ing.text || ''), // Convert to string array
+      instructions: recipeStore.steps.map(step => step.description || ''), // Convert to string array
+      tips: "Try garnishing with fresh herbs for extra flavor!" // Default tip
+    };
+  }, [
+    recipeStore.id,
     recipeStore.meta.title,
     recipeStore.meta.cuisine,
+    recipeStore.meta.cookTime,
+    recipeStore.meta.difficulty,
     recipeStore.servings,
+    recipeStore.ingredients,
+    recipeStore.steps,
     recipeImage
   ]);
   
