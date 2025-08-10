@@ -635,11 +635,11 @@ NATURAL VARIATIONS WITH AUTHENTIC INGREDIENTS:
 - "30 Garlic Clove Lamb" (ingredient count is appealing)
 - Use authentic ingredient names: "Thai basil" not "basil", "coriander" not "cilantro" for Indian dishes
 
-KEEP IT SIMPLE - NO CHEF JARGON:
-- BANNED WORDS: emulsion, gastrique, jus, mirepoix, roux, confit, rouille, aioli, reduction, essence, medley
-- USE SIMPLE WORDS: "sauce" not "reduction", "herbs" not "medley", "garlic sauce" not "aioli"
-- Sound delicious but approachable to home cooks
-- Examples: "Rich Beef Stew" not "Beef with Wine Reduction"
+KEEP IT SIMPLE AND APPETIZING:
+- BANNED WORDS: emulsion, gastrique, jus, mirepoix, roux, confit, rouille, aioli, reduction, essence, medley, layers, dressing
+- USE APPETIZING WORDS: "sauce" not "reduction", "herbs" not "medley", "tangy sauce" not "lime-fish dressing"
+- Sound delicious and natural to home cooks
+- Examples: "Rich Beef Stew" not "Beef with Wine Reduction", "Spicy Thai Salad" not "with Lime-Fish Dressing"
 
 VARY YOUR LANGUAGE:
 - Instead of always "Classic": Slow-Braised, Pan-Fried, Grilled, Roasted, Spicy, etc.
