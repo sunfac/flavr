@@ -588,13 +588,14 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     
     const seasonCues = ["", "summer", "winter", "spring", "autumn"];
     
-    // Enhanced randomization to prevent repetition
+    // Maximum randomization to prevent repetition
     const hashCode = (s: string) => s.split('').reduce((a, b) => (((a << 5) - a) + b.charCodeAt(0)) | 0, 0);
     const userIntentHash = hashCode((data.userIntent || "").toLowerCase());
     const sessionSalt = hashCode(data.clientId || "") ^ hashCode(new Date().toDateString());
-    const timeEntropy = Math.floor(Date.now() / 50); // Changes every 50ms
-    const randomBoost = Math.floor(Math.random() * 50000); // Additional entropy
-    const rngSeed = data.seeds.randomSeed ^ userIntentHash ^ sessionSalt ^ timeEntropy ^ randomBoost;
+    const timeEntropy = Math.floor(Date.now() / 10); // Changes every 10ms for maximum variation
+    const randomBoost = Math.floor(Math.random() * 100000); // Large random component
+    const extraEntropy = Math.floor(Math.random() * Date.now()); // Additional time-based entropy
+    const rngSeed = data.seeds.randomSeed ^ userIntentHash ^ sessionSalt ^ timeEntropy ^ randomBoost ^ extraEntropy;
     
     // Select cues based on seeded randomness
     const seededRandom = (seed: number, max: number) => Math.abs((seed * 9301 + 49297) % 233280) % max;
@@ -635,11 +636,11 @@ NATURAL VARIATIONS WITH AUTHENTIC INGREDIENTS:
 - "30 Garlic Clove Lamb" (ingredient count is appealing)
 - Use authentic ingredient names: "Thai basil" not "basil", "coriander" not "cilantro" for Indian dishes
 
-KEEP IT SIMPLE AND APPETIZING:
-- BANNED WORDS: emulsion, gastrique, jus, mirepoix, roux, confit, rouille, aioli, reduction, essence, medley, layers, dressing, zest
-- USE APPETIZING WORDS: "buttery sauce" not "butter", "herbs" not "medley", simple dish names when possible
-- Sound delicious and natural to home cooks
-- Examples: "Spicy Green Papaya Salad" (simple is better), "Rich Buttery Sauce" not "Rich Butter"
+KEEP IT SIMPLE AND APPETIZING - MAXIMUM VARIETY:
+- STRICTLY BANNED: emulsion, gastrique, jus, mirepoix, roux, confit, rouille, aioli, reduction, essence, medley, layers, dressing, zest, tender, infusion, aromatic, delight
+- AVOID REPETITION: Don't repeat "slow-braised", "with tender", "aromatic", vary cooking methods heavily
+- ROTATE STYLES: Simple names, method focus, ingredient focus, timing focus
+- GOOD VARIETY: "Som Tam Salad" (simple), "Beer-Battered Fish" (method), "30 Garlic Lamb" (ingredient count), "6-Hour Duck" (timing)
 
 VARY YOUR LANGUAGE:
 - Instead of always "Classic": Slow-Braised, Pan-Fried, Grilled, Roasted, Spicy, etc.
