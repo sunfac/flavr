@@ -579,6 +579,12 @@ Draw from the FULL RANGE of ${selectedCuisine} culinary tradition - not just the
 - Festival and celebration foods
 - Modern interpretations of classics
 
+FOR UK AUDIENCE - If using authentic dish names that may be unfamiliar:
+- Add brief, appetizing context: "Doro Wot (Ethiopian chicken stew)" 
+- Or describe the dish: "Samgyeopsal Korean Grilled Pork Belly"
+- Make it accessible: "Chermoula Moroccan Herb-Crusted Sea Bass"
+- Keep authentic names but add clarity for British home cooks
+
 PREFER LONGER, DESCRIPTIVE TITLES (6-10 words):
 - "30 Garlic Clove Lamb Leg" (5 words) ✓ GOOD
 - "Slow-Braised Beef Short Ribs" (5 words) ✓ GOOD  
