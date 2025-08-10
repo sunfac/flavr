@@ -615,25 +615,33 @@ Key Details: ${selectedDish.details}
 Cuisine: ${selectedCuisineKey}
 User Intent: ${data.userIntent || "delicious cooking"}
 
-PREFER LONGER, DESCRIPTIVE TITLES (5-10 words):
-- "30 Garlic Clove Lamb Leg with Minted Greens" (8 words) ✓ PERFECT
-- "Slow-Braised Beef Short Rib with Horseradish Mash" (8 words) ✓ PERFECT
-- "Pan-Fried Dover Sole with Brown Butter and Capers" (9 words) ✓ PERFECT
-- "6-Hour Duck Confit with Cherry Gastrique" (7 words) ✓ GOOD
-- "Grilled Mackerel with Gooseberry and Fennel Salad" (8 words) ✓ GOOD
-- "Thai Green Curry with Coconut and Basil" (8 words) ✓ GOOD
+PREFER LONGER, DESCRIPTIVE TITLES (6-10 words):
+- "30 Garlic Clove Lamb Leg" (5 words) ✓ GOOD
+- "Slow-Braised Beef Short Ribs" (5 words) ✓ GOOD  
+- "Pan-Fried Dover Sole with Brown Butter" (7 words) ✓ GOOD
+- "6-Hour Duck Confit" (4 words) ✓ GOOD
+- "Grilled Mackerel and Gooseberry Salad" (6 words) ✓ GOOD
+- "Thai Green Curry" (3 words) ✓ SIMPLE BUT GOOD
 
-AVOID SHORT TITLES like:
-- "Traditional Greek Moussaka" (3 words) ✗ TOO SHORT
-- "Fish and Chips" (3 words) ✗ TOO SHORT
-- "Coq au Vin" (3 words) ✗ TOO SHORT
+NATURAL VARIATIONS:
+- "Crispy Chicken Katsu Curry" (not "with curry")
+- "Lemon Herb Roasted Salmon" (not "with herbs")  
+- "Spicy Beef Rogan Josh" (not "with spices")
+- "20-Hour Braised Beef Ribs" (timing sounds impressive)
+- "30 Garlic Clove Lamb" (ingredient count is appealing)
+- Only use "with" when it genuinely improves the title
+
+AVOID TECHNICAL JARGON AND FLOWERY WORDS:
+- Don't use: emulsion, gastrique, spherification, jus, ravishing, silky, genuine
+- Keep it simple, direct, and appealing to home cooks
+- Use everyday cooking words that sound delicious but not pretentious
 
 VARY YOUR LANGUAGE:
-- Instead of always "Classic": Slow-Braised, Pan-Fried, Grilled, Roasted, 24-Hour, etc.
-- Include specific details: ingredient counts, cooking methods, accompaniments, timing
-- Make it cookbook-worthy and interesting
+- Instead of always "Classic": Slow-Braised, Pan-Fried, Grilled, Roasted, Spicy, etc.
+- Include specific details: ingredient counts, cooking methods, simple descriptors
+- Make it sound delicious and approachable
 
-AIM FOR 6-10 WORDS. Be descriptive and include interesting details.
+AIM FOR 5-8 WORDS. Be descriptive but natural.
 
 Output JSON with "title" key containing the recipe title.`;
 
