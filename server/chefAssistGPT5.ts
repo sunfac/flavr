@@ -625,13 +625,15 @@ PREFER LONGER, DESCRIPTIVE TITLES (6-10 words):
 - "Grilled Mackerel and Gooseberry Salad" (6 words) ✓ GOOD
 - "Thai Green Curry" (3 words) ✓ SIMPLE BUT GOOD
 
-NATURAL VARIATIONS:
+NATURAL VARIATIONS WITH AUTHENTIC INGREDIENTS:
 - "Crispy Chicken Katsu Curry" (not "with curry")
 - "Lemon Herb Roasted Salmon" (not "with herbs")  
 - "Spicy Beef Rogan Josh" (not "with spices")
+- "Thai Green Curry with Thai Basil" (authentic ingredient)
+- "Indian Dal with Fresh Coriander" (culturally specific)
 - "20-Hour Braised Beef Ribs" (timing sounds impressive)
 - "30 Garlic Clove Lamb" (ingredient count is appealing)
-- Only use "with" when it genuinely improves the title
+- Use authentic ingredient names: "Thai basil" not "basil", "coriander" not "cilantro" for Indian dishes
 
 KEEP IT SIMPLE - NO CHEF JARGON:
 - BANNED WORDS: emulsion, gastrique, jus, mirepoix, roux, confit, rouille, aioli, reduction, essence, medley
