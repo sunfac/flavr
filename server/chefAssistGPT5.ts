@@ -588,11 +588,13 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     
     const seasonCues = ["", "summer", "winter", "spring", "autumn"];
     
-    // Deterministic selection based on seeds
+    // Enhanced randomization to prevent repetition
     const hashCode = (s: string) => s.split('').reduce((a, b) => (((a << 5) - a) + b.charCodeAt(0)) | 0, 0);
     const userIntentHash = hashCode((data.userIntent || "").toLowerCase());
     const sessionSalt = hashCode(data.clientId || "") ^ hashCode(new Date().toDateString());
-    const rngSeed = data.seeds.randomSeed ^ userIntentHash ^ sessionSalt;
+    const timeEntropy = Math.floor(Date.now() / 50); // Changes every 50ms
+    const randomBoost = Math.floor(Math.random() * 50000); // Additional entropy
+    const rngSeed = data.seeds.randomSeed ^ userIntentHash ^ sessionSalt ^ timeEntropy ^ randomBoost;
     
     // Select cues based on seeded randomness
     const seededRandom = (seed: number, max: number) => Math.abs((seed * 9301 + 49297) % 233280) % max;
@@ -607,7 +609,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const selectedCuisineDishes = authenticDishes[selectedCuisineKey as keyof typeof authenticDishes];
     const selectedDish = selectedCuisineDishes[seededRandom(rngSeed + 1, selectedCuisineDishes.length)];
 
-    const systemMessage = `Create authentic recipe titles like real chefs do. Be descriptive and interesting. Avoid overusing "classic" - use varied words.`;
+    const systemMessage = `Create authentic restaurant-quality recipe titles like professional chefs do. Each title must be unique and restaurant menu-worthy. Use descriptive, appetizing language.`;
 
     const userMessage = `Create an authentic recipe title for: ${selectedDish.name}
 
@@ -642,6 +644,9 @@ VARY YOUR LANGUAGE:
 - Make it sound delicious and approachable
 
 AIM FOR 5-8 WORDS. Be descriptive but natural.
+
+IMPORTANT: This title must be RESTAURANT MENU-WORTHY and AUTHENTIC to the cuisine.
+Make it sound like something you'd see at a high-quality restaurant.
 
 Output JSON with "title" key containing the recipe title.`;
 
