@@ -607,28 +607,35 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const selectedCuisineDishes = authenticDishes[selectedCuisineKey as keyof typeof authenticDishes];
     const selectedDish = selectedCuisineDishes[seededRandom(rngSeed + 1, selectedCuisineDishes.length)];
 
-    const systemMessage = `You MUST create short recipe titles. Maximum 6 words. No descriptions. No explanations. Just the dish name.`;
+    const systemMessage = `Create authentic recipe titles like real chefs do. Be descriptive and interesting. Avoid overusing "classic" - use varied words.`;
 
-    const userMessage = `Create a SHORT recipe title for: ${selectedDish.name}
+    const userMessage = `Create an authentic recipe title for: ${selectedDish.name}
 
-EXAMPLES OF CORRECT LENGTH:
-- "Grilled Mackerel with Gooseberry Sauce" (5 words)
-- "Roasted Bream with Fennel" (4 words)  
-- "Braised Beef Short Rib" (4 words)
-- "Perfect Roast Chicken" (3 words)
-- "House Black Daal" (3 words)
-- "Traditional Greek Moussaka" (3 words)
-- "Authentic Thai Laab" (3 words)
-
-MAXIMUM 6 WORDS. NO MORE.
-NO technique descriptions.
-NO timing details.
-NO explanations.
-JUST the dish name.
-
+Key Details: ${selectedDish.details}
 Cuisine: ${selectedCuisineKey}
+User Intent: ${data.userIntent || "delicious cooking"}
 
-Output JSON with "title" key. Keep it short like the examples above.`;
+PREFER LONGER, DESCRIPTIVE TITLES (5-10 words):
+- "30 Garlic Clove Lamb Leg with Minted Greens" (8 words) ✓ PERFECT
+- "Slow-Braised Beef Short Rib with Horseradish Mash" (8 words) ✓ PERFECT
+- "Pan-Fried Dover Sole with Brown Butter and Capers" (9 words) ✓ PERFECT
+- "6-Hour Duck Confit with Cherry Gastrique" (7 words) ✓ GOOD
+- "Grilled Mackerel with Gooseberry and Fennel Salad" (8 words) ✓ GOOD
+- "Thai Green Curry with Coconut and Basil" (8 words) ✓ GOOD
+
+AVOID SHORT TITLES like:
+- "Traditional Greek Moussaka" (3 words) ✗ TOO SHORT
+- "Fish and Chips" (3 words) ✗ TOO SHORT
+- "Coq au Vin" (3 words) ✗ TOO SHORT
+
+VARY YOUR LANGUAGE:
+- Instead of always "Classic": Slow-Braised, Pan-Fried, Grilled, Roasted, 24-Hour, etc.
+- Include specific details: ingredient counts, cooking methods, accompaniments, timing
+- Make it cookbook-worthy and interesting
+
+AIM FOR 6-10 WORDS. Be descriptive and include interesting details.
+
+Output JSON with "title" key containing the recipe title.`;
 
     try {
       const completion = await openai.chat.completions.create({
@@ -637,7 +644,7 @@ Output JSON with "title" key. Keep it short like the examples above.`;
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_tokens: 30,  // Force very short responses
+        max_tokens: 50,  // Allow for descriptive titles
         response_format: { type: "json_object" }
       });
 
@@ -656,10 +663,10 @@ Output JSON with "title" key. Keep it short like the examples above.`;
       
       let title = parsed.title;
       
-      // Force title to be short - truncate if necessary
+      // Force title to be reasonable length - truncate if necessary
       const words = title.split(' ');
-      if (words.length > 6) {
-        title = words.slice(0, 6).join(' ');
+      if (words.length > 10) {
+        title = words.slice(0, 10).join(' ');
         console.log(`Title truncated to: ${title}`);
       }
       
@@ -679,7 +686,7 @@ Output JSON with "title" key. Keep it short like the examples above.`;
             { role: "system", content: systemMessage },
             { role: "user", content: userMessage }
           ],
-          max_tokens: 30,  // Force very short responses
+          max_tokens: 50,  // Allow for descriptive titles
           response_format: { type: "json_object" }
         });
         
