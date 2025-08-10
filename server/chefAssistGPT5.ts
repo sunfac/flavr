@@ -636,10 +636,10 @@ NATURAL VARIATIONS WITH AUTHENTIC INGREDIENTS:
 - Use authentic ingredient names: "Thai basil" not "basil", "coriander" not "cilantro" for Indian dishes
 
 KEEP IT SIMPLE AND APPETIZING:
-- BANNED WORDS: emulsion, gastrique, jus, mirepoix, roux, confit, rouille, aioli, reduction, essence, medley, layers, dressing
-- USE APPETIZING WORDS: "sauce" not "reduction", "herbs" not "medley", "tangy sauce" not "lime-fish dressing"
+- BANNED WORDS: emulsion, gastrique, jus, mirepoix, roux, confit, rouille, aioli, reduction, essence, medley, layers, dressing, zest
+- USE APPETIZING WORDS: "buttery sauce" not "butter", "herbs" not "medley", simple dish names when possible
 - Sound delicious and natural to home cooks
-- Examples: "Rich Beef Stew" not "Beef with Wine Reduction", "Spicy Thai Salad" not "with Lime-Fish Dressing"
+- Examples: "Spicy Green Papaya Salad" (simple is better), "Rich Buttery Sauce" not "Rich Butter"
 
 VARY YOUR LANGUAGE:
 - Instead of always "Classic": Slow-Braised, Pan-Fried, Grilled, Roasted, Spicy, etc.
