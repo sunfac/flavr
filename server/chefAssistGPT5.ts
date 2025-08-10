@@ -607,32 +607,28 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const selectedCuisineDishes = authenticDishes[selectedCuisineKey as keyof typeof authenticDishes];
     const selectedDish = selectedCuisineDishes[seededRandom(rngSeed + 1, selectedCuisineDishes.length)];
 
-    const systemMessage = `You are a culinary expert creating authentic dish suggestions that will guide recipe generation. Focus on genuine dishes with proper technique details and timing that will lead to maximum flavor.`;
+    const systemMessage = `You MUST create short recipe titles. Maximum 6 words. No descriptions. No explanations. Just the dish name.`;
 
-    const userMessage = `Create an authentic recipe suggestion based on: ${selectedDish.name}
+    const userMessage = `Create a SHORT recipe title for: ${selectedDish.name}
 
-Key Details: ${selectedDish.details}
+EXAMPLES OF CORRECT LENGTH:
+- "Grilled Mackerel with Gooseberry Sauce" (5 words)
+- "Roasted Bream with Fennel" (4 words)  
+- "Braised Beef Short Rib" (4 words)
+- "Perfect Roast Chicken" (3 words)
+- "House Black Daal" (3 words)
+- "Traditional Greek Moussaka" (3 words)
+- "Authentic Thai Laab" (3 words)
+
+MAXIMUM 6 WORDS. NO MORE.
+NO technique descriptions.
+NO timing details.
+NO explanations.
+JUST the dish name.
+
 Cuisine: ${selectedCuisineKey}
-User Intent: ${data.userIntent || "delicious cooking"}
 
-Your suggestion should be a detailed, authentic dish description that includes:
-- The authentic dish name 
-- Key flavor-boosting elements
-- Critical technique notes
-- Proper timing expectations
-- Cultural authenticity markers
-
-This suggestion will be fed into recipe generation, so include specific details about what makes this dish exceptional and authentic.
-
-Examples of the detailed style needed:
-
-"Authentic Thai Laab with toasted rice powder texture, fish sauce depth, lime brightness, and fresh herb punch - proper 20-minute technique for authentic northeastern Thai flavors"
-
-"Traditional Greek Yuvetsi - lamb shoulder braised 2 hours until falling apart, orzo cooked in rich tomato-wine sauce, finished with kasseri cheese for authentic taverna flavor"
-
-"Classic French Coq au Vin - authentic Burgundy wine braising with lardons and pearl onions, 90-minute simmer for wine-drunk chicken and silky sauce"
-
-Output JSON with "title" key containing the detailed authentic dish description.`;
+Output JSON with "title" key. Keep it short like the examples above.`;
 
     try {
       const completion = await openai.chat.completions.create({
@@ -641,7 +637,7 @@ Output JSON with "title" key containing the detailed authentic dish description.
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_tokens: 400,
+        max_tokens: 30,  // Force very short responses
         response_format: { type: "json_object" }
       });
 
@@ -657,7 +653,20 @@ Output JSON with "title" key containing the detailed authentic dish description.
       if (!parsed.title) {
         throw new Error("GPT-5 response missing 'title' field");
       }
-      return { title: parsed.title };
+      
+      let title = parsed.title;
+      
+      // Force title to be short - truncate if necessary
+      const words = title.split(' ');
+      if (words.length > 6) {
+        title = words.slice(0, 6).join(' ');
+        console.log(`Title truncated to: ${title}`);
+      }
+      
+      // Remove any descriptions or explanations after dashes/colons
+      title = title.split(' - ')[0].split(' : ')[0].split(': ')[0];
+      
+      return { title };
       
     } catch (error) {
       console.error("GPT-5 Inspire error:", error);
@@ -670,7 +679,7 @@ Output JSON with "title" key containing the detailed authentic dish description.
             { role: "system", content: systemMessage },
             { role: "user", content: userMessage }
           ],
-          max_tokens: 400,
+          max_tokens: 30,  // Force very short responses
           response_format: { type: "json_object" }
         });
         
