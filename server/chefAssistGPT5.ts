@@ -1020,7 +1020,7 @@ OUTPUT: JSON with "title" key only. Make it sound delicious and achievable.`;
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_tokens: 50,  // Allow for descriptive titles
+        max_tokens: 80,  // Allow for descriptive titles with explanations
         response_format: { type: "json_object" }
       });
 
@@ -1039,11 +1039,27 @@ OUTPUT: JSON with "title" key only. Make it sound delicious and achievable.`;
       
       let title = parsed.title;
       
-      // Force title to be reasonable length - truncate if necessary
-      const words = title.split(' ');
-      if (words.length > 10) {
-        title = words.slice(0, 10).join(' ');
-        console.log(`Title truncated to: ${title}`);
+      // Handle title length more intelligently
+      // If title has parentheses with description, preserve the core dish name + description
+      if (title.includes('(') && title.includes(')')) {
+        // Allow longer titles with descriptions, but limit to reasonable length
+        if (title.length > 120) {
+          // Keep the dish name and truncate the description
+          const beforeParen = title.split('(')[0].trim();
+          const description = title.split('(')[1]?.split(')')[0];
+          if (description && description.length > 50) {
+            const shortDesc = description.substring(0, 50) + '...';
+            title = `${beforeParen} (${shortDesc})`;
+          }
+          console.log(`Title truncated to: ${title}`);
+        }
+      } else {
+        // For titles without descriptions, keep word limit
+        const words = title.split(' ');
+        if (words.length > 12) {
+          title = words.slice(0, 12).join(' ');
+          console.log(`Title truncated to: ${title}`);
+        }
       }
       
       // Remove any descriptions or explanations after dashes/colons
@@ -1068,7 +1084,7 @@ OUTPUT: JSON with "title" key only. Make it sound delicious and achievable.`;
             { role: "system", content: systemMessage },
             { role: "user", content: userMessage }
           ],
-          max_tokens: 50,  // Allow for descriptive titles
+          max_tokens: 80,  // Allow for descriptive titles with explanations
           response_format: { type: "json_object" }
         });
         
