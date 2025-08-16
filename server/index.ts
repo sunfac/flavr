@@ -91,6 +91,11 @@ app.use((req, res, next) => {
   
   log(`Environment check - NODE_ENV: ${process.env.NODE_ENV}, isProduction: ${isProduction}, hasBuild: ${hasBuild}`);
 
+  // Always serve recipe images in both development and production
+  const imagesDir = path.resolve(import.meta.dirname, "public", "recipe-images");
+  app.use('/recipe-images', express.static(imagesDir));
+  log(`Serving recipe images from: ${imagesDir}`);
+
   if (isProduction && hasBuild) {
     log("Production mode detected with valid build - serving static files");
     // Use serveStatic function for production

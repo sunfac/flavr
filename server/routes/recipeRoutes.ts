@@ -241,8 +241,8 @@ async function generateRecipeImage(recipeTitle: string, cuisine: string, recipeI
         
         if (localImagePath) {
           console.log('✅ Image stored locally:', localImagePath);
-          // Update the recipe with the local image path
-          await storage.updateRecipeImage(recipeId, localImagePath);
+          // For chef assist recipes, we just return the local path
+          // No need to update database since these aren't saved recipes
           return localImagePath;
         } else {
           console.log('⚠️ Failed to store image locally, using DALL-E URL');
@@ -639,10 +639,15 @@ Return a JSON object with this structure:
       // Increment usage counter after successful generation
       incrementUsageCounter(req).catch(err => console.error('Failed to increment usage:', err));
 
-      // Generate image and log in background (don't await)
-      generateRecipeImage(recipe.title, recipe.cuisine, recipe.id).then(imageUrl => {
+      // Generate image in background and update recipe store
+      // Create a temporary ID for chef assist recipes since they're not saved to database
+      const tempRecipeId = Date.now();
+      generateRecipeImage(recipe.title, recipe.cuisine, tempRecipeId).then(imageUrl => {
         if (imageUrl) {
           console.log('🎨 Background image generated for GPT-5 Chef Assist:', recipe.title);
+          // Store the image URL so it can be served to frontend
+          recipe.imageUrl = imageUrl;
+          console.log(`📸 Recipe image URL stored: ${imageUrl}`);
         }
       }).catch(err => console.error('Background image generation failed:', err));
 

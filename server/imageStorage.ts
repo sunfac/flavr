@@ -18,7 +18,9 @@ export class ImageStorage {
 
   static async downloadAndStoreImage(imageUrl: string, recipeId: number): Promise<string | null> {
     try {
+      console.log(`📥 Starting image download for recipe ${recipeId} from:`, imageUrl);
       await this.ensureImagesDirectory();
+      console.log(`📁 Images directory ensured: ${this.IMAGES_DIR}`);
 
       const response = await fetch(imageUrl);
       if (!response.ok) {
@@ -26,12 +28,15 @@ export class ImageStorage {
         return null;
       }
 
+      console.log(`✅ Image response received, content-length: ${response.headers.get('content-length')}`);
       const buffer = await response.arrayBuffer();
       const extension = this.getImageExtension(imageUrl) || 'png';
       const filename = `recipe-${recipeId}.${extension}`;
       const filepath = path.join(this.IMAGES_DIR, filename);
 
+      console.log(`💾 Writing image to: ${filepath}`);
       await writeFile(filepath, Buffer.from(buffer));
+      console.log(`✅ Image successfully written to disk`);
       
       // Return the public URL path
       return `/recipe-images/${filename}`;
