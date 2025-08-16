@@ -645,9 +645,10 @@ Return a JSON object with this structure:
       generateRecipeImage(recipe.title, recipe.cuisine, tempRecipeId).then(imageUrl => {
         if (imageUrl) {
           console.log('🎨 Background image generated for GPT-5 Chef Assist:', recipe.title);
-          // Store the image URL so it can be served to frontend
-          recipe.imageUrl = imageUrl;
           console.log(`📸 Recipe image URL stored: ${imageUrl}`);
+          // Immediately update the recipe response to include the image
+          recipe.image = imageUrl;
+          recipe.imageUrl = imageUrl;
         }
       }).catch(err => console.error('Background image generation failed:', err));
 

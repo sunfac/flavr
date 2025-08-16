@@ -238,7 +238,7 @@ export const useRecipeStore = create<RecipeStore>()(
             difficulty: recipe.difficulty || currentState.meta.difficulty || 'Medium',
             cuisine: recipe.cuisine || currentState.meta.cuisine,
             image: recipe.image || recipe.imageUrl || recipe.imageSrc || currentState.meta.image,
-            imageLoading: false
+            imageLoading: recipe.imageLoading !== undefined ? recipe.imageLoading : !!(recipe.image || recipe.imageUrl || recipe.imageSrc)
           },
           currentStep: currentState.currentStep,
           completedSteps: currentState.completedSteps,
