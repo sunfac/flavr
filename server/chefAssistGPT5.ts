@@ -727,6 +727,8 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
 
 IMPORTANT: Always use "inspired by" language - never claim these are the actual chef's recipes. Use formats like "Gordon Ramsay-Inspired" or "Inspired by Gordon Ramsay" rather than "Gordon Ramsay's".
 
+FORMAT: Simple titles without descriptions in parentheses - "Chef Name-Inspired Dish Name" only.
+
 CHEF & COOKBOOK INSPIRATION:
 - Gordon Ramsay's signature dishes (Beef Wellington, Hell's Kitchen favorites)
 - Jamie Oliver's accessible classics (15-minute meals, comfort food)
@@ -810,6 +812,8 @@ EXAMPLES:
       inspirationPrompt = `Create a recipe title inspired by famous dishes from London's best restaurants and eateries.
 
 IMPORTANT: Always use "inspired by" language - never claim these are the actual restaurant's recipes. Use formats like "Dishoom-Inspired" or "Inspired by Dishoom" rather than "Dishoom's".
+
+FORMAT: Simple titles without descriptions in parentheses - "Restaurant Name-Inspired Dish Name" only.
 
 LONDON RESTAURANT INSPIRATION:
 - Dishoom's legendary black daal and bacon naan rolls
@@ -1009,9 +1013,9 @@ Randomization Seed: ${rngSeed} (use this to ensure variety)
 GUIDELINES:
 - Create titles that excite and inspire home cooks
 - Use authentic dish names to preserve cultural heritage
-- ALWAYS add clear descriptions in parentheses for any dish that might be unfamiliar to home cooks
-- Format: "Authentic Dish Name (Clear description of what it is)"
-- Examples: "Aliche Wot (Ethiopian fish stew)", "Pörkölt (Hungarian slow-cooked stew)"
+- For chef/restaurant inspired dishes: Simple titles without descriptions - "Chef Name-Inspired Dish Name"
+- For regional cuisine only: Add clear descriptions in parentheses for unfamiliar dishes
+- Examples: "Gordon Ramsay-Inspired Beef Wellington", "Aliche Wot (Ethiopian fish stew)"
 - Include variety: meat, seafood, vegetarian options
 
 OUTPUT: JSON with "title" key only. Make it sound delicious and achievable.`;
