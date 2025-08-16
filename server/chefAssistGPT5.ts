@@ -811,6 +811,74 @@ LONDON RESTAURANT INSPIRATION:
 - Rules' traditional game and British classics
 - Simpson's in the Strand's roast beef trolley
 - Sweetings' Victorian fish restaurant classics
+- Sabor's authentic Spanish regional cuisine
+- José's Andalusian tapas bar specialties
+- Quo Vadis's modern British heritage cooking
+- Bentley's Oyster Bar & Grill's seafood classics
+- Scott's Mayfair's sophisticated fish dishes
+- 34 Mayfair's premium steakhouse cuts
+- CUT at 45 Park Lane's Wolfgang Puck steaks
+- Goodman's dry-aged beef specialists
+- Flat Iron's simple steak perfection
+- Blacklock's Sunday roasts and chops
+- Quality Chop House's working class eating
+- Rochelle Canteen's simple seasonal British
+- Towpath Café's canal-side brunch gems
+- E Pellicci's traditional East End café
+- Regency Café's proper British breakfast
+- The Breakfast Club's all-day comfort food
+- Monmouth Coffee's artisan roasts
+- Princi's Italian bakery and deli
+- Konditor & Cook's artistic cakes
+- Fortnum & Mason's afternoon tea service
+- Claridge's traditional afternoon tea
+- The Ritz's palm court tea service
+- Savoy Grill's classic British fine dining
+- River Café's rustic Italian riverside
+- Zucca's inventive Italian small plates
+- Bancone's fresh pasta specialists
+- Cecconi's Mayfair's Northern Italian elegance
+- Murano's Angela Hartnett's refined Italian
+- Locanda Locatelli's Giorgio's Italian mastery
+- Franco Manca's sourdough pizza pioneers
+- Pizza Pilgrims's Neapolitan street pizza
+- Santa Maria's authentic Neapolitan pizzas
+- Yalla Yalla's Lebanese street food
+- Maroush's Lebanese fine dining institution
+- The Palomar's Jerusalem market cuisine
+- The Barbary's North African small plates
+- Koya Bar's Japanese udon specialists
+- Kiku's traditional Japanese sushi
+- Endo at the Rotunda's Tsukiji-trained sushi
+- On The Bab's Korean street food
+- Jinjuu's modern Korean fine dining
+- Cây Tre's authentic Vietnamese cuisine
+- Pho's accessible Vietnamese street food
+- Champor-Champor's homestyle Thai cooking
+- Som Saa's regional Thai specialties
+- Farang's modern Thai interpretation
+- Coya's Peruvian-Japanese Nikkei fusion
+- Lima Fitzrovia's Peruvian fine dining
+- Mestizo's authentic Mexican street food
+- Wahaca's colorful Mexican market food
+- Casa Pastor's modern Mexican taqueria
+- Kol's innovative Mexican fine dining
+- Indian Accent's contemporary Indian cuisine
+- Trishna's modern Indian coastal cooking
+- Benares's refined Indian fine dining
+- Tayyabs's legendary Punjabi grills
+- Lahore Kebab House's authentic Pakistani
+- Chettinad's South Indian specialist
+- Rasa's Keralan vegetarian cuisine
+- Gauthier Soho's innovative French vegetarian
+- Club Gascon's inventive French cuisine
+- Bleeding Heart's romantic French bistro
+- Brasserie Zédel's grand Parisian brasserie
+- Mon Plaisir's traditional French bistro
+- L'Escargot's classic French institution
+- Le Gavroche's legendary French fine dining
+- Chez Bruce's neighborhood French excellence
+- Trinity's modern European neighborhood gem
 
 EXAMPLES:
 - "Dishoom-Style Black Daal with Garlic Naan"
@@ -821,7 +889,16 @@ EXAMPLES:
 - "Bao's Taiwanese Pork Belly Buns"
 - "Kiln's Clay Pot Glass Noodles"
 - "Hoppers' Bone Marrow Curry"
-- "Brat's Wood-Fired Turbot"`;
+- "Brat's Wood-Fired Turbot"
+- "Sabor's Jamón Ibérico Croquetas"
+- "José's Andalusian Gazpacho"
+- "Scott's Dover Sole Meunière"
+- "Blacklock's Sunday Roast Beef"
+- "River Café's Chocolate Nemesis"
+- "Tayyabs's Lamb Chops"
+- "Som Saa's Green Papaya Salad"
+- "Coya's Nikkei Tiradito"
+- "Le Gavroche's Soufflé Suissesse"`;
     } else {
       // Regional and traditional cuisine
       inspirationPrompt = `Create an authentic recipe title from ${selectedCuisine} cuisine that captures the diversity and richness of the culinary tradition.
