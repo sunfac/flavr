@@ -61,17 +61,9 @@ function getRecipeExplanation(title: string): string | null {
     'baba ganoush': 'smoky eggplant dip',
     'tabbouleh': 'fresh parsley salad',
     
-    // Asian
+    // Asian (only less familiar dishes)
     'bulgogi': 'Korean BBQ beef',
-    'pad thai': 'Thai stir-fried noodles',
-    'tikka masala': 'creamy tomato curry',
     'rogan josh': 'spiced lamb curry',
-    'biryani': 'spiced rice with meat',
-    'pho': 'Vietnamese noodle soup',
-    'katsu': 'Japanese breaded cutlet',
-    'teriyaki': 'Japanese glazed',
-    'kimchi': 'Korean fermented cabbage',
-    'gyoza': 'Japanese dumplings',
     'okonomiyaki': 'savory pancake',
     'som tam': 'spicy papaya salad',
     'laksa': 'spicy coconut noodle soup',
@@ -83,15 +75,9 @@ function getRecipeExplanation(title: string): string | null {
     'gỏi cuốn': 'fresh spring rolls',
     'cà ri': 'Vietnamese curry',
     
-    // European
+    // European (only less familiar dishes)
     'moussaka': 'Greek layered casserole',
-    'paella': 'Spanish rice dish',
     'souvlaki': 'Greek grilled skewers',
-    'carbonara': 'creamy pasta with bacon',
-    'gnocchi': 'small potato dumplings',
-    'risotto': 'creamy Italian rice',
-    'coq au vin': 'chicken in wine sauce',
-    'goulash': 'Hungarian beef stew',
     'pörkölt': 'Hungarian slow-cooked stew',
     'nokedli': 'Hungarian dumplings',
     'bigos': 'hunter\'s stew',
