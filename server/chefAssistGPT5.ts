@@ -700,9 +700,29 @@ CHEF & COOKBOOK INSPIRATION:
 - Rick Stein's seafood specialties
 - Mary Berry's beloved bakes and traditional British fare
 - Marco Pierre White's refined classics
-- Heston Blumenthal's innovative takes on traditional dishes
+- Heston Blumenthal's innovative molecular gastronomy
 - Madhur Jaffrey's authentic Indian cuisine
 - Ken Hom's accessible Chinese cooking
+- Tom Kerridge's pub-style comfort food
+- Angela Hartnett's Italian-inspired dishes
+- Michel Roux Jr's French classics
+- James Martin's hearty British fare
+- Paul Hollywood's artisan breads and bakes
+- Gizzi Erskine's rock and roll cooking
+- Aldo Zilli's rustic Italian cuisine
+- José Andrés' Spanish tapas mastery
+- Daniel Boulud's French-American fusion
+- Thomas Keller's precision cooking
+- Alice Waters' farm-to-table philosophy
+- Julia Child's French cooking fundamentals
+- Anthony Bourdain's global street food
+- Emeril Lagasse's Creole and Cajun specialties
+- Wolfgang Puck's California cuisine
+- Ferran Adrià's avant-garde Spanish dishes
+- Nobu Matsuhisa's Japanese-Peruvian fusion
+- David Chang's Korean-American innovations
+- April Bloomfield's British gastropub fare
+- Stephanie Izard's global flavors
 
 EXAMPLES:
 - "Gordon Ramsay's Beef Wellington with Mushroom Duxelles"
@@ -710,7 +730,10 @@ EXAMPLES:
 - "Nigella's Chocolate Guinness Cake"
 - "Ottolenghi-Style Roasted Aubergine with Tahini"
 - "Rick Stein's Classic Fish Pie"
-- "Mary Berry's Victoria Sponge with Fresh Cream"`;
+- "Mary Berry's Victoria Sponge with Fresh Cream"
+- "Tom Kerridge's Hand & Flowers Slow-Cooked Lamb"
+- "Heston's Perfect Roast Chicken"
+- "Paul Hollywood's Sourdough Focaccia"`;
     } else if (inspirationType === 1) {
       // London restaurant inspired
       inspirationPrompt = `Create a recipe title inspired by famous dishes from London's best restaurants and eateries.
@@ -726,13 +749,43 @@ LONDON RESTAURANT INSPIRATION:
 - Duck & Waffle's signature brunch dishes
 - Chiltern Firehouse's glamorous comfort food
 - St. John's nose-to-tail British classics
+- Bao's Taiwanese steamed buns
+- Kiln's Thai street food
+- Hoppers' Sri Lankan hoppers and curries
+- Brat's wood-fired British cooking
+- Lyle's modern British seasonal dishes
+- Noble Rot's wine bar gastropub fare
+- The Clove Club's innovative British cuisine
+- Roka's Japanese robatayaki grills
+- Zuma's contemporary Japanese dining
+- Dinings SW3's Japanese-European fusion
+- Lima's Peruvian Nikkei cuisine
+- Temper's whole animal barbecue
+- Smoking Goat's Thai bar food
+- Ikoyi's West African spice-led cooking
+- The Ledbury's modern European fine dining
+- Pollen Street Social's Jason Atherton classics
+- Dinner by Heston's historical British dishes
+- Core by Clare Smyth's refined British cooking
+- Trinity's Clapham neighborhood gem
+- Petersham Nurseries' farm-to-table Italian
+- Hide's Mayfair multi-level dining
+- Aqua Shard's contemporary British cuisine
+- Galvin La Chapelle's classic French bistro
+- Rules' traditional game and British classics
+- Simpson's in the Strand's roast beef trolley
+- Sweetings' Victorian fish restaurant classics
 
 EXAMPLES:
 - "Dishoom-Style Black Daal with Garlic Naan"
 - "Padella's Hand-Rolled Pici Cacio e Pepe"
 - "The Ivy's Classic Shepherd's Pie"
 - "Hawksmoor-Style Dry-Aged Ribeye with Bone Marrow"
-- "Duck & Waffle's Signature Brunch Stack"`;
+- "Duck & Waffle's Signature Brunch Stack"
+- "Bao's Taiwanese Pork Belly Buns"
+- "Kiln's Clay Pot Glass Noodles"
+- "Hoppers' Bone Marrow Curry"
+- "Brat's Wood-Fired Turbot"`;
     } else {
       // Regional and traditional cuisine
       inspirationPrompt = `Create an authentic recipe title from ${selectedCuisine} cuisine that captures the diversity and richness of the culinary tradition.
