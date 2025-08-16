@@ -682,53 +682,81 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
       (cuisineContexts.find(c => c.toLowerCase().includes(data.cuisinePreference!.toLowerCase())) || "British") :
       cuisineContexts[seededRandom(rngSeed + mathRandom1, cuisineContexts.length)];
 
-    const systemMessage = `Create authentic, restaurant-quality recipe titles that showcase the full range of world cuisine. For exotic or regional dishes, include brief, helpful descriptions.`;
+    const systemMessage = `Create appealing recipe titles that draw inspiration from famous chefs, renowned restaurants, or authentic world cuisine. Add brief descriptions for dishes that might be unfamiliar to home cooks.`;
 
-    const userMessage = `Create an authentic recipe title from ${selectedCuisine} cuisine that captures the diversity and richness of the culinary tradition.
+    // Determine inspiration type based on seed
+    const inspirationType = seededRandom(rngSeed, 4);
+    
+    let inspirationPrompt = "";
+    if (inspirationType === 0) {
+      // Famous chef dishes and cookbook classics
+      inspirationPrompt = `Create a recipe title inspired by famous chefs, iconic cookbooks, or signature restaurant dishes from renowned establishments.
 
-User Intent: ${data.userIntent || "delicious cooking"}
-Randomization Seed: ${rngSeed} (use this to ensure variety)
+CHEF & COOKBOOK INSPIRATION:
+- Gordon Ramsay's signature dishes (Beef Wellington, Hell's Kitchen favorites)
+- Jamie Oliver's accessible classics (15-minute meals, comfort food)
+- Nigella Lawson's indulgent comfort dishes
+- Yotam Ottolenghi's vibrant Mediterranean fusion
+- Rick Stein's seafood specialties
+- Mary Berry's beloved bakes and traditional British fare
+- Marco Pierre White's refined classics
+- Heston Blumenthal's innovative takes on traditional dishes
+- Madhur Jaffrey's authentic Indian cuisine
+- Ken Hom's accessible Chinese cooking
+
+EXAMPLES:
+- "Gordon Ramsay's Beef Wellington with Mushroom Duxelles"
+- "Jamie's 15-Minute Carbonara with Crispy Pancetta"
+- "Nigella's Chocolate Guinness Cake"
+- "Ottolenghi-Style Roasted Aubergine with Tahini"
+- "Rick Stein's Classic Fish Pie"
+- "Mary Berry's Victoria Sponge with Fresh Cream"`;
+    } else if (inspirationType === 1) {
+      // London restaurant inspired
+      inspirationPrompt = `Create a recipe title inspired by famous dishes from London's best restaurants and eateries.
+
+LONDON RESTAURANT INSPIRATION:
+- Dishoom's legendary black daal and bacon naan rolls
+- Padella's fresh hand-rolled pasta
+- The Ivy's shepherd's pie and fish cakes
+- Sketch's afternoon tea delicacies
+- Hawksmoor's perfectly grilled steaks
+- Barrafina's Spanish tapas classics
+- Gymkhana's elevated Indian cuisine
+- Duck & Waffle's signature brunch dishes
+- Chiltern Firehouse's glamorous comfort food
+- St. John's nose-to-tail British classics
+
+EXAMPLES:
+- "Dishoom-Style Black Daal with Garlic Naan"
+- "Padella's Hand-Rolled Pici Cacio e Pepe"
+- "The Ivy's Classic Shepherd's Pie"
+- "Hawksmoor-Style Dry-Aged Ribeye with Bone Marrow"
+- "Duck & Waffle's Signature Brunch Stack"`;
+    } else {
+      // Regional and traditional cuisine
+      inspirationPrompt = `Create an authentic recipe title from ${selectedCuisine} cuisine that captures the diversity and richness of the culinary tradition.
 
 EMBRACE CULINARY DIVERSITY:
 - Draw from the FULL spectrum of ${selectedCuisine} cuisine - regional specialties, street food, comfort dishes, festival foods
 - Use authentic dish names to preserve cultural heritage
 - Include traditional cooking methods and unique ingredients
-- Showcase lesser-known gems alongside popular dishes
+- Showcase lesser-known gems alongside popular dishes`;
+    }
 
-FOR CLARITY - Add brief explanations when helpful:
-- "Moroccan Tagine (slow-cooked stew)" 
-- "Korean Bulgogi (marinated BBQ beef)"
-- "Ethiopian Doro Wat (spiced chicken stew)"
-- "Polish Bigos (hunter's stew)"
-- "Vietnamese Pho (aromatic noodle soup)"
-- "Peruvian Ceviche (citrus-cured fish)"
+    const userMessage = `${inspirationPrompt}
 
-AUTHENTIC EXAMPLES:
-- "Turkish Iskender Kebab (lamb over bread with yogurt)"
-- "Sicilian Caponata (sweet and sour eggplant)"
-- "Japanese Okonomiyaki (savory pancake)"
-- "Lebanese Fattoush (mixed herb salad)"
-- "Hungarian Goulash (paprika beef stew)"
-- "Thai Som Tam (spicy papaya salad)"
-- "Indian Biryani (layered spiced rice)"
-- "Mexican Cochinita Pibil (slow-roasted pork)"
+User Intent: ${data.userIntent || "delicious cooking"}
+Randomization Seed: ${rngSeed} (use this to ensure variety)
 
-STRUCTURE:
-- Lead with authentic dish name
-- Add brief description in parentheses if the dish might be unfamiliar
-- Keep descriptions simple: cooking method, main ingredients, or style
-- 4-8 words total including description
+GUIDELINES:
+- Create titles that excite and inspire home cooks
+- Add brief descriptions in parentheses for unfamiliar dishes
+- Keep total length 3-8 words
+- Mix familiar crowd-pleasers with exciting discoveries
+- Include variety: meat, seafood, vegetarian options
 
-VARIETY GOALS:
-- Mix familiar and exotic dishes equally
-- Include vegetarian, meat, and seafood options
-- Rotate cooking methods: grilled, braised, fried, baked, raw
-- Feature seasonal and comfort foods
-- Showcase unique cultural techniques
-
-GOAL: Introduce users to amazing dishes from around the world while ensuring they understand what they're getting into.
-
-Output JSON with "title" key. Include helpful context in parentheses when the dish name might be unfamiliar to a UK audience.`;
+OUTPUT: JSON with "title" key only. Make it sound delicious and achievable.`;
 
     try {
       const completion = await openai.chat.completions.create({
