@@ -51,31 +51,68 @@ function getRecipeExplanation(title: string): string | null {
   
   // Dictionary of dish explanations for potentially unfamiliar terms
   const explanations: Record<string, string> = {
+    // Middle Eastern & North African
     'tagine': 'slow-cooked Moroccan stew',
+    'shakshuka': 'eggs in tomato sauce',
+    'falafel': 'Middle Eastern chickpea fritters',
+    'fattoush': 'mixed herb salad',
+    'shawarma': 'roasted meat wrap',
+    'hummus': 'chickpea dip',
+    'baba ganoush': 'smoky eggplant dip',
+    'tabbouleh': 'fresh parsley salad',
+    
+    // Asian
     'bulgogi': 'Korean BBQ beef',
     'pad thai': 'Thai stir-fried noodles',
     'tikka masala': 'creamy tomato curry',
     'rogan josh': 'spiced lamb curry',
-    'moussaka': 'Greek layered casserole',
-    'paella': 'Spanish rice dish',
-    'souvlaki': 'Greek grilled skewers',
-    'teriyaki': 'Japanese glazed',
-    'carbonara': 'creamy pasta with bacon',
     'biryani': 'spiced rice with meat',
     'pho': 'Vietnamese noodle soup',
     'katsu': 'Japanese breaded cutlet',
-    'falafel': 'Middle Eastern chickpea fritters',
-    'shakshuka': 'eggs in tomato sauce',
-    'chili con carne': 'spicy beef stew',
-    'coq au vin': 'chicken in wine sauce',
-    'goulash': 'Hungarian beef stew',
-    'satay': 'Thai grilled skewers',
+    'teriyaki': 'Japanese glazed',
     'kimchi': 'Korean fermented cabbage',
+    'gyoza': 'Japanese dumplings',
+    'okonomiyaki': 'savory pancake',
+    'som tam': 'spicy papaya salad',
+    'laksa': 'spicy coconut noodle soup',
+    'rendang': 'slow-cooked spiced beef',
+    'doro wat': 'spiced chicken stew',
+    
+    // European
+    'moussaka': 'Greek layered casserole',
+    'paella': 'Spanish rice dish',
+    'souvlaki': 'Greek grilled skewers',
+    'carbonara': 'creamy pasta with bacon',
     'gnocchi': 'small potato dumplings',
     'risotto': 'creamy Italian rice',
+    'coq au vin': 'chicken in wine sauce',
+    'goulash': 'Hungarian beef stew',
+    'bigos': 'hunter\'s stew',
+    'ratatouille': 'vegetable stew',
+    'bouillabaisse': 'fish stew',
+    'cassoulet': 'white bean stew',
+    'osso buco': 'braised veal shanks',
+    'sauerbraten': 'marinated roast beef',
+    
+    // Latin American
     'enchiladas': 'Mexican rolled tortillas',
     'quesadillas': 'grilled cheese tortillas',
-    'gyoza': 'Japanese dumplings'
+    'ceviche': 'citrus-cured fish',
+    'mole': 'complex chocolate sauce',
+    'cochinita pibil': 'slow-roasted pork',
+    'empanadas': 'stuffed pastries',
+    'chimichurri': 'herb sauce',
+    'anticuchos': 'grilled skewers',
+    
+    // African
+    'bobotie': 'spiced meat casserole',
+    'bunny chow': 'curry in bread bowl',
+    'jollof': 'spiced rice dish',
+    'injera': 'spongy flatbread',
+    
+    // General terms
+    'satay': 'grilled skewers',
+    'chili con carne': 'spicy beef stew'
   };
   
   // Check if title contains any terms that need explanation
@@ -645,70 +682,53 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
       (cuisineContexts.find(c => c.toLowerCase().includes(data.cuisinePreference!.toLowerCase())) || "British") :
       cuisineContexts[seededRandom(rngSeed + mathRandom1, cuisineContexts.length)];
 
-    const systemMessage = `Create accessible, appetizing recipe titles that home cooks will understand and be excited to try. Balance authenticity with familiarity for a UK audience.`;
+    const systemMessage = `Create authentic, restaurant-quality recipe titles that showcase the full range of world cuisine. For exotic or regional dishes, include brief, helpful descriptions.`;
 
-    const userMessage = `Create a delicious recipe title from ${selectedCuisine} cuisine that sounds both authentic and approachable to home cooks.
+    const userMessage = `Create an authentic recipe title from ${selectedCuisine} cuisine that captures the diversity and richness of the culinary tradition.
 
 User Intent: ${data.userIntent || "delicious cooking"}
 Randomization Seed: ${rngSeed} (use this to ensure variety)
 
-ACCESSIBILITY FIRST - Make it approachable:
-- Use familiar cooking terms: "grilled", "roasted", "curry", "stir-fry", "slow-cooked"
-- Include ingredients people recognize: "chicken", "beef", "salmon", "pasta", "rice"
-- Add simple context for exotic dishes: "Pad Thai (Thai stir-fried noodles)", "Tikka Masala (creamy tomato curry)"
-- Prefer descriptive over authentic names when unclear: "Korean Beef BBQ" over "Bulgogi"
+EMBRACE CULINARY DIVERSITY:
+- Draw from the FULL spectrum of ${selectedCuisine} cuisine - regional specialties, street food, comfort dishes, festival foods
+- Use authentic dish names to preserve cultural heritage
+- Include traditional cooking methods and unique ingredients
+- Showcase lesser-known gems alongside popular dishes
 
-BALANCE AUTHENTICITY WITH CLARITY:
-✓ GOOD EXAMPLES:
-- "Thai Green Curry with Chicken"
-- "Moroccan Lamb Tagine with Apricots"  
-- "Korean Beef Bulgogi (Sweet Soy BBQ)"
-- "Italian Carbonara Pasta"
-- "Indian Butter Chicken Curry"
-- "Spanish Seafood Paella"
-- "Mexican Chicken Quesadillas"
-- "Greek Moussaka (Layered Lamb Bake)"
+FOR CLARITY - Add brief explanations when helpful:
+- "Moroccan Tagine (slow-cooked stew)" 
+- "Korean Bulgogi (marinated BBQ beef)"
+- "Ethiopian Doro Wat (spiced chicken stew)"
+- "Polish Bigos (hunter's stew)"
+- "Vietnamese Pho (aromatic noodle soup)"
+- "Peruvian Ceviche (citrus-cured fish)"
 
-✓ KEEP SIMPLE WHEN POSSIBLE:
-- "Honey Garlic Stir-Fry"
-- "Lemon Herb Roasted Chicken"
-- "Spicy Beef Noodle Soup"
-- "Crispy Fish and Chips"
-- "Slow-Cooked Beef Stew"
+AUTHENTIC EXAMPLES:
+- "Turkish Iskender Kebab (lamb over bread with yogurt)"
+- "Sicilian Caponata (sweet and sour eggplant)"
+- "Japanese Okonomiyaki (savory pancake)"
+- "Lebanese Fattoush (mixed herb salad)"
+- "Hungarian Goulash (paprika beef stew)"
+- "Thai Som Tam (spicy papaya salad)"
+- "Indian Biryani (layered spiced rice)"
+- "Mexican Cochinita Pibil (slow-roasted pork)"
 
-STRUCTURE GUIDELINES:
-- 3-6 words ideal (not too long)
-- Include main protein/ingredient
-- Add cooking method or key flavor
-- Brief explanation in parentheses if needed
-- Avoid chef jargon: no "confit", "gastrique", "essence", "emulsion"
+STRUCTURE:
+- Lead with authentic dish name
+- Add brief description in parentheses if the dish might be unfamiliar
+- Keep descriptions simple: cooking method, main ingredients, or style
+- 4-8 words total including description
 
-VARIETY FOCUS:
-- 70% familiar, accessible dishes that sound delicious
-- 30% slightly exotic but explained clearly
-- Rotate between proteins: chicken, beef, fish, vegetarian
-- Vary cooking methods: grilled, roasted, stir-fried, slow-cooked, baked
-- Include comfort foods and healthier options
+VARIETY GOALS:
+- Mix familiar and exotic dishes equally
+- Include vegetarian, meat, and seafood options
+- Rotate cooking methods: grilled, braised, fried, baked, raw
+- Feature seasonal and comfort foods
+- Showcase unique cultural techniques
 
-PRIORITY: HOME COOK FRIENDLY
-- Avoid obscure ingredients: no "sumac", "labneh", "moqueca", "za'atar"
-- Use common proteins: chicken breast, beef mince, salmon, cod
-- Simple seasonings: garlic, herbs, lemon, chili, soy sauce
-- Familiar vegetables: onions, peppers, mushrooms, tomatoes
+GOAL: Introduce users to amazing dishes from around the world while ensuring they understand what they're getting into.
 
-EXAMPLES OF WHAT TO CREATE:
-- "Thai Red Curry Chicken"
-- "Italian Spaghetti Bolognese" 
-- "Chinese Sweet and Sour Pork"
-- "Indian Chicken Tikka Masala"
-- "Mexican Beef Tacos"
-- "Greek Chicken Souvlaki"
-- "Japanese Teriyaki Salmon"
-- "Spanish Chicken Paella"
-
-GOAL: Create titles that make people think "I know what that is and I want to eat it!"
-
-Output JSON with "title" key only. Keep it simple and appetizing.`;
+Output JSON with "title" key. Include helpful context in parentheses when the dish name might be unfamiliar to a UK audience.`;
 
     try {
       const completion = await openai.chat.completions.create({
