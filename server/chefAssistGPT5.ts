@@ -76,7 +76,6 @@ function getRecipeExplanation(title: string): string | null {
     'som tam': 'spicy papaya salad',
     'laksa': 'spicy coconut noodle soup',
     'rendang': 'slow-cooked spiced beef',
-    'doro wat': 'spiced chicken stew',
     'chả cá': 'Vietnamese turmeric fish',
     'bánh mì': 'Vietnamese sandwich',
     'bánh xèo': 'Vietnamese crepe',
@@ -154,7 +153,6 @@ function getRecipeExplanation(title: string): string | null {
     'kitfo': 'Ethiopian steak tartare',
     'berbere': 'Ethiopian spice blend',
     'fufu': 'starchy side dish',
-    'tagine': 'North African stew',
     
     // General terms
     'satay': 'grilled skewers',
@@ -1059,21 +1057,30 @@ OUTPUT: JSON with "title" key only. Make it sound delicious and achievable.`;
       // If title has parentheses with description, preserve the core dish name + description
       if (title.includes('(') && title.includes(')')) {
         // Allow longer titles with descriptions, but limit to reasonable length
-        if (title.length > 120) {
-          // Keep the dish name and truncate the description
+        if (title.length > 150) {
+          // Keep the dish name and truncate the description more intelligently
           const beforeParen = title.split('(')[0].trim();
           const description = title.split('(')[1]?.split(')')[0];
-          if (description && description.length > 50) {
-            const shortDesc = description.substring(0, 50) + '...';
-            title = `${beforeParen} (${shortDesc})`;
+          if (description && description.length > 60) {
+            // Truncate at word boundaries, not mid-word
+            const words = description.split(' ');
+            let shortDesc = '';
+            for (const word of words) {
+              if ((shortDesc + ' ' + word).length <= 55) {
+                shortDesc += (shortDesc ? ' ' : '') + word;
+              } else {
+                break;
+              }
+            }
+            title = `${beforeParen} (${shortDesc}...)`;
           }
           console.log(`Title truncated to: ${title}`);
         }
       } else {
         // For titles without descriptions, keep word limit
         const words = title.split(' ');
-        if (words.length > 12) {
-          title = words.slice(0, 12).join(' ');
+        if (words.length > 15) {
+          title = words.slice(0, 15).join(' ');
           console.log(`Title truncated to: ${title}`);
         }
       }
