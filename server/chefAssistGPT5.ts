@@ -879,6 +879,52 @@ LONDON RESTAURANT INSPIRATION:
 - Le Gavroche's legendary French fine dining
 - Chez Bruce's neighborhood French excellence
 - Trinity's modern European neighborhood gem
+- Nando's peri-peri chicken specialties
+- Wagamama's Asian fusion noodle bowls
+- Prezzo's accessible Italian dining
+- Zizzi's modern Italian chain classics
+- Pizza Express's thin-crust pizza heritage
+- Ask Italian's family-friendly Italian fare
+- Bella Italia's traditional Italian comfort
+- Carluccio's authentic Italian deli culture
+- Giraffe's global comfort food menu
+- TGI Friday's American diner classics
+- Hard Rock Cafe's rock and roll burgers
+- Planet Hollywood's movie-themed dining
+- Rainforest Cafe's adventure dining experience
+- All Bar One's modern British gastropub
+- Slug & Lettuce's contemporary pub food
+- Harvester's salad bar and grills
+- Toby Carvery's traditional Sunday roasts
+- Beefeater's British pub classics
+- Wetherspoons's no-nonsense pub grub
+- Greene King's traditional pub fare
+- Fuller's brewery heritage dining
+- Young's pub classics and ales
+- Byron's premium burger specialists
+- Honest Burgers's locally-sourced patties
+- GBK's gourmet burger creations
+- Five Guys's American-style burgers
+- Shake Shack's cult burger following
+- McDonald's global fast food classics
+- KFC's finger-lickin' fried chicken
+- Burger King's flame-grilled whoppers
+- Subway's customizable sandwich subs
+- Greggs's British bakery staples
+- Pret A Manger's fresh sandwich culture
+- EAT's healthy grab-and-go options
+- Leon's naturally fast food philosophy
+- Itsu's healthy Asian-inspired cuisine
+- Yo! Sushi's kaiten belt dining
+- Wasabi's quick Japanese street food
+- Chopstix's wok-fresh Chinese takeaway
+- Busaba's Thai street food experience
+- Café Rouge's French bistro classics
+- Côte Brasserie's modern French dining
+- Las Iguanas's Latin American flavors
+- Chiquito's Tex-Mex family dining
+- Tortilla's fresh Mexican street food
+- Chipotle's build-your-own burrito bowls
 
 EXAMPLES:
 - "Dishoom-Style Black Daal with Garlic Naan"
@@ -898,7 +944,14 @@ EXAMPLES:
 - "Tayyabs's Lamb Chops"
 - "Som Saa's Green Papaya Salad"
 - "Coya's Nikkei Tiradito"
-- "Le Gavroche's Soufflé Suissesse"`;
+- "Le Gavroche's Soufflé Suissesse"
+- "Nando's Butterfly Chicken with Peri-Peri"
+- "Wagamama's Chicken Katsu Curry"
+- "Pizza Express's American Hot Pizza"
+- "Byron's Classic Beef Burger"
+- "Leon's Moroccan Meatballs"
+- "Yo! Sushi's Salmon Teriyaki"
+- "Toby Carvery's Traditional Sunday Roast"`;
     } else {
       // Regional and traditional cuisine
       inspirationPrompt = `Create an authentic recipe title from ${selectedCuisine} cuisine that captures the diversity and richness of the culinary tradition.
