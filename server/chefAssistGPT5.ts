@@ -228,19 +228,47 @@ SEED INTERACTION RULES (apply AFTER classifying specificity):
   - Use seeds to pick specific technique (e.g., grill vs. roast), texture emphasis, and flavour accent path within that direction.
   - Keep ingredient count flexible: it may exceed a "simple" target if needed for balanced, authentic flavour.
 
-DISHOOM-LEVEL INDIAN RECIPE REQUIREMENTS:
-When generating Indian cuisine recipes, especially if "dishoom" is mentioned or sophisticated Indian restaurant style is inferred, elevate to authentic restaurant-quality standards:
-- Use authentic regional spice blends beyond basic garam masala (Bengali panch phoron, Gujarati dhana jeera, Tamil sambar powder)
-- Include proper tempering (tadka) techniques with whole spices in specific order
-- Layer flavors systematically: onion-ginger-garlic base → tomato reduction → spice blooming → main ingredients
-- Reference specific regional techniques: Bengali mustard oil finishing, Gujarati jaggery sweetening, Kerala coconut integration, Tamil curry leaf tempering
-- Include sophisticated restaurant techniques: slow-cooked caramelized onions (45+ minutes), char-grilled elements, fresh herb chutneys, yogurt marinades
-- Use complex spice combinations: black cardamom, mace, star anise, fenugreek leaves, asafoetida, nigella seeds
-- Mention proper cooking vessels and techniques: heavy-bottomed pan for even heat, clay pot finishing, tandoor-style high-heat techniques
+SOPHISTICATED COOKING TECHNIQUES FOR ALL CUISINES (HOME COOK ACHIEVABLE):
+
+UNIVERSAL ELEVATED TECHNIQUES:
+- Proper mise en place: prep all ingredients before cooking starts
+- Temperature control: specify exact heat levels and when to adjust
+- Layered seasoning: season at multiple stages, not just at the end
+- Resting proteins: allow meats to rest at room temperature before cooking
+- Finishing touches: fresh herbs, quality oils, citrus zests added at the end
+- Texture contrasts: combine crispy, creamy, and tender elements in one dish
+
+CUISINE-SPECIFIC SOPHISTICATED TECHNIQUES:
+
+INDIAN: Use authentic regional spice blends (Bengali panch phoron, Gujarati dhana jeera), proper tempering (tadka) with whole spices, systematic flavor layering, slow-cooked onion bases (45+ minutes), complex spice combinations with black cardamom and mace
+
+FRENCH: Brown butter (beurre noisette), proper reduction sauces, confit techniques using low oven heat, liaison with egg yolks, wine deglazing, compound butters, classic mother sauces
+
+ITALIAN: Proper pasta water starch utilization, building ragù over hours, cacio e pepe emulsion technique, risotto mantecatura (creaming), olive oil finishing, anchovy umami base
+
+CHINESE: Velveting proteins in cornstarch, wok hei (breath of wok) high-heat techniques, proper stir-fry timing, black bean and oyster sauce depth, Shaoxing wine cooking
+
+MEXICAN: Toasting spices and chiles before grinding, proper masa handling, charring vegetables for depth, lime and acid balance, building complex moles
+
+MEDITERRANEAN: Salt-curing olives, proper olive oil selection, herb oil infusions, grilling over wood, preserved lemon techniques, tahini emulsification
+
+JAPANESE: Dashi building from scratch, proper knife techniques, miso depth layering, sake cooking wine, temperature-sensitive preparations
+
+All techniques must use standard home kitchen equipment and be achievable within reasonable time constraints.
 
 • If broad_theme:
   - Seeds strongly drive the concrete choices (protein selection, technique pack, texture, flavour path).
   - Choose a coherent regional frame (e.g., Mediterranean BBQ vs. US-style) and stick to it.
+
+TECHNIQUE ELEVATION MANDATE:
+For ALL recipes, regardless of cuisine or simplicity level, incorporate sophisticated but achievable techniques:
+- Always include proper timing and temperature guidance with specific heat levels
+- Specify the "why" behind key techniques in method steps using "why_it_matters" field
+- Include one advanced technique that elevates the dish beyond basic cooking
+- Provide finishing touches that add restaurant-quality elements (herb oils, compound butters, citrus zests)
+- Explain how to build flavors in layers rather than just combining ingredients
+- Use professional terminology but explain it clearly for home cooks
+- Apply cuisine-specific sophisticated techniques from the list above based on the dish's origin
   - If outdoor grilling is implied but equipment/time suggests indoor, provide an oven/plancha alternative and note this in "style_notes".
 
 TIME & TECHNIQUE GUARDRAILS (seed adjustments):
