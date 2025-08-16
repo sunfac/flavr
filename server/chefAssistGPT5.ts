@@ -723,6 +723,35 @@ CHEF & COOKBOOK INSPIRATION:
 - David Chang's Korean-American innovations
 - April Bloomfield's British gastropub fare
 - Stephanie Izard's global flavors
+- Paul Ainsworth's modern British cuisine
+- Nieves Barragán Mohacho's Spanish tapas
+- Nathan Outlaw's Cornish seafood mastery
+- Josh Eggleton's seasonal British cooking
+- Anna Hansen's global fusion dishes
+- Marcus Wareing's refined modern European
+- Sat Bains's innovative contemporary cuisine
+- Simon Rogan's farm-to-fork philosophy
+- Tommy Banks's Yorkshire ingredients focus
+- Roberta Hall McCarron's Scottish modern cooking
+- Lisa Goodwin-Allen's artistic presentations
+- Adam Handling's waste-conscious cooking
+- Aktar Islam's modern Indian cuisine
+- Endo Kazutoshi's sushi perfection
+- Asma Khan's home-style Indian cooking
+- Chantelle Nicholson's plant-forward cuisine
+- Jeremy Lee's seasonal British classics
+- Brett Graham's modern British innovation
+- Claude Bosi's French fine dining
+- Phil Howard's neighborhood restaurant style
+- Jason Atherton's global brasserie concept
+- Clare Smyth's ingredient-focused British
+- Tommy Myllymäki's Swedish precision
+- Magnus Nilsson's Nordic wilderness cooking
+- René Redzepi's New Nordic movement
+- Massimo Bottura's Italian innovation
+- Alain Ducasse's French mastery
+- Grant Achatz's molecular gastronomy
+- Dominique Crenn's poetic French cuisine
 
 EXAMPLES:
 - "Gordon Ramsay's Beef Wellington with Mushroom Duxelles"
@@ -733,7 +762,14 @@ EXAMPLES:
 - "Mary Berry's Victoria Sponge with Fresh Cream"
 - "Tom Kerridge's Hand & Flowers Slow-Cooked Lamb"
 - "Heston's Perfect Roast Chicken"
-- "Paul Hollywood's Sourdough Focaccia"`;
+- "Paul Hollywood's Sourdough Focaccia"
+- "Paul Ainsworth's Cornish Monkfish with Cider Sauce"
+- "Nieves Barragán's Milk-Fed Lamb with Romesco"
+- "Nathan Outlaw's Pan-Fried John Dory"
+- "Simon Rogan's Heritage Carrot with Goat's Curd"
+- "Marcus Wareing's Beef Short Rib with Bone Marrow"
+- "Asma Khan's Hyderabadi Biryani"
+- "René Redzepi's Fermented Mushroom Broth"`;
     } else if (inspirationType === 1) {
       // London restaurant inspired
       inspirationPrompt = `Create a recipe title inspired by famous dishes from London's best restaurants and eateries.
