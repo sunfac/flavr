@@ -714,11 +714,14 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
 
     const systemMessage = `Create appealing recipe titles that draw inspiration from famous chefs, renowned restaurants, or authentic world cuisine. Add brief descriptions for dishes that might be unfamiliar to home cooks.`;
 
-    // Determine inspiration type based on seed
-    const inspirationType = seededRandom(rngSeed, 4);
+    // Determine inspiration type based on seed - weighted toward chef/restaurant
+    // 0-2: Chef inspiration (60% weight)
+    // 3-4: Restaurant inspiration (40% weight)
+    // 5: Regional cuisine (rare fallback)
+    const inspirationType = seededRandom(rngSeed, 6);
     
     let inspirationPrompt = "";
-    if (inspirationType === 0) {
+    if (inspirationType <= 2) {
       // Famous chef dishes and cookbook classics
       inspirationPrompt = `Create a recipe title inspired by famous chefs, iconic cookbooks, or signature restaurant dishes from renowned establishments.
 
@@ -802,7 +805,7 @@ EXAMPLES:
 - "Marcus Wareing-Inspired Beef Short Rib with Bone Marrow"
 - "Asma Khan-Inspired Hyderabadi Biryani"
 - "René Redzepi-Inspired Fermented Mushroom Broth"`;
-    } else if (inspirationType === 1) {
+    } else if (inspirationType <= 4) {
       // London restaurant inspired
       inspirationPrompt = `Create a recipe title inspired by famous dishes from London's best restaurants and eateries.
 
@@ -987,7 +990,7 @@ EXAMPLES:
 - "Yo! Sushi-Inspired Salmon Teriyaki"
 - "Toby Carvery-Inspired Traditional Sunday Roast"`;
     } else {
-      // Regional and traditional cuisine
+      // Regional and traditional cuisine (rare fallback)
       inspirationPrompt = `Create an authentic recipe title from ${selectedCuisine} cuisine that captures the diversity and richness of the culinary tradition.
 
 EMBRACE CULINARY DIVERSITY:
