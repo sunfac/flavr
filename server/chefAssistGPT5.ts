@@ -998,13 +998,14 @@ EXAMPLES:
 - "Toby Carvery-Inspired Traditional Sunday Roast"`;
     } else {
       // Regional and traditional cuisine
-      inspirationPrompt = `Create an authentic recipe title from ${selectedCuisine} cuisine that captures the diversity and richness of the culinary tradition.
+      inspirationPrompt = `Create an authentic recipe title from ${selectedCuisine} cuisine that balances familiarity with culinary discovery.
 
-EMBRACE CULINARY DIVERSITY:
-- Draw from the FULL spectrum of ${selectedCuisine} cuisine - regional specialties, street food, comfort dishes, festival foods
-- Use authentic dish names to preserve cultural heritage
-- Include traditional cooking methods and unique ingredients
-- Showcase lesser-known gems alongside popular dishes`;
+BALANCE FAMILIARITY WITH DISCOVERY:
+- Favor well-known and moderately familiar dishes (80%) over extremely obscure regional specialties (20%)
+- Focus on popular restaurant dishes, street food favorites, and home cooking classics
+- Use authentic dish names for recognizable dishes like Pad Thai, Tikka Masala, Paella, Ragu Bolognese
+- Only suggest very regional/obscure dishes occasionally and with clear descriptions
+- Prioritize dishes that home cooks can realistically find ingredients for`;
     }
 
     const userMessage = `${inspirationPrompt}
@@ -1014,9 +1015,10 @@ Randomization Seed: ${rngSeed} (use this to ensure variety)
 
 GUIDELINES:
 - Create titles that excite and inspire home cooks
-- Add brief descriptions in parentheses for unfamiliar dishes
-- Keep total length 3-8 words
-- Mix familiar crowd-pleasers with exciting discoveries
+- Strongly favor familiar and moderately familiar dishes over extremely obscure ones
+- Add brief descriptions in parentheses for any dish that might be unfamiliar
+- Keep total length 3-8 words for simple dishes, longer for descriptive ones
+- Prioritize achievable recipes using common ingredients
 - Include variety: meat, seafood, vegetarian options
 
 OUTPUT: JSON with "title" key only. Make it sound delicious and achievable.`;
