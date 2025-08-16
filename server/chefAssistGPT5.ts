@@ -45,6 +45,49 @@ const FLAVOUR_PACK = [
 // Anti-repetition memory - rolling window of last 5 outputs
 let recentOutputs: Array<{protein: string, technique: string, flavour: string}> = [];
 
+// Helper function to provide brief explanations for potentially unfamiliar dishes
+function getRecipeExplanation(title: string): string | null {
+  const lowerTitle = title.toLowerCase();
+  
+  // Dictionary of dish explanations for potentially unfamiliar terms
+  const explanations: Record<string, string> = {
+    'tagine': 'slow-cooked Moroccan stew',
+    'bulgogi': 'Korean BBQ beef',
+    'pad thai': 'Thai stir-fried noodles',
+    'tikka masala': 'creamy tomato curry',
+    'rogan josh': 'spiced lamb curry',
+    'moussaka': 'Greek layered casserole',
+    'paella': 'Spanish rice dish',
+    'souvlaki': 'Greek grilled skewers',
+    'teriyaki': 'Japanese glazed',
+    'carbonara': 'creamy pasta with bacon',
+    'biryani': 'spiced rice with meat',
+    'pho': 'Vietnamese noodle soup',
+    'katsu': 'Japanese breaded cutlet',
+    'falafel': 'Middle Eastern chickpea fritters',
+    'shakshuka': 'eggs in tomato sauce',
+    'chili con carne': 'spicy beef stew',
+    'coq au vin': 'chicken in wine sauce',
+    'goulash': 'Hungarian beef stew',
+    'satay': 'Thai grilled skewers',
+    'kimchi': 'Korean fermented cabbage',
+    'gnocchi': 'small potato dumplings',
+    'risotto': 'creamy Italian rice',
+    'enchiladas': 'Mexican rolled tortillas',
+    'quesadillas': 'grilled cheese tortillas',
+    'gyoza': 'Japanese dumplings'
+  };
+  
+  // Check if title contains any terms that need explanation
+  for (const [term, explanation] of Object.entries(explanations)) {
+    if (lowerTitle.includes(term)) {
+      return explanation;
+    }
+  }
+  
+  return null;
+}
+
 interface SeedPacks {
   randomSeed: number;
   complexityLevel: number;
@@ -602,62 +645,70 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
       (cuisineContexts.find(c => c.toLowerCase().includes(data.cuisinePreference!.toLowerCase())) || "British") :
       cuisineContexts[seededRandom(rngSeed + mathRandom1, cuisineContexts.length)];
 
-    const systemMessage = `Create authentic restaurant-quality recipe titles like professional chefs do. Each title must be unique and restaurant menu-worthy. Use descriptive, appetizing language.`;
+    const systemMessage = `Create accessible, appetizing recipe titles that home cooks will understand and be excited to try. Balance authenticity with familiarity for a UK audience.`;
 
-    const userMessage = `Create an authentic, restaurant-quality recipe title from the vast world of ${selectedCuisine} cuisine.
+    const userMessage = `Create a delicious recipe title from ${selectedCuisine} cuisine that sounds both authentic and approachable to home cooks.
 
 User Intent: ${data.userIntent || "delicious cooking"}
 Randomization Seed: ${rngSeed} (use this to ensure variety)
 
-Draw from the FULL RANGE of ${selectedCuisine} culinary tradition - not just the most common dishes. Consider:
-- Regional specialties and lesser-known classics
-- Traditional cooking methods and techniques  
-- Seasonal ingredients and preparations
-- Street food and comfort dishes
-- Festival and celebration foods
-- Modern interpretations of classics
+ACCESSIBILITY FIRST - Make it approachable:
+- Use familiar cooking terms: "grilled", "roasted", "curry", "stir-fry", "slow-cooked"
+- Include ingredients people recognize: "chicken", "beef", "salmon", "pasta", "rice"
+- Add simple context for exotic dishes: "Pad Thai (Thai stir-fried noodles)", "Tikka Masala (creamy tomato curry)"
+- Prefer descriptive over authentic names when unclear: "Korean Beef BBQ" over "Bulgogi"
 
-FOR UK AUDIENCE - If using authentic dish names that may be unfamiliar:
-- Add brief, appetizing context: "Doro Wot (Ethiopian chicken stew)" 
-- Or describe the dish: "Samgyeopsal Korean Grilled Pork Belly"
-- Make it accessible: "Chermoula Moroccan Herb-Crusted Sea Bass"
-- Keep authentic names but add clarity for British home cooks
+BALANCE AUTHENTICITY WITH CLARITY:
+✓ GOOD EXAMPLES:
+- "Thai Green Curry with Chicken"
+- "Moroccan Lamb Tagine with Apricots"  
+- "Korean Beef Bulgogi (Sweet Soy BBQ)"
+- "Italian Carbonara Pasta"
+- "Indian Butter Chicken Curry"
+- "Spanish Seafood Paella"
+- "Mexican Chicken Quesadillas"
+- "Greek Moussaka (Layered Lamb Bake)"
 
-PREFER LONGER, DESCRIPTIVE TITLES (6-10 words):
-- "30 Garlic Clove Lamb Leg" (5 words) ✓ GOOD
-- "Slow-Braised Beef Short Ribs" (5 words) ✓ GOOD  
-- "Pan-Fried Dover Sole with Brown Butter" (7 words) ✓ GOOD
-- "6-Hour Duck Confit" (4 words) ✓ GOOD
-- "Grilled Mackerel and Gooseberry Salad" (6 words) ✓ GOOD
-- "Thai Green Curry" (3 words) ✓ SIMPLE BUT GOOD
+✓ KEEP SIMPLE WHEN POSSIBLE:
+- "Honey Garlic Stir-Fry"
+- "Lemon Herb Roasted Chicken"
+- "Spicy Beef Noodle Soup"
+- "Crispy Fish and Chips"
+- "Slow-Cooked Beef Stew"
 
-NATURAL VARIATIONS WITH AUTHENTIC INGREDIENTS:
-- "Crispy Chicken Katsu Curry" (not "with curry")
-- "Lemon Herb Roasted Salmon" (not "with herbs")  
-- "Spicy Beef Rogan Josh" (not "with spices")
-- "Thai Green Curry with Thai Basil" (authentic ingredient)
-- "Indian Dal with Fresh Coriander" (culturally specific)
-- "20-Hour Braised Beef Ribs" (timing sounds impressive)
-- "30 Garlic Clove Lamb" (ingredient count is appealing)
-- Use authentic ingredient names: "Thai basil" not "basil", "coriander" not "cilantro" for Indian dishes
+STRUCTURE GUIDELINES:
+- 3-6 words ideal (not too long)
+- Include main protein/ingredient
+- Add cooking method or key flavor
+- Brief explanation in parentheses if needed
+- Avoid chef jargon: no "confit", "gastrique", "essence", "emulsion"
 
-KEEP IT SIMPLE AND APPETIZING - MAXIMUM VARIETY:
-- STRICTLY BANNED: emulsion, gastrique, jus, mirepoix, roux, confit, rouille, aioli, reduction, essence, medley, layers, dressing, zest, tender, infusion, aromatic, delight
-- AVOID REPETITION: Don't repeat "slow-braised", "with tender", "aromatic", vary cooking methods heavily
-- ROTATE STYLES: Simple names, method focus, ingredient focus, timing focus
-- GOOD VARIETY: "Som Tam Salad" (simple), "Beer-Battered Fish" (method), "30 Garlic Lamb" (ingredient count), "6-Hour Duck" (timing)
+VARIETY FOCUS:
+- 70% familiar, accessible dishes that sound delicious
+- 30% slightly exotic but explained clearly
+- Rotate between proteins: chicken, beef, fish, vegetarian
+- Vary cooking methods: grilled, roasted, stir-fried, slow-cooked, baked
+- Include comfort foods and healthier options
 
-VARY YOUR LANGUAGE:
-- Instead of always "Classic": Slow-Braised, Pan-Fried, Grilled, Roasted, Spicy, etc.
-- Include specific details: ingredient counts, cooking methods, simple descriptors
-- Make it sound delicious and approachable
+PRIORITY: HOME COOK FRIENDLY
+- Avoid obscure ingredients: no "sumac", "labneh", "moqueca", "za'atar"
+- Use common proteins: chicken breast, beef mince, salmon, cod
+- Simple seasonings: garlic, herbs, lemon, chili, soy sauce
+- Familiar vegetables: onions, peppers, mushrooms, tomatoes
 
-AIM FOR 5-8 WORDS. Be descriptive but natural.
+EXAMPLES OF WHAT TO CREATE:
+- "Thai Red Curry Chicken"
+- "Italian Spaghetti Bolognese" 
+- "Chinese Sweet and Sour Pork"
+- "Indian Chicken Tikka Masala"
+- "Mexican Beef Tacos"
+- "Greek Chicken Souvlaki"
+- "Japanese Teriyaki Salmon"
+- "Spanish Chicken Paella"
 
-IMPORTANT: This title must be RESTAURANT MENU-WORTHY and AUTHENTIC to the cuisine.
-Make it sound like something you'd see at a high-quality restaurant.
+GOAL: Create titles that make people think "I know what that is and I want to eat it!"
 
-Output JSON with "title" key containing the recipe title.`;
+Output JSON with "title" key only. Keep it simple and appetizing.`;
 
     try {
       const completion = await openai.chat.completions.create({
@@ -695,7 +746,13 @@ Output JSON with "title" key containing the recipe title.`;
       // Remove any descriptions or explanations after dashes/colons
       title = title.split(' - ')[0].split(' : ')[0].split(': ')[0];
       
-      return { title };
+      // Add brief explanation for potentially unfamiliar dishes
+      const explanation = getRecipeExplanation(title);
+      
+      return { 
+        title,
+        ...(explanation && { description: explanation })
+      };
       
     } catch (error) {
       console.error("GPT-5 Inspire error:", error);
