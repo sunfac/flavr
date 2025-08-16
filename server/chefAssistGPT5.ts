@@ -692,6 +692,8 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
       // Famous chef dishes and cookbook classics
       inspirationPrompt = `Create a recipe title inspired by famous chefs, iconic cookbooks, or signature restaurant dishes from renowned establishments.
 
+IMPORTANT: Always use "inspired by" language - never claim these are the actual chef's recipes. Use formats like "Gordon Ramsay-Inspired" or "Inspired by Gordon Ramsay" rather than "Gordon Ramsay's".
+
 CHEF & COOKBOOK INSPIRATION:
 - Gordon Ramsay's signature dishes (Beef Wellington, Hell's Kitchen favorites)
 - Jamie Oliver's accessible classics (15-minute meals, comfort food)
@@ -754,25 +756,27 @@ CHEF & COOKBOOK INSPIRATION:
 - Dominique Crenn's poetic French cuisine
 
 EXAMPLES:
-- "Gordon Ramsay's Beef Wellington with Mushroom Duxelles"
-- "Jamie's 15-Minute Carbonara with Crispy Pancetta"
-- "Nigella's Chocolate Guinness Cake"
-- "Ottolenghi-Style Roasted Aubergine with Tahini"
-- "Rick Stein's Classic Fish Pie"
-- "Mary Berry's Victoria Sponge with Fresh Cream"
-- "Tom Kerridge's Hand & Flowers Slow-Cooked Lamb"
-- "Heston's Perfect Roast Chicken"
-- "Paul Hollywood's Sourdough Focaccia"
-- "Paul Ainsworth's Cornish Monkfish with Cider Sauce"
-- "Nieves Barragán's Milk-Fed Lamb with Romesco"
-- "Nathan Outlaw's Pan-Fried John Dory"
-- "Simon Rogan's Heritage Carrot with Goat's Curd"
-- "Marcus Wareing's Beef Short Rib with Bone Marrow"
-- "Asma Khan's Hyderabadi Biryani"
-- "René Redzepi's Fermented Mushroom Broth"`;
+- "Gordon Ramsay-Inspired Beef Wellington with Mushroom Duxelles"
+- "Jamie Oliver-Inspired 15-Minute Carbonara with Crispy Pancetta"
+- "Nigella-Inspired Chocolate Guinness Cake"
+- "Ottolenghi-Inspired Roasted Aubergine with Tahini"
+- "Rick Stein-Inspired Classic Fish Pie"
+- "Mary Berry-Inspired Victoria Sponge with Fresh Cream"
+- "Tom Kerridge-Inspired Hand & Flowers Slow-Cooked Lamb"
+- "Heston-Inspired Perfect Roast Chicken"
+- "Paul Hollywood-Inspired Sourdough Focaccia"
+- "Paul Ainsworth-Inspired Cornish Monkfish with Cider Sauce"
+- "Nieves Barragán-Inspired Milk-Fed Lamb with Romesco"
+- "Nathan Outlaw-Inspired Pan-Fried John Dory"
+- "Simon Rogan-Inspired Heritage Carrot with Goat's Curd"
+- "Marcus Wareing-Inspired Beef Short Rib with Bone Marrow"
+- "Asma Khan-Inspired Hyderabadi Biryani"
+- "René Redzepi-Inspired Fermented Mushroom Broth"`;
     } else if (inspirationType === 1) {
       // London restaurant inspired
       inspirationPrompt = `Create a recipe title inspired by famous dishes from London's best restaurants and eateries.
+
+IMPORTANT: Always use "inspired by" language - never claim these are the actual restaurant's recipes. Use formats like "Dishoom-Inspired" or "Inspired by Dishoom" rather than "Dishoom's".
 
 LONDON RESTAURANT INSPIRATION:
 - Dishoom's legendary black daal and bacon naan rolls
@@ -927,31 +931,31 @@ LONDON RESTAURANT INSPIRATION:
 - Chipotle's build-your-own burrito bowls
 
 EXAMPLES:
-- "Dishoom-Style Black Daal with Garlic Naan"
-- "Padella's Hand-Rolled Pici Cacio e Pepe"
-- "The Ivy's Classic Shepherd's Pie"
-- "Hawksmoor-Style Dry-Aged Ribeye with Bone Marrow"
-- "Duck & Waffle's Signature Brunch Stack"
-- "Bao's Taiwanese Pork Belly Buns"
-- "Kiln's Clay Pot Glass Noodles"
-- "Hoppers' Bone Marrow Curry"
-- "Brat's Wood-Fired Turbot"
-- "Sabor's Jamón Ibérico Croquetas"
-- "José's Andalusian Gazpacho"
-- "Scott's Dover Sole Meunière"
-- "Blacklock's Sunday Roast Beef"
-- "River Café's Chocolate Nemesis"
-- "Tayyabs's Lamb Chops"
-- "Som Saa's Green Papaya Salad"
-- "Coya's Nikkei Tiradito"
-- "Le Gavroche's Soufflé Suissesse"
-- "Nando's Butterfly Chicken with Peri-Peri"
-- "Wagamama's Chicken Katsu Curry"
-- "Pizza Express's American Hot Pizza"
-- "Byron's Classic Beef Burger"
-- "Leon's Moroccan Meatballs"
-- "Yo! Sushi's Salmon Teriyaki"
-- "Toby Carvery's Traditional Sunday Roast"`;
+- "Dishoom-Inspired Black Daal with Garlic Naan"
+- "Padella-Inspired Hand-Rolled Pici Cacio e Pepe"
+- "The Ivy-Inspired Classic Shepherd's Pie"
+- "Hawksmoor-Inspired Dry-Aged Ribeye with Bone Marrow"
+- "Duck & Waffle-Inspired Signature Brunch Stack"
+- "Bao-Inspired Taiwanese Pork Belly Buns"
+- "Kiln-Inspired Clay Pot Glass Noodles"
+- "Hoppers-Inspired Bone Marrow Curry"
+- "Brat-Inspired Wood-Fired Turbot"
+- "Sabor-Inspired Jamón Ibérico Croquetas"
+- "José-Inspired Andalusian Gazpacho"
+- "Scott's-Inspired Dover Sole Meunière"
+- "Blacklock-Inspired Sunday Roast Beef"
+- "River Café-Inspired Chocolate Nemesis"
+- "Tayyabs-Inspired Lamb Chops"
+- "Som Saa-Inspired Green Papaya Salad"
+- "Coya-Inspired Nikkei Tiradito"
+- "Le Gavroche-Inspired Soufflé Suissesse"
+- "Nando's-Inspired Butterfly Chicken with Peri-Peri"
+- "Wagamama-Inspired Chicken Katsu Curry"
+- "Pizza Express-Inspired American Hot Pizza"
+- "Byron-Inspired Classic Beef Burger"
+- "Leon-Inspired Moroccan Meatballs"
+- "Yo! Sushi-Inspired Salmon Teriyaki"
+- "Toby Carvery-Inspired Traditional Sunday Roast"`;
     } else {
       // Regional and traditional cuisine
       inspirationPrompt = `Create an authentic recipe title from ${selectedCuisine} cuisine that captures the diversity and richness of the culinary tradition.
