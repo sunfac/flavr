@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Users, ChefHat, Clock, RotateCcw, Heart, RefreshCw, Loader2, Copy } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
 import { useLocation } from 'wouter';
 import { animations, spacing } from '@/styles/tokens';
 import { useRecipeStore } from '@/stores/recipeStore';
@@ -118,15 +119,22 @@ function SaveButton() {
 
 export default function HeaderSection({ 
   recipe, 
-  currentServings
+  currentServings,
+  onServingsChange
 }: HeaderSectionProps) {
   const [location, navigate] = useLocation();
   const [isRerolling, setIsRerolling] = useState(false);
+  const [localServings, setLocalServings] = useState(currentServings);
   const { toast } = useToast();
   const generationParams = useRecipeStore((state) => state.generationParams);
   const updateActiveRecipe = useRecipeStore((state) => state.updateActiveRecipe);
   const setImageLoading = useRecipeStore((state) => state.setImageLoading);
   const activeRecipe = useRecipeStore((state) => state);
+
+  // Sync local servings with current servings when it changes
+  useEffect(() => {
+    setLocalServings(currentServings);
+  }, [currentServings]);
   
   const fastFacts = useMemo(() => {
     return [
@@ -462,11 +470,37 @@ Created with Flavr AI`;
           )}
         </div>
 
-        {/* Servings Display - No Interactive Controls */}
-        <div className="flex items-center justify-center">
-          <Badge variant="secondary" className="bg-orange-500/20 text-orange-200 px-4 py-2 text-lg border border-orange-400/30">
-            Serves {currentServings}
-          </Badge>
+        {/* Servings Slider */}
+        <div className="space-y-4">
+          <div className="text-center">
+            <Badge variant="secondary" className="bg-orange-500/20 text-orange-200 px-4 py-2 text-lg border border-orange-400/30">
+              Serves {localServings}
+            </Badge>
+          </div>
+          
+          <div className="max-w-xs mx-auto space-y-3">
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-slate-400 min-w-[20px]">1</span>
+              <Slider
+                value={[localServings]}
+                onValueChange={(value) => {
+                  const newServings = value[0];
+                  setLocalServings(newServings);
+                  if (onServingsChange) {
+                    onServingsChange(newServings);
+                  }
+                }}
+                min={1}
+                max={12}
+                step={1}
+                className="flex-1"
+              />
+              <span className="text-sm text-slate-400 min-w-[20px]">12</span>
+            </div>
+            <div className="text-center">
+              <span className="text-xs text-slate-500">Adjust servings to scale ingredients</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
