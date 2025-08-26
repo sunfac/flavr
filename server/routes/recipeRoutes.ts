@@ -685,4 +685,90 @@ Return a JSON object with this structure:
       res.status(500).json({ error: 'Failed to generate recipe' });
     }
   });
+
+  // Save recipe to user's cookbook
+  app.post("/api/save-recipe", async (req, res) => {
+    try {
+      console.log('💾 Saving recipe to cookbook...');
+      
+      // Check authentication
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      const { recipe } = req.body;
+
+      if (!recipe || !recipe.title || !recipe.ingredients || !recipe.instructions) {
+        return res.status(400).json({ error: 'Missing required recipe fields' });
+      }
+
+      // Prepare recipe data for database storage
+      const recipeData = {
+        userId: req.session.userId,
+        title: recipe.title,
+        description: recipe.description || '',
+        cookTime: recipe.cookTime || recipe.time || 30,
+        servings: recipe.servings || 4,
+        difficulty: recipe.difficulty || 'medium',
+        cuisine: recipe.cuisine || 'international',
+        mood: recipe.mood || recipe.vibe,
+        mode: recipe.mode || 'general',
+        ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : JSON.parse(recipe.ingredients || '[]'),
+        instructions: Array.isArray(recipe.instructions) ? recipe.instructions : JSON.parse(recipe.instructions || '[]'),
+        tips: recipe.tips || '',
+        imageUrl: recipe.imageUrl || recipe.image || null,
+        shoppingList: recipe.shoppingList || null,
+        originalPrompt: recipe.originalPrompt || '',
+        ambition: recipe.ambition,
+        dietary: recipe.dietary || [],
+        equipment: recipe.equipment || [],
+        budget: recipe.budget,
+        cookingTime: recipe.cookingTime,
+        quizData: recipe.quizData || {},
+        recipeText: recipe.recipeText || '',
+        isShared: false,
+        shareId: null
+      };
+
+      // Save recipe to database
+      const savedRecipe = await storage.createRecipe(recipeData);
+      console.log('✅ Recipe saved to database with ID:', savedRecipe.id);
+
+      // If there's an external image URL (like from DALL-E), download and store it locally
+      if (recipe.imageUrl && recipe.imageUrl.startsWith('http')) {
+        console.log('📥 Processing external image URL for local storage...');
+        const localImagePath = await ImageStorage.downloadAndStoreImage(recipe.imageUrl, savedRecipe.id);
+        
+        if (localImagePath) {
+          console.log('✅ Image downloaded and stored locally:', localImagePath);
+          // Update the recipe with the local image path
+          await storage.updateRecipe(savedRecipe.id, { imageUrl: localImagePath });
+          console.log('✅ Recipe updated with local image path');
+        }
+      } else if (!recipe.imageUrl) {
+        // Generate a new image for the saved recipe
+        console.log('🎨 Generating new image for saved recipe...');
+        const imageUrl = await generateRecipeImage(recipe.title, recipe.cuisine || 'international', savedRecipe.id);
+        
+        if (imageUrl) {
+          console.log('✅ New image generated and stored:', imageUrl);
+          // Update the recipe with the new image path
+          await storage.updateRecipe(savedRecipe.id, { imageUrl });
+          console.log('✅ Recipe updated with generated image');
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        recipeId: savedRecipe.id,
+        message: 'Recipe saved to your cookbook successfully'
+      });
+
+    } catch (error: any) {
+      console.error('❌ Failed to save recipe:', error);
+      res.status(500).json({ 
+        error: error.message || 'Failed to save recipe to cookbook' 
+      });
+    }
+  });
 }
