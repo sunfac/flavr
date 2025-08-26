@@ -428,9 +428,9 @@ USER CONTEXT:
 RECIPE REQUIREMENTS:
 - Create ONE original recipe fully reflecting the packs and authenticity constraints.
 - Use supermarket-available ingredients; pantry items allowed but not dominant.
-- Ingredient-count policy: target ${dynamicTargetRange}, but exceed if needed for flavour/authenticity.
+- Ingredient-count policy: target ${dynamicTargetRange}, but prioritize flavor development - include herbs, spices, acids, and aromatics for complex flavor profiles.
 - Steps must be short, imperative, and test-kitchen clear.
-- Provide finishing_touches and 2–4 flavour_boosts aligned to the packs.
+- Provide finishing_touches and 3–6 flavour_boosts aligned to the packs for maximum flavor development.
 - Include 1-3 side dishes that complement the main dish for a complete meal experience.
 - Respect must-use and avoid strictly. Honour time_budget; if impossible, set realistic total and note it in style_notes.
 - Title must be cookbook-style: 4–10 words with plain-English descriptors (e.g., "pan-seared", "crispy", "herb-lifted"). No chef-science jargon.
@@ -452,8 +452,8 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     { "step": 1, "instruction": "Concise imperative step.", "why_it_matters": "Optional 1-line rationale." },
     { "step": "final", "instruction": "Plate dish with garnish, suggest appropriate sides/accompaniments, and serve immediately.", "why_it_matters": "Complete meal presentation and pairing guidance." }
   ],
-  "finishing_touches": ["…"],
-  "flavour_boosts": ["…"],
+  "finishing_touches": ["Fresh herb finish", "Aromatic oil drizzle", "Citrus brightness"],
+  "flavour_boosts": ["Season generously at each stage", "Build umami with quality ingredients", "Layer acids and fats", "Toast spices before using", "Finish with fresh herbs", "Balance with citrus or vinegar"],
   "make_ahead_leftovers": "1–2 sentences",
   "allergens": ["…"],
   "nutrition_note": "Optional 1–2 sentences",
