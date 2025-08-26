@@ -125,11 +125,73 @@ export default function HeaderSection({
   const [location, navigate] = useLocation();
   const [isRerolling, setIsRerolling] = useState(false);
   const [localServings, setLocalServings] = useState(currentServings);
+  const [currentImage, setCurrentImage] = useState(recipe.image);
   const { toast } = useToast();
   const generationParams = useRecipeStore((state) => state.generationParams);
   const updateActiveRecipe = useRecipeStore((state) => state.updateActiveRecipe);
   const setImageLoading = useRecipeStore((state) => state.setImageLoading);
   const activeRecipe = useRecipeStore((state) => state);
+  
+  // Poll for image updates if recipe has tempId but no image
+  useEffect(() => {
+    const tempId = (recipe as any).tempId;
+    if (tempId && !currentImage) {
+      let pollCount = 0;
+      const maxPolls = 30; // Poll for up to 30 seconds
+      
+      const pollForImage = () => {
+        pollCount++;
+        console.log(`🔍 Polling for image update ${pollCount}/${maxPolls} for tempId: ${tempId}`);
+        
+        apiRequest("GET", `/api/recipe-update/${tempId}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.hasImage && data.imageUrl) {
+              console.log('✅ Image URL received from polling:', data.imageUrl);
+              setCurrentImage(data.imageUrl);
+              setImageLoading(false);
+              
+              // Update the recipe store with the image
+              const recipeStore = useRecipeStore.getState();
+              if (recipeStore.id === (recipe as any).id || recipeStore.meta.title === recipe.title) {
+                useRecipeStore.setState({
+                  ...recipeStore,
+                  meta: {
+                    ...recipeStore.meta,
+                    image: data.imageUrl
+                  }
+                });
+              }
+            } else if (pollCount < maxPolls) {
+              // Continue polling
+              setTimeout(pollForImage, 1000);
+            } else {
+              console.log('⏰ Stopped polling for image - max attempts reached');
+              setImageLoading(false);
+            }
+          })
+          .catch(error => {
+            console.error('Error polling for image:', error);
+            if (pollCount < maxPolls) {
+              setTimeout(pollForImage, 2000); // Longer delay on error
+            } else {
+              setImageLoading(false);
+            }
+          });
+      };
+      
+      // Start polling after a short delay
+      setImageLoading(true);
+      setTimeout(pollForImage, 2000);
+    }
+  }, [(recipe as any).tempId, currentImage]);
+  
+  // Update currentImage when recipe.image changes
+  useEffect(() => {
+    if (recipe.image && recipe.image !== currentImage) {
+      setCurrentImage(recipe.image);
+    }
+  }, [recipe.image]);
 
   // Sync local servings with current servings when it changes
   useEffect(() => {
@@ -300,16 +362,16 @@ Created with Flavr AI`;
       {/* Hero Image - Mobile First Design */}
       <div className="relative w-full">
         {/* Main Image Display */}
-        {recipe.image && !recipe.imageLoading ? (
+        {currentImage && !recipe.imageLoading ? (
           <div className="relative w-full aspect-[16/10] sm:aspect-video bg-gradient-to-br from-orange-400 to-orange-600 rounded-t-xl overflow-hidden">
             <img 
-              src={recipe.image} 
+              src={currentImage} 
               alt={recipe.title}
               className="w-full h-full object-cover"
               loading="eager"
               style={{ objectPosition: 'center' }}
               onLoad={() => {
-                console.log('✅ Image loaded successfully:', recipe.image);
+                console.log('✅ Image loaded successfully:', currentImage);
                 setImageLoading(false); // Clear loading state when image loads
                 // Scroll to absolute top after image loads
                 window.scrollTo(0, 0);
@@ -317,7 +379,7 @@ Created with Flavr AI`;
                 document.body.scrollTop = 0;
               }}
               onError={(e) => {
-                console.log('❌ Image failed to load:', recipe.image);
+                console.log('❌ Image failed to load:', currentImage);
                 setImageLoading(false); // Clear loading state on error
                 // Don't hide the image container, just show fallback
                 e.currentTarget.style.display = 'none';

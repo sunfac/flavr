@@ -639,16 +639,33 @@ Return a JSON object with this structure:
       // Increment usage counter after successful generation
       incrementUsageCounter(req).catch(err => console.error('Failed to increment usage:', err));
 
-      // Generate image in background and update recipe store
+      // Generate image in background and store in memory for retrieval
       // Create a temporary ID for chef assist recipes since they're not saved to database
       const tempRecipeId = Date.now();
+      recipe.tempId = tempRecipeId; // Add temp ID for tracking
+      
       generateRecipeImage(recipe.title, recipe.cuisine, tempRecipeId).then(imageUrl => {
         if (imageUrl) {
           console.log('🎨 Background image generated for GPT-5 Chef Assist:', recipe.title);
           console.log(`📸 Recipe image URL stored: ${imageUrl}`);
-          // Immediately update the recipe response to include the image
-          recipe.image = imageUrl;
-          recipe.imageUrl = imageUrl;
+          
+          // Store in a simple in-memory cache with the temp ID
+          if (!global.recipeImageCache) global.recipeImageCache = new Map();
+          global.recipeImageCache.set(tempRecipeId.toString(), {
+            imageUrl,
+            recipe: { ...recipe, image: imageUrl, imageUrl },
+            timestamp: Date.now()
+          });
+          
+          // Clean up old entries (older than 1 hour)
+          const oneHour = 60 * 60 * 1000;
+          for (const [key, value] of global.recipeImageCache.entries()) {
+            if (Date.now() - (value as any).timestamp > oneHour) {
+              global.recipeImageCache.delete(key);
+            }
+          }
+          
+          console.log(`📦 Recipe with image cached for tempId: ${tempRecipeId}`);
         }
       }).catch(err => console.error('Background image generation failed:', err));
 
@@ -769,6 +786,34 @@ Return a JSON object with this structure:
       res.status(500).json({ 
         error: error.message || 'Failed to save recipe to cookbook' 
       });
+    }
+  });
+
+  // Get updated recipe data (mainly for checking if images are ready)
+  app.get("/api/recipe-update/:tempId", (req, res) => {
+    try {
+      const { tempId } = req.params;
+      
+      if (!global.recipeImageCache) {
+        global.recipeImageCache = new Map();
+      }
+      
+      const cachedData = global.recipeImageCache.get(tempId);
+      
+      if (cachedData && (cachedData as any).imageUrl) {
+        console.log(`📸 Image ready for tempId ${tempId}: ${(cachedData as any).imageUrl}`);
+        res.json({ 
+          hasImage: true, 
+          imageUrl: (cachedData as any).imageUrl,
+          recipe: (cachedData as any).recipe 
+        });
+      } else {
+        console.log(`⏳ Image not ready yet for tempId ${tempId}`);
+        res.json({ hasImage: false });
+      }
+    } catch (error) {
+      console.error('Error checking recipe update:', error);
+      res.status(500).json({ error: 'Failed to check recipe update' });
     }
   });
 }
