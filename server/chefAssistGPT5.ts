@@ -537,7 +537,25 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
       }
 
       console.log("Content length:", content.length);
-      const recipe = JSON.parse(content);
+      
+      // Clean up any bad control characters before parsing
+      content = content.replace(/[\x00-\x1F\x7F-\x9F]/g, ' ');
+      
+      // Try to parse the recipe
+      let recipe;
+      try {
+        recipe = JSON.parse(content);
+      } catch (parseError) {
+        console.error("JSON parse error, attempting to fix:", parseError);
+        // Try to fix common JSON issues
+        content = content
+          .replace(/,\s*}/g, '}') // Remove trailing commas
+          .replace(/,\s*]/g, ']') // Remove trailing commas in arrays
+          .replace(/\n/g, ' ') // Replace newlines with spaces
+          .replace(/\t/g, ' '); // Replace tabs with spaces
+        
+        recipe = JSON.parse(content);
+      }
       console.log("Recipe parsed successfully");
       
       // Authenticity sense check
@@ -574,12 +592,20 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
   static async validateRecipeAuthenticity(recipe: any): Promise<{isAuthentic: boolean, issues: string[]}> {
     const issues: string[] = [];
     
-    // Expanded chef style validation to match your requested list
+    // Expanded chef style validation with comprehensive UK chef list
     const establishedChefs = [
       "Rick Stein", "Jamie Oliver", "Tom Kerridge", "James Martin", "Mary Berry", 
       "Delia Smith", "Marcus Wareing", "Gordon Ramsay", "Georgina Hayden", 
       "Jose Pizarro", "Nieves Barragan", "Jesse Jenkins", "Dishoom", 
-      "Yotam Ottolenghi", "Olia Hercules"
+      "Yotam Ottolenghi", "Olia Hercules", "Nigella Lawson", "Hugh Fearnley-Whittingstall",
+      "Marco Pierre White", "Heston Blumenthal", "Michel Roux Jr", "Angela Hartnett",
+      "Paul Hollywood", "Nadiya Hussain", "Ainsley Harriott", "Gino D'Acampo",
+      "Phil Vickery", "John Torode", "Gregg Wallace", "Gary Rhodes", "Keith Floyd",
+      "Ken Hom", "Madhur Jaffrey", "Prue Leith", "Raymond Blanc", "Antonio Carluccio",
+      "Giorgio Locatelli", "Francesco Mazzei", "Atul Kochhar", "Vivek Singh",
+      "Jun Tanaka", "Monica Galetti", "Clare Smyth", "Nathan Outlaw", "Josh Eggleton",
+      "Anna Hansen", "Sat Bains", "Simon Rogan", "Tommy Banks", "Roberta Hall McCarron",
+      "Lisa Goodwin-Allen", "Adam Handling", "Aktar Islam"
     ];
     
     // Check title authenticity - expanded blocklist
@@ -714,14 +740,19 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
 
     const systemMessage = `Create appealing recipe titles that draw inspiration from famous chefs, renowned restaurants, or authentic world cuisine. Add brief descriptions for dishes that might be unfamiliar to home cooks.`;
 
-    // Determine inspiration type based on seed - weighted toward chef/restaurant
-    // 0-2: Chef inspiration (60% weight)
-    // 3-4: Restaurant inspiration (40% weight)
-    // 5: Regional cuisine (rare fallback)
-    const inspirationType = seededRandom(rngSeed, 6);
+    // Enhanced variety with better distribution across categories
+    // Add more entropy to prevent repetition
+    const timeBasedSeed = Date.now() % 1000;
+    const varietySeed = rngSeed + timeBasedSeed + Math.floor(Math.random() * 500);
+    
+    // Determine inspiration type based on seed - better distribution
+    // 0-3: Chef inspiration (40% weight)
+    // 4-6: Restaurant inspiration (35% weight)  
+    // 7-9: Regional cuisine (25% weight)
+    const inspirationType = seededRandom(varietySeed, 10);
     
     let inspirationPrompt = "";
-    if (inspirationType <= 2) {
+    if (inspirationType <= 3) {
       // Famous chef dishes and cookbook classics
       inspirationPrompt = `Create a recipe title inspired by famous chefs, iconic cookbooks, or signature restaurant dishes from renowned establishments.
 
@@ -729,10 +760,55 @@ IMPORTANT: Always use "inspired by" language - never claim these are the actual 
 
 FORMAT: Simple titles without descriptions in parentheses - "Chef Name-Inspired Dish Name" only.
 
-WORLD-FAMOUS CHEF INSPIRATION:
+UK & WORLD-FAMOUS CHEF INSPIRATION (use variety based on seed ${varietySeed}):
+
+UK CELEBRITY CHEFS (prioritize these):
 - Gordon Ramsay's signature dishes (Beef Wellington, Hell's Kitchen favorites)
 - Jamie Oliver's accessible classics (15-minute meals, comfort food)
-- Nigella Lawson's indulgent comfort dishes
+- Nigella Lawson's indulgent comfort dishes  
+- Mary Berry's beloved bakes and traditional British fare
+- Tom Kerridge's pub-style comfort food
+- Rick Stein's seafood specialties
+- Delia Smith's foolproof classics
+- James Martin's hearty British fare
+- Hugh Fearnley-Whittingstall's sustainable cooking
+- Marco Pierre White's refined classics
+- Heston Blumenthal's innovative British cuisine
+- Michel Roux Jr's French classics
+- Angela Hartnett's Italian-inspired dishes
+- Paul Hollywood's artisan breads and bakes
+- Nadiya Hussain's comforting bakes and British-Bangladeshi fusion
+- Ainsley Harriott's Caribbean-British favorites
+- Gino D'Acampo's authentic Italian passion
+- Phil Vickery's proper British cooking
+- John Torode's Australian-British fusion
+- Gregg Wallace's working-class favorites
+- Gary Rhodes' refined British classics
+- Keith Floyd's wine-paired adventures
+- Ken Hom's authentic Chinese techniques
+- Madhur Jaffrey's traditional Indian home cooking
+- Prue Leith's classic techniques
+- Raymond Blanc's French countryside cuisine
+- Antonio Carluccio's rustic Italian
+- Giorgio Locatelli's regional Italian mastery
+- Francesco Mazzei's southern Italian specialties
+- Atul Kochhar's modern Indian fine dining
+- Vivek Singh's innovative Indian cuisine
+- Jun Tanaka's French-Japanese fusion
+- Monica Galetti's Samoan-French fusion
+- Clare Smyth's three-Michelin-star perfection
+- Nathan Outlaw's Cornish seafood mastery
+- Josh Eggleton's seasonal British cooking
+- Anna Hansen's global fusion dishes
+- Sat Bains's innovative contemporary cuisine
+- Simon Rogan's farm-to-fork philosophy
+- Tommy Banks's Yorkshire ingredients focus
+- Roberta Hall McCarron's Scottish modern cooking
+- Lisa Goodwin-Allen's artistic presentations
+- Adam Handling's waste-conscious cooking
+- Aktar Islam's modern Indian cuisine
+
+INTERNATIONAL CHEFS (for variety):
 - Julia Child's French cooking fundamentals
 - Anthony Bourdain's global street food
 - Thomas Keller's precision cooking
@@ -741,39 +817,11 @@ WORLD-FAMOUS CHEF INSPIRATION:
 - David Chang's Korean-American innovations
 - Ferran Adrià's avant-garde Spanish dishes
 - Massimo Bottura's Italian innovation
-- Rick Stein's seafood specialties
-- Mary Berry's beloved bakes and traditional British fare
-- Tom Kerridge's pub-style comfort food
-- Marcus Wareing's refined modern European
-- Delia Smith's foolproof classics
-- James Martin's hearty British fare
-- Hugh Fearnley-Whittingstall's sustainable cooking
-- Marco Pierre White's refined classics
-- Heston Blumenthal's innovative molecular gastronomy
-- Michel Roux Jr's French classics
-- Angela Hartnett's Italian-inspired dishes
-- Paul Hollywood's artisan breads and bakes
 - Wolfgang Puck's California cuisine
 - Emeril Lagasse's Creole and Cajun specialties
 - Alice Waters' farm-to-table philosophy
 - Nobu Matsuhisa's Japanese-Peruvian fusion
 - Daniel Boulud's French-American fusion
-- April Bloomfield's British gastropub fare
-- Stephanie Izard's global flavors
-- Paul Ainsworth's modern British cuisine
-- Nieves Barragán Mohacho's Spanish tapas
-- Nathan Outlaw's Cornish seafood mastery
-- Josh Eggleton's seasonal British cooking
-- Anna Hansen's global fusion dishes
-- Marcus Wareing's refined modern European
-- Sat Bains's innovative contemporary cuisine
-- Simon Rogan's farm-to-fork philosophy
-- Tommy Banks's Yorkshire ingredients focus
-- Roberta Hall McCarron's Scottish modern cooking
-- Lisa Goodwin-Allen's artistic presentations
-- Adam Handling's waste-conscious cooking
-- Aktar Islam's modern Indian cuisine
-- Endo Kazutoshi's sushi perfection
 - Asma Khan's home-style Indian cooking
 - Chantelle Nicholson's plant-forward cuisine
 - Jeremy Lee's seasonal British classics
@@ -807,7 +855,7 @@ EXAMPLES:
 - "Marcus Wareing-Inspired Beef Short Rib with Bone Marrow"
 - "Asma Khan-Inspired Hyderabadi Biryani"
 - "René Redzepi-Inspired Fermented Mushroom Broth"`;
-    } else if (inspirationType <= 4) {
+    } else if (inspirationType <= 6) {
       // London restaurant inspired
       inspirationPrompt = `Create a recipe title inspired by famous dishes from London's best restaurants and eateries.
 
