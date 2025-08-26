@@ -220,7 +220,7 @@ async function generateRecipeImage(recipeTitle: string, cuisine: string, recipeI
       '' : 
       'Show prepared, portioned pieces (fillets, cuts, portions) rather than whole animals. Focus on the cooked, plated dish as served.';
     
-    const imagePrompt = `Professional commercial food photography of ${recipeTitle}, ${cuisine} cuisine, M&S Marks & Spencer style photoshoot, premium quality, studio lighting, elegant styling, sophisticated presentation, high-end retail food photography, appetizing and luxurious, clean modern aesthetic, professional food styling, commercial grade image quality, 45-degree angle view. ${animalGuidance} Refined, upmarket presentation with attention to visual appeal and commercial polish.`;
+    const imagePrompt = `Photorealistic commercial food photography of ${recipeTitle}, ${cuisine} cuisine, M&S Marks & Spencer style, professional studio lighting, ultra-realistic detail, high-definition food photography, commercial quality, appetizing and luxurious presentation, clean modern aesthetic, professional food styling, photographic realism, 45-degree angle view. ${animalGuidance} Ultra-realistic, highly detailed, photographic quality with sharp focus and natural textures.`;
     
     const response = await openai.images.generate({
       model: "dall-e-3",

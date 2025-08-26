@@ -540,9 +540,17 @@ function EnhancedRecipeCard({
           }}
           currentServings={activeServings}
           onServingsChange={(newServings) => {
-            // Note: HeaderSection slider was removed to prevent infinite loops
-            // Servings are now managed through the recipe store only
-            recipeActions.updateServings(newServings);
+            console.log('🔄 Servings changed to:', newServings);
+            
+            // Update the recipe store immediately for live ingredient scaling
+            const currentStore = useRecipeStore.getState();
+            if (currentStore.id === recipe.id) {
+              useRecipeStore.setState({
+                ...currentStore,
+                servings: newServings
+              });
+              console.log('✅ Recipe store updated with new servings:', newServings);
+            }
           }}
         />
 
