@@ -746,26 +746,32 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const uniqueCounter = Math.floor(Math.random() * 10000);
     const varietySeed = (rngSeed + timeBasedSeed + uniqueCounter) % 1000000;
     
-    // Force different selection each time by using time-based modulo
-    const forceVariety = Date.now() % 3;
+    // Equal likelihood for all three categories (33.33% each)
+    const categoryRandom = Math.floor(Math.random() * 3);
     
-    // Determine inspiration type based on seed - better distribution
-    // Force rotation between categories to prevent repetition
+    // Determine inspiration type based on pure random selection for equal distribution
     let inspirationType;
-    if (forceVariety === 0) {
-      inspirationType = seededRandom(varietySeed, 4); // 0-3: Chef (forced)
-    } else if (forceVariety === 1) {
-      inspirationType = 4 + seededRandom(varietySeed, 3); // 4-6: Restaurant (forced)
+    if (categoryRandom === 0) {
+      inspirationType = seededRandom(varietySeed, 4); // 0-3: Chef
+    } else if (categoryRandom === 1) {
+      inspirationType = 4 + seededRandom(varietySeed, 3); // 4-6: Restaurant
     } else {
-      inspirationType = 7 + seededRandom(varietySeed, 3); // 7-9: Regional (forced)
+      inspirationType = 7 + seededRandom(varietySeed, 3); // 7-9: Regional
     }
     
     let inspirationPrompt = "";
     if (inspirationType <= 3) {
-      // Famous chef dishes and cookbook classics
-      // Add variety by selecting different chef groups
-      const chefGroup = seededRandom(varietySeed + 1000, 3);
-      const chefFocus = chefGroup === 0 ? "UK celebrity chefs" : chefGroup === 1 ? "international master chefs" : "rising star chefs";
+      // Famous chef dishes and cookbook classics - equal likelihood for all chefs
+      // Select individual chefs rather than groups for better distribution
+      const allChefs = [
+        "Gordon Ramsay", "Jamie Oliver", "Nigella Lawson", "Mary Berry", "Tom Kerridge", 
+        "Rick Stein", "Delia Smith", "James Martin", "Hugh Fearnley-Whittingstall", 
+        "Marco Pierre White", "Heston Blumenthal", "Michel Roux Jr", "Angela Hartnett",
+        "Paul Hollywood", "Nadiya Hussain", "Ainsley Harriott", "Gino D'Acampo",
+        "Yotam Ottolenghi", "José Andrés", "Julia Child", "Thomas Keller", "David Chang"
+      ];
+      const selectedChef = allChefs[seededRandom(varietySeed + 1000, allChefs.length)];
+      const chefFocus = selectedChef;
       
       inspirationPrompt = `Create a recipe title inspired by ${chefFocus}, focusing on their signature dishes that maximize flavor through professional techniques.
 
@@ -1176,13 +1182,14 @@ OUTPUT: JSON with "title" key only. Make it sophisticated and flavor-packed.`;
       // Remove any descriptions or explanations after dashes/colons
       title = title.split(' - ')[0].split(' : ')[0].split(': ')[0];
       
-      // Add brief explanation for potentially unfamiliar dishes
+      // Add brief explanation for potentially unfamiliar dishes in brackets
       const explanation = getRecipeExplanation(title);
       
-      return { 
-        title,
-        ...(explanation && { description: explanation })
-      };
+      if (explanation) {
+        title = `${title} (${explanation})`;
+      }
+      
+      return { title };
       
     } catch (error) {
       console.error("GPT-5 Inspire error:", error);
