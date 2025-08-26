@@ -155,10 +155,46 @@ function EnhancedRecipeCard({
     return () => window.removeEventListener('recipe-updated', handleRecipeUpdate as EventListener);
   }, [toast, recipe.id]);
 
+  // Initialize recipe store on mount if not already active
+  useEffect(() => {
+    // Only initialize if store is empty or has different recipe
+    if (!recipeStore.id || recipeStore.id !== recipe.id) {
+      recipeActions.replaceRecipe({
+        id: recipe.id,
+        servings: recipe.servings,
+        ingredients: recipe.ingredients.map((text: string, index: number) => ({
+          id: `ingredient-${index}`,
+          text,
+          checked: false
+        })),
+        steps: recipe.instructions.map((instruction: string, index: number) => ({
+          id: `step-${index}`,
+          title: `Step ${index + 1}`,
+          description: instruction,
+          duration: 0
+        })),
+        meta: {
+          title: recipe.title,
+          cookTime: recipe.cookTime,
+          difficulty: recipe.difficulty,
+          cuisine: recipe.cuisine,
+          description: recipe.description,
+          image: recipe.image
+        },
+        currentStep: 0,
+        completedSteps: [],
+        lastUpdated: Date.now()
+      });
+    }
+  }, [recipe.id]); // Only re-run if recipe ID changes
+
   // Sync servings from store without causing infinite loops
   const activeServings = useMemo(() => {
-    const isStoreActive = recipeStore.id === recipe.id && recipeStore.servings > 0;
-    return isStoreActive ? recipeStore.servings : recipe.servings;
+    // Always use store servings if store is initialized with this recipe
+    if (recipeStore.id === recipe.id && recipeStore.servings > 0) {
+      return recipeStore.servings;
+    }
+    return recipe.servings;
   }, [recipeStore.id, recipe.id, recipeStore.servings, recipe.servings]);
 
   // Use updated data from store if available, otherwise fall back to original
