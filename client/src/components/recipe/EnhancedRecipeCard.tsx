@@ -243,10 +243,13 @@ function EnhancedRecipeCard({
   // Scale ingredients based on serving adjustments
   // Always use original recipe servings from the initial recipe prop, not store modifications
   const originalServings = useMemo(() => {
-    // The recipe prop always contains the original/baseline servings from generation
-    // Don't use store servings as they change during interactions
-    return recipe.servings || 4;
-  }, [recipe.servings]); // Only depend on recipe.servings, not store
+    // Get original servings from meta if available, otherwise from recipe prop
+    // This ensures we always have the true baseline, even after store updates
+    const metaOriginal = recipeStore.id === recipe.id ? recipeStore.meta?.originalServings : undefined;
+    const baseline = metaOriginal || recipe.servings || 4;
+    console.log('🎯 Original servings baseline:', baseline, 'from meta:', metaOriginal, 'from recipe:', recipe.servings);
+    return baseline;
+  }, [recipe.servings, recipeStore.id, recipe.id, recipeStore.meta?.originalServings]); // Don't depend on store servings
   
   const scaledIngredients = useScaledIngredients(
     recipe.ingredients, // Always use original ingredients, not activeIngredients which may be modified
