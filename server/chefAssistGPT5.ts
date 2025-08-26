@@ -450,7 +450,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
   ],
   "method": [
     { "step": 1, "instruction": "Concise imperative step.", "why_it_matters": "Optional 1-line rationale." },
-    { "step": "final", "instruction": "Plate dish with garnish and serve immediately.", "why_it_matters": "Presentation and timing." }
+    { "step": "final", "instruction": "Plate dish with garnish, suggest appropriate sides/accompaniments, and serve immediately.", "why_it_matters": "Complete meal presentation and pairing guidance." }
   ],
   "finishing_touches": ["…"],
   "flavour_boosts": ["…"],

@@ -241,15 +241,16 @@ function EnhancedRecipeCard({
 
 
   // Scale ingredients based on serving adjustments
-  // ALWAYS use the recipe.servings as the fixed baseline - this never changes
-  const originalServings = recipe.servings || 4;
+  // ALWAYS use 4 as the fixed baseline since all recipes are generated for 4 servings
+  const originalServings = 4; // Fixed baseline - all generated recipes are 4 servings
   
   console.log('🎯 SCALING DEBUG:', {
-    'Recipe servings (baseline)': recipe.servings,
-    'Store servings (current)': recipeStore.servings,
+    'Recipe servings (from prop)': recipe.servings,
+    'Store servings (current)': recipeStore.servings, 
     'Active servings (current)': activeServings,
-    'Fixed original for scaling': originalServings,
-    'Will use for scaling calc': originalServings + ' → ' + activeServings
+    'FIXED original baseline': originalServings,
+    'Will use for scaling calc': originalServings + ' → ' + activeServings,
+    'Expected scaling factor': activeServings / originalServings
   });
   
   const scaledIngredients = useScaledIngredients(
