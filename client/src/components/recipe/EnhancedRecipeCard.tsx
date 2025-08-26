@@ -159,6 +159,7 @@ function EnhancedRecipeCard({
   useEffect(() => {
     // Only initialize if store is empty or has different recipe
     if (!recipeStore.id || recipeStore.id !== recipe.id) {
+      console.log('🔄 Recipe Store: Initializing for new recipe', recipe.id, 'with servings:', recipe.servings);
       recipeActions.replaceRecipe({
         id: recipe.id,
         servings: recipe.servings, // Keep original servings as baseline
@@ -193,8 +194,10 @@ function EnhancedRecipeCard({
   const activeServings = useMemo(() => {
     // Always use store servings if store is initialized with this recipe
     if (recipeStore.id === recipe.id && recipeStore.servings > 0) {
+      console.log('🔄 Using store servings:', recipeStore.servings, 'for recipe', recipe.id);
       return recipeStore.servings;
     }
+    console.log('🔄 Using recipe servings:', recipe.servings, 'for recipe', recipe.id);
     return recipe.servings;
   }, [recipeStore.id, recipe.id, recipeStore.servings, recipe.servings]);
 
