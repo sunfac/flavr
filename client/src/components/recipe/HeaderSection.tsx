@@ -68,7 +68,7 @@ function SaveButton() {
         imageUrl: activeRecipe.meta.image || ''
       };
       
-      const response = await apiRequest("POST", "/api/save-recipe", recipeData);
+      const response = await apiRequest("POST", "/api/save-recipe", { recipe: recipeData });
       if (!response.ok) {
         throw new Error('Failed to save recipe');
       }

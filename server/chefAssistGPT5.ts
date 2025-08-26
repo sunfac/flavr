@@ -381,6 +381,9 @@ For ALL recipes, regardless of cuisine or simplicity level, incorporate sophisti
 - Explain how to build flavors in layers rather than just combining ingredients
 - Use professional terminology but explain it clearly for home cooks
 - Apply cuisine-specific sophisticated techniques from the list above based on the dish's origin
+- CRITICAL: Include ALL foundation ingredients - onions, garlic, ginger, celery, carrots for aromatics as appropriate to cuisine
+- ESSENTIAL: Don't skip flavor bases - stock/broth, wine, vinegars, citrus, fresh herbs, quality fats
+- MANDATORY: Include finishing elements - fresh herbs, good olive oil, citrus zest, flaky salt, cracked pepper
   - If outdoor grilling is implied but equipment/time suggests indoor, provide an oven/plancha alternative and note this in "style_notes".
 
 TIME & TECHNIQUE GUARDRAILS (seed adjustments):
@@ -428,7 +431,7 @@ USER CONTEXT:
 RECIPE REQUIREMENTS:
 - Create ONE original recipe fully reflecting the packs and authenticity constraints.
 - Use supermarket-available ingredients; pantry items allowed but not dominant.
-- Ingredient-count policy: target ${dynamicTargetRange}, but prioritize flavor development - include herbs, spices, acids, and aromatics for complex flavor profiles.
+- Ingredient-count policy: target ${dynamicTargetRange}, but prioritize COMPLETE flavor development - MUST include herbs, spices, acids, aromatics, and all essential components needed for the dish to reach its full potential. Don't cut corners on ingredients that build flavor layers.
 - Steps must be short, imperative, and test-kitchen clear.
 - Provide finishing_touches and 3–6 flavour_boosts aligned to the packs for maximum flavor development.
 - Include 1-3 side dishes that complement the main dish for a complete meal experience.
