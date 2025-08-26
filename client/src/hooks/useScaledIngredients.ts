@@ -12,12 +12,16 @@ export function useScaledIngredients(
   currentServings: number
 ): ScaledIngredient[] {
   return useMemo(() => {
+    console.log('🔍 SCALING INGREDIENTS:', { originalIngredients: originalIngredients?.length, originalServings, currentServings });
+    
     // Handle invalid inputs gracefully
     if (!originalIngredients || !Array.isArray(originalIngredients)) {
+      console.log('❌ No original ingredients or not an array');
       return [];
     }
     
     if (!originalServings || originalServings <= 0 || !currentServings || currentServings <= 0) {
+      console.log('❌ Invalid servings, returning unscaled ingredients');
       return originalIngredients.map((ingredient, index) => ({
         id: `ingredient-${index}`,
         text: ingredient || '',
@@ -26,12 +30,19 @@ export function useScaledIngredients(
     }
     
     const scalingFactor = currentServings / originalServings;
+    console.log('✅ Scaling factor:', scalingFactor);
     
-    return originalIngredients.map((ingredient, index) => ({
-      id: `ingredient-${index}`,
-      text: scaleIngredientText(ingredient, scalingFactor),
-      checked: false
-    }));
+    const scaledIngredients = originalIngredients.map((ingredient, index) => {
+      const scaledText = scaleIngredientText(ingredient, scalingFactor);
+      console.log(`📝 Scaled: "${ingredient}" → "${scaledText}"`);
+      return {
+        id: `ingredient-${index}`,
+        text: scaledText,
+        checked: false
+      };
+    });
+    
+    return scaledIngredients;
   }, [originalIngredients, originalServings, currentServings]);
 }
 

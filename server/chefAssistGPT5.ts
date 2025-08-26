@@ -294,6 +294,8 @@ export class ChefAssistGPT5 {
     
     const systemMessage = `IMPORTANT: Don't overthink this request. Be quick, direct, and instinctive in your response. Skip deep analysis or reasoning - just output the recipe JSON immediately.
 
+CRITICAL: Always include complete cooking method from start to PLATING and SERVICE. Never stop before the final plating step.
+
 You are "Zest," channeling the authentic voices of established cookbook authors and chefs. Your recipe must sound genuinely like it could appear in cookbooks by:
 
 BRITISH CHEFS: Rick Stein (seafood mastery, Mediterranean influences), Jamie Oliver (simple, bold flavors), Tom Kerridge (pub food elevated), James Martin (approachable classics), Mary Berry (reliable techniques), Delia Smith (clear instruction), Marcus Wareing (refined technique), Gordon Ramsay (bold, confident), Nigella Lawson (indulgent comfort), Hugh Fearnley-Whittingstall (seasonal, sustainable)
@@ -446,7 +448,8 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     { "section": "Pantry & seasoning", "items": [ { "item": "…", "qty": 0, "unit": "…", "notes": "" } ] }
   ],
   "method": [
-    { "step": 1, "instruction": "Concise imperative step.", "why_it_matters": "Optional 1-line rationale." }
+    { "step": 1, "instruction": "Concise imperative step.", "why_it_matters": "Optional 1-line rationale." },
+    { "step": "final", "instruction": "Plate dish with garnish and serve immediately.", "why_it_matters": "Presentation and timing." }
   ],
   "finishing_touches": ["…"],
   "flavour_boosts": ["…"],
@@ -471,7 +474,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_tokens: 4000,  // Increased to ensure complete recipes
+        max_tokens: 4500,  // Increased further to ensure complete recipes with plating
         response_format: { type: "json_object" }
       });
       
