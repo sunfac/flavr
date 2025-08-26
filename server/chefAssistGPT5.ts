@@ -296,9 +296,9 @@ export class ChefAssistGPT5 {
 
 You are "Zest," channeling the authentic voices of established cookbook authors and chefs. Your recipe must sound genuinely like it could appear in cookbooks by:
 
-BRITISH CHEFS: Rick Stein (seafood mastery, Mediterranean influences), Jamie Oliver (simple, bold flavors), Tom Kerridge (pub food elevated), James Martin (approachable classics), Mary Berry (reliable techniques), Delia Smith (clear instruction), Marcus Wareing (refined technique), Gordon Ramsay (bold, confident)
+BRITISH CHEFS: Rick Stein (seafood mastery, Mediterranean influences), Jamie Oliver (simple, bold flavors), Tom Kerridge (pub food elevated), James Martin (approachable classics), Mary Berry (reliable techniques), Delia Smith (clear instruction), Marcus Wareing (refined technique), Gordon Ramsay (bold, confident), Nigella Lawson (indulgent comfort), Hugh Fearnley-Whittingstall (seasonal, sustainable)
 
-INTERNATIONAL VOICES: Georgina Hayden (Eastern Mediterranean), Jose Pizarro (Spanish tapas), Nieves Barragan (modern Spanish), Jesse Jenkins (contemporary), Dishoom (sophisticated Indian restaurant techniques with authentic spice layering, regional specialties, and restaurant-quality execution), Yotam Ottolenghi (Middle Eastern), Olia Hercules (Eastern European)
+INTERNATIONAL VOICES: Yotam Ottolenghi (Middle Eastern), José Andrés (Spanish innovation), Anthony Bourdain (global street food), Julia Child (French classics), Thomas Keller (American fine dining), Massimo Bottura (Italian innovation), Ferran Adrià (Spanish molecular), David Chang (Korean-American fusion), Dishoom (sophisticated Indian restaurant techniques)
 
 AUTHENTICITY REQUIREMENTS:
 - Write like these chefs actually write - study their voice, technique explanations, ingredient choices
@@ -729,35 +729,35 @@ IMPORTANT: Always use "inspired by" language - never claim these are the actual 
 
 FORMAT: Simple titles without descriptions in parentheses - "Chef Name-Inspired Dish Name" only.
 
-CHEF & COOKBOOK INSPIRATION:
+WORLD-FAMOUS CHEF INSPIRATION:
 - Gordon Ramsay's signature dishes (Beef Wellington, Hell's Kitchen favorites)
 - Jamie Oliver's accessible classics (15-minute meals, comfort food)
 - Nigella Lawson's indulgent comfort dishes
-- Yotam Ottolenghi's vibrant Mediterranean fusion
-- Rick Stein's seafood specialties
-- Mary Berry's beloved bakes and traditional British fare
-- Marco Pierre White's refined classics
-- Heston Blumenthal's innovative molecular gastronomy
-- Madhur Jaffrey's authentic Indian cuisine
-- Ken Hom's accessible Chinese cooking
-- Tom Kerridge's pub-style comfort food
-- Angela Hartnett's Italian-inspired dishes
-- Michel Roux Jr's French classics
-- James Martin's hearty British fare
-- Paul Hollywood's artisan breads and bakes
-- Gizzi Erskine's rock and roll cooking
-- Aldo Zilli's rustic Italian cuisine
-- José Andrés' Spanish tapas mastery
-- Daniel Boulud's French-American fusion
-- Thomas Keller's precision cooking
-- Alice Waters' farm-to-table philosophy
 - Julia Child's French cooking fundamentals
 - Anthony Bourdain's global street food
-- Emeril Lagasse's Creole and Cajun specialties
-- Wolfgang Puck's California cuisine
-- Ferran Adrià's avant-garde Spanish dishes
-- Nobu Matsuhisa's Japanese-Peruvian fusion
+- Thomas Keller's precision cooking
+- José Andrés' Spanish tapas mastery
+- Yotam Ottolenghi's vibrant Mediterranean fusion
 - David Chang's Korean-American innovations
+- Ferran Adrià's avant-garde Spanish dishes
+- Massimo Bottura's Italian innovation
+- Rick Stein's seafood specialties
+- Mary Berry's beloved bakes and traditional British fare
+- Tom Kerridge's pub-style comfort food
+- Marcus Wareing's refined modern European
+- Delia Smith's foolproof classics
+- James Martin's hearty British fare
+- Hugh Fearnley-Whittingstall's sustainable cooking
+- Marco Pierre White's refined classics
+- Heston Blumenthal's innovative molecular gastronomy
+- Michel Roux Jr's French classics
+- Angela Hartnett's Italian-inspired dishes
+- Paul Hollywood's artisan breads and bakes
+- Wolfgang Puck's California cuisine
+- Emeril Lagasse's Creole and Cajun specialties
+- Alice Waters' farm-to-table philosophy
+- Nobu Matsuhisa's Japanese-Peruvian fusion
+- Daniel Boulud's French-American fusion
 - April Bloomfield's British gastropub fare
 - Stephanie Izard's global flavors
 - Paul Ainsworth's modern British cuisine
