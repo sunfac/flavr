@@ -911,6 +911,175 @@ IMPORTANT:
   * Rich sauces, reductions, compound butters
 FORMAT: Simple titles - "${selectedRestaurant}-Inspired Dish Name" only.`;
     } else {
+- Duck & Waffle's signature brunch dishes
+- Chiltern Firehouse's glamorous comfort food
+- St. John's nose-to-tail British classics
+- Bao's Taiwanese steamed buns
+- Kiln's Thai street food
+- Hoppers' Sri Lankan hoppers and curries
+- Brat's wood-fired British cooking
+- Lyle's modern British seasonal dishes
+- Noble Rot's wine bar gastropub fare
+- The Clove Club's innovative British cuisine
+- Roka's Japanese robatayaki grills
+- Zuma's contemporary Japanese dining
+- Dinings SW3's Japanese-European fusion
+- Lima's Peruvian Nikkei cuisine
+- Temper's whole animal barbecue
+- Smoking Goat's Thai bar food
+- Ikoyi's West African spice-led cooking
+- The Ledbury's modern European fine dining
+- Pollen Street Social's Jason Atherton classics
+- Dinner by Heston's historical British dishes
+- Core by Clare Smyth's refined British cooking
+- Trinity's Clapham neighborhood gem
+- Petersham Nurseries' farm-to-table Italian
+- Hide's Mayfair multi-level dining
+- Aqua Shard's contemporary British cuisine
+- Galvin La Chapelle's classic French bistro
+- Rules' traditional game and British classics
+- Simpson's in the Strand's roast beef trolley
+- Sweetings' Victorian fish restaurant classics
+- Sabor's authentic Spanish regional cuisine
+- José's Andalusian tapas bar specialties
+- Quo Vadis's modern British heritage cooking
+- Bentley's Oyster Bar & Grill's seafood classics
+- Scott's Mayfair's sophisticated fish dishes
+- 34 Mayfair's premium steakhouse cuts
+- CUT at 45 Park Lane's Wolfgang Puck steaks
+- Goodman's dry-aged beef specialists
+- Flat Iron's simple steak perfection
+- Blacklock's Sunday roasts and chops
+- Quality Chop House's working class eating
+- Rochelle Canteen's simple seasonal British
+- Towpath Café's canal-side brunch gems
+- E Pellicci's traditional East End café
+- Regency Café's proper British breakfast
+- The Breakfast Club's all-day comfort food
+- Monmouth Coffee's artisan roasts
+- Princi's Italian bakery and deli
+- Konditor & Cook's artistic cakes
+- Fortnum & Mason's afternoon tea service
+- Claridge's traditional afternoon tea
+- The Ritz's palm court tea service
+- Savoy Grill's classic British fine dining
+- River Café's rustic Italian riverside
+- Zucca's inventive Italian small plates
+- Bancone's fresh pasta specialists
+- Cecconi's Mayfair's Northern Italian elegance
+- Murano's Angela Hartnett's refined Italian
+- Locanda Locatelli's Giorgio's Italian mastery
+- Franco Manca's sourdough pizza pioneers
+- Pizza Pilgrims's Neapolitan street pizza
+- Santa Maria's authentic Neapolitan pizzas
+- Yalla Yalla's Lebanese street food
+- Maroush's Lebanese fine dining institution
+- The Palomar's Jerusalem market cuisine
+- The Barbary's North African small plates
+- Koya Bar's Japanese udon specialists
+- Kiku's traditional Japanese sushi
+- Endo at the Rotunda's Tsukiji-trained sushi
+- On The Bab's Korean street food
+- Jinjuu's modern Korean fine dining
+- Cây Tre's authentic Vietnamese cuisine
+- Pho's accessible Vietnamese street food
+- Champor-Champor's homestyle Thai cooking
+- Som Saa's regional Thai specialties
+- Farang's modern Thai interpretation
+- Coya's Peruvian-Japanese Nikkei fusion
+- Lima Fitzrovia's Peruvian fine dining
+- Mestizo's authentic Mexican street food
+- Wahaca's colorful Mexican market food
+- Casa Pastor's modern Mexican taqueria
+- Kol's innovative Mexican fine dining
+- Indian Accent's contemporary Indian cuisine
+- Trishna's modern Indian coastal cooking
+- Benares's refined Indian fine dining
+- Tayyabs's legendary Punjabi grills
+- Lahore Kebab House's authentic Pakistani
+- Chettinad's South Indian specialist
+- Rasa's Keralan vegetarian cuisine
+- Gauthier Soho's innovative French vegetarian
+- Club Gascon's inventive French cuisine
+- Bleeding Heart's romantic French bistro
+- Brasserie Zédel's grand Parisian brasserie
+- Mon Plaisir's traditional French bistro
+- L'Escargot's classic French institution
+- Le Gavroche's legendary French fine dining
+- Chez Bruce's neighborhood French excellence
+- Trinity's modern European neighborhood gem
+- Nando's peri-peri chicken specialties
+- Wagamama's Asian fusion noodle bowls
+- Prezzo's accessible Italian dining
+- Zizzi's modern Italian chain classics
+- Pizza Express's thin-crust pizza heritage
+- Ask Italian's family-friendly Italian fare
+- Bella Italia's traditional Italian comfort
+- Carluccio's authentic Italian deli culture
+- Giraffe's global comfort food menu
+- TGI Friday's American diner classics
+- Hard Rock Cafe's rock and roll burgers
+- Planet Hollywood's movie-themed dining
+- Rainforest Cafe's adventure dining experience
+- All Bar One's modern British gastropub
+- Slug & Lettuce's contemporary pub food
+- Harvester's salad bar and grills
+- Toby Carvery's traditional Sunday roasts
+- Beefeater's British pub classics
+- Wetherspoons's no-nonsense pub grub
+- Greene King's traditional pub fare
+- Fuller's brewery heritage dining
+- Young's pub classics and ales
+- Byron's premium burger specialists
+- Honest Burgers's locally-sourced patties
+- GBK's gourmet burger creations
+- Five Guys's American-style burgers
+- Shake Shack's cult burger following
+- McDonald's global fast food classics
+- KFC's finger-lickin' fried chicken
+- Burger King's flame-grilled whoppers
+- Subway's customizable sandwich subs
+- Greggs's British bakery staples
+- Pret A Manger's fresh sandwich culture
+- EAT's healthy grab-and-go options
+- Leon's naturally fast food philosophy
+- Itsu's healthy Asian-inspired cuisine
+- Yo! Sushi's kaiten belt dining
+- Wasabi's quick Japanese street food
+- Chopstix's wok-fresh Chinese takeaway
+- Busaba's Thai street food experience
+- Café Rouge's French bistro classics
+- Côte Brasserie's modern French dining
+- Las Iguanas's Latin American flavors
+- Chiquito's Tex-Mex family dining
+- Tortilla's fresh Mexican street food
+- Chipotle's build-your-own burrito bowls
+
+EXAMPLES:
+- "Dishoom-Inspired Black Daal with Garlic Naan"
+- "Padella-Inspired Hand-Rolled Pici Cacio e Pepe"
+- "The Ivy-Inspired Classic Shepherd's Pie"
+- "Hawksmoor-Inspired Dry-Aged Ribeye with Bone Marrow"
+- "Duck & Waffle-Inspired Signature Brunch Stack"
+- "Bao-Inspired Taiwanese Pork Belly Buns"
+- "Kiln-Inspired Clay Pot Glass Noodles"
+- "Hoppers-Inspired Bone Marrow Curry"
+- "Brat-Inspired Wood-Fired Turbot"
+- "Sabor-Inspired Jamón Ibérico Croquetas"
+- "José-Inspired Andalusian Gazpacho"
+- "Scott's-Inspired Dover Sole Meunière"
+- "Blacklock-Inspired Sunday Roast Beef"
+- "River Café-Inspired Chocolate Nemesis"
+- "Tayyabs-Inspired Lamb Chops"
+- "Som Saa-Inspired Green Papaya Salad"
+- "Coya-Inspired Nikkei Tiradito"
+- "Le Gavroche-Inspired Soufflé Suissesse"
+- "Nando's-Inspired Butterfly Chicken with Peri-Peri"
+- "Wagamama-Inspired Chicken Katsu Curry"
+- "Pizza Express-Inspired American Hot Pizza"
+- "Byron-Inspired Classic Beef Burger"
+- "Leon-Inspired Moroccan Meatballs"
+- "Yo! Sushi-Inspired Salmon Teriyaki"
       // Mood-based recipes
       const moods = [
         "comforting winter warmth", "fresh spring awakening", "summer celebration", 
