@@ -749,21 +749,21 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const uniqueCounter = Math.floor(Math.random() * 10000);
     const varietySeed = (rngSeed + timeBasedSeed + uniqueCounter) % 1000000;
     
-    // Equal likelihood for all three categories (33.33% each)
+    // Equal likelihood for three categories: Chef, Restaurant, Mood (33.33% each)
     const categoryRandom = Math.floor(Math.random() * 3);
     
     // Determine inspiration type based on pure random selection for equal distribution
     let inspirationType;
     if (categoryRandom === 0) {
-      inspirationType = seededRandom(varietySeed, 4); // 0-3: Chef
+      inspirationType = 0; // Chef-inspired
     } else if (categoryRandom === 1) {
-      inspirationType = 4 + seededRandom(varietySeed, 3); // 4-6: Restaurant
+      inspirationType = 1; // Restaurant-inspired
     } else {
-      inspirationType = 7 + seededRandom(varietySeed, 3); // 7-9: Regional
+      inspirationType = 2; // Mood-based
     }
     
     let inspirationPrompt = "";
-    if (inspirationType <= 3) {
+    if (inspirationType === 0) {
       // Famous chef dishes and cookbook classics - equal likelihood for all chefs
       // Select individual chefs rather than groups for better distribution
       const allChefs = [
@@ -1094,15 +1094,33 @@ EXAMPLES:
 - "Yo! Sushi-Inspired Salmon Teriyaki"
 - "Toby Carvery-Inspired Traditional Sunday Roast"`;
     } else {
-      // Regional and traditional cuisine (rare fallback)
-      inspirationPrompt = `Create an authentic ${selectedCuisine} recipe title showcasing FLAVOR-MAXIMIZING techniques and sophisticated preparation methods.
+      // Mood-based recipes
+      const moods = [
+        "comforting winter warmth", "fresh spring awakening", "summer celebration", 
+        "cozy autumn gathering", "romantic dinner", "family feast", "quick weeknight", 
+        "weekend indulgence", "healthy reset", "nostalgic childhood", "exotic adventure", 
+        "elegant sophistication", "rustic simplicity", "spicy heat", "cooling freshness"
+      ];
+      
+      const selectedMood = moods[seededRandom(varietySeed + 3000, moods.length)];
+      
+      inspirationPrompt = `Create a recipe title that captures the mood of "${selectedMood}" using flavor-maximizing techniques.
 
-EMBRACE CULINARY DIVERSITY:
-- Draw from the full spectrum of ${selectedCuisine} cuisine - regional specialties, street food, comfort dishes, festival foods
-- Use authentic dish names to preserve cultural heritage
-- Include traditional cooking methods and unique ingredients
-- Showcase both popular dishes and lesser-known gems
-- Always add clear descriptions for dishes that might be unfamiliar to home cooks`;
+IMPORTANT:
+- Focus on dishes that evoke the specific mood through ingredients, techniques, and presentation
+- Use cooking methods that enhance the emotional connection to the dish
+- Incorporate seasonal elements when appropriate to the mood
+- Showcase professional techniques that build deep, satisfying flavors
+
+FORMAT: Simple titles that capture the mood - "Mood-Inspired Dish Name"
+REQUIREMENT: Every dish must showcase sophisticated cooking techniques and maximum flavor.
+
+MOOD-BASED EXAMPLES:
+- "Comforting Slow-Braised Short Ribs with Herb Butter"
+- "Fresh Spring Pea and Mint Risotto with Lemon Oil"
+- "Romantic Rose-Scented Duck with Cherry Gastrique"
+- "Nostalgic Grandmother's Chicken and Dumplings"
+- "Exotic Moroccan-Spiced Lamb with Apricot Glaze"`;
     }
 
     const userMessage = `${inspirationPrompt}
