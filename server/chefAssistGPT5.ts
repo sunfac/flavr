@@ -741,24 +741,45 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
     const systemMessage = `Create appealing recipe titles that draw inspiration from famous chefs, renowned restaurants, or authentic world cuisine. Add brief descriptions for dishes that might be unfamiliar to home cooks.`;
 
     // Enhanced variety with better distribution across categories
-    // Add more entropy to prevent repetition
-    const timeBasedSeed = Date.now() % 1000;
-    const varietySeed = rngSeed + timeBasedSeed + Math.floor(Math.random() * 500);
+    // Add more entropy to prevent repetition - use milliseconds for uniqueness
+    const timeBasedSeed = Date.now();
+    const uniqueCounter = Math.floor(Math.random() * 10000);
+    const varietySeed = (rngSeed + timeBasedSeed + uniqueCounter) % 1000000;
+    
+    // Force different selection each time by using time-based modulo
+    const forceVariety = Date.now() % 3;
     
     // Determine inspiration type based on seed - better distribution
-    // 0-3: Chef inspiration (40% weight)
-    // 4-6: Restaurant inspiration (35% weight)  
-    // 7-9: Regional cuisine (25% weight)
-    const inspirationType = seededRandom(varietySeed, 10);
+    // Force rotation between categories to prevent repetition
+    let inspirationType;
+    if (forceVariety === 0) {
+      inspirationType = seededRandom(varietySeed, 4); // 0-3: Chef (forced)
+    } else if (forceVariety === 1) {
+      inspirationType = 4 + seededRandom(varietySeed, 3); // 4-6: Restaurant (forced)
+    } else {
+      inspirationType = 7 + seededRandom(varietySeed, 3); // 7-9: Regional (forced)
+    }
     
     let inspirationPrompt = "";
     if (inspirationType <= 3) {
       // Famous chef dishes and cookbook classics
-      inspirationPrompt = `Create a recipe title inspired by famous chefs, iconic cookbooks, or signature restaurant dishes from renowned establishments.
+      // Add variety by selecting different chef groups
+      const chefGroup = seededRandom(varietySeed + 1000, 3);
+      const chefFocus = chefGroup === 0 ? "UK celebrity chefs" : chefGroup === 1 ? "international master chefs" : "rising star chefs";
+      
+      inspirationPrompt = `Create a recipe title inspired by ${chefFocus}, focusing on their signature dishes that maximize flavor through professional techniques.
 
-IMPORTANT: Always use "inspired by" language - never claim these are the actual chef's recipes. Use formats like "Gordon Ramsay-Inspired" or "Inspired by Gordon Ramsay" rather than "Gordon Ramsay's".
+IMPORTANT: 
+- Always use "inspired by" language - never claim these are the actual chef's recipes
+- Use formats like "Gordon Ramsay-Inspired" or "Inspired by Gordon Ramsay" rather than "Gordon Ramsay's"
+- MUST create dishes that showcase FLAVOR MAXIMIZATION techniques:
+  * Proper caramelization, Maillard reactions, umami building
+  * Layered seasoning, acid-fat balance, textural contrasts
+  * Professional techniques like deglazing, reduction, emulsification
+- Avoid basic/simple dishes - aim for cookbook-quality recipes with depth
 
-FORMAT: Simple titles without descriptions in parentheses - "Chef Name-Inspired Dish Name" only.
+FORMAT: Simple titles without descriptions - "Chef Name-Inspired Dish Name" only.
+FOCUS: Sophisticated, flavor-packed dishes that use professional techniques.
 
 UK & WORLD-FAMOUS CHEF INSPIRATION (use variety based on seed ${varietySeed}):
 
@@ -856,12 +877,34 @@ EXAMPLES:
 - "Asma Khan-Inspired Hyderabadi Biryani"
 - "René Redzepi-Inspired Fermented Mushroom Broth"`;
     } else if (inspirationType <= 6) {
-      // London restaurant inspired
-      inspirationPrompt = `Create a recipe title inspired by famous dishes from London's best restaurants and eateries.
+      // Restaurant inspired - rotate between different restaurant types
+      const restaurantType = seededRandom(varietySeed + 2000, 4);
+      let restaurantFocus;
+      
+      if (restaurantType === 0) {
+        restaurantFocus = "Michelin-starred restaurants";
+      } else if (restaurantType === 1) {
+        restaurantFocus = "trendy street food markets and pop-ups";
+      } else if (restaurantType === 2) {
+        restaurantFocus = "historic pubs and gastropubs";
+      } else {
+        restaurantFocus = "hidden neighborhood gems";
+      }
+      
+      inspirationPrompt = `Create a recipe title inspired by signature dishes from London's ${restaurantFocus}, focusing on flavor-maximizing techniques.
 
-IMPORTANT: Always use "inspired by" language - never claim these are the actual restaurant's recipes. Use formats like "Dishoom-Inspired" or "Inspired by Dishoom" rather than "Dishoom's".
+IMPORTANT: 
+- Always use "inspired by" language for restaurants
+- Rotate between DIFFERENT restaurants each time - avoid repetition
+- Focus on dishes that showcase MAXIMUM FLAVOR through:
+  * Complex spice blends, marinades, slow-cooking
+  * Charring, smoking, grilling for depth
+  * Fermented elements, pickles, chutneys
+  * Rich sauces, reductions, compound butters
+- Select from varied establishments - avoid repeating the same ones
 
-FORMAT: Simple titles without descriptions in parentheses - "Restaurant Name-Inspired Dish Name" only.
+FORMAT: Simple titles without descriptions - "Restaurant-Inspired Dish Name" only.
+REQUIREMENT: Use variety seed ${varietySeed} to select DIFFERENT restaurants each time.
 
 LONDON RESTAURANT INSPIRATION:
 - Dishoom's legendary black daal and bacon naan rolls
@@ -1043,7 +1086,7 @@ EXAMPLES:
 - "Toby Carvery-Inspired Traditional Sunday Roast"`;
     } else {
       // Regional and traditional cuisine (rare fallback)
-      inspirationPrompt = `Create an authentic recipe title from ${selectedCuisine} cuisine that captures the diversity and richness of the culinary tradition.
+      inspirationPrompt = `Create an authentic ${selectedCuisine} recipe title showcasing FLAVOR-MAXIMIZING techniques and sophisticated preparation methods.
 
 EMBRACE CULINARY DIVERSITY:
 - Draw from the full spectrum of ${selectedCuisine} cuisine - regional specialties, street food, comfort dishes, festival foods
@@ -1059,14 +1102,18 @@ User Intent: ${data.userIntent || "delicious cooking"}
 Randomization Seed: ${rngSeed} (use this to ensure variety)
 
 GUIDELINES:
-- Create titles that excite and inspire home cooks
-- Use authentic dish names to preserve cultural heritage
-- For chef/restaurant inspired dishes: Simple titles without descriptions - "Chef Name-Inspired Dish Name"
-- For regional cuisine only: Add clear descriptions in parentheses for unfamiliar dishes
-- Examples: "Gordon Ramsay-Inspired Beef Wellington", "Aliche Wot (Ethiopian fish stew)"
-- Include variety: meat, seafood, vegetarian options
+- Create titles that showcase PROFESSIONAL COOKING TECHNIQUES and MAXIMUM FLAVOR
+- Must demonstrate sophisticated preparation: braising, roasting, reduction, caramelization
+- Include flavor-building elements: marinades, compound butters, glazes, spice rubs
+- Avoid basic dishes - aim for restaurant-quality complexity with depth
+- Use authentic names but ensure dishes are flavor-forward and exciting
+- For chef/restaurant: Simple titles - "Chef Name-Inspired Dish Name"
+- For regional cuisine: Add descriptions for unfamiliar dishes
+- Examples: "Gordon Ramsay-Inspired Beef Wellington", "Char Siu Pork with Five-Spice Glaze"
 
-OUTPUT: JSON with "title" key only. Make it sound delicious and achievable.`;
+REQUIREMENT: Every dish must showcase at least 2-3 flavor maximization techniques.
+
+OUTPUT: JSON with "title" key only. Make it sophisticated and flavor-packed.`;
 
     try {
       const completion = await openai.chat.completions.create({

@@ -548,6 +548,14 @@ Created with Flavr AI`;
                 onValueChange={(value) => {
                   const newServings = value[0];
                   setLocalServings(newServings);
+                  
+                  // Update the recipe store immediately for live ingredient scaling
+                  const recipeStore = useRecipeStore.getState();
+                  useRecipeStore.setState({
+                    ...recipeStore,
+                    servings: newServings
+                  });
+                  
                   if (onServingsChange) {
                     onServingsChange(newServings);
                   }
