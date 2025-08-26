@@ -261,6 +261,31 @@ async function generateRecipeImage(recipeTitle: string, cuisine: string, recipeI
 }
 
 export function registerRecipeRoutes(app: Express) {
+  // Nutrition analysis endpoint - Simple mock implementation
+  app.post('/api/nutrition/analyze', (req, res) => {
+    const { ingredients, servings = 4 } = req.body;
+    
+    // Simple estimation for nutrition - can be replaced with real API later
+    const totalCalories = ingredients.length * 120; // Rough estimate
+    const perServing = Math.round(totalCalories / servings);
+    
+    res.json({
+      calories: totalCalories,
+      protein: Math.round(ingredients.length * 8),
+      carbs: Math.round(ingredients.length * 15),
+      fat: Math.round(ingredients.length * 5),
+      fiber: Math.round(ingredients.length * 2),
+      sugar: Math.round(ingredients.length * 3),
+      sodium: Math.round(ingredients.length * 200),
+      perServing: {
+        calories: perServing,
+        protein: Math.round((ingredients.length * 8) / servings),
+        carbs: Math.round((ingredients.length * 15) / servings),
+        fat: Math.round((ingredients.length * 5) / servings)
+      }
+    });
+  });
+
   // Test endpoint
   app.get("/api/test", (req, res) => {
     res.json({ 
@@ -633,18 +658,32 @@ Return a JSON object with this structure:
       // GPT-5 returns the recipe directly, not wrapped
       const recipe = result;
       
-      // Send recipe immediately to user for faster response
+      // Generate image BEFORE sending response
+      const tempRecipeId = Date.now();
+      console.log('🎨 Generating image first for better UX...');
+      
+      try {
+        const imageUrl = await generateRecipeImage(recipe.title, recipe.cuisine, tempRecipeId);
+        
+        if (imageUrl) {
+          console.log('✅ Image generated successfully:', imageUrl);
+          recipe.image = imageUrl;
+          recipe.imageUrl = imageUrl;
+        } else {
+          console.log('⚠️ Image generation failed, continuing without image');
+        }
+      } catch (imgError) {
+        console.error('Image generation error:', imgError);
+      }
+      
+      // Now send the complete recipe with image
       res.json({ recipe });
 
       // Increment usage counter after successful generation
       incrementUsageCounter(req).catch(err => console.error('Failed to increment usage:', err));
 
-      // Generate image in background and store in memory for retrieval
-      // Create a temporary ID for chef assist recipes since they're not saved to database
-      const tempRecipeId = Date.now();
-      recipe.tempId = tempRecipeId; // Add temp ID for tracking
-      
-      generateRecipeImage(recipe.title, recipe.cuisine, tempRecipeId).then(imageUrl => {
+      // No longer need background image generation since we do it upfront
+      /*generateRecipeImage(recipe.title, recipe.cuisine, tempRecipeId).then(imageUrl => {
         if (imageUrl) {
           console.log('🎨 Background image generated for GPT-5 Chef Assist:', recipe.title);
           console.log(`📸 Recipe image URL stored: ${imageUrl}`);
@@ -667,7 +706,7 @@ Return a JSON object with this structure:
           
           console.log(`📦 Recipe with image cached for tempId: ${tempRecipeId}`);
         }
-      }).catch(err => console.error('Background image generation failed:', err));
+      }).catch(err => console.error('Background image generation failed:', err));*/
 
       // Log the interaction for developer insights
       logSimpleGPTInteraction({
