@@ -471,7 +471,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_tokens: maxTokens,
+        max_tokens: 4000,  // Increased to ensure complete recipes
         response_format: { type: "json_object" }
       });
       
@@ -518,7 +518,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
             { role: "assistant", content: content },
             { role: "user", content: continuationPrompt }
           ],
-          max_tokens: 800,
+          max_tokens: 1500,  // Increased for complete continuation
           response_format: { type: "json_object" }
         });
         

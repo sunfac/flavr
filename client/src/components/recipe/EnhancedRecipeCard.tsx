@@ -239,8 +239,8 @@ function EnhancedRecipeCard({
   // Scale ingredients based on serving adjustments
   const scaledIngredients = useScaledIngredients(
     activeIngredients, 
-    recipe.servings, // Use original servings for scaling calculation
-    activeServings
+    recipe.servings || 4, // Use original servings for scaling calculation
+    activeServings || recipe.servings || 4
   );
 
   // Transform scaled ingredients into the correct format for IngredientPanel

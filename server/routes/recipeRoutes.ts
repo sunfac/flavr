@@ -220,7 +220,7 @@ async function generateRecipeImage(recipeTitle: string, cuisine: string, recipeI
       '' : 
       'Show prepared, portioned pieces (fillets, cuts, portions) rather than whole animals. Focus on the cooked, plated dish as served.';
     
-    const imagePrompt = `A realistic photograph of ${recipeTitle} as it would be expertly plated and served by an accomplished chef. Show the complete dish with all components mentioned in the title, beautifully presented with professional plating techniques. ${cuisine} cuisine style. ${animalGuidance} The food should display excellent knife skills, proper cooking techniques, and thoughtful garnishing - the work of someone with culinary training. Professional presentation with attention to color, texture, and composition. Include any sides, sauces, or accompaniments mentioned in the dish name, artfully arranged. Natural lighting, 45-degree angle view showing restaurant-quality execution while remaining true to the actual dish described.`;
+    const imagePrompt = `Delicious home-cooked ${recipeTitle}, ${cuisine} cuisine, warm and inviting, natural lighting, realistic food photography, authentic presentation on a simple plate, appetizing and approachable, no excessive garnish, 45-degree angle view. ${animalGuidance} Focus on the honest beauty of well-prepared food.`;
     
     const response = await openai.images.generate({
       model: "dall-e-3",
