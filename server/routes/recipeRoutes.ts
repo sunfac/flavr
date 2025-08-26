@@ -855,4 +855,85 @@ Return a JSON object with this structure:
       res.status(500).json({ error: 'Failed to check recipe update' });
     }
   });
+
+  // Ingredient substitution endpoint
+  app.post("/api/ingredient-substitute", async (req, res) => {
+    try {
+      const { ingredient, recipeContext } = req.body;
+      
+      if (!ingredient) {
+        return res.status(400).json({ error: "Ingredient is required" });
+      }
+
+      console.log('🔄 Processing ingredient substitution:', { ingredient, recipeContext });
+
+      // Generate a simple, contextual substitute using OpenAI
+      const prompt = `You are a culinary expert helping with ingredient substitutions. Return ONLY valid JSON.
+
+Recipe: ${recipeContext?.title || 'General recipe'}
+Cuisine: ${recipeContext?.cuisine || 'General'}
+Ingredient to substitute: "${ingredient}"
+All ingredients: ${recipeContext?.allIngredients?.join(', ') || 'Not specified'}
+Current instructions: 
+${recipeContext?.instructions?.map((step, i) => `Step ${i + 1}: ${step}`).join('\n') || 'Not provided'}
+
+Provide a JSON response with:
+1. "substitute" - the replacement ingredient with quantity/measurement
+2. "updatedInstructions" - array of cooking steps with the original ingredient references updated
+
+Format:
+{
+  "substitute": "replacement ingredient with quantity",
+  "updatedInstructions": ["updated step 1", "updated step 2", ...]
+}
+
+If no instruction updates are needed, return the original instructions unchanged.
+
+Important: Return each instruction as a separate array element, do not combine multiple steps into one.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 300
+      });
+
+      const content = completion.choices[0]?.message?.content?.trim();
+      let result;
+      
+      try {
+        result = JSON.parse(content || '{}');
+        // Ensure updatedInstructions is an array
+        if (!Array.isArray(result.updatedInstructions)) {
+          console.log('⚠️ updatedInstructions is not an array, using original instructions');
+          result.updatedInstructions = recipeContext?.instructions || [];
+        }
+      } catch (parseError) {
+        // Fallback to simple substitution if JSON parsing fails
+        console.log('⚠️ JSON parsing failed, using fallback');
+        result = {
+          substitute: content || ingredient,
+          updatedInstructions: recipeContext?.instructions || []
+        };
+      }
+      
+      console.log('✅ Ingredient substitution generated:', { 
+        original: ingredient, 
+        substitute: result.substitute,
+        instructionsUpdated: result.updatedInstructions?.length || 0
+      });
+
+      res.json({ 
+        substitute: result.substitute,
+        updatedInstructions: result.updatedInstructions
+      });
+
+    } catch (error) {
+      console.error('Error processing ingredient substitution:', error);
+      res.status(500).json({ 
+        error: 'Failed to process substitution',
+        substitute: req.body.ingredient // Fallback to original
+      });
+    }
+  });
 }

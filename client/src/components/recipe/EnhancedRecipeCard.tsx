@@ -238,15 +238,12 @@ function EnhancedRecipeCard({
 
 
   // Scale ingredients based on serving adjustments
-  // Store the original servings from the first time we see this recipe
+  // Always use original recipe servings from the initial recipe prop, not store modifications
   const originalServings = useMemo(() => {
-    // If store has this recipe but with original servings data, use that
-    if (recipeStore.id === recipe.id && recipeStore.meta.originalServings) {
-      return recipeStore.meta.originalServings;
-    }
-    // Otherwise use the recipe's current servings as the baseline
+    // The recipe prop always contains the original/baseline servings from generation
+    // Don't use store servings as they change during interactions
     return recipe.servings || 4;
-  }, [recipe.id, recipe.servings, recipeStore.id, recipeStore.meta.originalServings]);
+  }, [recipe.servings]); // Only depend on recipe.servings, not store
   
   const scaledIngredients = useScaledIngredients(
     recipe.ingredients, // Always use original ingredients, not activeIngredients which may be modified
@@ -378,9 +375,12 @@ function EnhancedRecipeCard({
       
     } catch (error) {
       console.error('Failed to substitute ingredient:', error);
+      
+      // Provide better error feedback
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: "Substitution failed",
-        description: "Could not find a suitable substitute",
+        description: `Could not find a suitable substitute: ${errorMessage}`,
         variant: "destructive"
       });
       

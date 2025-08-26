@@ -26,6 +26,7 @@ export interface RecipeMeta {
   cuisine?: string;
   image?: string;
   imageLoading?: boolean;
+  originalServings?: number;
 }
 
 export interface RecipeState {
