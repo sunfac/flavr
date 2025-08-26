@@ -161,7 +161,7 @@ function EnhancedRecipeCard({
     if (!recipeStore.id || recipeStore.id !== recipe.id) {
       recipeActions.replaceRecipe({
         id: recipe.id,
-        servings: recipe.servings,
+        servings: recipe.servings, // Keep original servings as baseline
         ingredients: recipe.ingredients.map((text: string, index: number) => ({
           id: `ingredient-${index}`,
           text,
@@ -179,7 +179,8 @@ function EnhancedRecipeCard({
           difficulty: recipe.difficulty,
           cuisine: recipe.cuisine,
           description: recipe.description,
-          image: recipe.image
+          image: recipe.image,
+          originalServings: recipe.servings || 4 // Store original servings for scaling reference
         },
         currentStep: 0,
         completedSteps: [],
@@ -237,8 +238,16 @@ function EnhancedRecipeCard({
 
 
   // Scale ingredients based on serving adjustments
-  // Always use the original recipe servings as the base for scaling calculations
-  const originalServings = recipe.servings || 4;
+  // Store the original servings from the first time we see this recipe
+  const originalServings = useMemo(() => {
+    // If store has this recipe but with original servings data, use that
+    if (recipeStore.id === recipe.id && recipeStore.meta.originalServings) {
+      return recipeStore.meta.originalServings;
+    }
+    // Otherwise use the recipe's current servings as the baseline
+    return recipe.servings || 4;
+  }, [recipe.id, recipe.servings, recipeStore.id, recipeStore.meta.originalServings]);
+  
   const scaledIngredients = useScaledIngredients(
     recipe.ingredients, // Always use original ingredients, not activeIngredients which may be modified
     originalServings, // Use original servings for scaling calculation

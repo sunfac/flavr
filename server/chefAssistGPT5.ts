@@ -431,6 +431,7 @@ RECIPE REQUIREMENTS:
 - Ingredient-count policy: target ${dynamicTargetRange}, but exceed if needed for flavour/authenticity.
 - Steps must be short, imperative, and test-kitchen clear.
 - Provide finishing_touches and 2–4 flavour_boosts aligned to the packs.
+- Include 1-3 side dishes that complement the main dish for a complete meal experience.
 - Respect must-use and avoid strictly. Honour time_budget; if impossible, set realistic total and note it in style_notes.
 - Title must be cookbook-style: 4–10 words with plain-English descriptors (e.g., "pan-seared", "crispy", "herb-lifted"). No chef-science jargon.
 - Return JSON only, matching the schema exactly.
@@ -456,7 +457,14 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
   "make_ahead_leftovers": "1–2 sentences",
   "allergens": ["…"],
   "nutrition_note": "Optional 1–2 sentences",
-  "shopping_list": [ { "item": "…", "qty": 0, "unit": "…" } ]
+  "shopping_list": [ { "item": "…", "qty": 0, "unit": "…" } ],
+  "side_dishes": [
+    {
+      "name": "Side dish name",
+      "description": "Brief description of the side dish",
+      "quick_method": "Simple preparation method (1-2 sentences)"
+    }
+  ]
 }`;
 
     try {
