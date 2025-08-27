@@ -14,6 +14,7 @@ import LoadingPage from "./LoadingPage";
 import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
 import DietaryToggleSection from "@/components/DietaryToggleSection";
 import { useQuery } from "@tanstack/react-query";
+import { detectDietaryConflicts } from "@/utils/dietaryConflictDetection";
 
 // Use the original chef assist examples
 const chefExamples = [
@@ -106,6 +107,52 @@ export default function ChefAssist() {
     }, 8000);
     return () => clearInterval(interval);
   }, [randomExamples.length]);
+
+  // Handle dietary preference changes and automatically turn off conflicting toggles
+  const handleDietaryChange = (newDietary: string[]) => {
+    setSelectedDietary(newDietary);
+    
+    // Check for conflicts with current prompt
+    if (prompt.trim()) {
+      const conflictResult = detectDietaryConflicts(prompt, newDietary);
+      if (conflictResult.hasConflict && conflictResult.message) {
+        // Remove conflicting dietary preferences
+        const updatedDietary = newDietary.filter(
+          dietary => !conflictResult.conflictingDietary.includes(dietary)
+        );
+        setSelectedDietary(updatedDietary);
+        
+        toast({
+          title: "Dietary conflict detected",
+          description: conflictResult.message,
+          variant: "default"
+        });
+      }
+    }
+  };
+
+  // Handle prompt changes and check for conflicts
+  const handlePromptChange = (newPrompt: string) => {
+    setPrompt(newPrompt);
+    
+    // Check for conflicts with selected dietary preferences
+    if (selectedDietary.length > 0 && newPrompt.trim()) {
+      const conflictResult = detectDietaryConflicts(newPrompt, selectedDietary);
+      if (conflictResult.hasConflict && conflictResult.message) {
+        // Remove conflicting dietary preferences
+        const updatedDietary = selectedDietary.filter(
+          dietary => !conflictResult.conflictingDietary.includes(dietary)
+        );
+        setSelectedDietary(updatedDietary);
+        
+        toast({
+          title: "Dietary conflict detected",
+          description: conflictResult.message,
+          variant: "default"
+        });
+      }
+    }
+  };
 
   const handleInspireMe = async () => {
     // Only check quota limit for non-subscribers
@@ -270,7 +317,7 @@ export default function ChefAssist() {
                 <Textarea
                   placeholder="Tell me about the dish you have in mind..."
                   value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
+                  onChange={(e) => handlePromptChange(e.target.value)}
                   className="min-h-[120px] md:min-h-[150px] text-base md:text-lg bg-slate-800/50 border-slate-600 text-white focus:border-orange-400 rounded-xl placeholder:text-slate-500"
                 />
 
@@ -291,7 +338,7 @@ export default function ChefAssist() {
                 <DietaryToggleSection
                   selectedDietary={selectedDietary}
                   selectedNutritional={selectedNutritional}
-                  onDietaryChange={setSelectedDietary}
+                  onDietaryChange={handleDietaryChange}
                   onNutritionalChange={setSelectedNutritional}
                   className="mt-6"
                 />
