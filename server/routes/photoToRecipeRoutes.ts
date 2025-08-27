@@ -190,19 +190,39 @@ MULTI-PAGE EXTRACTION REQUIREMENTS:
 - Look for serving suggestions, garnishes, or final touches that might be on separate pages
 - Ensure NO recipe elements are missing even if scattered across pages
 
-SUB-RECIPE EXTRACTION:
-- Look for ingredients with page references like "chilli drizzle (see page 45)" or "tamarind chutney (p. 23)"
-- When you find page references, check if those pages are included in the extracted text
-- If referenced pages are available, extract the FULL sub-recipe from those pages
-- Store sub-recipes in the subRecipes JSON section with this format:
-  "subRecipes": {
-    "chilli drizzle": {
-      "ingredients": ["1 red chilli, finely chopped", "2 tbsp olive oil"],
-      "instructions": ["Mix chopped chilli with oil", "Let infuse for 10 minutes"]
-    }
+SUB-RECIPE EXTRACTION - CRITICAL CORRELATION PROCESS:
+
+STEP 1: IDENTIFY PAGE REFERENCES IN MAIN RECIPE
+- Scan main recipe ingredients for page references: "chilli drizzle (see page 45)", "tamarind chutney (p. 23)", etc.
+- Note the ingredient name AND the page reference number
+- Common patterns: (see page X), (p. X), (page X), (turn to page X), (recipe on page X)
+
+STEP 2: FIND MATCHING SUB-RECIPE CONTENT
+- Scan ALL extracted text for recipe titles that match referenced ingredients
+- Look for sections with titles like "Chilli Drizzle", "Tamarind Chutney", etc.
+- These sub-recipes will have their own ingredient lists and method steps
+- Match by ingredient name even if page numbers aren't visible in the text
+
+STEP 3: EXTRACT COMPLETE SUB-RECIPES
+- When you find a matching sub-recipe section, extract the COMPLETE recipe
+- Include ALL ingredients and method steps from that sub-recipe
+- Store in subRecipes with the exact ingredient name as the key
+
+EXAMPLE CORRELATION:
+Main recipe ingredient: "3 tsp chilli drizzle (see page 45)"
+Found elsewhere in text: "CHILLI DRIZZLE" followed by ingredients and method
+→ Extract as: "chilli drizzle": { "ingredients": [...], "instructions": [...] }
+
+SUB-RECIPE FORMAT:
+"subRecipes": {
+  "chilli drizzle": {
+    "title": "Chilli Drizzle",
+    "ingredients": ["1 red chilli, finely chopped", "2 tbsp olive oil"],
+    "instructions": ["Finely chop the chilli", "Mix with oil and let infuse for 10 minutes"],
+    "servings": 1,
+    "prepTime": 5
   }
-- Even if not referenced by page, extract any complete sub-recipes found on the pages
-- Include common reference patterns: (see page X), (p. X), (page X), (turn to page X)
+}
 
 TECHNICAL REQUIREMENTS:
 - Parse ingredients accurately but rewrite all method steps completely
