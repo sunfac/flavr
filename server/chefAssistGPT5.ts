@@ -951,10 +951,24 @@ MOOD-BASED EXAMPLES:
 - "Exotic Moroccan-Spiced Lamb with Apricot Glaze"`;
     }
 
+    // Add dietary restrictions to the prompt
+    const dietaryRestrictions = data.avoid || [];
+    const dietaryPrompt = dietaryRestrictions.length > 0 
+      ? `\n\nCRITICAL DIETARY REQUIREMENTS:
+- MUST be suitable for: ${dietaryRestrictions.join(', ')}
+- NEVER suggest dishes containing ingredients that conflict with these dietary requirements
+- For vegan: NO meat, dairy, eggs, fish, or animal products
+- For vegetarian: NO meat, fish, or seafood (dairy and eggs OK)
+- For gluten-free: NO wheat, barley, rye, or gluten-containing ingredients
+- For dairy-free: NO milk, cheese, butter, cream, or dairy products
+- Ensure all suggested dishes fully comply with the selected dietary restrictions`
+      : '';
+
     const userMessage = `${inspirationPrompt}
 
 User Intent: ${data.userIntent || "delicious cooking"}
 Randomization Seed: ${rngSeed} (use this to ensure variety)
+${dietaryPrompt}
 
 GUIDELINES:
 - Create titles that showcase PROFESSIONAL COOKING TECHNIQUES and MAXIMUM FLAVOR
@@ -966,7 +980,7 @@ GUIDELINES:
 - For regional cuisine: Add descriptions for unfamiliar dishes
 - Examples: "Gordon Ramsay-Inspired Beef Wellington", "Char Siu Pork with Five-Spice Glaze"
 
-REQUIREMENT: Every dish must showcase at least 2-3 flavor maximization techniques.
+REQUIREMENT: Every dish must showcase at least 2-3 flavor maximization techniques AND comply with all dietary restrictions.
 
 OUTPUT: JSON with "title" key only. Make it sophisticated and flavor-packed.`;
 
