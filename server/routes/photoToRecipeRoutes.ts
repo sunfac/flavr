@@ -288,6 +288,17 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
 
       console.log('📋 Final recipe structure:', JSON.stringify(recipe, null, 2));
       
+      // Debug: Check for sub-recipes
+      console.log('🔍 DEBUG: Checking for sub-recipes in extracted data...');
+      if (recipe.subRecipes) {
+        console.log('✅ Sub-recipes found:', Object.keys(recipe.subRecipes));
+        Object.entries(recipe.subRecipes).forEach(([key, subRecipe]) => {
+          console.log(`  - ${key}:`, JSON.stringify(subRecipe, null, 2));
+        });
+      } else {
+        console.log('❌ No sub-recipes found in extraction');
+      }
+      
       // Initialize global cache if needed
       if (!global.recipeImageCache) {
         global.recipeImageCache = new Map();
@@ -297,48 +308,16 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
       const tempId = `photo-extracted-${Date.now()}`;
       recipe.tempId = tempId;
       
-      // Generate recipe image using DALL-E 3
-      console.log('📸 Generating image for extracted recipe...');
-      try {
-        const imagePrompt = `A professional, appetizing photo of ${recipe.title}, ${recipe.cuisine || 'home-cooked'} cuisine style, beautifully plated and garnished, natural lighting, food photography, high quality`;
-        
-        const imageResponse = await openai.images.generate({
-          model: "dall-e-3",
-          prompt: imagePrompt,
-          n: 1,
-          size: "1024x1024",
-          quality: "standard",
-        });
-
-        if (imageResponse.data?.[0]?.url) {
-          const imageUrl = imageResponse.data[0].url;
-          console.log('✅ DALL-E image generated:', imageUrl);
-          
-          // Store image locally
-          const localImagePath = await ImageStorage.downloadAndStoreImage(imageUrl, parseInt(recipe.id));
-          if (localImagePath) {
-            recipe.image = localImagePath;
-            recipe.imageUrl = `${process.env.REPL_ID ? `https://${process.env.REPL_ID}.repl.run` : 'http://localhost:5000'}/api/images/serve${localImagePath}`;
-            console.log('✅ Recipe image stored locally:', recipe.imageUrl);
-            
-            // Store in global cache for polling endpoint
-            global.recipeImageCache.set(tempId, {
-              recipe,
-              imageUrl: recipe.imageUrl
-            });
-            console.log(`📸 Cached image data for tempId: ${tempId}`);
-          }
-        }
-      } catch (imageError) {
-        console.error('⚠️ Image generation failed for extracted recipe:', imageError);
-        // Continue without image - not critical for extraction
-        
-        // Still cache the recipe without image for consistency
-        global.recipeImageCache.set(tempId, {
-          recipe,
-          imageUrl: null
-        });
-      }
+      // Skip image generation temporarily due to OpenAI quota issues
+      // Will be re-enabled once API quota is resolved
+      console.log('📸 Skipping image generation due to API quota limits');
+      
+      // Cache the recipe without image for now
+      global.recipeImageCache.set(tempId, {
+        recipe,
+        imageUrl: null
+      });
+      console.log(`📋 Cached recipe data without image for tempId: ${tempId}`);
 
       // Process sub-recipes if they exist
       if (recipe.subRecipes) {
