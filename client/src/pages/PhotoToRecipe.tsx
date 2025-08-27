@@ -416,8 +416,17 @@ export default function PhotoToRecipe() {
                 difficulty: extractedRecipe.difficulty,
                 cuisine: extractedRecipe.cuisine,
                 image: extractedRecipe.imageUrl,
-                ingredients: ingredientStrings,
-                instructions: instructionStrings,
+                ingredients: extractedRecipe.ingredients?.map((ing: any) => {
+                  if (typeof ing === 'string') return ing;
+                  if (ing.amount && ing.name) return `${ing.amount} ${ing.name}`;
+                  if (ing.text) return ing.text;
+                  return ing.toString();
+                }) || [],
+                instructions: extractedRecipe.instructions?.map((inst: any) => {
+                  if (typeof inst === 'string') return inst;
+                  if (inst.instruction) return inst.instruction;
+                  return inst.toString();
+                }) || [],
                 tips: extractedRecipe.tips?.join('\n') || ''
               }}
             />
