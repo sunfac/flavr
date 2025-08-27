@@ -16,6 +16,7 @@ import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
 import { useQuery } from "@tanstack/react-query";
 import DietaryToggleSection from "@/components/DietaryToggleSection";
 import { filterConflictingIngredients, getRemovedIngredientsMessage } from "@/utils/dietaryFilters";
+import { detectDietaryConflicts } from "@/utils/dietaryConflictDetection";
 
 export default function Fridge2Fork() {
   const [, navigate] = useLocation();
@@ -168,7 +169,7 @@ export default function Fridge2Fork() {
   const handleDietaryChange = (newDietary: string[]) => {
     setSelectedDietary(newDietary);
     
-    // Filter existing ingredients
+    // Filter existing ingredients based on dietary preferences
     const { filteredIngredients, removedIngredients } = filterConflictingIngredients(
       ingredients, 
       newDietary
@@ -188,6 +189,30 @@ export default function Fridge2Fork() {
         description: message,
         variant: "default"
       });
+    }
+  };
+
+  // Handle nutritional preference changes and check for conflicts
+  const handleNutritionalChange = (newNutritional: string[]) => {
+    setSelectedNutritional(newNutritional);
+    
+    // Check for conflicts with existing ingredients (treated as a text prompt)
+    if (ingredients.length > 0) {
+      const ingredientText = ingredients.join(", ");
+      const conflictResult = detectDietaryConflicts(ingredientText, selectedDietary, newNutritional);
+      if (conflictResult.hasConflict && conflictResult.message) {
+        // Remove conflicting nutritional preferences
+        const updatedNutritional = newNutritional.filter(
+          nutritional => !conflictResult.conflictingDietary.includes(nutritional)
+        );
+        setSelectedNutritional(updatedNutritional);
+        
+        toast({
+          title: "Nutritional conflict detected",
+          description: conflictResult.message,
+          variant: "default"
+        });
+      }
     }
   };
 
@@ -439,7 +464,7 @@ export default function Fridge2Fork() {
                   selectedDietary={selectedDietary}
                   selectedNutritional={selectedNutritional}
                   onDietaryChange={handleDietaryChange}
-                  onNutritionalChange={setSelectedNutritional}
+                  onNutritionalChange={handleNutritionalChange}
                   className="mt-8 pt-6 border-t border-slate-600"
                 />
 
