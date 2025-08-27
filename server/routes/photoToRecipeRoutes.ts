@@ -5,6 +5,8 @@ import fs from "fs";
 import { GoogleGenAI } from "@google/genai";
 import { storage } from "../storage";
 import { convertToUKIngredients } from "../ukIngredientMappings";
+import { ImageStorage } from "../imageStorage";
+import OpenAI from "openai";
 
 // Configure multer for photo uploads
 const upload = multer({
@@ -27,6 +29,9 @@ const uploadDir = path.join(process.cwd(), 'server/uploads/temp');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
+
+// Initialize OpenAI for image generation
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export function registerPhotoToRecipeRoutes(app: Express): void {
   // Extract recipe from cookbook photos
@@ -283,9 +288,35 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
 
       console.log('📋 Final recipe structure:', JSON.stringify(recipe, null, 2));
       
-      // Skip image generation for now to avoid errors
-      // Image generation can be added later through the recipe interface
-      console.log('📸 Skipping image generation for extracted recipe (will be generated on demand)');
+      // Generate recipe image using DALL-E 3
+      console.log('📸 Generating image for extracted recipe...');
+      try {
+        const imagePrompt = `A professional, appetizing photo of ${recipe.title}, ${recipe.cuisine || 'home-cooked'} cuisine style, beautifully plated and garnished, natural lighting, food photography, high quality`;
+        
+        const imageResponse = await openai.images.generate({
+          model: "dall-e-3",
+          prompt: imagePrompt,
+          n: 1,
+          size: "1024x1024",
+          quality: "standard",
+        });
+
+        if (imageResponse.data?.[0]?.url) {
+          const imageUrl = imageResponse.data[0].url;
+          console.log('✅ DALL-E image generated:', imageUrl);
+          
+          // Store image locally
+          const localImagePath = await ImageStorage.downloadAndStoreImage(imageUrl, parseInt(recipe.id));
+          if (localImagePath) {
+            recipe.image = localImagePath;
+            recipe.imageUrl = `${process.env.REPL_ID ? `https://${process.env.REPL_ID}.repl.run` : 'http://localhost:5000'}/api/images/serve${localImagePath}`;
+            console.log('✅ Recipe image stored locally:', recipe.imageUrl);
+          }
+        }
+      } catch (imageError) {
+        console.error('⚠️ Image generation failed for extracted recipe:', imageError);
+        // Continue without image - not critical for extraction
+      }
 
       // Process sub-recipes if they exist
       if (recipe.subRecipes) {

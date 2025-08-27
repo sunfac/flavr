@@ -61,12 +61,14 @@ interface ScaledIngredient {
 interface IngredientPanelProps {
   ingredients: ScaledIngredient[];
   onSubstitute: (id: string, currentIngredient: string) => void;
+  onSubRecipe?: (ingredientText: string, subRecipeName: string) => void;
   className?: string;
 }
 
 export default function IngredientPanel({ 
   ingredients, 
   onSubstitute, 
+  onSubRecipe,
   className = '' 
 }: IngredientPanelProps) {
   const [showScrollHint, setShowScrollHint] = useState(true);
@@ -113,6 +115,7 @@ export default function IngredientPanel({
                 key={ingredient.id}
                 ingredient={ingredient}
                 onSubstitute={onSubstitute}
+                onSubRecipe={onSubRecipe}
               />
             ))}
           </div>
@@ -155,6 +158,7 @@ export default function IngredientPanel({
                 key={ingredient.id}
                 ingredient={ingredient}
                 onSubstitute={onSubstitute}
+                onSubRecipe={onSubRecipe}
               />
             ))}
           </div>
@@ -166,10 +170,12 @@ export default function IngredientPanel({
 
 function IngredientSubstituteItem({ 
   ingredient, 
-  onSubstitute 
+  onSubstitute,
+  onSubRecipe 
 }: { 
   ingredient: ScaledIngredient; 
   onSubstitute: (id: string, currentIngredient: string) => void; 
+  onSubRecipe?: (ingredientText: string, subRecipeName: string) => void;
 }) {
   return (
     <motion.div
@@ -193,7 +199,13 @@ function IngredientSubstituteItem({
             return (
               <button 
                 className="ml-2 inline-flex items-center gap-1 text-xs text-orange-400 hover:text-orange-300 underline transition-colors"
-                onClick={() => onSubstitute(ingredient.id, questionText)}
+                onClick={() => {
+                  if (onSubRecipe && subRecipeInfo.subRecipe) {
+                    onSubRecipe(ingredient.text, subRecipeInfo.subRecipe);
+                  } else {
+                    onSubstitute(ingredient.id, questionText);
+                  }
+                }}
                 title={subRecipeInfo.pageReference ? `Referenced on ${subRecipeInfo.pageReference}` : 'Get recipe instructions'}
               >
                 <ExternalLink className="w-3 h-3" />
@@ -227,10 +239,12 @@ function IngredientSubstituteItem({
 
 function IngredientMobileItem({ 
   ingredient, 
-  onSubstitute 
+  onSubstitute,
+  onSubRecipe 
 }: { 
   ingredient: ScaledIngredient; 
   onSubstitute: (id: string, currentIngredient: string) => void; 
+  onSubRecipe?: (ingredientText: string, subRecipeName: string) => void;
 }) {
   return (
     <motion.div
@@ -255,7 +269,13 @@ function IngredientMobileItem({
             return (
               <button 
                 className="block mt-1 text-xs text-orange-400 hover:text-orange-300 underline transition-colors"
-                onClick={() => onSubstitute(ingredient.id, questionText)}
+                onClick={() => {
+                  if (onSubRecipe && subRecipeInfo.subRecipe) {
+                    onSubRecipe(ingredient.text, subRecipeInfo.subRecipe);
+                  } else {
+                    onSubstitute(ingredient.id, questionText);
+                  }
+                }}
               >
                 {subRecipeInfo.pageReference ? 'Cookbook Recipe' : 'Get Recipe'}
               </button>

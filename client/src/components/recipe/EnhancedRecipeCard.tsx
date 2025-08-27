@@ -60,6 +60,7 @@ import IngredientPanel from './IngredientPanel';
 import StepStack from './StepStack';
 import ProgressBar from './ProgressBar';
 import FooterSection from './FooterSection';
+import SubRecipeModal from './SubRecipeModal';
 import { animations, layout } from '@/styles/tokens';
 import SocialShareTools from '@/components/SocialShareTools';
 
@@ -78,6 +79,10 @@ interface Recipe {
   shareId?: string;
   isShared?: boolean;
   tempId?: string;
+  subRecipes?: Record<string, {
+    ingredients: string[];
+    instructions: string[];
+  }>;
 }
 
 interface EnhancedRecipeCardProps {
@@ -97,6 +102,15 @@ function EnhancedRecipeCard({
   const [currentStep, setCurrentStep] = useState(0);
   const [key, setKey] = useState(0); // Force re-render key
   const [ingredientStates, setIngredientStates] = useState<Record<string, boolean>>({});
+  const [subRecipeModal, setSubRecipeModal] = useState<{
+    isOpen: boolean;
+    recipeName: string;
+    subRecipe: { ingredients: string[]; instructions: string[] };
+  }>({
+    isOpen: false,
+    recipeName: '',
+    subRecipe: { ingredients: [], instructions: [] }
+  });
   const { toast } = useToast();
   
   const recipeStore = useRecipeStore();
@@ -287,6 +301,31 @@ function EnhancedRecipeCard({
 
 
 
+
+  // Handle sub-recipe display
+  const handleSubRecipeRequest = (ingredientText: string, subRecipeName: string) => {
+    console.log('🍽️ Sub-recipe requested:', { ingredientText, subRecipeName });
+    
+    // Look for the sub-recipe in the recipe's subRecipes
+    if (recipe.subRecipes && recipe.subRecipes[subRecipeName]) {
+      const subRecipe = recipe.subRecipes[subRecipeName];
+      setSubRecipeModal({
+        isOpen: true,
+        recipeName: subRecipeName,
+        subRecipe
+      });
+      return;
+    }
+    
+    // Fallback to chatbot if sub-recipe not found in extracted data
+    console.log('Sub-recipe not found in extracted data, falling back to chat');
+    const questionText = ingredientText.includes('page') 
+      ? `Show me the recipe for ${subRecipeName} from the cookbook photos`
+      : `How to make ${subRecipeName}?`;
+    
+    // This will trigger the chatbot
+    handleIngredientSubstitute('sub-recipe-request', questionText);
+  };
 
   const handleIngredientSubstitute = async (ingredientId: string, currentIngredient: string) => {
     // Update the loading state
@@ -600,6 +639,7 @@ function EnhancedRecipeCard({
           <IngredientPanel
             ingredients={formattedIngredients}
             onSubstitute={handleIngredientSubstitute}
+            onSubRecipe={handleSubRecipeRequest}
             className="md:h-[600px] md:sticky md:top-0"
           />
 
@@ -663,6 +703,14 @@ function EnhancedRecipeCard({
         />
       </motion.div>
 
+      {/* Sub-Recipe Modal */}
+      <SubRecipeModal
+        isOpen={subRecipeModal.isOpen}
+        onClose={() => setSubRecipeModal(prev => ({ ...prev, isOpen: false }))}
+        recipeName={subRecipeModal.recipeName}
+        subRecipe={subRecipeModal.subRecipe}
+        onBack={() => setSubRecipeModal(prev => ({ ...prev, isOpen: false }))}
+      />
 
     </div>
   );
