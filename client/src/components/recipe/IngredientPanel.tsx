@@ -1,15 +1,37 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { RefreshCw, Loader2, MessageCircle } from 'lucide-react';
+import { RefreshCw, Loader2, MessageCircle, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { animations } from '@/styles/tokens';
+
+// Common ingredients that might have sub-recipes
+const SUB_RECIPE_INGREDIENTS = [
+  'chilli drizzle', 'chili drizzle', 'harissa', 'pesto', 'chimichurri',
+  'tamarind chutney', 'mint chutney', 'salsa verde', 'tahini sauce',
+  'sriracha mayo', 'garlic aioli', 'herb oil', 'compound butter',
+  'spice mix', 'spice blend', 'curry paste', 'marinade'
+];
+
+function detectSubRecipe(ingredientText: string): { hasSubRecipe: boolean; subRecipe?: string } {
+  const lowerText = ingredientText.toLowerCase();
+  const foundSubRecipe = SUB_RECIPE_INGREDIENTS.find(subRecipe => 
+    lowerText.includes(subRecipe)
+  );
+  
+  return {
+    hasSubRecipe: !!foundSubRecipe,
+    subRecipe: foundSubRecipe
+  };
+}
 
 interface ScaledIngredient {
   id: string;
   text: string;
   isSubstituted?: boolean;
   isLoading?: boolean;
+  hasSubRecipe?: boolean;
+  subRecipe?: string;
 }
 
 interface IngredientPanelProps {
@@ -137,6 +159,21 @@ function IngredientSubstituteItem({
           : 'text-slate-200'
       }`}>
         {ingredient.text}
+        {(() => {
+          const subRecipeInfo = detectSubRecipe(ingredient.text);
+          if (subRecipeInfo.hasSubRecipe) {
+            return (
+              <button 
+                className="ml-2 inline-flex items-center gap-1 text-xs text-orange-400 hover:text-orange-300 underline transition-colors"
+                onClick={() => onSubstitute(ingredient.id, `How to make ${subRecipeInfo.subRecipe}?`)}
+              >
+                <ExternalLink className="w-3 h-3" />
+                Recipe
+              </button>
+            );
+          }
+          return null;
+        })()}
       </div>
       
       <Button
@@ -179,6 +216,20 @@ function IngredientMobileItem({
           : 'text-slate-100'
       }`}>
         {ingredient.text}
+        {(() => {
+          const subRecipeInfo = detectSubRecipe(ingredient.text);
+          if (subRecipeInfo.hasSubRecipe) {
+            return (
+              <button 
+                className="block mt-1 text-xs text-orange-400 hover:text-orange-300 underline transition-colors"
+                onClick={() => onSubstitute(ingredient.id, `How to make ${subRecipeInfo.subRecipe}?`)}
+              >
+                Get Recipe
+              </button>
+            );
+          }
+          return null;
+        })()}
       </div>
       
       <Button

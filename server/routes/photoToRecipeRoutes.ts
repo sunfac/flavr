@@ -164,6 +164,7 @@ MULTI-PAGE EXTRACTION REQUIREMENTS:
 - If cooking steps reference ingredients not yet listed, scan other pages for those ingredients
 - Look for serving suggestions, garnishes, or final touches that might be on separate pages
 - Ensure NO recipe elements are missing even if scattered across pages
+- For ingredients like 'chilli drizzle' or 'tamarind chutney', provide simple sub-recipes or note they can be store-bought
 
 TECHNICAL REQUIREMENTS:
 - Parse ingredients accurately but rewrite all method steps completely

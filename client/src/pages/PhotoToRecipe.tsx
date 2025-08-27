@@ -444,6 +444,34 @@ export default function PhotoToRecipe() {
                 }) || [],
                 tips: extractedRecipe.tips?.join('\n') || ''
               }}
+              onMount={() => {
+                // Initialize recipe store for chatbot interaction
+                recipeStore.initialize({
+                  meta: {
+                    title: extractedRecipe.title,
+                    description: extractedRecipe.description,
+                    cookTime: extractedRecipe.cookTime,
+                    difficulty: extractedRecipe.difficulty,
+                    cuisine: extractedRecipe.cuisine,
+                    image: extractedRecipe.imageUrl || undefined,
+                    tempId: `photo-extracted-${Date.now()}`,
+                    originalServings: extractedRecipe.servings || 4
+                  },
+                  ingredients: extractedRecipe.ingredients?.map((ing: any, index: number) => ({
+                    id: `ingredient-${index}`,
+                    text: typeof ing === 'string' ? ing : `${ing.amount || ''} ${ing.name || ing}`.trim(),
+                    checked: false
+                  })) || [],
+                  steps: extractedRecipe.instructions?.map((inst: any, index: number) => ({
+                    id: `step-${index}`,
+                    title: `Step ${index + 1}`,
+                    description: typeof inst === 'string' ? inst : inst.instruction || inst.toString(),
+                    duration: 0
+                  })) || [],
+                  servings: extractedRecipe.servings || 4,
+                  currentStep: 0
+                });
+              }}
             />
           </div>
         ) : (
