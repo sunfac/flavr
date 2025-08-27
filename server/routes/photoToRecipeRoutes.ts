@@ -2,7 +2,6 @@ import type { Express } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { GoogleGenAI } from "@google/genai";
 import { storage } from "../storage";
 import { convertToUKIngredients } from "../ukIngredientMappings";
 import { ImageStorage } from "../imageStorage";
@@ -76,14 +75,12 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
 
       console.log(`📸 Processing ${files.length} photos...`);
 
-      // Initialize Gemini Vision API
-      if (!process.env.GEMINI_API_KEY) {
-        throw new Error('GEMINI_API_KEY not configured');
+      // Initialize OpenAI Vision API
+      if (!process.env.OPENAI_API_KEY) {
+        throw new Error('OPENAI_API_KEY not configured');
       }
 
-      const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-      // Extract text from all photos using Gemini Vision
+      // Extract text from all photos using OpenAI Vision
       const extractedTexts: string[] = [];
       const failedFiles: string[] = [];
       
@@ -92,37 +89,46 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
         
         try {
           const imageBytes = fs.readFileSync(file.path);
+          const base64Image = imageBytes.toString("base64");
           
-          const response = await genai.models.generateContent({
-            model: "gemini-2.0-flash-exp",
-            contents: [
+          const response = await openai.chat.completions.create({
+            model: "gpt-4o", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+            messages: [
               {
-                inlineData: {
-                  data: imageBytes.toString("base64"),
-                  mimeType: file.mimetype,
-                },
-              },
-              {
-                text: `Extract ALL text from this cookbook page image. Focus on:
-                - Recipe title
-                - Ingredient lists with measurements
-                - Cooking instructions/method steps
-                - Serving information
-                - Cooking times
-                - Any notes or tips
-                
-                Please transcribe the text exactly as written, maintaining the structure and format. If this appears to be a recipe page, extract every detail you can see.`
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: `Extract ALL text from this cookbook page image. Focus on:
+                    - Recipe title
+                    - Ingredient lists with measurements
+                    - Cooking instructions/method steps
+                    - Serving information
+                    - Cooking times
+                    - Any notes or tips
+                    - Page references (e.g., "see page 45")
+                    
+                    Please transcribe the text exactly as written, maintaining the structure and format. If this appears to be a recipe page, extract every detail you can see, including any sub-recipe sections or references to other pages.`
+                  },
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: `data:${file.mimetype};base64,${base64Image}`
+                    }
+                  }
+                ]
               }
             ],
+            max_tokens: 1000
           });
 
-          const extractedText = response.text || '';
+          const extractedText = response.choices[0]?.message?.content || '';
           if (extractedText.trim()) {
             extractedTexts.push(extractedText);
             console.log(`✅ Text extracted from ${file.filename}: ${extractedText.substring(0, 100)}...`);
           }
         } catch (visionError) {
-          console.error(`❌ Vision API failed for ${file.filename}:`, visionError);
+          console.error(`❌ OpenAI Vision API failed for ${file.filename}:`, visionError);
           failedFiles.push(file.filename);
           
           // Continue with other files instead of throwing error
@@ -269,17 +275,21 @@ Return ONLY a valid JSON object with this exact structure:
 
 CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing commas.`;
 
-      const recipeResponse = await genai.models.generateContent({
-        model: "gemini-2.0-flash-exp",
-        contents: [{ text: recipePrompt }],
-        config: {
-          temperature: 0.3, // Lower temperature for more consistent JSON
-        },
+      const recipeResponse = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "user",
+            content: recipePrompt
+          }
+        ],
+        temperature: 0.3, // Lower temperature for more consistent JSON
+        max_tokens: 2000
       });
 
-      const recipeContent = recipeResponse.text;
+      const recipeContent = recipeResponse.choices[0]?.message?.content;
       if (!recipeContent) {
-        throw new Error('No recipe content received from Gemini');
+        throw new Error('No recipe content received from OpenAI');
       }
 
       // Parse the recipe JSON
