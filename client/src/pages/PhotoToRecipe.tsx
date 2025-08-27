@@ -17,6 +17,7 @@ interface PhotoUpload {
 }
 
 interface ExtractedRecipe {
+  id?: string;
   title: string;
   description: string;
   cuisine: string;
@@ -28,6 +29,8 @@ interface ExtractedRecipe {
   instructions: Array<{ step: number; instruction: string }>;
   tips: string[];
   nutritionalHighlights: string[];
+  imageUrl?: string;
+  tempId?: string;
 }
 
 export default function PhotoToRecipe() {
@@ -36,7 +39,7 @@ export default function PhotoToRecipe() {
     queryKey: ["/api/me"],
     retry: false,
   });
-  const user = userResponse?.user;
+  const user = (userResponse as any)?.user;
   const isAuthenticated = !!user;
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -430,7 +433,7 @@ export default function PhotoToRecipe() {
                 difficulty: extractedRecipe.difficulty,
                 cuisine: extractedRecipe.cuisine,
                 image: extractedRecipe.imageUrl || undefined,
-                tempId: `photo-extracted-${Date.now()}`, // Enable image generation for photo recipes
+                tempId: `photo-extracted-${Date.now()}`,
                 ingredients: extractedRecipe.ingredients?.map((ing: any) => {
                   if (typeof ing === 'string') return ing;
                   if (ing.amount && ing.name) return `${ing.amount} ${ing.name}`;
@@ -446,7 +449,8 @@ export default function PhotoToRecipe() {
               }}
               onMount={() => {
                 // Initialize recipe store for chatbot interaction
-                recipeStore.initialize({
+                const { initialize } = useRecipeStore.getState();
+                initialize({
                   meta: {
                     title: extractedRecipe.title,
                     description: extractedRecipe.description,

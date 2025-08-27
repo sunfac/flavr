@@ -77,6 +77,7 @@ interface Recipe {
   tips?: string;
   shareId?: string;
   isShared?: boolean;
+  tempId?: string;
 }
 
 interface EnhancedRecipeCardProps {
