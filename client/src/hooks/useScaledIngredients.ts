@@ -97,7 +97,7 @@ function scaleIngredientText(ingredient: string, scalingFactor: number): string 
     return formatScaledNumber(scaledValue);
   });
 
-  // Scale decimal and whole numbers (more comprehensive pattern)
+  // Scale decimal and whole numbers - comprehensive pattern to catch all standalone numbers
   scaledText = scaledText.replace(/\b(\d+(?:\.\d+)?)\b/g, (match, num, offset) => {
     // Check if this number was already processed as part of a fraction
     let alreadyProcessed = false;
@@ -115,6 +115,27 @@ function scaleIngredientText(ingredient: string, scalingFactor: number): string 
     
     const scaledValue = value * scalingFactor;
     return formatScaledNumber(scaledValue);
+  });
+  
+  // Additional pass for numbers directly connected to units (like 20g, 500ml)
+  scaledText = scaledText.replace(/(\d+(?:\.\d+)?)([a-zA-Z]+)/g, (match, num, unit, offset) => {
+    // Check if this was already processed
+    let alreadyProcessed = false;
+    for (let i = offset; i < offset + match.length; i++) {
+      if (processedIndices.has(i)) {
+        alreadyProcessed = true;
+        break;
+      }
+    }
+    
+    if (alreadyProcessed) return match;
+    
+    const value = parseFloat(num);
+    if (isNaN(value)) return match;
+    
+    const scaledValue = value * scalingFactor;
+    const scaledNumber = formatScaledNumber(scaledValue);
+    return `${scaledNumber}${unit}`;
   });
 
   return scaledText;
