@@ -959,11 +959,22 @@ Important: Return each instruction as a separate array element, do not combine m
         updatedInstructions: result.updatedInstructions
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing ingredient substitution:', error);
+      
+      // Handle OpenAI quota errors gracefully
+      if (error.status === 429 || error.code === 'insufficient_quota') {
+        return res.json({ 
+          substitute: req.body.ingredient, // Keep original ingredient
+          updatedInstructions: req.body.recipeContext?.instructions || [],
+          warning: 'AI substitution temporarily unavailable - ingredient unchanged'
+        });
+      }
+      
       res.status(500).json({ 
         error: 'Failed to process substitution',
-        substitute: req.body.ingredient // Fallback to original
+        substitute: req.body.ingredient,
+        updatedInstructions: req.body.recipeContext?.instructions || []
       });
     }
   });

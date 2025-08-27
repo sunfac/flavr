@@ -272,8 +272,22 @@ export default function PhotoToRecipe() {
               <CardHeader>
                 <CardTitle>Upload Cookbook Photos</CardTitle>
                 <p className="text-sm text-gray-600">
-                  Take clear photos of your cookbook pages. You can upload up to 3 pages for complex recipes.
+                  Take clear photos of your cookbook pages. Upload up to 3 pages for complex recipes with ingredients and instructions on separate pages.
                 </p>
+                <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-start gap-2">
+                    <div className="text-blue-600 mt-0.5">💡</div>
+                    <div className="text-sm text-blue-800">
+                      <p className="font-medium mb-1">Multi-page recipe tips:</p>
+                      <ul className="text-xs space-y-1 list-disc ml-4">
+                        <li>Include pages with ingredient lists, even if separate from instructions</li>
+                        <li>Capture any serving suggestions or garnish details</li>
+                        <li>Include pages with cooking tips or storage instructions</li>
+                        <li>We'll automatically combine all information into one complete recipe</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -416,6 +430,7 @@ export default function PhotoToRecipe() {
                 difficulty: extractedRecipe.difficulty,
                 cuisine: extractedRecipe.cuisine,
                 image: extractedRecipe.imageUrl || undefined,
+                tempId: `photo-extracted-${Date.now()}`, // Enable image generation for photo recipes
                 ingredients: extractedRecipe.ingredients?.map((ing: any) => {
                   if (typeof ing === 'string') return ing;
                   if (ing.amount && ing.name) return `${ing.amount} ${ing.name}`;

@@ -157,13 +157,19 @@ FLAVR STYLE GUIDELINES:
 - Add practical tips that make cooking easier ("don't worry if it looks lumpy at first")
 - Make the cooking process feel approachable and enjoyable
 
+MULTI-PAGE EXTRACTION REQUIREMENTS:
+- CAREFULLY scan ALL pages for complete recipe information
+- If ingredients are listed on one page and method on another, COMBINE them
+- If you see partial ingredient lists followed by "continued..." or page references, merge ALL parts
+- If cooking steps reference ingredients not yet listed, scan other pages for those ingredients
+- Look for serving suggestions, garnishes, or final touches that might be on separate pages
+- Ensure NO recipe elements are missing even if scattered across pages
+
 TECHNICAL REQUIREMENTS:
 - Parse ingredients accurately but rewrite all method steps completely
-- If the text spans multiple pages, combine ALL information logically
 - Use UK English throughout (aubergine not eggplant, courgette not zucchini, etc.)
 - Ensure all measurements are in UK format (grams, ml, celsius)
 - Estimate realistic prep and cook times based on complexity
-- Pay special attention to recipe elements split across pages
 
 Return ONLY a valid JSON object with this exact structure:
 {
@@ -308,7 +314,6 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
         description,
         cuisine,
         difficulty,
-        prepTime,
         cookTime,
         servings,
         ingredients: ingredientStrings,
