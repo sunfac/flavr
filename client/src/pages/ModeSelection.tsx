@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronRight, Refrigerator, ChefHat, CalendarDays, Lock } from "lucide-react";
+import { ChevronRight, Refrigerator, ChefHat, CalendarDays, Lock, Camera } from "lucide-react";
 import { useLocation } from "wouter";
 import { PageLayout } from "@/components/PageLayout";
 import { cn } from "@/lib/utils";
@@ -35,6 +35,15 @@ const modes: ModeCard[] = [
     color: "text-orange-500 dark:text-orange-400",
     route: "/chef-assist",
     gradient: "from-orange-500/10 to-orange-600/10 dark:from-orange-500/20 dark:to-orange-600/20"
+  },
+  {
+    title: "Photo to Recipe",
+    description: "Transform cookbook photos into interactive digital recipes with AI",
+    icon: <Camera className="w-12 h-12" />,
+    color: "text-blue-500 dark:text-blue-400",
+    route: "/photo-to-recipe",
+    gradient: "from-blue-500/10 to-blue-600/10 dark:from-blue-500/20 dark:to-blue-600/20",
+    isPremium: true
   },
   {
     title: "Meal Planner",
@@ -111,6 +120,7 @@ export default function ModeSelection() {
                   )}>
                     <Refrigerator className={cn("w-8 h-8 md:w-12 md:h-12", mode.title === "Fridge2Fork" ? "" : "hidden")} />
                     <ChefHat className={cn("w-8 h-8 md:w-12 md:h-12", mode.title === "Chef Assist" ? "" : "hidden")} />
+                    <Camera className={cn("w-8 h-8 md:w-12 md:h-12", mode.title === "Photo to Recipe" ? "" : "hidden")} />
                     <CalendarDays className={cn("w-8 h-8 md:w-12 md:h-12", mode.title === "Meal Planner" ? "" : "hidden")} />
                   </div>
                   <div className="flex items-center justify-center gap-2 mb-3">
