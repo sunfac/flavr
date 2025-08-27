@@ -14,6 +14,7 @@ import { Camera, Loader2, X } from "lucide-react";
 import { iconMap } from "@/lib/iconMap";
 import { useToast } from "@/hooks/use-toast";
 import DietaryToggleSection from "@/components/DietaryToggleSection";
+import { filterConflictingIngredients, getRemovedIngredientsMessage } from "@/utils/dietaryFilters";
 
 // Utility function to get random selection from array
 const getRandomSelection = (array: string[], count: number): string[] => {
@@ -284,7 +285,23 @@ export default function SlideQuizShell({
             .map(ingredient => ingredient.trim())
             .filter(ingredient => ingredient.length > 0);
           
-          const updatedIngredients = [...ingredients, ...newIngredients];
+          // Filter out conflicting ingredients based on dietary preferences
+          const { filteredIngredients, removedIngredients } = filterConflictingIngredients(
+            newIngredients, 
+            selectedDietary
+          );
+          
+          // Show message if ingredients were removed
+          if (removedIngredients.length > 0) {
+            const message = getRemovedIngredientsMessage(removedIngredients, selectedDietary);
+            toast({
+              title: "Ingredients filtered",
+              description: message,
+              variant: "default"
+            });
+          }
+          
+          const updatedIngredients = [...ingredients, ...filteredIngredients];
           updateAnswer(currentQ.id, updatedIngredients);
           setTempInput('');
         };
