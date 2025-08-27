@@ -583,11 +583,16 @@ Return a JSON object with this structure:
       
       const clientId = req.session?.userId?.toString() || req.ip || "anonymous";
       
-      // Combine dietary requirements and nutritional goals for inspire generation
+      // Only include dietary restrictions if they are actually selected/toggled on
+      const selectedDietary = req.body.dietary || [];
+      const selectedNutritional = req.body.nutritionalGoals || [];
+      const explicitAvoid = req.body.avoid || [];
+      
+      // Combine only non-empty dietary requirements for inspire generation
       const combinedDietaryNeeds = [
-        ...(req.body.dietary || []),
-        ...(req.body.nutritionalGoals || []),
-        ...(req.body.avoid || [])
+        ...selectedDietary.filter((item: string) => item && item.trim()),
+        ...selectedNutritional.filter((item: string) => item && item.trim()),
+        ...explicitAvoid.filter((item: string) => item && item.trim())
       ];
 
       const result = await ChefAssistGPT5.generateInspireTitle({
