@@ -10,7 +10,8 @@ const SUB_RECIPE_INGREDIENTS = [
   'chilli drizzle', 'chili drizzle', 'harissa', 'pesto', 'chimichurri',
   'tamarind chutney', 'mint chutney', 'salsa verde', 'tahini sauce',
   'sriracha mayo', 'garlic aioli', 'herb oil', 'compound butter',
-  'spice mix', 'spice blend', 'curry paste', 'marinade'
+  'spice mix', 'spice blend', 'curry paste', 'marinade',
+  'drizzle', 'chutney', 'sauce', 'paste', 'oil', 'mayo', 'aioli'
 ];
 
 function detectSubRecipe(ingredientText: string): { hasSubRecipe: boolean; subRecipe?: string; pageReference?: string } {
@@ -43,9 +44,38 @@ function detectSubRecipe(ingredientText: string): { hasSubRecipe: boolean; subRe
     lowerText.includes(subRecipe)
   );
   
+  if (foundSubRecipe) {
+    // Extract a more specific sub-recipe name from the ingredient text
+    // For example, "3 tsp chilli drizzle" -> "chilli drizzle"
+    const words = ingredientText.toLowerCase().split(/\s+/);
+    let specificName = foundSubRecipe;
+    
+    // Look for compound names (e.g., "chilli drizzle", "tamarind chutney")
+    for (let i = 0; i < words.length - 1; i++) {
+      const compound = `${words[i]} ${words[i + 1]}`;
+      if (SUB_RECIPE_INGREDIENTS.includes(compound)) {
+        specificName = compound;
+        break;
+      }
+    }
+    
+    // Also try 3-word combinations
+    for (let i = 0; i < words.length - 2; i++) {
+      const compound = `${words[i]} ${words[i + 1]} ${words[i + 2]}`;
+      if (SUB_RECIPE_INGREDIENTS.includes(compound)) {
+        specificName = compound;
+        break;
+      }
+    }
+    
+    return {
+      hasSubRecipe: true,
+      subRecipe: specificName
+    };
+  }
+  
   return {
-    hasSubRecipe: !!foundSubRecipe,
-    subRecipe: foundSubRecipe
+    hasSubRecipe: false
   };
 }
 

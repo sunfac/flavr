@@ -305,20 +305,43 @@ function EnhancedRecipeCard({
   // Handle sub-recipe display
   const handleSubRecipeRequest = (ingredientText: string, subRecipeName: string) => {
     console.log('🍽️ Sub-recipe requested:', { ingredientText, subRecipeName });
+    console.log('📚 Available sub-recipes:', recipe.subRecipes ? Object.keys(recipe.subRecipes) : 'None');
     
-    // Look for the sub-recipe in the recipe's subRecipes
-    if (recipe.subRecipes && recipe.subRecipes[subRecipeName]) {
-      const subRecipe = recipe.subRecipes[subRecipeName];
-      setSubRecipeModal({
-        isOpen: true,
-        recipeName: subRecipeName,
-        subRecipe
-      });
-      return;
+    // Look for the sub-recipe in the recipe's subRecipes with flexible matching
+    if (recipe.subRecipes) {
+      // Try exact match first
+      if (recipe.subRecipes[subRecipeName]) {
+        console.log('✅ Found exact match for sub-recipe:', subRecipeName);
+        const subRecipe = recipe.subRecipes[subRecipeName];
+        setSubRecipeModal({
+          isOpen: true,
+          recipeName: subRecipeName,
+          subRecipe
+        });
+        return;
+      }
+      
+      // Try fuzzy matching - look for partial matches in keys
+      const subRecipeKeys = Object.keys(recipe.subRecipes);
+      const fuzzyMatch = subRecipeKeys.find(key => 
+        key.toLowerCase().includes(subRecipeName.toLowerCase()) ||
+        subRecipeName.toLowerCase().includes(key.toLowerCase())
+      );
+      
+      if (fuzzyMatch) {
+        console.log('✅ Found fuzzy match for sub-recipe:', { requested: subRecipeName, found: fuzzyMatch });
+        const subRecipe = recipe.subRecipes[fuzzyMatch];
+        setSubRecipeModal({
+          isOpen: true,
+          recipeName: fuzzyMatch,
+          subRecipe
+        });
+        return;
+      }
     }
     
     // Fallback to chatbot if sub-recipe not found in extracted data
-    console.log('Sub-recipe not found in extracted data, falling back to chat');
+    console.log('❌ Sub-recipe not found in extracted data, falling back to chat');
     const questionText = ingredientText.includes('page') 
       ? `Show me the recipe for ${subRecipeName} from the cookbook photos`
       : `How to make ${subRecipeName}?`;
