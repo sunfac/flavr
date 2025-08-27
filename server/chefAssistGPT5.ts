@@ -954,6 +954,13 @@ MOOD-BASED EXAMPLES:
 
     // Add dietary restrictions to the prompt
     const dietaryRestrictions = data.avoid || [];
+    const isVeganOrVegetarian = dietaryRestrictions.some(restriction => 
+      restriction.toLowerCase().includes('vegan') || restriction.toLowerCase().includes('vegetarian')
+    );
+    
+    // Favor meat dishes 80% of the time when vegan/vegetarian isn't selected
+    const shouldFavorMeat = !isVeganOrVegetarian && Math.random() < 0.8;
+    
     const dietaryPrompt = dietaryRestrictions.length > 0 
       ? `\n\nCRITICAL DIETARY REQUIREMENTS:
 - MUST be suitable for: ${dietaryRestrictions.join(', ')}
@@ -964,12 +971,16 @@ MOOD-BASED EXAMPLES:
 - For dairy-free: NO milk, cheese, butter, cream, or dairy products
 - Ensure all suggested dishes fully comply with the selected dietary restrictions`
       : '';
+    
+    const meatPreferencePrompt = shouldFavorMeat 
+      ? `\n\nMEAT PREFERENCE: Strongly favor meat-based dishes (beef, pork, lamb, chicken, duck, etc.) over vegetarian options. Include high-quality proteins as the star ingredient.`
+      : '';
 
     const userMessage = `${inspirationPrompt}
 
 User Intent: ${data.userIntent || "delicious cooking"}
 Randomization Seed: ${rngSeed} (use this to ensure variety)
-${dietaryPrompt}
+${dietaryPrompt}${meatPreferencePrompt}
 
 GUIDELINES:
 - Create titles that showcase PROFESSIONAL COOKING TECHNIQUES and MAXIMUM FLAVOR
