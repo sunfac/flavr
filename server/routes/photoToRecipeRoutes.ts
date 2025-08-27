@@ -85,6 +85,7 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
 
       // Extract text from all photos using Gemini Vision
       const extractedTexts: string[] = [];
+      const failedFiles: string[] = [];
       
       for (const file of files) {
         console.log(`🔍 Analyzing photo: ${file.filename}`);
@@ -122,7 +123,10 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
           }
         } catch (visionError) {
           console.error(`❌ Vision API failed for ${file.filename}:`, visionError);
-          throw new Error(`Failed to analyze image ${file.filename}`);
+          failedFiles.push(file.filename);
+          
+          // Continue with other files instead of throwing error
+          console.log(`⚠️ Continuing with other photos despite failure for ${file.filename}`);
         } finally {
           // Clean up temporary file
           try {
@@ -134,7 +138,15 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
       }
 
       if (extractedTexts.length === 0) {
-        return res.status(400).json({ error: 'No text could be extracted from the photos' });
+        return res.status(400).json({ 
+          error: 'No text could be extracted from any photos. This may be due to API quota limits. Please try again later or with fewer photos.' 
+        });
+      }
+
+      // Log success/failure summary
+      console.log(`📊 Extraction summary: ${extractedTexts.length} successful, ${failedFiles.length} failed`);
+      if (failedFiles.length > 0) {
+        console.log(`⚠️ Failed files: ${failedFiles.join(', ')}`);
       }
 
       // Combine all extracted text
@@ -344,11 +356,18 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
         console.log('📚 Found sub-recipes:', Object.keys(recipe.subRecipes));
       }
 
+      // Prepare response message
+      let message = `Successfully extracted recipe from ${extractedTexts.length} photo(s)`;
+      if (failedFiles.length > 0) {
+        message += `. Note: ${failedFiles.length} photo(s) failed to process due to API limits, but extraction continued with available data.`;
+      }
+
       res.json({ 
         recipe,
         subRecipes: recipe.subRecipes || {},
         extractedPages: extractedTexts.length,
-        message: `Successfully extracted recipe from ${files.length} photo(s)`
+        failedPages: failedFiles.length,
+        message
       });
 
     } catch (error: any) {
