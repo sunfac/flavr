@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Upload, Camera, X, Plus, Loader2, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
@@ -14,6 +15,8 @@ interface PhotoUpload {
   file: File;
   preview: string;
   id: string;
+  type: 'main' | 'sub';
+  subRecipeName?: string;
 }
 
 interface ExtractedRecipe {
@@ -48,20 +51,46 @@ export default function PhotoToRecipe() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [photos, setPhotos] = useState<PhotoUpload[]>([]);
+  const [subRecipeSlots, setSubRecipeSlots] = useState<Array<{id: string, name: string, photo: PhotoUpload | null}>>([]);
   const [extractedRecipe, setExtractedRecipe] = useState<ExtractedRecipe | null>(null);
   const [showRecipeCard, setShowRecipeCard] = useState(false);
   const { replaceRecipe } = useRecipeStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [newSubRecipeName, setNewSubRecipeName] = useState('');
+
+  // Sub-recipe slot management functions
+  const addSubRecipeSlot = (name: string) => {
+    const newSlot = {
+      id: Date.now().toString(),
+      name: name.trim(),
+      photo: null
+    };
+    setSubRecipeSlots(prev => [...prev, newSlot]);
+  };
+
+  const removeSubRecipeSlot = (slotId: string) => {
+    setSubRecipeSlots(prev => prev.filter(slot => slot.id !== slotId));
+  };
 
   // Check if user has Flavr+ subscription or is developer
   const hasFlavrPlus = user?.hasFlavrPlus || user?.email === 'william@blycontracting.co.uk';
 
   const extractRecipeMutation = useMutation({
-    mutationFn: async (photoFiles: File[]) => {
+    mutationFn: async () => {
       const formData = new FormData();
-      photoFiles.forEach((file, index) => {
-        formData.append(`photo${index}`, file);
+      
+      // Add main recipe photos
+      photos.forEach((photo, index) => {
+        formData.append(`main_photo_${index}`, photo.file);
+      });
+      
+      // Add sub-recipe photos
+      subRecipeSlots.forEach((slot, slotIndex) => {
+        if (slot.photo) {
+          formData.append(`sub_${slot.name}`, slot.photo.file);
+          formData.append(`sub_name_${slotIndex}`, slot.name);
+        }
       });
       
       const response = await fetch('/api/extract-recipe-from-photos', {
@@ -180,33 +209,57 @@ export default function PhotoToRecipe() {
     },
   });
 
-  const handleFileSelect = (files: FileList | null) => {
+  const handleFileSelect = (files: FileList | null, type: 'main' | 'sub' = 'main', subRecipeName?: string) => {
     if (!files) return;
     
     const newPhotos: PhotoUpload[] = [];
-    for (let i = 0; i < Math.min(files.length, 3 - photos.length); i++) {
+    const maxFiles = type === 'main' ? 3 - photos.length : 1;
+    
+    for (let i = 0; i < Math.min(files.length, maxFiles); i++) {
       const file = files[i];
       if (file.type.startsWith('image/')) {
         const id = Date.now().toString() + i;
         const preview = URL.createObjectURL(file);
-        newPhotos.push({ file, preview, id });
+        newPhotos.push({ file, preview, id, type, subRecipeName });
       }
     }
     
-    setPhotos(prev => [...prev, ...newPhotos]);
+    if (type === 'main') {
+      setPhotos(prev => [...prev, ...newPhotos]);
+    } else if (subRecipeName) {
+      // Handle sub-recipe photo upload
+      setSubRecipeSlots(prev => prev.map(slot => 
+        slot.name === subRecipeName 
+          ? { ...slot, photo: newPhotos[0] || null }
+          : slot
+      ));
+    }
   };
 
-  const removePhoto = (id: string) => {
-    setPhotos(prev => {
-      const updated = prev.filter(photo => photo.id !== id);
-      // Clean up preview URLs
-      prev.forEach(photo => {
-        if (photo.id === id) {
-          URL.revokeObjectURL(photo.preview);
-        }
+  const removePhoto = (id: string, type: 'main' | 'sub' = 'main') => {
+    if (type === 'main') {
+      setPhotos(prev => {
+        const updated = prev.filter(photo => photo.id !== id);
+        // Clean up preview URLs
+        prev.forEach(photo => {
+          if (photo.id === id) {
+            URL.revokeObjectURL(photo.preview);
+          }
+        });
+        return updated;
       });
-      return updated;
-    });
+    } else {
+      // Remove sub-recipe photo
+      setSubRecipeSlots(prev => prev.map(slot => {
+        if (slot.photo?.id === id) {
+          if (slot.photo) {
+            URL.revokeObjectURL(slot.photo.preview);
+          }
+          return { ...slot, photo: null };
+        }
+        return slot;
+      }));
+    }
   };
 
   const handleExtractRecipe = () => {
@@ -219,7 +272,7 @@ export default function PhotoToRecipe() {
       return;
     }
     
-    extractRecipeMutation.mutate(photos.map(p => p.file));
+    extractRecipeMutation.mutate();
   };
 
   const handleSaveRecipe = () => {
@@ -283,27 +336,13 @@ export default function PhotoToRecipe() {
 
         {!extractedRecipe ? (
           <div className="space-y-6">
-            {/* Photo Upload Section */}
+            {/* Main Recipe Photos */}
             <Card>
               <CardHeader>
-                <CardTitle>Upload Cookbook Photos</CardTitle>
+                <CardTitle>Main Recipe Photos</CardTitle>
                 <p className="text-sm text-gray-600">
-                  Take clear photos of your cookbook pages. Upload up to 3 pages for complex recipes with ingredients and instructions on separate pages.
+                  Upload photos of your main recipe pages (ingredients, instructions, etc.).
                 </p>
-                <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="flex items-start gap-2">
-                    <div className="text-blue-600 mt-0.5">💡</div>
-                    <div className="text-sm text-blue-800">
-                      <p className="font-medium mb-1">Multi-page recipe tips:</p>
-                      <ul className="text-xs space-y-1 list-disc ml-4">
-                        <li>Include pages with ingredient lists, even if separate from instructions</li>
-                        <li>Capture any serving suggestions or garnish details</li>
-                        <li>Include pages with cooking tips or storage instructions</li>
-                        <li>We'll automatically combine all information into one complete recipe</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -399,6 +438,100 @@ export default function PhotoToRecipe() {
                       )}
                     </Button>
                   )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Sub-Recipe Photos Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Sub-Recipe Photos (Optional)</CardTitle>
+                <p className="text-sm text-gray-600">
+                  If your recipe references sub-recipes like "chilli drizzle" or "tamarind chutney", add them here for complete extraction.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Add Sub-Recipe Form */}
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Sub-recipe name (e.g., chilli drizzle)"
+                      value={newSubRecipeName}
+                      onChange={(e) => setNewSubRecipeName(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && newSubRecipeName.trim()) {
+                          addSubRecipeSlot(newSubRecipeName);
+                          setNewSubRecipeName('');
+                        }
+                      }}
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={() => {
+                        if (newSubRecipeName.trim()) {
+                          addSubRecipeSlot(newSubRecipeName);
+                          setNewSubRecipeName('');
+                        }
+                      }}
+                      disabled={!newSubRecipeName.trim()}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  {/* Sub-Recipe Slots */}
+                  {subRecipeSlots.map((slot) => (
+                    <div key={slot.id} className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium text-sm">{slot.name}</h4>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeSubRecipeSlot(slot.id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      
+                      {slot.photo ? (
+                        <div className="relative">
+                          <img
+                            src={slot.photo.preview}
+                            alt={slot.name}
+                            className="w-full h-32 object-cover rounded border"
+                          />
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="absolute top-1 right-1 w-6 h-6 p-0"
+                            onClick={() => removePhoto(slot.photo!.id, 'sub')}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div
+                          className="h-32 border-2 border-dashed border-gray-300 rounded flex items-center justify-center cursor-pointer hover:border-orange-500 transition-colors"
+                          onClick={() => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = 'image/*';
+                            input.onchange = (e) => {
+                              const files = (e.target as HTMLInputElement).files;
+                              handleFileSelect(files, 'sub', slot.name);
+                            };
+                            input.click();
+                          }}
+                        >
+                          <div className="text-center">
+                            <Upload className="w-6 h-6 text-gray-400 mx-auto mb-1" />
+                            <p className="text-xs text-gray-500">Add Photo</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>

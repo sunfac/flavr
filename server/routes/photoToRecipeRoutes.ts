@@ -34,11 +34,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export function registerPhotoToRecipeRoutes(app: Express): void {
   // Extract recipe from cookbook photos
-  app.post('/api/extract-recipe-from-photos', upload.fields([
-    { name: 'photo0', maxCount: 1 },
-    { name: 'photo1', maxCount: 1 },
-    { name: 'photo2', maxCount: 1 }
-  ]), async (req, res) => {
+  app.post('/api/extract-recipe-from-photos', upload.any(), async (req, res) => {
     try {
       console.log('📸 Starting photo-to-recipe extraction...');
       
@@ -60,31 +56,39 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
         });
       }
 
-      const fileFields = req.files as { [fieldname: string]: Express.Multer.File[] };
-      const files: Express.Multer.File[] = [];
-      
-      // Collect all uploaded files from different fields
-      if (fileFields) {
-        Object.values(fileFields).forEach(fileArray => {
-          files.push(...fileArray);
-        });
-      }
+      const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {
         return res.status(400).json({ error: 'No photos provided' });
       }
 
-      console.log(`📸 Processing ${files.length} photos...`);
+      // Separate main recipe photos from sub-recipe photos
+      const mainPhotos: Express.Multer.File[] = [];
+      const subRecipePhotos: Array<{ name: string, file: Express.Multer.File }> = [];
+      
+      files.forEach(file => {
+        if (file.fieldname.startsWith('main_photo_')) {
+          mainPhotos.push(file);
+        } else if (file.fieldname.startsWith('sub_')) {
+          // Extract sub-recipe name from fieldname (sub_{name})
+          const subRecipeName = file.fieldname.substring(4); // Remove 'sub_' prefix
+          subRecipePhotos.push({ name: subRecipeName, file });
+        }
+      });
+
+      console.log(`📸 Processing ${mainPhotos.length} main photos and ${subRecipePhotos.length} sub-recipe photos...`);
 
       // Initialize OpenAI Vision API
       if (!process.env.OPENAI_API_KEY) {
         throw new Error('OPENAI_API_KEY not configured');
       }
 
-      // Extract text from all photos using OpenAI Vision
-      const extractedTexts: string[] = [];
+      // Extract text from main recipe photos using OpenAI Vision
+      const mainRecipeTexts: string[] = [];
+      const subRecipeTexts: Record<string, string> = {};
       const failedFiles: string[] = [];
       
-      for (const file of files) {
+      // Process main recipe photos
+      for (const file of mainPhotos) {
         console.log(`🔍 Analyzing photo: ${file.filename}`);
         
         try {
@@ -124,8 +128,8 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
 
           const extractedText = response.choices[0]?.message?.content || '';
           if (extractedText.trim()) {
-            extractedTexts.push(extractedText);
-            console.log(`✅ Text extracted from ${file.filename}: ${extractedText.substring(0, 100)}...`);
+            mainRecipeTexts.push(extractedText);
+            console.log(`✅ Main recipe text extracted from ${file.filename}: ${extractedText.substring(0, 100)}...`);
           }
         } catch (visionError) {
           console.error(`❌ OpenAI Vision API failed for ${file.filename}:`, visionError);
@@ -143,20 +147,76 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
         }
       }
 
-      if (extractedTexts.length === 0) {
+      // Process sub-recipe photos
+      for (const subRecipe of subRecipePhotos) {
+        console.log(`🔍 Analyzing sub-recipe photo: ${subRecipe.name}`);
+        
+        try {
+          const imageBytes = fs.readFileSync(subRecipe.file.path);
+          const base64Image = imageBytes.toString("base64");
+          
+          const response = await openai.chat.completions.create({
+            model: "gpt-4o", // using gpt-4o for cost efficiency as requested
+            messages: [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: `Extract ALL text from this cookbook page image for the recipe: "${subRecipe.name}". Focus on:
+                    - Recipe title (should contain "${subRecipe.name}")
+                    - Complete ingredient list
+                    - Cooking method/instructions
+                    - Prep time and cooking time if shown
+                    - Any notes or tips
+                    
+                    This is a sub-recipe/side dish that will be referenced by a main recipe. Please extract every detail you can see.`
+                  },
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: `data:${subRecipe.file.mimetype};base64,${base64Image}`
+                    }
+                  }
+                ]
+              }
+            ],
+            max_tokens: 1000
+          });
+
+          const extractedText = response.choices[0]?.message?.content || '';
+          if (extractedText.trim()) {
+            subRecipeTexts[subRecipe.name] = extractedText;
+            console.log(`✅ Sub-recipe text extracted for ${subRecipe.name}: ${extractedText.substring(0, 100)}...`);
+          }
+        } catch (visionError) {
+          console.error(`❌ Sub-recipe vision API failed for ${subRecipe.name}:`, visionError);
+          failedFiles.push(subRecipe.file.filename);
+          console.log(`⚠️ Continuing without sub-recipe ${subRecipe.name}`);
+        } finally {
+          // Clean up temporary file
+          try {
+            fs.unlinkSync(subRecipe.file.path);
+          } catch (cleanupError) {
+            console.warn(`⚠️ Failed to cleanup sub-recipe file: ${subRecipe.file.path}`);
+          }
+        }
+      }
+
+      if (mainRecipeTexts.length === 0) {
         return res.status(400).json({ 
           error: 'No text could be extracted from any photos. This may be due to API quota limits. Please try again later or with fewer photos.' 
         });
       }
 
       // Log success/failure summary
-      console.log(`📊 Extraction summary: ${extractedTexts.length} successful, ${failedFiles.length} failed`);
+      console.log(`📊 Extraction summary: ${mainRecipeTexts.length} main recipes, ${Object.keys(subRecipeTexts).length} sub-recipes, ${failedFiles.length} failed`);
       if (failedFiles.length > 0) {
         console.log(`⚠️ Failed files: ${failedFiles.join(', ')}`);
       }
 
       // Combine all extracted text
-      const combinedText = extractedTexts.join('\n\n--- PAGE BREAK ---\n\n');
+      const combinedText = mainRecipeTexts.join('\n\n--- PAGE BREAK ---\n\n');
       console.log('📝 Combined extracted text length:', combinedText.length);
       console.log('📄 FULL EXTRACTED TEXT FOR DEBUG:');
       console.log(combinedText);
@@ -165,12 +225,23 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
       // Process the extracted text into a structured recipe using Gemini
       console.log('🤖 Converting extracted text to structured recipe...');
       
+      // Add sub-recipe information to the prompt
+      let subRecipeInfo = '';
+      if (Object.keys(subRecipeTexts).length > 0) {
+        subRecipeInfo = `\n\nSUB-RECIPE PHOTOS PROVIDED:
+The user has specifically uploaded photos for the following sub-recipes:
+${Object.entries(subRecipeTexts).map(([name, text]) => 
+  `\n--- SUB-RECIPE: ${name.toUpperCase()} ---\n${text}`
+).join('\n')}
+\nYou MUST extract these sub-recipes from the text above and include them in the subRecipes section.`;
+      }
+
       const recipePrompt = `You are a professional recipe parser working for Flavr AI. Convert the following extracted cookbook text into a well-structured recipe in JSON format, completely rewritten in Flavr's distinctive style.
 
 IMPORTANT: Before processing, FIRST scan ALL the text below to identify ALL recipes mentioned. Extract the MAIN DISH recipe as the primary output, but ALSO capture any sub-recipes (sauces, chutneys, etc.) that appear on the photographed pages in the subRecipes section. If you see a main curry AND a tamarind chutney, extract the MAIN CURRY as the recipe, and include the tamarind chutney in subRecipes.
 
-EXTRACTED TEXT:
-${combinedText}
+MAIN RECIPE EXTRACTED TEXT:
+${combinedText}${subRecipeInfo}
 
 CRITICAL COPYRIGHT REQUIREMENTS:
 - NEVER copy instructions, descriptions, or method steps verbatim from the source
