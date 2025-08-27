@@ -139,22 +139,31 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
       // Process the extracted text into a structured recipe using Gemini
       console.log('🤖 Converting extracted text to structured recipe...');
       
-      const recipePrompt = `You are a professional recipe parser. Convert the following extracted cookbook text into a well-structured recipe in JSON format.
+      const recipePrompt = `You are a professional recipe parser working for Flavr AI. Convert the following extracted cookbook text into a well-structured recipe in JSON format, completely rewritten in Flavr's distinctive style.
 
 EXTRACTED TEXT:
 ${combinedText}
 
-Instructions:
-- Parse this text and create a complete recipe
-- If the text spans multiple pages, combine ALL information logically (ingredients from one page, instructions from another, etc.)
-- If you see references like "see page X" or "continued on page Y", incorporate that information when available in the text
-- If ingredients appear on a separate page from instructions, merge them into a complete recipe
-- Fill in reasonable defaults for missing information
+CRITICAL COPYRIGHT REQUIREMENTS:
+- NEVER copy instructions, descriptions, or method steps verbatim from the source
+- COMPLETELY REWRITE all instructional text in Flavr's friendly, accessible style
+- Ingredient lists can be preserved as-is (not copyrightable)
+- All descriptions, tips, and method steps must be your own original wording
+
+FLAVR STYLE GUIDELINES:
+- Write instructions in a warm, encouraging tone like a helpful friend cooking alongside you
+- Use clear, simple language that builds confidence
+- Include helpful timing cues and sensory descriptions ("until golden and fragrant", "when it starts to sizzle")
+- Add practical tips that make cooking easier ("don't worry if it looks lumpy at first")
+- Make the cooking process feel approachable and enjoyable
+
+TECHNICAL REQUIREMENTS:
+- Parse ingredients accurately but rewrite all method steps completely
+- If the text spans multiple pages, combine ALL information logically
 - Use UK English throughout (aubergine not eggplant, courgette not zucchini, etc.)
 - Ensure all measurements are in UK format (grams, ml, celsius)
-- Estimate realistic prep and cook times based on the recipe complexity
-- Provide helpful cooking tips if not explicitly mentioned
-- Pay special attention to recipe elements that may be split across pages (ingredient lists, method steps, serving suggestions)
+- Estimate realistic prep and cook times based on complexity
+- Pay special attention to recipe elements split across pages
 
 Return ONLY a valid JSON object with this exact structure:
 {
