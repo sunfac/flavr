@@ -114,7 +114,7 @@ export default function ChefAssist() {
     
     // Check for conflicts with current prompt
     if (prompt.trim()) {
-      const conflictResult = detectDietaryConflicts(prompt, newDietary);
+      const conflictResult = detectDietaryConflicts(prompt, newDietary, selectedNutritional);
       if (conflictResult.hasConflict && conflictResult.message) {
         // Remove conflicting dietary preferences
         const updatedDietary = newDietary.filter(
@@ -131,22 +131,51 @@ export default function ChefAssist() {
     }
   };
 
+  // Handle nutritional preference changes and automatically turn off conflicting toggles
+  const handleNutritionalChange = (newNutritional: string[]) => {
+    setSelectedNutritional(newNutritional);
+    
+    // Check for conflicts with current prompt
+    if (prompt.trim()) {
+      const conflictResult = detectDietaryConflicts(prompt, selectedDietary, newNutritional);
+      if (conflictResult.hasConflict && conflictResult.message) {
+        // Remove conflicting nutritional preferences
+        const updatedNutritional = newNutritional.filter(
+          nutritional => !conflictResult.conflictingDietary.includes(nutritional)
+        );
+        setSelectedNutritional(updatedNutritional);
+        
+        toast({
+          title: "Nutritional conflict detected",
+          description: conflictResult.message,
+          variant: "default"
+        });
+      }
+    }
+  };
+
   // Handle prompt changes and check for conflicts
   const handlePromptChange = (newPrompt: string) => {
     setPrompt(newPrompt);
     
-    // Check for conflicts with selected dietary preferences
-    if (selectedDietary.length > 0 && newPrompt.trim()) {
-      const conflictResult = detectDietaryConflicts(newPrompt, selectedDietary);
+    // Check for conflicts with selected dietary and nutritional preferences
+    if ((selectedDietary.length > 0 || selectedNutritional.length > 0) && newPrompt.trim()) {
+      const conflictResult = detectDietaryConflicts(newPrompt, selectedDietary, selectedNutritional);
       if (conflictResult.hasConflict && conflictResult.message) {
         // Remove conflicting dietary preferences
         const updatedDietary = selectedDietary.filter(
           dietary => !conflictResult.conflictingDietary.includes(dietary)
         );
+        // Remove conflicting nutritional preferences
+        const updatedNutritional = selectedNutritional.filter(
+          nutritional => !conflictResult.conflictingDietary.includes(nutritional)
+        );
+        
         setSelectedDietary(updatedDietary);
+        setSelectedNutritional(updatedNutritional);
         
         toast({
-          title: "Dietary conflict detected",
+          title: "Conflict detected",
           description: conflictResult.message,
           variant: "default"
         });
@@ -339,7 +368,7 @@ export default function ChefAssist() {
                   selectedDietary={selectedDietary}
                   selectedNutritional={selectedNutritional}
                   onDietaryChange={handleDietaryChange}
-                  onNutritionalChange={setSelectedNutritional}
+                  onNutritionalChange={handleNutritionalChange}
                   className="mt-6"
                 />
 

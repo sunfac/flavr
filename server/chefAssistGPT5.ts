@@ -436,6 +436,7 @@ RECIPE REQUIREMENTS:
 - Provide finishing_touches and 3–6 flavour_boosts aligned to the packs for maximum flavor development.
 - Include 1-3 side dishes that complement the main dish for a complete meal experience.
 - Respect must-use and avoid strictly. Honour time_budget; if impossible, set realistic total and note it in style_notes.
+- CRITICAL DIETARY COMPLIANCE: If dietary needs are specified, the recipe MUST be fully compliant. For vegan: NO meat, dairy, eggs, fish, or animal products. For vegetarian: NO meat or fish (dairy/eggs OK). For gluten-free: NO wheat, barley, rye, or gluten-containing ingredients. For low-carb/keto: minimize carbohydrates. For low-fat: use minimal oils and fats. For low-sodium: avoid salt and high-sodium ingredients.
 - Title must be cookbook-style: 4–10 words with plain-English descriptors (e.g., "pan-seared", "crispy", "herb-lifted"). No chef-science jargon.
 - Return JSON only, matching the schema exactly.
 

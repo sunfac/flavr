@@ -7,7 +7,7 @@ interface ConflictResult {
   message?: string;
 }
 
-// Define ingredients that conflict with each dietary preference
+// Define ingredients that conflict with each dietary preference and nutritional goal
 const dietaryConflicts = {
   vegan: [
     // Meat and poultry
@@ -43,12 +43,26 @@ const dietaryConflicts = {
   ],
   'nut-free': [
     'almond', 'almonds', 'walnut', 'walnuts', 'pecan', 'pecans', 'cashew', 'cashews', 'pistachio', 'pistachios', 'hazelnut', 'hazelnuts', 'brazil nut', 'brazil nuts', 'macadamia', 'pine nut', 'pine nuts', 'peanut', 'peanuts', 'peanut butter', 'nutella', 'marzipan', 'nougat', 'praline'
+  ],
+  // Nutritional goals conflicts
+  'low-carb': [
+    'bread', 'pasta', 'rice', 'noodles', 'potato', 'potatoes', 'chips', 'fries', 'pizza', 'bagel', 'croissant', 'cake', 'cookies', 'biscuits', 'muffin', 'pancake', 'waffle', 'cereals', 'oats', 'quinoa', 'couscous', 'bulgur', 'barley', 'sweet potato', 'corn', 'banana', 'grapes', 'mango', 'pineapple'
+  ],
+  'keto': [
+    'bread', 'pasta', 'rice', 'noodles', 'potato', 'potatoes', 'chips', 'fries', 'pizza', 'bagel', 'croissant', 'cake', 'cookies', 'biscuits', 'muffin', 'pancake', 'waffle', 'cereals', 'oats', 'quinoa', 'couscous', 'bulgur', 'barley', 'sweet potato', 'corn', 'banana', 'grapes', 'mango', 'pineapple', 'beans', 'lentils', 'chickpeas', 'sugar', 'honey', 'maple syrup'
+  ],
+  'low-fat': [
+    'butter', 'oil', 'olive oil', 'coconut oil', 'avocado', 'nuts', 'cheese', 'cream', 'bacon', 'sausage', 'fried', 'deep fried', 'fatty', 'duck', 'lamb', 'pork belly', 'ribeye', 'salmon', 'mackerel', 'sardines'
+  ],
+  'low-sodium': [
+    'salt', 'salty', 'soy sauce', 'fish sauce', 'worcestershire', 'anchovy', 'olives', 'pickles', 'bacon', 'ham', 'salami', 'pepperoni', 'prosciutto', 'smoked', 'cured', 'processed', 'canned', 'stock cube', 'bouillon'
   ]
 };
 
 export function detectDietaryConflicts(
   userInput: string, 
-  selectedDietary: string[]
+  selectedDietary: string[],
+  selectedNutritional: string[] = []
 ): ConflictResult {
   const inputLower = userInput.toLowerCase();
   const conflicts: string[] = [];
@@ -66,6 +80,23 @@ export function detectDietaryConflicts(
       
       if (foundConflicts.length > 0) {
         conflicts.push(dietary);
+        conflictingIngredients.push(...foundConflicts);
+      }
+    }
+  }
+
+  // Check each selected nutritional goal for conflicts
+  for (const nutritional of selectedNutritional) {
+    const conflictingItems = dietaryConflicts[nutritional as keyof typeof dietaryConflicts];
+    if (conflictingItems) {
+      const foundConflicts = conflictingItems.filter(item => {
+        // Use word boundaries to avoid false positives
+        const regex = new RegExp(`\\b${item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+        return regex.test(inputLower);
+      });
+      
+      if (foundConflicts.length > 0) {
+        conflicts.push(nutritional);
         conflictingIngredients.push(...foundConflicts);
       }
     }

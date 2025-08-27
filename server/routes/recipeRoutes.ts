@@ -661,10 +661,15 @@ Return a JSON object with this structure:
       const clientId = req.session?.userId?.toString() || req.ip || "anonymous";
       
       // Combine dietary requirements and nutritional goals for backend processing
+      // Filter out empty values to ensure only selected preferences are included
+      const selectedDietary = req.body.dietary || [];
+      const selectedNutritional = req.body.nutritionalGoals || [];
+      const explicitDietaryNeeds = req.body.dietaryNeeds || [];
+      
       const combinedDietaryNeeds = [
-        ...(req.body.dietary || []),
-        ...(req.body.nutritionalGoals || []),
-        ...(req.body.dietaryNeeds || [])
+        ...selectedDietary.filter((item: string) => item && item.trim()),
+        ...selectedNutritional.filter((item: string) => item && item.trim()),
+        ...explicitDietaryNeeds.filter((item: string) => item && item.trim())
       ];
 
       const result = await ChefAssistGPT5.generateFullRecipe({
