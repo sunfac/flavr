@@ -288,6 +288,15 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
 
       console.log('📋 Final recipe structure:', JSON.stringify(recipe, null, 2));
       
+      // Initialize global cache if needed
+      if (!global.recipeImageCache) {
+        global.recipeImageCache = new Map();
+      }
+      
+      // Create a tempId for image polling
+      const tempId = `photo-extracted-${Date.now()}`;
+      recipe.tempId = tempId;
+      
       // Generate recipe image using DALL-E 3
       console.log('📸 Generating image for extracted recipe...');
       try {
@@ -311,11 +320,24 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
             recipe.image = localImagePath;
             recipe.imageUrl = `${process.env.REPL_ID ? `https://${process.env.REPL_ID}.repl.run` : 'http://localhost:5000'}/api/images/serve${localImagePath}`;
             console.log('✅ Recipe image stored locally:', recipe.imageUrl);
+            
+            // Store in global cache for polling endpoint
+            global.recipeImageCache.set(tempId, {
+              recipe,
+              imageUrl: recipe.imageUrl
+            });
+            console.log(`📸 Cached image data for tempId: ${tempId}`);
           }
         }
       } catch (imageError) {
         console.error('⚠️ Image generation failed for extracted recipe:', imageError);
         // Continue without image - not critical for extraction
+        
+        // Still cache the recipe without image for consistency
+        global.recipeImageCache.set(tempId, {
+          recipe,
+          imageUrl: null
+        });
       }
 
       // Process sub-recipes if they exist
