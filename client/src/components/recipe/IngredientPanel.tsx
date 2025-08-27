@@ -229,10 +229,14 @@ function IngredientSubstituteItem({
             return (
               <button 
                 className="ml-2 inline-flex items-center gap-1 text-xs text-orange-400 hover:text-orange-300 underline transition-colors"
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('🍽️ Sub-recipe link clicked:', { ingredientText: ingredient.text, subRecipe: subRecipeInfo.subRecipe });
                   if (onSubRecipe && subRecipeInfo.subRecipe) {
                     onSubRecipe(ingredient.text, subRecipeInfo.subRecipe);
                   } else {
+                    console.log('⚠️ onSubRecipe not available, falling back to substitution');
                     onSubstitute(ingredient.id, questionText);
                   }
                 }}
@@ -299,10 +303,14 @@ function IngredientMobileItem({
             return (
               <button 
                 className="block mt-1 text-xs text-orange-400 hover:text-orange-300 underline transition-colors"
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('📱 Mobile sub-recipe link clicked:', { ingredientText: ingredient.text, subRecipe: subRecipeInfo.subRecipe });
                   if (onSubRecipe && subRecipeInfo.subRecipe) {
                     onSubRecipe(ingredient.text, subRecipeInfo.subRecipe);
                   } else {
+                    console.log('⚠️ onSubRecipe not available, falling back to substitution');
                     onSubstitute(ingredient.id, questionText);
                   }
                 }}
