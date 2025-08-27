@@ -213,21 +213,26 @@ MULTI-PAGE EXTRACTION REQUIREMENTS:
 
 SUB-RECIPE EXTRACTION - CRITICAL CORRELATION PROCESS:
 
-STEP 1: IDENTIFY PAGE REFERENCES IN MAIN RECIPE
-- Scan main recipe ingredients for page references: "chilli drizzle (see page 45)", "tamarind chutney (p. 23)", etc.
-- Note the ingredient name AND the page reference number
-- Common patterns: (see page X), (p. X), (page X), (turn to page X), (recipe on page X)
+MANDATORY: You MUST extract sub-recipes if ANY of these appear in the main recipe ingredients:
+- "chilli drizzle" - LOOK FOR: any recipe titled "Chilli Drizzle", "Chili Drizzle", or similar
+- "tamarind chutney" - LOOK FOR: any recipe titled "Tamarind Chutney", "Tamarind Sauce", or similar  
+- Any ingredient followed by "(see page X)" or similar reference
 
-STEP 2: FIND MATCHING SUB-RECIPE CONTENT
-- Scan ALL extracted text for recipe titles that match referenced ingredients
-- Look for sections with titles like "Chilli Drizzle", "Tamarind Chutney", etc.
-- These sub-recipes will have their own ingredient lists and method steps
-- Match by ingredient name even if page numbers aren't visible in the text
+STEP 1: SCAN ALL TEXT FOR SUB-RECIPE SECTIONS
+- Look through ALL extracted text for recipe titles that could be sub-recipes
+- Search for: CHILLI DRIZZLE, TAMARIND CHUTNEY, or any sauce/condiment recipes
+- These will appear as separate recipe sections with their own ingredients and methods
+- They may NOT have page references - find them by name matching
 
-STEP 3: EXTRACT COMPLETE SUB-RECIPES
-- When you find a matching sub-recipe section, extract the COMPLETE recipe
-- Include ALL ingredients and method steps from that sub-recipe
-- Store in subRecipes with the exact ingredient name as the key
+STEP 2: AGGRESSIVE MATCHING
+- If main recipe mentions "chilli drizzle" → find ANY recipe with "chilli" in the title
+- If main recipe mentions "tamarind chutney" → find ANY recipe with "tamarind" in the title
+- Match even if spelling or formatting differs slightly
+
+STEP 3: EXTRACT EVERYTHING FOUND
+- Extract ALL matching sub-recipes, even if you're not 100% certain
+- Include complete ingredients and method steps for each sub-recipe
+- Store with the exact name from the main recipe ingredients as the key
 
 EXAMPLE CORRELATION:
 Main recipe ingredient: "3 tsp chilli drizzle (see page 45)"
