@@ -270,6 +270,21 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
         return res.status(400).json({ error: 'Missing required recipe fields' });
       }
 
+      // Convert complex ingredient/instruction objects to simple strings for database storage
+      const ingredientStrings = ingredients.map((ing: any) => {
+        if (typeof ing === 'string') return ing;
+        if (ing.name && ing.amount) return `${ing.amount} ${ing.name}`;
+        if (ing.item && ing.qty) return `${ing.qty} ${ing.unit || ''} ${ing.item}`.trim();
+        return ing.toString();
+      });
+
+      const instructionStrings = instructions.map((inst: any) => {
+        if (typeof inst === 'string') return inst;
+        if (inst.instruction) return inst.instruction;
+        if (inst.step && inst.instruction) return inst.instruction;
+        return inst.toString();
+      });
+
       // Save recipe to database
       const savedRecipe = await storage.createRecipe({
         userId: req.session.userId,
@@ -280,8 +295,8 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
         prepTime,
         cookTime,
         servings,
-        ingredients: JSON.stringify(ingredients),
-        instructions: JSON.stringify(instructions),
+        ingredients: JSON.stringify(ingredientStrings),
+        instructions: JSON.stringify(instructionStrings),
         tips: tips ? JSON.stringify(tips) : '[]',
         nutritionalHighlights: nutritionalHighlights ? JSON.stringify(nutritionalHighlights) : '[]',
         imageUrl: null, // No image for photo-extracted recipes initially

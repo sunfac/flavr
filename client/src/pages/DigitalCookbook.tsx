@@ -53,9 +53,9 @@ export default function DigitalCookbook() {
                          recipe.description?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesFilter = selectedFilter === "all" || 
-                         recipe.mode === selectedFilter ||
-                         recipe.cuisine.toLowerCase() === selectedFilter.toLowerCase() ||
-                         recipe.difficulty.toLowerCase() === selectedFilter.toLowerCase();
+                         `mode-${recipe.mode}` === selectedFilter ||
+                         `cuisine-${recipe.cuisine.toLowerCase()}` === selectedFilter ||
+                         `difficulty-${recipe.difficulty.toLowerCase()}` === selectedFilter;
     
     return matchesSearch && matchesFilter;
   }) || [];
@@ -73,9 +73,9 @@ export default function DigitalCookbook() {
     
     return [
       { label: "All Recipes", value: "all" },
-      ...filteredModes.map(mode => ({ label: `${mode.charAt(0).toUpperCase() + mode.slice(1)} Mode`, value: mode })),
-      ...cuisines.map(cuisine => ({ label: cuisine, value: cuisine.toLowerCase() })),
-      ...difficulties.map(diff => ({ label: diff, value: diff.toLowerCase() }))
+      ...filteredModes.map((mode, index) => ({ label: `${mode.charAt(0).toUpperCase() + mode.slice(1)} Mode`, value: `mode-${mode}` })),
+      ...cuisines.map((cuisine, index) => ({ label: cuisine, value: `cuisine-${cuisine.toLowerCase()}` })),
+      ...difficulties.map((diff, index) => ({ label: diff, value: `difficulty-${diff.toLowerCase()}` }))
     ];
   };
 
@@ -83,15 +83,39 @@ export default function DigitalCookbook() {
     // Load recipe into store and navigate to Recipe page for full experience with chat
     const { replaceRecipe } = useRecipeStore.getState();
     
+    // Parse stored JSON strings back to arrays if needed
+    let ingredientArray: string[] = [];
+    let instructionArray: string[] = [];
+    
+    try {
+      ingredientArray = typeof recipe.ingredients === 'string' 
+        ? JSON.parse(recipe.ingredients) 
+        : recipe.ingredients;
+    } catch {
+      ingredientArray = Array.isArray(recipe.ingredients) 
+        ? recipe.ingredients 
+        : [recipe.ingredients?.toString() || ''];
+    }
+    
+    try {
+      instructionArray = typeof recipe.instructions === 'string' 
+        ? JSON.parse(recipe.instructions) 
+        : recipe.instructions;
+    } catch {
+      instructionArray = Array.isArray(recipe.instructions) 
+        ? recipe.instructions 
+        : [recipe.instructions?.toString() || ''];
+    }
+    
     replaceRecipe({
       id: recipe.id.toString(),
       servings: recipe.servings,
-      ingredients: recipe.ingredients.map((text, index) => ({
+      ingredients: ingredientArray.map((text, index) => ({
         id: `ingredient-${index}`,
         text,
         checked: false
       })),
-      steps: recipe.instructions.map((instruction, index) => ({
+      steps: instructionArray.map((instruction, index) => ({
         id: `step-${index}`,
         title: `Step ${index + 1}`,
         description: instruction
