@@ -100,12 +100,12 @@ export default function PhotoToRecipe() {
           description: instruction
         })),
         meta: {
-          title: recipe.title,
-          description: recipe.description,
-          cookTime: recipe.cookTime,
-          difficulty: recipe.difficulty,
-          cuisine: recipe.cuisine,
-          image: null // No image initially, will be generated
+          title: recipe.title || '',
+          description: recipe.description || '',
+          cookTime: recipe.cookTime || 30,
+          difficulty: recipe.difficulty || 'Medium',
+          cuisine: recipe.cuisine || '',
+          image: recipe.imageUrl || undefined
         },
         currentStep: 0,
         completedSteps: [],
@@ -406,7 +406,21 @@ export default function PhotoToRecipe() {
                 </Button>
               </div>
             </div>
-            <EnhancedRecipeCard />
+            <EnhancedRecipeCard 
+              recipe={{
+                id: extractedRecipe.id || Date.now().toString(),
+                title: extractedRecipe.title,
+                description: extractedRecipe.description,
+                cookTime: extractedRecipe.cookTime,
+                servings: extractedRecipe.servings,
+                difficulty: extractedRecipe.difficulty,
+                cuisine: extractedRecipe.cuisine,
+                image: extractedRecipe.imageUrl,
+                ingredients: ingredientStrings,
+                instructions: instructionStrings,
+                tips: extractedRecipe.tips?.join('\n') || ''
+              }}
+            />
           </div>
         ) : (
           /* Basic Extracted Recipe Display for editing */

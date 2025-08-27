@@ -225,33 +225,9 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
 
       console.log('📋 Final recipe structure:', JSON.stringify(recipe, null, 2));
       
-      // Generate an image for the extracted recipe in the background
-      try {
-        console.log('🎨 Generating image for extracted recipe...');
-        // This could be moved to after saving if needed, but doing it here for immediate display
-        const imageResponse = await fetch('http://localhost:5000/api/generate-recipe-image', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            title: recipe.title,
-            description: recipe.description,
-            cuisine: recipe.cuisine
-          })
-        });
-        
-        if (imageResponse.ok) {
-          const imageData = await imageResponse.json();
-          recipe.imageUrl = imageData.imageUrl;
-          console.log('✅ Image generated for extracted recipe:', imageData.imageUrl);
-        } else {
-          console.log('⚠️ Image generation failed for extracted recipe, continuing without image');
-        }
-      } catch (error) {
-        console.log('⚠️ Image generation error for extracted recipe:', error);
-        // Continue without image - this is not a critical failure
-      }
+      // Skip image generation for now to avoid errors
+      // Image generation can be added later through the recipe interface
+      console.log('📸 Skipping image generation for extracted recipe (will be generated on demand)');
 
       res.json({ 
         recipe,
@@ -323,8 +299,8 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
         prepTime,
         cookTime,
         servings,
-        ingredients: JSON.stringify(ingredientStrings),
-        instructions: JSON.stringify(instructionStrings),
+        ingredients: ingredientStrings,
+        instructions: instructionStrings,
         tips: tips ? JSON.stringify(tips) : '[]',
         nutritionalHighlights: nutritionalHighlights ? JSON.stringify(nutritionalHighlights) : '[]',
         imageUrl: null, // No image for photo-extracted recipes initially
