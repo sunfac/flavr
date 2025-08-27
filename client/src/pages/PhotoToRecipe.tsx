@@ -258,9 +258,9 @@ export default function PhotoToRecipe() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 p-4">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white mb-2">Photo to Recipe</h1>
-          <p className="text-gray-300">
+        <div className="mb-4 md:mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Photo to Recipe</h1>
+          <p className="text-sm md:text-base text-gray-300 leading-relaxed">
             Photograph your favorite cookbook recipes (up to 3 pages) and convert them to editable digital format
           </p>
         </div>
@@ -415,7 +415,7 @@ export default function PhotoToRecipe() {
                 servings: extractedRecipe.servings,
                 difficulty: extractedRecipe.difficulty,
                 cuisine: extractedRecipe.cuisine,
-                image: extractedRecipe.imageUrl,
+                image: extractedRecipe.imageUrl || undefined,
                 ingredients: extractedRecipe.ingredients?.map((ing: any) => {
                   if (typeof ing === 'string') return ing;
                   if (ing.amount && ing.name) return `${ing.amount} ${ing.name}`;

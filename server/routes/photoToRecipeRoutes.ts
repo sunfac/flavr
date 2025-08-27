@@ -146,12 +146,15 @@ ${combinedText}
 
 Instructions:
 - Parse this text and create a complete recipe
-- If the text spans multiple pages, combine all information logically
+- If the text spans multiple pages, combine ALL information logically (ingredients from one page, instructions from another, etc.)
+- If you see references like "see page X" or "continued on page Y", incorporate that information when available in the text
+- If ingredients appear on a separate page from instructions, merge them into a complete recipe
 - Fill in reasonable defaults for missing information
 - Use UK English throughout (aubergine not eggplant, courgette not zucchini, etc.)
 - Ensure all measurements are in UK format (grams, ml, celsius)
 - Estimate realistic prep and cook times based on the recipe complexity
 - Provide helpful cooking tips if not explicitly mentioned
+- Pay special attention to recipe elements that may be split across pages (ingredient lists, method steps, serving suggestions)
 
 Return ONLY a valid JSON object with this exact structure:
 {
