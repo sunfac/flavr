@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Camera, Loader2, X } from "lucide-react";
 import { iconMap } from "@/lib/iconMap";
 import { useToast } from "@/hooks/use-toast";
+import DietaryToggleSection from "@/components/DietaryToggleSection";
 
 // Utility function to get random selection from array
 const getRandomSelection = (array: string[], count: number): string[] => {
@@ -65,6 +66,8 @@ export default function SlideQuizShell({
   const [detectedIngredients, setDetectedIngredients] = useState<string[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<Record<string, boolean>>({});
   const [additionalIngredient, setAdditionalIngredient] = useState('');
+  const [selectedDietary, setSelectedDietary] = useState<string[]>([]);
+  const [selectedNutritional, setSelectedNutritional] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -127,8 +130,15 @@ export default function SlideQuizShell({
     setIsCompleting(true);
     onLoading?.(true);
     
+    // Include dietary and nutritional preferences in the submission
+    const enhancedAnswers = {
+      ...answers,
+      dietary: selectedDietary,
+      nutritionalGoals: selectedNutritional
+    };
+    
     setTimeout(() => {
-      onSubmit(answers);
+      onSubmit(enhancedAnswers);
       onLoading?.(false);
     }, 1000);
   };
@@ -451,6 +461,17 @@ export default function SlideQuizShell({
                   ))}
                 </div>
               </div>
+            )}
+
+            {/* Dietary and Nutritional Toggle Section for Shopping Mode */}
+            {theme === 'shopping' && currentQ.id === 'ingredients' && (
+              <DietaryToggleSection
+                selectedDietary={selectedDietary}
+                selectedNutritional={selectedNutritional}
+                onDietaryChange={setSelectedDietary}
+                onNutritionalChange={setSelectedNutritional}
+                className="mt-6 pt-6 border-t border-slate-600"
+              />
             )}
 
             {/* Photo Ingredients Confirmation Modal */}

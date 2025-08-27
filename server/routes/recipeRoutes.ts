@@ -641,11 +641,18 @@ Return a JSON object with this structure:
       
       const clientId = req.session?.userId?.toString() || req.ip || "anonymous";
       
+      // Combine dietary requirements and nutritional goals for backend processing
+      const combinedDietaryNeeds = [
+        ...(req.body.dietary || []),
+        ...(req.body.nutritionalGoals || []),
+        ...(req.body.dietaryNeeds || [])
+      ];
+
       const result = await ChefAssistGPT5.generateFullRecipe({
         userIntent: userPrompt,
         servings,
         timeBudget: req.body.timeBudget,
-        dietaryNeeds: req.body.dietaryNeeds || [],
+        dietaryNeeds: combinedDietaryNeeds,
         mustUse: req.body.mustUse || [],
         avoid: req.body.avoid || [],
         equipment: req.body.equipment || [],

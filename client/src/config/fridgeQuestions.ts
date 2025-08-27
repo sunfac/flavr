@@ -82,36 +82,22 @@ export const fridgeQuestions: QuestionConfig[] = [
   },
   {
     id: "dietary",
-    label: "Dietary requirements",
-    subtitle: "Any dietary restrictions or preferences?",
-    type: "toggle-grid",
+    label: "Dietary preferences",
+    subtitle: "Any restrictions or goals?",
+    type: "multi-select",
     options: [
-      { value: "noRestrictions", label: "No restrictions", icon: "Check", desc: "Eat everything" },
-      { value: "vegan", label: "Vegan", icon: "Leaf", desc: "Plant-based only" },
-      { value: "vegetarian", label: "Vegetarian", icon: "Carrot", desc: "No meat or fish" },
-      { value: "pescatarian", label: "Pescatarian", icon: "Fish", desc: "Fish but no meat" },
-      { value: "glutenFree", label: "Gluten-free", icon: "WheatOff", desc: "No wheat/gluten" },
-      { value: "dairyFree", label: "Dairy-free", icon: "MilkOff", desc: "No dairy products" },
-      { value: "nutFree", label: "Nut-free", icon: "NutOff", desc: "No nuts or seeds" },
-      { value: "halal", label: "Halal", icon: "Moon", desc: "Islamic dietary laws" },
-      { value: "kosher", label: "Kosher", icon: "Star", desc: "Jewish dietary laws" }
-    ]
-  },
-  {
-    id: "nutritionalGoals",
-    label: "Nutritional goals",
-    subtitle: "What are your health and fitness priorities?",
-    type: "toggle-grid",
-    options: [
-      { value: "balanced", label: "Balanced nutrition", icon: "Scale", desc: "Well-rounded meals" },
-      { value: "highProtein", label: "High protein", icon: "Zap", desc: "Build & maintain muscle" },
-      { value: "lowCarb", label: "Low carb", icon: "Minus", desc: "Reduce carbohydrates" },
-      { value: "lowCalorie", label: "Low calorie", icon: "Target", desc: "Weight management" },
-      { value: "keto", label: "Ketogenic", icon: "Flame", desc: "Very low carb, high fat" },
-      { value: "paleo", label: "Paleo", icon: "Mountain", desc: "Whole foods, no processed" },
-      { value: "lowSodium", label: "Low sodium", icon: "Heart", desc: "Heart-healthy" },
-      { value: "highFiber", label: "High fiber", icon: "Wheat", desc: "Digestive health" },
-      { value: "antioxidantRich", label: "Antioxidant-rich", icon: "Sparkles", desc: "Colorful, nutrient-dense" }
+      { value: "noRestrictions", label: "No restrictions" },
+      { value: "vegan", label: "Vegan" },
+      { value: "vegetarian", label: "Vegetarian" },
+      { value: "glutenFree", label: "Gluten-free" },
+      { value: "dairyFree", label: "Dairy-free" },
+      { value: "nutFree", label: "Nut-free" },
+      { value: "pescatarian", label: "Pescatarian" },
+      { value: "keto", label: "Keto" },
+      { value: "paleo", label: "Paleo" },
+      { value: "lowCarb", label: "Low-carb" },
+      { value: "highProtein", label: "High-protein" },
+      { value: "lowCalorie", label: "Low-calorie" }
     ]
   },
   {

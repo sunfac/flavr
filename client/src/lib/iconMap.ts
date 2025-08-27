@@ -2,7 +2,7 @@ import {
   // Navigation & UI
   Menu, Settings, Crown, LogIn, UserPlus, Home, ArrowLeft, ArrowRight,
   CheckCircle, X, Send, Plus, Minus, Star, Heart, Share2, Download,
-  ChevronLeft, ChevronRight, Lock, History,
+  ChevronLeft, ChevronRight, ChevronDown, Lock, History,
   
   // Cooking & Food
   ChefHat, Utensils, UtensilsCrossed, Flame, Wine, Soup, Coffee,
@@ -49,6 +49,7 @@ export const iconMap = {
   arrowRight: ArrowRight,
   chevronLeft: ChevronLeft,
   chevronRight: ChevronRight,
+  chevronDown: ChevronDown,
   lock: Lock,
   history: History,
   checkCircle: CheckCircle,

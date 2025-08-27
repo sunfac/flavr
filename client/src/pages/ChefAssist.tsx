@@ -12,6 +12,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { iconMap } from "@/lib/iconMap";
 import LoadingPage from "./LoadingPage";
 import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
+import DietaryToggleSection from "@/components/DietaryToggleSection";
 import { useQuery } from "@tanstack/react-query";
 
 // Use the original chef assist examples
@@ -74,6 +75,8 @@ export default function ChefAssist() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentExampleIndex, setCurrentExampleIndex] = useState(0);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [selectedDietary, setSelectedDietary] = useState<string[]>([]);
+  const [selectedNutritional, setSelectedNutritional] = useState<string[]>([]);
   const { toast } = useToast();
   const { updateActiveRecipe } = useRecipeStore();
 
@@ -152,7 +155,9 @@ export default function ChefAssist() {
       const response = await apiRequest("POST", "/api/chef-assist/generate", {
         prompt: prompt.trim(),
         servings: 4, // Default servings
-        cookingTime: 30 // Default cooking time
+        cookingTime: 30, // Default cooking time
+        dietary: selectedDietary,
+        nutritionalGoals: selectedNutritional
       });
       const data = await response.json() as { recipe: any };
 
@@ -278,6 +283,15 @@ export default function ChefAssist() {
                     Inspire Me
                   </Button>
                 </div>
+
+                {/* Dietary and Nutritional Toggles */}
+                <DietaryToggleSection
+                  selectedDietary={selectedDietary}
+                  selectedNutritional={selectedNutritional}
+                  onDietaryChange={setSelectedDietary}
+                  onNutritionalChange={setSelectedNutritional}
+                  className="mt-6"
+                />
 
                 {/* Continue button matching original quiz style */}
                 <Button
