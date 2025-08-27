@@ -224,6 +224,34 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
       recipe.mode = 'photo-extraction';
 
       console.log('📋 Final recipe structure:', JSON.stringify(recipe, null, 2));
+      
+      // Generate an image for the extracted recipe in the background
+      try {
+        console.log('🎨 Generating image for extracted recipe...');
+        // This could be moved to after saving if needed, but doing it here for immediate display
+        const imageResponse = await fetch('http://localhost:5000/api/generate-recipe-image', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            title: recipe.title,
+            description: recipe.description,
+            cuisine: recipe.cuisine
+          })
+        });
+        
+        if (imageResponse.ok) {
+          const imageData = await imageResponse.json();
+          recipe.imageUrl = imageData.imageUrl;
+          console.log('✅ Image generated for extracted recipe:', imageData.imageUrl);
+        } else {
+          console.log('⚠️ Image generation failed for extracted recipe, continuing without image');
+        }
+      } catch (error) {
+        console.log('⚠️ Image generation error for extracted recipe:', error);
+        // Continue without image - this is not a critical failure
+      }
 
       res.json({ 
         recipe,

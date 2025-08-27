@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, Camera, X, Plus, Loader2, Crown } from "lucide-react";
@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { EnhancedRecipeCard } from "@/components/recipe/EnhancedRecipeCard";
+import { useRecipeStore } from "@/stores/recipeStore";
 
 interface PhotoUpload {
   file: File;
@@ -29,6 +31,7 @@ interface ExtractedRecipe {
 }
 
 export default function PhotoToRecipe() {
+  const queryClient = useQueryClient();
   const { data: userResponse, isLoading } = useQuery({
     queryKey: ["/api/me"],
     retry: false,
@@ -39,6 +42,8 @@ export default function PhotoToRecipe() {
   const { toast } = useToast();
   const [photos, setPhotos] = useState<PhotoUpload[]>([]);
   const [extractedRecipe, setExtractedRecipe] = useState<ExtractedRecipe | null>(null);
+  const [showRecipeCard, setShowRecipeCard] = useState(false);
+  const { replaceRecipe } = useRecipeStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -65,7 +70,50 @@ export default function PhotoToRecipe() {
       return response.json();
     },
     onSuccess: (data) => {
-      setExtractedRecipe(data.recipe);
+      const recipe = data.recipe;
+      setExtractedRecipe(recipe);
+      
+      // Convert extracted recipe to recipe store format for EnhancedRecipeCard
+      const ingredientStrings = recipe.ingredients.map((ing: any) => {
+        if (typeof ing === 'string') return ing;
+        if (ing.name && ing.amount) return `${ing.amount} ${ing.name}`;
+        return ing.toString();
+      });
+
+      const instructionStrings = recipe.instructions.map((inst: any) => {
+        if (typeof inst === 'string') return inst;
+        if (inst.instruction) return inst.instruction;
+        return inst.toString();
+      });
+      
+      replaceRecipe({
+        id: recipe.id || Date.now().toString(),
+        servings: recipe.servings || 4,
+        ingredients: ingredientStrings.map((text: string, index: number) => ({
+          id: `ingredient-${index}`,
+          text,
+          checked: false
+        })),
+        steps: instructionStrings.map((instruction: string, index: number) => ({
+          id: `step-${index}`,
+          title: `Step ${index + 1}`,
+          description: instruction
+        })),
+        meta: {
+          title: recipe.title,
+          description: recipe.description,
+          cookTime: recipe.cookTime,
+          difficulty: recipe.difficulty,
+          cuisine: recipe.cuisine,
+          image: null // No image initially, will be generated
+        },
+        currentStep: 0,
+        completedSteps: [],
+        lastUpdated: Date.now()
+      });
+      
+      setShowRecipeCard(true);
+      
       toast({
         title: "Recipe Extracted!",
         description: "Your cookbook recipe has been converted successfully.",
@@ -98,6 +146,9 @@ export default function PhotoToRecipe() {
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate cookbook query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['/api/recipes'] });
+      
       toast({
         title: "Recipe Saved!",
         description: "Your recipe has been added to My Cookbook.",
@@ -322,8 +373,43 @@ export default function PhotoToRecipe() {
               </CardContent>
             </Card>
           </div>
+        ) : showRecipeCard ? (
+          /* Enhanced Recipe Card Display */
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-bold text-white">Your Extracted Recipe</h1>
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => {
+                    setShowRecipeCard(false);
+                    setExtractedRecipe(null);
+                    setPhotos([]);
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  Start Over
+                </Button>
+                <Button
+                  onClick={handleSaveRecipe}
+                  disabled={saveRecipeMutation.isPending}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  {saveRecipeMutation.isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save to My Cookbook'
+                  )}
+                </Button>
+              </div>
+            </div>
+            <EnhancedRecipeCard />
+          </div>
         ) : (
-          /* Extracted Recipe Display */
+          /* Basic Extracted Recipe Display for editing */
           <div className="space-y-6">
             <Card>
               <CardHeader>
