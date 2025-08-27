@@ -14,6 +14,8 @@ import { useRecipeStore } from "@/stores/recipeStore";
 import RecipeSelectionCards from "@/components/RecipeSelectionCards";
 import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
 import { useQuery } from "@tanstack/react-query";
+import DietaryToggleSection from "@/components/DietaryToggleSection";
+import { filterConflictingIngredients, getRemovedIngredientsMessage } from "@/utils/dietaryFilters";
 
 export default function Fridge2Fork() {
   const [, navigate] = useLocation();
@@ -27,6 +29,8 @@ export default function Fridge2Fork() {
   const [showSelection, setShowSelection] = useState(false);
   const [savedQuizData, setSavedQuizData] = useState<any>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [selectedDietary, setSelectedDietary] = useState<string[]>([]);
+  const [selectedNutritional, setSelectedNutritional] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -131,7 +135,23 @@ export default function Fridge2Fork() {
         .filter(item => item && !ingredients.includes(item));
       
       if (newIngredients.length > 0) {
-        setIngredients([...ingredients, ...newIngredients]);
+        // Filter out conflicting ingredients based on dietary preferences
+        const { filteredIngredients, removedIngredients } = filterConflictingIngredients(
+          newIngredients, 
+          selectedDietary
+        );
+        
+        // Show message if ingredients were removed
+        if (removedIngredients.length > 0) {
+          const message = getRemovedIngredientsMessage(removedIngredients, selectedDietary);
+          toast({
+            title: "Ingredients filtered",
+            description: message,
+            variant: "default"
+          });
+        }
+        
+        setIngredients([...ingredients, ...filteredIngredients]);
         setCurrentIngredient("");
       }
     }
@@ -142,6 +162,33 @@ export default function Fridge2Fork() {
     setIngredients(ingredients.filter((_, i) => i !== index));
     // Also remove from confidence data
     setIngredientsWithConfidence(prev => prev.filter(item => item.name !== ingredientToRemove));
+  };
+
+  // Handle dietary preference changes and filter existing ingredients
+  const handleDietaryChange = (newDietary: string[]) => {
+    setSelectedDietary(newDietary);
+    
+    // Filter existing ingredients
+    const { filteredIngredients, removedIngredients } = filterConflictingIngredients(
+      ingredients, 
+      newDietary
+    );
+    
+    // Update ingredients if any were removed
+    if (removedIngredients.length > 0) {
+      setIngredients(filteredIngredients);
+      // Also remove from confidence data
+      setIngredientsWithConfidence(prev => 
+        prev.filter(item => !removedIngredients.includes(item.name))
+      );
+      
+      const message = getRemovedIngredientsMessage(removedIngredients, newDietary);
+      toast({
+        title: "Ingredients filtered",
+        description: message,
+        variant: "default"
+      });
+    }
   };
 
   const handleGenerateRecipes = async () => {
@@ -169,7 +216,7 @@ export default function Fridge2Fork() {
         cookingTime: Math.floor(Math.random() * 21) + 20, // 20-40 minutes
         budget: Math.floor(Math.random() * 4) + 3, // £3-6
         equipment: ["oven", "stovetop", "basic kitchen tools"],
-        dietaryRestrictions: [],
+        dietaryRestrictions: [...selectedDietary, ...selectedNutritional],
         ingredientFlexibility: "pantry", // Allow pantry staples
         mode: "fridge"
       };
@@ -386,6 +433,15 @@ export default function Fridge2Fork() {
                     </motion.div>
                   )}
                 </AnimatePresence>
+
+                {/* Dietary and Nutritional Toggle Section */}
+                <DietaryToggleSection
+                  selectedDietary={selectedDietary}
+                  selectedNutritional={selectedNutritional}
+                  onDietaryChange={handleDietaryChange}
+                  onNutritionalChange={setSelectedNutritional}
+                  className="mt-8 pt-6 border-t border-slate-600"
+                />
 
                 {/* Continue button matching original quiz style */}
                 <Button
