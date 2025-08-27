@@ -141,6 +141,8 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
       
       const recipePrompt = `You are a professional recipe parser working for Flavr AI. Convert the following extracted cookbook text into a well-structured recipe in JSON format, completely rewritten in Flavr's distinctive style.
 
+IMPORTANT: Before processing, FIRST scan ALL the text below to identify ALL recipes mentioned. Then choose ONLY the MAIN DISH recipe (not sauces, chutneys, or accompaniments) to extract. If you see multiple recipes like a main curry AND a tamarind chutney, extract the MAIN CURRY, not the chutney.
+
 EXTRACTED TEXT:
 ${combinedText}
 
@@ -156,6 +158,24 @@ FLAVR STYLE GUIDELINES:
 - Include helpful timing cues and sensory descriptions ("until golden and fragrant", "when it starts to sizzle")
 - Add practical tips that make cooking easier ("don't worry if it looks lumpy at first")
 - Make the cooking process feel approachable and enjoyable
+
+MAIN RECIPE IDENTIFICATION (CRITICAL):
+- IDENTIFY THE PRIMARY MAIN DISH first before processing sub-recipes
+- Look for the LARGEST, most complete recipe with a full ingredient list and method
+- Main recipes typically have:
+  * 4+ servings mentioned
+  * Substantial ingredient lists (6+ ingredients)
+  * Complete cooking methods with multiple steps (5+ steps)
+  * Dish names that are full meals (not condiments/sides)
+  * Include proteins, vegetables, or substantial carbohydrates
+  * Have prep AND cook times (not just mixing instructions)
+- AVOID extracting these as main recipes:
+  * Sauces, chutneys, relishes, dressings
+  * Spice mixes, marinades, stocks
+  * Garnishes, sides, or accompaniments
+  * Single-ingredient preparations
+- If multiple recipes exist, choose the one that represents the COMPLETE MEAL (not the accompaniment)
+- Look for recipe titles that indicate main dishes: curry, stir-fry, roast, bake, stew, etc.
 
 MULTI-PAGE EXTRACTION REQUIREMENTS:
 - CAREFULLY scan ALL pages for complete recipe information
