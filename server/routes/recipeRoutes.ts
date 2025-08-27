@@ -514,6 +514,13 @@ Return a JSON object with this structure:
   ]
 }`;
 
+      // Combine dietary requirements from quiz and inline toggles
+      const combinedDietaryNeeds = [
+        ...dietaryRestrictions,
+        ...(req.body.quizData?.dietary || []),
+        ...(req.body.quizData?.nutritionalGoals || [])
+      ];
+
       // Use GPT-5 with MichelinChefAI for enhanced recipe generation
       const response = await MichelinChefAI.generateRecipeIdeas({
         ingredients,
@@ -521,7 +528,7 @@ Return a JSON object with this structure:
         cookingTime,
         budget,
         equipment,
-        dietary: dietaryRestrictions,
+        dietary: combinedDietaryNeeds,
         ingredientFlexibility
       }, "Fridge Mode");
 

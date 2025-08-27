@@ -480,8 +480,8 @@ export default function SlideQuizShell({
               </div>
             )}
 
-            {/* Dietary and Nutritional Toggle Section for Shopping Mode */}
-            {theme === 'shopping' && currentQ.id === 'ingredients' && (
+            {/* Dietary and Nutritional Toggle Section for Fridge and Shopping Mode */}
+            {(theme === 'shopping' || theme === 'fridge') && currentQ.id === 'ingredients' && (
               <DietaryToggleSection
                 selectedDietary={selectedDietary}
                 selectedNutritional={selectedNutritional}
