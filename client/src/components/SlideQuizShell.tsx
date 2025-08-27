@@ -69,6 +69,31 @@ export default function SlideQuizShell({
   const [additionalIngredient, setAdditionalIngredient] = useState('');
   const [selectedDietary, setSelectedDietary] = useState<string[]>([]);
   const [selectedNutritional, setSelectedNutritional] = useState<string[]>([]);
+  
+  // Handle dietary preference changes and filter existing ingredients
+  const handleDietaryChange = (newDietary: string[]) => {
+    setSelectedDietary(newDietary);
+    
+    // Check if current question is ingredients and filter existing ingredients
+    if (currentQ?.id === 'ingredients') {
+      const currentIngredients = Array.isArray(answers[currentQ.id]) ? answers[currentQ.id] : [];
+      const { filteredIngredients, removedIngredients } = filterConflictingIngredients(
+        currentIngredients, 
+        newDietary
+      );
+      
+      // Update ingredients if any were removed
+      if (removedIngredients.length > 0) {
+        updateAnswer(currentQ.id, filteredIngredients);
+        const message = getRemovedIngredientsMessage(removedIngredients, newDietary);
+        toast({
+          title: "Ingredients filtered",
+          description: message,
+          variant: "default"
+        });
+      }
+    }
+  };
   const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -485,7 +510,7 @@ export default function SlideQuizShell({
               <DietaryToggleSection
                 selectedDietary={selectedDietary}
                 selectedNutritional={selectedNutritional}
-                onDietaryChange={setSelectedDietary}
+                onDietaryChange={handleDietaryChange}
                 onNutritionalChange={setSelectedNutritional}
                 className="mt-6 pt-6 border-t border-slate-600"
               />
