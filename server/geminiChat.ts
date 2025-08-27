@@ -102,6 +102,7 @@ Servings: ${currentRecipe.servings}
 Cook Time: ${currentRecipe.cookTime} minutes  
 Difficulty: ${currentRecipe.difficulty}
 Cuisine: ${currentRecipe.cuisine || 'Not specified'}
+Source: ${currentRecipe.mode === 'photo-extraction' ? 'Extracted from cookbook photos' : 'AI generated'}
 
 Ingredients:
 ${currentRecipe.ingredients?.map((ing: string, i: number) => `${i + 1}. ${ing}`).join('\n') || 'None specified'}
@@ -110,6 +111,17 @@ Instructions:
 ${currentRecipe.instructions?.map((inst: string, i: number) => `${i + 1}. ${inst}`).join('\n') || 'None specified'}
 
 ${currentRecipe.tips ? `Tips: ${currentRecipe.tips}` : ''}
+
+${currentRecipe.subRecipes && Object.keys(currentRecipe.subRecipes).length > 0 ? `
+SUB-RECIPES AVAILABLE FROM COOKBOOK PHOTOS:
+${Object.entries(currentRecipe.subRecipes).map(([name, recipe]: [string, any]) => 
+  `${name}:
+  - Ingredients: ${recipe.ingredients?.join(', ') || 'Not specified'}
+  - Instructions: ${recipe.instructions?.join(' ') || 'Not specified'}`
+).join('\n')}
+
+IMPORTANT: When users ask about these sub-recipes (like "show me the chilli drizzle recipe"), provide the EXACT instructions from the cookbook photos above, not generic versions.
+` : ''}
 ` : 'No current recipe loaded.'}
 
 ORIGINAL OPENAI CONTEXT:
@@ -261,7 +273,7 @@ EXECUTE updateRecipe function now with the recipe changes we discussed.` : messa
       }
       
       onChunk({ type: 'done' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Gemini Streaming Error:', error);
       onChunk({ type: 'error', message: error.message });
     }

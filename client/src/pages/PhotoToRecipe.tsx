@@ -31,6 +31,10 @@ interface ExtractedRecipe {
   nutritionalHighlights: string[];
   imageUrl?: string;
   tempId?: string;
+  subRecipes?: Record<string, {
+    ingredients: string[];
+    instructions: string[];
+  }>;
 }
 
 export default function PhotoToRecipe() {
@@ -76,6 +80,13 @@ export default function PhotoToRecipe() {
       const recipe = data.recipe;
       // Ensure recipe has a stable ID to prevent re-renders
       recipe.id = recipe.id || `extracted-${Date.now()}`;
+      
+      // Include sub-recipes from the response
+      if (data.subRecipes) {
+        recipe.subRecipes = data.subRecipes;
+        console.log('📚 Sub-recipes included:', Object.keys(data.subRecipes));
+      }
+      
       setExtractedRecipe(recipe);
       
       // Convert extracted recipe to recipe store format for EnhancedRecipeCard

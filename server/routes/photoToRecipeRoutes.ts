@@ -141,7 +141,7 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
       
       const recipePrompt = `You are a professional recipe parser working for Flavr AI. Convert the following extracted cookbook text into a well-structured recipe in JSON format, completely rewritten in Flavr's distinctive style.
 
-IMPORTANT: Before processing, FIRST scan ALL the text below to identify ALL recipes mentioned. Then choose ONLY the MAIN DISH recipe (not sauces, chutneys, or accompaniments) to extract. If you see multiple recipes like a main curry AND a tamarind chutney, extract the MAIN CURRY, not the chutney.
+IMPORTANT: Before processing, FIRST scan ALL the text below to identify ALL recipes mentioned. Extract the MAIN DISH recipe as the primary output, but ALSO capture any sub-recipes (sauces, chutneys, etc.) that appear on the photographed pages in the subRecipes section. If you see a main curry AND a tamarind chutney, extract the MAIN CURRY as the recipe, and include the tamarind chutney in subRecipes.
 
 EXTRACTED TEXT:
 ${combinedText}
@@ -185,11 +185,18 @@ MULTI-PAGE EXTRACTION REQUIREMENTS:
 - Look for serving suggestions, garnishes, or final touches that might be on separate pages
 - Ensure NO recipe elements are missing even if scattered across pages
 
-PAGE REFERENCE DETECTION:
+SUB-RECIPE EXTRACTION:
 - Look for ingredients with page references like "chilli drizzle (see page 45)" or "tamarind chutney (p. 23)"
 - When you find page references, check if those pages are included in the extracted text
-- If referenced pages are available, extract the full sub-recipe from those pages
-- Store sub-recipes as separate entries that can be accessed via ingredient links
+- If referenced pages are available, extract the FULL sub-recipe from those pages
+- Store sub-recipes in the subRecipes JSON section with this format:
+  "subRecipes": {
+    "chilli drizzle": {
+      "ingredients": ["1 red chilli, finely chopped", "2 tbsp olive oil"],
+      "instructions": ["Mix chopped chilli with oil", "Let infuse for 10 minutes"]
+    }
+  }
+- Even if not referenced by page, extract any complete sub-recipes found on the pages
 - Include common reference patterns: (see page X), (p. X), (page X), (turn to page X)
 
 TECHNICAL REQUIREMENTS:
@@ -280,8 +287,14 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
       // Image generation can be added later through the recipe interface
       console.log('📸 Skipping image generation for extracted recipe (will be generated on demand)');
 
+      // Process sub-recipes if they exist
+      if (recipe.subRecipes) {
+        console.log('📚 Found sub-recipes:', Object.keys(recipe.subRecipes));
+      }
+
       res.json({ 
         recipe,
+        subRecipes: recipe.subRecipes || {},
         extractedPages: extractedTexts.length,
         message: `Successfully extracted recipe from ${files.length} photo(s)`
       });
