@@ -576,11 +576,18 @@ Return a JSON object with this structure:
       
       const clientId = req.session?.userId?.toString() || req.ip || "anonymous";
       
+      // Combine dietary requirements and nutritional goals for inspire generation
+      const combinedDietaryNeeds = [
+        ...(req.body.dietary || []),
+        ...(req.body.nutritionalGoals || []),
+        ...(req.body.avoid || [])
+      ];
+
       const result = await ChefAssistGPT5.generateInspireTitle({
         seeds,
         userIntent: req.body.userIntent || "",
         cuisinePreference: req.body.cuisinePreference,
-        avoid: req.body.avoid || [],
+        avoid: combinedDietaryNeeds,
         clientId
       });
       

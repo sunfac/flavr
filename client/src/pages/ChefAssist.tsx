@@ -116,8 +116,11 @@ export default function ChefAssist() {
 
     setIsProcessing(true);
     try {
-      // Get AI-generated unique suggestion
-      const response = await apiRequest("POST", "/api/chef-assist/inspire", {});
+      // Get AI-generated unique suggestion with dietary preferences
+      const response = await apiRequest("POST", "/api/chef-assist/inspire", {
+        dietary: selectedDietary,
+        nutritionalGoals: selectedNutritional
+      });
       const data = await response.json() as { suggestion: string };
       setPrompt(data.suggestion);
     } catch (error) {
