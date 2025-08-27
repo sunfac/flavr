@@ -13,8 +13,32 @@ const SUB_RECIPE_INGREDIENTS = [
   'spice mix', 'spice blend', 'curry paste', 'marinade'
 ];
 
-function detectSubRecipe(ingredientText: string): { hasSubRecipe: boolean; subRecipe?: string } {
+function detectSubRecipe(ingredientText: string): { hasSubRecipe: boolean; subRecipe?: string; pageReference?: string } {
   const lowerText = ingredientText.toLowerCase();
+  
+  // First check for page references in brackets
+  const pageRefPatterns = [
+    /\(see page (\d+)\)/i,
+    /\(p\.?\s*(\d+)\)/i, 
+    /\(page (\d+)\)/i,
+    /\(turn to page (\d+)\)/i,
+    /\(recipe on page (\d+)\)/i
+  ];
+  
+  for (const pattern of pageRefPatterns) {
+    const match = ingredientText.match(pattern);
+    if (match) {
+      // Extract the ingredient name before the page reference
+      const ingredientName = ingredientText.replace(pattern, '').trim();
+      return {
+        hasSubRecipe: true,
+        subRecipe: ingredientName,
+        pageReference: `page ${match[1]}`
+      };
+    }
+  }
+  
+  // Fallback to common ingredient detection
   const foundSubRecipe = SUB_RECIPE_INGREDIENTS.find(subRecipe => 
     lowerText.includes(subRecipe)
   );
@@ -162,13 +186,18 @@ function IngredientSubstituteItem({
         {(() => {
           const subRecipeInfo = detectSubRecipe(ingredient.text);
           if (subRecipeInfo.hasSubRecipe) {
+            const questionText = subRecipeInfo.pageReference 
+              ? `Show me the recipe for ${subRecipeInfo.subRecipe} from the cookbook photos`
+              : `How to make ${subRecipeInfo.subRecipe}?`;
+            
             return (
               <button 
                 className="ml-2 inline-flex items-center gap-1 text-xs text-orange-400 hover:text-orange-300 underline transition-colors"
-                onClick={() => onSubstitute(ingredient.id, `How to make ${subRecipeInfo.subRecipe}?`)}
+                onClick={() => onSubstitute(ingredient.id, questionText)}
+                title={subRecipeInfo.pageReference ? `Referenced on ${subRecipeInfo.pageReference}` : 'Get recipe instructions'}
               >
                 <ExternalLink className="w-3 h-3" />
-                Recipe
+                {subRecipeInfo.pageReference ? 'Cookbook Recipe' : 'Recipe'}
               </button>
             );
           }
@@ -219,12 +248,16 @@ function IngredientMobileItem({
         {(() => {
           const subRecipeInfo = detectSubRecipe(ingredient.text);
           if (subRecipeInfo.hasSubRecipe) {
+            const questionText = subRecipeInfo.pageReference 
+              ? `Show me the recipe for ${subRecipeInfo.subRecipe} from the cookbook photos`
+              : `How to make ${subRecipeInfo.subRecipe}?`;
+              
             return (
               <button 
                 className="block mt-1 text-xs text-orange-400 hover:text-orange-300 underline transition-colors"
-                onClick={() => onSubstitute(ingredient.id, `How to make ${subRecipeInfo.subRecipe}?`)}
+                onClick={() => onSubstitute(ingredient.id, questionText)}
               >
-                Get Recipe
+                {subRecipeInfo.pageReference ? 'Cookbook Recipe' : 'Get Recipe'}
               </button>
             );
           }

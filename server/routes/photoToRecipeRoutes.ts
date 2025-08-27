@@ -164,7 +164,13 @@ MULTI-PAGE EXTRACTION REQUIREMENTS:
 - If cooking steps reference ingredients not yet listed, scan other pages for those ingredients
 - Look for serving suggestions, garnishes, or final touches that might be on separate pages
 - Ensure NO recipe elements are missing even if scattered across pages
-- For ingredients like 'chilli drizzle' or 'tamarind chutney', provide simple sub-recipes or note they can be store-bought
+
+PAGE REFERENCE DETECTION:
+- Look for ingredients with page references like "chilli drizzle (see page 45)" or "tamarind chutney (p. 23)"
+- When you find page references, check if those pages are included in the extracted text
+- If referenced pages are available, extract the full sub-recipe from those pages
+- Store sub-recipes as separate entries that can be accessed via ingredient links
+- Include common reference patterns: (see page X), (p. X), (page X), (turn to page X)
 
 TECHNICAL REQUIREMENTS:
 - Parse ingredients accurately but rewrite all method steps completely
@@ -182,13 +188,19 @@ Return ONLY a valid JSON object with this exact structure:
   "cookTime": 30,
   "servings": 4,
   "ingredients": [
-    {"name": "ingredient name", "amount": "quantity with UK units"}
+    {"name": "ingredient name", "amount": "quantity with UK units", "pageReference": "page 45"}
   ],
   "instructions": [
     {"step": 1, "instruction": "detailed cooking step"}
   ],
   "tips": ["helpful cooking tip"],
-  "nutritionalHighlights": ["nutritional benefit"]
+  "nutritionalHighlights": ["nutritional benefit"],
+  "subRecipes": {
+    "chilli drizzle": {
+      "ingredients": ["1 red chilli", "2 tbsp olive oil"],
+      "instructions": ["Finely chop chilli", "Mix with oil"]
+    }
+  }
 }
 
 CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing commas.`;
