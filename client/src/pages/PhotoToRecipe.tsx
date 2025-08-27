@@ -74,6 +74,8 @@ export default function PhotoToRecipe() {
     },
     onSuccess: (data) => {
       const recipe = data.recipe;
+      // Ensure recipe has a stable ID to prevent re-renders
+      recipe.id = recipe.id || `extracted-${Date.now()}`;
       setExtractedRecipe(recipe);
       
       // Convert extracted recipe to recipe store format for EnhancedRecipeCard
@@ -90,7 +92,7 @@ export default function PhotoToRecipe() {
       });
       
       replaceRecipe({
-        id: recipe.id || Date.now().toString(),
+        id: recipe.id,
         servings: recipe.servings || 4,
         ingredients: ingredientStrings.map((text: string, index: number) => ({
           id: `ingredient-${index}`,
@@ -433,7 +435,7 @@ export default function PhotoToRecipe() {
                 difficulty: extractedRecipe.difficulty,
                 cuisine: extractedRecipe.cuisine,
                 image: extractedRecipe.imageUrl || undefined,
-                tempId: `photo-extracted-${Date.now()}`,
+                tempId: `photo-extracted-${extractedRecipe.id || extractedRecipe.title.replace(/\s+/g, '-').toLowerCase()}`,
                 ingredients: extractedRecipe.ingredients?.map((ing: any) => {
                   if (typeof ing === 'string') return ing;
                   if (ing.amount && ing.name) return `${ing.amount} ${ing.name}`;
@@ -446,35 +448,6 @@ export default function PhotoToRecipe() {
                   return inst.toString();
                 }) || [],
                 tips: extractedRecipe.tips?.join('\n') || ''
-              }}
-              onMount={() => {
-                // Initialize recipe store for chatbot interaction
-                const { initialize } = useRecipeStore.getState();
-                initialize({
-                  meta: {
-                    title: extractedRecipe.title,
-                    description: extractedRecipe.description,
-                    cookTime: extractedRecipe.cookTime,
-                    difficulty: extractedRecipe.difficulty,
-                    cuisine: extractedRecipe.cuisine,
-                    image: extractedRecipe.imageUrl || undefined,
-                    tempId: `photo-extracted-${Date.now()}`,
-                    originalServings: extractedRecipe.servings || 4
-                  },
-                  ingredients: extractedRecipe.ingredients?.map((ing: any, index: number) => ({
-                    id: `ingredient-${index}`,
-                    text: typeof ing === 'string' ? ing : `${ing.amount || ''} ${ing.name || ing}`.trim(),
-                    checked: false
-                  })) || [],
-                  steps: extractedRecipe.instructions?.map((inst: any, index: number) => ({
-                    id: `step-${index}`,
-                    title: `Step ${index + 1}`,
-                    description: typeof inst === 'string' ? inst : inst.instruction || inst.toString(),
-                    duration: 0
-                  })) || [],
-                  servings: extractedRecipe.servings || 4,
-                  currentStep: 0
-                });
               }}
             />
           </div>
