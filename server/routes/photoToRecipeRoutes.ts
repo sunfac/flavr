@@ -92,7 +92,7 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
           const base64Image = imageBytes.toString("base64");
           
           const response = await openai.chat.completions.create({
-            model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+            model: "gpt-4o", // using gpt-4o for cost efficiency as requested
             messages: [
               {
                 role: "user",
@@ -276,7 +276,7 @@ Return ONLY a valid JSON object with this exact structure:
 CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing commas.`;
 
       const recipeResponse = await openai.chat.completions.create({
-        model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+        model: "gpt-4o", // using gpt-4o for cost efficiency as requested
         messages: [
           {
             role: "user",
