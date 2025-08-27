@@ -992,6 +992,13 @@ GUIDELINES:
 - For regional cuisine: Add descriptions for unfamiliar dishes
 - Examples: "Gordon Ramsay-Inspired Beef Wellington", "Char Siu Pork with Five-Spice Glaze"
 
+CRITICAL TITLE REQUIREMENTS:
+- NEVER create incomplete titles like "Inspired by..." without the actual dish name
+- ALWAYS include the complete dish name after "Inspired by" or "Chef Name-Inspired"
+- Every title MUST have a specific dish name, not just the inspiration source
+- Examples of GOOD titles: "Gordon Ramsay-Inspired Beef Wellington", "Ottolenghi-Inspired Roasted Cauliflower with Tahini"
+- Examples of BAD titles: "Inspired by Gordon Ramsay", "Jamie Oliver-Inspired", "Restaurant-Inspired Dish"
+
 REQUIREMENT: Every dish must showcase at least 2-3 flavor maximization techniques AND comply with all dietary restrictions.
 
 OUTPUT: JSON with "title" key only. Make it sophisticated and flavor-packed.`;
@@ -1021,6 +1028,35 @@ OUTPUT: JSON with "title" key only. Make it sophisticated and flavor-packed.`;
       }
       
       let title = parsed.title;
+      
+      // Validate title completeness - check for incomplete "Inspired by..." titles
+      const isIncompleteTitle = (
+        title.toLowerCase().includes('inspired by') && 
+        !title.toLowerCase().match(/inspired by.*\w+.*\w+/) // Must have words after "inspired by"
+      ) || (
+        title.toLowerCase().match(/^[a-z\s]+-inspired$/i) && // Ends with just "-inspired"
+        !title.toLowerCase().includes(' inspired ') // No dish name after
+      ) || (
+        title.toLowerCase().trim().endsWith('inspired') ||
+        title.toLowerCase().includes('inspired by') && title.split(' ').length < 4
+      );
+      
+      if (isIncompleteTitle) {
+        console.warn(`Detected incomplete title: "${title}", regenerating...`);
+        // Fallback to a complete dish name
+        const fallbackDishes = [
+          "Pan-Seared Duck Breast with Cherry Gastrique",
+          "Slow-Braised Beef Short Ribs with Red Wine Reduction",
+          "Herb-Crusted Rack of Lamb with Rosemary Jus",
+          "Char-Grilled Ribeye with Compound Butter",
+          "Crispy-Skin Chicken Thighs with Lemon Thyme",
+          "Seared Scallops with Cauliflower Purée",
+          "Roasted Pork Belly with Apple Glaze",
+          "Grilled Salmon with Dill Hollandaise"
+        ];
+        title = fallbackDishes[Math.floor(Math.random() * fallbackDishes.length)];
+        console.log(`Using fallback title: "${title}"`);
+      }
       
       // Handle title length more intelligently
       // If title has parentheses with description, preserve the core dish name + description
