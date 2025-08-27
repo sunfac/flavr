@@ -158,6 +158,9 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
       // Combine all extracted text
       const combinedText = extractedTexts.join('\n\n--- PAGE BREAK ---\n\n');
       console.log('📝 Combined extracted text length:', combinedText.length);
+      console.log('📄 FULL EXTRACTED TEXT FOR DEBUG:');
+      console.log(combinedText);
+      console.log('=== END EXTRACTED TEXT ===');
 
       // Process the extracted text into a structured recipe using Gemini
       console.log('🤖 Converting extracted text to structured recipe...');
@@ -364,6 +367,16 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
       // Process sub-recipes if they exist
       if (recipe.subRecipes) {
         console.log('📚 Found sub-recipes:', Object.keys(recipe.subRecipes));
+        console.log('📋 Sub-recipe details:', JSON.stringify(recipe.subRecipes, null, 2));
+      } else {
+        console.log('❌ No sub-recipes found in extracted data');
+        console.log('🔍 Debug: Looking for common sub-recipe indicators in text...');
+        const subRecipeIndicators = ['chutney', 'drizzle', 'sauce', 'marinade', 'dressing'];
+        subRecipeIndicators.forEach(indicator => {
+          if (combinedText.toLowerCase().includes(indicator)) {
+            console.log(`✅ Found "${indicator}" in text - should have been extracted`);
+          }
+        });
       }
 
       // Prepare response message
