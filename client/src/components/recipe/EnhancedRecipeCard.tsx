@@ -305,14 +305,17 @@ function EnhancedRecipeCard({
   // Handle sub-recipe display
   const handleSubRecipeRequest = (ingredientText: string, subRecipeName: string) => {
     console.log('🍽️ Sub-recipe requested:', { ingredientText, subRecipeName });
-    console.log('📚 Available sub-recipes:', recipe.subRecipes ? Object.keys(recipe.subRecipes) : 'None');
     
-    // Look for the sub-recipe in the recipe's subRecipes with flexible matching
-    if (recipe.subRecipes) {
+    // Check both the recipe prop and the recipe store for sub-recipes
+    const availableSubRecipes = recipe.subRecipes || recipeStore.subRecipes;
+    console.log('📚 Available sub-recipes:', availableSubRecipes ? Object.keys(availableSubRecipes) : 'None');
+    
+    // Look for the sub-recipe in the available subRecipes with flexible matching
+    if (availableSubRecipes) {
       // Try exact match first
-      if (recipe.subRecipes[subRecipeName]) {
+      if (availableSubRecipes[subRecipeName]) {
         console.log('✅ Found exact match for sub-recipe:', subRecipeName);
-        const subRecipe = recipe.subRecipes[subRecipeName];
+        const subRecipe = availableSubRecipes[subRecipeName];
         setSubRecipeModal({
           isOpen: true,
           recipeName: subRecipeName,
@@ -322,7 +325,7 @@ function EnhancedRecipeCard({
       }
       
       // Try fuzzy matching - look for partial matches in keys
-      const subRecipeKeys = Object.keys(recipe.subRecipes);
+      const subRecipeKeys = Object.keys(availableSubRecipes);
       const fuzzyMatch = subRecipeKeys.find(key => 
         key.toLowerCase().includes(subRecipeName.toLowerCase()) ||
         subRecipeName.toLowerCase().includes(key.toLowerCase())
@@ -330,7 +333,7 @@ function EnhancedRecipeCard({
       
       if (fuzzyMatch) {
         console.log('✅ Found fuzzy match for sub-recipe:', { requested: subRecipeName, found: fuzzyMatch });
-        const subRecipe = recipe.subRecipes[fuzzyMatch];
+        const subRecipe = availableSubRecipes[fuzzyMatch];
         setSubRecipeModal({
           isOpen: true,
           recipeName: fuzzyMatch,

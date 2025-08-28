@@ -83,12 +83,10 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
       }
 
       // Extract text from main recipe photos using OpenAI Vision
-      const mainRecipeTexts: string[] = [];
-      const subRecipeTexts: Record<string, string> = {};
-      const failedFiles: string[] = [];
+      // Use proper concurrent processing with Promise.allSettled to handle failures gracefully
+      console.log('⚡ Processing all photos concurrently for maximum speed...');
       
-      // Process main recipe photos in parallel for better performance
-      console.log('⚡ Processing main recipe photos in parallel for speed...');
+      // Process main recipe photos concurrently
       const mainPhotoPromises = mainPhotos.map(async (file) => {
         console.log(`🔍 Analyzing photo: ${file.filename}`);
         
@@ -129,9 +127,10 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
 
           const extractedText = response.choices[0]?.message?.content || '';
           if (extractedText.trim()) {
-            mainRecipeTexts.push(extractedText);
             console.log(`✅ Main recipe text extracted from ${file.filename}: ${extractedText.substring(0, 100)}...`);
+            return { success: true, text: extractedText, filename: file.filename };
           }
+          return { success: false, filename: file.filename };
         } catch (visionError) {
           console.error(`❌ OpenAI Vision API failed for ${file.filename}:`, visionError);
           failedFiles.push(file.filename);
