@@ -133,10 +133,10 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
             return { success: true, text: extractedText, filename: file.filename };
           }
           return { success: false, filename: file.filename };
-        } catch (visionError) {
+        } catch (visionError: any) {
           console.error(`❌ OpenAI Vision API failed for ${file.filename}:`, visionError);
           console.log(`⚠️ Continuing with other photos despite failure for ${file.filename}`);
-          return { success: false, filename: file.filename, error: visionError.message };
+          return { success: false, filename: file.filename, error: visionError?.message || 'Unknown error' };
         } finally {
           // Clean up temporary file
           try {
@@ -156,7 +156,7 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
           failedFiles.push(result.value.filename);
         } else if (result.status === 'rejected') {
           console.error('Main photo processing failed:', result.reason);
-          failedFiles.push(mainPhotos[index].filename);
+          failedFiles.push(mainPhotos[index]?.filename || 'unknown');
         }
       });
 
@@ -204,10 +204,10 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
             return { success: true, name: subRecipe.name, text: extractedText };
           }
           return { success: false, name: subRecipe.name };
-        } catch (visionError) {
+        } catch (visionError: any) {
           console.error(`❌ Sub-recipe vision API failed for ${subRecipe.name}:`, visionError);
           console.log(`⚠️ Continuing without sub-recipe ${subRecipe.name}`);
-          return { success: false, name: subRecipe.name, error: visionError.message };
+          return { success: false, name: subRecipe.name, error: visionError?.message || 'Unknown error' };
         } finally {
           // Clean up temporary file
           try {
@@ -222,12 +222,12 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
       const subRecipeResults = await Promise.allSettled(subRecipePromises);
       subRecipeResults.forEach((result, index) => {
         if (result.status === 'fulfilled' && result.value.success) {
-          subRecipeTexts[result.value.name] = result.value.text;
+          subRecipeTexts[result.value.name] = result.value.text || '';
         } else if (result.status === 'fulfilled' && !result.value.success) {
-          failedFiles.push(subRecipePhotos[index].file.filename);
+          failedFiles.push(subRecipePhotos[index]?.file?.filename || 'unknown');
         } else if (result.status === 'rejected') {
           console.error('Sub-recipe processing failed:', result.reason);
-          failedFiles.push(subRecipePhotos[index].file.filename);
+          failedFiles.push(subRecipePhotos[index]?.file?.filename || 'unknown');
         }
       });
 
