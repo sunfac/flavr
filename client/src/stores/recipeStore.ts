@@ -35,6 +35,11 @@ export interface RecipeState {
   ingredients: Ingredient[];
   steps: Step[];
   meta: RecipeMeta;
+  subRecipes?: Record<string, {
+    title?: string;
+    ingredients: string[];
+    instructions: string[];
+  }>;
   // UI state
   currentStep: number;
   completedSteps: number[];

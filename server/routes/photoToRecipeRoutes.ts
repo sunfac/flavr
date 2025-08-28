@@ -87,8 +87,9 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
       const subRecipeTexts: Record<string, string> = {};
       const failedFiles: string[] = [];
       
-      // Process main recipe photos
-      for (const file of mainPhotos) {
+      // Process main recipe photos in parallel for better performance
+      console.log('⚡ Processing main recipe photos in parallel for speed...');
+      const mainPhotoPromises = mainPhotos.map(async (file) => {
         console.log(`🔍 Analyzing photo: ${file.filename}`);
         
         try {
@@ -145,10 +146,14 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
             console.warn(`⚠️ Failed to cleanup temp file: ${file.path}`);
           }
         }
-      }
+      });
 
-      // Process sub-recipe photos
-      for (const subRecipe of subRecipePhotos) {
+      // Wait for all main photo processing to complete
+      await Promise.all(mainPhotoPromises);
+
+      // Process sub-recipe photos in parallel for better performance  
+      console.log('⚡ Processing sub-recipe photos in parallel for speed...');
+      const subRecipePromises = subRecipePhotos.map(async (subRecipe) => {
         console.log(`🔍 Analyzing sub-recipe photo: ${subRecipe.name}`);
         
         try {
@@ -201,7 +206,10 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
             console.warn(`⚠️ Failed to cleanup sub-recipe file: ${subRecipe.file.path}`);
           }
         }
-      }
+      });
+
+      // Wait for all sub-recipe processing to complete
+      await Promise.all(subRecipePromises);
 
       if (mainRecipeTexts.length === 0) {
         return res.status(400).json({ 
@@ -429,16 +437,41 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
       const tempId = `photo-extracted-${Date.now()}`;
       recipe.tempId = tempId;
       
-      // Skip image generation temporarily due to OpenAI quota issues
-      // Will be re-enabled once API quota is resolved
-      console.log('📸 Skipping image generation due to API quota limits');
+      // Generate recipe image using DALL-E 3
+      console.log('🎨 Generating recipe image...');
+      try {
+        const imageResponse = await openai.images.generate({
+          model: "dall-e-3",
+          prompt: `Professional food photography of ${recipe.title}, ${recipe.description}. High-quality, appetizing, clean background, natural lighting, cookbook style`,
+          n: 1,
+          size: "1024x1024",
+          quality: "standard",
+        });
+
+        if (imageResponse.data[0]?.url) {
+          const imageUrl = imageResponse.data[0].url;
+          recipe.imageUrl = imageUrl;
+          
+          // Update cache with image
+          global.recipeImageCache.set(tempId, {
+            recipe,
+            imageUrl
+          });
+          console.log(`🎨 Recipe image generated and cached for tempId: ${tempId}`);
+        }
+      } catch (imageError) {
+        console.warn('⚠️ Image generation failed:', imageError.message);
+        console.log('📸 Continuing without image generation...');
+      }
       
-      // Cache the recipe without image for now
-      global.recipeImageCache.set(tempId, {
-        recipe,
-        imageUrl: null
-      });
-      console.log(`📋 Cached recipe data without image for tempId: ${tempId}`);
+      // Ensure cache is set if no image was generated
+      if (!global.recipeImageCache.has(tempId)) {
+        global.recipeImageCache.set(tempId, {
+          recipe,
+          imageUrl: null
+        });
+        console.log(`📋 Cached recipe data without image for tempId: ${tempId}`);
+      }
 
       // Process sub-recipes if they exist
       if (recipe.subRecipes) {

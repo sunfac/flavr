@@ -152,6 +152,7 @@ export default function PhotoToRecipe() {
           cuisine: recipe.cuisine || '',
           image: recipe.imageUrl || undefined
         },
+        subRecipes: recipe.subRecipes || {},
         currentStep: 0,
         completedSteps: [],
         lastUpdated: Date.now()
