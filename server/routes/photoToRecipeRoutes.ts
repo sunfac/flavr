@@ -83,10 +83,12 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
       }
 
       // Extract text from main recipe photos using OpenAI Vision
-      // Use proper concurrent processing with Promise.allSettled to handle failures gracefully
-      console.log('⚡ Processing all photos concurrently for maximum speed...');
+      const mainRecipeTexts: string[] = [];
+      const subRecipeTexts: Record<string, string> = {};
+      const failedFiles: string[] = [];
       
       // Process main recipe photos concurrently
+      console.log('⚡ Processing all photos concurrently for maximum speed...');
       const mainPhotoPromises = mainPhotos.map(async (file) => {
         console.log(`🔍 Analyzing photo: ${file.filename}`);
         
@@ -133,10 +135,8 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
           return { success: false, filename: file.filename };
         } catch (visionError) {
           console.error(`❌ OpenAI Vision API failed for ${file.filename}:`, visionError);
-          failedFiles.push(file.filename);
-          
-          // Continue with other files instead of throwing error
           console.log(`⚠️ Continuing with other photos despite failure for ${file.filename}`);
+          return { success: false, filename: file.filename, error: visionError.message };
         } finally {
           // Clean up temporary file
           try {
@@ -147,8 +147,18 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
         }
       });
 
-      // Wait for all main photo processing to complete
-      await Promise.all(mainPhotoPromises);
+      // Wait for all main photo processing and collect results
+      const mainPhotoResults = await Promise.allSettled(mainPhotoPromises);
+      mainPhotoResults.forEach((result, index) => {
+        if (result.status === 'fulfilled' && result.value.success) {
+          mainRecipeTexts.push(result.value.text);
+        } else if (result.status === 'fulfilled' && !result.value.success) {
+          failedFiles.push(result.value.filename);
+        } else if (result.status === 'rejected') {
+          console.error('Main photo processing failed:', result.reason);
+          failedFiles.push(mainPhotos[index].filename);
+        }
+      });
 
       // Process sub-recipe photos in parallel for better performance  
       console.log('⚡ Processing sub-recipe photos in parallel for speed...');
@@ -190,13 +200,14 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
 
           const extractedText = response.choices[0]?.message?.content || '';
           if (extractedText.trim()) {
-            subRecipeTexts[subRecipe.name] = extractedText;
             console.log(`✅ Sub-recipe text extracted for ${subRecipe.name}: ${extractedText.substring(0, 100)}...`);
+            return { success: true, name: subRecipe.name, text: extractedText };
           }
+          return { success: false, name: subRecipe.name };
         } catch (visionError) {
           console.error(`❌ Sub-recipe vision API failed for ${subRecipe.name}:`, visionError);
-          failedFiles.push(subRecipe.file.filename);
           console.log(`⚠️ Continuing without sub-recipe ${subRecipe.name}`);
+          return { success: false, name: subRecipe.name, error: visionError.message };
         } finally {
           // Clean up temporary file
           try {
@@ -207,8 +218,18 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
         }
       });
 
-      // Wait for all sub-recipe processing to complete
-      await Promise.all(subRecipePromises);
+      // Wait for all sub-recipe processing and collect results
+      const subRecipeResults = await Promise.allSettled(subRecipePromises);
+      subRecipeResults.forEach((result, index) => {
+        if (result.status === 'fulfilled' && result.value.success) {
+          subRecipeTexts[result.value.name] = result.value.text;
+        } else if (result.status === 'fulfilled' && !result.value.success) {
+          failedFiles.push(subRecipePhotos[index].file.filename);
+        } else if (result.status === 'rejected') {
+          console.error('Sub-recipe processing failed:', result.reason);
+          failedFiles.push(subRecipePhotos[index].file.filename);
+        }
+      });
 
       if (mainRecipeTexts.length === 0) {
         return res.status(400).json({ 
