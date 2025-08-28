@@ -456,7 +456,7 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
       }
 
       // Prepare response message
-      let message = `Successfully extracted recipe from ${extractedTexts.length} photo(s)`;
+      let message = `Successfully extracted recipe from ${mainRecipeTexts.length} photo(s)`;
       if (failedFiles.length > 0) {
         message += `. Note: ${failedFiles.length} photo(s) failed to process due to API limits, but extraction continued with available data.`;
       }
@@ -464,7 +464,7 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
       res.json({ 
         recipe,
         subRecipes: recipe.subRecipes || {},
-        extractedPages: extractedTexts.length,
+        extractedPages: mainRecipeTexts.length,
         failedPages: failedFiles.length,
         message
       });
@@ -474,15 +474,13 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
       
       // Clean up any remaining temporary files
       if (req.files) {
-        const fileFields = req.files as { [fieldname: string]: Express.Multer.File[] };
-        Object.values(fileFields).forEach(fileArray => {
-          fileArray.forEach(file => {
-            try {
-              fs.unlinkSync(file.path);
-            } catch (cleanupError) {
-              console.warn(`⚠️ Failed to cleanup temp file: ${file.path}`);
-            }
-          });
+        const files = req.files as Express.Multer.File[];
+        files.forEach(file => {
+          try {
+            fs.unlinkSync(file.path);
+          } catch (cleanupError) {
+            console.warn(`⚠️ Failed to cleanup temp file: ${file.path}`);
+          }
         });
       }
 
