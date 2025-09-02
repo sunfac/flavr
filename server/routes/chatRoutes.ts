@@ -4,6 +4,7 @@ import { storage } from "../storage";
 import { requireAuth } from "./authRoutes";
 import { insertChatMessageSchema } from "@shared/schema";
 import { logGPTInteraction, logSimpleGPTInteraction } from "../developerLogger";
+import { ZestService } from "../zestService";
 
 // Session type extension
 declare module 'express-session' {
@@ -20,7 +21,166 @@ if (!process.env.OPENAI_API_KEY) {
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export function registerChatRoutes(app: Express) {
-  // Chat endpoint for streaming responses with function calling
+  const zestService = new ZestService();
+
+  // Enhanced Zest chat endpoint with user memory and intent detection
+  app.post("/api/zest/chat", async (req, res) => {
+    try {
+      const { message, conversationHistory = [], currentRecipe } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ error: "Message is required" });
+      }
+
+      // Get user context
+      const userContext = {
+        userId: req.session?.userId,
+        pseudoUserId: req.body.pseudoUserId, // For anonymous users
+        isAuthenticated: !!req.session?.userId
+      };
+
+      console.log('🧠 Zest chat request:', { 
+        message: message.substring(0, 100) + '...', 
+        userId: userContext.userId,
+        hasCurrentRecipe: !!currentRecipe 
+      });
+
+      // Load user memory and preferences
+      const userMemory = await zestService.getUserMemory(userContext);
+      console.log('🔍 User memory loaded:', {
+        hasPreferences: !!userMemory.preferences,
+        conversationHistory: userMemory.recentConversations.length,
+        cookingHistory: userMemory.cookingHistory.length
+      });
+
+      // Detect recipe intent
+      const intentResult = await zestService.detectRecipeIntent(message);
+      console.log('🎯 Intent detection:', intentResult);
+
+      // If high confidence recipe intent, offer to create recipe
+      if (intentResult.isRecipeIntent && intentResult.confidence > 0.7) {
+        const confirmationResponse = {
+          message: `I'd love to help you with that! ${intentResult.suggestedAction} Would you like me to turn this into a Flavr recipe card?`,
+          isRecipeIntent: true,
+          confidence: intentResult.confidence,
+          requiresConfirmation: true
+        };
+        
+        return res.json(confirmationResponse);
+      }
+
+      // Build context with user memory
+      const contextPrompt = zestService.buildZestContext(userMemory, currentRecipe);
+
+      // Generate regular conversational response
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: contextPrompt },
+          ...conversationHistory.map((msg: any) => ({
+            role: msg.role || (msg.sender === 'user' ? 'user' : 'assistant'),
+            content: msg.content || msg.text
+          })),
+          { role: "user", content: message }
+        ],
+        max_tokens: 800,
+        temperature: 0.7
+      });
+
+      const zestResponse = response.choices[0].message.content;
+
+      // Extract topics for memory update
+      const topicsToRemember = [message.substring(0, 50)];
+      
+      // Update user preferences/memory if context suggests it
+      if (message.toLowerCase().includes('prefer') || message.toLowerCase().includes('like') || message.toLowerCase().includes('avoid')) {
+        await zestService.updateUserPreferences(userContext, {}, topicsToRemember);
+      }
+
+      // Save conversation to history
+      if (userContext.userId) {
+        try {
+          await storage.createChatMessage({
+            userId: userContext.userId,
+            message: message,
+            response: zestResponse || 'No response generated'
+          });
+        } catch (error) {
+          console.error('Error saving chat message:', error);
+        }
+      }
+
+      return res.json({
+        message: zestResponse,
+        isRecipeIntent: false,
+        userMemory: {
+          hasPreferences: !!userMemory.preferences,
+          topicsRemembered: topicsToRemember.length
+        }
+      });
+
+    } catch (error) {
+      console.error('Error in Zest chat:', error);
+      res.status(500).json({ error: "Failed to process chat message" });
+    }
+  });
+
+  // Recipe generation endpoint for when user confirms intent
+  app.post("/api/zest/generate-recipe", async (req, res) => {
+    try {
+      const { message, userConfirmed } = req.body;
+      
+      if (!userConfirmed) {
+        return res.status(400).json({ error: "User confirmation required" });
+      }
+
+      const userContext = {
+        userId: req.session?.userId,
+        pseudoUserId: req.body.pseudoUserId,
+        isAuthenticated: !!req.session?.userId
+      };
+
+      // Load user memory
+      const userMemory = await zestService.getUserMemory(userContext);
+
+      // Generate recipe
+      const recipe = await zestService.generateRecipe(message, userContext, userMemory);
+
+      // Save recipe if user is authenticated
+      if (userContext.userId && recipe) {
+        try {
+          await storage.createRecipe({
+            userId: userContext.userId,
+            title: recipe.title,
+            description: recipe.description,
+            cookTime: recipe.cookTime,
+            servings: recipe.servings,
+            difficulty: recipe.difficulty,
+            cuisine: recipe.cuisine,
+            mood: recipe.mood,
+            mode: 'zest-chat',
+            ingredients: recipe.ingredients,
+            instructions: recipe.instructions,
+            tips: recipe.tips,
+            originalPrompt: message
+          });
+        } catch (error) {
+          console.error('Error saving Zest-generated recipe:', error);
+        }
+      }
+
+      return res.json({
+        recipe: recipe,
+        message: "Here's your personalized recipe! I've created this based on your request and preferences. You can save it, modify it, or ask me any questions about the cooking process."
+      });
+
+    } catch (error) {
+      console.error('Error generating recipe:', error);
+      res.status(500).json({ error: "Failed to generate recipe" });
+    }
+  });
+
+  // Original chat endpoint for streaming responses with function calling
   app.post("/api/chat/stream", async (req, res) => {
     try {
       const { message, conversationHistory = [], currentRecipe, openAIContext } = req.body;

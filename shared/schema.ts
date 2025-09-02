@@ -238,6 +238,48 @@ export const insertInteractionLogSchema = createInsertSchema(interactionLogs).om
   timestamp: true,
 });
 
+// User cooking preferences for Zest AI memory
+export const userPreferences = pgTable("user_preferences", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  pseudoUserId: integer("pseudo_user_id").references(() => pseudoUsers.id),
+  
+  // Cooking preferences
+  preferredCuisines: jsonb("preferred_cuisines").$type<string[]>(),
+  dietaryRestrictions: jsonb("dietary_restrictions").$type<string[]>(),
+  avoidedIngredients: jsonb("avoided_ingredients").$type<string[]>(),
+  favoriteIngredients: jsonb("favorite_ingredients").$type<string[]>(),
+  
+  // Cooking style and skills
+  skillLevel: text("skill_level"), // "beginner", "intermediate", "advanced"
+  timePreference: integer("time_preference"), // usual cooking time in minutes
+  budgetPreference: text("budget_preference"), // "budget", "moderate", "premium"
+  ambitionLevel: text("ambition_level"), // "quick", "balanced", "ambitious"
+  
+  // Equipment and kitchen setup
+  availableEquipment: jsonb("available_equipment").$type<string[]>(),
+  kitchenSize: text("kitchen_size"), // "small", "medium", "large"
+  
+  // Personal preferences
+  spiceLevel: text("spice_level"), // "mild", "medium", "hot"
+  cookingMood: text("cooking_mood"), // last expressed mood preference
+  
+  // Memory and context
+  lastInteractionTopics: jsonb("last_interaction_topics").$type<string[]>(),
+  mentionedPreferences: jsonb("mentioned_preferences").$type<Record<string, any>>(),
+  cookingGoals: text("cooking_goals"),
+  
+  // Metadata
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertUserPreferencesSchema = createInsertSchema(userPreferences).omit({
+  id: true,
+  createdAt: true,
+  lastUpdated: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertPseudoUser = z.infer<typeof insertPseudoUserSchema>;
@@ -252,3 +294,5 @@ export type InsertRecipeGenerationLog = z.infer<typeof insertRecipeGenerationLog
 export type RecipeGenerationLog = typeof recipeGenerationLogs.$inferSelect;
 export type InsertInteractionLog = z.infer<typeof insertInteractionLogSchema>;
 export type InteractionLog = typeof interactionLogs.$inferSelect;
+export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
+export type UserPreferences = typeof userPreferences.$inferSelect;

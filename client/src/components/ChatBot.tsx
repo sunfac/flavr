@@ -20,6 +20,8 @@ interface ChatMessage {
   isUser: boolean;
   text: string;
   timestamp: Date;
+  isConfirmation?: boolean;
+  originalMessage?: string;
 }
 
 interface Recipe {
@@ -139,16 +141,17 @@ export default function ChatBot({
     };
   };
 
-  // Send chat message with function calling support
+  // Enhanced Zest chat with user memory and intent detection
   const sendMessageMutation = useMutation({
     mutationFn: async (data: { message: string; currentRecipe?: Recipe; mode?: string }) => {
-      // Build conversation history from local messages (not chatHistory from db)
+      // Build conversation history from local messages
       const conversationHistory = localMessages.map(msg => ({
         role: msg.isUser ? 'user' : 'assistant',
         content: msg.isUser ? msg.message : msg.response
       }));
-      
-      const response = await fetch("/api/chat/stream", {
+
+      // Use enhanced Zest endpoint
+      const response = await fetch("/api/zest/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -165,64 +168,27 @@ export default function ChatBot({
         throw new Error(`Chat request failed: ${response.statusText}`);
       }
 
-      // Read streaming response
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let fullResponse = "";
-      let functionCalls: any[] = [];
-
-      while (reader) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6));
-              
-              if (data.done) {
-                break;
-              }
-              
-              if (data.content) {
-                fullResponse += data.content;
-              }
-              
-              if (data.function_call) {
-                functionCalls.push(data.function_call);
-              }
-              
-              if (data.type === 'recipeUpdate' && data.recipe) {
-                // Handle recipe update from server
-                functionCalls.push({
-                  name: 'updateRecipe',
-                  arguments: data.recipe
-                });
-              }
-            } catch (e) {
-              // Skip invalid JSON
-            }
-          }
-        }
-      }
-
+      // Parse JSON response from enhanced Zest
+      const result = await response.json();
+      
       return { 
-        response: fullResponse,
-        functionCalls 
+        response: result.message,
+        isRecipeIntent: result.isRecipeIntent,
+        requiresConfirmation: result.requiresConfirmation,
+        confidence: result.confidence,
+        userMemory: result.userMemory
       };
     },
     onSuccess: async (result) => {
-      // Result is already parsed from streaming response
-      
-      console.log('🔍 CHAT RESPONSE RECEIVED:', {
-        hasFunctionCalls: !!result.functionCalls,
+      console.log('🧠 Zest response received:', {
+        hasRecipeIntent: result.isRecipeIntent,
+        requiresConfirmation: result.requiresConfirmation,
+        userMemory: result.userMemory,
         responseLength: result.response?.length || 0
       });
-      
-      const newMessage: ChatMessage = {
+
+      // Create Zest response message
+      const zestMessage: ChatMessage = {
         id: Date.now(),
         message,
         response: result.response,
@@ -230,69 +196,84 @@ export default function ChatBot({
         text: result.response,
         timestamp: new Date(),
       };
-      // Don't add the message to local state yet - preserve chat history
+
+      // Add the Zest response to chat
+      setLocalMessages(prev => [...prev, zestMessage]);
       setMessage("");
 
-      // Handle OpenAI function calls for live recipe updates FIRST
-      console.log('🔍 CHATBOT RESPONSE:', {
-        hasFunctionCalls: !!result.functionCalls,
-        functionCallsLength: result.functionCalls?.length || 0,
-        functionCalls: result.functionCalls
-      });
-
-      if (result.functionCalls && Array.isArray(result.functionCalls)) {
-        console.log('🎯 Processing function calls:', result.functionCalls);
-        result.functionCalls.forEach((functionCall: any) => {
-          if (functionCall.name === 'updateRecipe') {
-            try {
-              // Parse the arguments if they're a string
-              const args = typeof functionCall.arguments === 'string' 
-                ? JSON.parse(functionCall.arguments) 
-                : functionCall.arguments;
-              
-              console.log(`🔧 EXECUTING Function Call: updateRecipe`, args);
-              
-              // Update the recipe with the new data
-              console.log('🔄 Updating recipe in store with:', args);
-              
-              // Use the updateActiveRecipe action which handles both formats
-              recipeActions.updateActiveRecipe(args);
-              
-              // Force a re-render by updating the recipe in parent component if available
-              if (onRecipeUpdate) {
-                onRecipeUpdate(args);
-              }
-              
-              // Show confirmation message
-              const updateMessage: ChatMessage = {
-                id: Date.now() + 1,
-                message: "",
-                response: "✅ Recipe updated! I've made the changes you requested.",
-                isUser: false,
-                text: "✅ Recipe updated! I've made the changes you requested.",
-                timestamp: new Date(),
-              };
-              setTimeout(() => {
-                setLocalMessages(prev => [...prev, updateMessage]);
-              }, 500);
-              
-              console.log('✅ Recipe store updated successfully');
-              
-            } catch (error) {
-              console.error('Error processing function call:', error);
-            }
-          }
-        });
+      // Handle recipe intent confirmation
+      if (result.isRecipeIntent && result.requiresConfirmation) {
+        // Add confirmation buttons
+        const confirmationMessage: ChatMessage = {
+          id: Date.now() + 1,
+          message: "",
+          response: "Create Recipe",
+          isUser: false,
+          text: "Create Recipe",
+          timestamp: new Date(),
+          isConfirmation: true,
+          originalMessage: message // Store original message for recipe generation
+        };
+        
+        setLocalMessages(prev => [...prev, confirmationMessage]);
       }
-
-      // Add the message to local state AFTER processing function calls
-      setLocalMessages(prev => [...prev, newMessage]);
     },
     onError: (error) => {
       console.error('Chat error:', error);
       toast({
         title: "Chat Error",
         description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Recipe generation mutation for confirmed intent
+  const generateRecipeMutation = useMutation({
+    mutationFn: async (data: { message: string }) => {
+      const response = await fetch("/api/zest/generate-recipe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: data.message,
+          userConfirmed: true
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Recipe generation failed: ${response.statusText}`);
+      }
+
+      return response.json();
+    },
+    onSuccess: (result) => {
+      console.log('🧪 Recipe generated:', result);
+      
+      // Add recipe confirmation message
+      const recipeMessage: ChatMessage = {
+        id: Date.now(),
+        message: "",
+        response: result.message,
+        isUser: false,
+        text: result.message,
+        timestamp: new Date(),
+      };
+      
+      setLocalMessages(prev => [...prev, recipeMessage]);
+
+      // Navigate to the generated recipe if it was saved
+      if (result.recipe) {
+        // TODO: Update this to navigate to recipe or update current recipe context
+        console.log('Generated recipe:', result.recipe);
+      }
+    },
+    onError: (error) => {
+      console.error('Recipe generation error:', error);
+      toast({
+        title: "Recipe Generation Error",
+        description: "Failed to generate recipe. Please try again.",
         variant: "destructive",
       });
     }
@@ -510,6 +491,36 @@ export default function ChatBot({
                   }`}
                 >
                   <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.text}</p>
+                  
+                  {/* Recipe generation confirmation buttons */}
+                  {msg.isConfirmation && msg.originalMessage && (
+                    <div className="mt-3 flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          generateRecipeMutation.mutate({ message: msg.originalMessage! });
+                          // Remove confirmation message after click
+                          setLocalMessages(prev => prev.filter(m => m.id !== msg.id));
+                        }}
+                        disabled={generateRecipeMutation.isPending}
+                        className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs px-3 py-1"
+                      >
+                        {generateRecipeMutation.isPending ? "Creating..." : "Yes, Create Recipe!"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          // Remove confirmation message
+                          setLocalMessages(prev => prev.filter(m => m.id !== msg.id));
+                        }}
+                        className="border-slate-500 text-slate-300 hover:bg-slate-600 text-xs px-3 py-1"
+                      >
+                        No Thanks
+                      </Button>
+                    </div>
+                  )}
+                  
                   <p className="text-[10px] sm:text-xs opacity-70 mt-1">
                     {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
