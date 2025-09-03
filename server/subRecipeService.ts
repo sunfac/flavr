@@ -69,7 +69,11 @@ export class SubRecipeService {
       'bao buns', 'tortillas', 'pita bread', 'naan', 'spring onions', 'scallions',
       'shallots', 'leeks', 'ginger', 'chili', 'chilies', 'jalapenos', 'serrano',
       'avocado', 'lime juice', 'lemon juice', 'vinegar', 'soy sauce', 'fish sauce',
-      'coconut milk', 'cream', 'stock', 'broth', 'wine', 'beer', 'sake'
+      'coconut milk', 'cream', 'stock', 'broth', 'wine', 'beer', 'sake',
+      'filet mignon', 'ribeye', 'sirloin', 'tenderloin', 'strip steak', 'porterhouse',
+      'olive oil', 'vegetable oil', 'canola oil', 'sunflower oil', 'sesame oil',
+      'pinot noir', 'cabernet', 'merlot', 'chardonnay', 'sauvignon blanc', 'red wine', 'white wine',
+      'beef stock', 'chicken stock', 'vegetable stock', 'fish stock'
     ];
     
     for (const ingredient of ingredients) {
