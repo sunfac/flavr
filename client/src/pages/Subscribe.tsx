@@ -21,6 +21,7 @@ import { Crown } from "lucide-react";
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
   throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
 }
+console.log("Loading Stripe with public key:", import.meta.env.VITE_STRIPE_PUBLIC_KEY ? "Present" : "Missing");
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 const SubscribeForm = () => {
@@ -118,6 +119,19 @@ export default function Subscribe() {
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [clientSecret, setClientSecret] = useState("");
+  const [stripeLoaded, setStripeLoaded] = useState(false);
+
+  // Check if Stripe is loaded
+  useEffect(() => {
+    stripePromise.then((stripe) => {
+      if (stripe) {
+        console.log("Stripe loaded successfully");
+        setStripeLoaded(true);
+      } else {
+        console.error("Failed to load Stripe");
+      }
+    });
+  }, []);
 
   // Close all menus
   const closeAllMenus = () => {
@@ -459,24 +473,33 @@ export default function Subscribe() {
                 </div>
 
                 {/* Payment form */}
-                {clientSecret ? (
-                  <Elements 
-                    stripe={stripePromise} 
-                    options={{ 
-                      clientSecret,
-                      appearance: {
-                        theme: 'night',
-                        variables: {
-                          colorPrimary: '#fb923c',
-                          colorBackground: '#1e293b',
-                          colorText: '#f1f5f9',
-                          colorDanger: '#ef4444'
+                {clientSecret && stripeLoaded ? (
+                  <div>
+                    <p className="text-xs text-slate-400 mb-2">Stripe Payment Form (£7.99/month)</p>
+                    <Elements 
+                      stripe={stripePromise} 
+                      options={{ 
+                        clientSecret,
+                        appearance: {
+                          theme: 'night',
+                          variables: {
+                            colorPrimary: '#fb923c',
+                            colorBackground: '#0f172a',
+                            colorText: '#f1f5f9',
+                            colorDanger: '#ef4444',
+                            borderRadius: '8px'
+                          }
                         }
-                      }
-                    }}
-                  >
-                    <SubscribeForm />
-                  </Elements>
+                      }}
+                    >
+                      <SubscribeForm />
+                    </Elements>
+                  </div>
+                ) : clientSecret ? (
+                  <div className="flex flex-col items-center justify-center py-4 space-y-2">
+                    <div className="animate-spin w-6 h-6 border-3 border-orange-500 border-t-transparent rounded-full" />
+                    <p className="text-slate-400 text-xs">Loading Stripe payment system...</p>
+                  </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-4 space-y-2">
                     <div className="animate-spin w-6 h-6 border-3 border-orange-500 border-t-transparent rounded-full" />
