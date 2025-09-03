@@ -249,11 +249,18 @@ export default function ChatBot({
     },
     onError: (error) => {
       console.error('Chat error:', error);
-      toast({
-        title: "Chat Error",
-        description: "Failed to send message. Please try again.",
-        variant: "destructive",
-      });
+      
+      // Add error message to chat instead of toast
+      const errorMessage: ChatMessage = {
+        id: Date.now(),
+        message: "",
+        response: "❌ Sorry, I'm having trouble processing your message right now. Please try again in a moment.",
+        isUser: false,
+        text: "❌ Sorry, I'm having trouble processing your message right now. Please try again in a moment.",
+        timestamp: new Date(),
+      };
+      
+      setLocalMessages(prev => [...prev, errorMessage]);
     }
   });
 
@@ -326,25 +333,38 @@ export default function ChatBot({
         // Set servings
         recipeActions.setServings(result.recipe.servings || 4);
         
-        // Close the chat and show success message
-        toast({
-          title: "Recipe Created!",
-          description: `${result.recipe.title} has been added to your recipe collection.`,
-        });
+        // Add success message to chat instead of toast
+        const successMessage: ChatMessage = {
+          id: Date.now() + 1,
+          message: "",
+          response: `✅ Success! ${result.recipe.title} has been created and is ready to cook. The recipe is now displayed below.`,
+          isUser: false,
+          text: `✅ Success! ${result.recipe.title} has been created and is ready to cook. The recipe is now displayed below.`,
+          timestamp: new Date(),
+        };
+        
+        setLocalMessages(prev => [...prev, successMessage]);
         
         // Close chat after a short delay
         setTimeout(() => {
           if (onClose) onClose();
-        }, 1000);
+        }, 2000);
       }
     },
     onError: (error) => {
       console.error('Recipe generation error:', error);
-      toast({
-        title: "Recipe Generation Error",
-        description: "Failed to generate recipe. Please try again.",
-        variant: "destructive",
-      });
+      
+      // Add error message to chat instead of toast
+      const errorMessage: ChatMessage = {
+        id: Date.now(),
+        message: "",
+        response: "❌ Sorry, I couldn't create the recipe right now. This might be because you've reached your monthly recipe limit or there was a technical issue. Please try again or check your subscription status.",
+        isUser: false,
+        text: "❌ Sorry, I couldn't create the recipe right now. This might be because you've reached your monthly recipe limit or there was a technical issue. Please try again or check your subscription status.",
+        timestamp: new Date(),
+      };
+      
+      setLocalMessages(prev => [...prev, errorMessage]);
     }
   });
 
