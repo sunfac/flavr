@@ -56,31 +56,39 @@ export default function FloatingChatButton({ className = "", variant = "floating
           </div>
         </div>
 
-        {/* Chat Modal */}
+        {/* Chat Modal - Mobile Optimized */}
         <AnimatePresence>
           {isChatOpen && (
             <motion.div
-              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              className="fixed inset-0 z-50 flex items-center justify-center md:p-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              {/* Backdrop */}
+              {/* Backdrop - only visible on desktop */}
               <motion.div
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm hidden md:block"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={handleCloseChat}
               />
 
-              {/* Chat Panel */}
+              {/* Chat Panel - Full screen on mobile, modal on desktop */}
               <motion.div
-                className="relative w-full max-w-md h-[600px] bg-slate-900 rounded-2xl shadow-2xl border border-slate-700/50 overflow-hidden"
-                initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                className="relative w-full h-full md:max-w-md md:h-[600px] bg-slate-900 md:rounded-2xl shadow-2xl border-0 md:border border-slate-700/50 overflow-hidden"
+                initial={{ 
+                  scale: typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 0.8, 
+                  opacity: 0, 
+                  y: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : 20 
+                }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.8, opacity: 0, y: 20 }}
+                exit={{ 
+                  scale: typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 0.8, 
+                  opacity: 0, 
+                  y: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : 20 
+                }}
                 transition={{ 
                   type: "spring", 
                   stiffness: 300, 
@@ -158,31 +166,39 @@ export default function FloatingChatButton({ className = "", variant = "floating
         </div>
       </motion.div>
 
-      {/* Chat Modal */}
+      {/* Chat Modal - Mobile Optimized */}
       <AnimatePresence>
         {isChatOpen && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center md:p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            {/* Backdrop */}
+            {/* Backdrop - only visible on desktop */}
             <motion.div
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm hidden md:block"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={handleCloseChat}
             />
 
-            {/* Chat Panel */}
+            {/* Chat Panel - Full screen on mobile, modal on desktop */}
             <motion.div
-              className="relative w-full max-w-md h-[600px] bg-slate-900 rounded-2xl shadow-2xl border border-slate-700/50 overflow-hidden"
-              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              className="relative w-full h-full md:max-w-md md:h-[600px] bg-slate-900 md:rounded-2xl shadow-2xl border-0 md:border border-slate-700/50 overflow-hidden"
+              initial={{ 
+                scale: typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 0.8, 
+                opacity: 0, 
+                y: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : 20 
+              }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.8, opacity: 0, y: 20 }}
+              exit={{ 
+                scale: typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 0.8, 
+                opacity: 0, 
+                y: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : 20 
+              }}
               transition={{ 
                 type: "spring", 
                 stiffness: 300, 
