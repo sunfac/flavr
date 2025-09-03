@@ -23,22 +23,36 @@ export default function FloatingChatButton({ className = "", variant = "floating
   if (variant === "fixed") {
     return (
       <>
-        {/* Fixed Chat Button for Mode Selection */}
+        {/* Fixed Chat Button for Mode Selection - Card Style */}
         <div className={`relative ${className}`}>
-          <div className="relative group">
-            {/* Glow effects */}
-            <div className="absolute -inset-2 bg-gradient-to-r from-orange-500/20 via-amber-500/15 to-orange-500/20 rounded-xl blur-xl opacity-60 animate-pulse"></div>
-            <div className="absolute -inset-1 bg-gradient-to-r from-orange-400/30 to-amber-400/30 rounded-xl blur-lg opacity-80 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="relative overflow-hidden transition-all duration-300 group bg-background border border-border rounded-lg shadow-lg hover:shadow-xl hover:scale-105 cursor-pointer dark:bg-gray-800/50 dark:border-gray-700 max-w-sm">
+            {/* Gradient overlay on hover */}
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-orange-600/10 dark:from-orange-500/20 dark:to-orange-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             
-            {/* Main Button */}
-            <Button
-              onClick={handleToggleChat}
-              className="relative px-8 py-4 text-lg font-bold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 text-white border-0 rounded-xl group flex items-center gap-3"
-              size="lg"
-            >
-              <iconMap.chefHat className="w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
-              <span className="relative z-10">Talk to Your Private Chef Now</span>
-            </Button>
+            {/* Card Content */}
+            <div className="relative text-center py-4 md:py-6 px-6" onClick={handleToggleChat}>
+              {/* Chef Hat Icon */}
+              <div className="p-3 md:p-4 rounded-full bg-background/80 backdrop-blur-sm inline-flex mx-auto mb-3 md:mb-4 border-2 border-orange-500/20 text-orange-500 dark:text-orange-400">
+                <iconMap.chefHat className="w-8 h-8 md:w-10 md:h-10" />
+              </div>
+              
+              {/* Title */}
+              <h3 className="text-xl md:text-2xl font-bold mb-2 text-foreground">Talk to Your Private Chef</h3>
+              
+              {/* Description */}
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-4">
+                Get instant cooking advice, recipe suggestions, and personalized culinary guidance
+              </p>
+              
+              {/* Action Button */}
+              <Button
+                className="w-full transition-all duration-200 font-semibold group-hover:translate-y-[-2px] shadow-lg hover:shadow-xl bg-orange-600 hover:bg-orange-700 text-white"
+                size="lg"
+              >
+                Start Chatting
+                <iconMap.arrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </div>
           </div>
         </div>
 
