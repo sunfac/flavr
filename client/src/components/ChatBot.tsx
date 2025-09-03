@@ -83,7 +83,10 @@ export default function ChatBot({
     };
 
     return {
-      recipe: activeRecipe,
+      recipe: {
+        ...activeRecipe,
+        description: activeRecipe.description || ""
+      } as Recipe,
       hasRecipe: !!(activeRecipe.title && activeRecipe.ingredients?.length > 0),
       currentMode: currentMode
     };
@@ -727,7 +730,7 @@ export default function ChatBot({
                             setTimeout(() => {
                               sendMessageMutation.mutate({ 
                                 message: `Another suggestion for: ${msg.originalMessage}`, 
-                                currentRecipe: getCurrentRecipeContext().recipe,
+                                currentRecipe: getCurrentRecipeContext().recipe || undefined,
                                 mode: detectedMode 
                               });
                             }, 500);

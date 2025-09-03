@@ -59,6 +59,70 @@ export function registerChatRoutes(app: Express) {
       const intentResult = await zestService.detectRecipeIntent(message);
       console.log('🎯 Intent detection:', intentResult);
 
+      // Check if this is a quick cooking question that doesn't need a recipe card
+      const isQuickAnswerRequest = !intentResult.isRecipeIntent && (
+        message.toLowerCase().includes('how do i') ||
+        message.toLowerCase().includes('how to') ||
+        message.toLowerCase().includes('what is') ||
+        message.toLowerCase().includes('can i use') ||
+        message.toLowerCase().includes('substitute') ||
+        message.toLowerCase().includes('wine pair') ||
+        message.toLowerCase().includes('store') ||
+        message.toLowerCase().includes('keep') ||
+        message.toLowerCase().includes('how long') ||
+        message.toLowerCase().includes('best way') ||
+        message.toLowerCase().includes('technique') ||
+        message.toLowerCase().includes('equipment') ||
+        message.toLowerCase().includes('temperature')
+      );
+
+      // If it's a quick answer request, provide direct conversational response
+      if (isQuickAnswerRequest) {
+        console.log('🔍 Quick answer mode detected, providing direct response');
+        
+        // Build context with user memory for personalized answers
+        const contextPrompt = zestService.buildZestContext(userMemory, currentRecipe);
+        
+        const quickResponse = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            { role: "system", content: contextPrompt + "\n\nQUICK ANSWER MODE: Provide direct, helpful cooking advice without offering to create recipe cards. Be concise but thorough." },
+            ...conversationHistory.map((msg: any) => ({
+              role: msg.role || (msg.sender === 'user' ? 'user' : 'assistant'),
+              content: msg.content || msg.text
+            })),
+            { role: "user", content: message }
+          ],
+          max_tokens: 400,
+          temperature: 0.7
+        });
+
+        const quickAnswer = quickResponse.choices[0].message.content;
+        
+        // Save the conversation
+        if (userContext.userId) {
+          try {
+            await storage.createChatMessage({
+              userId: userContext.userId,
+              message: message,
+              response: quickAnswer || 'No response generated'
+            });
+          } catch (error) {
+            console.error('Error saving quick answer chat:', error);
+          }
+        }
+
+        return res.json({
+          message: quickAnswer,
+          isRecipeIntent: false,
+          isQuickAnswer: true,
+          userMemory: {
+            hasPreferences: !!userMemory.preferences,
+            topicsRemembered: [message.substring(0, 50)]
+          }
+        });
+      }
+
       // If recipe intent detected AND no valid current recipe exists, offer to create new recipe
       if (intentResult.isRecipeIntent && intentResult.confidence >= 0.7 && (!currentRecipe || !currentRecipe.title || currentRecipe.title.trim().length === 0 || !currentRecipe.ingredients || currentRecipe.ingredients.length === 0)) {
         // Use the smart inspiration system with enhanced context for user intent
