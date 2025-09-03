@@ -384,7 +384,13 @@ export default function ChatBot({
 
   // Recipe generation mutation for confirmed intent
   const generateRecipeMutation = useMutation({
-    mutationFn: async (data: { message: string; suggestedRecipeTitle?: string }) => {
+    mutationFn: async (data: { 
+      message: string; 
+      suggestedRecipeTitle?: string;
+      isFlavorMaximized?: boolean;
+      selectedInspiration?: string;
+      originalMessage?: string;
+    }) => {
       const response = await fetch("/api/zest/generate-recipe", {
         method: "POST",
         headers: {
@@ -393,7 +399,10 @@ export default function ChatBot({
         body: JSON.stringify({
           message: data.message,
           userConfirmed: true,
-          suggestedRecipeTitle: data.suggestedRecipeTitle
+          suggestedRecipeTitle: data.suggestedRecipeTitle,
+          isFlavorMaximized: data.isFlavorMaximized,
+          selectedInspiration: data.selectedInspiration,
+          originalMessage: data.originalMessage
         }),
       });
 
@@ -712,7 +721,10 @@ export default function ChatBot({
                         onClick={() => {
                           generateRecipeMutation.mutate({ 
                             message: msg.originalMessage!, 
-                            suggestedRecipeTitle: msg.suggestedRecipeTitle 
+                            suggestedRecipeTitle: msg.suggestedRecipeTitle,
+                            isFlavorMaximized: (msg as any).isFlavorMaximized,
+                            selectedInspiration: (msg as any).selectedInspiration,
+                            originalMessage: (msg as any).originalMessage
                           });
                           // Remove confirmation message after click
                           setLocalMessages(prev => prev.filter(m => m.id !== msg.id));

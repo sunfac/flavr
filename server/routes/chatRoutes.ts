@@ -379,56 +379,86 @@ Respond with JSON: {"shouldBypass": true/false, "confidence": 0-1, "reasoning": 
           willBypass: isFullRecipeIdea
         });
         
-        // If this is a full recipe idea, bypass inspiration and use direct flavor-maximized generation with chef/restaurant inspiration
+        // If this is a full recipe idea, bypass inspiration and offer the same user experience with enhanced title
         if (isFullRecipeIdea) {
-          console.log('🎯 EXPLICIT DISH REQUEST: Bypassing inspiration system, using direct flavor-maximized recipe generation');
+          console.log('🎯 EXPLICIT DISH REQUEST: Bypassing inspiration, creating enhanced title for user confirmation');
           
           try {
-            // Use ZestService to generate the recipe directly with flavor maximization
-            const directRecipe = await zestService.generateFlavorMaximizedRecipe(
-              message,
-              userContext,
-              userMemory
-            );
+            // Generate enhanced title using chef/restaurant inspiration
+            const allChefs = [
+              "Gordon Ramsay", "Jamie Oliver", "Nigella Lawson", "Mary Berry", "Tom Kerridge", 
+              "Rick Stein", "Delia Smith", "James Martin", "Hugh Fearnley-Whittingstall", 
+              "Marco Pierre White", "Heston Blumenthal", "Michel Roux Jr", "Angela Hartnett",
+              "Paul Hollywood", "Nadiya Hussain", "Ainsley Harriott", "Gino D'Acampo",
+              "Yotam Ottolenghi", "José Andrés", "Julia Child", "Thomas Keller", "David Chang"
+            ];
             
-            // Save the recipe immediately
-            let savedRecipe;
-            if (userContext.userId) {
-              try {
-                savedRecipe = await storage.createRecipe({
-                  ...directRecipe,
-                  userId: userContext.userId
-                });
-                
-                // Update usage tracking
-                const user = await storage.getUser(userContext.userId);
-                if (user) {
-                  const isDeveloper = user.email === "william@blycontracting.co.uk";
-                  const hasUnlimitedAccess = user.hasFlavrPlus || isDeveloper;
-                  
-                  if (!hasUnlimitedAccess) {
-                    await storage.updateUserUsage(userContext.userId, (user.recipesThisMonth || 0) + 1);
-                  }
-                } else {
-                  const pseudoId = req.headers['x-pseudo-user-id'] as string || req.session?.id || 'anonymous';
-                  const pseudoUser = await storage.getPseudoUser(pseudoId);
-                  if (pseudoUser) {
-                    await storage.updatePseudoUserUsage(pseudoId, (pseudoUser.recipesThisMonth || 0) + 1);
-                  }
-                }
-              } catch (error) {
-                console.error('Error saving direct recipe:', error);
-              }
-            }
+            const allRestaurants = [
+              "Dishoom", "Padella", "Hawksmoor", "Barrafina", "Gymkhana", 
+              "Duck & Waffle", "St. John", "Bao", "Kiln", "Hoppers", 
+              "Brat", "Lyle's", "The Clove Club", "Roka", "Zuma", 
+              "Lima", "Temper", "Smoking Goat", "Ikoyi", "The Ledbury"
+            ];
+            
+            // Randomly choose between chef or restaurant inspiration (50/50)
+            const useChefInspiration = Math.random() < 0.5;
+            const selectedInspiration = useChefInspiration 
+              ? allChefs[Math.floor(Math.random() * allChefs.length)]
+              : allRestaurants[Math.floor(Math.random() * allRestaurants.length)];
+            
+            console.log(`🎲 Selected ${useChefInspiration ? 'chef' : 'restaurant'} inspiration: ${selectedInspiration}`);
+            
+            // Generate enhanced title that preserves intent but adds flair
+            const titleResponse = await openai.chat.completions.create({
+              model: "gpt-4o",
+              messages: [
+                {
+                  role: "system",
+                  content: `You are a culinary title expert. Transform the user's recipe request into an elevated ${selectedInspiration}-style version while preserving their core intent.
 
+EXAMPLES:
+- "quick tomato meatball pasta" → "${selectedInspiration}-Style Quick Tomato Meatball Pasta with Herb Oil"
+- "chicken curry" → "${selectedInspiration}'s Aromatic Chicken Curry"
+- "chocolate cake" → "${selectedInspiration}-Inspired Rich Chocolate Cake"
+
+KEY PRINCIPLES:
+- Preserve the user's EXACT dish type and key elements
+- Add ${selectedInspiration}'s distinctive flair
+- Keep it appetizing and specific
+- Don't change the fundamental dish they requested
+
+Respond with ONLY the enhanced title.`
+                },
+                {
+                  role: "user",
+                  content: message
+                }
+              ],
+              max_tokens: 50,
+              temperature: 0.7
+            });
+            
+            const enhancedTitle = titleResponse.choices[0].message.content?.trim() || message;
+            console.log('🍯 Enhanced title generated:', enhancedTitle);
+            
+            // Return the same format as inspiration system with confirmation buttons
             return res.json({
-              recipe: directRecipe,
-              savedRecipeId: savedRecipe?.id,
-              message: `Perfect! I've created a flavor-maximized version of "${directRecipe.title}" just for you. This recipe is designed to maximize every layer of flavor while staying true to your request!`
+              message: `Perfect! I've created an elevated version of your request: "${enhancedTitle}". This will be a flavor-maximized recipe that stays true to what you asked for but with ${selectedInspiration}'s expertise. Would you like me to turn this into a full Flavr recipe card?`,
+              isRecipeIntent: true,
+              confidence: 0.95,
+              requiresConfirmation: true,
+              suggestedRecipeTitle: enhancedTitle,
+              originalMessage: message,
+              isFlavorMaximized: true, // Flag to indicate this uses the special system
+              selectedInspiration,
+              userMemory: {
+                hasPreferences: !!userMemory.preferences,
+                topicsRemembered: [message, enhancedTitle]
+              }
             });
             
           } catch (error) {
-            console.error('Error generating direct flavor-maximized recipe:', error);
+            console.error('Error generating enhanced title:', error);
             return res.json({
               message: "I'd love to create that recipe for you! Could you try asking again?",
               isRecipeIntent: false
@@ -798,7 +828,14 @@ Examples of NON-modification requests:
   // Recipe generation endpoint for when user confirms intent
   app.post("/api/zest/generate-recipe", async (req, res) => {
     try {
-      const { message, userConfirmed, suggestedRecipeTitle } = req.body;
+      const { 
+        message, 
+        userConfirmed, 
+        suggestedRecipeTitle, 
+        isFlavorMaximized, 
+        selectedInspiration, 
+        originalMessage 
+      } = req.body;
       
       if (!userConfirmed) {
         return res.status(400).json({ error: "User confirmation required" });
@@ -853,10 +890,27 @@ Examples of NON-modification requests:
       // Load user memory
       const userMemory = await zestService.getUserMemory(userContext);
 
-      // Generate recipe using the suggested title if available, otherwise use original message
-      const recipePrompt = suggestedRecipeTitle || message;
-      console.log('🍳 Generating recipe for:', { originalMessage: message, suggestedTitle: suggestedRecipeTitle, usingPrompt: recipePrompt });
-      const recipe = await zestService.generateRecipe(recipePrompt, userContext, userMemory);
+      // Check if this is a flavor-maximized recipe from the bypass system
+      let recipe;
+      if (isFlavorMaximized && selectedInspiration) {
+        console.log('🎯 Using flavor-maximized generation in Zest endpoint:', {
+          title: suggestedRecipeTitle,
+          inspiration: selectedInspiration,
+          originalRequest: originalMessage
+        });
+        
+        // Use flavor-maximized generation
+        recipe = await zestService.generateFlavorMaximizedRecipe(
+          originalMessage || message,
+          userContext,
+          userMemory
+        );
+      } else {
+        // Generate recipe using the suggested title if available, otherwise use original message
+        const recipePrompt = suggestedRecipeTitle || message;
+        console.log('🍳 Generating standard recipe for:', { originalMessage: message, suggestedTitle: suggestedRecipeTitle, usingPrompt: recipePrompt });
+        recipe = await zestService.generateRecipe(recipePrompt, userContext, userMemory);
+      }
 
       // Log chat recipe generation for developer monitoring
       if (userContext.userId && recipe) {

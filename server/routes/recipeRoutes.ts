@@ -627,7 +627,13 @@ Return a JSON object with this structure:
   // Chef Assist recipe generation - GPT-5 Implementation
   app.post("/api/chef-assist/generate", async (req, res) => {
     try {
-      const { prompt: userPrompt, servings = 4 } = req.body;
+      const { 
+        prompt: userPrompt, 
+        servings = 4, 
+        isFlavorMaximized, 
+        selectedInspiration, 
+        originalMessage 
+      } = req.body;
 
       if (!userPrompt) {
         return res.status(400).json({ error: "No prompt provided" });
@@ -637,6 +643,86 @@ Return a JSON object with this structure:
       const limitCheck = await checkAndEnforceUsageLimit(req);
       if (!limitCheck.allowed) {
         return res.status(403).json(limitCheck.error);
+      }
+
+      // If this is a flavor-maximized recipe from the bypass system, use special generation
+      if (isFlavorMaximized && selectedInspiration) {
+        console.log('🎯 Using flavor-maximized generation for bypass system:', {
+          title: userPrompt,
+          inspiration: selectedInspiration,
+          originalRequest: originalMessage
+        });
+
+        // Import ZestService for flavor-maximized generation
+        const { ZestService } = await import('../zestService');
+        const zestService = new ZestService();
+
+        // Build user context
+        const userContext = {
+          userId: req.session?.userId,
+          pseudoUserId: req.headers['x-pseudo-user-id'] as string || req.session?.id
+        };
+
+        // Build memory context (simplified for this endpoint)
+        const memory = {
+          preferences: null,
+          conversationHistory: [],
+          cookingHistory: []
+        };
+
+        const flavorMaximizedRecipe = await zestService.generateFlavorMaximizedRecipe(
+          originalMessage || userPrompt,
+          userContext,
+          memory
+        );
+
+        // Apply UK conversions
+        const convertedRecipe = convertRecipeToUKEnglish(flavorMaximizedRecipe);
+
+        // Generate image
+        const tempRecipeId = Date.now();
+        console.log('🎨 Generating image for flavor-maximized recipe...');
+        
+        try {
+          const imageUrl = await generateRecipeImage(convertedRecipe.title, convertedRecipe.cuisine, tempRecipeId);
+          if (imageUrl) {
+            console.log('✅ Image generated successfully:', imageUrl);
+            convertedRecipe.image = imageUrl;
+            convertedRecipe.imageUrl = imageUrl;
+          }
+        } catch (imageError) {
+          console.error('Error generating recipe image:', imageError);
+        }
+
+        // Save the recipe
+        let savedRecipe;
+        if (req.session?.userId) {
+          try {
+            savedRecipe = await storage.createRecipe({
+              ...convertedRecipe,
+              userId: req.session.userId
+            });
+            
+            // Update usage tracking
+            const user = await storage.getUser(req.session.userId);
+            if (user) {
+              const isDeveloper = user.email === "william@blycontracting.co.uk";
+              const hasUnlimitedAccess = user.hasFlavrPlus || isDeveloper;
+              
+              if (!hasUnlimitedAccess) {
+                await storage.updateUserUsage(req.session.userId, (user.recipesThisMonth || 0) + 1);
+              }
+            }
+          } catch (error) {
+            console.error('Error saving flavor-maximized recipe:', error);
+          }
+        }
+
+        return res.json({
+          recipe: convertedRecipe,
+          savedRecipeId: savedRecipe?.id,
+          isFlavorMaximized: true
+        });
       }
 
       // Generate random seeds for ultra-maximum variation

@@ -667,12 +667,17 @@ Respond only with valid JSON format.`
 
       const result = JSON.parse(response.choices[0].message.content || '{}');
       
-      // Ensure proper structure
+      // Ensure proper structure and data types
+      const cookTimeValue = result.cookTime || result.cooking_time || 45;
+      const parsedCookTime = typeof cookTimeValue === 'string' ? 
+        parseInt(cookTimeValue.replace(/\D/g, '')) || 45 : 
+        cookTimeValue;
+
       return {
         title: result.title || `Flavor-Maximized ${userMessage}`,
         description: result.description || 'A delicious recipe optimized for maximum flavor',
         servings: result.servings || 4,
-        cookTime: result.cookTime || result.cooking_time || 45,
+        cookTime: parsedCookTime,
         difficulty: result.difficulty || 'Medium',
         cuisine: result.cuisine || 'International',
         ingredients: Array.isArray(result.ingredients) ? result.ingredients : [],
