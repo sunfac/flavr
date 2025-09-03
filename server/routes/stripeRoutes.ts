@@ -23,7 +23,7 @@ export function registerStripeRoutes(app: Express) {
     try {
       console.log("🔔 Create subscription request received");
       console.log("Session userId:", req.session?.userId);
-      console.log("STRIPE_MONTHLY_PRICE_ID:", process.env.STRIPE_MONTHLY_PRICE_ID ? "Set" : "Not set");
+      console.log("STRIPE_MONTHLY_PRICE_ID:", process.env.STRIPE_MONTHLY_PRICE_ID ? `Set: ${process.env.STRIPE_MONTHLY_PRICE_ID.substring(0, 15)}...` : "Not set");
       
       if (!req.session?.userId) {
         console.log("❌ Authentication failed - no session userId");
@@ -33,12 +33,12 @@ export function registerStripeRoutes(app: Express) {
       const { priceId = PRICE_IDS.monthly } = req.body;
       console.log("Using price ID:", priceId);
       
-      // Check if price ID is configured
-      if (!priceId) {
-        console.log("❌ No price ID configured");
+      // Check if price ID is configured and valid
+      if (!priceId || !priceId.startsWith('price_')) {
+        console.log("❌ Invalid price ID configured:", priceId);
         return res.status(400).json({ 
-          error: "Stripe is not configured", 
-          message: "Please set up Stripe products and prices. See STRIPE_SETUP.md for instructions." 
+          error: "Invalid Stripe price configuration", 
+          message: `The price ID '${priceId}' is invalid. Price IDs must start with 'price_'. Please check your Stripe dashboard and update STRIPE_MONTHLY_PRICE_ID.` 
         });
       }
       const user = await storage.getUser(req.session.userId);
