@@ -2,14 +2,19 @@ import { useState } from 'react';
 import { useLocation } from 'wouter';
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
+import GlobalNavigation from "@/components/GlobalNavigation";
 import ChatBot from "@/components/ChatBot";
 
 export default function ChatMode() {
   const [, navigate] = useLocation();
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
   const handleMenuClick = () => {
-    // Navigate back to mode selection or home
-    navigate('/app');
+    setIsNavOpen(true);
+  };
+
+  const handleNavClose = () => {
+    setIsNavOpen(false);
   };
 
   return (
@@ -24,6 +29,11 @@ export default function ChatMode() {
           />
         </div>
       </main>
+
+      <GlobalNavigation 
+        isOpen={isNavOpen}
+        onClose={handleNavClose}
+      />
 
       <GlobalFooter currentMode="chat" />
     </div>
