@@ -305,6 +305,14 @@ export default function ChatBot({
       setLocalMessages(prev => [...prev, zestMessage]);
       setMessage("");
 
+      // Debug logging for chat flow
+      console.log('🔍 ChatBot Debug - Zest Response:', {
+        isRecipeIntent: result.isRecipeIntent,
+        requiresConfirmation: result.requiresConfirmation,
+        suggestedRecipeTitle: result.suggestedRecipeTitle,
+        confidence: result.confidence
+      });
+
       // Handle recipe intent confirmation
       if (result.isRecipeIntent && result.requiresConfirmation) {
         // Add confirmation buttons
