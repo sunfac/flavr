@@ -695,7 +695,7 @@ export default function ChatBot({
                 </div>
               </div>
             ))}
-            {sendMessageMutation.isPending && (
+            {(sendMessageMutation.isPending || generateRecipeMutation.isPending) && (
               <div className="text-left">
                 <div className="inline-block px-4 py-2 rounded-xl bg-slate-700/90 backdrop-blur-sm border border-slate-600/50">
                   <div className="flex items-center space-x-2">
@@ -703,7 +703,11 @@ export default function ChatBot({
                     <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
                     <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                     <span className="text-slate-300 text-sm ml-2">
-                      {hasCurrentRecipe ? "Updating your recipe..." : "Zest is thinking..."}
+                      {generateRecipeMutation.isPending 
+                        ? "Creating your recipe..." 
+                        : hasCurrentRecipe 
+                        ? "Updating your recipe..." 
+                        : "Zest is thinking..."}
                     </span>
                   </div>
                 </div>
