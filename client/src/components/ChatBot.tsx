@@ -215,11 +215,11 @@ export default function ChatBot({
         userMemory: result.userMemory
       };
     },
-    onSuccess: async (result) => {
+    onSuccess: async (result, variables) => {
       // Create Zest response message
       const zestMessage: ChatMessage = {
         id: Date.now(),
-        message,
+        message: variables.message,
         response: result.response,
         isUser: false,
         text: result.response,
@@ -236,12 +236,12 @@ export default function ChatBot({
         const confirmationMessage: ChatMessage = {
           id: Date.now() + 1,
           message: "",
-          response: "Create Recipe",
+          response: "Would you like me to create this recipe?",
           isUser: false,
-          text: "Create Recipe",
+          text: "Would you like me to create this recipe?",
           timestamp: new Date(),
           isConfirmation: true,
-          originalMessage: message // Store original message for recipe generation
+          originalMessage: variables.message // Use the original message from mutation variables
         };
         
         setLocalMessages(prev => [...prev, confirmationMessage]);
