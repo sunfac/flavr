@@ -72,8 +72,8 @@ export default function ChatBot({
      location.includes('/fridge') ? 'fridge' : 
      location.includes('/chef') ? 'chef' : undefined);
 
-  // Expanded list of direct example commands with Lucide icons
-  const allSuggestionChips = [
+  // Recipe modification suggestions (when a recipe exists)
+  const recipeModificationChips = [
     { text: "Make this for 6 people", icon: iconMap.users, updatesRecipe: true },
     { text: "Make it vegan", icon: iconMap.heart, updatesRecipe: true },
     { text: "Add more spice", icon: iconMap.flame, updatesRecipe: true },
@@ -93,6 +93,30 @@ export default function ChatBot({
     { text: "Make it spicier", icon: iconMap.sparkles, updatesRecipe: true },
     { text: "Suggest leftovers ideas", icon: iconMap.refrigerator, updatesRecipe: false }
   ];
+
+  // General cooking help suggestions (when no recipe exists)
+  const generalCookingChips = [
+    { text: "I need a quick dinner idea", icon: iconMap.clock, updatesRecipe: false },
+    { text: "What can I make with pasta?", icon: iconMap.utensilsCrossed, updatesRecipe: false },
+    { text: "Suggest a healthy breakfast", icon: iconMap.coffee, updatesRecipe: false },
+    { text: "Easy recipes for beginners", icon: iconMap.smile, updatesRecipe: false },
+    { text: "What's good for meal prep?", icon: iconMap.calendar, updatesRecipe: false },
+    { text: "I have chicken, what to make?", icon: iconMap.beef, updatesRecipe: false },
+    { text: "Comfort food recipes", icon: iconMap.heart, updatesRecipe: false },
+    { text: "Quick 30-minute meals", icon: iconMap.timer, updatesRecipe: false },
+    { text: "Vegetarian dinner ideas", icon: iconMap.leaf, updatesRecipe: false },
+    { text: "One-pot meal suggestions", icon: iconMap.chef, updatesRecipe: false },
+    { text: "Best dessert to impress?", icon: iconMap.sparkles, updatesRecipe: false },
+    { text: "Cooking techniques to learn", icon: iconMap.chefHat, updatesRecipe: false },
+    { text: "Seasonal ingredient ideas", icon: iconMap.calendar, updatesRecipe: false },
+    { text: "Budget-friendly recipes", icon: iconMap.dollarSign, updatesRecipe: false },
+    { text: "Kid-friendly meal ideas", icon: iconMap.users, updatesRecipe: false },
+    { text: "Date night cooking ideas", icon: iconMap.wine, updatesRecipe: false }
+  ];
+
+  // Determine which suggestion set to use
+  const hasCurrentRecipe = currentRecipe || (recipeStore.meta.title && recipeStore.ingredients.length > 0);
+  const allSuggestionChips = hasCurrentRecipe ? recipeModificationChips : generalCookingChips;
 
   // Rotating chips state - show 6 at a time, rotate every 6 seconds
   const [chipRotationIndex, setChipRotationIndex] = useState(0);
