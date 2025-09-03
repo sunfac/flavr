@@ -32,6 +32,7 @@ import DigitalCookbook from "@/pages/DigitalCookbook";
 import BudgetPlanner from "@/pages/BudgetPlanner";
 import Fridge2Fork from "@/pages/Fridge2Fork";
 import ChefAssist from "@/pages/ChefAssist";
+import ChatMode from "@/pages/ChatMode";
 import Recipe from "@/pages/Recipe";
 import RecipeSelection from "@/pages/RecipeSelection";
 import LoadingPage from "@/pages/LoadingPage";
@@ -71,6 +72,7 @@ function Router() {
       <Route path="/budget-planner" component={BudgetPlanner} />
       <Route path="/fridge2fork" component={Fridge2Fork} />
       <Route path="/chef-assist" component={ChefAssist} />
+      <Route path="/chat" component={ChatMode} />
       <Route path="/recipe" component={Recipe} />
       <Route path="/recipe-selection" component={RecipeSelection} />
       <Route path="/share/:shareId" component={PublicRecipeView} />
