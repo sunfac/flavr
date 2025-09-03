@@ -52,10 +52,24 @@ export class SubRecipeService {
   async detectPotentialSubRecipes(ingredients: string[]): Promise<Map<string, SubRecipeDetection>> {
     const detections = new Map<string, SubRecipeDetection>();
     
-    // Exclude very basic single-word ingredients that are typically store-bought
+    // Exclude basic ingredients that are typically store-bought
     const basicIngredients = [
       'salt', 'pepper', 'water', 'oil', 'flour', 'sugar', 'milk', 'eggs', 'butter',
-      'onion', 'garlic', 'tomato', 'potato', 'carrot', 'celery', 'lemon', 'lime'
+      'onion', 'garlic', 'tomato', 'potato', 'carrot', 'celery', 'lemon', 'lime',
+      'beef', 'pork', 'chicken', 'lamb', 'duck', 'fish', 'salmon', 'tuna', 'cod',
+      'pork belly', 'chicken breast', 'beef steak', 'lamb chops', 'duck breast',
+      'cucumber', 'lettuce', 'spinach', 'kale', 'cabbage', 'broccoli', 'cauliflower',
+      'mushrooms', 'bell pepper', 'peppers', 'cheese', 'mozzarella', 'parmesan',
+      'cheddar', 'feta', 'goat cheese', 'cream cheese', 'yogurt', 'sour cream',
+      'bread', 'pasta', 'rice', 'noodles', 'quinoa', 'couscous', 'bulgur',
+      'beans', 'lentils', 'chickpeas', 'black beans', 'kidney beans',
+      'nuts', 'almonds', 'walnuts', 'pecans', 'pine nuts', 'cashews',
+      'herbs', 'basil', 'parsley', 'cilantro', 'thyme', 'rosemary', 'oregano',
+      'spices', 'cumin', 'paprika', 'cinnamon', 'nutmeg', 'cardamom',
+      'bao buns', 'tortillas', 'pita bread', 'naan', 'spring onions', 'scallions',
+      'shallots', 'leeks', 'ginger', 'chili', 'chilies', 'jalapenos', 'serrano',
+      'avocado', 'lime juice', 'lemon juice', 'vinegar', 'soy sauce', 'fish sauce',
+      'coconut milk', 'cream', 'stock', 'broth', 'wine', 'beer', 'sake'
     ];
     
     for (const ingredient of ingredients) {
@@ -86,25 +100,31 @@ export class SubRecipeService {
         continue;
       }
       
-      // Check if the ingredient suggests it could be homemade
-      const homemadeIndicators = [
-        'paste', 'sauce', 'drizzle', 'oil', 'butter', 'mayo', 'aioli', 'chutney',
-        'marinade', 'dressing', 'stock', 'broth', 'mix', 'blend', 'rub',
-        'fermented', 'pickled', 'cured', 'homemade', 'fresh'
+      // Only suggest for complex components that can be made from scratch
+      const complexComponents = [
+        'pesto', 'aioli', 'mayo', 'mayonnaise', 'chimichurri', 'salsa', 'guacamole',
+        'hummus', 'tapenade', 'chutney', 'relish', 'harissa', 'romesco',
+        'curry paste', 'thai curry paste', 'red curry paste', 'green curry paste',
+        'garam masala', 'spice mix', 'spice blend', 'rub', 'seasoning mix',
+        'compound butter', 'herb butter', 'garlic butter', 'flavored butter',
+        'marinade', 'glaze', 'reduction', 'gastrique', 'jus', 'coulis',
+        'hollandaise', 'bearnaise', 'beurre blanc', 'veloute', 'bechamel',
+        'tahini', 'tzatziki', 'raita', 'pickle', 'pickled', 'fermented',
+        'stock', 'bone broth', 'dashi', 'fumet', 'consomme',
+        'pasta sauce', 'tomato sauce', 'bolognese', 'ragu', 'marinara',
+        'vinaigrette', 'dressing', 'emulsion', 'infused oil', 'flavored oil'
       ];
       
-      const hasHomemadeIndicator = homemadeIndicators.some(indicator => 
-        lowerExtracted.includes(indicator) || lowerIngredient.includes(`${indicator} `)
+      const isComplexComponent = complexComponents.some(component => 
+        lowerExtracted.includes(component) || lowerIngredient.includes(component)
       );
       
-      // Only suggest subrecipes for ingredients with strong homemade indicators
-      // Removed compound ingredient logic to reduce inappropriate suggestions
-      
-      if (hasHomemadeIndicator) {
+      // Only suggest subrecipes for complex components that can be made from scratch
+      if (isComplexComponent) {
         detections.set(ingredient, {
           hasSubRecipe: true,
           subRecipeName: extractedName,
-          confidence: hasHomemadeIndicator ? 0.9 : 0.7,
+          confidence: 0.9,
           suggestion: `Create homemade ${extractedName}`
         });
       }
