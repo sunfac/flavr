@@ -66,6 +66,16 @@ export function registerChatRoutes(app: Express) {
         // Extract additional context from user message for better suggestions
         const lowerMessage = message.toLowerCase();
         
+        // Detect specific ingredient requests first
+        const commonIngredients = ['pasta', 'chicken', 'beef', 'pork', 'fish', 'salmon', 'shrimp', 'rice', 'potatoes', 'eggs', 'tofu', 'mushrooms', 'spinach', 'tomatoes', 'cheese', 'bread', 'beans', 'lentils', 'quinoa', 'avocado'];
+        let specificIngredient = '';
+        for (const ingredient of commonIngredients) {
+          if (lowerMessage.includes(ingredient)) {
+            specificIngredient = ingredient;
+            break;
+          }
+        }
+        
         // Detect cuisine preferences
         let cuisinePreference = '';
         const cuisines = ['italian', 'chinese', 'thai', 'mexican', 'indian', 'japanese', 'french', 'greek', 'spanish', 'turkish', 'lebanese', 'moroccan', 'korean', 'vietnamese'];
@@ -84,24 +94,60 @@ export function registerChatRoutes(app: Express) {
         if (lowerMessage.includes('dairy-free') || lowerMessage.includes('dairy free')) avoidTerms.push('dairy', 'milk', 'cheese');
         if (lowerMessage.includes('nut-free') || lowerMessage.includes('nut free')) avoidTerms.push('nuts', 'peanuts');
         
-        // Pass the user's original message with extracted context to the intelligent inspiration system
-        const titleResult = await ChefAssistGPT5.generateInspireTitle({
-          userIntent: message,
-          clientId: clientId,
-          cuisinePreference: cuisinePreference,
-          avoid: avoidTerms,
-          seeds: {
-            randomSeed: Math.floor(Math.random() * 10000),
-            complexityLevel: Math.floor(Math.random() * 15) + 1,
-            simpleStyle: Math.floor(Math.random() * 15) + 1,
-            creativityMode: Math.floor(Math.random() * 8) + 1,
-            seasonalFocus: Math.floor(Math.random() * 6) + 1,
-            textureTheme: Math.floor(Math.random() * 10) + 1,
-            flavorProfile: Math.floor(Math.random() * 12) + 1
-          }
-        });
-        
-        const inspiredTitle = titleResult.title;
+        // If user specified an ingredient, create a more targeted suggestion using direct OpenAI call
+        let inspiredTitle;
+        if (specificIngredient) {
+          // For specific ingredient requests, use a direct OpenAI call to ensure relevance
+          const ingredientResponse = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              { 
+                role: "system", 
+                content: `You are a professional chef creating recipe titles. Generate ONE specific recipe title that prominently features the requested ingredient as the main component.
+
+CRITICAL REQUIREMENTS:
+- The recipe title MUST feature ${specificIngredient} as the primary ingredient
+- Use format: "[Chef Name]-Inspired [Specific Dish Name] with [Key Feature]"
+- Choose from these chef voices: Jamie Oliver, Rick Stein, Tom Kerridge, Mary Berry, Delia Smith, Marcus Wareing, Georgina Hayden, Jose Pizarro, Yotam Ottolenghi
+- Be specific about the dish type (not just "pasta" but "Carbonara" or "Cacio e Pepe")
+- Include one standout technique or flavor element
+- ${cuisinePreference ? `Make it ${cuisinePreference} cuisine focused.` : ''}
+- ${avoidTerms.length > 0 ? `Avoid these ingredients: ${avoidTerms.join(', ')}.` : ''}
+
+Examples of good format:
+- "Jamie Oliver-Inspired Creamy Carbonara with Crispy Pancetta"
+- "Rick Stein-Inspired Seafood Linguine with White Wine & Herbs"
+- "Tom Kerridge-Inspired Beef Ragu Pappardelle with Red Wine Reduction"
+
+Respond with ONLY the recipe title, nothing else.`
+              },
+              { role: "user", content: `Create a recipe title featuring ${specificIngredient}` }
+            ],
+            max_tokens: 50,
+            temperature: 0.7
+          });
+          
+          inspiredTitle = ingredientResponse.choices[0].message.content?.trim() || `${specificIngredient.charAt(0).toUpperCase() + specificIngredient.slice(1)} Recipe`;
+        } else {
+          // Use the general inspiration system for broader requests
+          const titleResult = await ChefAssistGPT5.generateInspireTitle({
+            userIntent: message,
+            clientId: clientId,
+            cuisinePreference: cuisinePreference,
+            avoid: avoidTerms,
+            seeds: {
+              randomSeed: Math.floor(Math.random() * 10000),
+              complexityLevel: Math.floor(Math.random() * 15) + 1,
+              simpleStyle: Math.floor(Math.random() * 15) + 1,
+              creativityMode: Math.floor(Math.random() * 8) + 1,
+              seasonalFocus: Math.floor(Math.random() * 6) + 1,
+              textureTheme: Math.floor(Math.random() * 10) + 1,
+              flavorProfile: Math.floor(Math.random() * 12) + 1
+            }
+          });
+          
+          inspiredTitle = titleResult.title;
+        }
         
         // Create an engaging description of the inspired dish
         const suggestionResponse = await openai.chat.completions.create({
