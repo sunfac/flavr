@@ -1113,15 +1113,21 @@ OUTPUT: JSON with "title" key only. Make it sophisticated, flavor-packed, AND di
       let title = parsed.title;
       
       // Validate title completeness - check for incomplete "Inspired by..." titles
+      const lowerTitle = title.toLowerCase().trim();
       const isIncompleteTitle = (
-        title.toLowerCase().includes('inspired by') && 
-        !title.toLowerCase().match(/inspired by.*\w+.*\w+/) // Must have words after "inspired by"
-      ) || (
-        title.toLowerCase().match(/^[a-z\s]+-inspired$/i) && // Ends with just "-inspired"
-        !title.toLowerCase().includes(' inspired ') // No dish name after
-      ) || (
-        title.toLowerCase().trim().endsWith('inspired') ||
-        title.toLowerCase().includes('inspired by') && title.split(' ').length < 4
+        // Catches "Inspired by Chef Name:" without dish name
+        lowerTitle.match(/^inspired by [^:]+:?\s*$/i) ||
+        // Catches "Chef Name-Inspired" without dish name  
+        lowerTitle.match(/^[^-]+-inspired:?\s*$/i) ||
+        // Catches titles that end with just "inspired"
+        lowerTitle.endsWith(' inspired') ||
+        lowerTitle.endsWith(':inspired') ||
+        // Catches "Inspired by" with very few words after (likely incomplete)
+        (lowerTitle.includes('inspired by') && title.split(' ').length < 6) ||
+        // Catches titles that are just chef names + "inspired"
+        lowerTitle.match(/^(inspired by )?[a-z\s]+ inspired$/i) ||
+        // Catches colons with nothing substantial after
+        (title.includes(':') && title.split(':')[1]?.trim().length < 3)
       );
       
       if (isIncompleteTitle) {
