@@ -113,7 +113,14 @@ RECIPE INTENT indicators:
 - "I need a recipe that..."
 - "Create a dish with..."
 - "Turn this into a recipe"
+- "I need a [meal] idea..." (breakfast, lunch, dinner, etc.)
+- "What should I cook..."
+- "Give me a [meal] suggestion..."
+- "I'm looking for something to cook..."
+- "Help me decide what to make..."
+- "What can I make for [meal]..."
 - Mentions specific dish names with intent to cook
+- Requests for meal ideas, cooking suggestions, or dish recommendations
 
 NOT RECIPE INTENT:
 - General cooking questions ("How do I dice onions?")

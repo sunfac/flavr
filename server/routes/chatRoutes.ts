@@ -57,8 +57,8 @@ export function registerChatRoutes(app: Express) {
       const intentResult = await zestService.detectRecipeIntent(message);
       console.log('🎯 Intent detection:', intentResult);
 
-      // If high confidence recipe intent, offer to create recipe with specific suggestion
-      if (intentResult.isRecipeIntent && intentResult.confidence > 0.7) {
+      // If recipe intent detected, offer to create recipe with specific suggestion
+      if (intentResult.isRecipeIntent && intentResult.confidence >= 0.7) {
         // Generate a specific recipe suggestion using Inspire Me style variety
         const { ChefAssistGPT5 } = await import('../chefAssistGPT5');
         const clientId = req.ip || 'anonymous';
