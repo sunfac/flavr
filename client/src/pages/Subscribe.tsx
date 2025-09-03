@@ -123,15 +123,36 @@ export default function Subscribe() {
 
   // Check if Stripe is loaded
   useEffect(() => {
-    stripePromise.then((stripe) => {
-      if (stripe) {
-        console.log("Stripe loaded successfully");
-        setStripeLoaded(true);
-      } else {
-        console.error("Failed to load Stripe");
+    let timeoutId: NodeJS.Timeout;
+    
+    const checkStripe = async () => {
+      try {
+        const stripe = await stripePromise;
+        if (stripe) {
+          console.log("Stripe loaded successfully");
+          setStripeLoaded(true);
+        } else {
+          console.error("Failed to load Stripe - no stripe instance");
+        }
+      } catch (error) {
+        console.error("Error loading Stripe:", error);
       }
-    });
-  }, []);
+    };
+    
+    checkStripe();
+    
+    // Fallback timeout
+    timeoutId = setTimeout(() => {
+      if (!stripeLoaded) {
+        console.error("Stripe loading timeout - falling back to basic form");
+        setStripeLoaded(true); // Allow form to show even if Stripe fails
+      }
+    }, 10000);
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [stripeLoaded]);
 
   // Close all menus
   const closeAllMenus = () => {
