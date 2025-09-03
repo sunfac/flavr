@@ -702,6 +702,9 @@ export default function ChatBot({
                     <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
                     <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
                     <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                    <span className="text-slate-300 text-sm ml-2">
+                      {hasCurrentRecipe ? "Updating your recipe..." : "Zest is thinking..."}
+                    </span>
                   </div>
                 </div>
               </div>
