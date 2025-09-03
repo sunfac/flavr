@@ -230,18 +230,65 @@ Keep it conversational and enthusiastic like you're recommending your favorite d
       if (currentRecipe) {
         console.log('🔧 Recipe modification request detected with current recipe:', currentRecipe.title);
         
-        // Check if this is a modification request
-        const modificationKeywords = [
-          'make it', 'make this', 'change', 'substitute', 'replace', 'swap', 
-          'vegan', 'vegetarian', 'gluten-free', 'dairy-free', 'spice', 'spicy', 'spicier',
-          'people', 'servings', 'double', 'half', 'healthier', 'easier',
-          'more', 'less', 'without', 'add', 'remove', 'different',
-          'hotter', 'milder', 'kick', 'heat', 'chili', 'pepper', 'hot sauce'
-        ];
-        
-        const isModificationRequest = modificationKeywords.some(keyword => 
-          message.toLowerCase().includes(keyword)
-        );
+        // Use AI to intelligently detect if this is a recipe modification request
+        const modificationDetectionResponse = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: `You are an AI that determines if a user message is requesting modifications to an existing recipe. 
+
+CURRENT RECIPE CONTEXT: "${currentRecipe.title}"
+
+Analyze the user's message and determine:
+1. Is this asking to modify/change/adjust the current recipe?
+2. Or is this asking for general cooking advice/tips?
+3. Or is this requesting a completely new recipe?
+
+Respond with ONLY a JSON object:
+{
+  "isModificationRequest": boolean,
+  "confidence": number (0-1),
+  "reasoning": "brief explanation"
+}
+
+Examples of modification requests:
+- "make it spicier", "add garlic", "use chicken instead", "make it vegan"
+- "can you make this gluten-free?", "what if I don't have cream?"
+- "increase the portions", "make it less salty", "add vegetables"
+- "use different herbs", "make it Italian style", "add a crispy topping"
+
+Examples of NON-modification requests:
+- "how do I store leftovers?", "what wine pairs with this?"
+- "tell me about Italian cuisine", "what are good cooking tips?"
+- "I want a different chicken recipe", "suggest a dessert"`
+            },
+            {
+              role: "user",
+              content: message
+            }
+          ],
+          max_tokens: 150,
+          temperature: 0.1,
+          response_format: { type: "json_object" }
+        });
+
+        let isModificationRequest = false;
+        try {
+          const detection = JSON.parse(modificationDetectionResponse.choices[0].message.content || '{}');
+          isModificationRequest = detection.isModificationRequest && detection.confidence > 0.6;
+          console.log('🤖 AI Modification Detection:', detection);
+        } catch (error) {
+          console.error('Error parsing modification detection:', error);
+          // Fallback to keyword detection
+          const modificationKeywords = [
+            'make it', 'make this', 'change', 'substitute', 'replace', 'swap', 
+            'add', 'remove', 'without', 'instead', 'more', 'less', 'different'
+          ];
+          isModificationRequest = modificationKeywords.some(keyword => 
+            message.toLowerCase().includes(keyword)
+          );
+        }
         
         if (isModificationRequest) {
           console.log('🎯 Processing recipe modification request');

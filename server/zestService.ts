@@ -425,7 +425,7 @@ Make it personal, professional-quality, and optimized for maximum flavor impact.
     try {
       console.log('🔧 Generating recipe modification for:', currentRecipe.title);
 
-      const prompt = `You are a professional chef. The user has this recipe and wants to modify it:
+      const prompt = `You are a professional chef with expertise in adapting recipes. The user wants to modify their current recipe based on their specific request.
 
 CURRENT RECIPE:
 Title: ${currentRecipe.title}
@@ -435,14 +435,18 @@ Difficulty: ${currentRecipe.difficulty}
 Ingredients: ${currentRecipe.ingredients.join(', ')}
 Instructions: ${currentRecipe.instructions.join(' ')}
 
-USER REQUEST: "${modificationRequest}"
+USER MODIFICATION REQUEST: "${modificationRequest}"
 
-Please provide the MODIFIED recipe with all the requested changes. Make sure to:
-1. Keep the same overall structure and format
-2. Update ingredients list and quantities as needed
-3. Modify instructions to reflect the changes
-4. Adjust cooking times and difficulty if needed
-5. Maintain the cooking technique and essence of the dish
+Your task is to intelligently understand what the user wants and adapt the recipe accordingly. This could involve:
+- Changing ingredients (substitutions, additions, removals)
+- Adjusting cooking methods or techniques
+- Modifying flavors, textures, or dietary requirements
+- Scaling portions up or down
+- Changing the style or cuisine influence
+- Making it easier/harder to prepare
+- Any other creative adaptation they've requested
+
+Be creative and professional - interpret their request thoughtfully and make appropriate changes throughout the recipe. If the request is unclear, make reasonable assumptions based on cooking best practices.
 
 Respond with a valid JSON object in this exact format:
 {
