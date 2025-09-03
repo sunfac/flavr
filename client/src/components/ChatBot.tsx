@@ -224,10 +224,41 @@ export default function ChatBot({
         requiresConfirmation: result.requiresConfirmation,
         confidence: result.confidence,
         userMemory: result.userMemory,
-        suggestedRecipeTitle: result.suggestedRecipeTitle
+        suggestedRecipeTitle: result.suggestedRecipeTitle,
+        isRecipeModification: result.isRecipeModification,
+        modifiedRecipe: result.modifiedRecipe,
+        streamingUpdate: result.streamingUpdate
       };
     },
     onSuccess: async (result, variables) => {
+      // Handle recipe modification first (live streaming updates)
+      if (result.isRecipeModification && result.modifiedRecipe && onRecipeUpdate) {
+        console.log('🔄 Applying recipe modification:', result.modifiedRecipe.title);
+        
+        // Update the recipe store directly with the modified recipe
+        onRecipeUpdate(result.modifiedRecipe);
+        
+        // Show success message
+        const modificationMessage: ChatMessage = {
+          id: Date.now(),
+          message: variables.message,
+          response: `✅ Recipe updated! ${result.modifiedRecipe.modifications || 'Changes applied successfully.'}`,
+          isUser: false,
+          text: `✅ Recipe updated! ${result.modifiedRecipe.modifications || 'Changes applied successfully.'}`,
+          timestamp: new Date(),
+        };
+
+        setLocalMessages(prev => [...prev, modificationMessage]);
+        setMessage("");
+        
+        toast({
+          title: "Recipe Updated",
+          description: result.modifiedRecipe.modifications || "Your recipe has been modified successfully!",
+        });
+        
+        return; // Don't process as regular message
+      }
+
       // Create Zest response message
       const zestMessage: ChatMessage = {
         id: Date.now(),

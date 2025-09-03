@@ -413,4 +413,96 @@ Make it personal, professional-quality, and optimized for maximum flavor impact.
 
     return context.join('\n');
   }
+
+  /**
+   * Generate a modified version of a recipe based on user request
+   */
+  async generateRecipeModification(
+    modificationRequest: string,
+    currentRecipe: any,
+    userContext: UserContext
+  ): Promise<any> {
+    try {
+      console.log('🔧 Generating recipe modification for:', currentRecipe.title);
+
+      const prompt = `You are a professional chef. The user has this recipe and wants to modify it:
+
+CURRENT RECIPE:
+Title: ${currentRecipe.title}
+Servings: ${currentRecipe.servings}
+Cook Time: ${currentRecipe.cookTime} minutes
+Difficulty: ${currentRecipe.difficulty}
+Ingredients: ${currentRecipe.ingredients.join(', ')}
+Instructions: ${currentRecipe.instructions.join(' ')}
+
+USER REQUEST: "${modificationRequest}"
+
+Please provide the MODIFIED recipe with all the requested changes. Make sure to:
+1. Keep the same overall structure and format
+2. Update ingredients list and quantities as needed
+3. Modify instructions to reflect the changes
+4. Adjust cooking times and difficulty if needed
+5. Maintain the cooking technique and essence of the dish
+
+Respond with a valid JSON object in this exact format:
+{
+  "title": "Updated recipe title",
+  "description": "Brief description of changes made",
+  "ingredients": ["updated ingredient list"],
+  "instructions": ["updated step-by-step instructions"],
+  "servings": number,
+  "cookTime": number,
+  "difficulty": "Easy/Medium/Hard",
+  "cuisine": "cuisine type",
+  "tags": ["relevant", "tags"],
+  "modifications": "Brief explanation of what was changed"
+}`;
+
+      // Track cost for recipe modification
+      await aiCostTracker.trackCost({
+        userId: userContext.userId,
+        sessionId: userContext.pseudoUserId?.toString(),
+        provider: 'openai',
+        model: 'gpt-4o',
+        operation: 'recipe-modification',
+        inputTokens: prompt.length / 4, // Rough estimate
+        requestData: { 
+          originalRecipe: currentRecipe.title,
+          modificationRequest: modificationRequest
+        }
+      });
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+        messages: [
+          { role: "system", content: prompt },
+          { role: "user", content: modificationRequest }
+        ],
+        max_tokens: 2000,
+        temperature: 0.3 // Lower temperature for more consistent modifications
+      });
+
+      // Track completion cost
+      await aiCostTracker.trackCost({
+        userId: userContext.userId,
+        sessionId: userContext.pseudoUserId?.toString(),
+        provider: 'openai',
+        model: 'gpt-4o',
+        operation: 'recipe-modification-completion',
+        outputTokens: (response.choices[0].message.content?.length || 0) / 4,
+        requestData: { 
+          modificationSuccess: true,
+          responseLength: response.choices[0].message.content?.length
+        }
+      });
+
+      const modifiedRecipe = JSON.parse(response.choices[0].message.content || '{}');
+      
+      console.log('✅ Recipe modification completed:', modifiedRecipe.title);
+      return modifiedRecipe;
+    } catch (error) {
+      console.error('Error generating recipe modification:', error);
+      throw error;
+    }
+  }
 }

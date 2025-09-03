@@ -899,34 +899,33 @@ Return a JSON object with this structure:
       console.log('🔄 Processing ingredient substitution:', { ingredient, recipeContext });
 
       // Generate a simple, contextual substitute using OpenAI
-      const prompt = `You are a culinary expert helping with ingredient substitutions. Return ONLY valid JSON.
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o", // Use gpt-4o for better JSON compliance
+        messages: [
+          {
+            role: "system", 
+            content: "You are a culinary expert. You MUST respond with valid JSON only. No additional text or formatting."
+          },
+          {
+            role: "user", 
+            content: `Substitute "${ingredient}" in this recipe:
 
 Recipe: ${recipeContext?.title || 'General recipe'}
 Cuisine: ${recipeContext?.cuisine || 'General'}
-Ingredient to substitute: "${ingredient}"
 All ingredients: ${recipeContext?.allIngredients?.join(', ') || 'Not specified'}
-Current instructions: 
-${recipeContext?.instructions?.map((step, i) => `Step ${i + 1}: ${step}`).join('\n') || 'Not provided'}
 
-Provide a JSON response with:
-1. "substitute" - the replacement ingredient with quantity/measurement
-2. "updatedInstructions" - array of cooking steps with the original ingredient references updated
-
-Format:
+Return only this JSON structure:
 {
   "substitute": "replacement ingredient with quantity",
-  "updatedInstructions": ["updated step 1", "updated step 2", ...]
+  "updatedInstructions": ${JSON.stringify(recipeContext?.instructions || [])}
 }
 
-If no instruction updates are needed, return the original instructions unchanged.
-
-Important: Return each instruction as a separate array element, do not combine multiple steps into one.`;
-
-      const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.3,
-        max_tokens: 300
+Update the substitute field with the best replacement. Update any instructions that mention "${ingredient}" to use the substitute instead.`
+          }
+        ],
+        temperature: 0.1, // Lower temperature for more consistent JSON
+        max_tokens: 800,
+        response_format: { type: "json_object" } // Force JSON response
       });
 
       const content = completion.choices[0]?.message?.content?.trim();

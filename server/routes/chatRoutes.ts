@@ -53,12 +53,12 @@ export function registerChatRoutes(app: Express) {
         cookingHistory: userMemory.cookingHistory.length
       });
 
-      // Detect recipe intent
+      // Detect recipe intent - but only for new recipes if no current recipe exists
       const intentResult = await zestService.detectRecipeIntent(message);
       console.log('🎯 Intent detection:', intentResult);
 
-      // If recipe intent detected, offer to create recipe with specific suggestion
-      if (intentResult.isRecipeIntent && intentResult.confidence >= 0.7) {
+      // If recipe intent detected AND no current recipe exists, offer to create new recipe
+      if (intentResult.isRecipeIntent && intentResult.confidence >= 0.7 && !currentRecipe) {
         // Use the smart inspiration system with enhanced context for user intent
         const { ChefAssistGPT5 } = await import('../chefAssistGPT5');
         const clientId = req.ip || 'anonymous';
@@ -224,6 +224,46 @@ Keep it conversational and enthusiastic like you're recommending your favorite d
         };
         
         return res.json(confirmationResponse);
+      }
+
+      // Handle recipe modifications when a current recipe exists
+      if (currentRecipe) {
+        console.log('🔧 Recipe modification request detected with current recipe:', currentRecipe.title);
+        
+        // Check if this is a modification request
+        const modificationKeywords = [
+          'make it', 'make this', 'change', 'substitute', 'replace', 'swap', 
+          'vegan', 'vegetarian', 'gluten-free', 'dairy-free', 'spice', 'spicy',
+          'people', 'servings', 'double', 'half', 'healthier', 'easier',
+          'more', 'less', 'without', 'add', 'remove', 'different'
+        ];
+        
+        const isModificationRequest = modificationKeywords.some(keyword => 
+          message.toLowerCase().includes(keyword)
+        );
+        
+        if (isModificationRequest) {
+          console.log('🎯 Processing recipe modification request');
+          
+          try {
+            // Use ZestService to generate recipe modification
+            const modifiedRecipe = await zestService.generateRecipeModification(
+              message,
+              currentRecipe,
+              userContext
+            );
+            
+            return res.json({
+              message: "Here's your updated recipe!",
+              isRecipeModification: true,
+              modifiedRecipe: modifiedRecipe,
+              streamingUpdate: true
+            });
+          } catch (error) {
+            console.error('Error generating recipe modification:', error);
+            // Fall through to regular conversation
+          }
+        }
       }
 
       // Build context with user memory
