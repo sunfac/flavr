@@ -976,11 +976,37 @@ MOOD-BASED EXAMPLES:
       ? `\n\nMEAT PREFERENCE: Strongly favor meat-based dishes (beef, pork, lamb, chicken, duck, etc.) over vegetarian options. Include high-quality proteins as the star ingredient.`
       : '';
 
+    // Check if this is a meal-specific request
+    const userIntent = data.userIntent || "delicious cooking";
+    const lowerUserIntent = userIntent.toLowerCase();
+    
+    console.log(`🥞 BREAKFAST CHECK - User Intent: "${userIntent}", Lower: "${lowerUserIntent}", Contains breakfast: ${lowerUserIntent.includes('breakfast')}`);
+    
+    let mealSpecificPrompt = '';
+    if (lowerUserIntent.includes('breakfast') || lowerUserIntent.includes('brunch')) {
+      console.log('🥞 BREAKFAST MODE ACTIVATED - Adding critical breakfast constraints');
+      
+      mealSpecificPrompt = `\n\nCRITICAL MEAL REQUIREMENT: This MUST be a BREAKFAST or BRUNCH dish. Suitable options include:
+- Eggs dishes (scrambled, poached, omelettes, frittatas)
+- Pancakes, waffles, French toast
+- Porridge, granola, yogurt bowls  
+- Breakfast meats (bacon, sausage, smoked salmon)
+- Avocado toast, breakfast sandwiches
+- Smoothie bowls, healthy breakfast bowls
+- Pastries suitable for breakfast
+- Coffee/tea accompaniments
+NEVER suggest dinner dishes, roasts, or heavy main courses for breakfast requests.`;
+    } else if (lowerUserIntent.includes('lunch')) {
+      mealSpecificPrompt = `\n\nMEAL REQUIREMENT: This should be a LUNCH dish - lighter than dinner but more substantial than snacks.`;
+    } else if (lowerUserIntent.includes('dinner')) {
+      mealSpecificPrompt = `\n\nMEAL REQUIREMENT: This should be a DINNER dish - substantial main course appropriate for evening meals.`;
+    }
+
     const userMessage = `${inspirationPrompt}
 
-User Intent: ${data.userIntent || "delicious cooking"}
+User Intent: ${userIntent}
 Randomization Seed: ${rngSeed} (use this to ensure variety)
-${dietaryPrompt}${meatPreferencePrompt}
+${dietaryPrompt}${meatPreferencePrompt}${mealSpecificPrompt}
 
 GUIDELINES:
 - Create titles that showcase PROFESSIONAL COOKING TECHNIQUES and MAXIMUM FLAVOR

@@ -172,12 +172,12 @@ Be warm and encouraging like Zest, but keep it concise for easy chat reading.`
             textureSeed: Math.floor(Math.random() * 10),
             flavourSeed: Math.floor(Math.random() * 12),
             randomSeed: Math.floor(Math.random() * 1000000),
-            complexityLevel: 'medium',
-            simpleStyle: 'balanced',
-            creativityMode: 'classic',
-            seasonalFocus: 'neutral',
-            texturePreference: 'varied',
-            flavourProfile: 'balanced'
+            complexityLevel: Math.floor(Math.random() * 15) + 1,
+            simpleStyle: Math.floor(Math.random() * 15) + 1,
+            creativityMode: Math.floor(Math.random() * 8) + 1,
+            seasonalFocus: Math.floor(Math.random() * 6) + 1,
+            textureTheme: Math.floor(Math.random() * 10) + 1,
+            flavorProfile: Math.floor(Math.random() * 12) + 1
           };
           
           const inspiration = await ChefAssistGPT5.generateInspireTitle({
