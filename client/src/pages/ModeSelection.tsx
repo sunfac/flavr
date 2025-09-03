@@ -22,7 +22,7 @@ interface ModeCard {
 
 const modes: ModeCard[] = [
   {
-    title: "Fridge Mode", 
+    title: "Fridge2Fork", 
     description: "Snap a photo or list your ingredients - instant recipes tailored to what you have",
     icon: <Refrigerator className="w-12 h-12" />,
     color: "text-green-500 dark:text-green-400",
@@ -30,41 +30,25 @@ const modes: ModeCard[] = [
     gradient: "from-green-500/10 to-green-600/10 dark:from-green-500/20 dark:to-green-600/20"
   },
   {
-    title: "Shopping Mode",
-    description: "Get complete recipes with organized shopping lists for your next grocery trip",
-    icon: <ShoppingCart className="w-12 h-12" />,
-    color: "text-blue-500 dark:text-blue-400",
-    route: "/shopping",
-    gradient: "from-blue-500/10 to-blue-600/10 dark:from-blue-500/20 dark:to-blue-600/20"
-  },
-  {
     title: "Chef Assist",
-    description: "Tell us what you're craving - get personalized recipes with professional guidance",
+    description: "Tell us what you're craving - get personalized recipes in seconds",
     icon: <ChefHat className="w-12 h-12" />,
     color: "text-orange-500 dark:text-orange-400",
     route: "/chef-assist",
     gradient: "from-orange-500/10 to-orange-600/10 dark:from-orange-500/20 dark:to-orange-600/20"
   },
   {
-    title: "Budget Planner",
-    description: "Smart meal planning that maximizes flavor while staying within your budget",
-    icon: <DollarSign className="w-12 h-12" />,
-    color: "text-emerald-500 dark:text-emerald-400",
-    route: "/budget-planner",
-    gradient: "from-emerald-500/10 to-emerald-600/10 dark:from-emerald-500/20 dark:to-emerald-600/20"
-  },
-  {
     title: "Photo to Recipe",
     description: "Transform cookbook photos into interactive digital recipes with AI",
     icon: <Camera className="w-12 h-12" />,
-    color: "text-indigo-500 dark:text-indigo-400",
+    color: "text-blue-500 dark:text-blue-400",
     route: "/photo-to-recipe",
-    gradient: "from-indigo-500/10 to-indigo-600/10 dark:from-indigo-500/20 dark:to-indigo-600/20",
+    gradient: "from-blue-500/10 to-blue-600/10 dark:from-blue-500/20 dark:to-blue-600/20",
     isPremium: true
   },
   {
     title: "Meal Planner",
-    description: "Plan your week with AI-generated meal schedules and shopping lists",
+    description: "Plan your week with AI-generated meal schedules and smart shopping lists",
     icon: <CalendarDays className="w-12 h-12" />,
     color: "text-purple-500 dark:text-purple-400",
     route: "/meal-planner",
@@ -114,7 +98,7 @@ export default function ModeSelection() {
           <FloatingChatButton variant="fixed" />
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-6 md:mb-12 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 md:mb-12 max-w-7xl mx-auto">
           {modes.map((mode, index) => (
             <motion.div
               key={mode.title}
@@ -140,18 +124,18 @@ export default function ModeSelection() {
                   mode.gradient
                 )} />
                 
-                <CardHeader className="relative text-center py-4 md:py-8">
+                <CardHeader className="relative text-center py-4 md:py-6">
                   <div className={cn(
-                    "p-3 md:p-4 rounded-full bg-background/80 backdrop-blur-sm inline-flex mx-auto mb-3 md:mb-4 border-2 border-current/20", 
+                    "p-2 sm:p-3 md:p-4 rounded-full bg-background/80 backdrop-blur-sm inline-flex mx-auto mb-2 sm:mb-3 md:mb-4 border-2 border-current/20", 
                     mode.color
                   )}>
-                    <Refrigerator className={cn("w-8 h-8 md:w-12 md:h-12", mode.title === "Fridge2Fork" ? "" : "hidden")} />
-                    <ChefHat className={cn("w-8 h-8 md:w-12 md:h-12", mode.title === "Chef Assist" ? "" : "hidden")} />
-                    <Camera className={cn("w-8 h-8 md:w-12 md:h-12", mode.title === "Photo to Recipe" ? "" : "hidden")} />
-                    <CalendarDays className={cn("w-8 h-8 md:w-12 md:h-12", mode.title === "Meal Planner" ? "" : "hidden")} />
+                    <Refrigerator className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Fridge2Fork" ? "" : "hidden")} />
+                    <ChefHat className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Chef Assist" ? "" : "hidden")} />
+                    <Camera className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Photo to Recipe" ? "" : "hidden")} />
+                    <CalendarDays className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Meal Planner" ? "" : "hidden")} />
                   </div>
-                  <div className="flex items-center justify-center gap-2 mb-3">
-                    <CardTitle className="text-xl md:text-2xl font-bold">{mode.title}</CardTitle>
+                  <div className="flex items-center justify-center gap-2 mb-2 sm:mb-3">
+                    <CardTitle className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold">{mode.title}</CardTitle>
                   </div>
                   <div className="flex items-center justify-center gap-2 mb-3">
                     {mode.isPremium && (
@@ -166,28 +150,29 @@ export default function ModeSelection() {
                       </Badge>
                     )}
                   </div>
-                  <CardDescription className="text-sm md:text-base leading-relaxed px-2">
+                  <CardDescription className="text-xs sm:text-sm md:text-base leading-snug px-1 sm:px-2 text-center">
                     {mode.description}
                   </CardDescription>
                 </CardHeader>
                 
-                <CardContent className="relative pb-4 md:pb-8">
+                <CardContent className="relative pb-3 sm:pb-4 md:pb-6">
                   <Button
                     className={cn(
-                      "w-full transition-all duration-200 font-semibold",
+                      "w-full transition-all duration-200 font-semibold text-xs sm:text-sm",
                       mode.isComingSoon 
                         ? "cursor-not-allowed bg-gray-400 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-600 text-white" 
                         : "group-hover:translate-y-[-2px] shadow-lg hover:shadow-xl",
                       !mode.isComingSoon && mode.color === "text-green-500 dark:text-green-400" ? "bg-green-600 hover:bg-green-700" : "",
                       !mode.isComingSoon && mode.color === "text-orange-500 dark:text-orange-400" ? "bg-orange-600 hover:bg-orange-700" : "",
+                      !mode.isComingSoon && mode.color === "text-blue-500 dark:text-blue-400" ? "bg-blue-600 hover:bg-blue-700" : "",
                       !mode.isComingSoon && mode.color === "text-purple-500 dark:text-purple-400" ? "bg-purple-600 hover:bg-purple-700" : ""
                     )}
-                    size="lg"
+                    size="default"
                     disabled={mode.isComingSoon}
                   >
                     {mode.isComingSoon ? "Coming Soon" : "Get Started"}
                     {!mode.isComingSoon && (
-                      <ChevronRight className="w-4 h-4 md:w-5 md:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                      <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ml-1 sm:ml-2 group-hover:translate-x-1 transition-transform" />
                     )}
                   </Button>
                 </CardContent>
