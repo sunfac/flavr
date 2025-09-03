@@ -139,8 +139,9 @@ export default function RecipeView() {
   const handleRecipeUpdate = (updatedRecipe: any) => {
     console.log('🔄 Recipe update received from chat bot:', updatedRecipe.title);
     
-    // Update the recipe data with the modified version
-    Object.assign(recipe, {
+    // Create updated recipe object
+    const updatedData = {
+      ...recipe,
       title: updatedRecipe.title,
       description: updatedRecipe.description,
       ingredients: updatedRecipe.ingredients,
@@ -149,13 +150,10 @@ export default function RecipeView() {
       cookTime: updatedRecipe.cookTime,
       difficulty: updatedRecipe.difficulty,
       cuisine: updatedRecipe.cuisine
-    });
+    };
     
     // Force component re-render by updating query data
-    queryClient.setQueryData(['/api/recipes', id], (oldData: any) => ({
-      ...oldData,
-      ...recipe
-    }));
+    queryClient.setQueryData([`/api/recipe/${recipeId}`], { recipe: updatedData });
     
     toast({
       title: "Recipe Updated",

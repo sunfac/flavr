@@ -205,19 +205,23 @@ export default function ChatBot({
   // Extract history from response
   const chatHistory = Array.isArray(historyData) ? historyData : (historyData as any)?.history || [];
 
-  // Load chat history when component mounts or recipe changes
+  // Load chat history when component mounts (but not when recipe changes to preserve chat during modifications)
   useEffect(() => {
     const recipeKey = getRecipeKey();
     const savedMessages = loadChatHistory();
-    setLocalMessages(savedMessages);
-  }, [getCurrentRecipeContext().recipe?.title]); // Reload when recipe title changes
+    if (localMessages.length === 0) { // Only load if chat is empty
+      setLocalMessages(savedMessages);
+    }
+  }, []); // Remove recipe title dependency to prevent clearing during modifications
   
   // Save chat history whenever localMessages changes
   useEffect(() => {
     if (localMessages.length > 0) {
-      saveChatHistory(localMessages);
+      // Save to a stable key that doesn't change during recipe modifications
+      const stableKey = currentRecipe?.id ? `recipe-${currentRecipe.id}` : 'general-chat';
+      localStorage.setItem(`chat-history-${stableKey}`, JSON.stringify(localMessages));
     }
-  }, [localMessages]);
+  }, [localMessages, currentRecipe?.id]);
 
 
   // Enhanced Zest chat with user memory and intent detection
@@ -264,11 +268,16 @@ export default function ChatBot({
     },
     onSuccess: async (result, variables) => {
       // Handle recipe modification first (live streaming updates)
-      if (result.isRecipeModification && result.modifiedRecipe && onRecipeUpdate) {
+      if (result.isRecipeModification && result.modifiedRecipe) {
         console.log('🔄 Applying recipe modification:', result.modifiedRecipe.title);
         
         // Update the recipe store directly with the modified recipe
-        onRecipeUpdate(result.modifiedRecipe);
+        recipeActions.updateActiveRecipe(result.modifiedRecipe);
+        
+        // Also update parent component if callback exists
+        if (onRecipeUpdate) {
+          onRecipeUpdate(result.modifiedRecipe);
+        }
         
         // Show success message
         const modificationMessage: ChatMessage = {
@@ -370,7 +379,13 @@ export default function ChatBot({
       return response.json();
     },
     onSuccess: (result) => {
-      console.log('🧪 Recipe generated:', result);
+      console.log('🧪 Recipe generated successfully! Response:', result);
+      console.log('🔍 Recipe data check:', {
+        hasRecipe: !!result.recipe,
+        recipeTitle: result.recipe?.title,
+        savedRecipeId: result.savedRecipeId,
+        messageContent: result.message
+      });
       
       // Add recipe confirmation message
       const recipeMessage: ChatMessage = {
