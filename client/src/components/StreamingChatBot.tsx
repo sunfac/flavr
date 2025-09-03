@@ -260,11 +260,11 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
   // Text-to-speech functionality completely removed per user request
 
   const suggestedQuestions = [
-    "Make this recipe spicier",
-    "Add a side dish",
-    "Make it for 6 people",
-    "Can I bake this instead?",
-    "Make it dairy-free"
+    "I want something quick for dinner",
+    "What's a good breakfast idea?",
+    "Give me a healthy lunch option",
+    "Suggest a comfort food recipe",
+    "I need a vegetarian dinner idea"
   ];
 
   return (
