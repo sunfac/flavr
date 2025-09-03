@@ -59,17 +59,49 @@ export function registerChatRoutes(app: Express) {
 
       // If high confidence recipe intent, offer to create recipe with specific suggestion
       if (intentResult.isRecipeIntent && intentResult.confidence > 0.7) {
-        // Generate a specific recipe suggestion first
+        // Generate a specific recipe suggestion using Inspire Me style variety
+        const { ChefAssistGPT5 } = await import('../chefAssistGPT5');
+        const clientId = req.ip || 'anonymous';
+        
+        // Generate an authentic dish title first using the same system as Inspire Me
+        const inspiredTitle = await ChefAssistGPT5.generateInspireTitle({
+          userIntent: message,
+          clientId: clientId,
+          timeBudget: 30, // Default quick suggestion
+          dietaryNeeds: [],
+          mustUse: [],
+          avoid: [],
+          equipment: ['stove', 'oven', 'basic-tools'],
+          budgetNote: '',
+          cuisinePreference: '',
+          seeds: {
+            randomSeed: Math.floor(Math.random() * 10000),
+            complexityLevel: Math.floor(Math.random() * 15) + 1,
+            simpleStyle: Math.floor(Math.random() * 15) + 1,
+            creativityMode: Math.floor(Math.random() * 8) + 1,
+            seasonalFocus: Math.floor(Math.random() * 6) + 1,
+            textureTheme: Math.floor(Math.random() * 10) + 1,
+            flavorProfile: Math.floor(Math.random() * 12) + 1
+          }
+        });
+        
+        // Create an engaging description of the inspired dish
         const suggestionResponse = await openai.chat.completions.create({
           model: "gpt-4o",
           messages: [
             { 
               role: "system", 
-              content: `You are Zest, a warm cooking assistant. The user wants a recipe. Give them a SPECIFIC dish suggestion with brief details about what makes it appealing, then ask if they want it as a recipe card. Be enthusiastic and specific.
+              content: `You are Zest, a warm cooking assistant. You've suggested this specific dish: "${inspiredTitle}". Create an enthusiastic, brief description (2-3 sentences) highlighting what makes this dish appealing (flavors, timing, techniques), then ask if they want it as a recipe card.
 
-Example: "How about a creamy lemon garlic pasta? It's ready in 15 minutes with tender pasta, fresh lemon zest, crispy garlic, and a splash of white wine for depth. The sauce is silky and bright - perfect for a quick dinner! Would you like me to turn this into a full Flavr recipe card?"`
+Be authentic and specific about the dish. Focus on:
+- Key flavor elements and techniques
+- Why it's perfect for their request  
+- Brief timing/ease details if relevant
+- End with asking if they want the full recipe card
+
+Keep it conversational and enthusiastic like you're recommending your favorite dish to a friend.`
             },
-            { role: "user", content: message }
+            { role: "user", content: `The user asked: "${message}" and I'm suggesting: ${inspiredTitle}` }
           ],
           max_tokens: 200,
           temperature: 0.8
