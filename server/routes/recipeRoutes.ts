@@ -660,7 +660,8 @@ Return a JSON object with this structure:
         // Build user context
         const userContext = {
           userId: req.session?.userId,
-          pseudoUserId: req.headers['x-pseudo-user-id'] as string || req.session?.id
+          pseudoUserId: req.headers['x-pseudo-user-id'] as string || req.session?.id,
+          isAuthenticated: !!req.session?.userId
         };
 
         // Build memory context (simplified for this endpoint)
@@ -710,7 +711,7 @@ Return a JSON object with this structure:
               const hasUnlimitedAccess = user.hasFlavrPlus || isDeveloper;
               
               if (!hasUnlimitedAccess) {
-                await storage.updateUserUsage(req.session.userId, (user.recipesThisMonth || 0) + 1);
+                await storage.updateUserUsage(req.session.userId, (user.recipesThisMonth || 0) + 1, user.imagesThisMonth || 0);
               }
             }
           } catch (error) {
