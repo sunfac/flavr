@@ -114,6 +114,19 @@ export default function ChatBot({
     return saved ? JSON.parse(saved) : [];
   };
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Track mobile state for responsive chat styling
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   // Connect to timer store
   const timerStore = useTimerStore();
@@ -637,7 +650,9 @@ export default function ChatBot({
   };
 
   return (
-    <div className="h-full flex flex-col bg-slate-900">
+    <div className={`h-full flex flex-col bg-slate-900 md:static md:h-full ${
+      isMobile ? 'mobile-chat-panel fixed top-0 left-0 right-0 bottom-0 z-50' : ''
+    }`}>
         <CardHeader className="p-3 sm:p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="relative group">
@@ -669,7 +684,9 @@ export default function ChatBot({
           {/* Messages Area */}
           <div 
             ref={scrollAreaRef}
-            className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 chat-messages"
+            className={`flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 chat-messages ${
+              isMobile ? 'mobile-chat-messages' : ''
+            }`}
             style={{ 
               flex: '1 1 0%',
               minHeight: '0',
@@ -864,7 +881,9 @@ export default function ChatBot({
 
           {/* Input Area - Mobile Keyboard Safe */}
           <div 
-            className="border-t-2 border-orange-500/60 bg-slate-900 p-3 sm:p-4 flex-shrink-0 chat-input-area"
+            className={`border-t-2 border-orange-500/60 bg-slate-900 p-3 sm:p-4 flex-shrink-0 chat-input-area ${
+              isMobile ? 'mobile-chat-input' : ''
+            }`}
             style={{
               position: 'relative',
               zIndex: 10,
