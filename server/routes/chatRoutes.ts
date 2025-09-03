@@ -108,20 +108,59 @@ export function registerChatRoutes(app: Express) {
         if (specificIngredient) {
           console.log('🎯 Using targeted ingredient mode for:', specificIngredient);
           
-          // Create balanced chef selection with proper randomization
-          const chefVoices = [
-            "Jamie Oliver", "Rick Stein", "Tom Kerridge", "Mary Berry", "Delia Smith", 
-            "Marcus Wareing", "Georgina Hayden", "Jose Pizarro", "Yotam Ottolenghi",
-            "Gordon Ramsay", "Nigella Lawson", "Hugh Fearnley-Whittingstall", "James Martin",
-            "Angela Hartnett", "Paul Hollywood", "Nadiya Hussain", "Gino D'Acampo"
+          // Use the same comprehensive chef list as the Inspire Me system for alignment
+          const allChefs = [
+            "Gordon Ramsay", "Jamie Oliver", "Nigella Lawson", "Mary Berry", "Tom Kerridge", 
+            "Rick Stein", "Delia Smith", "James Martin", "Hugh Fearnley-Whittingstall", 
+            "Marco Pierre White", "Heston Blumenthal", "Michel Roux Jr", "Angela Hartnett",
+            "Paul Hollywood", "Nadiya Hussain", "Ainsley Harriott", "Gino D'Acampo",
+            "Yotam Ottolenghi", "José Andrés", "Julia Child", "Thomas Keller", "David Chang",
+            "Phil Vickery", "John Torode", "Gregg Wallace", "Gary Rhodes", "Keith Floyd", 
+            "Ken Hom", "Madhur Jaffrey", "Prue Leith", "Raymond Blanc", "Antonio Carluccio",
+            "Giorgio Locatelli", "Francesco Mazzei", "Atul Kochhar", "Vivek Singh", 
+            "Jun Tanaka", "Monica Galetti", "Clare Smyth", "Nathan Outlaw", "Josh Eggleton",
+            "Anna Hansen", "Sat Bains", "Simon Rogan", "Tommy Banks", "Roberta Hall McCarron",
+            "Lisa Goodwin-Allen", "Adam Handling", "Aktar Islam"
           ];
           
-          // Generate a proper random seed based on user session and timestamp
-          const userSeed = (req.session?.userId || 0) + Date.now();
-          const randomIndex = Math.floor(Math.random() * chefVoices.length);
-          const selectedChef = chefVoices[randomIndex];
+          // Align with Inspire Me system: randomly choose between chef, restaurant, or mood inspiration (33% each)
+          const inspirationType = Math.floor(Math.random() * 3);
+          let selectedInspiration;
+          let inspirationFormat;
           
-          console.log(`🎲 Chef selection: ${selectedChef} (${randomIndex + 1}/${chefVoices.length})`);
+          if (inspirationType === 0) {
+            // Chef inspiration
+            const randomIndex = Math.floor(Math.random() * allChefs.length);
+            selectedInspiration = allChefs[randomIndex];
+            inspirationFormat = `${selectedInspiration}-Inspired`;
+            console.log(`🎲 Chef selection: ${selectedInspiration} (${randomIndex + 1}/${allChefs.length})`);
+          } else if (inspirationType === 1) {
+            // Restaurant inspiration (aligned with ChefAssistGPT5)
+            const allRestaurants = [
+              "Dishoom", "Padella", "The Ivy", "Sketch", "Hawksmoor", "Barrafina", "Gymkhana", 
+              "Duck & Waffle", "Chiltern Firehouse", "St. John", "Bao", "Kiln", "Hoppers", 
+              "Brat", "Lyle's", "Noble Rot", "The Clove Club", "Roka", "Zuma", "Dinings SW3", 
+              "Lima", "Temper", "Smoking Goat", "Ikoyi", "The Ledbury", "Pollen Street Social", 
+              "Dinner by Heston", "Core by Clare Smyth", "Trinity", "Petersham Nurseries", 
+              "Hide", "Aqua Shard", "Galvin La Chapelle", "Rules", "Simpson's in the Strand", 
+              "Sweetings", "Nando's", "Wagamama", "Pizza Express", "Byron", "Leon", "Yo! Sushi"
+            ];
+            const randomIndex = Math.floor(Math.random() * allRestaurants.length);
+            selectedInspiration = allRestaurants[randomIndex];
+            inspirationFormat = `${selectedInspiration}-Inspired`;
+            console.log(`🏪 Restaurant selection: ${selectedInspiration} (${randomIndex + 1}/${allRestaurants.length})`);
+          } else {
+            // Mood inspiration 
+            const moods = [
+              "Comforting", "Fresh Spring", "Summer Celebration", "Cozy Autumn", "Romantic", 
+              "Family Feast", "Quick Weeknight", "Weekend Indulgence", "Healthy Reset", 
+              "Nostalgic", "Exotic Adventure", "Elegant", "Rustic", "Spicy", "Cooling"
+            ];
+            const randomIndex = Math.floor(Math.random() * moods.length);
+            selectedInspiration = moods[randomIndex];
+            inspirationFormat = selectedInspiration;
+            console.log(`🎭 Mood selection: ${selectedInspiration} (${randomIndex + 1}/${moods.length})`);
+          }
           
           // For specific ingredient requests, use a direct OpenAI call to ensure relevance
           const ingredientResponse = await openai.chat.completions.create({
@@ -129,12 +168,14 @@ export function registerChatRoutes(app: Express) {
             messages: [
               { 
                 role: "system", 
-                content: `You are a professional chef creating recipe titles. Generate ONE specific recipe title that prominently features the requested ingredient as the main component.
+                content: `You are a professional creating recipe titles. Generate ONE specific recipe title that prominently features the requested ingredient as the main component.
 
 CRITICAL REQUIREMENTS:
 - The recipe title MUST feature ${specificIngredient} as the primary ingredient
-- Use format: "${selectedChef}-Inspired [Specific Dish Name] with [Key Feature]"
-- MUST use exactly this chef: ${selectedChef}
+- Use format: "${inspirationFormat} [Specific Dish Name] with [Key Feature]"
+- ${inspirationType === 0 ? `MUST use exactly this chef: ${selectedInspiration}` : ''}
+- ${inspirationType === 1 ? `MUST align with ${selectedInspiration} restaurant style` : ''}
+- ${inspirationType === 2 ? `MUST capture the ${selectedInspiration} mood` : ''}
 - Be specific about the dish type (not just "pasta" but "Carbonara" or "Cacio e Pepe")
 - Include one standout technique or flavor element
 - ${cuisinePreference ? `Make it ${cuisinePreference} cuisine focused.` : ''}
@@ -142,8 +183,8 @@ CRITICAL REQUIREMENTS:
 
 Examples of good format:
 - "Jamie Oliver-Inspired Creamy Carbonara with Crispy Pancetta"
-- "Rick Stein-Inspired Seafood Linguine with White Wine & Herbs"
-- "Tom Kerridge-Inspired Beef Ragu Pappardelle with Red Wine Reduction"
+- "Dishoom-Inspired Black Daal with Fragrant Spices"
+- "Comforting Chicken Pasta Bake with Herb Crust"
 
 Respond with ONLY the recipe title, nothing else.`
               },
