@@ -906,8 +906,7 @@ EXAMPLES:
         "Lima", "Temper", "Smoking Goat", "Ikoyi", "The Ledbury", "Pollen Street Social", 
         "Dinner by Heston", "Core by Clare Smyth", "Trinity", "Petersham Nurseries", 
         "Hide", "Aqua Shard", "Galvin La Chapelle", "Rules", "Simpson's in the Strand", 
-        "Sweetings", "Spring", "The River Café", "Chez Bruce", "The Square", "Alain Ducasse", 
-        "Le Bernardin", "Eleven Madison Park", "Noma"
+        "Sweetings", "Nando's", "Wagamama", "Pizza Express", "Byron", "Leon", "Yo! Sushi"
       ];
       
       const selectedRestaurant = allRestaurants[seededRandom(varietySeed + 2000, allRestaurants.length)];
