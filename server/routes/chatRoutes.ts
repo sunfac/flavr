@@ -105,6 +105,22 @@ export function registerChatRoutes(app: Express) {
         console.log('🍝 About to check ingredient path, specificIngredient:', specificIngredient);
         if (specificIngredient) {
           console.log('🎯 Using targeted ingredient mode for:', specificIngredient);
+          
+          // Create balanced chef selection with proper randomization
+          const chefVoices = [
+            "Jamie Oliver", "Rick Stein", "Tom Kerridge", "Mary Berry", "Delia Smith", 
+            "Marcus Wareing", "Georgina Hayden", "Jose Pizarro", "Yotam Ottolenghi",
+            "Gordon Ramsay", "Nigella Lawson", "Hugh Fearnley-Whittingstall", "James Martin",
+            "Angela Hartnett", "Paul Hollywood", "Nadiya Hussain", "Gino D'Acampo"
+          ];
+          
+          // Generate a proper random seed based on user session and timestamp
+          const userSeed = (req.session?.userId || 0) + Date.now();
+          const randomIndex = Math.floor(Math.random() * chefVoices.length);
+          const selectedChef = chefVoices[randomIndex];
+          
+          console.log(`🎲 Chef selection: ${selectedChef} (${randomIndex + 1}/${chefVoices.length})`);
+          
           // For specific ingredient requests, use a direct OpenAI call to ensure relevance
           const ingredientResponse = await openai.chat.completions.create({
             model: "gpt-4o",
@@ -115,8 +131,8 @@ export function registerChatRoutes(app: Express) {
 
 CRITICAL REQUIREMENTS:
 - The recipe title MUST feature ${specificIngredient} as the primary ingredient
-- Use format: "[Chef Name]-Inspired [Specific Dish Name] with [Key Feature]"
-- Choose from these chef voices: Jamie Oliver, Rick Stein, Tom Kerridge, Mary Berry, Delia Smith, Marcus Wareing, Georgina Hayden, Jose Pizarro, Yotam Ottolenghi
+- Use format: "${selectedChef}-Inspired [Specific Dish Name] with [Key Feature]"
+- MUST use exactly this chef: ${selectedChef}
 - Be specific about the dish type (not just "pasta" but "Carbonara" or "Cacio e Pepe")
 - Include one standout technique or flavor element
 - ${cuisinePreference ? `Make it ${cuisinePreference} cuisine focused.` : ''}
