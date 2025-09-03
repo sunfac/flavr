@@ -641,6 +641,8 @@ Return a complete recipe object as JSON with:
 
 ALWAYS preserve the user's CORE INTENT while elevating it with ${selectedInspiration}'s distinctive style, techniques, and ingredients. Make it restaurant-quality delicious!
 
+IMPORTANT: Never instruct users to make basic pantry staples from scratch (tomato paste, soy sauce, vinegar, etc.). Focus on cooking techniques and creative combinations instead.
+
 Respond only with valid JSON format.`
           },
           {
