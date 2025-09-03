@@ -100,6 +100,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get single recipe endpoint
+  app.get("/api/recipe/:id", async (req, res) => {
+    try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const { id } = req.params;
+      const recipe = await storage.getRecipe(parseInt(id));
+      
+      if (!recipe) {
+        return res.status(404).json({ error: "Recipe not found" });
+      }
+
+      // Verify recipe belongs to the user (security check)
+      if (recipe.userId !== req.session.userId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      res.json({ recipe });
+    } catch (error) {
+      console.error("Failed to fetch recipe:", error);
+      res.status(500).json({ error: "Failed to fetch recipe" });
+    }
+  });
+
   // Delete recipe endpoint
   app.delete("/api/recipes/:id", async (req, res) => {
     try {
