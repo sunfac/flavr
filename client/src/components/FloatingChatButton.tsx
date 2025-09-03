@@ -71,7 +71,8 @@ export default function FloatingChatButton({ className = "", variant = "floating
               
               {/* Slide-out Panel */}
               <motion.div
-                className="fixed inset-0 md:top-0 md:right-0 md:left-auto md:bottom-0 h-screen md:h-full w-full md:w-96 bg-slate-900 shadow-2xl z-[9999] flex flex-col"
+                className="fixed inset-0 md:top-0 md:right-0 md:left-auto md:bottom-0 h-screen md:h-full w-full md:w-96 bg-slate-900 shadow-2xl flex flex-col"
+                style={{ zIndex: 99999 }}
                 initial={{ x: "100%" }}
                 animate={{ x: 0 }}
                 exit={{ x: "100%" }}
@@ -82,7 +83,7 @@ export default function FloatingChatButton({ className = "", variant = "floating
                 }}
               >
                 {/* Retract Arrow - Mobile Only */}
-                <div className="md:hidden absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full z-[10000]">
+                <div className="md:hidden absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full" style={{ zIndex: 100000 }}>
                   <Button
                     onClick={handleCloseChat}
                     className="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-l-lg shadow-lg border-r-0"
@@ -169,7 +170,8 @@ export default function FloatingChatButton({ className = "", variant = "floating
           <>
             {/* Desktop Backdrop */}
             <motion.div
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden md:block"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm hidden md:block"
+              style={{ zIndex: 99998 }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -178,7 +180,8 @@ export default function FloatingChatButton({ className = "", variant = "floating
             
             {/* Slide-out Panel */}
             <motion.div
-              className="fixed inset-0 md:top-0 md:right-0 md:left-auto md:bottom-0 h-screen md:h-full w-full md:w-96 bg-slate-900 shadow-2xl z-[9999] flex flex-col"
+              className="fixed inset-0 md:top-0 md:right-0 md:left-auto md:bottom-0 h-screen md:h-full w-full md:w-96 bg-slate-900 shadow-2xl flex flex-col"
+              style={{ zIndex: 99999 }}
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
@@ -189,7 +192,7 @@ export default function FloatingChatButton({ className = "", variant = "floating
               }}
             >
               {/* Retract Arrow - Mobile Only */}
-              <div className="md:hidden absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full z-[10000]">
+              <div className="md:hidden absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full" style={{ zIndex: 100000 }}>
                 <Button
                   onClick={handleCloseChat}
                   className="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-l-lg shadow-lg border-r-0"
