@@ -687,7 +687,7 @@ export default function ChatBot({
                   
                   {/* Recipe generation confirmation buttons */}
                   {msg.isConfirmation && msg.originalMessage && (
-                    <div className="mt-3 flex gap-2">
+                    <div className="mt-3 flex flex-wrap gap-2">
                       <Button
                         size="sm"
                         onClick={() => {
@@ -701,7 +701,24 @@ export default function ChatBot({
                         disabled={generateRecipeMutation.isPending}
                         className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs px-3 py-1"
                       >
-                        {generateRecipeMutation.isPending ? "Creating..." : "Yes, Create Recipe!"}
+                        {generateRecipeMutation.isPending ? "Creating..." : "Recipe Card"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          // Generate quick recipe directly in chat
+                          sendMessageMutation.mutate({ 
+                            message: `Quick recipe for: ${msg.suggestedRecipeTitle || msg.originalMessage}`, 
+                            currentRecipe: getCurrentRecipeContext().recipe || undefined,
+                            mode: detectedMode 
+                          });
+                          // Remove confirmation message after click
+                          setLocalMessages(prev => prev.filter(m => m.id !== msg.id));
+                        }}
+                        disabled={sendMessageMutation.isPending}
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-3 py-1"
+                      >
+                        {sendMessageMutation.isPending ? "Getting..." : "Quick Recipe"}
                       </Button>
                       <Button
                         size="sm"

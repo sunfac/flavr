@@ -59,6 +59,76 @@ export function registerChatRoutes(app: Express) {
       const intentResult = await zestService.detectRecipeIntent(message);
       console.log('🎯 Intent detection:', intentResult);
 
+      // Check if this is a request for a quick recipe in chat
+      const isQuickRecipeRequest = message.toLowerCase().startsWith('quick recipe for:');
+      
+      if (isQuickRecipeRequest) {
+        console.log('🔍 Quick recipe request detected, generating condensed recipe');
+        
+        const recipeTitle = message.replace(/^quick recipe for:\s*/i, '').trim();
+        
+        // Build context for quick recipe generation
+        const contextPrompt = zestService.buildZestContext(userMemory, currentRecipe);
+        
+        const quickRecipeResponse = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            { 
+              role: "system", 
+              content: `${contextPrompt}
+
+QUICK RECIPE MODE: Generate a condensed, easy-to-follow recipe directly in the chat. Keep it concise but complete.
+
+Format:
+📝 **Recipe Title**
+
+🥘 **Ingredients:** (bullet points, 4-8 items max)
+• Main ingredient with quantity
+• Key flavor enhancers
+
+👨‍🍳 **Quick Method:** (2-4 simple steps)
+1. Prep step with timing
+2. Cooking step with technique
+3. Finishing step
+
+⏱️ **Time:** Total cooking time | **Serves:** Number of people
+
+💡 **Pro Tip:** One key technique or flavor enhancement
+
+Be warm and encouraging like Zest, but keep it concise for easy chat reading.` 
+            },
+            { role: "user", content: `Give me a quick recipe for: ${recipeTitle}` }
+          ],
+          max_tokens: 500,
+          temperature: 0.7
+        });
+
+        const quickRecipe = quickRecipeResponse.choices[0].message.content;
+        
+        // Save the conversation
+        if (userContext.userId) {
+          try {
+            await storage.createChatMessage({
+              userId: userContext.userId,
+              message: message,
+              response: quickRecipe || 'No response generated'
+            });
+          } catch (error) {
+            console.error('Error saving quick recipe chat:', error);
+          }
+        }
+
+        return res.json({
+          message: quickRecipe,
+          isRecipeIntent: false,
+          isQuickRecipe: true,
+          userMemory: {
+            hasPreferences: !!userMemory.preferences,
+            topicsRemembered: [recipeTitle]
+          }
+        });
+      }
+
       // Check if this is a quick cooking question that doesn't need a recipe card
       const isQuickAnswerRequest = !intentResult.isRecipeIntent && (
         message.toLowerCase().includes('how do i') ||
