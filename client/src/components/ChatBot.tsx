@@ -233,8 +233,15 @@ export default function ChatBot({
         timestamp: new Date(),
       };
 
+      console.log('📝 Adding Zest message to local messages:', zestMessage);
+      console.log('📋 Current local messages count:', localMessages.length);
+
       // Add the Zest response to chat
-      setLocalMessages(prev => [...prev, zestMessage]);
+      setLocalMessages(prev => {
+        const newMessages = [...prev, zestMessage];
+        console.log('📋 Updated local messages count:', newMessages.length);
+        return newMessages;
+      });
       setMessage("");
 
       // Handle recipe intent confirmation
@@ -394,7 +401,7 @@ export default function ChatBot({
 
   // Initialize with welcome message and history
   useEffect(() => {
-    if (actualIsOpen && chatHistory) {
+    if (actualIsOpen && chatHistory && !hasInitialized) {
       const messages: ChatMessage[] = [];
       
       // Add Zest's welcome message if we have a recipe (check recipe store instead of prop)
@@ -431,16 +438,16 @@ export default function ChatBot({
         });
       });
 
-      // Only set messages if we don't have any existing messages to preserve chat history
-      if (localMessages.length === 0) {
-        setLocalMessages(messages);
-      }
+      setLocalMessages(messages);
+      setHasInitialized(true);
     }
-  }, [actualIsOpen, chatHistory, hasShownWelcome, recipeStore.meta.title]);
+  }, [actualIsOpen, chatHistory, hasInitialized]);
 
   const handleSend = (messageText?: string) => {
     const textToSend = messageText || message;
     if (!textToSend.trim()) return;
+
+    console.log('💬 Sending message:', textToSend);
 
     // Add user message immediately
     const userMessage: ChatMessage = {
@@ -451,7 +458,13 @@ export default function ChatBot({
       text: textToSend,
       timestamp: new Date(),
     };
-    setLocalMessages(prev => [...prev, userMessage]);
+    
+    console.log('👤 Adding user message to local messages:', userMessage);
+    setLocalMessages(prev => {
+      const newMessages = [...prev, userMessage];
+      console.log('📋 Updated messages after user message:', newMessages.length);
+      return newMessages;
+    });
     setShowSuggestions(false);
 
     // Send to API with enhanced context
@@ -517,6 +530,7 @@ export default function ChatBot({
               overscrollBehavior: 'contain'
             }}
           >
+            {console.log('🎨 Rendering messages, localMessages.length:', localMessages.length)}
             {localMessages.map((msg, index) => (
               <div key={msg.id} className={`mb-3 ${msg.isUser ? "text-right" : "text-left"}`}>
                 <div
