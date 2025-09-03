@@ -1010,39 +1010,73 @@ IF THE USER ASKED FOR BREAKFAST, ONLY SUGGEST BREAKFAST FOODS.`;
     } else if (lowerUserIntent.includes('dinner')) {
       mealSpecificPrompt = `\n\nMEAL REQUIREMENT: This should be a DINNER dish - substantial main course appropriate for evening meals.`;
     } else if (lowerUserIntent.includes('sauce') || lowerUserIntent.includes('dressing')) {
-      mealSpecificPrompt = `\n\nSAUCE/DRESSING REQUIREMENT: This should be a sauce, dressing, or condiment - NOT a main dish.`;
+      mealSpecificPrompt = `\n\n🚨 SAUCE/DRESSING REQUIREMENT: This MUST be ONLY a sauce, dressing, or condiment - NEVER a main dish or full recipe.
+      
+ALLOWED SAUCE TYPES:
+- Tomato sauces, cream sauces, pesto
+- Pasta sauces, stir-fry sauces 
+- Dressings, vinaigrettes, mayonnaises
+- Glazes, reductions, compound butters
+- Marinades, dips, chutneys
+
+STRICTLY FORBIDDEN:
+- NO full pasta dishes, NO main courses
+- NO complete meals with protein + sauce
+- ONLY the sauce/dressing component`;
     } else if (lowerUserIntent.includes('salad')) {
-      mealSpecificPrompt = `\n\nSALAD REQUIREMENT: This should be a salad dish with fresh ingredients, dressing, and appropriate toppings.`;
+      mealSpecificPrompt = `\n\n🚨 SALAD REQUIREMENT: This MUST be a salad dish with fresh, light ingredients.
+      
+For "fresh salad" requests, prioritize:
+- Light greens (arugula, spinach, mixed leaves)
+- Fresh vegetables, herbs, light proteins
+- Simple, bright dressings
+- NO heavy meats like duck - use light proteins like chicken, fish, or vegetarian`;
     } else if (lowerUserIntent.includes('side dish') || lowerUserIntent.includes('side') || lowerUserIntent.includes('sides')) {
-      mealSpecificPrompt = `\n\nSIDE DISH REQUIREMENT: This should be a side dish or accompaniment - NOT a main course.`;
+      mealSpecificPrompt = `\n\n🚨 SIDE DISH REQUIREMENT: This MUST be a side dish or accompaniment - NEVER a main course.
+      
+Examples: roasted vegetables, rice pilaf, bread, potatoes, etc.`;
     }
 
     const userMessage = `${inspirationPrompt}
 
-User Intent: ${userIntent}
-Randomization Seed: ${rngSeed} (use this to ensure variety)
+🎯 CRITICAL USER INTENT: ${userIntent}
+🎲 Randomization Seed: ${rngSeed} (use this to ensure variety)
 ${dietaryPrompt}${meatPreferencePrompt}${mealSpecificPrompt}
 
+🚨 ABSOLUTE PRIMARY REQUIREMENT: The recipe title MUST EXACTLY fulfill the user's specific request: "${userIntent}"
+
+🔥 CRITICAL HIERARCHY - FOLLOW THIS ORDER STRICTLY:
+1. DISH TYPE OVERRIDE: If user asks for sauce/salad/side/soup/dessert → ONLY suggest that exact type
+2. MEAL TYPE OVERRIDE: If user specifies breakfast/lunch/dinner → ONLY suggest dishes for that meal  
+3. STYLE MODIFIERS: Apply light/fresh/healthy/spicy/etc. as specified
+4. INGREDIENT FOCUS: Include requested ingredients as primary components
+5. CHEF INSPIRATION: Apply chef/restaurant styling LAST, within the constraints above
+
+🚨 EXAMPLES OF STRICT ADHERENCE:
+- "fresh salad" → MUST be a salad (light, fresh ingredients) - NOT heavy duck salads
+- "sauce for pasta" → MUST be a sauce/dressing - NOT a full pasta dish
+- "healthy breakfast" → MUST be breakfast food - NOT dinner dishes
+- "light lunch" → MUST be a lunch dish that's light - NOT heavy mains
+- "side dish" → MUST be a side/accompaniment - NOT main courses
+
+⚠️ VIOLATION CHECK: If the suggested dish doesn't directly answer what the user asked for, REJECT IT and try again.
+
 GUIDELINES:
-- Create titles that showcase PROFESSIONAL COOKING TECHNIQUES and MAXIMUM FLAVOR
-- Must demonstrate sophisticated preparation: braising, roasting, reduction, caramelization
-- Include flavor-building elements: marinades, compound butters, glazes, spice rubs
-- Avoid basic dishes - aim for restaurant-quality complexity with depth
-- Use authentic names but ensure dishes are flavor-forward and exciting
-- For chef/restaurant: Simple titles - "Chef Name-Inspired Dish Name"
-- For regional cuisine: Add descriptions for unfamiliar dishes
-- Examples: "Gordon Ramsay-Inspired Beef Wellington", "Char Siu Pork with Five-Spice Glaze"
+- FIRST ensure the dish type matches user request (breakfast → breakfast foods, sauce → sauces, etc.)
+- THEN apply chef/restaurant inspiration styling to that appropriate dish type
+- Showcase professional techniques appropriate for the dish type
+- Include flavor-building elements suitable for the specific dish category
+- Use authentic names but ensure dishes directly answer the user's request
 
-CRITICAL TITLE REQUIREMENTS:
-- NEVER create incomplete titles like "Inspired by..." without the actual dish name
-- ALWAYS include the complete dish name after "Inspired by" or "Chef Name-Inspired"
-- Every title MUST have a specific dish name, not just the inspiration source
-- Examples of GOOD titles: "Gordon Ramsay-Inspired Beef Wellington", "Ottolenghi-Inspired Roasted Cauliflower with Tahini"
-- Examples of BAD titles: "Inspired by Gordon Ramsay", "Jamie Oliver-Inspired", "Restaurant-Inspired Dish"
+EXAMPLES OF PROPER USER INTENT RESPECT:
+- User: "healthy breakfast" → "Ottolenghi-Inspired Shakshuka with Fresh Herbs" (NOT dinner dishes)
+- User: "sauce for pasta" → "Marcella Hazan-Inspired Cacio e Pepe Sauce" (NOT main dishes)
+- User: "light salad" → "Alice Waters-Inspired Spring Greens with Lemon Vinaigrette" (NOT heavy dishes)
+- User: "side dish" → "Yotam Ottolenghi-Inspired Roasted Vegetables with Tahini" (NOT main courses)
 
-REQUIREMENT: Every dish must showcase at least 2-3 flavor maximization techniques AND comply with all dietary restrictions.
+🚨 CRITICAL: The suggested dish MUST be appropriate for what the user actually asked for, not just a random chef-inspired dish.
 
-OUTPUT: JSON with "title" key only. Make it sophisticated and flavor-packed.`;
+OUTPUT: JSON with "title" key only. Make it sophisticated, flavor-packed, AND directly relevant to user intent.`;
 
     try {
       const completion = await openai.chat.completions.create({

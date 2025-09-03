@@ -296,6 +296,7 @@ Be warm and encouraging like Zest, but keep it concise for easy chat reading.`
 
       // If recipe intent detected AND no valid current recipe exists, offer to create new recipe
       if (intentResult.isRecipeIntent && intentResult.confidence >= 0.7 && (!currentRecipe || !currentRecipe.title || currentRecipe.title.trim().length === 0 || !currentRecipe.ingredients || currentRecipe.ingredients.length === 0)) {
+        console.log('🆕 PRE-RECIPE MODE: No current recipe, generating new suggestion with user intent respect');
         // Use the smart inspiration system with enhanced context for user intent
         const { ChefAssistGPT5 } = await import('../chefAssistGPT5');
         const clientId = req.ip || 'anonymous';
@@ -303,13 +304,24 @@ Be warm and encouraging like Zest, but keep it concise for easy chat reading.`
         // Extract additional context from user message for better suggestions
         const lowerMessage = message.toLowerCase();
         
-        // Detect specific ingredient requests first
+        // Check if this is a dish-type request first (higher priority than ingredient detection)
+        const isDishTypeRequest = lowerMessage.includes('sauce') || 
+                                 lowerMessage.includes('salad') || 
+                                 lowerMessage.includes('side dish') || 
+                                 lowerMessage.includes('side') || 
+                                 lowerMessage.includes('soup') || 
+                                 lowerMessage.includes('dessert') ||
+                                 lowerMessage.includes('dressing');
+        
+        // Only detect specific ingredients if NOT a dish-type request
         const commonIngredients = ['pasta', 'chicken', 'beef', 'pork', 'fish', 'salmon', 'shrimp', 'rice', 'potatoes', 'eggs', 'tofu', 'mushrooms', 'spinach', 'tomatoes', 'cheese', 'bread', 'beans', 'lentils', 'quinoa', 'avocado'];
         let specificIngredient = '';
-        for (const ingredient of commonIngredients) {
-          if (lowerMessage.includes(ingredient)) {
-            specificIngredient = ingredient;
-            break;
+        if (!isDishTypeRequest) {
+          for (const ingredient of commonIngredients) {
+            if (lowerMessage.includes(ingredient)) {
+              specificIngredient = ingredient;
+              break;
+            }
           }
         }
         
