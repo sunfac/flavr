@@ -1,8 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
 import WebSocket, { WebSocketServer } from "ws";
 import { storage } from "../storage";
+import { db } from "../db";
 import { setupGoogleLiveAudioWebSocket } from "../googleLiveAudio";
 import { registerAuthRoutes } from "./authRoutes";
 import { registerRecipeRoutes } from "./recipeRoutes";
@@ -21,8 +23,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add route debugging
   console.log('🔧 Registering Express routes...');
   
-  // Setup session middleware with enhanced persistence
+  // Setup PostgreSQL session store for persistent sessions
+  const PgSession = connectPgSimple(session);
+  
+  // Setup session middleware with persistent database storage
   app.use(session({
+    store: new PgSession({
+      conString: process.env.DATABASE_URL,
+      tableName: 'sessions',
+      createTableIfMissing: false, // We'll handle table creation via schema
+    }),
     secret: process.env.SESSION_SECRET || 'flavr-dev-secret-key-2025',
     resave: false,
     saveUninitialized: false,

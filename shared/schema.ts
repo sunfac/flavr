@@ -238,6 +238,13 @@ export const insertInteractionLogSchema = createInsertSchema(interactionLogs).om
   timestamp: true,
 });
 
+// Sessions table for persistent login across server restarts
+export const sessions = pgTable("sessions", {
+  sid: text("sid").primaryKey(),
+  sess: jsonb("sess").notNull(),
+  expire: timestamp("expire").notNull(),
+});
+
 // User cooking preferences for Zest AI memory
 export const userPreferences = pgTable("user_preferences", {
   id: serial("id").primaryKey(),
