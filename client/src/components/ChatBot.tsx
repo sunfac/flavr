@@ -22,6 +22,8 @@ interface ChatMessage {
   timestamp: Date;
   isConfirmation?: boolean;
   originalMessage?: string;
+  isRecipeCreated?: boolean;
+  recipeTitle?: string;
 }
 
 interface Recipe {
@@ -330,22 +332,19 @@ export default function ChatBot({
           tips: result.recipe.tips || ''
         });
         
-        // Add success message to chat instead of toast
+        // Add success message with View Recipe button
         const successMessage: ChatMessage = {
           id: Date.now() + 1,
           message: "",
-          response: `✅ Success! ${result.recipe.title} has been created and is ready to cook. The recipe is now displayed below.`,
+          response: `✅ Success! ${result.recipe.title} has been created and is ready to cook.`,
           isUser: false,
-          text: `✅ Success! ${result.recipe.title} has been created and is ready to cook. The recipe is now displayed below.`,
+          text: `✅ Success! ${result.recipe.title} has been created and is ready to cook.`,
           timestamp: new Date(),
+          isRecipeCreated: true,
+          recipeTitle: result.recipe.title
         };
         
         setLocalMessages(prev => [...prev, successMessage]);
-        
-        // Close chat after a short delay
-        setTimeout(() => {
-          if (onClose) onClose();
-        }, 2000);
       }
     },
     onError: (error) => {
@@ -602,6 +601,23 @@ export default function ChatBot({
                         className="border-slate-500 text-slate-300 hover:bg-slate-600 text-xs px-3 py-1"
                       >
                         No Thanks
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {/* View Recipe Card button after successful generation */}
+                  {msg.isRecipeCreated && (
+                    <div className="mt-3">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          // Close chat and recipe should be displayed
+                          if (onClose) onClose();
+                        }}
+                        className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs px-3 py-1 flex items-center gap-2"
+                      >
+                        <iconMap.ChefHat className="w-3 h-3" />
+                        View Recipe Card
                       </Button>
                     </div>
                   )}
