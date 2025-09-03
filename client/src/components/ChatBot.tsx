@@ -704,8 +704,34 @@ export default function ChatBot({
                         size="sm"
                         variant="outline"
                         onClick={() => {
-                          // Remove confirmation message
-                          setLocalMessages(prev => prev.filter(m => m.id !== msg.id));
+                          // Remove confirmation message and ask for another suggestion with context
+                          setLocalMessages(prev => {
+                            const filteredMessages = prev.filter(m => m.id !== msg.id);
+                            
+                            // Add a follow-up message asking for another suggestion with context retained
+                            const followUpMessage: ChatMessage = {
+                              id: Date.now(),
+                              message: '',
+                              response: `No worries! Would you like me to suggest another ${msg.originalMessage?.toLowerCase().includes('pasta') ? 'pasta' : msg.originalMessage?.toLowerCase().includes('chicken') ? 'chicken' : msg.originalMessage?.toLowerCase().includes('beef') ? 'beef' : msg.originalMessage?.toLowerCase().includes('fish') ? 'fish' : msg.originalMessage?.toLowerCase().includes('vegetarian') ? 'vegetarian' : ''} recipe instead? I have plenty more ideas that might be perfect for you!`,
+                              isUser: false,
+                              text: `No worries! Would you like me to suggest another ${msg.originalMessage?.toLowerCase().includes('pasta') ? 'pasta' : msg.originalMessage?.toLowerCase().includes('chicken') ? 'chicken' : msg.originalMessage?.toLowerCase().includes('beef') ? 'beef' : msg.originalMessage?.toLowerCase().includes('fish') ? 'fish' : msg.originalMessage?.toLowerCase().includes('vegetarian') ? 'vegetarian' : ''} recipe instead? I have plenty more ideas that might be perfect for you!`,
+                              timestamp: new Date(),
+                              isConfirmation: false
+                            };
+                            
+                            return [...filteredMessages, followUpMessage];
+                          });
+                          
+                          // Trigger another suggestion with the original context
+                          if (msg.originalMessage) {
+                            setTimeout(() => {
+                              sendMessageMutation.mutate({ 
+                                message: `Another suggestion for: ${msg.originalMessage}`, 
+                                currentRecipe: getCurrentRecipeContext().recipe,
+                                mode: detectedMode 
+                              });
+                            }, 500);
+                          }
                         }}
                         className="border-slate-500 text-slate-300 hover:bg-slate-600 text-xs px-3 py-1"
                       >
