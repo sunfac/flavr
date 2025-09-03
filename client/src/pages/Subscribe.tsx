@@ -397,7 +397,7 @@ export default function Subscribe() {
 
               {/* Pricing */}
               <div className="text-center p-4 bg-muted rounded-lg">
-                <div className="text-2xl font-bold font-playfair text-foreground">$4.99</div>
+                <div className="text-2xl font-bold font-playfair text-foreground">£7.99</div>
                 <div className="text-sm text-muted-foreground">per month</div>
               </div>
 

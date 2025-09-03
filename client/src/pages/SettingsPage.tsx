@@ -220,7 +220,7 @@ export default function SettingsPage() {
                   onClick={handleUpgrade}
                   className="w-full bg-gradient-to-r from-primary to-accent text-white hover:from-primary/90 hover:to-accent/90"
                 >
-                  Upgrade for $4.99/month
+                  Upgrade for £7.99/month
                 </Button>
               </CardContent>
             </Card>

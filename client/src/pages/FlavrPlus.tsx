@@ -144,7 +144,7 @@ export default function FlavrPlus() {
                 <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-3 py-1 rounded-full text-sm font-medium inline-block mb-4">
                   Most Popular
                 </div>
-                <CardTitle className="text-3xl font-bold text-white">£4.99</CardTitle>
+                <CardTitle className="text-3xl font-bold text-white">£7.99</CardTitle>
                 <p className="text-slate-400">per month</p>
               </CardHeader>
               <CardContent>
