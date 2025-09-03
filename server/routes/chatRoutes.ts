@@ -357,20 +357,55 @@ Be warm like Zest - acknowledge the conversation context and provide practical, 
                                     lowerMessage.includes('pie') ||
                                     lowerMessage.includes('tart');
         
-        // If this is a specific dish request, generate directly without inspiration system
+        // If this is a specific dish request, use flavor-maximized generation
         if (isSpecificDishRequest) {
-          console.log('🎯 DIRECT DISH REQUEST: Bypassing inspiration system for specific dish:', message);
+          console.log('🎯 EXPLICIT DISH REQUEST: Using flavor-maximized generation for:', message);
+          
+          // Generate a flavor-maximized title based on the specific user request
+          const flavorMaximizedResponse = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              {
+                role: "system",
+                content: `You are a flavor maximization expert. When given a specific dish request, create an enhanced version that maximizes flavor while staying true to the user's intent.
+
+FLAVOR MAXIMIZATION PRINCIPLES:
+- Add specific ingredients that enhance the base dish (herbs, spices, aromatics)
+- Include cooking techniques that build flavor (caramelization, browning, layering)
+- Specify flavor-boosting elements (citrus zest, compound butters, wine reductions)
+- Maintain the core identity of the requested dish
+- Use descriptive culinary language that suggests depth of flavor
+
+Examples:
+- "meatball recipe" → "Italian Herb-Crusted Meatballs with San Marzano Tomato and Red Wine Reduction"
+- "chicken pasta" → "Garlic and Herb Roasted Chicken Pasta with Lemon Parmesan Cream"
+- "chocolate cake" → "Rich Dark Chocolate Cake with Espresso and Sea Salt Caramel"
+- "beef stir fry" → "Sichuan Pepper Beef Stir Fry with Ginger Scallion Oil"
+
+Respond with ONLY the enhanced recipe title.`
+              },
+              {
+                role: "user",
+                content: message
+              }
+            ],
+            max_tokens: 60,
+            temperature: 0.7
+          });
+          
+          const enhancedTitle = flavorMaximizedResponse.choices[0].message.content?.trim() || message;
+          console.log('🍯 Flavor-maximized title generated:', enhancedTitle);
           
           return res.json({
-            message: `Perfect! I'll create exactly what you asked for: ${message}. Let me generate that recipe for you right now!`,
+            message: `Perfect! I'll create a flavor-maximized version of what you asked for. Get ready for: "${enhancedTitle}" - this is going to be delicious!`,
             isRecipeIntent: true,
             requiresConfirmation: true,
-            suggestedRecipeTitle: message,
+            suggestedRecipeTitle: enhancedTitle,
             originalMessage: message,
             confidence: 0.95,
             userMemory: {
               hasPreferences: !!userMemory.preferences,
-              topicsRemembered: [message]
+              topicsRemembered: [message, enhancedTitle]
             }
           });
         }
