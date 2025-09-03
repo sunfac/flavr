@@ -132,6 +132,19 @@ Keep it conversational and enthusiastic like you're recommending your favorite d
         
         const specificSuggestion = suggestionResponse.choices[0].message.content;
         
+        // Log chat recipe suggestion for developer monitoring
+        if (userContext.userId) {
+          await logGPTInteraction(
+            userContext.userId,
+            "chat-suggestion",
+            { userMessage: message, cuisinePreference, avoidTerms },
+            `User request: ${message}. Generated inspiration: ${inspiredTitle}`,
+            specificSuggestion || "No response generated",
+            { suggestedTitle: inspiredTitle },
+            { actualResponse: specificSuggestion }
+          );
+        }
+        
         const confirmationResponse = {
           message: specificSuggestion || `I'd love to help you with that! ${intentResult.suggestedAction} Would you like me to turn this into a Flavr recipe card?`,
           isRecipeIntent: true,
@@ -258,6 +271,19 @@ Keep it conversational and enthusiastic like you're recommending your favorite d
 
       // Generate recipe
       const recipe = await zestService.generateRecipe(message, userContext, userMemory);
+
+      // Log chat recipe generation for developer monitoring
+      if (userContext.userId && recipe) {
+        await logGPTInteraction(
+          userContext.userId,
+          "chat-recipe-generation",
+          { userMessage: message },
+          `Chat recipe generation request: ${message}`,
+          `Generated recipe: ${recipe.title}`,
+          { requestedRecipe: message },
+          { generatedRecipe: { title: recipe.title, cuisine: recipe.cuisine, servings: recipe.servings } }
+        );
+      }
 
       // Save recipe and increment usage counter
       let savedRecipe = null;

@@ -85,6 +85,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Developer all recipes endpoint (developer access only)
+  app.get("/api/developer/all-recipes", async (req, res) => {
+    try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Check if user is developer
+      const user = await storage.getUser(req.session.userId);
+      if (user?.email !== "william@blycontracting.co.uk") {
+        return res.status(403).json({ error: "Developer access required" });
+      }
+
+      const allRecipes = await storage.getAllRecipes();
+      res.json(allRecipes);
+    } catch (error) {
+      console.error("Failed to fetch all recipes:", error);
+      res.status(500).json({ error: "Failed to fetch all recipes" });
+    }
+  });
+
   // Get recipes endpoint
   app.get("/api/recipes", async (req, res) => {
     try {
