@@ -9,9 +9,9 @@ const openai = new OpenAI({
 // Style pack definitions for deterministic variation
 const TECHNIQUE_PACK = [
   "rustic-braise", "quick-sear-roast", "pan-sauce-reduction", "grill-marinade",
-  "shallow-fry-crisp", "steam-then-sear", "gentle-poach", "emulsion-building",
-  "sheet-pan-oven", "pressure-cooker", "confit-style-fat", "sous-vide-then-sear",
-  "smoker-style-rub(oven-alt)", "dough/lamination", "cure-then-cook(fast)"
+  "shallow-fry-crisp", "steam-then-sear", "gentle-poach", "roast-and-rest",
+  "sheet-pan-oven", "pressure-cooker", "slow-cooker", "pan-fry-finish",
+  "oven-roast", "stir-fry", "simple-bake"
 ];
 
 const SIMPLICITY_PACK = [
@@ -40,7 +40,7 @@ const TEXTURE_PACK = [
 const FLAVOUR_PACK = [
   "umami-layering", "heat-ladder(mild→med)", "citrus-acid-balance", "herbaceous-lift",
   "nutty-browning", "aromatic-spice-base", "garlicky-comfort", "sweet-salty-contrast",
-  "smoke&char", "pickled-accent", "fermented-depth", "peppery-bite"
+  "smoke&char", "pickled-accent", "rich-and-savory", "peppery-bite"
 ];
 
 // Anti-repetition memory - rolling window of last 5 outputs
@@ -1046,6 +1046,11 @@ Examples: roasted vegetables, rice pilaf, bread, potatoes, etc.`;
 ${dietaryPrompt}${meatPreferencePrompt}${mealSpecificPrompt}
 
 🚨 ABSOLUTE PRIMARY REQUIREMENT: The recipe title MUST EXACTLY fulfill the user's specific request: "${userIntent}"
+
+🚨 ACCESSIBILITY REQUIREMENTS - AVOID EXTRAVAGANT INGREDIENTS & TECHNIQUES:
+BANNED INGREDIENTS: truffle, caviar, foie gras, gold leaf, saffron, lobster, wagyu, uni, oysters, exotic mushrooms (matsutake, chanterelle), expensive cuts (dry-aged beef, rack of lamb)
+BANNED TECHNIQUES: fermentation, sous-vide, molecular gastronomy, spherification, liquid nitrogen, smoking (unless basic), curing, confit, multi-day marinades
+USE INSTEAD: accessible ingredients from supermarkets, simple roasting/grilling/pan-frying, standard cooking methods, common herbs and spices
 
 🔥 CRITICAL HIERARCHY - FOLLOW THIS ORDER STRICTLY:
 1. DISH TYPE OVERRIDE: If user asks for sauce/salad/side/soup/dessert → ONLY suggest that exact type
