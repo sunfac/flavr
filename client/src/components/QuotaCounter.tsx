@@ -26,12 +26,35 @@ export default function QuotaCounter({ className = '', showUpgradeHint = false }
     refetchInterval: 2000, // Refresh every 2 seconds
   });
 
-  // Update remaining recipes count from server
+  // Update remaining recipes count from server or fallback to client calculation
   useEffect(() => {
     if (quotaData && typeof quotaData === 'object' && 'remainingRecipes' in quotaData) {
       setRemainingRecipes((quotaData as any).remainingRecipes || 0);
+    } else {
+      // Fallback to client-side calculation using localStorage
+      import('@/lib/quotaManager').then(({ getRemainingRecipes }) => {
+        setRemainingRecipes(getRemainingRecipes());
+      });
     }
   }, [quotaData]);
+
+  // Also update on localStorage changes (when recipes are generated)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      import('@/lib/quotaManager').then(({ getRemainingRecipes }) => {
+        setRemainingRecipes(getRemainingRecipes());
+      });
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    // Also listen for custom events when quota changes
+    window.addEventListener('quotaUpdated', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('quotaUpdated', handleStorageChange);
+    };
+  }, []);
 
   // Don't show counter for authenticated Flavr+ users or developer account
   if (user?.hasFlavrPlus || user?.email === 'william@blycontracting.co.uk') {

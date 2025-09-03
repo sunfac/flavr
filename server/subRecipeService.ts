@@ -97,10 +97,10 @@ export class SubRecipeService {
         lowerExtracted.includes(indicator) || lowerIngredient.includes(`${indicator} `)
       );
       
-      // Also allow compound ingredients (2+ words) even without specific indicators
-      const isCompoundIngredient = extractedName.split(' ').length >= 2;
+      // Only suggest subrecipes for ingredients with strong homemade indicators
+      // Removed compound ingredient logic to reduce inappropriate suggestions
       
-      if (hasHomemadeIndicator || isCompoundIngredient) {
+      if (hasHomemadeIndicator) {
         detections.set(ingredient, {
           hasSubRecipe: true,
           subRecipeName: extractedName,

@@ -26,7 +26,7 @@ export default function ChatMode() {
     <div className="min-h-screen bg-slate-900 text-white">
       <GlobalHeader onMenuClick={handleMenuClick} />
       
-      <main className="pt-20 pb-24 h-screen">
+      <main className="pt-20 pb-safe h-[calc(100vh-5rem)] md:pb-24 md:h-screen">
         <div className="h-full">
           <ChatBot 
             currentMode="chef"

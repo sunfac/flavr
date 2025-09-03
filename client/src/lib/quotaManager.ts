@@ -45,6 +45,11 @@ export async function checkQuotaBeforeGPT(): Promise<boolean> {
   localStorage.setItem(usageKey, (usage + 1).toString());
   console.log(`[Flavr] Global recipe #${usage + 1} generated for pseudo-user: ${userId}`);
 
+  // Dispatch custom event to update UI components
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('quotaUpdated'));
+  }
+
   return true; // User is under quota, proceed to GPT
 }
 

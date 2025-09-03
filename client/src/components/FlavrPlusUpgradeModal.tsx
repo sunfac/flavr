@@ -99,7 +99,7 @@ export default function FlavrPlusUpgradeModal({
         <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 rounded-xl p-3 md:p-4 mb-4 md:mb-6 border border-orange-500/20">
           <div className="text-center">
             <div className="flex items-baseline justify-center space-x-2">
-              <span className="text-3xl font-bold text-orange-400">£4.99</span>
+              <span className="text-3xl font-bold text-orange-400">£7.99</span>
               <span className="text-slate-400">/month</span>
             </div>
             <p className="text-sm text-slate-400 mt-1">

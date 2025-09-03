@@ -85,7 +85,7 @@ export function SubRecipeButton({
           )}
           <span className="text-xs font-medium">
             {isGenerating ? 'Creating...' : (
-              pageReference ? 'Cookbook Recipe' : `Make ${subRecipeName}`
+              pageReference ? 'Cookbook Recipe' : 'Make it'
             )}
           </span>
           {!isGenerating && <ExternalLink className="w-3 h-3 opacity-70" />}
