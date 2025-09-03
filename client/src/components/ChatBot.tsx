@@ -292,10 +292,50 @@ export default function ChatBot({
       
       setLocalMessages(prev => [...prev, recipeMessage]);
 
-      // Navigate to the generated recipe if it was saved
+      // Update recipe store with generated recipe and navigate
       if (result.recipe) {
-        // TODO: Update this to navigate to recipe or update current recipe context
         console.log('Generated recipe:', result.recipe);
+        
+        // Update the global recipe store with the generated recipe
+        recipeActions.setRecipeMeta({
+          title: result.recipe.title,
+          description: result.recipe.description || '',
+          cookTime: result.recipe.cookTime || 30,
+          servings: result.recipe.servings || 4,
+          difficulty: result.recipe.difficulty || 'medium',
+          cuisine: result.recipe.cuisine || '',
+          image: null
+        });
+        
+        // Set ingredients
+        const ingredients = (result.recipe.ingredients || []).map((ingredient, index) => ({
+          id: index + 1,
+          text: ingredient,
+          checked: false
+        }));
+        recipeActions.setIngredients(ingredients);
+        
+        // Set instructions as steps
+        const steps = (result.recipe.instructions || []).map((instruction, index) => ({
+          id: index + 1,
+          description: instruction,
+          completed: false
+        }));
+        recipeActions.setSteps(steps);
+        
+        // Set servings
+        recipeActions.setServings(result.recipe.servings || 4);
+        
+        // Close the chat and show success message
+        toast({
+          title: "Recipe Created!",
+          description: `${result.recipe.title} has been added to your recipe collection.`,
+        });
+        
+        // Close chat after a short delay
+        setTimeout(() => {
+          if (onClose) onClose();
+        }, 1000);
       }
     },
     onError: (error) => {

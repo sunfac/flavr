@@ -134,12 +134,40 @@ export function registerChatRoutes(app: Express) {
         return res.status(400).json({ error: "User confirmation required" });
       }
 
-      // Check usage limit before generating recipe
+      // Check usage limit before generating recipe (simplified inline check)
+      const userId = req.session?.userId;
+      const pseudoId = req.headers['x-pseudo-user-id'] as string || req.session?.id || 'anonymous';
+      
       try {
-        const { checkAndEnforceUsageLimit } = await import('../quotaService');
-        const limitCheck = await checkAndEnforceUsageLimit(req);
-        if (!limitCheck.allowed) {
-          return res.status(403).json(limitCheck.error);
+        if (userId) {
+          const user = await storage.getUser(userId);
+          if (user) {
+            const isDeveloper = user.email === "william@blycontracting.co.uk";
+            const hasUnlimitedAccess = user.hasFlavrPlus || isDeveloper;
+            
+            if (!hasUnlimitedAccess && (user.recipesThisMonth || 0) >= 3) {
+              return res.status(403).json({
+                error: "You have no free recipes remaining this month. Sign up for Flavr+ to get unlimited recipes!",
+                recipesUsed: user.recipesThisMonth || 0,
+                recipesLimit: 3,
+                hasFlavrPlus: false
+              });
+            }
+          }
+        } else {
+          let pseudoUser = await storage.getPseudoUser(pseudoId);
+          if (!pseudoUser) {
+            pseudoUser = await storage.createPseudoUser({ pseudoId });
+          }
+          
+          if ((pseudoUser.recipesThisMonth || 0) >= 3) {
+            return res.status(403).json({
+              error: "You have no free recipes remaining this month. Sign up for Flavr+ to get unlimited recipes!",
+              recipesUsed: pseudoUser.recipesThisMonth || 0,
+              recipesLimit: 3,
+              hasFlavrPlus: false
+            });
+          }
         }
       } catch (quotaError) {
         console.error('Error checking quota:', quotaError);
@@ -158,24 +186,46 @@ export function registerChatRoutes(app: Express) {
       // Generate recipe
       const recipe = await zestService.generateRecipe(message, userContext, userMemory);
 
-      // Save recipe if user is authenticated
-      if (userContext.userId && recipe) {
+      // Save recipe and increment usage counter
+      let savedRecipe = null;
+      if (recipe) {
         try {
-          await storage.createRecipe({
-            userId: userContext.userId,
-            title: recipe.title,
-            description: recipe.description,
-            cookTime: recipe.cookTime,
-            servings: recipe.servings,
-            difficulty: recipe.difficulty,
-            cuisine: recipe.cuisine,
-            mood: recipe.mood,
-            mode: 'zest-chat',
-            ingredients: recipe.ingredients,
-            instructions: recipe.instructions,
-            tips: recipe.tips,
-            originalPrompt: message
-          });
+          // Save recipe if user is authenticated
+          if (userContext.userId) {
+            savedRecipe = await storage.createRecipe({
+              userId: userContext.userId,
+              title: recipe.title,
+              description: recipe.description,
+              cookTime: recipe.cookTime,
+              servings: recipe.servings,
+              difficulty: recipe.difficulty,
+              cuisine: recipe.cuisine,
+              mood: recipe.mood,
+              mode: 'zest-chat',
+              ingredients: recipe.ingredients,
+              instructions: recipe.instructions,
+              tips: recipe.tips,
+              originalPrompt: message
+            });
+          }
+          
+          // Increment usage counter
+          if (userContext.userId) {
+            const user = await storage.getUser(userContext.userId);
+            if (user) {
+              const isDeveloper = user.email === "william@blycontracting.co.uk";
+              const hasUnlimitedAccess = user.hasFlavrPlus || isDeveloper;
+              
+              if (!hasUnlimitedAccess) {
+                await storage.updateUserUsage(userContext.userId, (user.recipesThisMonth || 0) + 1, user.imagesThisMonth || 0);
+              }
+            }
+          } else {
+            const pseudoUser = await storage.getPseudoUser(pseudoId);
+            if (pseudoUser) {
+              await storage.updatePseudoUserUsage(pseudoId, (pseudoUser.recipesThisMonth || 0) + 1);
+            }
+          }
         } catch (error) {
           console.error('Error saving Zest-generated recipe:', error);
         }
