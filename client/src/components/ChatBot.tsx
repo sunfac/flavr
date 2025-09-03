@@ -66,6 +66,26 @@ export default function ChatBot({
   const actualIsOpen = isOpen !== undefined ? isOpen : true;
   const [message, setMessage] = useState("");
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
+  
+  // Generate unique key for current recipe to persist chat per recipe
+  const getRecipeKey = () => {
+    const recipe = getCurrentRecipeContext().recipe;
+    if (!recipe || !recipe.title) return 'no-recipe';
+    return `recipe-${recipe.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`;
+  };
+  
+  // Save chat history to localStorage per recipe
+  const saveChatHistory = (messages: ChatMessage[]) => {
+    const recipeKey = getRecipeKey();
+    localStorage.setItem(`chat-history-${recipeKey}`, JSON.stringify(messages));
+  };
+  
+  // Load chat history from localStorage for current recipe
+  const loadChatHistory = (): ChatMessage[] => {
+    const recipeKey = getRecipeKey();
+    const saved = localStorage.getItem(`chat-history-${recipeKey}`);
+    return saved ? JSON.parse(saved) : [];
+  };
   const [showSuggestions, setShowSuggestions] = useState(true);
   
   // Connect to global recipe store
@@ -163,6 +183,20 @@ export default function ChatBot({
 
   // Extract history from response
   const chatHistory = Array.isArray(historyData) ? historyData : (historyData as any)?.history || [];
+
+  // Load chat history when component mounts or recipe changes
+  useEffect(() => {
+    const recipeKey = getRecipeKey();
+    const savedMessages = loadChatHistory();
+    setLocalMessages(savedMessages);
+  }, [getCurrentRecipeContext().recipe?.title]); // Reload when recipe title changes
+  
+  // Save chat history whenever localMessages changes
+  useEffect(() => {
+    if (localMessages.length > 0) {
+      saveChatHistory(localMessages);
+    }
+  }, [localMessages]);
 
   // Get current recipe data from store or props with full context
   const getCurrentRecipeContext = () => {

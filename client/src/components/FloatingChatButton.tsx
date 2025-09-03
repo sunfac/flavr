@@ -137,9 +137,15 @@ export default function FloatingChatButton({ className = "", variant = "floating
 
   return (
     <>
-      {/* Floating Chat Button */}
-      <motion.div
-        className={`fixed bottom-6 right-6 z-[9999] ${className}`}
+      {/* Floating Chat Button - Portal to ensure highest z-index */}
+      {typeof window !== "undefined" && createPortal(
+        <motion.div
+          style={{ 
+            position: 'fixed',
+            bottom: '1.5rem',
+            right: '1.5rem',
+            zIndex: 999999999
+          }}
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ 
@@ -191,7 +197,9 @@ export default function FloatingChatButton({ className = "", variant = "floating
             !
           </motion.div>
         </div>
-      </motion.div>
+        </motion.div>,
+        document.body
+      )}
 
       {/* Chat Panel - Portal to Body */}
       {typeof window !== "undefined" && createPortal(

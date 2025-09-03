@@ -139,11 +139,27 @@ export default function RecipeView() {
   const handleRecipeUpdate = (updatedRecipe: any) => {
     console.log('🔄 Recipe update received from chat bot:', updatedRecipe.title);
     
-    // For now, just show success message since the chat bot handles live updates
-    // In the future, you could implement full recipe refresh here
+    // Update the recipe data with the modified version
+    Object.assign(recipe, {
+      title: updatedRecipe.title,
+      description: updatedRecipe.description,
+      ingredients: updatedRecipe.ingredients,
+      instructions: updatedRecipe.instructions,
+      servings: updatedRecipe.servings,
+      cookTime: updatedRecipe.cookTime,
+      difficulty: updatedRecipe.difficulty,
+      cuisine: updatedRecipe.cuisine
+    });
+    
+    // Force component re-render by updating query data
+    queryClient.setQueryData(['/api/recipes', id], (oldData: any) => ({
+      ...oldData,
+      ...recipe
+    }));
+    
     toast({
       title: "Recipe Updated",
-      description: "Your recipe has been successfully modified!",
+      description: updatedRecipe.modifications || "Your recipe has been successfully modified!",
     });
   };
 
