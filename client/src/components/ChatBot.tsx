@@ -442,7 +442,7 @@ export default function ChatBot({
   };
 
   return (
-    <div className="h-full min-h-screen md:min-h-0 flex flex-col bg-slate-900" style={{ height: '100vh' }}>
+    <div className="h-full flex flex-col bg-slate-900">
         <CardHeader className="p-3 sm:p-4 border-b border-white/10 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="relative group">

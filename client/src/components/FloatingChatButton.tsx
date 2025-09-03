@@ -56,52 +56,49 @@ export default function FloatingChatButton({ className = "", variant = "floating
           </div>
         </div>
 
-        {/* Chat Modal - Mobile Optimized */}
+        {/* Chat Panel - Slide from Right */}
         <AnimatePresence>
           {isChatOpen && (
-            <motion.div
-              className="fixed inset-0 z-50 flex items-center justify-center md:p-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              {/* Backdrop - only visible on desktop */}
+            <>
+              {/* Desktop Backdrop */}
               <motion.div
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm hidden md:block"
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:block"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={handleCloseChat}
               />
-
-              {/* Chat Panel - Full screen on mobile, modal on desktop */}
+              
+              {/* Slide-out Panel */}
               <motion.div
-                className="relative w-full h-screen md:h-[600px] md:max-w-md bg-slate-900 md:rounded-2xl shadow-2xl border-0 md:border border-slate-700/50 overflow-hidden"
-                initial={{ 
-                  scale: typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 0.8, 
-                  opacity: 0, 
-                  y: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : 20 
-                }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ 
-                  scale: typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 0.8, 
-                  opacity: 0, 
-                  y: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : 20 
-                }}
+                className="fixed top-0 right-0 h-full w-full md:w-96 bg-slate-900 shadow-2xl z-50 flex flex-col"
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
                 transition={{ 
                   type: "spring", 
                   stiffness: 300, 
                   damping: 30 
                 }}
               >
+                {/* Retract Arrow - Mobile Only */}
+                <div className="md:hidden absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full z-10">
+                  <Button
+                    onClick={handleCloseChat}
+                    className="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-l-lg shadow-lg border-r-0"
+                    size="sm"
+                  >
+                    <iconMap.chevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+
                 <ChatBot
                   isOpen={isChatOpen}
                   onClose={handleCloseChat}
                   currentRecipe={undefined}
                 />
               </motion.div>
-            </motion.div>
+            </>
           )}
         </AnimatePresence>
       </>
@@ -166,52 +163,49 @@ export default function FloatingChatButton({ className = "", variant = "floating
         </div>
       </motion.div>
 
-      {/* Chat Modal - Mobile Optimized */}
+      {/* Chat Panel - Slide from Right */}
       <AnimatePresence>
         {isChatOpen && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center md:p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {/* Backdrop - only visible on desktop */}
+          <>
+            {/* Desktop Backdrop */}
             <motion.div
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm hidden md:block"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:block"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={handleCloseChat}
             />
-
-            {/* Chat Panel - Full screen on mobile, modal on desktop */}
+            
+            {/* Slide-out Panel */}
             <motion.div
-              className="relative w-full h-screen md:h-[600px] md:max-w-md bg-slate-900 md:rounded-2xl shadow-2xl border-0 md:border border-slate-700/50 overflow-hidden"
-              initial={{ 
-                scale: typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 0.8, 
-                opacity: 0, 
-                y: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : 20 
-              }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ 
-                scale: typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 0.8, 
-                opacity: 0, 
-                y: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : 20 
-              }}
+              className="fixed top-0 right-0 h-full w-full md:w-96 bg-slate-900 shadow-2xl z-50 flex flex-col"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
               transition={{ 
                 type: "spring", 
                 stiffness: 300, 
                 damping: 30 
               }}
             >
+              {/* Retract Arrow - Mobile Only */}
+              <div className="md:hidden absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full z-10">
+                <Button
+                  onClick={handleCloseChat}
+                  className="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-l-lg shadow-lg border-r-0"
+                  size="sm"
+                >
+                  <iconMap.chevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+
               <ChatBot
                 isOpen={isChatOpen}
                 onClose={handleCloseChat}
                 currentRecipe={undefined}
               />
             </motion.div>
-          </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>
