@@ -59,26 +59,82 @@ export function registerChatRoutes(app: Express) {
 
       // If recipe intent detected, offer to create recipe with specific suggestion
       if (intentResult.isRecipeIntent && intentResult.confidence >= 0.7) {
-        // Generate a specific recipe suggestion using Inspire Me style variety
-        const { ChefAssistGPT5 } = await import('../chefAssistGPT5');
-        const clientId = req.ip || 'anonymous';
+        let inspiredTitle = '';
         
-        // Generate an authentic dish title first using the same system as Inspire Me
-        const inspiredTitle = await ChefAssistGPT5.generateInspireTitle({
-          userIntent: message,
-          clientId: clientId,
-          cuisinePreference: '',
-          avoid: [],
-          seeds: {
-            randomSeed: Math.floor(Math.random() * 10000),
-            complexityLevel: Math.floor(Math.random() * 15) + 1,
-            simpleStyle: Math.floor(Math.random() * 15) + 1,
-            creativityMode: Math.floor(Math.random() * 8) + 1,
-            seasonalFocus: Math.floor(Math.random() * 6) + 1,
-            textureTheme: Math.floor(Math.random() * 10) + 1,
-            flavorProfile: Math.floor(Math.random() * 12) + 1
-          }
-        });
+        // Check if user is asking for meal-specific recipes and generate appropriate suggestions
+        const lowerMessage = message.toLowerCase();
+        const isBreakfastRequest = lowerMessage.includes('breakfast') || lowerMessage.includes('morning') || 
+                                  lowerMessage.includes('brunch') || lowerMessage.includes('start the day');
+        const isLunchRequest = lowerMessage.includes('lunch') || lowerMessage.includes('midday');
+        const isDinnerRequest = lowerMessage.includes('dinner') || lowerMessage.includes('evening') || lowerMessage.includes('supper');
+        
+        if (isBreakfastRequest) {
+          // Generate a breakfast-specific suggestion directly
+          const breakfastOptions = [
+            "Fluffy Ricotta Pancakes with Honey Butter",
+            "Avocado Toast with Perfect Poached Egg",
+            "Steel-Cut Oats with Caramelized Apple & Walnuts",
+            "Greek Yogurt Parfait with Homemade Granola",
+            "Scrambled Eggs with Smoked Salmon & Chives",
+            "French Toast with Berry Compote",
+            "Green Smoothie Bowl with Tropical Toppings",
+            "English Breakfast Muffins with Turkey Sausage",
+            "Overnight Chia Pudding with Fresh Berries",
+            "Spinach & Feta Breakfast Wrap"
+          ];
+          
+          // Select a random breakfast option
+          inspiredTitle = breakfastOptions[Math.floor(Math.random() * breakfastOptions.length)];
+        } else if (isLunchRequest) {
+          // Generate lunch-specific suggestions
+          const lunchOptions = [
+            "Mediterranean Quinoa Bowl with Lemon Tahini",
+            "Grilled Chicken Caesar Wrap with Homemade Dressing",
+            "Thai-Style Beef Salad with Fresh Herbs",
+            "Tuscan White Bean & Kale Soup",
+            "Salmon Niçoise Salad with Soft-Boiled Eggs",
+            "Vietnamese Banh Mi with Pickled Vegetables",
+            "Moroccan Chickpea & Sweet Potato Stew",
+            "Japanese Chirashi Bowl with Fresh Sashimi"
+          ];
+          
+          inspiredTitle = lunchOptions[Math.floor(Math.random() * lunchOptions.length)];
+        } else if (isDinnerRequest) {
+          // Generate dinner-specific suggestions  
+          const dinnerOptions = [
+            "Pan-Seared Duck Breast with Cherry Gastrique",
+            "Slow-Braised Lamb Shoulder with Rosemary",
+            "Miso-Glazed Black Cod with Asian Greens",
+            "Beef Wellington with Truffle Jus",
+            "Seafood Paella with Saffron & Aioli",
+            "Thai Green Curry with Jasmine Rice",
+            "Coq au Vin with Buttery Mashed Potatoes",
+            "Grilled Ribeye with Chimichurri & Roasted Vegetables"
+          ];
+          
+          inspiredTitle = dinnerOptions[Math.floor(Math.random() * dinnerOptions.length)];
+        } else {
+          // Use the general inspiration system for non-breakfast requests
+          const { ChefAssistGPT5 } = await import('../chefAssistGPT5');
+          const clientId = req.ip || 'anonymous';
+          
+          const titleResult = await ChefAssistGPT5.generateInspireTitle({
+            userIntent: message,
+            clientId: clientId,
+            cuisinePreference: '',
+            avoid: [],
+            seeds: {
+              randomSeed: Math.floor(Math.random() * 10000),
+              complexityLevel: Math.floor(Math.random() * 15) + 1,
+              simpleStyle: Math.floor(Math.random() * 15) + 1,
+              creativityMode: Math.floor(Math.random() * 8) + 1,
+              seasonalFocus: Math.floor(Math.random() * 6) + 1,
+              textureTheme: Math.floor(Math.random() * 10) + 1,
+              flavorProfile: Math.floor(Math.random() * 12) + 1
+            }
+          });
+          inspiredTitle = titleResult.title;
+        }
         
         // Create an engaging description of the inspired dish
         const suggestionResponse = await openai.chat.completions.create({
