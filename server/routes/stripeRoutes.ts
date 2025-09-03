@@ -21,14 +21,21 @@ export function registerStripeRoutes(app: Express) {
   // Create subscription endpoint
   app.post("/api/create-subscription", async (req, res) => {
     try {
+      console.log("🔔 Create subscription request received");
+      console.log("Session userId:", req.session?.userId);
+      console.log("STRIPE_MONTHLY_PRICE_ID:", process.env.STRIPE_MONTHLY_PRICE_ID ? "Set" : "Not set");
+      
       if (!req.session?.userId) {
+        console.log("❌ Authentication failed - no session userId");
         return res.status(401).json({ error: "Authentication required" });
       }
 
       const { priceId = PRICE_IDS.monthly } = req.body;
+      console.log("Using price ID:", priceId);
       
       // Check if price ID is configured
       if (!priceId) {
+        console.log("❌ No price ID configured");
         return res.status(400).json({ 
           error: "Stripe is not configured", 
           message: "Please set up Stripe products and prices. See STRIPE_SETUP.md for instructions." 
@@ -276,7 +283,7 @@ export function registerStripeRoutes(app: Express) {
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
-        const subscription = invoice.subscription;
+        const subscription = (invoice as any).subscription;
         
         if (subscription && typeof subscription === 'string') {
           const sub = await stripe.subscriptions.retrieve(subscription);
