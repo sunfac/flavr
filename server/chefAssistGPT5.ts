@@ -547,9 +547,28 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
             const partialRecipe = JSON.parse(content);
             const restOfRecipe = JSON.parse(continuationContent);
             content = JSON.stringify({...partialRecipe, ...restOfRecipe});
-          } catch {
-            // If parsing fails, concatenate strings and hope for the best
-            content = content.replace(/\}\s*$/, ',') + continuationContent.replace(/^\s*\{/, '');
+          } catch (parseError) {
+            console.log("JSON merge failed, trying to fix manually...");
+            // More careful string concatenation
+            let cleanContent = content.trim();
+            let cleanContinuation = continuationContent.trim();
+            
+            // Remove closing brace from first part
+            if (cleanContent.endsWith('}')) {
+              cleanContent = cleanContent.slice(0, -1);
+            }
+            
+            // Remove opening brace from continuation
+            if (cleanContinuation.startsWith('{')) {
+              cleanContinuation = cleanContinuation.slice(1);
+            }
+            
+            // Add comma if needed
+            if (!cleanContent.endsWith(',')) {
+              cleanContent += ',';
+            }
+            
+            content = cleanContent + cleanContinuation;
           }
         }
       }
@@ -570,9 +589,19 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
           .replace(/,\s*}/g, '}') // Remove trailing commas
           .replace(/,\s*]/g, ']') // Remove trailing commas in arrays
           .replace(/\n/g, ' ') // Replace newlines with spaces
-          .replace(/\t/g, ' '); // Replace tabs with spaces
+          .replace(/\t/g, ' ') // Replace tabs with spaces
+          .replace(/([^"]),(\s*[}\]])/g, '$1$2') // Remove trailing commas before closing brackets
+          .replace(/(['"])\s*:\s*(['"])/g, '$1:$2') // Fix spacing around colons
+          .replace(/}\s*{/g, '},{') // Fix missing commas between objects
+          .replace(/]\s*\[/g, '],['); // Fix missing commas between arrays
         
-        recipe = JSON.parse(content);
+        try {
+          recipe = JSON.parse(content);
+        } catch (secondError) {
+          console.error("Second JSON parse attempt failed:", secondError);
+          console.error("Problematic content:", content.substring(0, 500) + "...");
+          throw new Error("Failed to parse recipe JSON after multiple attempts");
+        }
       }
       console.log("Recipe parsed successfully");
       
