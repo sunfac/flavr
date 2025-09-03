@@ -239,18 +239,18 @@ Make it personal, professional-quality, and optimized for maximum flavor impact.
       
       // Generate recipe image for chat-generated recipes
       try {
-        const { generateRecipeImageWithImagen3, createRecipeImagePrompt } = await import('./imageGeneration');
+        const { generateRecipeImageWithDallE, createRecipeImagePrompt } = await import('./imageGeneration');
         const imagePrompt = createRecipeImagePrompt(recipe.title, recipe.ingredients, recipe.mood, recipe.cuisine);
-        const imageUrl = await generateRecipeImageWithImagen3(imagePrompt);
+        const imageUrl = await generateRecipeImageWithDallE(imagePrompt);
         
-        // Track image generation cost
+        // Track image generation cost for DALL-E
         await aiCostTracker.trackCost({
           userId: context.userId,
           sessionId: context.pseudoUserId?.toString(),
-          provider: 'google',
-          model: 'imagen-3',
+          provider: 'openai',
+          model: 'dall-e-3',
           operation: 'image-generation',
-          fixedCostUsd: '0.04', // Google Imagen 3 pricing
+          fixedCostUsd: '0.04', // DALL-E 3 standard quality pricing
           requestData: { prompt: imagePrompt, recipe: recipe.title }
         });
         
@@ -267,8 +267,8 @@ Make it personal, professional-quality, and optimized for maximum flavor impact.
           await aiCostTracker.trackCost({
             userId: context.userId,
             sessionId: context.pseudoUserId?.toString(),
-            provider: 'google',
-            model: 'imagen-3',
+            provider: 'openai',
+            model: 'dall-e-3',
             operation: 'image-generation-failed',
             fixedCostUsd: '0.00',
             requestData: { error: imageError instanceof Error ? imageError.message : 'Unknown error' }
