@@ -986,20 +986,35 @@ MOOD-BASED EXAMPLES:
     if (lowerUserIntent.includes('breakfast') || lowerUserIntent.includes('brunch')) {
       console.log('🥞 BREAKFAST MODE ACTIVATED - Adding critical breakfast constraints');
       
-      mealSpecificPrompt = `\n\nCRITICAL MEAL REQUIREMENT: This MUST be a BREAKFAST or BRUNCH dish. Suitable options include:
-- Eggs dishes (scrambled, poached, omelettes, frittatas)
-- Pancakes, waffles, French toast
-- Porridge, granola, yogurt bowls  
-- Breakfast meats (bacon, sausage, smoked salmon)
-- Avocado toast, breakfast sandwiches
+      mealSpecificPrompt = `\n\n🚨 CRITICAL BREAKFAST REQUIREMENT: This MUST be a BREAKFAST or BRUNCH dish. 
+
+ALLOWED BREAKFAST DISHES ONLY:
+- Eggs: scrambled, poached, omelettes, frittatas, shakshuka
+- Pancakes, waffles, French toast, crepes
+- Porridge, oatmeal, granola, yogurt bowls, acai bowls
+- Breakfast meats: bacon, sausage, smoked salmon, ham
+- Toast: avocado toast, breakfast sandwiches, croque monsieur
 - Smoothie bowls, healthy breakfast bowls
-- Pastries suitable for breakfast
+- Pastries: croissants, danish, muffins
 - Coffee/tea accompaniments
-NEVER suggest dinner dishes, roasts, or heavy main courses for breakfast requests.`;
+
+🚨 STRICTLY FORBIDDEN FOR BREAKFAST:
+- NO roasted chicken, duck, lamb, beef
+- NO heavy main courses or dinner dishes
+- NO complex meat dishes meant for dinner
+- NO sophisticated main courses
+
+IF THE USER ASKED FOR BREAKFAST, ONLY SUGGEST BREAKFAST FOODS.`;
     } else if (lowerUserIntent.includes('lunch')) {
       mealSpecificPrompt = `\n\nMEAL REQUIREMENT: This should be a LUNCH dish - lighter than dinner but more substantial than snacks.`;
     } else if (lowerUserIntent.includes('dinner')) {
       mealSpecificPrompt = `\n\nMEAL REQUIREMENT: This should be a DINNER dish - substantial main course appropriate for evening meals.`;
+    } else if (lowerUserIntent.includes('sauce') || lowerUserIntent.includes('dressing')) {
+      mealSpecificPrompt = `\n\nSAUCE/DRESSING REQUIREMENT: This should be a sauce, dressing, or condiment - NOT a main dish.`;
+    } else if (lowerUserIntent.includes('salad')) {
+      mealSpecificPrompt = `\n\nSALAD REQUIREMENT: This should be a salad dish with fresh ingredients, dressing, and appropriate toppings.`;
+    } else if (lowerUserIntent.includes('side dish') || lowerUserIntent.includes('side') || lowerUserIntent.includes('sides')) {
+      mealSpecificPrompt = `\n\nSIDE DISH REQUIREMENT: This should be a side dish or accompaniment - NOT a main course.`;
     }
 
     const userMessage = `${inspirationPrompt}
