@@ -203,7 +203,8 @@ Keep it conversational and enthusiastic like you're recommending your favorite d
           message: specificSuggestion || `I'd love to help you with that! ${intentResult.suggestedAction} Would you like me to turn this into a Flavr recipe card?`,
           isRecipeIntent: true,
           confidence: intentResult.confidence,
-          requiresConfirmation: true
+          requiresConfirmation: true,
+          suggestedRecipeTitle: inspiredTitle
         };
         
         return res.json(confirmationResponse);
@@ -268,7 +269,7 @@ Keep it conversational and enthusiastic like you're recommending your favorite d
   // Recipe generation endpoint for when user confirms intent
   app.post("/api/zest/generate-recipe", async (req, res) => {
     try {
-      const { message, userConfirmed } = req.body;
+      const { message, userConfirmed, suggestedRecipeTitle } = req.body;
       
       if (!userConfirmed) {
         return res.status(400).json({ error: "User confirmation required" });
@@ -323,8 +324,10 @@ Keep it conversational and enthusiastic like you're recommending your favorite d
       // Load user memory
       const userMemory = await zestService.getUserMemory(userContext);
 
-      // Generate recipe
-      const recipe = await zestService.generateRecipe(message, userContext, userMemory);
+      // Generate recipe using the suggested title if available, otherwise use original message
+      const recipePrompt = suggestedRecipeTitle || message;
+      console.log('🍳 Generating recipe for:', { originalMessage: message, suggestedTitle: suggestedRecipeTitle, usingPrompt: recipePrompt });
+      const recipe = await zestService.generateRecipe(recipePrompt, userContext, userMemory);
 
       // Log chat recipe generation for developer monitoring
       if (userContext.userId && recipe) {

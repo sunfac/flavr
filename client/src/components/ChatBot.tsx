@@ -25,6 +25,7 @@ interface ChatMessage {
   originalMessage?: string;
   isRecipeCreated?: boolean;
   recipeTitle?: string;
+  suggestedRecipeTitle?: string;
 }
 
 interface Recipe {
@@ -59,7 +60,7 @@ export default function ChatBot({
     queryKey: ["/api/me"],
     retry: false,
   });
-  const isAuthenticated = !!userData?.user;
+  const isAuthenticated = !!(userData as any)?.user;
   // Use isOpen prop if provided, otherwise default to true
   const actualIsOpen = isOpen !== undefined ? isOpen : true;
   const [message, setMessage] = useState("");
@@ -221,7 +222,8 @@ export default function ChatBot({
         isRecipeIntent: result.isRecipeIntent,
         requiresConfirmation: result.requiresConfirmation,
         confidence: result.confidence,
-        userMemory: result.userMemory
+        userMemory: result.userMemory,
+        suggestedRecipeTitle: result.suggestedRecipeTitle
       };
     },
     onSuccess: async (result, variables) => {
@@ -250,7 +252,8 @@ export default function ChatBot({
           text: "Would you like me to create this recipe?",
           timestamp: new Date(),
           isConfirmation: true,
-          originalMessage: variables.message // Use the original message from mutation variables
+          originalMessage: variables.message, // Use the original message from mutation variables
+          suggestedRecipeTitle: result.suggestedRecipeTitle
         };
         
         setLocalMessages(prev => [...prev, confirmationMessage]);
@@ -275,7 +278,7 @@ export default function ChatBot({
 
   // Recipe generation mutation for confirmed intent
   const generateRecipeMutation = useMutation({
-    mutationFn: async (data: { message: string }) => {
+    mutationFn: async (data: { message: string; suggestedRecipeTitle?: string }) => {
       const response = await fetch("/api/zest/generate-recipe", {
         method: "POST",
         headers: {
@@ -283,7 +286,8 @@ export default function ChatBot({
         },
         body: JSON.stringify({
           message: data.message,
-          userConfirmed: true
+          userConfirmed: true,
+          suggestedRecipeTitle: data.suggestedRecipeTitle
         }),
       });
 
@@ -589,7 +593,10 @@ export default function ChatBot({
                       <Button
                         size="sm"
                         onClick={() => {
-                          generateRecipeMutation.mutate({ message: msg.originalMessage! });
+                          generateRecipeMutation.mutate({ 
+                            message: msg.originalMessage!, 
+                            suggestedRecipeTitle: msg.suggestedRecipeTitle 
+                          });
                           // Remove confirmation message after click
                           setLocalMessages(prev => prev.filter(m => m.id !== msg.id));
                         }}
