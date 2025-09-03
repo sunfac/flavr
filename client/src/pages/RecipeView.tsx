@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
-import ChatBot from "@/components/ChatBot";
+import FloatingChatButton from "@/components/FloatingChatButton";
 import SocialShareTools from "@/components/SocialShareTools";
 import EnhancedRecipeCard from "@/components/recipe/EnhancedRecipeCard";
 
@@ -167,13 +167,12 @@ export default function RecipeView() {
             />
           </div>
 
-          {/* AI Chef Chat */}
-          <div className="bg-slate-800/30 rounded-xl backdrop-blur-sm">
-            <ChatBot 
-              currentRecipe={recipe}
-              currentMode={recipe.mode}
-            />
-          </div>
+          {/* Floating AI Chef Chat Button */}
+          <FloatingChatButton 
+            variant="floating" 
+            currentRecipe={recipe}
+            currentMode={recipe.mode}
+          />
         </div>
       </main>
 

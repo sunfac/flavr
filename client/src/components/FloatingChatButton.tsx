@@ -8,9 +8,11 @@ import ChatBot from "@/components/ChatBot";
 interface FloatingChatButtonProps {
   className?: string;
   variant?: "floating" | "fixed";
+  currentRecipe?: any;
+  currentMode?: string;
 }
 
-export default function FloatingChatButton({ className = "", variant = "floating" }: FloatingChatButtonProps) {
+export default function FloatingChatButton({ className = "", variant = "floating", currentRecipe, currentMode }: FloatingChatButtonProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const handleToggleChat = () => {
@@ -118,7 +120,8 @@ export default function FloatingChatButton({ className = "", variant = "floating
                   <ChatBot
                     isOpen={isChatOpen}
                     onClose={handleCloseChat}
-                    currentRecipe={undefined}
+                    currentRecipe={currentRecipe}
+                    currentMode={currentMode}
                   />
                 </motion.div>
               </>
@@ -249,7 +252,8 @@ export default function FloatingChatButton({ className = "", variant = "floating
                 <ChatBot
                   isOpen={isChatOpen}
                   onClose={handleCloseChat}
-                  currentRecipe={undefined}
+                  currentRecipe={currentRecipe}
+                  currentMode={currentMode}
                 />
               </motion.div>
             </>
