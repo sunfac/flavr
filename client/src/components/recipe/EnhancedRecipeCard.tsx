@@ -697,6 +697,28 @@ function EnhancedRecipeCard({
           </div>
         )}
 
+        {/* Share Recipe Section */}
+        <div className="p-6 bg-slate-800/20 border-t border-slate-700/50">
+          <RecipeShareTools
+            id={recipe.id}
+            shareId={recipe.shareId}
+            title={activeTitle}
+            description={recipe.description || 'A delicious recipe created with Flavr AI'}
+            imageUrl={activeImage}
+            isShared={recipe.isShared || false}
+            onShareToggle={onShare}
+            recipe={{
+              ...recipe,
+              title: activeTitle,
+              servings: activeServings,
+              cookTime: activeCookTime,
+              difficulty: activeDifficulty,
+              image: activeImage,
+              imageUrl: activeImage
+            }}
+          />
+        </div>
+
         {/* Footer Section */}
         <FooterSection
           recipeId={recipe.id}
