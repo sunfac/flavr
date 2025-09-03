@@ -67,11 +67,11 @@ export default function FloatingChatButton({ className = "", variant = "floating
                   className="fixed inset-0 bg-black/60 backdrop-blur-sm hidden md:block"
                   style={{ 
                     zIndex: 2147483647,
-                    position: 'fixed !important',
-                    top: '0 !important',
-                    left: '0 !important',
-                    right: '0 !important',
-                    bottom: '0 !important'
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0
                   }}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -198,11 +198,11 @@ export default function FloatingChatButton({ className = "", variant = "floating
                 className="fixed inset-0 bg-black/60 backdrop-blur-sm hidden md:block"
                 style={{ 
                   zIndex: 2147483647,
-                  position: 'fixed !important',
-                  top: '0 !important',
-                  left: '0 !important',
-                  right: '0 !important',
-                  bottom: '0 !important'
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0
                 }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
