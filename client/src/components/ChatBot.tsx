@@ -27,6 +27,8 @@ interface ChatMessage {
   recipeTitle?: string;
   suggestedRecipeTitle?: string;
   savedRecipeId?: number;
+  waitingForAlternative?: boolean;
+  originalContext?: string;
 }
 
 interface Recipe {
@@ -724,34 +726,49 @@ export default function ChatBot({
                         size="sm"
                         variant="outline"
                         onClick={() => {
-                          // Remove confirmation message and ask for another suggestion with context
+                          // Remove confirmation message and ask for permission to suggest another
                           setLocalMessages(prev => {
                             const filteredMessages = prev.filter(m => m.id !== msg.id);
                             
-                            // Add a follow-up message asking for another suggestion with context retained
+                            // Extract context from original message for smart suggestions
+                            const originalLower = msg.originalMessage?.toLowerCase() || '';
+                            let contextType = '';
+                            
+                            if (originalLower.includes('healthy breakfast') || originalLower.includes('breakfast')) {
+                              contextType = 'healthy breakfast';
+                            } else if (originalLower.includes('pasta')) {
+                              contextType = 'pasta';
+                            } else if (originalLower.includes('chicken')) {
+                              contextType = 'chicken';
+                            } else if (originalLower.includes('beef')) {
+                              contextType = 'beef';
+                            } else if (originalLower.includes('fish') || originalLower.includes('salmon')) {
+                              contextType = 'fish';
+                            } else if (originalLower.includes('vegetarian') || originalLower.includes('vegan')) {
+                              contextType = 'vegetarian';
+                            } else if (originalLower.includes('dinner')) {
+                              contextType = 'dinner';
+                            } else if (originalLower.includes('lunch')) {
+                              contextType = 'lunch';
+                            } else {
+                              contextType = 'recipe';
+                            }
+                            
+                            // Add a follow-up message asking for permission with preserved context
                             const followUpMessage: ChatMessage = {
                               id: Date.now(),
                               message: '',
-                              response: `No worries! Would you like me to suggest another ${msg.originalMessage?.toLowerCase().includes('pasta') ? 'pasta' : msg.originalMessage?.toLowerCase().includes('chicken') ? 'chicken' : msg.originalMessage?.toLowerCase().includes('beef') ? 'beef' : msg.originalMessage?.toLowerCase().includes('fish') ? 'fish' : msg.originalMessage?.toLowerCase().includes('vegetarian') ? 'vegetarian' : ''} recipe instead? I have plenty more ideas that might be perfect for you!`,
+                              response: `No worries! Would you like me to suggest another ${contextType} recipe instead? Just say "yes" and I'll give you a different idea that might be more your style! 😊`,
                               isUser: false,
-                              text: `No worries! Would you like me to suggest another ${msg.originalMessage?.toLowerCase().includes('pasta') ? 'pasta' : msg.originalMessage?.toLowerCase().includes('chicken') ? 'chicken' : msg.originalMessage?.toLowerCase().includes('beef') ? 'beef' : msg.originalMessage?.toLowerCase().includes('fish') ? 'fish' : msg.originalMessage?.toLowerCase().includes('vegetarian') ? 'vegetarian' : ''} recipe instead? I have plenty more ideas that might be perfect for you!`,
+                              text: `No worries! Would you like me to suggest another ${contextType} recipe instead? Just say "yes" and I'll give you a different idea that might be more your style! 😊`,
                               timestamp: new Date(),
-                              isConfirmation: false
+                              isConfirmation: false,
+                              waitingForAlternative: true,
+                              originalContext: msg.originalMessage
                             };
                             
                             return [...filteredMessages, followUpMessage];
                           });
-                          
-                          // Trigger another suggestion with the original context
-                          if (msg.originalMessage) {
-                            setTimeout(() => {
-                              sendMessageMutation.mutate({ 
-                                message: `Another suggestion for: ${msg.originalMessage}`, 
-                                currentRecipe: getCurrentRecipeContext().recipe || undefined,
-                                mode: detectedMode 
-                              });
-                            }, 500);
-                          }
                         }}
                         className="border-slate-500 text-slate-300 hover:bg-slate-600 text-xs px-3 py-1"
                       >

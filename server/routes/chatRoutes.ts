@@ -55,12 +55,12 @@ export function registerChatRoutes(app: Express) {
         cookingHistory: userMemory.cookingHistory.length
       });
 
+      // Check if this is a request for a quick recipe in chat (check this FIRST)
+      const isQuickRecipeRequest = message.toLowerCase().startsWith('quick recipe for:');
+      
       // Detect recipe intent - but only for new recipes if no current recipe exists
       const intentResult = await zestService.detectRecipeIntent(message);
       console.log('🎯 Intent detection:', intentResult);
-
-      // Check if this is a request for a quick recipe in chat
-      const isQuickRecipeRequest = message.toLowerCase().startsWith('quick recipe for:');
       
       if (isQuickRecipeRequest) {
         console.log('🔍 Quick recipe request detected, generating condensed recipe');
@@ -127,6 +127,91 @@ Be warm and encouraging like Zest, but keep it concise for easy chat reading.`
             topicsRemembered: [recipeTitle]
           }
         });
+      }
+
+      // Check if user is confirming they want an alternative suggestion
+      const isAlternativeConfirmation = message.toLowerCase().trim() === 'yes' && 
+        conversationHistory.length > 0 && 
+        conversationHistory[conversationHistory.length - 1]?.response?.includes('Would you like me to suggest another');
+
+      if (isAlternativeConfirmation) {
+        console.log('🔄 User confirmed alternative suggestion request');
+        
+        // Find the original context from the last few messages
+        let originalContext = 'recipe';
+        for (let i = conversationHistory.length - 1; i >= Math.max(0, conversationHistory.length - 5); i--) {
+          const msg = conversationHistory[i];
+          if (msg.message && msg.message.includes('suggestion for:')) {
+            originalContext = msg.message.replace('Another suggestion for:', '').replace('suggestion for:', '').trim();
+            break;
+          } else if (msg.response && msg.response.includes('suggest another')) {
+            // Extract context type from the response
+            const match = msg.response.match(/suggest another (\w+(?:\s+\w+)*) recipe/);
+            if (match) {
+              originalContext = match[1];
+            }
+            break;
+          }
+        }
+        
+        console.log('🔍 Alternative context found:', originalContext);
+        
+        // Use the smart inspiration system with preserved context
+        const { ChefAssistGPT5 } = await import('../chefAssistGPT5');
+        const clientId = req.ip || 'anonymous';
+        
+        try {
+          console.log('🎲 Generating alternative suggestion with context:', originalContext);
+          const chefAssist = new ChefAssistGPT5();
+          const inspiration = await chefAssist.generateRecipeInspiration({
+            userMessage: originalContext,
+            clientId,
+            mode: "chat-suggestion",
+            userHistory: userMemory
+          });
+
+          if (!inspiration?.title) {
+            throw new Error('No inspiration generated');
+          }
+
+          const suggestedTitle = inspiration.title;
+          const response = `How about ${suggestedTitle}? This sounds delicious and fits what you're looking for! Would you like me to turn this into a full Flavr recipe card?`;
+
+          // Save the conversation with original context preserved
+          if (userContext.userId) {
+            try {
+              await storage.createChatMessage({
+                userId: userContext.userId,
+                message: message,
+                response: response
+              });
+            } catch (error) {
+              console.error('Error saving alternative suggestion chat:', error);
+            }
+          }
+
+          return res.json({
+            message: response,
+            isRecipeIntent: true,
+            isConfirmation: true,
+            suggestedRecipeTitle: suggestedTitle,
+            originalMessage: originalContext,
+            userMemory: {
+              hasPreferences: !!userMemory.preferences,
+              topicsRemembered: [originalContext, suggestedTitle]
+            }
+          });
+        } catch (error) {
+          console.error('Error generating alternative suggestion:', error);
+          return res.json({
+            message: "Sorry, I'm having trouble coming up with another suggestion right now. Could you try asking again?",
+            isRecipeIntent: false,
+            userMemory: {
+              hasPreferences: !!userMemory.preferences,
+              topicsRemembered: [originalContext]
+            }
+          });
+        }
       }
 
       // Check if this is a quick cooking question that doesn't need a recipe card
