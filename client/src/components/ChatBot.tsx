@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { iconMap } from "@/lib/iconMap";
-import { useRecipeStore, recipeActions } from "@/stores/recipeStore";
+import { useRecipeStore, recipeActions, Step } from "@/stores/recipeStore";
 import { useTimerStore } from "@/stores/timerStore";
 // Authentication check using /api/me endpoint
 
@@ -76,9 +76,9 @@ export default function ChatBot({
       title: recipeStore.meta.title,
       description: recipeStore.meta.description,
       ingredients: recipeStore.ingredients,
-      instructions: recipeStore.instructions,
+      instructions: recipeStore.steps.map((step: Step) => step.description),
       cookTime: recipeStore.meta.cookTime,
-      servings: recipeStore.meta.servings,
+      servings: recipeStore.servings || 4,
       difficulty: recipeStore.meta.difficulty
     };
 
@@ -110,8 +110,7 @@ export default function ChatBot({
   };
   const [showSuggestions, setShowSuggestions] = useState(true);
   
-  // Connect to global recipe store
-  const recipeStore = useRecipeStore();
+  // Connect to timer store
   const timerStore = useTimerStore();
   const [hasInitialized, setHasInitialized] = useState(false);
   const [hasShownWelcome, setHasShownWelcome] = useState(false);
