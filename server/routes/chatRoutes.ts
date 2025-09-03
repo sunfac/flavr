@@ -357,57 +357,61 @@ Be warm like Zest - acknowledge the conversation context and provide practical, 
                                     lowerMessage.includes('pie') ||
                                     lowerMessage.includes('tart');
         
-        // If this is a specific dish request, use flavor-maximized generation
+        // If this is a specific dish request, bypass inspiration and use direct flavor-maximized generation
         if (isSpecificDishRequest) {
-          console.log('🎯 EXPLICIT DISH REQUEST: Using flavor-maximized generation for:', message);
+          console.log('🎯 EXPLICIT DISH REQUEST: Bypassing inspiration system, using direct flavor-maximized recipe generation');
           
-          // Generate a flavor-maximized title based on the specific user request
-          const flavorMaximizedResponse = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-              {
-                role: "system",
-                content: `You are a flavor maximization expert. When given a specific dish request, create an enhanced version that maximizes flavor while staying true to the user's intent.
-
-FLAVOR MAXIMIZATION PRINCIPLES:
-- Add specific ingredients that enhance the base dish (herbs, spices, aromatics)
-- Include cooking techniques that build flavor (caramelization, browning, layering)
-- Specify flavor-boosting elements (citrus zest, compound butters, wine reductions)
-- Maintain the core identity of the requested dish
-- Use descriptive culinary language that suggests depth of flavor
-
-Examples:
-- "meatball recipe" → "Italian Herb-Crusted Meatballs with San Marzano Tomato and Red Wine Reduction"
-- "chicken pasta" → "Garlic and Herb Roasted Chicken Pasta with Lemon Parmesan Cream"
-- "chocolate cake" → "Rich Dark Chocolate Cake with Espresso and Sea Salt Caramel"
-- "beef stir fry" → "Sichuan Pepper Beef Stir Fry with Ginger Scallion Oil"
-
-Respond with ONLY the enhanced recipe title.`
-              },
-              {
-                role: "user",
-                content: message
+          try {
+            // Use ZestService to generate the recipe directly with flavor maximization
+            const directRecipe = await zestService.generateFlavorMaximizedRecipe(
+              message,
+              userContext,
+              userMemory
+            );
+            
+            // Save the recipe immediately
+            let savedRecipe;
+            if (userContext.userId) {
+              try {
+                savedRecipe = await storage.createRecipe({
+                  ...directRecipe,
+                  userId: userContext.userId
+                });
+                
+                // Update usage tracking
+                const user = await storage.getUser(userContext.userId);
+                if (user) {
+                  const isDeveloper = user.email === "william@blycontracting.co.uk";
+                  const hasUnlimitedAccess = user.hasFlavrPlus || isDeveloper;
+                  
+                  if (!hasUnlimitedAccess) {
+                    await storage.updateUserUsage(userContext.userId, (user.recipesThisMonth || 0) + 1);
+                  }
+                } else {
+                  const pseudoId = req.headers['x-pseudo-user-id'] as string || req.session?.id || 'anonymous';
+                  const pseudoUser = await storage.getPseudoUser(pseudoId);
+                  if (pseudoUser) {
+                    await storage.updatePseudoUserUsage(pseudoId, (pseudoUser.recipesThisMonth || 0) + 1);
+                  }
+                }
+              } catch (error) {
+                console.error('Error saving direct recipe:', error);
               }
-            ],
-            max_tokens: 60,
-            temperature: 0.7
-          });
-          
-          const enhancedTitle = flavorMaximizedResponse.choices[0].message.content?.trim() || message;
-          console.log('🍯 Flavor-maximized title generated:', enhancedTitle);
-          
-          return res.json({
-            message: `Perfect! I'll create a flavor-maximized version of what you asked for. Get ready for: "${enhancedTitle}" - this is going to be delicious!`,
-            isRecipeIntent: true,
-            requiresConfirmation: true,
-            suggestedRecipeTitle: enhancedTitle,
-            originalMessage: message,
-            confidence: 0.95,
-            userMemory: {
-              hasPreferences: !!userMemory.preferences,
-              topicsRemembered: [message, enhancedTitle]
             }
-          });
+
+            return res.json({
+              recipe: directRecipe,
+              savedRecipeId: savedRecipe?.id,
+              message: `Perfect! I've created a flavor-maximized version of "${directRecipe.title}" just for you. This recipe is designed to maximize every layer of flavor while staying true to your request!`
+            });
+            
+          } catch (error) {
+            console.error('Error generating direct flavor-maximized recipe:', error);
+            return res.json({
+              message: "I'd love to create that recipe for you! Could you try asking again?",
+              isRecipeIntent: false
+            });
+          }
         }
         
         // Check if this is a dish-type request first (higher priority than ingredient detection)

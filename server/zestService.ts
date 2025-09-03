@@ -539,4 +539,109 @@ CRITICAL: Respond with ONLY a valid JSON object. Do NOT use markdown formatting,
       throw error;
     }
   }
+
+  /**
+   * Generate a flavor-maximized recipe directly from explicit user requests
+   */
+  async generateFlavorMaximizedRecipe(userMessage: string, context: UserContext, memory: ZestMemory): Promise<any> {
+    try {
+      // Build context from user memory
+      const preferencesContext = this.buildPreferencesContext(memory);
+      
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are Zest, Flavr's expert cooking assistant specialized in FLAVOR MAXIMIZATION. When a user makes an explicit recipe request, create a complete recipe that maximizes flavor while staying true to their intent.
+
+USER CONTEXT:
+${preferencesContext}
+
+CRITICAL FLAVOR MAXIMIZATION PRINCIPLES:
+
+1. INGREDIENT ENHANCEMENT:
+   - Elevate base ingredients with complementary flavors
+   - Add aromatic foundations (shallots, garlic, fresh herbs)
+   - Include umami boosters (mushrooms, anchovies, aged cheeses, soy sauce)
+   - Use citrus zests and finishing acids for brightness
+   - Incorporate quality fats (butter, olive oil, cream) strategically
+
+2. TECHNIQUE OPTIMIZATION:
+   - Brown proteins and aromatics for deep flavors
+   - Build flavor layers (sauté → deglaze → reduce)
+   - Use proper seasoning throughout cooking, not just at the end
+   - Include resting periods for flavor integration
+   - Finish with fresh herbs, citrus, or flaky salt
+
+3. SAUCE & LIQUID MASTERY:
+   - Create pan sauces from fond
+   - Use wine, stock, or cream for depth
+   - Reduce liquids to concentrate flavors
+   - Balance acid, fat, salt, and heat
+
+4. TIMING & TEXTURE:
+   - Cook ingredients to optimal texture for maximum flavor
+   - Include textural contrasts (crispy, creamy, tender)
+   - Time seasoning for best absorption
+
+5. FINISHING TOUCHES:
+   - Fresh herb garnishes
+   - Quality finishing oils
+   - Textural elements (toasted nuts, crispy shallots)
+   - Citrus zests or squeezes
+
+RECIPE FORMAT:
+Return a complete recipe object with:
+- Enhanced title reflecting flavor focus
+- 4 servings
+- Complete ingredient list with specific quantities
+- Detailed step-by-step instructions emphasizing flavor-building techniques
+- Cooking time estimate
+- Difficulty level
+- Brief description highlighting flavor profile
+
+ALWAYS maximize flavor while honoring the user's original request. Make it restaurant-quality delicious!`
+          },
+          {
+            role: "user",
+            content: `Create a flavor-maximized recipe for: ${userMessage}`
+          }
+        ],
+        max_tokens: 2000,
+        temperature: 0.7,
+        response_format: { type: "json_object" }
+      });
+
+      // Track cost for flavor-maximized recipe generation
+      await aiCostTracker.trackCost({
+        userId: context.userId,
+        provider: 'openai',
+        model: 'gpt-4o',
+        operation: 'flavor-maximized-recipe-generation',
+        inputTokens: response.usage?.prompt_tokens,
+        outputTokens: response.usage?.completion_tokens,
+        requestData: { messageLength: userMessage.length, hasPreferences: !!memory.preferences },
+        responseData: { maxTokens: 2000 }
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '{}');
+      
+      // Ensure proper structure
+      return {
+        title: result.title || `Flavor-Maximized ${userMessage}`,
+        description: result.description || 'A delicious recipe optimized for maximum flavor',
+        servings: result.servings || 4,
+        cookTime: result.cookTime || result.cooking_time || 45,
+        difficulty: result.difficulty || 'Medium',
+        cuisine: result.cuisine || 'International',
+        ingredients: Array.isArray(result.ingredients) ? result.ingredients : [],
+        instructions: Array.isArray(result.instructions) ? result.instructions : [],
+        tips: result.tips || 'This recipe is designed to maximize flavor through proper technique and ingredient selection.'
+      };
+    } catch (error) {
+      console.error('Error generating flavor-maximized recipe:', error);
+      throw new Error('Failed to generate flavor-maximized recipe');
+    }
+  }
 }
