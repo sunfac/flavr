@@ -270,7 +270,7 @@ function EnhancedRecipeCard({
   });
   
   const scaledIngredients = useScaledIngredients(
-    recipe.ingredients, // Always use original ingredients, not activeIngredients which may be modified
+    activeIngredients, // Use activeIngredients to show substitutions (these come from store which includes substituted ingredients)
     originalServings, // Use original servings for scaling calculation
     activeServings || originalServings
   );
@@ -388,7 +388,11 @@ function EnhancedRecipeCard({
       console.log('🔄 Got substitute:', { original: currentIngredient, substitute });
 
       // Update the ingredient directly in local state and store
-      const index = parseInt(ingredientId.split('-')[1]);
+      const indexMatch = ingredientId.match(/ingredient-(\d+)/);
+      const index = indexMatch ? parseInt(indexMatch[1]) : -1;
+      
+      console.log('🔍 Parsing ingredient ID:', { ingredientId, index, activeIngredientsLength: activeIngredients.length });
+      
       if (index >= 0 && index < activeIngredients.length) {
         // Create updated ingredients array
         const updatedIngredients = [...activeIngredients];
