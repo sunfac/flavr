@@ -61,6 +61,8 @@ export function registerStripeRoutes(app: Express) {
         await storage.updateUserStripeInfo(user.id, customerId);
       }
 
+      console.log("✅ Creating subscription with customer:", customerId);
+      
       // Create subscription with trial
       const subscription = await stripe.subscriptions.create({
         customer: customerId,
@@ -72,14 +74,24 @@ export function registerStripeRoutes(app: Express) {
         expand: ['latest_invoice.payment_intent'],
       });
 
+      console.log("✅ Subscription created:", subscription.id);
+      console.log("Invoice status:", subscription.latest_invoice ? "Present" : "Missing");
+
       const invoice = subscription.latest_invoice as Stripe.Invoice;
       if (!invoice || typeof invoice === 'string') {
+        console.log("❌ Invoice issue - invoice:", typeof invoice, invoice);
         throw new Error('Failed to retrieve invoice');
       }
+      
+      console.log("Payment intent status:", (invoice as any).payment_intent ? "Present" : "Missing");
+      
       const paymentIntent = (invoice as any).payment_intent as Stripe.PaymentIntent;
       if (!paymentIntent || typeof paymentIntent === 'string') {
+        console.log("❌ Payment intent issue - type:", typeof paymentIntent, "value:", paymentIntent);
         throw new Error('Failed to create payment intent');
       }
+
+      console.log("✅ Payment intent created successfully:", paymentIntent.id);
 
       res.json({ 
         subscriptionId: subscription.id,
