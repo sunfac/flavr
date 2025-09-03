@@ -60,7 +60,7 @@ export function registerChatRoutes(app: Express) {
       console.log('🎯 Intent detection:', intentResult);
 
       // If recipe intent detected AND no valid current recipe exists, offer to create new recipe
-      if (intentResult.isRecipeIntent && intentResult.confidence >= 0.7 && (!currentRecipe || !currentRecipe.title || !currentRecipe.ingredients || currentRecipe.ingredients.length === 0)) {
+      if (intentResult.isRecipeIntent && intentResult.confidence >= 0.7 && (!currentRecipe || !currentRecipe.title || currentRecipe.title.trim().length === 0 || !currentRecipe.ingredients || currentRecipe.ingredients.length === 0)) {
         // Use the smart inspiration system with enhanced context for user intent
         const { ChefAssistGPT5 } = await import('../chefAssistGPT5');
         const clientId = req.ip || 'anonymous';
@@ -181,7 +181,7 @@ Respond with ONLY the recipe title, nothing else.`
           messages: [
             { 
               role: "system", 
-              content: `You are Zest, a warm cooking assistant. You've suggested this specific dish: "${inspiredTitle}". 
+              content: `You are Zest, a warm personal chef companion. You've suggested this specific dish: "${inspiredTitle}". 
 
 CRITICAL: Start your response by clearly stating the dish name, then create an enthusiastic, brief description (2-3 sentences) highlighting what makes this dish appealing.
 
@@ -194,7 +194,7 @@ Be authentic and specific about the dish. Focus on:
 - Brief timing/ease details if relevant
 - End with asking if they want the full recipe card
 
-Keep it conversational and enthusiastic like you're recommending your favorite dish to a friend.`
+IMPORTANT: Write like a real chef talking to a friend - NO ** formatting, NO markdown, just natural conversational language. Be warm and personal, not robotic.`
             },
             { role: "user", content: `The user asked: "${message}" and I'm suggesting: ${inspiredTitle}` }
           ],
@@ -229,7 +229,7 @@ Keep it conversational and enthusiastic like you're recommending your favorite d
       }
 
       // Handle recipe modifications ONLY when a current recipe exists AND has proper content
-      if (currentRecipe && currentRecipe.title && currentRecipe.ingredients && currentRecipe.ingredients.length > 0) {
+      if (currentRecipe && currentRecipe.title && currentRecipe.title.trim().length > 0 && currentRecipe.ingredients && currentRecipe.ingredients.length > 0) {
         console.log('🔧 Recipe modification request detected with current recipe:', currentRecipe.title);
         
         // Use AI to intelligently detect if this is a recipe modification request
