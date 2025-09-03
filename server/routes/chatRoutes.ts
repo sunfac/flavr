@@ -29,7 +29,7 @@ function selectAppropriateInspiration(message: string, allChefs: string[], allRe
       lowerMessage.includes('carbonara') || lowerMessage.includes('bolognese') || lowerMessage.includes('marinara') ||
       lowerMessage.includes('parmigiana') || lowerMessage.includes('gnocchi') || lowerMessage.includes('lasagna')) {
     const italianChefs = ['Gino D\'Acampo', 'Antonio Carluccio', 'Giorgio Locatelli'];
-    const italianRestaurants = ['Padella', 'Barrafina', 'Zuma'];
+    const italianRestaurants = ['Padella', 'Bancone', 'Barrafina'];
     const useChef = Math.random() < 0.6; // Slight preference for chefs for Italian
     return useChef 
       ? italianChefs[Math.floor(Math.random() * italianChefs.length)]
@@ -474,7 +474,7 @@ Respond with JSON: {"shouldBypass": true/false, "confidence": 0-1, "reasoning": 
               "Dishoom", "Padella", "Hawksmoor", "Barrafina", "Gymkhana", 
               "Duck & Waffle", "St. John", "Bao", "Kiln", "Hoppers", 
               "Brat", "Lyle's", "The Clove Club", "Roka", "Zuma", 
-              "Lima", "Temper", "Smoking Goat", "Ikoyi", "The Ledbury"
+              "Lima", "Temper", "Smoking Goat", "Ikoyi", "The Ledbury", "Bancone"
             ];
             
             // Smart selection based on dish type and cuisine

@@ -561,7 +561,7 @@ CRITICAL: Respond with ONLY a valid JSON object. Do NOT use markdown formatting,
         "Dishoom", "Padella", "Hawksmoor", "Barrafina", "Gymkhana", 
         "Duck & Waffle", "St. John", "Bao", "Kiln", "Hoppers", 
         "Brat", "Lyle's", "The Clove Club", "Roka", "Zuma", 
-        "Lima", "Temper", "Smoking Goat", "Ikoyi", "The Ledbury"
+        "Lima", "Temper", "Smoking Goat", "Ikoyi", "The Ledbury", "Bancone"
       ];
       
       // Randomly choose between chef or restaurant inspiration (50/50)
