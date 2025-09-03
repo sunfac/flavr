@@ -7,6 +7,7 @@ import { PageLayout } from "@/components/PageLayout";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import QuotaCounter from "@/components/QuotaCounter";
+import FloatingChatButton from "@/components/FloatingChatButton";
 
 interface ModeCard {
   title: string;
@@ -186,6 +187,9 @@ export default function ModeSelection() {
           </Button>
         </motion.div>
       </div>
+
+      {/* Floating Chat Button */}
+      <FloatingChatButton />
     </PageLayout>
   );
 }
