@@ -134,6 +134,18 @@ export function registerChatRoutes(app: Express) {
         return res.status(400).json({ error: "User confirmation required" });
       }
 
+      // Check usage limit before generating recipe
+      try {
+        const { checkAndEnforceUsageLimit } = await import('../quotaService');
+        const limitCheck = await checkAndEnforceUsageLimit(req);
+        if (!limitCheck.allowed) {
+          return res.status(403).json(limitCheck.error);
+        }
+      } catch (quotaError) {
+        console.error('Error checking quota:', quotaError);
+        // Continue without quota check if quota service fails
+      }
+
       const userContext = {
         userId: req.session?.userId,
         pseudoUserId: req.body.pseudoUserId,

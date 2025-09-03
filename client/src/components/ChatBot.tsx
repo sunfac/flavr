@@ -216,13 +216,6 @@ export default function ChatBot({
       };
     },
     onSuccess: async (result) => {
-      console.log('🧠 Zest response received:', {
-        hasRecipeIntent: result.isRecipeIntent,
-        requiresConfirmation: result.requiresConfirmation,
-        userMemory: result.userMemory,
-        responseLength: result.response?.length || 0
-      });
-
       // Create Zest response message
       const zestMessage: ChatMessage = {
         id: Date.now(),
@@ -233,15 +226,8 @@ export default function ChatBot({
         timestamp: new Date(),
       };
 
-      console.log('📝 Adding Zest message to local messages:', zestMessage);
-      console.log('📋 Current local messages count:', localMessages.length);
-
       // Add the Zest response to chat
-      setLocalMessages(prev => {
-        const newMessages = [...prev, zestMessage];
-        console.log('📋 Updated local messages count:', newMessages.length);
-        return newMessages;
-      });
+      setLocalMessages(prev => [...prev, zestMessage]);
       setMessage("");
 
       // Handle recipe intent confirmation
@@ -447,8 +433,6 @@ export default function ChatBot({
     const textToSend = messageText || message;
     if (!textToSend.trim()) return;
 
-    console.log('💬 Sending message:', textToSend);
-
     // Add user message immediately
     const userMessage: ChatMessage = {
       id: Date.now(),
@@ -459,12 +443,7 @@ export default function ChatBot({
       timestamp: new Date(),
     };
     
-    console.log('👤 Adding user message to local messages:', userMessage);
-    setLocalMessages(prev => {
-      const newMessages = [...prev, userMessage];
-      console.log('📋 Updated messages after user message:', newMessages.length);
-      return newMessages;
-    });
+    setLocalMessages(prev => [...prev, userMessage]);
     setShowSuggestions(false);
 
     // Send to API with enhanced context
@@ -530,7 +509,6 @@ export default function ChatBot({
               overscrollBehavior: 'contain'
             }}
           >
-            {console.log('🎨 Rendering messages, localMessages.length:', localMessages.length)}
             {localMessages.map((msg, index) => (
               <div key={msg.id} className={`mb-3 ${msg.isUser ? "text-right" : "text-left"}`}>
                 <div
