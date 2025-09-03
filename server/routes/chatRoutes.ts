@@ -327,6 +327,54 @@ Be warm like Zest - acknowledge the conversation context and provide practical, 
         // Extract additional context from user message for better suggestions
         const lowerMessage = message.toLowerCase();
         
+        // Check if this is a specific dish request that should bypass inspiration system
+        const isSpecificDishRequest = lowerMessage.includes('meatball') || 
+                                    lowerMessage.includes('meatballs') ||
+                                    lowerMessage.includes('burger') || 
+                                    lowerMessage.includes('pizza') ||
+                                    lowerMessage.includes('pancake') ||
+                                    lowerMessage.includes('pancakes') ||
+                                    lowerMessage.includes('stir fry') ||
+                                    lowerMessage.includes('curry') ||
+                                    lowerMessage.includes('pasta') ||
+                                    lowerMessage.includes('spaghetti') ||
+                                    lowerMessage.includes('lasagna') ||
+                                    lowerMessage.includes('risotto') ||
+                                    lowerMessage.includes('casserole') ||
+                                    lowerMessage.includes('sandwich') ||
+                                    lowerMessage.includes('wrap') ||
+                                    lowerMessage.includes('taco') ||
+                                    lowerMessage.includes('burrito') ||
+                                    lowerMessage.includes('quesadilla') ||
+                                    lowerMessage.includes('omelette') ||
+                                    lowerMessage.includes('omelet') ||
+                                    lowerMessage.includes('quiche') ||
+                                    lowerMessage.includes('frittata') ||
+                                    lowerMessage.includes('cake') ||
+                                    lowerMessage.includes('cookies') ||
+                                    lowerMessage.includes('bread') ||
+                                    lowerMessage.includes('muffin') ||
+                                    lowerMessage.includes('pie') ||
+                                    lowerMessage.includes('tart');
+        
+        // If this is a specific dish request, generate directly without inspiration system
+        if (isSpecificDishRequest) {
+          console.log('🎯 DIRECT DISH REQUEST: Bypassing inspiration system for specific dish:', message);
+          
+          return res.json({
+            message: `Perfect! I'll create exactly what you asked for: ${message}. Let me generate that recipe for you right now!`,
+            isRecipeIntent: true,
+            requiresConfirmation: true,
+            suggestedRecipeTitle: message,
+            originalMessage: message,
+            confidence: 0.95,
+            userMemory: {
+              hasPreferences: !!userMemory.preferences,
+              topicsRemembered: [message]
+            }
+          });
+        }
+        
         // Check if this is a dish-type request first (higher priority than ingredient detection)
         const isDishTypeRequest = lowerMessage.includes('sauce') || 
                                  lowerMessage.includes('salad') || 
