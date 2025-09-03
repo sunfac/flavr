@@ -162,12 +162,28 @@ Be warm and encouraging like Zest, but keep it concise for easy chat reading.`
         
         try {
           console.log('🎲 Generating alternative suggestion with context:', originalContext);
-          const chefAssist = new ChefAssistGPT5();
-          const inspiration = await chefAssist.generateRecipeInspiration({
-            userMessage: originalContext,
-            clientId,
-            mode: "chat-suggestion",
-            userHistory: userMemory
+          
+          // Generate seed packs for inspiration
+          const seedPacks = {
+            techniqueSeed: Math.floor(Math.random() * 15),
+            simplicitySeed: Math.floor(Math.random() * 15),
+            creativitySeed: Math.floor(Math.random() * 8),
+            seasonSeed: Math.floor(Math.random() * 6),
+            textureSeed: Math.floor(Math.random() * 10),
+            flavourSeed: Math.floor(Math.random() * 12),
+            randomSeed: Math.floor(Math.random() * 1000000),
+            complexityLevel: 'medium',
+            simpleStyle: 'balanced',
+            creativityMode: 'classic',
+            seasonalFocus: 'neutral',
+            texturePreference: 'varied',
+            flavourProfile: 'balanced'
+          };
+          
+          const inspiration = await ChefAssistGPT5.generateInspireTitle({
+            seeds: seedPacks,
+            userIntent: originalContext,
+            clientId
           });
 
           if (!inspiration?.title) {
