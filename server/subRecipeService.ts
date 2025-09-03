@@ -104,19 +104,13 @@ export class SubRecipeService {
         continue;
       }
       
-      // Only suggest for complex components that can be made from scratch
+      // Only suggest for very specific complex components that are truly worth making from scratch
       const complexComponents = [
-        'pesto', 'aioli', 'mayo', 'mayonnaise', 'chimichurri', 'salsa', 'guacamole',
-        'hummus', 'tapenade', 'chutney', 'relish', 'harissa', 'romesco',
+        'pesto', 'aioli', 'chimichurri', 'guacamole', 'hummus', 'harissa', 'romesco',
         'curry paste', 'thai curry paste', 'red curry paste', 'green curry paste',
-        'garam masala', 'spice mix', 'spice blend', 'rub', 'seasoning mix',
-        'compound butter', 'herb butter', 'garlic butter', 'flavored butter',
-        'marinade', 'glaze', 'reduction', 'gastrique', 'jus', 'coulis',
-        'hollandaise', 'bearnaise', 'beurre blanc', 'veloute', 'bechamel',
-        'tahini', 'tzatziki', 'raita', 'pickle', 'pickled', 'fermented',
-        'stock', 'bone broth', 'dashi', 'fumet', 'consomme',
-        'pasta sauce', 'tomato sauce', 'bolognese', 'ragu', 'marinara',
-        'vinaigrette', 'dressing', 'emulsion', 'infused oil', 'flavored oil'
+        'compound butter', 'herb butter', 'garlic butter',
+        'hollandaise', 'bearnaise', 'tzatziki',
+        'vinaigrette', 'homemade dressing'
       ];
       
       const isComplexComponent = complexComponents.some(component => 
