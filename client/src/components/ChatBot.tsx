@@ -616,7 +616,7 @@ export default function ChatBot({
                         }}
                         className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs px-3 py-1 flex items-center gap-2"
                       >
-                        <iconMap.ChefHat className="w-3 h-3" />
+                        <iconMap.chefHat className="w-3 h-3" />
                         View Recipe Card
                       </Button>
                     </div>

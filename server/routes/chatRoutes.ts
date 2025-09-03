@@ -67,13 +67,8 @@ export function registerChatRoutes(app: Express) {
         const inspiredTitle = await ChefAssistGPT5.generateInspireTitle({
           userIntent: message,
           clientId: clientId,
-          timeBudget: 30, // Default quick suggestion
-          dietaryNeeds: [],
-          mustUse: [],
-          avoid: [],
-          equipment: ['stove', 'oven', 'basic-tools'],
-          budgetNote: '',
           cuisinePreference: '',
+          avoid: [],
           seeds: {
             randomSeed: Math.floor(Math.random() * 10000),
             complexityLevel: Math.floor(Math.random() * 15) + 1,
