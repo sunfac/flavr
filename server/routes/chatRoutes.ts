@@ -20,6 +20,83 @@ if (!process.env.OPENAI_API_KEY) {
 }
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Smart inspiration selection based on dish type
+function selectAppropriateInspiration(message: string, allChefs: string[], allRestaurants: string[]): string {
+  const lowerMessage = message.toLowerCase();
+  
+  // Italian dishes - prefer Italian chefs and Italian restaurants
+  if (lowerMessage.includes('pasta') || lowerMessage.includes('pizza') || lowerMessage.includes('risotto') || 
+      lowerMessage.includes('carbonara') || lowerMessage.includes('bolognese') || lowerMessage.includes('marinara') ||
+      lowerMessage.includes('parmigiana') || lowerMessage.includes('gnocchi') || lowerMessage.includes('lasagna')) {
+    const italianChefs = ['Gino D\'Acampo', 'Antonio Carluccio', 'Giorgio Locatelli'];
+    const italianRestaurants = ['Padella', 'Barrafina', 'Zuma'];
+    const useChef = Math.random() < 0.6; // Slight preference for chefs for Italian
+    return useChef 
+      ? italianChefs[Math.floor(Math.random() * italianChefs.length)]
+      : italianRestaurants[Math.floor(Math.random() * italianRestaurants.length)];
+  }
+  
+  // Indian dishes - prefer Indian-focused chefs and restaurants
+  if (lowerMessage.includes('curry') || lowerMessage.includes('dal') || lowerMessage.includes('biryani') ||
+      lowerMessage.includes('tandoori') || lowerMessage.includes('masala') || lowerMessage.includes('naan')) {
+    const indianChefs = ['Atul Kochhar', 'Cyrus Todiwala', 'Vivek Singh'];
+    const indianRestaurants = ['Dishoom', 'Gymkhana', 'Hoppers'];
+    const useChef = Math.random() < 0.4; // Preference for restaurants for Indian
+    return useChef 
+      ? indianChefs[Math.floor(Math.random() * indianChefs.length)]
+      : indianRestaurants[Math.floor(Math.random() * indianRestaurants.length)];
+  }
+  
+  // Asian dishes - prefer Asian-focused chefs and restaurants
+  if (lowerMessage.includes('stir fry') || lowerMessage.includes('noodles') || lowerMessage.includes('ramen') ||
+      lowerMessage.includes('pad thai') || lowerMessage.includes('pho') || lowerMessage.includes('dumplings') ||
+      lowerMessage.includes('sushi') || lowerMessage.includes('miso') || lowerMessage.includes('teriyaki')) {
+    const asianChefs = ['Ken Hom', 'Ching He Huang', 'David Chang'];
+    const asianRestaurants = ['Bao', 'Kiln', 'Roka', 'Smoking Goat'];
+    const useChef = Math.random() < 0.3; // Strong preference for restaurants for Asian
+    return useChef 
+      ? asianChefs[Math.floor(Math.random() * asianChefs.length)]
+      : asianRestaurants[Math.floor(Math.random() * asianRestaurants.length)];
+  }
+  
+  // British/Classic dishes - prefer British chefs and traditional restaurants
+  if (lowerMessage.includes('fish and chips') || lowerMessage.includes('roast') || lowerMessage.includes('pie') ||
+      lowerMessage.includes('bangers') || lowerMessage.includes('shepherd') || lowerMessage.includes('cottage') ||
+      lowerMessage.includes('toad in the hole') || lowerMessage.includes('bubble and squeak')) {
+    const britishChefs = ['Gordon Ramsay', 'Jamie Oliver', 'Tom Kerridge', 'Rick Stein', 'Mary Berry'];
+    const britishRestaurants = ['St. John', 'Rules', 'Simpson\'s in the Strand'];
+    const useChef = Math.random() < 0.7; // Strong preference for chefs for British
+    return useChef 
+      ? britishChefs[Math.floor(Math.random() * britishChefs.length)]
+      : britishRestaurants[Math.floor(Math.random() * britishRestaurants.length)];
+  }
+  
+  // Steakhouse/Meat dishes - prefer steakhouse restaurants
+  if (lowerMessage.includes('steak') || lowerMessage.includes('beef') || lowerMessage.includes('lamb') ||
+      lowerMessage.includes('pork') || lowerMessage.includes('bbq') || lowerMessage.includes('grill')) {
+    const meatChefs = ['Gordon Ramsay', 'Marco Pierre White', 'Tom Kerridge'];
+    const steakhouses = ['Hawksmoor', 'Temper', 'Brat'];
+    const useChef = Math.random() < 0.3; // Strong preference for steakhouses
+    return useChef 
+      ? meatChefs[Math.floor(Math.random() * meatChefs.length)]
+      : steakhouses[Math.floor(Math.random() * steakhouses.length)];
+  }
+  
+  // Baking/Desserts - prefer baking specialists
+  if (lowerMessage.includes('cake') || lowerMessage.includes('cookies') || lowerMessage.includes('bread') ||
+      lowerMessage.includes('muffin') || lowerMessage.includes('scone') || lowerMessage.includes('tart') ||
+      lowerMessage.includes('pudding') || lowerMessage.includes('bake')) {
+    const bakingChefs = ['Mary Berry', 'Paul Hollywood', 'Nadiya Hussain', 'Delia Smith'];
+    return bakingChefs[Math.floor(Math.random() * bakingChefs.length)];
+  }
+  
+  // Default: use any chef or restaurant (50/50 split)
+  const useChef = Math.random() < 0.5;
+  return useChef 
+    ? allChefs[Math.floor(Math.random() * allChefs.length)]
+    : allRestaurants[Math.floor(Math.random() * allRestaurants.length)];
+}
+
 export function registerChatRoutes(app: Express) {
   const zestService = new ZestService();
 
@@ -400,13 +477,10 @@ Respond with JSON: {"shouldBypass": true/false, "confidence": 0-1, "reasoning": 
               "Lima", "Temper", "Smoking Goat", "Ikoyi", "The Ledbury"
             ];
             
-            // Randomly choose between chef or restaurant inspiration (50/50)
-            const useChefInspiration = Math.random() < 0.5;
-            const selectedInspiration = useChefInspiration 
-              ? allChefs[Math.floor(Math.random() * allChefs.length)]
-              : allRestaurants[Math.floor(Math.random() * allRestaurants.length)];
+            // Smart selection based on dish type and cuisine
+            const selectedInspiration = selectAppropriateInspiration(message, allChefs, allRestaurants);
             
-            console.log(`🎲 Selected ${useChefInspiration ? 'chef' : 'restaurant'} inspiration: ${selectedInspiration}`);
+            console.log(`🎲 Selected inspiration: ${selectedInspiration}`);
             
             // Generate enhanced title that preserves intent but adds flair
             const titleResponse = await openai.chat.completions.create({
