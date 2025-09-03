@@ -205,14 +205,21 @@ export default function ChatBot({
   // Extract history from response
   const chatHistory = Array.isArray(historyData) ? historyData : (historyData as any)?.history || [];
 
-  // Load chat history when component mounts (but not when recipe changes to preserve chat during modifications)
+  // Load chat history when component mounts - use stable key that doesn't change during modifications
   useEffect(() => {
-    const recipeKey = getRecipeKey();
-    const savedMessages = loadChatHistory();
     if (localMessages.length === 0) { // Only load if chat is empty
-      setLocalMessages(savedMessages);
+      const stableKey = currentRecipe?.id ? `recipe-${currentRecipe.id}` : 'general-chat';
+      const saved = localStorage.getItem(`chat-history-${stableKey}`);
+      if (saved) {
+        try {
+          const savedMessages = JSON.parse(saved);
+          setLocalMessages(savedMessages);
+        } catch (error) {
+          console.warn('Failed to parse saved chat messages:', error);
+        }
+      }
     }
-  }, []); // Remove recipe title dependency to prevent clearing during modifications
+  }, [currentRecipe?.id]); // Only depend on stable recipe ID
   
   // Save chat history whenever localMessages changes
   useEffect(() => {

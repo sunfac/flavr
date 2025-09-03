@@ -341,7 +341,7 @@ Servings: ${recipe?.servings || 4}`;
             description: "Your recipe is ready to print or share",
           });
         })
-        .catch((error) => {
+        .catch((error: any) => {
           // Restore original positioning on error
           element.style.position = originalPosition;
           element.style.top = originalTop;
