@@ -76,6 +76,12 @@ export function registerChatRoutes(app: Express) {
           }
         }
         
+        console.log('🔍 Ingredient detection:', {
+          message: lowerMessage,
+          detectedIngredient: specificIngredient,
+          willUseFocusedMode: !!specificIngredient
+        });
+        
         // Detect cuisine preferences
         let cuisinePreference = '';
         const cuisines = ['italian', 'chinese', 'thai', 'mexican', 'indian', 'japanese', 'french', 'greek', 'spanish', 'turkish', 'lebanese', 'moroccan', 'korean', 'vietnamese'];
@@ -96,7 +102,9 @@ export function registerChatRoutes(app: Express) {
         
         // If user specified an ingredient, create a more targeted suggestion using direct OpenAI call
         let inspiredTitle;
+        console.log('🍝 About to check ingredient path, specificIngredient:', specificIngredient);
         if (specificIngredient) {
+          console.log('🎯 Using targeted ingredient mode for:', specificIngredient);
           // For specific ingredient requests, use a direct OpenAI call to ensure relevance
           const ingredientResponse = await openai.chat.completions.create({
             model: "gpt-4o",
