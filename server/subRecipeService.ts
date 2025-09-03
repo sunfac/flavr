@@ -24,55 +24,42 @@ export interface GeneratedSubRecipe {
 
 export class SubRecipeService {
   /**
-   * Detect potential sub-recipes from ingredient list
+   * Extract ingredient name from text by removing measurements and quantities
+   */
+  extractIngredientName(ingredientText: string): string {
+    const cleanText = ingredientText
+      .replace(/^\d+[\s\-]*(cups?|tbsp|tsp|tablespoons?|teaspoons?|oz|ounces?|lbs?|pounds?|g|grams?|kg|kilograms?|ml|milliliters?|l|liters?|pints?|quarts?|gallons?)\s*/i, '')
+      .replace(/^\d+[\s\-]*x\s*/i, '') // Remove "2x" style multipliers
+      .replace(/^a\s+pinch\s+of\s*/i, '') // Remove "a pinch of"
+      .replace(/^a\s+handful\s+of\s*/i, '') // Remove "a handful of"
+      .replace(/^some\s*/i, '') // Remove "some"
+      .replace(/^fresh\s*/i, '') // Remove "fresh" prefix
+      .replace(/^dried\s*/i, '') // Remove "dried" prefix
+      .replace(/^ground\s*/i, '') // Remove "ground" prefix
+      .replace(/^\d+\/\d+\s*/g, '') // Remove fractions like "1/2"
+      .replace(/^\d+\.\d+\s*/g, '') // Remove decimals like "2.5"
+      .replace(/^\d+\s*/g, '') // Remove standalone numbers
+      .replace(/^(large|medium|small)\s*/i, '') // Remove size descriptors
+      .replace(/\s*\([^)]*\)$/, '') // Remove anything in parentheses at the end
+      .trim();
+    
+    return cleanText;
+  }
+
+  /**
+   * Detect potential sub-recipes from ingredient list using intelligent extraction
    */
   async detectPotentialSubRecipes(ingredients: string[]): Promise<Map<string, SubRecipeDetection>> {
     const detections = new Map<string, SubRecipeDetection>();
     
-    // Common sub-recipe patterns to look for (more specific to avoid false positives)
-    const subRecipePatterns = [
-      'chilli drizzle', 'chili drizzle', 'harissa paste', 'pesto', 'chimichurri',
-      'tamarind chutney', 'mint chutney', 'salsa verde', 'tahini sauce',
-      'sriracha mayo', 'garlic aioli', 'herb oil', 'compound butter',
-      'spice mix', 'spice blend', 'curry paste', 'marinade',
-      'fermented black garlic paste', 'black garlic paste', 'fermented garlic',
-      'homemade stock', 'vegetable stock', 'chicken stock', 'bone broth',
-      'pickled vegetables', 'fermented chili', 'herb paste',
-      'homemade', 'fresh pasta', 'pizza dough', 'bread dough', 'pasta dough',
-      'stock', 'broth', 'pickled', 'fermented', 'cured',
-      // More specific sauce patterns to avoid catching basic condiments
-      'herb sauce', 'cream sauce', 'butter sauce', 'wine sauce', 'reduction',
-      'hollandaise', 'béarnaise', 'beurre blanc', 'jus', 'gravy',
-      'relish', 'chutney', 'salsa', 'dressing', 'vinaigrette'
-    ];
-    
-    // Exclude basic ingredients and store-bought condiments that shouldn't become sub-recipes
-    const excludeBasicIngredients = [
-      'olive oil', 'vegetable oil', 'canola oil', 'butter', 'salt', 'pepper', 
-      'flour', 'sugar', 'water', 'milk', 'eggs',
-      // Common condiments and sauces that are typically store-bought
-      'soy sauce', 'sriracha', 'worcestershire sauce', 'fish sauce', 'oyster sauce',
-      'balsamic vinegar', 'apple cider vinegar', 'white vinegar', 'red wine vinegar',
-      'honey', 'maple syrup', 'dijon mustard', 'whole grain mustard', 'yellow mustard',
-      'ketchup', 'tomato sauce', 'tomato paste', 'coconut milk', 'heavy cream',
-      'sesame oil', 'vanilla extract', 'lemon juice', 'lime juice', 'white wine',
-      'red wine', 'rice vinegar', 'mirin', 'sake', 'dark soy sauce', 'light soy sauce',
-      'hoisin sauce', 'hot sauce', 'tabasco', 'paprika', 'cumin', 'coriander',
-      'cinnamon', 'nutmeg', 'bay leaves', 'thyme', 'rosemary', 'oregano', 'basil',
-      'parsley', 'cilantro', 'garlic powder', 'onion powder', 'smoked paprika',
-      'cayenne pepper', 'black pepper', 'white pepper', 'red pepper flakes',
-      'italian seasoning', 'herbs de provence', 'five spice', 'garam masala',
-      'curry powder', 'turmeric', 'ginger powder', 'mustard seed', 'fennel seed',
-      'coriander seed', 'cardamom', 'star anise', 'cloves', 'allspice'
+    // Exclude very basic single-word ingredients that are typically store-bought
+    const basicIngredients = [
+      'salt', 'pepper', 'water', 'oil', 'flour', 'sugar', 'milk', 'eggs', 'butter',
+      'onion', 'garlic', 'tomato', 'potato', 'carrot', 'celery', 'lemon', 'lime'
     ];
     
     for (const ingredient of ingredients) {
       const lowerIngredient = ingredient.toLowerCase();
-      
-      // Skip basic ingredients
-      if (excludeBasicIngredients.some(basic => lowerIngredient.includes(basic))) {
-        continue;
-      }
       
       // Check for page references first (cookbook extraction)
       const pageRefPattern = /\(see page (\d+)\)/i;
@@ -89,51 +76,36 @@ export class SubRecipeService {
         continue;
       }
       
-      // Check for sub-recipe patterns (longest matches first for specificity)
-      const sortedPatterns = subRecipePatterns.sort((a, b) => b.length - a.length);
-      const foundPattern = sortedPatterns.find(pattern => 
-        lowerIngredient.includes(pattern)
+      // Smart detection: extract ingredient name and check if it could be homemade
+      const extractedName = this.extractIngredientName(ingredient);
+      const lowerExtracted = extractedName.toLowerCase();
+      
+      // Skip very basic ingredients
+      const isBasicIngredient = basicIngredients.includes(lowerExtracted);
+      if (isBasicIngredient || extractedName.length < 3) {
+        continue;
+      }
+      
+      // Check if the ingredient suggests it could be homemade
+      const homemadeIndicators = [
+        'paste', 'sauce', 'drizzle', 'oil', 'butter', 'mayo', 'aioli', 'chutney',
+        'marinade', 'dressing', 'stock', 'broth', 'mix', 'blend', 'rub',
+        'fermented', 'pickled', 'cured', 'homemade', 'fresh'
+      ];
+      
+      const hasHomemadeIndicator = homemadeIndicators.some(indicator => 
+        lowerExtracted.includes(indicator) || lowerIngredient.includes(`${indicator} `)
       );
       
-      if (foundPattern) {
-        // Extract more specific name if possible
-        let specificName = foundPattern;
-        const words = lowerIngredient.split(/\s+/);
-        
-        // Look for compound names (4-word combinations first, then 3-word, then 2-word)
-        for (let i = 0; i < words.length - 3; i++) {
-          const compound = `${words[i]} ${words[i + 1]} ${words[i + 2]} ${words[i + 3]}`;
-          if (subRecipePatterns.includes(compound)) {
-            specificName = compound;
-            break;
-          }
-        }
-        
-        if (specificName === foundPattern) {
-          for (let i = 0; i < words.length - 2; i++) {
-            const compound = `${words[i]} ${words[i + 1]} ${words[i + 2]}`;
-            if (subRecipePatterns.includes(compound)) {
-              specificName = compound;
-              break;
-            }
-          }
-        }
-        
-        if (specificName === foundPattern) {
-          for (let i = 0; i < words.length - 1; i++) {
-            const compound = `${words[i]} ${words[i + 1]}`;
-            if (subRecipePatterns.includes(compound)) {
-              specificName = compound;
-              break;
-            }
-          }
-        }
-        
+      // Also allow compound ingredients (2+ words) even without specific indicators
+      const isCompoundIngredient = extractedName.split(' ').length >= 2;
+      
+      if (hasHomemadeIndicator || isCompoundIngredient) {
         detections.set(ingredient, {
           hasSubRecipe: true,
-          subRecipeName: specificName,
-          confidence: 0.8,
-          suggestion: `Create homemade ${specificName}`
+          subRecipeName: extractedName,
+          confidence: hasHomemadeIndicator ? 0.9 : 0.7,
+          suggestion: `Create homemade ${extractedName}`
         });
       }
     }

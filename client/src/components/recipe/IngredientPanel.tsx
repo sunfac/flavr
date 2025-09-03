@@ -6,17 +6,26 @@ import { Badge } from '@/components/ui/badge';
 import { SubRecipeButton } from './SubRecipeButton';
 import { animations } from '@/styles/tokens';
 
-// Common ingredients that might have sub-recipes
-const SUB_RECIPE_INGREDIENTS = [
-  'chilli drizzle', 'chili drizzle', 'harissa paste', 'pesto', 'chimichurri',
-  'tamarind chutney', 'mint chutney', 'salsa verde', 'tahini sauce',
-  'sriracha mayo', 'garlic aioli', 'herb oil', 'compound butter',
-  'spice mix', 'spice blend', 'curry paste', 'marinade',
-  'fermented black garlic paste', 'black garlic paste', 'fermented garlic',
-  'homemade stock', 'vegetable stock', 'chicken stock', 'bone broth',
-  'pickled vegetables', 'fermented chili', 'herb paste',
-  'drizzle', 'chutney', 'sauce', 'paste', 'mayo', 'aioli'
-];
+function extractIngredientName(ingredientText: string): string {
+  // Remove common measurements and quantities
+  const cleanText = ingredientText
+    .replace(/^\d+[\s\-]*(cups?|tbsp|tsp|tablespoons?|teaspoons?|oz|ounces?|lbs?|pounds?|g|grams?|kg|kilograms?|ml|milliliters?|l|liters?|pints?|quarts?|gallons?)\s*/i, '')
+    .replace(/^\d+[\s\-]*x\s*/i, '') // Remove "2x" style multipliers
+    .replace(/^a\s+pinch\s+of\s*/i, '') // Remove "a pinch of"
+    .replace(/^a\s+handful\s+of\s*/i, '') // Remove "a handful of"
+    .replace(/^some\s*/i, '') // Remove "some"
+    .replace(/^fresh\s*/i, '') // Remove "fresh" prefix
+    .replace(/^dried\s*/i, '') // Remove "dried" prefix
+    .replace(/^ground\s*/i, '') // Remove "ground" prefix
+    .replace(/^\d+\/\d+\s*/g, '') // Remove fractions like "1/2"
+    .replace(/^\d+\.\d+\s*/g, '') // Remove decimals like "2.5"
+    .replace(/^\d+\s*/g, '') // Remove standalone numbers
+    .replace(/^(large|medium|small)\s*/i, '') // Remove size descriptors
+    .replace(/\s*\([^)]*\)$/, '') // Remove anything in parentheses at the end
+    .trim();
+  
+  return cleanText;
+}
 
 function detectSubRecipe(ingredientText: string): { hasSubRecipe: boolean; subRecipe?: string; pageReference?: string } {
   const lowerText = ingredientText.toLowerCase();
@@ -43,62 +52,40 @@ function detectSubRecipe(ingredientText: string): { hasSubRecipe: boolean; subRe
     }
   }
   
-  // Fallback to common ingredient detection
-  // Exclude basic pantry staples that shouldn't be sub-recipes
-  const excludeBasicIngredients = ['olive oil', 'vegetable oil', 'canola oil', 'butter', 'salt', 'pepper', 'flour', 'sugar'];
-  const isBasicIngredient = excludeBasicIngredients.some(basic => lowerText.includes(basic));
+  // Smart detection: check if ingredient looks like it could be made from scratch
+  const extractedName = extractIngredientName(ingredientText);
   
-  if (isBasicIngredient) {
+  // Exclude very basic single-word ingredients that are typically store-bought
+  const basicIngredients = [
+    'salt', 'pepper', 'water', 'oil', 'flour', 'sugar', 'milk', 'eggs', 'butter',
+    'onion', 'garlic', 'tomato', 'potato', 'carrot', 'celery', 'lemon', 'lime'
+  ];
+  
+  const lowerExtracted = extractedName.toLowerCase();
+  const isBasicIngredient = basicIngredients.includes(lowerExtracted);
+  
+  if (isBasicIngredient || extractedName.length < 3) {
     return { hasSubRecipe: false };
   }
   
-  // Sort by length (longest first) to prioritize more specific matches
-  const sortedSubRecipeIngredients = SUB_RECIPE_INGREDIENTS.sort((a, b) => b.length - a.length);
-  const foundSubRecipe = sortedSubRecipeIngredients.find(subRecipe => 
-    lowerText.includes(subRecipe)
+  // Check if the ingredient suggests it could be homemade
+  const homemadeIndicators = [
+    'paste', 'sauce', 'drizzle', 'oil', 'butter', 'mayo', 'aioli', 'chutney',
+    'marinade', 'dressing', 'stock', 'broth', 'mix', 'blend', 'rub',
+    'fermented', 'pickled', 'cured', 'homemade', 'fresh'
+  ];
+  
+  const hasHomemadeIndicator = homemadeIndicators.some(indicator => 
+    lowerExtracted.includes(indicator) || lowerText.includes(`${indicator} `)
   );
   
-  if (foundSubRecipe) {
-    // Extract a more specific sub-recipe name from the ingredient text
-    // For example, "3 tsp chilli drizzle" -> "chilli drizzle"
-    const words = ingredientText.toLowerCase().split(/\s+/);
-    let specificName = foundSubRecipe;
-    
-    // Try to extract the exact ingredient name from the text
-    // Check for 4-word combinations first (most specific)
-    for (let i = 0; i < words.length - 3; i++) {
-      const compound = `${words[i]} ${words[i + 1]} ${words[i + 2]} ${words[i + 3]}`;
-      if (SUB_RECIPE_INGREDIENTS.includes(compound)) {
-        specificName = compound;
-        break;
-      }
-    }
-    
-    // If not found, try 3-word combinations
-    if (specificName === foundSubRecipe) {
-      for (let i = 0; i < words.length - 2; i++) {
-        const compound = `${words[i]} ${words[i + 1]} ${words[i + 2]}`;
-        if (SUB_RECIPE_INGREDIENTS.includes(compound)) {
-          specificName = compound;
-          break;
-        }
-      }
-    }
-    
-    // Finally try 2-word combinations
-    if (specificName === foundSubRecipe) {
-      for (let i = 0; i < words.length - 1; i++) {
-        const compound = `${words[i]} ${words[i + 1]}`;
-        if (SUB_RECIPE_INGREDIENTS.includes(compound)) {
-          specificName = compound;
-          break;
-        }
-      }
-    }
-    
+  // Also allow compound ingredients (2+ words) even without specific indicators
+  const isCompoundIngredient = extractedName.split(' ').length >= 2;
+  
+  if (hasHomemadeIndicator || isCompoundIngredient) {
     return {
       hasSubRecipe: true,
-      subRecipe: specificName
+      subRecipe: extractedName
     };
   }
   
