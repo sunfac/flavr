@@ -87,7 +87,11 @@ const SubscribeForm = () => {
       <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
         <PaymentElement 
           options={{
-            layout: "tabs"
+            layout: "tabs",
+            wallets: {
+              applePay: "auto",
+              googlePay: "auto"
+            }
           }}
         />
       </div>
