@@ -57,10 +57,28 @@ export function registerChatRoutes(app: Express) {
       const intentResult = await zestService.detectRecipeIntent(message);
       console.log('🎯 Intent detection:', intentResult);
 
-      // If high confidence recipe intent, offer to create recipe
+      // If high confidence recipe intent, offer to create recipe with specific suggestion
       if (intentResult.isRecipeIntent && intentResult.confidence > 0.7) {
+        // Generate a specific recipe suggestion first
+        const suggestionResponse = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            { 
+              role: "system", 
+              content: `You are Zest, a warm cooking assistant. The user wants a recipe. Give them a SPECIFIC dish suggestion with brief details about what makes it appealing, then ask if they want it as a recipe card. Be enthusiastic and specific.
+
+Example: "How about a creamy lemon garlic pasta? It's ready in 15 minutes with tender pasta, fresh lemon zest, crispy garlic, and a splash of white wine for depth. The sauce is silky and bright - perfect for a quick dinner! Would you like me to turn this into a full Flavr recipe card?"`
+            },
+            { role: "user", content: message }
+          ],
+          max_tokens: 200,
+          temperature: 0.8
+        });
+        
+        const specificSuggestion = suggestionResponse.choices[0].message.content;
+        
         const confirmationResponse = {
-          message: `I'd love to help you with that! ${intentResult.suggestedAction} Would you like me to turn this into a Flavr recipe card?`,
+          message: specificSuggestion || `I'd love to help you with that! ${intentResult.suggestedAction} Would you like me to turn this into a Flavr recipe card?`,
           isRecipeIntent: true,
           confidence: intentResult.confidence,
           requiresConfirmation: true
