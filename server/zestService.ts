@@ -450,7 +450,7 @@ Your task is to intelligently understand what the user wants and adapt the recip
 
 Be creative and professional - interpret their request thoughtfully and make appropriate changes throughout the recipe. If the request is unclear, make reasonable assumptions based on cooking best practices.
 
-CRITICAL: Respond with ONLY a valid JSON object. Do NOT use markdown formatting, do NOT wrap in ```json blocks, just return the raw JSON in this exact format:
+CRITICAL: Respond with ONLY a valid JSON object. Do NOT use markdown formatting, do NOT wrap in backtick blocks, just return the raw JSON in this exact format:
 {
   "title": "Updated recipe title",
   "description": "Brief description of changes made",
