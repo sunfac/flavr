@@ -118,19 +118,24 @@ export default function ChatBot({
   const hasCurrentRecipe = currentRecipe || (recipeStore.meta.title && recipeStore.ingredients.length > 0);
   const allSuggestionChips = hasCurrentRecipe ? recipeModificationChips : generalCookingChips;
 
-  // Rotating chips state - show 6 at a time, rotate every 6 seconds
+  // Rotating chips state - show 4 at a time (2x2 grid), rotate every 5 seconds
   const [chipRotationIndex, setChipRotationIndex] = useState(0);
+  const chipsToShow = 4;
   
   useEffect(() => {
     const interval = setInterval(() => {
-      setChipRotationIndex(prev => (prev + 6) % allSuggestionChips.length);
-    }, 6000);
+      setChipRotationIndex(prev => {
+        const nextIndex = prev + chipsToShow;
+        // Reset to 0 when we've shown all chips
+        return nextIndex >= allSuggestionChips.length ? 0 : nextIndex;
+      });
+    }, 5000);
     
     return () => clearInterval(interval);
   }, [allSuggestionChips.length]);
   
-  // Get current 6 chips to display
-  const suggestionChips = allSuggestionChips.slice(chipRotationIndex, chipRotationIndex + 6);
+  // Get current 4 chips to display
+  const suggestionChips = allSuggestionChips.slice(chipRotationIndex, chipRotationIndex + chipsToShow);
 
   // Get chat history
   const { data: historyData } = useQuery({
@@ -568,16 +573,16 @@ export default function ChatBot({
           {(localMessages.length <= 1 || (showSuggestions && localMessages.length <= 2)) && (
             <div className="px-3 sm:px-4 py-3 border-t border-slate-700/50 flex-shrink-0 bg-slate-900/50">
               <div className="text-xs text-slate-400 mb-2">Quick suggestions:</div>
-              <div className="flex flex-wrap gap-2">
-                {suggestionChips.slice(0, 6).map((chip, index) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {suggestionChips.map((chip, index) => (
                   <Badge
-                    key={index}
+                    key={`${chipRotationIndex}-${index}`}
                     variant={chip.updatesRecipe ? "secondary" : "outline"}
-                    className="cursor-pointer hover:bg-orange-500 hover:text-white transition-all duration-300 flex items-center gap-1 shadow-md backdrop-blur-sm bg-slate-700/80 border-slate-600 text-white"
+                    className="cursor-pointer hover:bg-orange-500 hover:text-white transition-all duration-300 flex items-center gap-1 shadow-md backdrop-blur-sm bg-slate-700/80 border-slate-600 text-white justify-start p-2 h-auto min-h-[36px] text-left"
                     onClick={handleSuggestionClick(chip.text)}
                   >
-                    <chip.icon className="w-3 h-3" />
-                    <span className="text-xs">{chip.text}</span>
+                    <chip.icon className="w-3 h-3 flex-shrink-0" />
+                    <span className="text-xs leading-tight">{chip.text}</span>
                   </Badge>
                 ))}
               </div>
