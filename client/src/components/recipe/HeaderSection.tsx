@@ -363,7 +363,7 @@ Created with Flavr AI`;
       <div className="relative w-full">
         {/* Main Image Display */}
         {currentImage && !recipe.imageLoading ? (
-          <div className="relative w-full aspect-[4/3] sm:aspect-[3/2] lg:aspect-[5/3] bg-gradient-to-br from-orange-400 to-orange-600 rounded-t-xl overflow-hidden">
+          <div className="relative w-full aspect-[4/3] sm:aspect-[3/2] lg:aspect-[2/1] bg-gradient-to-br from-orange-400 to-orange-600 rounded-t-xl overflow-hidden">
             <img 
               src={currentImage} 
               alt={recipe.title}
@@ -441,7 +441,7 @@ Created with Flavr AI`;
             </div>
           </div>
         ) : (
-          <div className="relative w-full aspect-[4/3] sm:aspect-[3/2] lg:aspect-[5/3] bg-gradient-to-br from-orange-400 to-orange-600 rounded-t-xl overflow-hidden flex items-center justify-center">
+          <div className="relative w-full aspect-[4/3] sm:aspect-[3/2] lg:aspect-[2/1] bg-gradient-to-br from-orange-400 to-orange-600 rounded-t-xl overflow-hidden flex items-center justify-center">
             <div className="text-center p-6 text-white">
               <h1 className="font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight break-words mb-2">
                 {recipe.title}
