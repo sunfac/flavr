@@ -17,6 +17,11 @@ export default function ChatMode() {
     setIsNavOpen(false);
   };
 
+  const handleChatClose = () => {
+    // Navigate back to mode selection when chat is closed
+    navigate('/app');
+  };
+
   return (
     <div className="min-h-screen bg-slate-900 text-white">
       <GlobalHeader onMenuClick={handleMenuClick} />
@@ -26,6 +31,7 @@ export default function ChatMode() {
           <ChatBot 
             currentMode="chef"
             isOpen={true}
+            onClose={handleChatClose}
           />
         </div>
       </main>
