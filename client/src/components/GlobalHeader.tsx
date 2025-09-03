@@ -71,7 +71,12 @@ export default function GlobalHeader({
 
         {/* Center: Chef Hat Logo */}
         <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
-          <img src={FlavrLogo} alt="Flavr" className="w-10 h-10" />
+          <button 
+            onClick={() => navigate('/')}
+            className="hover:opacity-80 transition-opacity"
+          >
+            <img src={FlavrLogo} alt="Flavr" className="w-10 h-10" />
+          </button>
         </div>
 
         {/* Right: Mobile-optimized authentication/settings buttons */}
