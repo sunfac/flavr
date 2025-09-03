@@ -73,7 +73,9 @@ export class SubRecipeService {
       'filet mignon', 'ribeye', 'sirloin', 'tenderloin', 'strip steak', 'porterhouse',
       'olive oil', 'vegetable oil', 'canola oil', 'sunflower oil', 'sesame oil',
       'pinot noir', 'cabernet', 'merlot', 'chardonnay', 'sauvignon blanc', 'red wine', 'white wine',
-      'beef stock', 'chicken stock', 'vegetable stock', 'fish stock'
+      'beef stock', 'chicken stock', 'vegetable stock', 'fish stock',
+      'sage', 'fresh sage', 'garlic', 'garlic cloves', 'onion', 'onions', 'shallots',
+      'apples', 'pork belly', 'butter', 'salt', 'pepper', 'black pepper', 'lemon juice'
     ];
     
     for (const ingredient of ingredients) {
