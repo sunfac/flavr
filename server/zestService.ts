@@ -541,22 +541,53 @@ CRITICAL: Respond with ONLY a valid JSON object. Do NOT use markdown formatting,
   }
 
   /**
-   * Generate a flavor-maximized recipe directly from explicit user requests
+   * Generate a flavor-maximized recipe directly from explicit user requests with chef/restaurant inspiration
    */
   async generateFlavorMaximizedRecipe(userMessage: string, context: UserContext, memory: ZestMemory): Promise<any> {
     try {
       // Build context from user memory
       const preferencesContext = this.buildPreferencesContext(memory);
       
+      // Select chef or restaurant inspiration for this specific dish
+      const allChefs = [
+        "Gordon Ramsay", "Jamie Oliver", "Nigella Lawson", "Mary Berry", "Tom Kerridge", 
+        "Rick Stein", "Delia Smith", "James Martin", "Hugh Fearnley-Whittingstall", 
+        "Marco Pierre White", "Heston Blumenthal", "Michel Roux Jr", "Angela Hartnett",
+        "Paul Hollywood", "Nadiya Hussain", "Ainsley Harriott", "Gino D'Acampo",
+        "Yotam Ottolenghi", "José Andrés", "Julia Child", "Thomas Keller", "David Chang"
+      ];
+      
+      const allRestaurants = [
+        "Dishoom", "Padella", "Hawksmoor", "Barrafina", "Gymkhana", 
+        "Duck & Waffle", "St. John", "Bao", "Kiln", "Hoppers", 
+        "Brat", "Lyle's", "The Clove Club", "Roka", "Zuma", 
+        "Lima", "Temper", "Smoking Goat", "Ikoyi", "The Ledbury"
+      ];
+      
+      // Randomly choose between chef or restaurant inspiration (50/50)
+      const useChefInspiration = Math.random() < 0.5;
+      const selectedInspiration = useChefInspiration 
+        ? allChefs[Math.floor(Math.random() * allChefs.length)]
+        : allRestaurants[Math.floor(Math.random() * allRestaurants.length)];
+      
+      const inspirationType = useChefInspiration ? 'chef' : 'restaurant';
+      console.log(`🎲 Selected ${inspirationType} inspiration for full recipe: ${selectedInspiration}`);
+      
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
             role: "system",
-            content: `You are Zest, Flavr's expert cooking assistant specialized in FLAVOR MAXIMIZATION. When a user makes an explicit recipe request, create a complete recipe that maximizes flavor while staying true to their intent.
+            content: `You are Zest, Flavr's expert cooking assistant specialized in FLAVOR MAXIMIZATION. When a user makes an explicit recipe request, create a complete recipe that maximizes flavor while staying true to their intent, drawing inspiration from ${selectedInspiration}.
 
 USER CONTEXT:
 ${preferencesContext}
+
+${inspirationType.toUpperCase()} INSPIRATION: ${selectedInspiration}
+${useChefInspiration ? 
+  `Channel ${selectedInspiration}'s cooking style, techniques, and flavor preferences while creating this recipe.` :
+  `Draw inspiration from ${selectedInspiration}'s signature flavors, ingredients, and cooking approach.`
+}
 
 CRITICAL FLAVOR MAXIMIZATION PRINCIPLES:
 
@@ -593,15 +624,15 @@ CRITICAL FLAVOR MAXIMIZATION PRINCIPLES:
 
 RECIPE FORMAT:
 Return a complete recipe object with:
-- Enhanced title reflecting flavor focus
+- Enhanced title reflecting flavor focus and ${selectedInspiration} inspiration
 - 4 servings
 - Complete ingredient list with specific quantities
 - Detailed step-by-step instructions emphasizing flavor-building techniques
 - Cooking time estimate
 - Difficulty level
-- Brief description highlighting flavor profile
+- Brief description highlighting flavor profile and inspiration
 
-ALWAYS maximize flavor while honoring the user's original request. Make it restaurant-quality delicious!`
+ALWAYS maximize flavor while honoring the user's original request and incorporating ${selectedInspiration}'s style. Make it restaurant-quality delicious!`
           },
           {
             role: "user",

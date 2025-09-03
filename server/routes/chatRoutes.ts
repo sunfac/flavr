@@ -327,38 +327,31 @@ Be warm like Zest - acknowledge the conversation context and provide practical, 
         // Extract additional context from user message for better suggestions
         const lowerMessage = message.toLowerCase();
         
-        // Check if this is a specific dish request that should bypass inspiration system
-        const isSpecificDishRequest = lowerMessage.includes('meatball') || 
-                                    lowerMessage.includes('meatballs') ||
-                                    lowerMessage.includes('burger') || 
-                                    lowerMessage.includes('pizza') ||
-                                    lowerMessage.includes('pancake') ||
-                                    lowerMessage.includes('pancakes') ||
-                                    lowerMessage.includes('stir fry') ||
-                                    lowerMessage.includes('curry') ||
-                                    lowerMessage.includes('pasta') ||
-                                    lowerMessage.includes('spaghetti') ||
-                                    lowerMessage.includes('lasagna') ||
-                                    lowerMessage.includes('risotto') ||
-                                    lowerMessage.includes('casserole') ||
-                                    lowerMessage.includes('sandwich') ||
-                                    lowerMessage.includes('wrap') ||
-                                    lowerMessage.includes('taco') ||
-                                    lowerMessage.includes('burrito') ||
-                                    lowerMessage.includes('quesadilla') ||
-                                    lowerMessage.includes('omelette') ||
-                                    lowerMessage.includes('omelet') ||
-                                    lowerMessage.includes('quiche') ||
-                                    lowerMessage.includes('frittata') ||
-                                    lowerMessage.includes('cake') ||
-                                    lowerMessage.includes('cookies') ||
-                                    lowerMessage.includes('bread') ||
-                                    lowerMessage.includes('muffin') ||
-                                    lowerMessage.includes('pie') ||
-                                    lowerMessage.includes('tart');
+        // Check if this is a FULL recipe idea that warrants direct generation
+        // Look for combination of specific dish + descriptive elements (ingredients, cooking method, flavors)
+        const dishTerms = ['meatball', 'meatballs', 'burger', 'pizza', 'pancake', 'pancakes', 'stir fry', 'curry', 'pasta', 'spaghetti', 'lasagna', 'risotto', 'casserole', 'sandwich', 'wrap', 'taco', 'burrito', 'quesadilla', 'omelette', 'omelet', 'quiche', 'frittata', 'cake', 'cookies', 'bread', 'muffin', 'pie', 'tart'];
+        const hasDishTerm = dishTerms.some(term => lowerMessage.includes(term));
         
-        // If this is a specific dish request, bypass inspiration and use direct flavor-maximized generation
-        if (isSpecificDishRequest) {
+        // Look for descriptive elements that indicate a full recipe idea
+        const descriptiveElements = [
+          // Cooking methods
+          'quick', 'slow cooked', 'roasted', 'grilled', 'baked', 'fried', 'steamed', 'braised',
+          // Flavor profiles  
+          'spicy', 'creamy', 'crispy', 'garlic', 'herb', 'lemon', 'cheesy', 'savory', 'sweet',
+          // Specific ingredients
+          'tomato', 'chicken', 'beef', 'pork', 'mushroom', 'spinach', 'cheese', 'bacon',
+          // Cuisine styles
+          'italian', 'thai', 'mexican', 'indian', 'chinese', 'mediterranean', 'asian',
+          // Recipe modifiers
+          'recipe', 'easy', 'healthy', 'vegetarian', 'vegan', 'gluten free'
+        ];
+        const hasDescriptiveElements = descriptiveElements.filter(element => lowerMessage.includes(element)).length >= 1;
+        
+        // Only bypass if it's a dish term + descriptive elements (indicating a full recipe idea)
+        const isFullRecipeIdea = hasDishTerm && hasDescriptiveElements && message.split(' ').length >= 3;
+        
+        // If this is a full recipe idea, bypass inspiration and use direct flavor-maximized generation with chef/restaurant inspiration
+        if (isFullRecipeIdea) {
           console.log('🎯 EXPLICIT DISH REQUEST: Bypassing inspiration system, using direct flavor-maximized recipe generation');
           
           try {
