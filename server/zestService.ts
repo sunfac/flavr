@@ -471,7 +471,7 @@ Respond with a valid JSON object in this exact format:
         provider: 'openai',
         model: 'gpt-4o',
         operation: 'recipe-modification',
-        inputTokens: prompt.length / 4, // Rough estimate
+        inputTokens: Math.round(prompt.length / 4), // Rough estimate
         requestData: { 
           originalRecipe: currentRecipe.title,
           modificationRequest: modificationRequest
@@ -495,14 +495,21 @@ Respond with a valid JSON object in this exact format:
         provider: 'openai',
         model: 'gpt-4o',
         operation: 'recipe-modification-completion',
-        outputTokens: (response.choices[0].message.content?.length || 0) / 4,
+        outputTokens: Math.round((response.choices[0].message.content?.length || 0) / 4),
         requestData: { 
           modificationSuccess: true,
           responseLength: response.choices[0].message.content?.length
         }
       });
 
-      const modifiedRecipe = JSON.parse(response.choices[0].message.content || '{}');
+      let responseContent = response.choices[0].message.content || '{}';
+      
+      // Clean up markdown formatting if present
+      if (responseContent.includes('```json')) {
+        responseContent = responseContent.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+      }
+      
+      const modifiedRecipe = JSON.parse(responseContent);
       
       console.log('✅ Recipe modification completed:', modifiedRecipe.title);
       return modifiedRecipe;

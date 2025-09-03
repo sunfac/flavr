@@ -304,14 +304,17 @@ Examples of NON-modification requests:
             );
             
             return res.json({
-              message: "Here's your updated recipe!",
+              message: "Perfect! I've updated your recipe with those changes.",
               isRecipeModification: true,
               modifiedRecipe: modifiedRecipe,
               streamingUpdate: true
             });
           } catch (error) {
             console.error('Error generating recipe modification:', error);
-            // Fall through to regular conversation
+            return res.json({
+              message: "I'd be happy to help modify your recipe! Could you be a bit more specific about what you'd like to change?",
+              isRecipeModification: false
+            });
           }
         }
       }

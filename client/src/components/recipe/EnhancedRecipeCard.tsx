@@ -673,7 +673,7 @@ function EnhancedRecipeCard({
             onSubstitute={handleIngredientSubstitute}
             onSubRecipe={handleSubRecipeRequest}
             recipeId={parseInt(recipe.id)}
-            className="md:h-[600px] md:sticky md:top-0"
+            className="md:h-auto md:max-h-[80vh] md:sticky md:top-4"
           />
 
           {/* Step Stack */}
