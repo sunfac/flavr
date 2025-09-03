@@ -392,44 +392,44 @@ export default function Subscribe() {
         onAuthRequired={() => navigate("/")}
       />
       
-      <main className="container mx-auto px-4 py-6 pt-24 relative z-10">
-        <div className="max-w-md mx-auto">
-          <div className="text-center mb-8">
+      <main className="container mx-auto px-4 py-6 pt-20 pb-20 relative z-10 min-h-screen flex items-center">
+        <div className="max-w-xs mx-auto w-full">
+          <div className="text-center mb-4">
             <div className="relative inline-block">
-              <Crown className="w-16 h-16 text-orange-400 mx-auto mb-4 drop-shadow-lg" />
-              <div className="absolute -inset-3 bg-orange-400/20 rounded-full blur-xl"></div>
+              <Crown className="w-12 h-12 text-orange-400 mx-auto mb-3 drop-shadow-lg" />
+              <div className="absolute -inset-2 bg-orange-400/20 rounded-full blur-lg"></div>
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">Almost there!</h1>
-            <p className="text-slate-300">Complete your payment to unlock unlimited recipes</p>
+            <h1 className="text-2xl font-bold text-white mb-2">Almost there!</h1>
+            <p className="text-slate-300 text-sm">Complete your payment to unlock unlimited recipes</p>
           </div>
           
           <div className="relative">
             <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl blur opacity-50"></div>
             <Card className="relative bg-slate-800/80 backdrop-blur-sm border-orange-500/30 border shadow-2xl">
-              <CardHeader className="text-center border-b border-slate-700/50">
-                <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-3 py-1 rounded-full text-sm font-medium inline-block mb-4">
+              <CardHeader className="text-center border-b border-slate-700/50 pb-4">
+                <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-2 py-1 rounded-full text-xs font-medium inline-block mb-3">
                   Flavr+ Premium
                 </div>
-                <CardTitle className="text-2xl font-bold text-white">£7.99/month</CardTitle>
-                <p className="text-slate-400 text-sm">Unlimited recipes • Cancel anytime</p>
+                <CardTitle className="text-xl font-bold text-white">£7.99/month</CardTitle>
+                <p className="text-slate-400 text-xs">Unlimited recipes • Cancel anytime</p>
               </CardHeader>
               
-              <CardContent className="pt-6 space-y-6">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm text-slate-300">
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <CardContent className="pt-3 space-y-3 px-3 pb-4">
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 text-xs text-slate-300">
+                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full flex-shrink-0"></div>
                     <span>Unlimited AI recipe generation</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-slate-300">
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <div className="flex items-center gap-2 text-xs text-slate-300">
+                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full flex-shrink-0"></div>
                     <span>HD recipe images with every recipe</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-slate-300">
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <div className="flex items-center gap-2 text-xs text-slate-300">
+                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full flex-shrink-0"></div>
                     <span>Priority customer support</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-slate-300">
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <div className="flex items-center gap-2 text-xs text-slate-300">
+                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full flex-shrink-0"></div>
                     <span>Advanced recipe customization</span>
                   </div>
                 </div>
@@ -440,9 +440,9 @@ export default function Subscribe() {
                     <SubscribeForm />
                   </Elements>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-8 space-y-4">
-                    <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full" />
-                    <p className="text-slate-400 text-sm">Setting up your subscription...</p>
+                  <div className="flex flex-col items-center justify-center py-4 space-y-2">
+                    <div className="animate-spin w-6 h-6 border-3 border-orange-500 border-t-transparent rounded-full" />
+                    <p className="text-slate-400 text-xs">Setting up your subscription...</p>
                   </div>
                 )}
               </CardContent>
