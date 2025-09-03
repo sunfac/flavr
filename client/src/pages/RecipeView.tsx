@@ -135,6 +135,18 @@ export default function RecipeView() {
     });
   };
 
+  // Handle recipe updates from chat bot
+  const handleRecipeUpdate = (updatedRecipe: any) => {
+    console.log('🔄 Recipe update received from chat bot:', updatedRecipe.title);
+    
+    // For now, just show success message since the chat bot handles live updates
+    // In the future, you could implement full recipe refresh here
+    toast({
+      title: "Recipe Updated",
+      description: "Your recipe has been successfully modified!",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-slate-900">
       <GlobalHeader />
@@ -172,6 +184,7 @@ export default function RecipeView() {
             variant="floating" 
             currentRecipe={recipe}
             currentMode={recipe.mode}
+            onRecipeUpdate={handleRecipeUpdate}
           />
         </div>
       </main>

@@ -10,9 +10,10 @@ interface FloatingChatButtonProps {
   variant?: "floating" | "fixed";
   currentRecipe?: any;
   currentMode?: string;
+  onRecipeUpdate?: (updatedRecipe: any) => void;
 }
 
-export default function FloatingChatButton({ className = "", variant = "floating", currentRecipe, currentMode }: FloatingChatButtonProps) {
+export default function FloatingChatButton({ className = "", variant = "floating", currentRecipe, currentMode, onRecipeUpdate }: FloatingChatButtonProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const handleToggleChat = () => {
@@ -122,6 +123,7 @@ export default function FloatingChatButton({ className = "", variant = "floating
                     onClose={handleCloseChat}
                     currentRecipe={currentRecipe}
                     currentMode={currentMode}
+                    onRecipeUpdate={onRecipeUpdate}
                   />
                 </motion.div>
               </>
@@ -254,6 +256,7 @@ export default function FloatingChatButton({ className = "", variant = "floating
                   onClose={handleCloseChat}
                   currentRecipe={currentRecipe}
                   currentMode={currentMode}
+                  onRecipeUpdate={onRecipeUpdate}
                 />
               </motion.div>
             </>

@@ -233,9 +233,10 @@ Keep it conversational and enthusiastic like you're recommending your favorite d
         // Check if this is a modification request
         const modificationKeywords = [
           'make it', 'make this', 'change', 'substitute', 'replace', 'swap', 
-          'vegan', 'vegetarian', 'gluten-free', 'dairy-free', 'spice', 'spicy',
+          'vegan', 'vegetarian', 'gluten-free', 'dairy-free', 'spice', 'spicy', 'spicier',
           'people', 'servings', 'double', 'half', 'healthier', 'easier',
-          'more', 'less', 'without', 'add', 'remove', 'different'
+          'more', 'less', 'without', 'add', 'remove', 'different',
+          'hotter', 'milder', 'kick', 'heat', 'chili', 'pepper', 'hot sauce'
         ];
         
         const isModificationRequest = modificationKeywords.some(keyword => 
