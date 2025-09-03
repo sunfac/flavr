@@ -304,34 +304,31 @@ export default function ChatBot({
         console.log('Generated recipe:', result.recipe);
         
         // Update the global recipe store with the generated recipe
-        recipeActions.setRecipeMeta({
+        const ingredients = (result.recipe.ingredients || []).map((ingredient: string, index: number) => ({
+          id: (index + 1).toString(),
+          text: ingredient,
+          checked: false
+        }));
+        
+        const steps = (result.recipe.instructions || []).map((instruction: string, index: number) => ({
+          id: (index + 1).toString(),
+          title: `Step ${index + 1}`,
+          description: instruction,
+          completed: false
+        }));
+        
+        // Use updateActiveRecipe to properly update the store
+        recipeActions.updateActiveRecipe({
           title: result.recipe.title,
           description: result.recipe.description || '',
           cookTime: result.recipe.cookTime || 30,
           servings: result.recipe.servings || 4,
           difficulty: result.recipe.difficulty || 'medium',
           cuisine: result.recipe.cuisine || '',
-          image: null
+          ingredients: ingredients,
+          instructions: steps,
+          tips: result.recipe.tips || ''
         });
-        
-        // Set ingredients
-        const ingredients = (result.recipe.ingredients || []).map((ingredient, index) => ({
-          id: index + 1,
-          text: ingredient,
-          checked: false
-        }));
-        recipeActions.setIngredients(ingredients);
-        
-        // Set instructions as steps
-        const steps = (result.recipe.instructions || []).map((instruction, index) => ({
-          id: index + 1,
-          description: instruction,
-          completed: false
-        }));
-        recipeActions.setSteps(steps);
-        
-        // Set servings
-        recipeActions.setServings(result.recipe.servings || 4);
         
         // Add success message to chat instead of toast
         const successMessage: ChatMessage = {
