@@ -7,11 +7,11 @@ import { animations } from '@/styles/tokens';
 
 // Common ingredients that might have sub-recipes
 const SUB_RECIPE_INGREDIENTS = [
-  'chilli drizzle', 'chili drizzle', 'harissa', 'pesto', 'chimichurri',
+  'chilli drizzle', 'chili drizzle', 'harissa paste', 'pesto', 'chimichurri',
   'tamarind chutney', 'mint chutney', 'salsa verde', 'tahini sauce',
   'sriracha mayo', 'garlic aioli', 'herb oil', 'compound butter',
   'spice mix', 'spice blend', 'curry paste', 'marinade',
-  'drizzle', 'chutney', 'sauce', 'paste', 'oil', 'mayo', 'aioli'
+  'drizzle', 'chutney', 'sauce', 'paste', 'mayo', 'aioli'
 ];
 
 function detectSubRecipe(ingredientText: string): { hasSubRecipe: boolean; subRecipe?: string; pageReference?: string } {
@@ -40,6 +40,14 @@ function detectSubRecipe(ingredientText: string): { hasSubRecipe: boolean; subRe
   }
   
   // Fallback to common ingredient detection
+  // Exclude basic pantry staples that shouldn't be sub-recipes
+  const excludeBasicIngredients = ['olive oil', 'vegetable oil', 'canola oil', 'butter', 'salt', 'pepper', 'flour', 'sugar'];
+  const isBasicIngredient = excludeBasicIngredients.some(basic => lowerText.includes(basic));
+  
+  if (isBasicIngredient) {
+    return { hasSubRecipe: false };
+  }
+  
   const foundSubRecipe = SUB_RECIPE_INGREDIENTS.find(subRecipe => 
     lowerText.includes(subRecipe)
   );

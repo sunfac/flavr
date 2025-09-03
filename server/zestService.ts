@@ -209,7 +209,25 @@ Make it personal, professional-quality, and optimized for maximum flavor impact.
         max_tokens: 1500
       });
 
-      return JSON.parse(response.choices[0].message.content || '{}');
+      const recipe = JSON.parse(response.choices[0].message.content || '{}');
+      
+      // Generate recipe image for chat-generated recipes
+      try {
+        const { generateRecipeImageWithImagen3, createRecipeImagePrompt } = await import('./imageGeneration');
+        const imagePrompt = createRecipeImagePrompt(recipe.title, recipe.ingredients, recipe.mood, recipe.cuisine);
+        const imageUrl = await generateRecipeImageWithImagen3(imagePrompt);
+        if (imageUrl) {
+          recipe.imageUrl = imageUrl;
+          console.log('✅ Recipe image generated for chat recipe:', recipe.title);
+        } else {
+          console.log('⚠️ Recipe image generation failed for chat recipe:', recipe.title);
+        }
+      } catch (imageError) {
+        console.error('Error generating image for chat recipe:', imageError);
+        // Continue without image - don't fail the entire recipe generation
+      }
+      
+      return recipe;
     } catch (error) {
       console.error('Error generating recipe:', error);
       throw error;
