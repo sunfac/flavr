@@ -122,7 +122,7 @@ export default function FloatingChatButton({ className = "", variant = "floating
                     isOpen={isChatOpen}
                     onClose={handleCloseChat}
                     currentRecipe={currentRecipe}
-                    currentMode={currentMode}
+                    currentMode={currentMode as "shopping" | "fridge" | "chef" | undefined}
                     onRecipeUpdate={onRecipeUpdate}
                   />
                 </motion.div>
@@ -263,7 +263,7 @@ export default function FloatingChatButton({ className = "", variant = "floating
                   isOpen={isChatOpen}
                   onClose={handleCloseChat}
                   currentRecipe={currentRecipe}
-                  currentMode={currentMode}
+                  currentMode={currentMode as "shopping" | "fridge" | "chef" | undefined}
                   onRecipeUpdate={onRecipeUpdate}
                 />
               </motion.div>

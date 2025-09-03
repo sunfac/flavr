@@ -66,6 +66,28 @@ export default function ChatBot({
   const actualIsOpen = isOpen !== undefined ? isOpen : true;
   const [message, setMessage] = useState("");
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
+
+  // Connect to global recipe store
+  const recipeStore = useRecipeStore();
+  
+  // Get current recipe data from store or props with full context
+  const getCurrentRecipeContext = () => {
+    const activeRecipe = currentRecipe || {
+      title: recipeStore.meta.title,
+      description: recipeStore.meta.description,
+      ingredients: recipeStore.ingredients,
+      instructions: recipeStore.instructions,
+      cookTime: recipeStore.meta.cookTime,
+      servings: recipeStore.meta.servings,
+      difficulty: recipeStore.meta.difficulty
+    };
+
+    return {
+      recipe: activeRecipe,
+      hasRecipe: !!(activeRecipe.title && activeRecipe.ingredients?.length > 0),
+      currentMode: currentMode
+    };
+  };
   
   // Generate unique key for current recipe to persist chat per recipe
   const getRecipeKey = () => {
@@ -198,29 +220,6 @@ export default function ChatBot({
     }
   }, [localMessages]);
 
-  // Get current recipe data from store or props with full context
-  const getCurrentRecipeContext = () => {
-    const activeRecipe = currentRecipe || {
-      title: recipeStore.meta.title,
-      description: recipeStore.meta.description,
-      cookTime: recipeStore.meta.cookTime,
-      servings: recipeStore.servings,
-      difficulty: recipeStore.meta.difficulty,
-      cuisine: recipeStore.meta.cuisine,
-      ingredients: recipeStore.ingredients.map(ing => ing.text),
-      instructions: recipeStore.steps.map(step => step.description),
-      tips: "",
-      image: recipeStore.meta.image
-    };
-
-    return {
-      recipe: activeRecipe,
-      mode: detectedMode,
-      currentStep: recipeStore.currentStep,
-      completedSteps: recipeStore.completedSteps,
-      activeTimers: Object.keys(timerStore.timers).filter(id => timerStore.timers[id].isActive)
-    };
-  };
 
   // Enhanced Zest chat with user memory and intent detection
   const sendMessageMutation = useMutation({
