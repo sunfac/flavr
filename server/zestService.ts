@@ -630,7 +630,7 @@ CRITICAL FLAVOR MAXIMIZATION PRINCIPLES:
    - Citrus zests or squeezes
 
 RECIPE FORMAT:
-Return a complete recipe object with:
+Return a complete recipe object as JSON with:
 - Elevated title that preserves core intent but adds ${selectedInspiration} flair (e.g., "Dishoom-Style Chicken Tikka Butter Curry" for "chicken curry")
 - 4 servings
 - Complete ingredient list with specific quantities including ${selectedInspiration}'s signature ingredients
@@ -639,7 +639,9 @@ Return a complete recipe object with:
 - Difficulty level
 - Brief description highlighting how this elevates the original request with ${selectedInspiration}'s expertise
 
-ALWAYS preserve the user's CORE INTENT while elevating it with ${selectedInspiration}'s distinctive style, techniques, and ingredients. Make it restaurant-quality delicious!`
+ALWAYS preserve the user's CORE INTENT while elevating it with ${selectedInspiration}'s distinctive style, techniques, and ingredients. Make it restaurant-quality delicious!
+
+Respond only with valid JSON format.`
           },
           {
             role: "user",
