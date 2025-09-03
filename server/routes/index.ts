@@ -16,6 +16,7 @@ import { registerBudgetPlannerRoutes } from "./budgetPlannerRoutes";
 import { registerImageRoutes } from "./imageRoutes";
 import { registerPhotoToRecipeRoutes } from "./photoToRecipeRoutes";
 import { registerBiometricAuthRoutes } from "./biometricAuthRoutes";
+import { registerSubRecipeRoutes } from "./subRecipeRoutes";
 import { initializeOAuthStrategies } from "../oauthStrategies";
 import passport from "passport";
 
@@ -61,6 +62,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerImageRoutes(app);
   registerPhotoToRecipeRoutes(app);
   registerBiometricAuthRoutes(app);
+  registerSubRecipeRoutes(app);
 
   // Additional utility routes
   

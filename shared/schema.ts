@@ -82,6 +82,11 @@ export const recipes = pgTable("recipes", {
   recipeText: text("recipe_text"), // full formatted recipe output
   isShared: boolean("is_shared").default(false),
   shareId: text("share_id").unique(), // for public sharing links
+  // Sub-recipe tracking
+  parentRecipeId: integer("parent_recipe_id"), // Links to parent recipe (self-reference)
+  isSubRecipe: boolean("is_sub_recipe").default(false),
+  subRecipeFor: text("sub_recipe_for"), // Which ingredient this is a sub-recipe for
+  subRecipeIds: jsonb("sub_recipe_ids").$type<number[]>(), // IDs of related sub-recipes
   createdAt: timestamp("created_at").defaultNow(),
 });
 

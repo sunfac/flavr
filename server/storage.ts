@@ -69,6 +69,10 @@ export interface IStorage {
   
   getAllRecipes(): Promise<Recipe[]>;
   deleteRecipe(id: number): Promise<void>;
+  
+  // Sub-recipe operations
+  getSubRecipes(parentRecipeId: number): Promise<Recipe[]>;
+  getParentRecipe(subRecipeId: number): Promise<Recipe | undefined>;
 }
 
 
@@ -428,6 +432,21 @@ export class DatabaseStorage implements IStorage {
           .where(eq(pseudoUsers.pseudoId, pseudoId));
       }
     }
+  }
+
+  // Sub-recipe operations
+  async getSubRecipes(parentRecipeId: number): Promise<Recipe[]> {
+    return await db.select().from(recipes)
+      .where(and(eq(recipes.parentRecipeId, parentRecipeId), eq(recipes.isSubRecipe, true)))
+      .orderBy(desc(recipes.createdAt));
+  }
+
+  async getParentRecipe(subRecipeId: number): Promise<Recipe | undefined> {
+    const subRecipe = await this.getRecipe(subRecipeId);
+    if (subRecipe?.parentRecipeId) {
+      return await this.getRecipe(subRecipe.parentRecipeId);
+    }
+    return undefined;
   }
 }
 

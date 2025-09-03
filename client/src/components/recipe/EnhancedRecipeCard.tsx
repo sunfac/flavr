@@ -61,6 +61,7 @@ import StepStack from './StepStack';
 import ProgressBar from './ProgressBar';
 import FooterSection from './FooterSection';
 import SubRecipeModal from './SubRecipeModal';
+import { RecipeNavigation } from './RecipeNavigation';
 import { animations, layout } from '@/styles/tokens';
 import SocialShareTools from '@/components/SocialShareTools';
 
@@ -639,6 +640,11 @@ function EnhancedRecipeCard({
           }}
         />
 
+        {/* Recipe Navigation - Sub-recipes and parent navigation */}
+        <div className="px-4 md:px-6 pb-4">
+          <RecipeNavigation recipeId={parseInt(recipe.id)} />
+        </div>
+
         {/* Main Grid - Responsive Layout */}
         <div 
           className="recipe-main-grid relative"
@@ -666,6 +672,7 @@ function EnhancedRecipeCard({
             ingredients={formattedIngredients}
             onSubstitute={handleIngredientSubstitute}
             onSubRecipe={handleSubRecipeRequest}
+            recipeId={parseInt(recipe.id)}
             className="md:h-[600px] md:sticky md:top-0"
           />
 

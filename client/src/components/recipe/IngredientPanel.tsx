@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { RefreshCw, Loader2, MessageCircle, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { SubRecipeButton } from './SubRecipeButton';
 import { animations } from '@/styles/tokens';
 
 // Common ingredients that might have sub-recipes
@@ -100,6 +101,7 @@ interface IngredientPanelProps {
   ingredients: ScaledIngredient[];
   onSubstitute: (id: string, currentIngredient: string) => void;
   onSubRecipe?: (ingredientText: string, subRecipeName: string) => void;
+  recipeId?: number; // Added for sub-recipe generation
   className?: string;
 }
 
@@ -107,6 +109,7 @@ export default function IngredientPanel({
   ingredients, 
   onSubstitute, 
   onSubRecipe,
+  recipeId,
   className = '' 
 }: IngredientPanelProps) {
   const [showScrollHint, setShowScrollHint] = useState(true);
@@ -154,6 +157,7 @@ export default function IngredientPanel({
                 ingredient={ingredient}
                 onSubstitute={onSubstitute}
                 onSubRecipe={onSubRecipe}
+                recipeId={recipeId}
               />
             ))}
           </div>
@@ -197,6 +201,7 @@ export default function IngredientPanel({
                 ingredient={ingredient}
                 onSubstitute={onSubstitute}
                 onSubRecipe={onSubRecipe}
+                recipeId={recipeId}
               />
             ))}
           </div>
@@ -209,11 +214,13 @@ export default function IngredientPanel({
 function IngredientSubstituteItem({ 
   ingredient, 
   onSubstitute,
-  onSubRecipe 
+  onSubRecipe,
+  recipeId 
 }: { 
   ingredient: ScaledIngredient; 
   onSubstitute: (id: string, currentIngredient: string) => void; 
   onSubRecipe?: (ingredientText: string, subRecipeName: string) => void;
+  recipeId?: number;
 }) {
   return (
     <motion.div
@@ -229,30 +236,15 @@ function IngredientSubstituteItem({
         {ingredient.text}
         {(() => {
           const subRecipeInfo = detectSubRecipe(ingredient.text);
-          if (subRecipeInfo.hasSubRecipe) {
-            const questionText = subRecipeInfo.pageReference 
-              ? `Show me the recipe for ${subRecipeInfo.subRecipe} from the cookbook photos`
-              : `How to make ${subRecipeInfo.subRecipe}?`;
-            
+          if (subRecipeInfo.hasSubRecipe && recipeId && subRecipeInfo.subRecipe) {
             return (
-              <button 
-                className="ml-2 inline-flex items-center gap-1 text-xs text-orange-400 hover:text-orange-300 underline transition-colors"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log('🍽️ Sub-recipe link clicked:', { ingredientText: ingredient.text, subRecipe: subRecipeInfo.subRecipe });
-                  if (onSubRecipe && subRecipeInfo.subRecipe) {
-                    onSubRecipe(ingredient.text, subRecipeInfo.subRecipe);
-                  } else {
-                    console.log('⚠️ onSubRecipe not available, falling back to substitution');
-                    onSubstitute(ingredient.id, questionText);
-                  }
-                }}
-                title={subRecipeInfo.pageReference ? `Referenced on ${subRecipeInfo.pageReference}` : 'Get recipe instructions'}
-              >
-                <ExternalLink className="w-3 h-3" />
-                {subRecipeInfo.pageReference ? 'Cookbook Recipe' : 'Recipe'}
-              </button>
+              <SubRecipeButton
+                recipeId={recipeId}
+                ingredientText={ingredient.text}
+                subRecipeName={subRecipeInfo.subRecipe}
+                pageReference={subRecipeInfo.pageReference}
+                className="ml-2 inline-block"
+              />
             );
           }
           return null;
@@ -282,11 +274,13 @@ function IngredientSubstituteItem({
 function IngredientMobileItem({ 
   ingredient, 
   onSubstitute,
-  onSubRecipe 
+  onSubRecipe,
+  recipeId 
 }: { 
   ingredient: ScaledIngredient; 
   onSubstitute: (id: string, currentIngredient: string) => void; 
   onSubRecipe?: (ingredientText: string, subRecipeName: string) => void;
+  recipeId?: number;
 }) {
   return (
     <motion.div
@@ -303,28 +297,15 @@ function IngredientMobileItem({
         {ingredient.text}
         {(() => {
           const subRecipeInfo = detectSubRecipe(ingredient.text);
-          if (subRecipeInfo.hasSubRecipe) {
-            const questionText = subRecipeInfo.pageReference 
-              ? `Show me the recipe for ${subRecipeInfo.subRecipe} from the cookbook photos`
-              : `How to make ${subRecipeInfo.subRecipe}?`;
-              
+          if (subRecipeInfo.hasSubRecipe && recipeId && subRecipeInfo.subRecipe) {
             return (
-              <button 
-                className="block mt-1 text-xs text-orange-400 hover:text-orange-300 underline transition-colors"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log('📱 Mobile sub-recipe link clicked:', { ingredientText: ingredient.text, subRecipe: subRecipeInfo.subRecipe });
-                  if (onSubRecipe && subRecipeInfo.subRecipe) {
-                    onSubRecipe(ingredient.text, subRecipeInfo.subRecipe);
-                  } else {
-                    console.log('⚠️ onSubRecipe not available, falling back to substitution');
-                    onSubstitute(ingredient.id, questionText);
-                  }
-                }}
-              >
-                {subRecipeInfo.pageReference ? 'Cookbook Recipe' : 'Get Recipe'}
-              </button>
+              <SubRecipeButton
+                recipeId={recipeId}
+                ingredientText={ingredient.text}
+                subRecipeName={subRecipeInfo.subRecipe}
+                pageReference={subRecipeInfo.pageReference}
+                className="block mt-1"
+              />
             );
           }
           return null;
