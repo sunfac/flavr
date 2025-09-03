@@ -1047,10 +1047,11 @@ ${dietaryPrompt}${meatPreferencePrompt}${mealSpecificPrompt}
 
 🚨 ABSOLUTE PRIMARY REQUIREMENT: The recipe title MUST EXACTLY fulfill the user's specific request: "${userIntent}"
 
-🚨 ACCESSIBILITY REQUIREMENTS - AVOID EXTRAVAGANT INGREDIENTS & TECHNIQUES:
-BANNED INGREDIENTS: truffle, caviar, foie gras, gold leaf, saffron, lobster, wagyu, uni, oysters, exotic mushrooms (matsutake, chanterelle), expensive cuts (dry-aged beef, rack of lamb)
-BANNED TECHNIQUES: fermentation, sous-vide, molecular gastronomy, spherification, liquid nitrogen, smoking (unless basic), curing, confit, multi-day marinades
-USE INSTEAD: accessible ingredients from supermarkets, simple roasting/grilling/pan-frying, standard cooking methods, common herbs and spices
+🚨 ACCESSIBILITY REQUIREMENTS - FAVOR EVERYDAY INGREDIENTS & TECHNIQUES:
+REDUCE USAGE: truffle, caviar, foie gras, gold leaf, wagyu, uni, exotic mushrooms (matsutake, chanterelle), expensive cuts (dry-aged beef, rack of lamb)
+OCCASIONAL USE ONLY: saffron, lobster, oysters (use sparingly, not as primary ingredients)
+MINIMIZE TECHNIQUES: fermentation, sous-vide, molecular gastronomy, spherification, liquid nitrogen, extensive curing, confit, multi-day marinades
+PRIORITIZE INSTEAD: accessible supermarket ingredients, simple roasting/grilling/pan-frying, standard cooking methods, common herbs and spices, affordable proteins
 
 🔥 CRITICAL HIERARCHY - FOLLOW THIS ORDER STRICTLY:
 1. DISH TYPE OVERRIDE: If user asks for sauce/salad/side/soup/dessert → ONLY suggest that exact type
