@@ -1049,7 +1049,7 @@ ${dietaryPrompt}${meatPreferencePrompt}${mealSpecificPrompt}
 
 🚨 ACCESSIBILITY REQUIREMENTS - FAVOR EVERYDAY INGREDIENTS & TECHNIQUES:
 REDUCE USAGE: truffle, caviar, foie gras, gold leaf, wagyu, uni, exotic mushrooms (matsutake, chanterelle), expensive cuts (dry-aged beef, rack of lamb)
-OCCASIONAL USE ONLY: saffron, lobster, oysters (use sparingly, not as primary ingredients)
+REDUCE FREQUENCY: saffron, lobster (allowed as primary ingredients but use less often - maybe 1 in 10 suggestions)
 MINIMIZE TECHNIQUES: fermentation, sous-vide, molecular gastronomy, spherification, liquid nitrogen, extensive curing, confit, multi-day marinades
 PRIORITIZE INSTEAD: accessible supermarket ingredients, simple roasting/grilling/pan-frying, standard cooking methods, common herbs and spices, affordable proteins
 
