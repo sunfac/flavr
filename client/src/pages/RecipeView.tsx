@@ -7,7 +7,6 @@ import { apiRequest } from "@/lib/queryClient";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
 import FloatingChatButton from "@/components/FloatingChatButton";
-import SocialShareTools from "@/components/SocialShareTools";
 import EnhancedRecipeCard from "@/components/recipe/EnhancedRecipeCard";
 
 interface Recipe {
@@ -175,23 +174,6 @@ export default function RecipeView() {
 
         {/* Additional Content Section */}
         <div className="max-w-7xl mx-auto px-6 py-8">
-          {/* Social Share Tools */}
-          <div className="mb-8">
-            <SocialShareTools
-              id={recipe.id.toString()}
-              shareId={recipe.shareId || undefined}
-              title={recipe.title}
-              description={recipe.description || ""}
-              imageUrl={recipe.imageUrl || undefined}
-              isShared={recipe.isShared || false}
-              onShareToggle={() => 
-                shareToggleMutation.mutate({
-                  id: recipe.id,
-                  isShared: !recipe.isShared
-                })
-              }
-            />
-          </div>
 
           {/* Floating AI Chef Chat Button */}
           <FloatingChatButton 
