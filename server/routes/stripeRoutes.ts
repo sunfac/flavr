@@ -65,11 +65,11 @@ export function registerStripeRoutes(app: Express) {
         expand: ['latest_invoice.payment_intent'],
       });
 
-      const invoice = subscription.latest_invoice;
+      const invoice = subscription.latest_invoice as Stripe.Invoice;
       if (!invoice || typeof invoice === 'string') {
         throw new Error('Failed to retrieve invoice');
       }
-      const paymentIntent = invoice.payment_intent;
+      const paymentIntent = (invoice as any).payment_intent as Stripe.PaymentIntent;
       if (!paymentIntent || typeof paymentIntent === 'string') {
         throw new Error('Failed to create payment intent');
       }
@@ -169,13 +169,13 @@ export function registerStripeRoutes(app: Express) {
           await storage.updateUserSubscription(user.id, {
             hasFlavrPlus: isActive,
             subscriptionStatus: subscription.status,
-            subscriptionEndDate: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
+            subscriptionEndDate: (subscription as any).current_period_end ? new Date((subscription as any).current_period_end * 1000) : null,
           });
 
           return res.json({
             hasFlavrPlus: isActive,
             subscriptionStatus: subscription.status,
-            currentPeriodEnd: subscription.current_period_end,
+            currentPeriodEnd: (subscription as any).current_period_end,
             cancelAtPeriodEnd: subscription.cancel_at_period_end,
           });
         } catch (stripeError) {
@@ -232,7 +232,7 @@ export function registerStripeRoutes(app: Express) {
             stripeSubscriptionId: subscription.id,
             stripeCustomerId: subscription.customer as string,
             subscriptionStartDate: new Date(subscription.start_date * 1000),
-            subscriptionEndDate: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
+            subscriptionEndDate: (subscription as any).current_period_end ? new Date((subscription as any).current_period_end * 1000) : null,
           });
           console.log(`✅ Updated subscription for user ${userId}: ${subscription.status}`);
         }
@@ -256,7 +256,7 @@ export function registerStripeRoutes(app: Express) {
 
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice;
-        const subscription = invoice.subscription;
+        const subscription = (invoice as any).subscription;
         
         if (subscription && typeof subscription === 'string') {
           const sub = await stripe.subscriptions.retrieve(subscription);
@@ -266,7 +266,7 @@ export function registerStripeRoutes(app: Express) {
             await storage.updateUserSubscription(parseInt(userId), {
               hasFlavrPlus: true,
               subscriptionStatus: 'active',
-              subscriptionRenewDate: sub.current_period_end ? new Date(sub.current_period_end * 1000) : null,
+              subscriptionRenewDate: (sub as any).current_period_end ? new Date((sub as any).current_period_end * 1000) : null,
             });
             console.log(`💰 Payment succeeded for user ${userId}`);
           }

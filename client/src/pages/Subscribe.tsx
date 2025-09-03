@@ -14,6 +14,7 @@ import GlobalFooter from "@/components/GlobalFooter";
 import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
 import Loading from "@/components/Loading";
+import { Crown } from "lucide-react";
 
 // Make sure to call `loadStripe` outside of a component's render to avoid
 // recreating the `Stripe` object on every render.
@@ -64,13 +65,25 @@ const SubscribeForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement />
+      <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+        <PaymentElement />
+      </div>
       <Button 
         type="submit" 
-        className="w-full bg-gradient-to-r from-primary to-accent text-white hover:from-primary/90 hover:to-accent/90"
+        className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-lg py-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
         disabled={!stripe || isProcessing}
       >
-        {isProcessing ? "Processing..." : "Subscribe to Flavr+"}
+        {isProcessing ? (
+          <div className="flex items-center gap-2">
+            <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
+            <span>Processing Payment...</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Crown className="w-5 h-5" />
+            <span>Subscribe to Flavr+</span>
+          </div>
+        )}
       </Button>
     </form>
   );
@@ -354,91 +367,101 @@ export default function Subscribe() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black relative overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-1/3 left-1/3 w-96 h-96 bg-orange-500 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/3 right-1/3 w-72 h-72 bg-orange-600 rounded-full blur-3xl"></div>
+      </div>
+      
       <GlobalHeader 
         onMenuClick={() => setShowNavigation(true)}
         onSettingsClick={() => setShowSettings(true)}
         onAuthRequired={() => navigate("/")}
       />
       
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-6 pt-24 relative z-10">
         <div className="max-w-md mx-auto">
-          <Card>
-            <CardHeader className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-accent to-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="fas fa-crown text-white text-2xl"></i>
-              </div>
-              <CardTitle className="font-playfair text-2xl">Upgrade to Flavr+</CardTitle>
-              <p className="text-muted-foreground">
-                Unlock unlimited recipes and premium features
-              </p>
-            </CardHeader>
-            
-            <CardContent className="space-y-6">
-              {/* Features list */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 text-sm">
-                  <i className="fas fa-check text-success"></i>
-                  <span>Unlimited AI recipe generation</span>
+          <div className="text-center mb-8">
+            <div className="relative inline-block">
+              <Crown className="w-16 h-16 text-orange-400 mx-auto mb-4 drop-shadow-lg" />
+              <div className="absolute -inset-3 bg-orange-400/20 rounded-full blur-xl"></div>
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2">Almost there!</h1>
+            <p className="text-slate-300">Complete your payment to unlock unlimited recipes</p>
+          </div>
+          
+          <div className="relative">
+            <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl blur opacity-50"></div>
+            <Card className="relative bg-slate-800/80 backdrop-blur-sm border-orange-500/30 border shadow-2xl">
+              <CardHeader className="text-center border-b border-slate-700/50">
+                <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-3 py-1 rounded-full text-sm font-medium inline-block mb-4">
+                  Flavr+ Premium
                 </div>
-                <div className="flex items-center space-x-3 text-sm">
-                  <i className="fas fa-check text-success"></i>
-                  <span>HD recipe images with every recipe</span>
+                <CardTitle className="text-2xl font-bold text-white">£7.99/month</CardTitle>
+                <p className="text-slate-400 text-sm">Unlimited recipes • Cancel anytime</p>
+              </CardHeader>
+              
+              <CardContent className="pt-6 space-y-6">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-sm text-slate-300">
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <span>Unlimited AI recipe generation</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-slate-300">
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <span>HD recipe images with every recipe</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-slate-300">
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <span>Priority customer support</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-slate-300">
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <span>Advanced recipe customization</span>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-3 text-sm">
-                  <i className="fas fa-check text-success"></i>
-                  <span>Priority customer support</span>
-                </div>
-                <div className="flex items-center space-x-3 text-sm">
-                  <i className="fas fa-check text-success"></i>
-                  <span>Advanced recipe customization</span>
-                </div>
-              </div>
 
-              {/* Pricing */}
-              <div className="text-center p-4 bg-muted rounded-lg">
-                <div className="text-2xl font-bold font-playfair text-foreground">£7.99</div>
-                <div className="text-sm text-muted-foreground">per month</div>
-              </div>
-
-              {/* Payment form */}
-              {clientSecret ? (
-                <Elements stripe={stripePromise} options={{ clientSecret }}>
-                  <SubscribeForm />
-                </Elements>
-              ) : (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-                </div>
-              )}
-
-              <div className="text-center">
-                <button 
-                  onClick={() => navigate("/settings")}
-                  className="text-muted-foreground text-sm hover:text-foreground transition-colors"
-                >
-                  Maybe Later
-                </button>
-              </div>
-            </CardContent>
-          </Card>
+                {/* Payment form */}
+                {clientSecret ? (
+                  <Elements stripe={stripePromise} options={{ clientSecret }}>
+                    <SubscribeForm />
+                  </Elements>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                    <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full" />
+                    <p className="text-slate-400 text-sm">Setting up your subscription...</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </main>
 
-      {/* Navigation Panel */}
+      <GlobalFooter />
+
+      {/* Navigation Menu */}
       {showNavigation && (
-        <GlobalNavigation onClose={() => setShowNavigation(false)} />
+        <GlobalNavigation 
+          onClose={() => setShowNavigation(false)}
+        />
       )}
 
       {/* Settings Panel */}
       {showSettings && (
-        <SettingsPanel onClose={() => setShowSettings(false)} />
+        <SettingsPanel 
+          onClose={() => setShowSettings(false)}
+        />
       )}
 
       {/* User Menu */}
       {showUserMenu && (
-        <UserMenu onClose={() => setShowUserMenu(false)} />
+        <UserMenu 
+          onClose={() => setShowUserMenu(false)}
+        />
       )}
     </div>
   );
+
 }

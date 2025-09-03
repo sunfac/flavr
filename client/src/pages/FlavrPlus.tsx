@@ -117,48 +117,82 @@ export default function FlavrPlus() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black relative overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-orange-500 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-600 rounded-full blur-3xl"></div>
+      </div>
+      
       <GlobalHeader 
         onMenuClick={() => openMenu('navigation')}
         onSettingsClick={() => openMenu('settings')}
         onAuthRequired={() => navigate("/")}
       />
       
-      <main className="pt-20 pb-24 px-4">
+      <main className="pt-20 pb-24 px-4 relative z-10">
         <div className="max-w-4xl mx-auto">
           {/* Hero Section */}
           <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-2 mb-6">
-              <Crown className="w-12 h-12 text-orange-400" />
-              <h1 className="text-4xl font-bold text-white">Flavr+</h1>
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="relative">
+                <Crown className="w-14 h-14 text-orange-400 drop-shadow-lg" />
+                <div className="absolute -inset-2 bg-orange-400/20 rounded-full blur-xl"></div>
+              </div>
+              <h1 className="text-5xl font-bold text-white bg-gradient-to-r from-white to-orange-100 bg-clip-text">Flavr+</h1>
             </div>
-            <p className="text-xl text-slate-400 max-w-2xl mx-auto">
+            <p className="text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
               Unlock the full power of AI-driven cooking with unlimited recipes, premium features, and exclusive content
             </p>
+            <div className="mt-6 flex items-center justify-center gap-2 text-orange-400">
+              <Sparkles className="w-5 h-5" />
+              <span className="text-sm font-medium">Join thousands of premium chefs</span>
+              <Sparkles className="w-5 h-5" />
+            </div>
           </div>
 
           {/* Pricing Card */}
-          <div className="max-w-lg mx-auto mb-12">
-            <Card className="bg-slate-800/50 border-orange-500/20 border-2">
+          <div className="max-w-lg mx-auto mb-12 relative">
+            <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl blur opacity-75"></div>
+            <Card className="relative bg-slate-800/80 backdrop-blur-sm border-orange-500/30 border-2 shadow-2xl">
               <CardHeader className="text-center pb-4">
-                <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-3 py-1 rounded-full text-sm font-medium inline-block mb-4">
-                  Most Popular
+                <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-full text-sm font-medium inline-block mb-6 shadow-lg">
+                  ⭐ Most Popular Choice
                 </div>
-                <CardTitle className="text-3xl font-bold text-white">£7.99</CardTitle>
-                <p className="text-slate-400">per month</p>
+                <div className="relative">
+                  <CardTitle className="text-4xl font-bold text-white mb-2">£7.99</CardTitle>
+                  <div className="absolute -top-2 -right-4 text-sm text-orange-400 font-medium">per month</div>
+                </div>
+                <p className="text-slate-300 text-sm">Unlimited access to everything</p>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-6">
                 <Button 
                   onClick={handleUpgradeClick}
                   size="lg"
-                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold mb-6"
+                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-lg py-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                 >
-                  <Crown className="w-5 h-5 mr-2" />
+                  <Crown className="w-6 h-6 mr-3" />
                   Start Your Flavr+ Journey
                 </Button>
                 
-                <div className="text-center text-sm text-slate-400">
-                  Cancel anytime • Secure payment with Stripe
+                <div className="flex items-center justify-center gap-6 text-xs text-slate-400">
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <span>Cancel anytime</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                    <span>Secure with Stripe</span>
+                  </div>
+                </div>
+                
+                <div className="text-center">
+                  <div className="text-xs text-slate-500 mb-2">Trusted by premium chefs worldwide</div>
+                  <div className="flex justify-center space-x-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 text-orange-400 fill-current" />
+                    ))}
+                  </div>
                 </div>
               </CardContent>
             </Card>
