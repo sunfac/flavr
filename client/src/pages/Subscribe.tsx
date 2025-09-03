@@ -30,6 +30,8 @@ const SubscribeForm = () => {
   const [, navigate] = useLocation();
   const [isProcessing, setIsProcessing] = useState(false);
 
+  console.log("SubscribeForm rendered:", { stripe: !!stripe, elements: !!elements });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -66,7 +68,11 @@ const SubscribeForm = () => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
-        <PaymentElement />
+        <PaymentElement 
+          options={{
+            layout: "tabs"
+          }}
+        />
       </div>
       <Button 
         type="submit" 
@@ -205,6 +211,7 @@ export default function Subscribe() {
             return;
           }
           const data = await res.json();
+          console.log("Subscription API response:", data);
           
           // Handle case where no payment is required
           if (data.status === 'no_payment_required') {
@@ -217,6 +224,7 @@ export default function Subscribe() {
             return;
           }
           
+          console.log("Setting clientSecret:", data.clientSecret ? "present" : "missing");
           setClientSecret(data.clientSecret);
         })
         .catch((error) => {
@@ -436,7 +444,21 @@ export default function Subscribe() {
 
                 {/* Payment form */}
                 {clientSecret ? (
-                  <Elements stripe={stripePromise} options={{ clientSecret }}>
+                  <Elements 
+                    stripe={stripePromise} 
+                    options={{ 
+                      clientSecret,
+                      appearance: {
+                        theme: 'night',
+                        variables: {
+                          colorPrimary: '#fb923c',
+                          colorBackground: '#1e293b',
+                          colorText: '#f1f5f9',
+                          colorDanger: '#ef4444'
+                        }
+                      }
+                    }}
+                  >
                     <SubscribeForm />
                   </Elements>
                 ) : (
