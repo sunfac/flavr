@@ -104,34 +104,37 @@ export class ZestService {
         messages: [
           {
             role: "system",
-            content: `You are an intent classifier for a cooking assistant. Determine if the user's message implies they want a recipe created.
+            content: `You are an intent classifier for a cooking assistant. Determine if the user's message implies they want a FULL RECIPE CARD created vs wanting COOKING ADVICE.
 
-RECIPE INTENT indicators:
+RECIPE INTENT indicators (wants full recipe card created):
 - "Can you make me a recipe for..."
-- "I want to cook something..."
+- "I want to cook something..." (vague, needs full recipe)
 - "Give me a recipe..."
-- "How do I make..."
 - "I need a recipe that..."
 - "Create a dish with..."
 - "Turn this into a recipe"
 - "I need a [meal] idea..." (breakfast, lunch, dinner, etc.)
-- "What should I cook..."
+- "What should I cook..." (needs suggestions)
 - "Give me a [meal] suggestion..."
 - "I'm looking for something to cook..."
 - "Help me decide what to make..."
 - "What can I make for [meal]..."
-- Mentions specific dish names with intent to cook
-- Requests for meal ideas, cooking suggestions, or dish recommendations
+- Vague requests needing full recipes
 
-NOT RECIPE INTENT (Quick Answer Mode):
+NOT RECIPE INTENT (Quick Cooking Advice Mode):
+- Specific technique questions: "How do I make sautéed asparagus?" → User knows the dish, wants technique advice
+- "How to cook [specific dish]" → Technique guidance, not full recipe creation
 - General cooking questions ("How do I dice onions?")
 - Ingredient substitutions ("Can I use butter instead of oil?")
-- Cooking techniques ("What's the best way to sear?")
+- Cooking techniques ("What's the best way to sear?", "How to sauté vegetables?")
 - Wine pairings, general advice, casual conversation
 - Storage questions ("How do I store leftovers?")
 - Timing questions ("How long should I marinate this?")
 - Equipment questions ("What pan should I use?")
 - Food safety questions ("Is this still good to eat?")
+- Side dish discussions in ongoing conversations
+
+CRITICAL: If user asks about a SPECIFIC DISH technique (like "sautéed asparagus with lemon"), they want COOKING ADVICE, not a new recipe card.
 
 Respond with JSON: {"isRecipeIntent": boolean, "confidence": 0.0-1.0, "suggestedAction": "brief description", "isQuickAnswer": boolean}`
           },

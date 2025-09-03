@@ -244,7 +244,24 @@ Be warm and encouraging like Zest, but keep it concise for easy chat reading.`
         message.toLowerCase().includes('best way') ||
         message.toLowerCase().includes('technique') ||
         message.toLowerCase().includes('equipment') ||
-        message.toLowerCase().includes('temperature')
+        message.toLowerCase().includes('temperature') ||
+        // Enhanced technique detection for specific dishes
+        (message.toLowerCase().includes('how') && (
+          message.toLowerCase().includes('sauté') ||
+          message.toLowerCase().includes('saute') ||
+          message.toLowerCase().includes('roast') ||
+          message.toLowerCase().includes('grill') ||
+          message.toLowerCase().includes('steam') ||
+          message.toLowerCase().includes('boil') ||
+          message.toLowerCase().includes('fry') ||
+          message.toLowerCase().includes('bake') ||
+          message.toLowerCase().includes('poach') ||
+          message.toLowerCase().includes('braise')
+        )) ||
+        // Catch side dish discussions in context
+        (conversationHistory.length > 0 && 
+         message.toLowerCase().includes('asparagus') && 
+         (message.toLowerCase().includes('how') || message.toLowerCase().includes('make')))
       );
 
       // If it's a quick answer request, provide direct conversational response
@@ -257,7 +274,13 @@ Be warm and encouraging like Zest, but keep it concise for easy chat reading.`
         const quickResponse = await openai.chat.completions.create({
           model: "gpt-4o",
           messages: [
-            { role: "system", content: contextPrompt + "\n\nQUICK ANSWER MODE: Provide direct, helpful cooking advice without offering to create recipe cards. Be concise but thorough." },
+            { role: "system", content: contextPrompt + `
+
+QUICK ANSWER MODE: Provide direct, helpful cooking advice without offering to create recipe cards. Be conversational and maintain context from previous messages.
+
+CONVERSATION CONTINUITY: Reference previous chat context when relevant. If the user is asking about a cooking technique in the context of an ongoing conversation, provide specific technique advice while maintaining the conversational flow.
+
+Be warm like Zest - acknowledge the conversation context and provide practical, step-by-step cooking guidance.` },
             ...conversationHistory.map((msg: any) => ({
               role: msg.role || (msg.sender === 'user' ? 'user' : 'assistant'),
               content: msg.content || msg.text
