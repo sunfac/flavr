@@ -35,6 +35,9 @@ export class SubRecipeService {
       'tamarind chutney', 'mint chutney', 'salsa verde', 'tahini sauce',
       'sriracha mayo', 'garlic aioli', 'herb oil', 'compound butter',
       'spice mix', 'spice blend', 'curry paste', 'marinade',
+      'fermented black garlic paste', 'black garlic paste', 'fermented garlic',
+      'homemade stock', 'vegetable stock', 'chicken stock', 'bone broth',
+      'pickled vegetables', 'fermented chili', 'herb paste',
       'homemade', 'fresh pasta', 'pizza dough', 'bread dough', 'pasta dough',
       'stock', 'broth', 'pickled', 'fermented', 'cured',
       // More specific sauce patterns to avoid catching basic condiments
@@ -86,8 +89,9 @@ export class SubRecipeService {
         continue;
       }
       
-      // Check for sub-recipe patterns
-      const foundPattern = subRecipePatterns.find(pattern => 
+      // Check for sub-recipe patterns (longest matches first for specificity)
+      const sortedPatterns = subRecipePatterns.sort((a, b) => b.length - a.length);
+      const foundPattern = sortedPatterns.find(pattern => 
         lowerIngredient.includes(pattern)
       );
       
@@ -96,12 +100,32 @@ export class SubRecipeService {
         let specificName = foundPattern;
         const words = lowerIngredient.split(/\s+/);
         
-        // Look for compound names
-        for (let i = 0; i < words.length - 1; i++) {
-          const compound = `${words[i]} ${words[i + 1]}`;
+        // Look for compound names (4-word combinations first, then 3-word, then 2-word)
+        for (let i = 0; i < words.length - 3; i++) {
+          const compound = `${words[i]} ${words[i + 1]} ${words[i + 2]} ${words[i + 3]}`;
           if (subRecipePatterns.includes(compound)) {
             specificName = compound;
             break;
+          }
+        }
+        
+        if (specificName === foundPattern) {
+          for (let i = 0; i < words.length - 2; i++) {
+            const compound = `${words[i]} ${words[i + 1]} ${words[i + 2]}`;
+            if (subRecipePatterns.includes(compound)) {
+              specificName = compound;
+              break;
+            }
+          }
+        }
+        
+        if (specificName === foundPattern) {
+          for (let i = 0; i < words.length - 1; i++) {
+            const compound = `${words[i]} ${words[i + 1]}`;
+            if (subRecipePatterns.includes(compound)) {
+              specificName = compound;
+              break;
+            }
           }
         }
         

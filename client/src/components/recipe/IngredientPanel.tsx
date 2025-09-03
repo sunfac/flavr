@@ -12,6 +12,9 @@ const SUB_RECIPE_INGREDIENTS = [
   'tamarind chutney', 'mint chutney', 'salsa verde', 'tahini sauce',
   'sriracha mayo', 'garlic aioli', 'herb oil', 'compound butter',
   'spice mix', 'spice blend', 'curry paste', 'marinade',
+  'fermented black garlic paste', 'black garlic paste', 'fermented garlic',
+  'homemade stock', 'vegetable stock', 'chicken stock', 'bone broth',
+  'pickled vegetables', 'fermented chili', 'herb paste',
   'drizzle', 'chutney', 'sauce', 'paste', 'mayo', 'aioli'
 ];
 
@@ -49,7 +52,9 @@ function detectSubRecipe(ingredientText: string): { hasSubRecipe: boolean; subRe
     return { hasSubRecipe: false };
   }
   
-  const foundSubRecipe = SUB_RECIPE_INGREDIENTS.find(subRecipe => 
+  // Sort by length (longest first) to prioritize more specific matches
+  const sortedSubRecipeIngredients = SUB_RECIPE_INGREDIENTS.sort((a, b) => b.length - a.length);
+  const foundSubRecipe = sortedSubRecipeIngredients.find(subRecipe => 
     lowerText.includes(subRecipe)
   );
   
@@ -59,21 +64,35 @@ function detectSubRecipe(ingredientText: string): { hasSubRecipe: boolean; subRe
     const words = ingredientText.toLowerCase().split(/\s+/);
     let specificName = foundSubRecipe;
     
-    // Look for compound names (e.g., "chilli drizzle", "tamarind chutney")
-    for (let i = 0; i < words.length - 1; i++) {
-      const compound = `${words[i]} ${words[i + 1]}`;
+    // Try to extract the exact ingredient name from the text
+    // Check for 4-word combinations first (most specific)
+    for (let i = 0; i < words.length - 3; i++) {
+      const compound = `${words[i]} ${words[i + 1]} ${words[i + 2]} ${words[i + 3]}`;
       if (SUB_RECIPE_INGREDIENTS.includes(compound)) {
         specificName = compound;
         break;
       }
     }
     
-    // Also try 3-word combinations
-    for (let i = 0; i < words.length - 2; i++) {
-      const compound = `${words[i]} ${words[i + 1]} ${words[i + 2]}`;
-      if (SUB_RECIPE_INGREDIENTS.includes(compound)) {
-        specificName = compound;
-        break;
+    // If not found, try 3-word combinations
+    if (specificName === foundSubRecipe) {
+      for (let i = 0; i < words.length - 2; i++) {
+        const compound = `${words[i]} ${words[i + 1]} ${words[i + 2]}`;
+        if (SUB_RECIPE_INGREDIENTS.includes(compound)) {
+          specificName = compound;
+          break;
+        }
+      }
+    }
+    
+    // Finally try 2-word combinations
+    if (specificName === foundSubRecipe) {
+      for (let i = 0; i < words.length - 1; i++) {
+        const compound = `${words[i]} ${words[i + 1]}`;
+        if (SUB_RECIPE_INGREDIENTS.includes(compound)) {
+          specificName = compound;
+          break;
+        }
       }
     }
     
