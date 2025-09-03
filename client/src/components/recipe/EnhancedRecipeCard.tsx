@@ -63,7 +63,6 @@ import FooterSection from './FooterSection';
 import SubRecipeModal from './SubRecipeModal';
 import { RecipeNavigation } from './RecipeNavigation';
 import { animations, layout } from '@/styles/tokens';
-import SocialShareTools from '@/components/SocialShareTools';
 
 interface Recipe {
   id: string;

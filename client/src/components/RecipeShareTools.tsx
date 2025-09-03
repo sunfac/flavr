@@ -566,23 +566,6 @@ Servings: ${recipe?.servings || 4}`;
             </p>
           </div>
 
-          {/* Copy Link Section */}
-          <div className="mt-6 p-4 bg-orange-500/10 border border-orange-500/20 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-orange-300 mb-1">Share Link</p>
-                <p className="text-xs text-orange-200 truncate">{publicUrl}</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigator.clipboard.writeText(publicUrl)}
-                className="ml-3 hover:bg-orange-500/20"
-              >
-                <iconMap.copy className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>
