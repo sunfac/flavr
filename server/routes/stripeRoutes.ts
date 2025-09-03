@@ -63,7 +63,20 @@ export function registerStripeRoutes(app: Express) {
 
       console.log("✅ Creating subscription with customer:", customerId);
       
-      // Create subscription with trial
+      // Check if user already has an incomplete subscription - clean it up first
+      const existingSubscriptions = await stripe.subscriptions.list({
+        customer: customerId,
+        status: 'incomplete',
+        limit: 10
+      });
+      
+      // Cancel any existing incomplete subscriptions
+      for (const existingSub of existingSubscriptions.data) {
+        console.log(`🗑️ Canceling existing incomplete subscription: ${existingSub.id}`);
+        await stripe.subscriptions.cancel(existingSub.id);
+      }
+
+      // Create subscription with proper payment collection
       const subscription = await stripe.subscriptions.create({
         customer: customerId,
         items: [{
@@ -72,6 +85,9 @@ export function registerStripeRoutes(app: Express) {
         payment_behavior: 'default_incomplete',
         payment_settings: { save_default_payment_method: 'on_subscription' },
         expand: ['latest_invoice.payment_intent'],
+        metadata: {
+          userId: user.id.toString(),
+        }
       });
 
       console.log("✅ Subscription created:", subscription.id);
@@ -91,7 +107,34 @@ export function registerStripeRoutes(app: Express) {
       
       // Handle case where no payment intent is needed (e.g., $0 amount, trial, etc.)
       if (!paymentIntent) {
-        console.log("ℹ️ No payment intent needed - invoice may be $0 or already paid");
+        console.log("ℹ️ No payment intent - checking if manual creation needed");
+        
+        // If there's an amount due but no payment intent, create one manually
+        if ((invoice as any).amount_due > 0) {
+          console.log("💰 Creating payment intent manually for amount:", (invoice as any).amount_due);
+          
+          const manualPaymentIntent = await stripe.paymentIntents.create({
+            amount: (invoice as any).amount_due,
+            currency: (invoice as any).currency || 'gbp',
+            customer: customerId,
+            metadata: {
+              subscriptionId: subscription.id,
+              invoiceId: (invoice as any).id,
+              userId: user.id.toString(),
+            },
+            automatic_payment_methods: {
+              enabled: true,
+            },
+          });
+          
+          console.log("✅ Manual payment intent created:", manualPaymentIntent.id);
+          
+          return res.json({ 
+            subscriptionId: subscription.id,
+            clientSecret: manualPaymentIntent.client_secret,
+            paymentIntentId: manualPaymentIntent.id,
+          });
+        }
         
         // If invoice is already paid or $0, subscription is ready
         if ((invoice as any).status === 'paid' || (invoice as any).amount_due === 0) {
@@ -305,6 +348,28 @@ export function registerStripeRoutes(app: Express) {
         break;
       }
 
+      case 'payment_intent.succeeded': {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        const userId = paymentIntent.metadata?.userId;
+        const subscriptionId = paymentIntent.metadata?.subscriptionId;
+        
+        if (userId && subscriptionId) {
+          // Update subscription status
+          const sub = await stripe.subscriptions.retrieve(subscriptionId);
+          await storage.updateUserSubscription(parseInt(userId), {
+            hasFlavrPlus: true,
+            subscriptionStatus: 'active',
+            subscriptionProvider: 'stripe',
+            stripeSubscriptionId: subscriptionId,
+            stripeCustomerId: sub.customer as string,
+            subscriptionStartDate: new Date(sub.start_date * 1000),
+            subscriptionRenewDate: (sub as any).current_period_end ? new Date((sub as any).current_period_end * 1000) : null,
+          });
+          console.log(`💰 Manual payment succeeded for user ${userId}, subscription ${subscriptionId}`);
+        }
+        break;
+      }
+
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice;
         const subscription = (invoice as any).subscription;
@@ -319,7 +384,7 @@ export function registerStripeRoutes(app: Express) {
               subscriptionStatus: 'active',
               subscriptionRenewDate: (sub as any).current_period_end ? new Date((sub as any).current_period_end * 1000) : null,
             });
-            console.log(`💰 Payment succeeded for user ${userId}`);
+            console.log(`💰 Invoice payment succeeded for user ${userId}`);
           }
         }
         break;
