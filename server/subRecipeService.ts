@@ -29,21 +29,38 @@ export class SubRecipeService {
   async detectPotentialSubRecipes(ingredients: string[]): Promise<Map<string, SubRecipeDetection>> {
     const detections = new Map<string, SubRecipeDetection>();
     
-    // Common sub-recipe patterns to look for
+    // Common sub-recipe patterns to look for (more specific to avoid false positives)
     const subRecipePatterns = [
       'chilli drizzle', 'chili drizzle', 'harissa paste', 'pesto', 'chimichurri',
       'tamarind chutney', 'mint chutney', 'salsa verde', 'tahini sauce',
       'sriracha mayo', 'garlic aioli', 'herb oil', 'compound butter',
       'spice mix', 'spice blend', 'curry paste', 'marinade',
-      'drizzle', 'chutney', 'sauce', 'paste', 'mayo', 'aioli',
-      'homemade pasta', 'fresh pasta', 'pizza dough', 'bread',
-      'stock', 'broth', 'pickled', 'fermented', 'cured'
+      'homemade', 'fresh pasta', 'pizza dough', 'bread dough', 'pasta dough',
+      'stock', 'broth', 'pickled', 'fermented', 'cured',
+      // More specific sauce patterns to avoid catching basic condiments
+      'herb sauce', 'cream sauce', 'butter sauce', 'wine sauce', 'reduction',
+      'hollandaise', 'béarnaise', 'beurre blanc', 'jus', 'gravy',
+      'relish', 'chutney', 'salsa', 'dressing', 'vinaigrette'
     ];
     
-    // Exclude basic ingredients that shouldn't become sub-recipes
+    // Exclude basic ingredients and store-bought condiments that shouldn't become sub-recipes
     const excludeBasicIngredients = [
       'olive oil', 'vegetable oil', 'canola oil', 'butter', 'salt', 'pepper', 
-      'flour', 'sugar', 'water', 'milk', 'eggs'
+      'flour', 'sugar', 'water', 'milk', 'eggs',
+      // Common condiments and sauces that are typically store-bought
+      'soy sauce', 'sriracha', 'worcestershire sauce', 'fish sauce', 'oyster sauce',
+      'balsamic vinegar', 'apple cider vinegar', 'white vinegar', 'red wine vinegar',
+      'honey', 'maple syrup', 'dijon mustard', 'whole grain mustard', 'yellow mustard',
+      'ketchup', 'tomato sauce', 'tomato paste', 'coconut milk', 'heavy cream',
+      'sesame oil', 'vanilla extract', 'lemon juice', 'lime juice', 'white wine',
+      'red wine', 'rice vinegar', 'mirin', 'sake', 'dark soy sauce', 'light soy sauce',
+      'hoisin sauce', 'hot sauce', 'tabasco', 'paprika', 'cumin', 'coriander',
+      'cinnamon', 'nutmeg', 'bay leaves', 'thyme', 'rosemary', 'oregano', 'basil',
+      'parsley', 'cilantro', 'garlic powder', 'onion powder', 'smoked paprika',
+      'cayenne pepper', 'black pepper', 'white pepper', 'red pepper flakes',
+      'italian seasoning', 'herbs de provence', 'five spice', 'garam masala',
+      'curry powder', 'turmeric', 'ginger powder', 'mustard seed', 'fennel seed',
+      'coriander seed', 'cardamom', 'star anise', 'cloves', 'allspice'
     ];
     
     for (const ingredient of ingredients) {
