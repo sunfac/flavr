@@ -8,7 +8,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2024-06-20",
+  apiVersion: "2025-08-27.basil",
 });
 
 // Define subscription prices (you'll need to create these in Stripe Dashboard)
@@ -65,7 +65,11 @@ export function registerStripeRoutes(app: Express) {
         expand: ['latest_invoice.payment_intent'],
       });
 
-      const paymentIntent = subscription.latest_invoice?.payment_intent;
+      const invoice = subscription.latest_invoice;
+      if (!invoice || typeof invoice === 'string') {
+        throw new Error('Failed to retrieve invoice');
+      }
+      const paymentIntent = invoice.payment_intent;
       if (!paymentIntent || typeof paymentIntent === 'string') {
         throw new Error('Failed to create payment intent');
       }
