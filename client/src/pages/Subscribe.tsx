@@ -32,10 +32,26 @@ const SubscribeForm = () => {
 
   console.log("SubscribeForm rendered:", { stripe: !!stripe, elements: !!elements });
 
+  // Don't render form until Stripe is ready
+  if (!stripe || !elements) {
+    return (
+      <div className="flex flex-col items-center justify-center py-6 space-y-3">
+        <div className="animate-spin w-6 h-6 border-3 border-orange-500 border-t-transparent rounded-full" />
+        <p className="text-slate-400 text-xs">Loading payment form...</p>
+      </div>
+    );
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!stripe || !elements) {
+      console.log("Stripe not ready - stripe:", !!stripe, "elements:", !!elements);
+      toast({
+        title: "Payment System Loading",
+        description: "Please wait for the payment form to load completely.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -400,7 +416,7 @@ export default function Subscribe() {
         onAuthRequired={() => navigate("/")}
       />
       
-      <main className="container mx-auto px-4 py-6 pt-20 pb-20 relative z-10 min-h-screen flex items-center">
+      <main className="container mx-auto px-4 py-6 pt-20 pb-32 relative z-10 min-h-screen flex items-center">
         <div className="max-w-xs mx-auto w-full">
           <div className="text-center mb-4">
             <div className="relative inline-block">
