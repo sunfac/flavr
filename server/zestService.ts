@@ -590,8 +590,8 @@ ${useChefInspiration ?
 }
 
 INTENT ELEVATION EXAMPLES:
-- "Chicken curry" → "${selectedInspiration}-Style Aromatic Chicken Tikka Masala" (if Dishoom) or "${selectedInspiration}'s Herb-Crusted Chicken Curry" (if Gordon Ramsay)
-- "Pasta" → "${selectedInspiration}-Style Handmade Pasta with [signature sauce]"
+- "Quick chicken curry" → "${selectedInspiration}-Style Aromatic Chicken Tikka Masala" (if Dishoom) or "${selectedInspiration}'s Herb-Crusted Chicken Curry" (if Gordon Ramsay)
+- "Tomato meatball recipe" → "${selectedInspiration}-Style Herb-Crusted Meatballs with Wine Reduction"
 - "Chocolate cake" → "${selectedInspiration}'s Rich Dark Chocolate [signature technique] Cake"
 
 KEY PRINCIPLE: Always preserve the user's CORE INTENT (chicken curry = chicken curry) but elevate it with specific techniques, ingredients, or styles that make it special and distinctive.

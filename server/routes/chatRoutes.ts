@@ -329,7 +329,7 @@ Be warm like Zest - acknowledge the conversation context and provide practical, 
         
         // Check if this is a FULL recipe idea that warrants direct generation
         // Look for combination of specific dish + descriptive elements (ingredients, cooking method, flavors)
-        const dishTerms = ['meatball', 'meatballs', 'burger', 'pizza', 'pancake', 'pancakes', 'stir fry', 'curry', 'pasta', 'spaghetti', 'lasagna', 'risotto', 'casserole', 'sandwich', 'wrap', 'taco', 'burrito', 'quesadilla', 'omelette', 'omelet', 'quiche', 'frittata', 'cake', 'cookies', 'bread', 'muffin', 'pie', 'tart'];
+        const dishTerms = ['meatball', 'meatballs', 'burger', 'pizza', 'pancake', 'pancakes', 'stir fry', 'curry', 'spaghetti', 'lasagna', 'risotto', 'casserole', 'sandwich', 'wrap', 'taco', 'burrito', 'quesadilla', 'omelette', 'omelet', 'quiche', 'frittata', 'cake', 'cookies', 'bread', 'muffin', 'pie', 'tart'];
         const hasDishTerm = dishTerms.some(term => lowerMessage.includes(term));
         
         // Look for descriptive elements that indicate a full recipe idea
