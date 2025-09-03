@@ -389,6 +389,7 @@ Keep it conversational and enthusiastic like you're recommending your favorite d
 
       return res.json({
         recipe: recipe,
+        savedRecipeId: savedRecipe?.id,
         message: "Here's your personalized recipe! I've created this based on your request and preferences. You can save it, modify it, or ask me any questions about the cooking process."
       });
 

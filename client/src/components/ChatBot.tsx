@@ -26,6 +26,7 @@ interface ChatMessage {
   isRecipeCreated?: boolean;
   recipeTitle?: string;
   suggestedRecipeTitle?: string;
+  savedRecipeId?: number;
 }
 
 interface Recipe {
@@ -352,7 +353,8 @@ export default function ChatBot({
           text: `✅ Success! ${result.recipe.title} has been created and is ready to cook.`,
           timestamp: new Date(),
           isRecipeCreated: true,
-          recipeTitle: result.recipe.title
+          recipeTitle: result.recipe.title,
+          savedRecipeId: result.savedRecipeId
         };
         
         setLocalMessages(prev => [...prev, successMessage]);
@@ -625,15 +627,27 @@ export default function ChatBot({
                       <Button
                         size="sm"
                         onClick={() => {
-                          // For unauthenticated users, navigate to a temporary recipe view
-                          // For authenticated users, close chat normally
+                          // Navigate to the generated recipe
                           if (!isAuthenticated) {
                             // Create temporary recipe view URL and navigate
                             const recipeData = encodeURIComponent(JSON.stringify(recipeStore));
                             window.location.href = `/temp-recipe?data=${recipeData}`;
                           } else {
-                            // Normal authenticated flow - close chat and recipe should be displayed
+                            // For authenticated users, navigate to the recipe view page
+                            // First close the chat, then navigate
                             if (onClose) onClose();
+                            
+                            // Navigate to the recipe view after a brief delay
+                            setTimeout(() => {
+                              // Use the saved recipe ID from the message if available
+                              const savedRecipeId = msg.savedRecipeId;
+                              if (savedRecipeId) {
+                                window.location.href = `/recipe/${savedRecipeId}`;
+                              } else {
+                                // Fallback: navigate to recipes list and it will show the latest recipe
+                                window.location.href = '/recipes';
+                              }
+                            }, 100);
                           }
                         }}
                         className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs px-3 py-1 flex items-center gap-2"
