@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { iconMap } from "@/lib/iconMap";
 import { motion, AnimatePresence } from "framer-motion";
@@ -56,52 +57,75 @@ export default function FloatingChatButton({ className = "", variant = "floating
           </div>
         </div>
 
-        {/* Chat Panel - Slide from Right */}
-        <AnimatePresence>
-          {isChatOpen && (
-            <>
-              {/* Desktop Backdrop */}
-              <motion.div
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] hidden md:block"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={handleCloseChat}
-              />
-              
-              {/* Slide-out Panel */}
-              <motion.div
-                className="fixed inset-0 md:top-0 md:right-0 md:left-auto md:bottom-0 h-screen md:h-full w-full md:w-96 bg-slate-900 shadow-2xl flex flex-col"
-                style={{ zIndex: 99999 }}
-                initial={{ x: "100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "100%" }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 300, 
-                  damping: 30 
-                }}
-              >
-                {/* Retract Arrow - Mobile Only */}
-                <div className="md:hidden absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full" style={{ zIndex: 100000 }}>
-                  <Button
-                    onClick={handleCloseChat}
-                    className="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-l-lg shadow-lg border-r-0"
-                    size="sm"
-                  >
-                    <iconMap.chevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                <ChatBot
-                  isOpen={isChatOpen}
-                  onClose={handleCloseChat}
-                  currentRecipe={undefined}
+        {/* Chat Panel - Portal to Body */}
+        {typeof window !== "undefined" && createPortal(
+          <AnimatePresence>
+            {isChatOpen && (
+              <>
+                {/* Desktop Backdrop */}
+                <motion.div
+                  className="fixed inset-0 bg-black/60 backdrop-blur-sm hidden md:block"
+                  style={{ 
+                    zIndex: 2147483647,
+                    position: 'fixed !important',
+                    top: '0 !important',
+                    left: '0 !important',
+                    right: '0 !important',
+                    bottom: '0 !important'
+                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={handleCloseChat}
                 />
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
+                
+                {/* Slide-out Panel */}
+                <motion.div
+                  className="bg-slate-900 shadow-2xl flex flex-col"
+                  style={{ 
+                    zIndex: 2147483647,
+                    position: 'fixed',
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    left: typeof window !== 'undefined' && window.innerWidth >= 768 ? 'auto' : 0,
+                    width: typeof window !== 'undefined' && window.innerWidth >= 768 ? '384px' : '100%',
+                    height: '100vh'
+                  }}
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 300, 
+                    damping: 30 
+                  }}
+                >
+                  {/* Retract Arrow - Mobile Only */}
+                  <div 
+                    className="md:hidden absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full"
+                    style={{ zIndex: 2147483647 }}
+                  >
+                    <Button
+                      onClick={handleCloseChat}
+                      className="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-l-lg shadow-lg border-r-0"
+                      size="sm"
+                    >
+                      <iconMap.chevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  <ChatBot
+                    isOpen={isChatOpen}
+                    onClose={handleCloseChat}
+                    currentRecipe={undefined}
+                  />
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
       </>
     );
   }
@@ -164,53 +188,75 @@ export default function FloatingChatButton({ className = "", variant = "floating
         </div>
       </motion.div>
 
-      {/* Chat Panel - Slide from Right */}
-      <AnimatePresence>
-        {isChatOpen && (
-          <>
-            {/* Desktop Backdrop */}
-            <motion.div
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm hidden md:block"
-              style={{ zIndex: 99998 }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={handleCloseChat}
-            />
-            
-            {/* Slide-out Panel */}
-            <motion.div
-              className="fixed inset-0 md:top-0 md:right-0 md:left-auto md:bottom-0 h-screen md:h-full w-full md:w-96 bg-slate-900 shadow-2xl flex flex-col"
-              style={{ zIndex: 99999 }}
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ 
-                type: "spring", 
-                stiffness: 300, 
-                damping: 30 
-              }}
-            >
-              {/* Retract Arrow - Mobile Only */}
-              <div className="md:hidden absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full" style={{ zIndex: 100000 }}>
-                <Button
-                  onClick={handleCloseChat}
-                  className="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-l-lg shadow-lg border-r-0"
-                  size="sm"
-                >
-                  <iconMap.chevronRight className="w-4 h-4" />
-                </Button>
-              </div>
-
-              <ChatBot
-                isOpen={isChatOpen}
-                onClose={handleCloseChat}
-                currentRecipe={undefined}
+      {/* Chat Panel - Portal to Body */}
+      {typeof window !== "undefined" && createPortal(
+        <AnimatePresence>
+          {isChatOpen && (
+            <>
+              {/* Desktop Backdrop */}
+              <motion.div
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm hidden md:block"
+                style={{ 
+                  zIndex: 2147483647,
+                  position: 'fixed !important',
+                  top: '0 !important',
+                  left: '0 !important',
+                  right: '0 !important',
+                  bottom: '0 !important'
+                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={handleCloseChat}
               />
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+              
+              {/* Slide-out Panel */}
+              <motion.div
+                className="bg-slate-900 shadow-2xl flex flex-col"
+                style={{ 
+                  zIndex: 2147483647,
+                  position: 'fixed',
+                  top: 0,
+                  right: 0,
+                  bottom: 0,
+                  left: typeof window !== 'undefined' && window.innerWidth >= 768 ? 'auto' : 0,
+                  width: typeof window !== 'undefined' && window.innerWidth >= 768 ? '384px' : '100%',
+                  height: '100vh'
+                }}
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 300, 
+                  damping: 30 
+                }}
+              >
+                {/* Retract Arrow - Mobile Only */}
+                <div 
+                  className="md:hidden absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full"
+                  style={{ zIndex: 2147483647 }}
+                >
+                  <Button
+                    onClick={handleCloseChat}
+                    className="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-l-lg shadow-lg border-r-0"
+                    size="sm"
+                  >
+                    <iconMap.chevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                <ChatBot
+                  isOpen={isChatOpen}
+                  onClose={handleCloseChat}
+                  currentRecipe={undefined}
+                />
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 }
