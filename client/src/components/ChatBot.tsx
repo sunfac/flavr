@@ -715,8 +715,8 @@ export default function ChatBot({
             )}
           </div>
 
-          {/* Suggestion Chips - Always show at start of conversation */}
-          {(localMessages.length <= 1 || (showSuggestions && localMessages.length <= 2)) && (
+          {/* Suggestion Chips - Keep visible throughout conversation */}
+          {showSuggestions && (
             <div className="px-3 sm:px-4 py-3 border-t border-slate-700/50 flex-shrink-0 bg-slate-900/50">
               <div className="text-xs text-slate-400 mb-2">Quick suggestions:</div>
               <div 

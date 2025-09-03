@@ -42,7 +42,9 @@ export function registerChatRoutes(app: Express) {
       console.log('🧠 Zest chat request:', { 
         message: message.substring(0, 100) + '...', 
         userId: userContext.userId,
-        hasCurrentRecipe: !!currentRecipe 
+        hasCurrentRecipe: !!currentRecipe,
+        currentRecipeTitle: currentRecipe?.title,
+        currentRecipeIngredients: currentRecipe?.ingredients?.length || 0
       });
 
       // Load user memory and preferences
@@ -57,8 +59,8 @@ export function registerChatRoutes(app: Express) {
       const intentResult = await zestService.detectRecipeIntent(message);
       console.log('🎯 Intent detection:', intentResult);
 
-      // If recipe intent detected AND no current recipe exists, offer to create new recipe
-      if (intentResult.isRecipeIntent && intentResult.confidence >= 0.7 && !currentRecipe) {
+      // If recipe intent detected AND no valid current recipe exists, offer to create new recipe
+      if (intentResult.isRecipeIntent && intentResult.confidence >= 0.7 && (!currentRecipe || !currentRecipe.title || !currentRecipe.ingredients || currentRecipe.ingredients.length === 0)) {
         // Use the smart inspiration system with enhanced context for user intent
         const { ChefAssistGPT5 } = await import('../chefAssistGPT5');
         const clientId = req.ip || 'anonymous';
@@ -226,8 +228,8 @@ Keep it conversational and enthusiastic like you're recommending your favorite d
         return res.json(confirmationResponse);
       }
 
-      // Handle recipe modifications when a current recipe exists
-      if (currentRecipe) {
+      // Handle recipe modifications ONLY when a current recipe exists AND has proper content
+      if (currentRecipe && currentRecipe.title && currentRecipe.ingredients && currentRecipe.ingredients.length > 0) {
         console.log('🔧 Recipe modification request detected with current recipe:', currentRecipe.title);
         
         // Use AI to intelligently detect if this is a recipe modification request
