@@ -327,28 +327,57 @@ Be warm like Zest - acknowledge the conversation context and provide practical, 
         // Extract additional context from user message for better suggestions
         const lowerMessage = message.toLowerCase();
         
-        // Check if this is a FULL recipe idea that warrants direct generation
-        // Look for combination of specific dish + descriptive elements (ingredients, cooking method, flavors)
-        const dishTerms = ['meatball', 'meatballs', 'burger', 'pizza', 'pancake', 'pancakes', 'stir fry', 'curry', 'spaghetti', 'lasagna', 'risotto', 'casserole', 'sandwich', 'wrap', 'taco', 'burrito', 'quesadilla', 'omelette', 'omelet', 'quiche', 'frittata', 'cake', 'cookies', 'bread', 'muffin', 'pie', 'tart'];
-        const hasDishTerm = dishTerms.some(term => lowerMessage.includes(term));
+        // Use AI to intelligently assess if this is a complete recipe idea that warrants direct generation
+        console.log('🧠 Analyzing user intent for bypass potential:', message);
         
-        // Look for descriptive elements that indicate a full recipe idea
-        const descriptiveElements = [
-          // Cooking methods
-          'quick', 'slow cooked', 'roasted', 'grilled', 'baked', 'fried', 'steamed', 'braised',
-          // Flavor profiles  
-          'spicy', 'creamy', 'crispy', 'garlic', 'herb', 'lemon', 'cheesy', 'savory', 'sweet',
-          // Specific ingredients
-          'tomato', 'chicken', 'beef', 'pork', 'mushroom', 'spinach', 'cheese', 'bacon',
-          // Cuisine styles
-          'italian', 'thai', 'mexican', 'indian', 'chinese', 'mediterranean', 'asian',
-          // Recipe modifiers
-          'recipe', 'easy', 'healthy', 'vegetarian', 'vegan', 'gluten free'
-        ];
-        const hasDescriptiveElements = descriptiveElements.filter(element => lowerMessage.includes(element)).length >= 1;
+        const intentAnalysis = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: `You are an intent analysis expert. Determine if a user's message contains enough specific information to warrant direct recipe generation (bypassing inspiration system) or if it's too vague and needs inspiration suggestions.
+
+BYPASS CRITERIA - User message should contain:
+1. A clear dish/food type (not just "dinner" or "something")
+2. Specific elements like ingredients, cooking methods, flavors, or style
+3. Enough detail to create a targeted recipe
+
+EXAMPLES THAT SHOULD BYPASS:
+- "quick tomato meatball recipe" ✅ (dish + method + ingredient)
+- "spicy chicken curry" ✅ (dish + flavor profile)  
+- "garlic herb roasted vegetables" ✅ (cooking method + flavors + food)
+- "chocolate chip cookies" ✅ (specific dish type)
+- "italian sausage pasta" ✅ (ingredient + cuisine + dish)
+- "creamy mushroom risotto" ✅ (texture + ingredient + specific dish)
+
+EXAMPLES THAT NEED INSPIRATION:
+- "pasta" ❌ (too vague)
+- "something for dinner" ❌ (no specifics)
+- "healthy food" ❌ (too broad)
+- "I'm hungry" ❌ (no recipe intent)
+- "what should I cook" ❌ (asking for suggestions)
+
+Respond with JSON: {"shouldBypass": true/false, "confidence": 0-1, "reasoning": "brief explanation"}`
+            },
+            {
+              role: "user", 
+              content: message
+            }
+          ],
+          max_tokens: 150,
+          temperature: 0.1,
+          response_format: { type: "json_object" }
+        });
+
+        const analysis = JSON.parse(intentAnalysis.choices[0].message.content || '{"shouldBypass": false, "confidence": 0}');
+        const isFullRecipeIdea = analysis.shouldBypass && analysis.confidence >= 0.7;
         
-        // Only bypass if it's a dish term + descriptive elements (indicating a full recipe idea)
-        const isFullRecipeIdea = hasDishTerm && hasDescriptiveElements && message.split(' ').length >= 3;
+        console.log('🧠 Intent analysis result:', {
+          shouldBypass: analysis.shouldBypass,
+          confidence: analysis.confidence,
+          reasoning: analysis.reasoning,
+          willBypass: isFullRecipeIdea
+        });
         
         // If this is a full recipe idea, bypass inspiration and use direct flavor-maximized generation with chef/restaurant inspiration
         if (isFullRecipeIdea) {
