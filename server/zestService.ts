@@ -2,6 +2,7 @@ import { db } from "./db";
 import { userPreferences, chatMessages, recipes, users, pseudoUsers } from "@shared/schema";
 import { eq, desc, and } from "drizzle-orm";
 import OpenAI from "openai";
+import { aiCostTracker } from "./aiCostTracker";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -139,6 +140,18 @@ Respond with JSON: {"isRecipeIntent": boolean, "confidence": 0.0-1.0, "suggested
         max_tokens: 150
       });
 
+      // Track cost for intent detection
+      await aiCostTracker.trackCost({
+        userId: undefined, // Intent detection doesn't need user tracking
+        provider: 'openai',
+        model: 'gpt-4o',
+        operation: 'intent-detection',
+        inputTokens: response.usage?.prompt_tokens,
+        outputTokens: response.usage?.completion_tokens,
+        requestData: { messageLength: message.length },
+        responseData: { maxTokens: 150 }
+      });
+
       const result = JSON.parse(response.choices[0].message.content || '{}');
       return {
         isRecipeIntent: result.isRecipeIntent || false,
@@ -209,6 +222,19 @@ Make it personal, professional-quality, and optimized for maximum flavor impact.
         max_tokens: 1500
       });
 
+      // Track cost for recipe generation
+      await aiCostTracker.trackCost({
+        userId: context.userId,
+        sessionId: context.pseudoUserId?.toString(),
+        provider: 'openai',
+        model: 'gpt-4o',
+        operation: 'recipe-generation',
+        inputTokens: response.usage?.prompt_tokens,
+        outputTokens: response.usage?.completion_tokens,
+        requestData: { userMessage, hasPreferences: !!memory.preferences },
+        responseData: { maxTokens: 1500 }
+      });
+
       const recipe = JSON.parse(response.choices[0].message.content || '{}');
       
       // Generate recipe image for chat-generated recipes
@@ -216,6 +242,18 @@ Make it personal, professional-quality, and optimized for maximum flavor impact.
         const { generateRecipeImageWithImagen3, createRecipeImagePrompt } = await import('./imageGeneration');
         const imagePrompt = createRecipeImagePrompt(recipe.title, recipe.ingredients, recipe.mood, recipe.cuisine);
         const imageUrl = await generateRecipeImageWithImagen3(imagePrompt);
+        
+        // Track image generation cost
+        await aiCostTracker.trackCost({
+          userId: context.userId,
+          sessionId: context.pseudoUserId?.toString(),
+          provider: 'google',
+          model: 'imagen-3',
+          operation: 'image-generation',
+          fixedCostUsd: '0.04', // Google Imagen 3 pricing
+          requestData: { prompt: imagePrompt, recipe: recipe.title }
+        });
+        
         if (imageUrl) {
           recipe.imageUrl = imageUrl;
           console.log('✅ Recipe image generated for chat recipe:', recipe.title);
@@ -224,6 +262,20 @@ Make it personal, professional-quality, and optimized for maximum flavor impact.
         }
       } catch (imageError) {
         console.error('Error generating image for chat recipe:', imageError);
+        // Still track the cost even if it failed
+        try {
+          await aiCostTracker.trackCost({
+            userId: context.userId,
+            sessionId: context.pseudoUserId?.toString(),
+            provider: 'google',
+            model: 'imagen-3',
+            operation: 'image-generation-failed',
+            fixedCostUsd: '0.00',
+            requestData: { error: imageError instanceof Error ? imageError.message : 'Unknown error' }
+          });
+        } catch (trackError) {
+          console.error('Error tracking failed image generation cost:', trackError);
+        }
         // Continue without image - don't fail the entire recipe generation
       }
       

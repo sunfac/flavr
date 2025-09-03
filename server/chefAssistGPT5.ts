@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import crypto from "crypto";
+import { aiCostTracker } from "./aiCostTracker";
 
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY 

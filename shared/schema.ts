@@ -120,6 +120,24 @@ export const developerLogs = pgTable("developer_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// AI Cost tracking for developer analytics
+export const aiCosts = pgTable("ai_costs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  sessionId: text("session_id"), // For anonymous users
+  provider: text("provider").notNull(), // openai, google, replicate, etc.
+  model: text("model"), // gpt-4o, gemini-pro, etc.
+  operation: text("operation").notNull(), // recipe-generation, chat, image-generation, etc.
+  inputTokens: integer("input_tokens"),
+  outputTokens: integer("output_tokens"),
+  totalTokens: integer("total_tokens"),
+  costUsd: text("cost_usd").notNull(), // Store as string to avoid floating point issues
+  requestData: jsonb("request_data").$type<Record<string, any>>(), // Additional context
+  responseData: jsonb("response_data").$type<Record<string, any>>(), // Response metadata
+  timestamp: timestamp("timestamp").defaultNow(),
+  monthYear: text("month_year").notNull(), // Format: "YYYY-MM" for easy monthly aggregation
+});
+
 // Enhanced recipe generation logs for analytics and AI training
 export const recipeGenerationLogs = pgTable("recipe_generation_logs", {
   id: serial("id").primaryKey(),
@@ -292,6 +310,11 @@ export const insertUserPreferencesSchema = createInsertSchema(userPreferences).o
   lastUpdated: true,
 });
 
+export const insertAiCostSchema = createInsertSchema(aiCosts).omit({
+  id: true,
+  timestamp: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertPseudoUser = z.infer<typeof insertPseudoUserSchema>;
@@ -308,3 +331,5 @@ export type InsertInteractionLog = z.infer<typeof insertInteractionLogSchema>;
 export type InteractionLog = typeof interactionLogs.$inferSelect;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
 export type UserPreferences = typeof userPreferences.$inferSelect;
+export type InsertAiCost = z.infer<typeof insertAiCostSchema>;
+export type AiCost = typeof aiCosts.$inferSelect;

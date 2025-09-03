@@ -22,6 +22,7 @@ import RecipeCardTest from "@/pages/RecipeCardTest";
 import DeveloperLogs from "@/pages/DeveloperLogs";
 import DeveloperRecipes from "@/pages/DeveloperRecipes";
 import ImageMigration from "@/pages/ImageMigration";
+import AICostsDashboard from "@/pages/developer/AICostsDashboard";
 import PhotoToRecipe from "@/pages/PhotoToRecipe";
 import DiagnosticPage from "@/pages/DiagnosticPage";
 import NotFound from "@/pages/not-found";
@@ -62,6 +63,7 @@ function Router() {
       <Route path="/developer-logs" component={DeveloperLogs} />
       <Route path="/developer-recipes" component={DeveloperRecipes} />
       <Route path="/image-migration" component={ImageMigration} />
+      <Route path="/ai-costs" component={AICostsDashboard} />
       <Route path="/photo-to-recipe" component={PhotoToRecipe} />
       <Route path="/diagnostic" component={DiagnosticPage} />
 

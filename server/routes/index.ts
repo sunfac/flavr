@@ -108,6 +108,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Developer AI costs endpoint (developer access only)
+  app.get("/api/developer/ai-costs", async (req, res) => {
+    try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Check if user is developer
+      const user = await storage.getUser(req.session.userId);
+      if (user?.email !== "william@blycontracting.co.uk") {
+        return res.status(403).json({ error: "Developer access required" });
+      }
+
+      const { aiCostTracker } = await import("../aiCostTracker");
+      const now = new Date();
+      const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const lastMonth = `${now.getFullYear()}-${String(now.getMonth()).padStart(2, '0')}`;
+
+      const [currentMonthCosts, lastMonthCosts] = await Promise.all([
+        aiCostTracker.getMonthlyTotalCosts(currentMonth),
+        aiCostTracker.getMonthlyTotalCosts(lastMonth)
+      ]);
+
+      res.json({
+        currentMonth: {
+          month: currentMonth,
+          ...currentMonthCosts
+        },
+        lastMonth: {
+          month: lastMonth,
+          ...lastMonthCosts
+        },
+        summary: {
+          currentMonthTotal: parseFloat(currentMonthCosts.totalCost),
+          lastMonthTotal: parseFloat(lastMonthCosts.totalCost),
+          monthOverMonth: parseFloat(currentMonthCosts.totalCost) - parseFloat(lastMonthCosts.totalCost)
+        }
+      });
+    } catch (error) {
+      console.error("Failed to fetch AI costs:", error);
+      res.status(500).json({ error: "Failed to fetch AI costs" });
+    }
+  });
+
   // Get recipes endpoint
   app.get("/api/recipes", async (req, res) => {
     try {

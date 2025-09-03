@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { aiCostTracker } from "./aiCostTracker";
 
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY 
@@ -12,7 +13,7 @@ export class MichelinChefAI {
   /**
    * Generate recipe ideas with Michelin-star quality and maximum flavor focus
    */
-  static async generateRecipeIdeas(quizData: any, mode: string): Promise<any> {
+  static async generateRecipeIdeas(quizData: any, mode: string, userId?: number): Promise<any> {
     const systemPrompt = this.buildMichelinSystemPrompt(mode);
     const userPrompt = this.buildFlavorMaximizedPrompt(quizData, mode);
 
@@ -24,6 +25,18 @@ export class MichelinChefAI {
           { role: "user", content: userPrompt }
         ],
         max_completion_tokens: 16000 // Maximum allocation for GPT-5 reasoning + full content
+      });
+
+      // Track cost for recipe ideas generation
+      await aiCostTracker.trackCost({
+        userId,
+        provider: 'openai',
+        model: this.MODEL,
+        operation: 'recipe-ideas-generation',
+        inputTokens: completion.usage?.prompt_tokens,
+        outputTokens: completion.usage?.completion_tokens,
+        requestData: { mode, hasQuizData: !!quizData },
+        responseData: { maxTokens: 16000 }
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -41,7 +54,7 @@ export class MichelinChefAI {
   /**
    * Generate complete recipe with maximum flavor optimization
    */
-  static async generateFullRecipe(selectedRecipe: any, quizData: any, mode: string): Promise<any> {
+  static async generateFullRecipe(selectedRecipe: any, quizData: any, mode: string, userId?: number): Promise<any> {
     const systemPrompt = this.buildMichelinFullRecipeSystemPrompt();
     const userPrompt = this.buildFullRecipePrompt(selectedRecipe, quizData, mode);
 
@@ -53,6 +66,18 @@ export class MichelinChefAI {
           { role: "user", content: userPrompt }
         ],
         max_completion_tokens: 20000 // Maximum allocation for GPT-5 reasoning + detailed recipe
+      });
+
+      // Track cost for full recipe generation
+      await aiCostTracker.trackCost({
+        userId,
+        provider: 'openai',
+        model: this.MODEL,
+        operation: 'full-recipe-generation',
+        inputTokens: completion.usage?.prompt_tokens,
+        outputTokens: completion.usage?.completion_tokens,
+        requestData: { mode, selectedRecipe: selectedRecipe?.title, hasQuizData: !!quizData },
+        responseData: { maxTokens: 20000 }
       });
 
       const content = completion.choices[0]?.message?.content;

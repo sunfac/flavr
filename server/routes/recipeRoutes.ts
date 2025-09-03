@@ -530,7 +530,7 @@ Return a JSON object with this structure:
         equipment,
         dietary: combinedDietaryNeeds,
         ingredientFlexibility
-      }, "Fridge Mode");
+      }, "Fridge Mode", req.session?.userId);
 
       // GPT-5 response is already parsed JSON
       console.log('🍽️ Fridge2Fork recipes generated via GPT-5:', response.recipes?.length || 0);
