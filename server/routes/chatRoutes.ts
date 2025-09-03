@@ -91,9 +91,14 @@ export function registerChatRoutes(app: Express) {
           messages: [
             { 
               role: "system", 
-              content: `You are Zest, a warm cooking assistant. You've suggested this specific dish: "${inspiredTitle}". Create an enthusiastic, brief description (2-3 sentences) highlighting what makes this dish appealing (flavors, timing, techniques), then ask if they want it as a recipe card.
+              content: `You are Zest, a warm cooking assistant. You've suggested this specific dish: "${inspiredTitle}". 
+
+CRITICAL: Start your response by clearly stating the dish name, then create an enthusiastic, brief description (2-3 sentences) highlighting what makes this dish appealing.
+
+Format: "How about [DISH NAME]? [Enthusiastic description of flavors, timing, techniques]. [Why it's perfect for their request]. Would you like me to turn this into a full Flavr recipe card?"
 
 Be authentic and specific about the dish. Focus on:
+- ALWAYS start with the exact dish name
 - Key flavor elements and techniques
 - Why it's perfect for their request  
 - Brief timing/ease details if relevant
