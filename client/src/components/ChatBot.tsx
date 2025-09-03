@@ -118,18 +118,25 @@ export default function ChatBot({
   const hasCurrentRecipe = currentRecipe || (recipeStore.meta.title && recipeStore.ingredients.length > 0);
   const allSuggestionChips = hasCurrentRecipe ? recipeModificationChips : generalCookingChips;
 
-  // Rotating chips state - show 4 at a time (2x2 grid), rotate every 5 seconds
+  // Rotating chips state - show 4 at a time (2x2 grid), rotate every 8 seconds with fade
   const [chipRotationIndex, setChipRotationIndex] = useState(0);
+  const [isRotating, setIsRotating] = useState(false);
   const chipsToShow = 4;
   
   useEffect(() => {
     const interval = setInterval(() => {
-      setChipRotationIndex(prev => {
-        const nextIndex = prev + chipsToShow;
-        // Reset to 0 when we've shown all chips
-        return nextIndex >= allSuggestionChips.length ? 0 : nextIndex;
-      });
-    }, 5000);
+      setIsRotating(true);
+      
+      // After fade out, change the chips
+      setTimeout(() => {
+        setChipRotationIndex(prev => {
+          const nextIndex = prev + chipsToShow;
+          // Reset to 0 when we've shown all chips
+          return nextIndex >= allSuggestionChips.length ? 0 : nextIndex;
+        });
+        setIsRotating(false);
+      }, 200); // 200ms fade out duration
+    }, 8000);
     
     return () => clearInterval(interval);
   }, [allSuggestionChips.length]);
@@ -573,7 +580,9 @@ export default function ChatBot({
           {(localMessages.length <= 1 || (showSuggestions && localMessages.length <= 2)) && (
             <div className="px-3 sm:px-4 py-3 border-t border-slate-700/50 flex-shrink-0 bg-slate-900/50">
               <div className="text-xs text-slate-400 mb-2">Quick suggestions:</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div 
+                className={`grid grid-cols-1 sm:grid-cols-2 gap-2 transition-opacity duration-200 ${isRotating ? 'opacity-0' : 'opacity-100'}`}
+              >
                 {suggestionChips.map((chip, index) => (
                   <Badge
                     key={`${chipRotationIndex}-${index}`}
