@@ -17,7 +17,6 @@ import HeroFoodImage from "@assets/3D8C8E94-9BC0-4F6A-95F2-8951941A709B.png";
 import { motion } from "framer-motion";
 import { iconMap } from "@/lib/iconMap";
 import AuthModal from "@/components/AuthModal";
-import FloatingChatButton from "@/components/FloatingChatButton";
 
 export default function LandingPage() {
   const [, navigate] = useLocation();
@@ -889,9 +888,6 @@ export default function LandingPage() {
       {showUserMenu && (
         <UserMenu onClose={closeAllMenus} />
       )}
-
-      {/* Floating Chat Button */}
-      <FloatingChatButton />
     </div>
   );
 }

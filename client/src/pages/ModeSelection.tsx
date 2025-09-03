@@ -88,6 +88,16 @@ export default function ModeSelection() {
           </div>
         </motion.div>
 
+        {/* Talk to Private Chef Button - Fixed above mode cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="flex justify-center mb-8 md:mb-12"
+        >
+          <FloatingChatButton variant="fixed" />
+        </motion.div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-6 md:mb-12 max-w-6xl mx-auto">
           {modes.map((mode, index) => (
             <motion.div
@@ -187,9 +197,6 @@ export default function ModeSelection() {
           </Button>
         </motion.div>
       </div>
-
-      {/* Floating Chat Button */}
-      <FloatingChatButton />
     </PageLayout>
   );
 }

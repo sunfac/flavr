@@ -6,9 +6,10 @@ import ChatBot from "@/components/ChatBot";
 
 interface FloatingChatButtonProps {
   className?: string;
+  variant?: "floating" | "fixed";
 }
 
-export default function FloatingChatButton({ className = "" }: FloatingChatButtonProps) {
+export default function FloatingChatButton({ className = "", variant = "floating" }: FloatingChatButtonProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const handleToggleChat = () => {
@@ -18,6 +19,72 @@ export default function FloatingChatButton({ className = "" }: FloatingChatButto
   const handleCloseChat = () => {
     setIsChatOpen(false);
   };
+
+  if (variant === "fixed") {
+    return (
+      <>
+        {/* Fixed Chat Button for Mode Selection */}
+        <div className={`relative ${className}`}>
+          <div className="relative group">
+            {/* Glow effects */}
+            <div className="absolute -inset-2 bg-gradient-to-r from-orange-500/20 via-amber-500/15 to-orange-500/20 rounded-xl blur-xl opacity-60 animate-pulse"></div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-orange-400/30 to-amber-400/30 rounded-xl blur-lg opacity-80 group-hover:opacity-100 transition-opacity duration-300"></div>
+            
+            {/* Main Button */}
+            <Button
+              onClick={handleToggleChat}
+              className="relative px-8 py-4 text-lg font-bold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 text-white border-0 rounded-xl group flex items-center gap-3"
+              size="lg"
+            >
+              <iconMap.chefHat className="w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
+              <span className="relative z-10">Talk to Your Private Chef Now</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* Chat Modal */}
+        <AnimatePresence>
+          {isChatOpen && (
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {/* Backdrop */}
+              <motion.div
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={handleCloseChat}
+              />
+
+              {/* Chat Panel */}
+              <motion.div
+                className="relative w-full max-w-md h-[600px] bg-slate-900 rounded-2xl shadow-2xl border border-slate-700/50 overflow-hidden"
+                initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.8, opacity: 0, y: 20 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 300, 
+                  damping: 30 
+                }}
+              >
+                <ChatBot
+                  isOpen={isChatOpen}
+                  onClose={handleCloseChat}
+                  currentRecipe={undefined}
+                />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </>
+    );
+  }
 
   return (
     <>
@@ -111,7 +178,6 @@ export default function FloatingChatButton({ className = "" }: FloatingChatButto
               <ChatBot
                 isOpen={isChatOpen}
                 onClose={handleCloseChat}
-                chatHistory={[]}
                 currentRecipe={undefined}
               />
             </motion.div>
