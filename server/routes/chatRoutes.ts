@@ -361,6 +361,7 @@ Keep it conversational and enthusiastic like you're recommending your favorite d
               ingredients: recipe.ingredients,
               instructions: recipe.instructions,
               tips: recipe.tips,
+              imageUrl: recipe.imageUrl, // Include the generated image URL
               originalPrompt: message
             });
           }
