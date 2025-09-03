@@ -77,7 +77,7 @@ export default function FloatingChatButton({ className = "", variant = "floating
 
               {/* Chat Panel - Full screen on mobile, modal on desktop */}
               <motion.div
-                className="relative w-full h-full md:max-w-md md:h-[600px] bg-slate-900 md:rounded-2xl shadow-2xl border-0 md:border border-slate-700/50 overflow-hidden"
+                className="relative w-full h-screen md:h-[600px] md:max-w-md bg-slate-900 md:rounded-2xl shadow-2xl border-0 md:border border-slate-700/50 overflow-hidden"
                 initial={{ 
                   scale: typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 0.8, 
                   opacity: 0, 
@@ -187,7 +187,7 @@ export default function FloatingChatButton({ className = "", variant = "floating
 
             {/* Chat Panel - Full screen on mobile, modal on desktop */}
             <motion.div
-              className="relative w-full h-full md:max-w-md md:h-[600px] bg-slate-900 md:rounded-2xl shadow-2xl border-0 md:border border-slate-700/50 overflow-hidden"
+              className="relative w-full h-screen md:h-[600px] md:max-w-md bg-slate-900 md:rounded-2xl shadow-2xl border-0 md:border border-slate-700/50 overflow-hidden"
               initial={{ 
                 scale: typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 0.8, 
                 opacity: 0, 
