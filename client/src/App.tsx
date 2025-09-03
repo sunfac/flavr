@@ -35,6 +35,7 @@ import Recipe from "@/pages/Recipe";
 import RecipeSelection from "@/pages/RecipeSelection";
 import LoadingPage from "@/pages/LoadingPage";
 import PublicRecipeView from "./pages/PublicRecipeView";
+import TempRecipe from "@/pages/TempRecipe";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 
 function Router() {
@@ -71,6 +72,7 @@ function Router() {
       <Route path="/recipe" component={Recipe} />
       <Route path="/recipe-selection" component={RecipeSelection} />
       <Route path="/share/:shareId" component={PublicRecipeView} />
+      <Route path="/temp-recipe" component={TempRecipe} />
       <Route path="/loading" component={() => <LoadingPage title="Loading..." subtitle="Please wait while we prepare your experience" />} />
       <Route component={NotFound} />
     </Switch>

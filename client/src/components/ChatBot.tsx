@@ -11,6 +11,7 @@ import { useLocation } from "wouter";
 import { iconMap } from "@/lib/iconMap";
 import { useRecipeStore, recipeActions } from "@/stores/recipeStore";
 import { useTimerStore } from "@/stores/timerStore";
+// Authentication check using /api/me endpoint
 
 
 interface ChatMessage {
@@ -53,6 +54,12 @@ export default function ChatBot({
   isOpen = true,
   onClose
 }: ChatBotProps & { isOpen?: boolean; onClose?: () => void }) {
+  // Check authentication status via /api/me endpoint
+  const { data: userData } = useQuery({
+    queryKey: ["/api/me"],
+    retry: false,
+  });
+  const isAuthenticated = !!userData?.user;
   // Use isOpen prop if provided, otherwise default to true
   const actualIsOpen = isOpen !== undefined ? isOpen : true;
   const [message, setMessage] = useState("");
@@ -611,8 +618,16 @@ export default function ChatBot({
                       <Button
                         size="sm"
                         onClick={() => {
-                          // Close chat and recipe should be displayed
-                          if (onClose) onClose();
+                          // For unauthenticated users, navigate to a temporary recipe view
+                          // For authenticated users, close chat normally
+                          if (!isAuthenticated) {
+                            // Create temporary recipe view URL and navigate
+                            const recipeData = encodeURIComponent(JSON.stringify(recipeStore));
+                            window.location.href = `/temp-recipe?data=${recipeData}`;
+                          } else {
+                            // Normal authenticated flow - close chat and recipe should be displayed
+                            if (onClose) onClose();
+                          }
                         }}
                         className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs px-3 py-1 flex items-center gap-2"
                       >
