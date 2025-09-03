@@ -205,6 +205,18 @@ export default function Subscribe() {
             return;
           }
           const data = await res.json();
+          
+          // Handle case where no payment is required
+          if (data.status === 'no_payment_required') {
+            toast({
+              title: "Subscription Activated!",
+              description: "Welcome to Flavr+ Premium! Your subscription is now active.",
+            });
+            // Refresh page to show premium status
+            window.location.reload();
+            return;
+          }
+          
           setClientSecret(data.clientSecret);
         })
         .catch((error) => {

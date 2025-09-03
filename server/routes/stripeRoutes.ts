@@ -84,11 +84,43 @@ export function registerStripeRoutes(app: Express) {
       }
       
       console.log("Payment intent status:", (invoice as any).payment_intent ? "Present" : "Missing");
+      console.log("Invoice amount due:", (invoice as any).amount_due);
+      console.log("Invoice status:", (invoice as any).status);
       
       const paymentIntent = (invoice as any).payment_intent as Stripe.PaymentIntent;
-      if (!paymentIntent || typeof paymentIntent === 'string') {
-        console.log("❌ Payment intent issue - type:", typeof paymentIntent, "value:", paymentIntent);
-        throw new Error('Failed to create payment intent');
+      
+      // Handle case where no payment intent is needed (e.g., $0 amount, trial, etc.)
+      if (!paymentIntent) {
+        console.log("ℹ️ No payment intent needed - invoice may be $0 or already paid");
+        
+        // If invoice is already paid or $0, subscription is ready
+        if ((invoice as any).status === 'paid' || (invoice as any).amount_due === 0) {
+          console.log("✅ Subscription ready - no payment required");
+          
+          // Update user subscription status
+          await storage.updateUserSubscription(user.id, {
+            hasFlavrPlus: true,
+            subscriptionStatus: 'active',
+            subscriptionProvider: 'stripe',
+            stripeSubscriptionId: subscription.id,
+            stripeCustomerId: customerId,
+          });
+          
+          return res.json({ 
+            subscriptionId: subscription.id,
+            clientSecret: null, // No payment needed
+            status: 'no_payment_required'
+          });
+        }
+        
+        // Otherwise, something went wrong
+        console.log("❌ No payment intent but payment seems required");
+        throw new Error('Payment intent missing but payment required');
+      }
+
+      if (typeof paymentIntent === 'string') {
+        console.log("❌ Payment intent is string ID, need to expand it");
+        throw new Error('Payment intent not properly expanded');
       }
 
       console.log("✅ Payment intent created successfully:", paymentIntent.id);
