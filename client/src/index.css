@@ -310,18 +310,30 @@ body {
     max-height: calc(100dvh - 64px) !important;
   }
 
-  .mobile-chat-input {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    z-index: 60 !important;
-  }
+  /* Mobile-specific styling using media queries for consistent behavior */
+  @media (max-width: 767px) {
+    .mobile-chat-panel {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      z-index: 50 !important;
+    }
 
-  .mobile-chat-input input {
-    font-size: 16px !important; /* Prevents zoom on iOS */
-    transform: translateZ(0); /* Hardware acceleration */
-    -webkit-appearance: none !important;
+    .chat-input-area {
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      z-index: 60 !important;
+    }
+
+    .chat-input-area input {
+      font-size: 16px !important; /* Prevents zoom on iOS */
+      transform: translateZ(0); /* Hardware acceleration */
+      -webkit-appearance: none !important;
+    }
   }
 
   .mobile-chat-messages {
@@ -370,7 +382,7 @@ body {
       -webkit-overflow-scrolling: touch;
     }
     
-    .mobile-chat-input {
+    .chat-input-area {
       position: fixed !important;
       bottom: env(safe-area-inset-bottom, 0px) !important;
     }
