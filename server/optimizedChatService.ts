@@ -22,6 +22,13 @@ interface OptimizedChatResponse {
   intent: string;
   confidence: number;
   estimatedCost: number;
+  requiresIntentClarification?: boolean;
+  clarificationOptions?: Array<{
+    type: 'quick_recipe' | 'full_recipe' | 'recipe_options' | 'continue_chat';
+    label: string;
+    description: string;
+    icon: string;
+  }>;
   suggestedActions?: Array<{
     type: 'quick_recipe' | 'full_recipe' | 'continue_chat';
     label: string;
@@ -73,6 +80,13 @@ export class OptimizedChatService {
           break;
 
         case 'recipe_request':
+          // Check if we should clarify intent for ambiguous recipe requests
+          const shouldClarify = this.shouldClarifyIntent(request.message, intentResult);
+          
+          if (shouldClarify) {
+            return this.generateIntentClarification(request.message, startTime);
+          }
+          
           const recipeResponse = await this.handleRecipeRequest(request, intentResult);
           response = recipeResponse.message;
           suggestedActions = recipeResponse.actions;
@@ -297,5 +311,65 @@ Provide clear, specific modification advice. Be concise and practical.`
   // Fallback handler
   private static async handleFallback(request: OptimizedChatRequest): Promise<string> {
     return "I'd love to help! Could you tell me more about what you're looking to cook or any cooking questions you have?";
+  }
+
+  // Check if intent clarification is needed
+  private static shouldClarifyIntent(message: string, intentResult: any): boolean {
+    const lower = message.toLowerCase().trim();
+    
+    // Clarify for common ambiguous recipe requests
+    const ambiguousPatterns = [
+      'quick recipe',
+      'dinner recipe',
+      'breakfast recipe', 
+      'lunch recipe',
+      'easy recipe',
+      'recipe for',
+      'recipe suggestion',
+      'give me a recipe',
+      'show me a recipe',
+      'i want a recipe'
+    ];
+
+    return ambiguousPatterns.some(pattern => lower.includes(pattern)) && 
+           intentResult.confidence < 0.95;
+  }
+
+  // Generate intent clarification response
+  private static generateIntentClarification(message: string, startTime: number): OptimizedChatResponse {
+    const clarificationOptions = [
+      {
+        type: 'quick_recipe' as const,
+        label: '💬 Quick recipe in chat',
+        description: 'Get a simple recipe right here in our conversation',
+        icon: '💬'
+      },
+      {
+        type: 'full_recipe' as const,
+        label: '📋 Complete recipe card',
+        description: 'Generate a detailed recipe with ingredients, steps, and timing',
+        icon: '📋'
+      },
+      {
+        type: 'recipe_options' as const,
+        label: '🎯 Show me 3 options',
+        description: 'See 3 different recipe suggestions to choose from',
+        icon: '🎯'
+      }
+    ];
+
+    return {
+      message: `I can help you with that! How would you like me to present your recipe?`,
+      intent: 'clarification_needed',
+      confidence: 1.0,
+      estimatedCost: 0,
+      requiresIntentClarification: true,
+      clarificationOptions,
+      metadata: {
+        modelUsed: 'clarification',
+        processingTimeMs: Date.now() - startTime,
+        tokenCount: 50
+      }
+    };
   }
 }

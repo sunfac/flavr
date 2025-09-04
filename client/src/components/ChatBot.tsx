@@ -34,6 +34,13 @@ interface ChatMessage {
     label: string;
     data?: any;
   }>;
+  requiresIntentClarification?: boolean;
+  clarificationOptions?: Array<{
+    type: 'quick_recipe' | 'full_recipe' | 'recipe_options' | 'continue_chat';
+    label: string;
+    description: string;
+    icon: string;
+  }>;
   isOptimized?: boolean;
   metadata?: {
     modelUsed: string;
@@ -426,6 +433,8 @@ export default function ChatBot({
         text: result.message,
         timestamp: new Date(),
         suggestedActions: result.suggestedActions,
+        requiresIntentClarification: result.requiresIntentClarification,
+        clarificationOptions: result.clarificationOptions,
         isOptimized: true,
         metadata: result.metadata
       };
@@ -1043,6 +1052,46 @@ export default function ChatBot({
                         return null;
                       })}
                       
+                    </div>
+                  )}
+
+                  {/* NEW: Intent clarification options */}
+                  {msg.requiresIntentClarification && msg.clarificationOptions && (
+                    <div className="mt-3 space-y-2">
+                      {msg.clarificationOptions.map((option, optionIndex) => (
+                        <Button
+                          key={optionIndex}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const originalMessage = msg.message;
+                            
+                            if (option.type === 'quick_recipe') {
+                              // Send request for quick recipe in chat
+                              optimizedChatMutation.mutate({ message: `Quick recipe for: ${originalMessage}` });
+                            } else if (option.type === 'full_recipe') {
+                              // Generate full recipe card
+                              optimizedRecipeMutation.mutate({
+                                suggestedTitle: originalMessage,
+                                originalMessage: originalMessage,
+                                type: 'full'
+                              });
+                            } else if (option.type === 'recipe_options') {
+                              // Show 3 recipe options
+                              optimizedChatMutation.mutate({ message: `Show me 3 recipe options for: ${originalMessage}` });
+                            }
+                          }}
+                          className="w-full justify-start text-left p-3 h-auto border-slate-700 hover:bg-slate-700"
+                        >
+                          <div className="flex items-start space-x-3">
+                            <span className="text-lg">{option.icon}</span>
+                            <div>
+                              <div className="font-medium text-white">{option.label}</div>
+                              <div className="text-sm text-slate-400">{option.description}</div>
+                            </div>
+                          </div>
+                        </Button>
+                      ))}
                     </div>
                   )}
                   
