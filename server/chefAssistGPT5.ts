@@ -1,4 +1,6 @@
 import { OpenAI } from "openai";
+import { UserInputAnalyzer, UserInputAnalysis } from './userInputAnalyzer';
+import { AdaptivePromptBuilder, AdaptivePromptResult } from './adaptivePromptBuilder';
 
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY 
@@ -119,7 +121,9 @@ export class ChefAssistGPT5 {
   static setCachedRecipe(key: string, recipe: any) {
     if (this.recipeCache.size >= this.cacheMaxSize) {
       const firstKey = this.recipeCache.keys().next().value;
-      this.recipeCache.delete(firstKey);
+      if (firstKey) {
+        this.recipeCache.delete(firstKey);
+      }
     }
     this.recipeCache.set(key, recipe);
   }
@@ -174,86 +178,57 @@ export class ChefAssistGPT5 {
       return cachedRecipe;
     }
     
+    // NEW: Intelligent Input Analysis
+    const inputAnalysis = await UserInputAnalyzer.analyzeUserInput(
+      data.userIntent,
+      data.clientId,
+      data.dietaryNeeds,
+      data.equipment
+    );
+    
+    console.log(`Input specificity: ${inputAnalysis.specificity}, Model: ${inputAnalysis.promptStrategy.modelRecommendation}`);
+    
+    // Get variety guidance for vague prompts
+    const varietyGuidance = UserInputAnalyzer.getVarietyGuidance(inputAnalysis, data.clientId);
+    
+    // Build adaptive prompt based on analysis
+    const promptResult = AdaptivePromptBuilder.buildOptimizedPrompt(
+      inputAnalysis,
+      {
+        userIntent: data.userIntent,
+        servings: data.servings,
+        timeBudget: data.timeBudget,
+        dietaryNeeds: data.dietaryNeeds,
+        mustUse: data.mustUse,
+        avoid: data.avoid,
+        equipment: data.equipment,
+        budgetNote: data.budgetNote,
+        cuisinePreference: data.cuisinePreference
+      },
+      varietyGuidance
+    );
+    
+    // Legacy style pack integration (only for vague prompts that need creative variety)
     const stylePacks = selectStylePacks(data.seeds, data.userIntent, data.clientId || "");
     const { packs: adjustedPacks, adjustments } = applyCoherenceGuardrails(stylePacks, data.timeBudget || null);
+
+    // Use the optimized adaptive prompts
+    console.log(`Using ${promptResult.speedExpected} generation (est. cost: $${promptResult.estimatedCost.toFixed(4)})`);
     
-    const dynamicTargetRange = getDynamicTargetRange(adjustedPacks.simplicityPack);
-    
-    // Use smart model selection
-    const modelConfig = this.selectOptimalModel(data.userIntent, data.dietaryNeeds, data.mustUse);
-    const fallbackTokens = 4096;
-
-    const systemMessage = `You are "Zest," a cookbook-quality recipe expert. Create authentic, flavorful recipes in the style of established chefs like Rick Stein, Jamie Oliver, Nigella Lawson, Yotam Ottolenghi.
-
-CORE REQUIREMENTS:
-- British English, metric measurements, UK ingredients
-- Professional techniques with clear instructions
-- Complete methods from prep to plating
-- Authentic flavor development and seasoning
-- Output JSON only, match schema exactly
-
-RECIPE STANDARDS:
-- Use supermarket ingredients, avoid making basics from scratch
-- Focus on technique and flavor layering
-- Include proper timing and temperature guidance
-- Ensure dietary requirements are strictly followed
-
-OUTPUT: Return ONLY JSON matching the provided schema. No extra text.`;
-
-    const userMessage = `Generate complete recipe JSON immediately. Focus on flavor and clear instructions.
-
-USER REQUEST: "${data.userIntent}"
-
-RECIPE PARAMETERS:
-- Servings: ${data.servings}
-- Time budget: ${data.timeBudget || "flexible"}
-- Dietary needs: ${data.dietaryNeeds?.join(", ") || "none"}
-- Must-use ingredients: ${data.mustUse?.join(", ") || "none"}
-- Avoid ingredients: ${data.avoid?.join(", ") || "none"}
-- Equipment: ${data.equipment?.join(", ") || "standard kitchen"}
-- Budget: ${data.budgetNote || "standard"}
-- Cuisine preference: ${data.cuisinePreference || "flexible"}
-
-RECIPE REQUIREMENTS:
-- Target ingredient count: ${dynamicTargetRange}
-- Include complete cooking method with timing
-- Add finishing touches and flavor enhancement tips
-- Provide side dish suggestions
-- Respect all dietary restrictions strictly
-
-JSON SCHEMA:
-{
-  "title": "4-8 words, appetizing and clear",
-  "servings": ${data.servings},
-  "time": { "prep_min": 15, "cook_min": 25, "total_min": 40 },
-  "cuisine": "string",
-  "style_notes": [${adjustments.map(a => `"${a}"`).join(", ")}],
-  "equipment": ["pan","oven"],
-  "ingredients": [
-    { "section": "Main", "items": [{ "item": "...", "qty": 0, "unit": "g|ml|tbsp", "notes": "" }] }
-  ],
-  "method": [
-    { "step": 1, "instruction": "Clear step", "why_it_matters": "Brief reason" }
-  ],
-  "finishing_touches": ["..."],
-  "flavour_boosts": ["..."],
-  "make_ahead_leftovers": "Brief note",
-  "allergens": ["..."],
-  "shopping_list": [{ "item": "...", "qty": 0, "unit": "..." }],
-  "side_dishes": [{ "name": "...", "description": "...", "quick_method": "..." }]
-}`;
+    const systemMessage = promptResult.systemMessage;
+    const userMessage = promptResult.userMessage;
 
     try {
-      console.log(`Calling ${modelConfig.model} for full recipe with max_completion_tokens: ${modelConfig.tokens}`);
+      console.log(`Calling ${promptResult.modelRecommendation} for full recipe with max_completion_tokens: ${promptResult.maxTokens}`);
       const startTime = Date.now();
       
       const completionPromise = openai.chat.completions.create({
-        model: modelConfig.model,
+        model: promptResult.modelRecommendation,
         messages: [
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_tokens: modelConfig.tokens,
+        max_tokens: promptResult.maxTokens,
         response_format: { type: "json_object" }
       });
       
@@ -272,7 +247,7 @@ JSON SCHEMA:
             { role: "system", content: systemMessage },
             { role: "user", content: userMessage }
           ],
-          max_tokens: fallbackTokens,
+          max_tokens: 4096,
           response_format: { type: "json_object" }
         });
       }
@@ -306,6 +281,20 @@ JSON SCHEMA:
       
       console.log("Recipe parsed successfully:", recipe.title);
       
+      // Record generation for variety tracking
+      if (inputAnalysis.vaguePromptSignature && data.clientId) {
+        UserInputAnalyzer.recordGeneration(
+          inputAnalysis, 
+          data.clientId, 
+          recipe.cuisine || 'British',
+          recipe.method?.[0]?.instruction?.toLowerCase()?.includes('roast') ? 'roasting' :
+          recipe.method?.[0]?.instruction?.toLowerCase()?.includes('fry') ? 'frying' :
+          recipe.method?.[0]?.instruction?.toLowerCase()?.includes('braise') ? 'braising' :
+          recipe.method?.[0]?.instruction?.toLowerCase()?.includes('grill') ? 'grilling' :
+          'general'
+        );
+      }
+      
       // Cache the generated recipe for performance
       this.setCachedRecipe(cacheKey, recipe);
       
@@ -317,7 +306,7 @@ JSON SCHEMA:
     }
   }
 
-  // Optimized Inspire Me title generation
+  // Optimized Inspire Me title generation  
   static async generateInspireTitle(data: {
     seeds: SeedPacks;
     userIntent?: string;
@@ -326,8 +315,18 @@ JSON SCHEMA:
     clientId?: string;
   }): Promise<{ title: string }> {
     
-    // Use optimized model selection for cost efficiency
-    const modelConfig = this.selectOptimalModel(data.userIntent || 'inspire me', [], []);
+    // NEW: Use input analysis for Inspire Me optimization
+    const inspirationAnalysis = await UserInputAnalyzer.analyzeUserInput(
+      data.userIntent || 'inspire me',
+      data.clientId,
+      [],
+      []
+    );
+    
+    // Get variety guidance to avoid repetition
+    const varietyGuidance = UserInputAnalyzer.getVarietyGuidance(inspirationAnalysis, data.clientId);
+    
+    console.log(`Inspire Me - Input specificity: ${inspirationAnalysis.specificity}, Model: ${inspirationAnalysis.promptStrategy.modelRecommendation}`);
     
     // Enhanced cuisine selection for variety
     const cuisineContexts = [
@@ -337,18 +336,25 @@ JSON SCHEMA:
       "Brazilian", "Argentinian", "Russian", "Polish", "Hungarian"
     ];
     
-    // Smart randomization for variety
-    const hashCode = (s: string) => s.split('').reduce((a, b) => (((a << 5) - a) + b.charCodeAt(0)) | 0, 0);
-    const userIntentHash = hashCode((data.userIntent || "").toLowerCase());
-    const sessionSalt = hashCode(data.clientId || "") ^ hashCode(new Date().toDateString());
-    const timeBasedSeed = Date.now() + Math.floor(Math.random() * 10000);
-    const rngSeed = data.seeds.randomSeed ^ userIntentHash ^ sessionSalt ^ timeBasedSeed;
+    // Use variety guidance if available, otherwise use smart randomization
+    let selectedCuisine: string;
     
-    const seededRandom = (seed: number, max: number) => Math.abs((seed * 9301 + 49297) % 233280) % max;
-    
-    const selectedCuisine = data.cuisinePreference ? 
-      (cuisineContexts.find(c => c.toLowerCase().includes(data.cuisinePreference!.toLowerCase())) || "British") :
-      cuisineContexts[seededRandom(rngSeed, cuisineContexts.length)];
+    if (varietyGuidance.suggestCuisine) {
+      selectedCuisine = varietyGuidance.suggestCuisine;
+      console.log(`Using variety guidance cuisine: ${selectedCuisine} (avoiding: ${varietyGuidance.avoidCuisines.join(', ')})`);
+    } else if (data.cuisinePreference) {
+      selectedCuisine = cuisineContexts.find(c => c.toLowerCase().includes(data.cuisinePreference!.toLowerCase())) || "British";
+    } else {
+      // Smart randomization for first-time or non-tracked requests
+      const hashCode = (s: string) => s.split('').reduce((a, b) => (((a << 5) - a) + b.charCodeAt(0)) | 0, 0);
+      const userIntentHash = hashCode((data.userIntent || "").toLowerCase());
+      const sessionSalt = hashCode(data.clientId || "") ^ hashCode(new Date().toDateString());
+      const timeBasedSeed = Date.now() + Math.floor(Math.random() * 10000);
+      const rngSeed = data.seeds.randomSeed ^ userIntentHash ^ sessionSalt ^ timeBasedSeed;
+      
+      const seededRandom = (seed: number, max: number) => Math.abs((seed * 9301 + 49297) % 233280) % max;
+      selectedCuisine = cuisineContexts[seededRandom(rngSeed, cuisineContexts.length)];
+    }
 
     // Enhanced inspiration categories with creative freedom
     const inspirationType = Math.floor(Math.random() * 3); // Equal distribution
@@ -363,7 +369,7 @@ JSON SCHEMA:
         "Mary Berry's reliable techniques", "Tom Kerridge's pub refinement", "David Chang's Korean-American fusion",
         "Julia Child's French fundamentals", "Anthony Bourdain's global street food", "Marcus Wareing's precision"
       ];
-      const selectedStyle = chefStyles[seededRandom(rngSeed + 1000, chefStyles.length)];
+      const selectedStyle = chefStyles[Math.floor(Math.random() * chefStyles.length)];
       
       inspirationPrompt = `Create a ${selectedCuisine} recipe title inspired by ${selectedStyle}.
       
@@ -378,7 +384,7 @@ STYLE: Use "Chef Name-Inspired" format to show inspiration without claiming auth
         "Indian restaurant spices", "Mexican cantina flavors", "Greek taverna traditions",
         "Lebanese meze selections", "Korean BBQ techniques", "Vietnamese pho mastery"
       ];
-      const selectedType = restaurantTypes[seededRandom(rngSeed + 2000, restaurantTypes.length)];
+      const selectedType = restaurantTypes[Math.floor(Math.random() * restaurantTypes.length)];
       
       inspirationPrompt = `Create a ${selectedCuisine} recipe title inspired by ${selectedType}.
       
@@ -393,7 +399,7 @@ STYLE: Capture the essence of professional cooking in accessible format.`;
         "family gatherings", "outdoor entertaining", "winter warmth", "spring freshness",
         "summer lightness", "autumn harvest", "nostalgic comfort", "elegant sophistication"
       ];
-      const selectedOccasion = occasions[seededRandom(rngSeed + 3000, occasions.length)];
+      const selectedOccasion = occasions[Math.floor(Math.random() * occasions.length)];
       
       inspirationPrompt = `Create a ${selectedCuisine} recipe title perfect for ${selectedOccasion}.
       
@@ -433,10 +439,10 @@ CREATE A RECIPE TITLE THAT:
 JSON OUTPUT: {"title": "Your Creative Recipe Title"}`;
 
     try {
-      console.log(`Calling ${modelConfig.model} for inspire title generation`);
+      console.log(`Calling ${inspirationAnalysis.promptStrategy.modelRecommendation} for inspire title generation`);
       
       const result = await openai.chat.completions.create({
-        model: modelConfig.model,
+        model: inspirationAnalysis.promptStrategy.modelRecommendation,
         messages: [
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
@@ -452,6 +458,16 @@ JSON OUTPUT: {"title": "Your Creative Recipe Title"}`;
 
       console.log("Raw inspire response:", content);
       const parsedResult = JSON.parse(content);
+      
+      // Record inspire title generation for variety tracking
+      if (inspirationAnalysis.vaguePromptSignature && data.clientId) {
+        UserInputAnalyzer.recordGeneration(
+          inspirationAnalysis,
+          data.clientId,
+          selectedCuisine,
+          'inspire_me'
+        );
+      }
       
       return {
         title: parsedResult.title || "Delicious Home-Cooked Recipe"
