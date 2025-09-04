@@ -209,9 +209,14 @@ Be warm and encouraging like Zest, but keep it concise for easy chat reading.`
       }
 
       // Check if user is confirming they want an alternative suggestion
-      const isAlternativeConfirmation = message.toLowerCase().trim() === 'yes' && 
+      const messageClean = message.toLowerCase().trim().replace(/[.!?]+$/, ''); // Remove trailing punctuation
+      const isYesResponse = ['yes', 'y', 'yeah', 'yep', 'sure', 'ok', 'okay'].includes(messageClean);
+      
+      const isAlternativeConfirmation = isYesResponse && 
         conversationHistory.length > 0 && 
-        conversationHistory[conversationHistory.length - 1]?.response?.includes('Would you like me to suggest another');
+        (conversationHistory[conversationHistory.length - 1]?.response?.includes('Would you like me to suggest another') ||
+         conversationHistory[conversationHistory.length - 1]?.response?.includes('different idea') ||
+         conversationHistory[conversationHistory.length - 1]?.response?.includes('another recipe'));
 
       if (isAlternativeConfirmation) {
         console.log('🔄 User confirmed alternative suggestion request');

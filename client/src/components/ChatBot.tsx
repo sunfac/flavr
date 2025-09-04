@@ -755,48 +755,56 @@ export default function ChatBot({
                         size="sm"
                         variant="outline"
                         onClick={() => {
-                          // Remove confirmation message and ask for permission to suggest another
-                          setLocalMessages(prev => {
-                            const filteredMessages = prev.filter(m => m.id !== msg.id);
-                            
-                            // Extract context from original message for smart suggestions
-                            const originalLower = msg.originalMessage?.toLowerCase() || '';
-                            let contextType = '';
-                            
-                            if (originalLower.includes('healthy breakfast') || originalLower.includes('breakfast')) {
-                              contextType = 'healthy breakfast';
-                            } else if (originalLower.includes('pasta')) {
-                              contextType = 'pasta';
-                            } else if (originalLower.includes('chicken')) {
-                              contextType = 'chicken';
-                            } else if (originalLower.includes('beef')) {
-                              contextType = 'beef';
-                            } else if (originalLower.includes('fish') || originalLower.includes('salmon')) {
-                              contextType = 'fish';
-                            } else if (originalLower.includes('vegetarian') || originalLower.includes('vegan')) {
-                              contextType = 'vegetarian';
-                            } else if (originalLower.includes('dinner')) {
-                              contextType = 'dinner';
-                            } else if (originalLower.includes('lunch')) {
-                              contextType = 'lunch';
-                            } else {
-                              contextType = 'recipe';
-                            }
-                            
-                            // Add a follow-up message asking for permission with preserved context
-                            const followUpMessage: ChatMessage = {
-                              id: Date.now(),
-                              message: '',
-                              response: `No worries! Would you like me to suggest another ${contextType} recipe instead? Just say "yes" and I'll give you a different idea that might be more your style! 😊`,
-                              isUser: false,
-                              text: `No worries! Would you like me to suggest another ${contextType} recipe instead? Just say "yes" and I'll give you a different idea that might be more your style! 😊`,
-                              timestamp: new Date(),
-                              isConfirmation: false,
-                              waitingForAlternative: true,
-                              originalContext: msg.originalMessage
-                            };
-                            
-                            return [...filteredMessages, followUpMessage];
+                          // Remove confirmation message and send alternative request to backend
+                          setLocalMessages(prev => prev.filter(m => m.id !== msg.id));
+                          
+                          // Extract context from original message for smart suggestions  
+                          const originalLower = msg.originalMessage?.toLowerCase() || '';
+                          let contextType = '';
+                          
+                          if (originalLower.includes('healthy breakfast') || originalLower.includes('breakfast')) {
+                            contextType = 'healthy breakfast';
+                          } else if (originalLower.includes('pasta')) {
+                            contextType = 'pasta';
+                          } else if (originalLower.includes('chicken')) {
+                            contextType = 'chicken';
+                          } else if (originalLower.includes('beef')) {
+                            contextType = 'beef';
+                          } else if (originalLower.includes('fish') || originalLower.includes('salmon')) {
+                            contextType = 'fish';
+                          } else if (originalLower.includes('vegetarian') || originalLower.includes('vegan')) {
+                            contextType = 'vegetarian';
+                          } else if (originalLower.includes('dinner')) {
+                            contextType = 'dinner';
+                          } else if (originalLower.includes('lunch')) {
+                            contextType = 'lunch';
+                          } else {
+                            contextType = 'recipe';
+                          }
+                          
+                          // Send alternative request message to backend to create proper conversation history
+                          const alternativeRequest = `No thanks to that recipe. Would you like me to suggest another ${contextType} recipe instead?`;
+                          
+                          // Add the alternative request message to local chat
+                          const botMessage: ChatMessage = {
+                            id: Date.now(),
+                            message: '',
+                            response: alternativeRequest,
+                            isUser: false,
+                            text: alternativeRequest,
+                            timestamp: new Date(),
+                            waitingForAlternative: true,
+                            originalContext: msg.originalMessage
+                          };
+                          
+                          setLocalMessages(prev => [...prev, botMessage]);
+                          
+                          // Also send to backend to save in conversation history
+                          sendMessageMutation.mutate({ 
+                            message: alternativeRequest,
+                            currentRecipe,
+                            mode: detectedMode,
+                            isSystemMessage: true  // Flag to indicate this is a system-generated message
                           });
                         }}
                         className="border-slate-500 text-slate-300 hover:bg-slate-600 text-xs px-3 py-1"
