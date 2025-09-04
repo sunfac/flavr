@@ -142,7 +142,7 @@ export default function FloatingChatButton({ className = "", variant = "floating
         <motion.div
           style={{ 
             position: 'fixed',
-            bottom: '1.5rem',
+            bottom: '5rem',
             right: '1.5rem',
             zIndex: 1000
           }}
