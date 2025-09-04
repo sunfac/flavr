@@ -32,15 +32,24 @@ export class SubRecipeService {
       .replace(/^\d+[\s\-]*x\s*/i, '') // Remove "2x" style multipliers
       .replace(/^a\s+pinch\s+of\s*/i, '') // Remove "a pinch of"
       .replace(/^a\s+handful\s+of\s*/i, '') // Remove "a handful of"
+      .replace(/^a\s+few\s*/i, '') // Remove "a few"
       .replace(/^some\s*/i, '') // Remove "some"
       .replace(/^fresh\s*/i, '') // Remove "fresh" prefix
       .replace(/^dried\s*/i, '') // Remove "dried" prefix
       .replace(/^ground\s*/i, '') // Remove "ground" prefix
+      .replace(/^chopped\s*/i, '') // Remove "chopped" prefix
+      .replace(/^sliced\s*/i, '') // Remove "sliced" prefix
+      .replace(/^diced\s*/i, '') // Remove "diced" prefix
+      .replace(/^minced\s*/i, '') // Remove "minced" prefix
+      .replace(/^finely\s*/i, '') // Remove "finely" prefix
+      .replace(/^roughly\s*/i, '') // Remove "roughly" prefix
+      .replace(/^coarsely\s*/i, '') // Remove "coarsely" prefix
       .replace(/^\d+\/\d+\s*/g, '') // Remove fractions like "1/2"
       .replace(/^\d+\.\d+\s*/g, '') // Remove decimals like "2.5"
       .replace(/^\d+\s*/g, '') // Remove standalone numbers
-      .replace(/^(large|medium|small)\s*/i, '') // Remove size descriptors
+      .replace(/^(large|medium|small|extra|baby|young|old|new)\s*/i, '') // Remove size/age descriptors
       .replace(/\s*\([^)]*\)$/, '') // Remove anything in parentheses at the end
+      .replace(/,.*$/, '') // Remove everything after first comma
       .trim();
     
     return cleanText;
@@ -54,28 +63,65 @@ export class SubRecipeService {
     
     // Exclude basic ingredients that are typically store-bought
     const basicIngredients = [
-      'salt', 'pepper', 'water', 'oil', 'flour', 'sugar', 'milk', 'eggs', 'butter',
-      'onion', 'garlic', 'tomato', 'potato', 'carrot', 'celery', 'lemon', 'lime',
-      'beef', 'pork', 'chicken', 'lamb', 'duck', 'fish', 'salmon', 'tuna', 'cod',
-      'pork belly', 'chicken breast', 'beef steak', 'lamb chops', 'duck breast',
-      'cucumber', 'lettuce', 'spinach', 'kale', 'cabbage', 'broccoli', 'cauliflower',
-      'mushrooms', 'bell pepper', 'peppers', 'cheese', 'mozzarella', 'parmesan',
-      'cheddar', 'feta', 'goat cheese', 'cream cheese', 'yogurt', 'sour cream',
-      'bread', 'pasta', 'rice', 'noodles', 'quinoa', 'couscous', 'bulgur',
-      'beans', 'lentils', 'chickpeas', 'black beans', 'kidney beans',
-      'nuts', 'almonds', 'walnuts', 'pecans', 'pine nuts', 'cashews',
-      'herbs', 'basil', 'parsley', 'cilantro', 'thyme', 'rosemary', 'oregano',
-      'spices', 'cumin', 'paprika', 'cinnamon', 'nutmeg', 'cardamom',
-      'bao buns', 'tortillas', 'pita bread', 'naan', 'spring onions', 'scallions',
-      'shallots', 'leeks', 'ginger', 'chili', 'chilies', 'jalapenos', 'serrano',
-      'avocado', 'lime juice', 'lemon juice', 'vinegar', 'soy sauce', 'fish sauce',
-      'coconut milk', 'cream', 'stock', 'broth', 'wine', 'beer', 'sake',
-      'filet mignon', 'ribeye', 'sirloin', 'tenderloin', 'strip steak', 'porterhouse',
-      'olive oil', 'vegetable oil', 'canola oil', 'sunflower oil', 'sesame oil',
-      'pinot noir', 'cabernet', 'merlot', 'chardonnay', 'sauvignon blanc', 'red wine', 'white wine',
-      'beef stock', 'chicken stock', 'vegetable stock', 'fish stock',
-      'sage', 'fresh sage', 'garlic', 'garlic cloves', 'onion', 'onions', 'shallots',
-      'apples', 'pork belly', 'butter', 'salt', 'pepper', 'black pepper', 'lemon juice'
+      // Basic seasonings and liquids
+      'salt', 'pepper', 'black pepper', 'white pepper', 'water', 'oil', 'flour', 'sugar', 'brown sugar', 'milk', 'eggs', 'butter',
+      
+      // Basic vegetables and aromatics
+      'onion', 'onions', 'garlic', 'garlic cloves', 'tomato', 'tomatoes', 'potato', 'potatoes', 'carrot', 'carrots', 'celery',
+      'lemon', 'lemons', 'lime', 'limes', 'cucumber', 'lettuce', 'spinach', 'kale', 'cabbage', 'broccoli', 'cauliflower',
+      'mushrooms', 'button mushrooms', 'bell pepper', 'bell peppers', 'peppers', 'red pepper', 'green pepper', 'yellow pepper',
+      'shallots', 'leeks', 'ginger', 'fresh ginger', 'chili', 'chilies', 'chilli', 'chillies', 'jalapenos', 'serrano',
+      'spring onions', 'scallions', 'green onions', 'avocado', 'avocados',
+      
+      // Basic proteins
+      'beef', 'pork', 'chicken', 'lamb', 'duck', 'fish', 'salmon', 'tuna', 'cod', 'prawns', 'shrimp',
+      'pork belly', 'chicken breast', 'chicken thighs', 'beef steak', 'lamb chops', 'duck breast',
+      'filet mignon', 'ribeye', 'sirloin', 'tenderloin', 'strip steak', 'porterhouse', 'ground beef', 'mince',
+      
+      // Dairy and cheese
+      'cheese', 'mozzarella', 'parmesan', 'cheddar', 'feta', 'goat cheese', 'cream cheese', 'yogurt', 'sour cream',
+      'cream', 'heavy cream', 'double cream', 'single cream', 'crème fraîche',
+      
+      // Carbs and grains
+      'bread', 'pasta', 'rice', 'brown rice', 'basmati rice', 'jasmine rice', 'noodles', 'quinoa', 'couscous', 'bulgur',
+      'bao buns', 'tortillas', 'pita bread', 'naan', 'flatbread', 'sourdough', 'baguette',
+      
+      // Legumes and nuts
+      'beans', 'lentils', 'chickpeas', 'black beans', 'kidney beans', 'white beans', 'cannellini beans',
+      'nuts', 'almonds', 'walnuts', 'pecans', 'pine nuts', 'cashews', 'hazelnuts', 'peanuts',
+      
+      // Fresh herbs (common ones)
+      'herbs', 'basil', 'fresh basil', 'parsley', 'fresh parsley', 'cilantro', 'fresh cilantro', 'coriander',
+      'thyme', 'fresh thyme', 'rosemary', 'fresh rosemary', 'oregano', 'fresh oregano', 'mint', 'fresh mint',
+      'sage', 'fresh sage', 'chives', 'fresh chives', 'dill', 'fresh dill', 'tarragon', 'bay leaves',
+      
+      // Common spices
+      'spices', 'cumin', 'ground cumin', 'paprika', 'smoked paprika', 'cinnamon', 'ground cinnamon', 'nutmeg', 'cardamom',
+      'turmeric', 'ground turmeric', 'coriander seeds', 'ground coriander', 'fennel seeds', 'star anise',
+      'cloves', 'allspice', 'garam masala', 'curry powder', 'chili powder', 'cayenne', 'red pepper flakes',
+      
+      // Oils and vinegars
+      'olive oil', 'extra virgin olive oil', 'vegetable oil', 'canola oil', 'sunflower oil', 'sesame oil',
+      'coconut oil', 'avocado oil', 'vinegar', 'white vinegar', 'red wine vinegar', 'balsamic vinegar',
+      'apple cider vinegar', 'rice vinegar',
+      
+      // Sauces and condiments
+      'soy sauce', 'fish sauce', 'worcestershire sauce', 'hot sauce', 'sriracha', 'tabasco', 'mustard',
+      'dijon mustard', 'honey', 'maple syrup', 'ketchup', 'mayonnaise', 'mayo',
+      
+      // Juices and liquids
+      'lime juice', 'lemon juice', 'orange juice', 'coconut milk', 'coconut cream', 'stock', 'broth',
+      'chicken stock', 'beef stock', 'vegetable stock', 'fish stock', 'bone broth',
+      'wine', 'red wine', 'white wine', 'beer', 'sake', 'mirin', 'cooking wine',
+      'pinot noir', 'cabernet', 'merlot', 'chardonnay', 'sauvignon blanc',
+      
+      // Fruits (common ones)
+      'apples', 'oranges', 'bananas', 'grapes', 'berries', 'strawberries', 'blueberries', 'raspberries',
+      'mango', 'pineapple', 'peaches', 'pears', 'plums', 'cherries',
+      
+      // Baking ingredients
+      'baking powder', 'baking soda', 'vanilla', 'vanilla extract', 'yeast', 'cornstarch', 'cornflour',
+      'cocoa powder', 'chocolate', 'dark chocolate', 'milk chocolate'
     ];
     
     for (const ingredient of ingredients) {
