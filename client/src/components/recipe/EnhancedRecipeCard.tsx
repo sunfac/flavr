@@ -171,7 +171,7 @@ function EnhancedRecipeCard({
     
     window.addEventListener('recipe-updated', handleRecipeUpdate as EventListener);
     return () => window.removeEventListener('recipe-updated', handleRecipeUpdate as EventListener);
-  }, [toast, recipe.id]);
+  }, [toast]); // Remove recipe.id dependency to prevent infinite loops
 
   // Initialize recipe store on mount if not already active
   useEffect(() => {
@@ -206,7 +206,7 @@ function EnhancedRecipeCard({
         lastUpdated: Date.now()
       });
     }
-  }, [recipe.id]); // Only re-run if recipe ID changes
+  }, [recipe.id, recipeStore.id]); // Only depend on IDs to prevent infinite loops
 
   // Sync servings from store without causing infinite loops
   const activeServings = useMemo(() => {
