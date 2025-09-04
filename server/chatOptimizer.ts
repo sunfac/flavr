@@ -123,6 +123,7 @@ Respond with JSON: {
   ): ChatIntentResult | null {
     
     const lower = message.toLowerCase().trim();
+    console.log(`🔍 Quick pattern check: "${message}" -> "${lower}"`);
     
     // Quick recipe request pattern
     if (lower.startsWith('quick recipe for:')) {
@@ -155,11 +156,10 @@ Respond with JSON: {
     }
 
     // Recipe suggestion patterns (should generate recipe options)
-    if (lower.includes('dinner suggestion') ||
-        lower.includes('recipe suggestion') ||
-        lower.includes('suggest') ||
-        lower.includes('recommendation') ||
-        lower.includes('ideas for') ||
+    if (lower === 'dinner suggestion' ||
+        lower === 'recipe suggestion' ||
+        lower === 'breakfast suggestion' ||
+        lower === 'lunch suggestion' ||
         lower.includes('what should i cook') ||
         lower.includes('what can i make')) {
       return {
