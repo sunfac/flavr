@@ -1048,7 +1048,8 @@ export default function ChatBot({
                         <div className="w-full mt-2 text-xs text-slate-400 flex items-center gap-2">
                           <iconMap.zap className="w-3 h-3 text-green-400" />
                           <span>
-                            Optimized • {msg.metadata.modelUsed} • {msg.metadata.processingTimeMs}ms • ~${msg.metadata.estimatedCost.toFixed(4)}
+                            Optimized • {msg.metadata.modelUsed} • {msg.metadata.processingTimeMs}ms
+                            {msg.metadata.estimatedCost && ` • ~$${msg.metadata.estimatedCost.toFixed(4)}`}
                           </span>
                         </div>
                       )}
