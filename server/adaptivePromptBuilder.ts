@@ -143,6 +143,18 @@ RECIPE STANDARDS:
     // Start with core user request
     let message = `Generate a complete recipe JSON that maximizes flavor and home cook confidence.\n\nUSER REQUEST: "${recipeData.userIntent}"`;
     
+    // CRITICAL: Preserve the original user intent as the title for Inspire Me recipes
+    // This ensures chef inspirations and specific titles are maintained
+    const shouldPreserveTitle = extractedElements.chefReference || 
+                               extractedElements.namedDish ||
+                               recipeData.userIntent.includes('-inspired') ||
+                               recipeData.userIntent.includes('-style');
+    
+    if (shouldPreserveTitle) {
+      message += `\n\nIMPORTANT: Use this EXACT title for the recipe: "${recipeData.userIntent}"`;
+      message += `\nDo not modify or shorten this title - it contains specific inspiration context that must be preserved.`;
+    }
+    
     // Add extracted context for better targeting
     if (extractedElements.namedDish) {
       message += `\nSPECIFIC DISH: Focus on authentic ${extractedElements.namedDish} preparation`;
@@ -242,10 +254,10 @@ RECIPE STANDARDS:
   private static buildSchemaText(specificity: InputSpecificity): string {
     
     if (specificity === InputSpecificity.CRYSTAL_CLEAR) {
-      // Minimal schema for clear inputs
+      // Minimal schema for clear inputs (note: title will be set via prompt instruction)
       return `JSON SCHEMA:
 {
-  "title": "Appetizing dish name (4-8 words)",
+  "title": "Use the exact title specified in the prompt above",
   "servings": number,
   "time": { "prep_min": number, "cook_min": number, "total_min": number },
   "cuisine": "cuisine type",

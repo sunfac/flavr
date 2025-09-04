@@ -295,6 +295,29 @@ export function registerRecipeRoutes(app: Express) {
     });
   });
 
+  // Image polling endpoint for parallel processing
+  app.get("/api/recipe-image/:tempRecipeId", (req, res) => {
+    const { tempRecipeId } = req.params;
+    
+    if (!global.recipeImageCache || !global.recipeImageCache.has(tempRecipeId)) {
+      return res.json({ status: 'generating', imageUrl: null });
+    }
+    
+    const cached = global.recipeImageCache.get(tempRecipeId) as any;
+    
+    // Clean up old cache entries (older than 1 hour)
+    const oneHour = 60 * 60 * 1000;
+    if (Date.now() - cached.timestamp > oneHour) {
+      global.recipeImageCache.delete(tempRecipeId);
+      return res.json({ status: 'expired', imageUrl: null });
+    }
+    
+    return res.json({ 
+      status: 'ready', 
+      imageUrl: cached.imageUrl 
+    });
+  });
+
   // Vision API - Analyze ingredients from image
   app.post("/api/vision/analyze-ingredients", upload.single('image'), processFridgeImage);
 
@@ -680,20 +703,28 @@ Return a JSON object with this structure:
         // Apply UK conversions
         const convertedRecipe = convertRecipeToUKEnglish(flavorMaximizedRecipe);
 
-        // Generate image
+        // Start parallel image generation (don't await)
         const tempRecipeId = Date.now();
-        console.log('🎨 Generating image for flavor-maximized recipe...');
+        console.log('🎨 Starting parallel image generation for better UX...');
         
-        try {
-          const imageUrl = await generateRecipeImage(convertedRecipe.title, convertedRecipe.cuisine, tempRecipeId);
-          if (imageUrl) {
-            console.log('✅ Image generated successfully:', imageUrl);
-            convertedRecipe.image = imageUrl;
-            convertedRecipe.imageUrl = imageUrl;
-          }
-        } catch (imageError) {
-          console.error('Error generating recipe image:', imageError);
-        }
+        // Start image generation in background
+        const imageGenerationPromise = generateRecipeImage(convertedRecipe.title, convertedRecipe.cuisine, tempRecipeId)
+          .then(imageUrl => {
+            if (imageUrl) {
+              console.log('✅ Parallel image generated successfully:', imageUrl);
+              // Store in cache for frontend retrieval
+              if (!global.recipeImageCache) global.recipeImageCache = new Map();
+              global.recipeImageCache.set(tempRecipeId.toString(), {
+                imageUrl,
+                timestamp: Date.now()
+              } as any);
+            }
+            return imageUrl;
+          })
+          .catch(error => {
+            console.error('Background image generation failed:', error);
+            return null;
+          });
 
         // Save the recipe
         let savedRecipe;
@@ -720,7 +751,7 @@ Return a JSON object with this structure:
         }
 
         return res.json({
-          recipe: convertedRecipe,
+          recipe: { ...convertedRecipe, tempRecipeId }, // Include tempRecipeId for image retrieval
           savedRecipeId: savedRecipe?.id,
           isFlavorMaximized: true
         });
@@ -776,26 +807,31 @@ Return a JSON object with this structure:
       // GPT-5 returns the recipe directly, not wrapped
       const recipe = result;
       
-      // Generate image BEFORE sending response
+      // Start parallel image generation (don't wait for it)
       const tempRecipeId = Date.now();
-      console.log('🎨 Generating image first for better UX...');
+      console.log('🎨 Starting parallel image generation for faster response...');
       
-      try {
-        const imageUrl = await generateRecipeImage(recipe.title, recipe.cuisine, tempRecipeId);
-        
-        if (imageUrl) {
-          console.log('✅ Image generated successfully:', imageUrl);
-          recipe.image = imageUrl;
-          recipe.imageUrl = imageUrl;
-        } else {
-          console.log('⚠️ Image generation failed, continuing without image');
-        }
-      } catch (imgError) {
-        console.error('Image generation error:', imgError);
-      }
+      // Start image generation in background
+      generateRecipeImage(recipe.title, recipe.cuisine, tempRecipeId)
+        .then(imageUrl => {
+          if (imageUrl) {
+            console.log('✅ Parallel image generated successfully:', imageUrl);
+            // Store in cache for frontend retrieval
+            if (!global.recipeImageCache) global.recipeImageCache = new Map();
+            global.recipeImageCache.set(tempRecipeId.toString(), {
+              imageUrl,
+              timestamp: Date.now()
+            } as any);
+          }
+        })
+        .catch(error => {
+          console.error('Background image generation failed:', error);
+        });
       
-      // Now send the complete recipe with image
-      res.json({ recipe });
+      // Send response immediately with tempRecipeId for image polling
+      res.json({ 
+        recipe: { ...recipe, tempRecipeId }
+      });
 
       // Increment usage counter after successful generation
       incrementUsageCounter(req).catch(err => console.error('Failed to increment usage:', err));
