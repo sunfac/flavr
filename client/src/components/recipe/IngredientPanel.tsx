@@ -52,42 +52,8 @@ function detectSubRecipe(ingredientText: string): { hasSubRecipe: boolean; subRe
     }
   }
   
-  // Smart detection: check if ingredient looks like it could be made from scratch
-  const extractedName = extractIngredientName(ingredientText);
-  
-  // Exclude very basic single-word ingredients that are typically store-bought
-  const basicIngredients = [
-    'salt', 'pepper', 'water', 'oil', 'flour', 'sugar', 'milk', 'eggs', 'butter',
-    'onion', 'garlic', 'tomato', 'potato', 'carrot', 'celery', 'lemon', 'lime'
-  ];
-  
-  const lowerExtracted = extractedName.toLowerCase();
-  const isBasicIngredient = basicIngredients.includes(lowerExtracted);
-  
-  if (isBasicIngredient || extractedName.length < 3) {
-    return { hasSubRecipe: false };
-  }
-  
-  // Check if the ingredient suggests it could be homemade
-  const homemadeIndicators = [
-    'paste', 'sauce', 'drizzle', 'oil', 'butter', 'mayo', 'aioli', 'chutney',
-    'marinade', 'dressing', 'stock', 'broth', 'mix', 'blend', 'rub',
-    'fermented', 'pickled', 'cured', 'homemade', 'fresh'
-  ];
-  
-  const hasHomemadeIndicator = homemadeIndicators.some(indicator => 
-    lowerExtracted.includes(indicator) || lowerText.includes(`${indicator} `)
-  );
-  
-  // Also allow compound ingredients (2+ words) even without specific indicators
-  const isCompoundIngredient = extractedName.split(' ').length >= 2;
-  
-  if (hasHomemadeIndicator || isCompoundIngredient) {
-    return {
-      hasSubRecipe: true,
-      subRecipe: extractedName
-    };
-  }
+  // Sub-recipe buttons should only appear for ingredients with page references
+  // This feature is specifically for image-to-recipe functionality where cookbook pages reference other recipes
   
   return {
     hasSubRecipe: false

@@ -348,7 +348,7 @@ export default function ChatBot({
       });
 
       // Handle recipe intent confirmation
-      if (result.isRecipeIntent && result.requiresConfirmation) {
+      if (result.isRecipeIntent && (result.requiresConfirmation || result.isConfirmation)) {
         // Add confirmation buttons
         const confirmationMessage: ChatMessage = {
           id: Date.now() + 1,
