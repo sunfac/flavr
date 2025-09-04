@@ -144,7 +144,7 @@ export default function FloatingChatButton({ className = "", variant = "floating
             position: 'fixed',
             bottom: '1.5rem',
             right: '1.5rem',
-            zIndex: 999999999
+            zIndex: 1000
           }}
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -210,7 +210,7 @@ export default function FloatingChatButton({ className = "", variant = "floating
               <motion.div
                 className="fixed inset-0 bg-black/60 backdrop-blur-sm hidden md:block"
                 style={{ 
-                  zIndex: 2147483647,
+                  zIndex: 1050,
                   position: 'fixed',
                   top: 0,
                   left: 0,
@@ -225,15 +225,14 @@ export default function FloatingChatButton({ className = "", variant = "floating
               
               {/* Slide-out Panel */}
               <motion.div
-                className="bg-slate-900 shadow-2xl flex flex-col"
+                className="bg-slate-900 shadow-2xl flex flex-col floating-chat-panel"
                 style={{ 
-                  zIndex: 2147483647,
+                  zIndex: 1060,
                   position: 'fixed',
                   top: 0,
                   right: 0,
                   bottom: 0,
-                  left: typeof window !== 'undefined' && window.innerWidth >= 768 ? 'auto' : 0,
-                  width: typeof window !== 'undefined' && window.innerWidth >= 768 ? '384px' : '100%',
+                  left: 0,
                   height: '100vh'
                 }}
                 initial={{ x: "100%" }}
@@ -248,7 +247,7 @@ export default function FloatingChatButton({ className = "", variant = "floating
                 {/* Retract Arrow - Mobile Only */}
                 <div 
                   className="md:hidden absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full"
-                  style={{ zIndex: 2147483647 }}
+                  style={{ zIndex: 1070 }}
                 >
                   <Button
                     onClick={handleCloseChat}

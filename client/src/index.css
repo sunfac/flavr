@@ -336,6 +336,14 @@ body {
     }
   }
 
+  /* Desktop-specific positioning for floating chat panels */
+  @media (min-width: 768px) {
+    .floating-chat-panel {
+      left: auto !important;
+      width: 384px !important;
+    }
+  }
+
   .mobile-chat-messages {
     padding-bottom: 120px !important; /* Extra space for input */
   }
