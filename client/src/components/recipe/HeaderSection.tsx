@@ -87,13 +87,13 @@ function SaveButton() {
         toast({
           title: "Sign in required",
           description: "Please sign in to save recipes to My Cookbook",
-          variant: "destructive"
+          variant: "destructive",
         });
       } else {
         toast({
-          title: "Failed to save",
-          description: "Could not save recipe. Please try again.",
-          variant: "destructive"
+          title: "Failed to save recipe",
+          description: error.message || "Please try again",
+          variant: "destructive",
         });
       }
     }
@@ -101,19 +101,25 @@ function SaveButton() {
   
   return (
     <Button
-      onClick={() => !isSaved && saveMutation.mutate()}
-      disabled={isSaved || saveMutation.isPending}
+      onClick={() => saveMutation.mutate()}
+      disabled={saveMutation.isPending || isSaved}
       size="sm"
       variant="secondary"
-      className={`${
-        isSaved 
-          ? 'bg-red-500/20 border-red-500 text-red-300 hover:bg-red-500/30' 
-          : 'bg-black/40 hover:bg-black/60 text-white'
-      } backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer`}
+      className={`bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer ${
+        isSaved ? 'bg-green-600/80 hover:bg-green-600/80' : ''
+      }`}
       style={{ pointerEvents: 'auto' }}
     >
-      <Heart className={`w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1 ${isSaved ? 'fill-current' : ''}`} />
-      <span className="text-xs font-medium">{isSaved ? 'Saved' : 'Save'}</span>
+      {saveMutation.isPending ? (
+        <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin mr-0.5 sm:mr-1" />
+      ) : isSaved ? (
+        <Heart className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1 fill-current" />
+      ) : (
+        <BookOpen className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+      )}
+      <span className="text-xs font-medium">
+        {isSaved ? 'Saved' : saveMutation.isPending ? 'Saving...' : 'Save'}
+      </span>
     </Button>
   );
 }
@@ -127,215 +133,141 @@ export default function HeaderSection({
   const [isRerolling, setIsRerolling] = useState(false);
   const [localServings, setLocalServings] = useState(currentServings);
   const [currentImage, setCurrentImage] = useState(recipe.image);
+  const [imagePollingId, setImagePollingId] = useState<string | null>(null);
   const { toast } = useToast();
   const generationParams = useRecipeStore((state) => state.generationParams);
   const updateActiveRecipe = useRecipeStore((state) => state.updateActiveRecipe);
   const setImageLoading = useRecipeStore((state) => state.setImageLoading);
   const activeRecipe = useRecipeStore((state) => state);
   
-  // Poll for image updates if recipe has tempId but no image
+  // Check if recipe has tempRecipeId for parallel image polling
   useEffect(() => {
-    const tempId = (recipe as any).tempId;
-    if (tempId && !currentImage) {
-      let pollCount = 0;
-      const maxPolls = 30; // Poll for up to 30 seconds
-      
-      const pollForImage = () => {
-        pollCount++;
-        console.log(`🔍 Polling for image update ${pollCount}/${maxPolls} for tempId: ${tempId}`);
-        
-        apiRequest("GET", `/api/recipe-update/${tempId}`)
-          .then(response => response.json())
-          .then(data => {
-            if (data.hasImage && data.imageUrl) {
-              console.log('✅ Image URL received from polling:', data.imageUrl);
-              setCurrentImage(data.imageUrl);
-              setImageLoading(false);
-              
-              // Update the recipe store with the image
-              const recipeStore = useRecipeStore.getState();
-              if (recipeStore.id === (recipe as any).id || recipeStore.meta.title === recipe.title) {
-                useRecipeStore.setState({
-                  ...recipeStore,
-                  meta: {
-                    ...recipeStore.meta,
-                    image: data.imageUrl
-                  }
-                });
-              }
-            } else if (pollCount < maxPolls) {
-              // Continue polling
-              setTimeout(pollForImage, 1000);
-            } else {
-              console.log('⏰ Stopped polling for image - max attempts reached');
-              setImageLoading(false);
-            }
-          })
-          .catch(error => {
-            console.error('Error polling for image:', error);
-            if (pollCount < maxPolls) {
-              setTimeout(pollForImage, 2000); // Longer delay on error
-            } else {
-              setImageLoading(false);
-            }
-          });
-      };
-      
-      // Start polling after a short delay
+    const recipeWithTempId = recipe as any;
+    if (recipeWithTempId?.tempRecipeId && !currentImage) {
+      setImagePollingId(recipeWithTempId.tempRecipeId.toString());
       setImageLoading(true);
-      setTimeout(pollForImage, 2000);
     }
-  }, [(recipe as any).tempId, currentImage]);
-  
-  // Update currentImage when recipe.image changes
+  }, [recipe]);
+
+  // Poll for parallel image generation
   useEffect(() => {
-    if (recipe.image && recipe.image !== currentImage) {
-      setCurrentImage(recipe.image);
-    }
+    if (!imagePollingId) return;
+
+    const pollForImage = async () => {
+      try {
+        const response = await apiRequest("GET", `/api/recipe-image/${imagePollingId}`);
+        if (!response.ok) return;
+        
+        const data = await response.json();
+        
+        if (data.status === 'ready' && data.imageUrl) {
+          console.log('✅ Parallel image ready:', data.imageUrl);
+          setCurrentImage(data.imageUrl);
+          setImageLoading(false);
+          setImagePollingId(null);
+        } else if (data.status === 'expired') {
+          console.log('⏰ Image generation expired');
+          setImageLoading(false);
+          setImagePollingId(null);
+        }
+        // If status is 'generating', continue polling
+      } catch (error) {
+        console.error('Image polling error:', error);
+        setImageLoading(false);
+        setImagePollingId(null);
+      }
+    };
+
+    // Poll every 2 seconds
+    const interval = setInterval(pollForImage, 2000);
+    
+    // Initial poll
+    pollForImage();
+    
+    // Cleanup
+    return () => clearInterval(interval);
+  }, [imagePollingId]);
+
+  // Update local state when recipe image changes
+  useEffect(() => {
+    setCurrentImage(recipe.image);
   }, [recipe.image]);
 
-  // Sync local servings with current servings when it changes
-  useEffect(() => {
-    setLocalServings(currentServings);
-  }, [currentServings]);
-  
   const fastFacts = useMemo(() => {
+    const cookTimeStr = typeof recipe.cookTime === 'number' 
+      ? `${recipe.cookTime}m` 
+      : recipe.cookTime;
+    
     return [
-      { icon: Users, label: `Serves ${currentServings}`, value: 'servings' },
-      { icon: Clock, label: `${recipe.cookTime} min`, value: 'timer' },
+      { icon: Clock, label: cookTimeStr },
+      { icon: Users, label: `${currentServings} servings` },
+      { icon: ChefHat, label: recipe.difficulty }
     ];
-  }, [currentServings, recipe.cookTime]);
-
-  const handleStartAgain = () => {
-    navigate('/app');
-  };
-
-
+  }, [recipe.cookTime, recipe.difficulty, currentServings]);
 
   const handleCopyIngredients = async () => {
-    const ingredients = activeRecipe.ingredients?.map((ing: any) => ing.text || ing) || [];
-    const instructions = activeRecipe.steps?.map((step: any) => step.description || step) || [];
-    
-    const fullRecipeText = `${recipe.title}
-
-${recipe.description ? `${recipe.description}\n\n` : ''}📝 Ingredients (serves ${currentServings || 4}):
-${ingredients.map((ing: any) => `• ${ing}`).join('\n')}
-
-👨‍🍳 Instructions:
-${instructions.map((step: any, index: number) => `${index + 1}. ${step}`).join('\n\n')}
-
-Cook Time: ${recipe.cookTime} minutes
-Difficulty: ${recipe.difficulty}
-${recipe.cuisine ? `Cuisine: ${recipe.cuisine}` : ''}
-
-Created with Flavr AI`;
-    
     try {
-      await navigator.clipboard.writeText(fullRecipeText);
+      const ingredients = activeRecipe.ingredients
+        .map((ing: any) => ing.text || ing)
+        .join('\n');
+      
+      await navigator.clipboard.writeText(ingredients);
       toast({
-        title: "Recipe copied!",
-        description: "Full recipe with ingredients & steps copied",
+        title: "Ingredients copied!",
+        description: "Recipe ingredients copied to clipboard",
       });
     } catch (error) {
       toast({
         title: "Copy failed",
-        description: "Could not copy recipe",
+        description: "Could not copy to clipboard",
         variant: "destructive",
       });
     }
   };
 
-  const handleReroll = async () => {
-    if (!generationParams) {
-      toast({
-        title: "Unable to reroll",
-        description: "Recipe generation parameters not found",
-        variant: "destructive",
-      });
-      return;
-    }
+  const handleStartAgain = () => {
+    navigate('/');
+  };
 
-    setIsRerolling(true);
-    setImageLoading(true); // Set placeholder image during reroll
+  const handleReroll = async () => {
+    if (!generationParams || isRerolling) return;
     
-    // Clear the current image to show loading state immediately
-    updateActiveRecipe({
-      ...useRecipeStore.getState(),
-      meta: {
-        ...useRecipeStore.getState().meta,
-        image: undefined,
-        imageLoading: true
-      }
-    }, generationParams);
+    setIsRerolling(true);
     
     try {
-      const { mode, originalInputs } = generationParams;
-      let response;
-
-      if (mode === 'chef') {
-        response = await apiRequest('POST', '/api/chef-assist/generate', {
-          prompt: originalInputs.prompt,
-          servings: originalInputs.servings,
-          cookingTime: originalInputs.cookingTime,
-          isReroll: true // Flag to indicate this is a reroll for enhanced variation
-        });
-      } else if (mode === 'fridge') {
-        // For fridge mode, regenerate from the recipe idea
-        // For fridge mode, need to check if we're using generate-fridge-recipe instead
-        if (originalInputs.ingredients) {
-          response = await apiRequest('POST', '/api/generate-fridge-recipe', {
-            ingredients: originalInputs.ingredients,
-            servings: originalInputs.servings || 4,
-            cookingTime: originalInputs.cookingTime || 30,
-            budget: originalInputs.budget || 4.5,
-            equipment: originalInputs.equipment || ["oven", "stovetop"],
-            dietaryRestrictions: originalInputs.dietaryRestrictions || [],
-            ingredientFlexibility: originalInputs.ingredientFlexibility || "pantry",
-            isReroll: true // Flag to indicate this is a reroll for enhanced variation
-          });
-        } else {
-          response = await apiRequest('POST', '/api/generate-full-recipe', {
-            recipeIdea: originalInputs.recipeIdea,
-            quizData: originalInputs.quizData,
-            isReroll: true // Flag to indicate this is a reroll for enhanced variation
-          });
+      updateActiveRecipe({
+        ...useRecipeStore.getState(),
+        meta: {
+          ...useRecipeStore.getState().meta,
+          image: undefined,
+          imageLoading: true
         }
-      } else if (mode === 'shopping') {
-        // For shopping mode, regenerate from the selected recipe
-        response = await apiRequest('POST', '/api/generate-full-recipe', {
-          selectedRecipe: originalInputs.selectedRecipe,
-          mode: 'shopping',
-          quizData: originalInputs.quizData,
-          isReroll: true // Flag to indicate this is a reroll for enhanced variation
-        });
-      } else {
-        throw new Error('Unsupported reroll mode');
-      }
-
-      const data = await response.json();
+      }, generationParams);
       
-      // Handle different response formats from different endpoints
-      const newRecipe = data.recipe || data;
+      const { mode, originalInputs } = generationParams;
       
-      if (newRecipe && (newRecipe.title || newRecipe.ingredients)) {
-        // Preserve generation parameters for future rerolls
-        newRecipe.generationParams = generationParams;
-        updateActiveRecipe(newRecipe, generationParams);
-        
-        toast({
-          title: "Recipe rerolled successfully!",
-          description: "Here's a fresh variation using the same inputs",
+      if (mode === 'shopping') {
+        const response = await apiRequest("POST", "/api/generate-shopping-recipe", {
+          ...originalInputs,
+          isReroll: true
         });
         
-        // Scroll to top to show new recipe
-        window.scrollTo(0, 0);
-      } else {
-        throw new Error("No recipe data received");
+        if (!response.ok) {
+          throw new Error(`Failed to generate recipe: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.recipe) {
+          console.log('🔄 Reroll successful, navigating to new recipe');
+          window.scrollTo(0, 0);
+        } else {
+          throw new Error("No recipe data received");
+        }
       }
     } catch (error: any) {
       console.error('Error rerolling recipe:', error);
       
-      // Check for quota limit errors
       if (error.message && error.message.includes('You have no free recipes remaining')) {
         toast({
           title: "You have no free recipes remaining this month",
@@ -351,7 +283,7 @@ Created with Flavr AI`;
       }
     } finally {
       setIsRerolling(false);
-      setImageLoading(false); // Clear loading state when done
+      setImageLoading(false);
     }
   };
 
@@ -362,145 +294,121 @@ Created with Flavr AI`;
       
       {/* Hero Image - Mobile First Design */}
       <div className="relative w-full">
-        {/* Main Image Display */}
-        {currentImage && !recipe.imageLoading ? (
-          <div className="relative w-full aspect-[4/3] sm:aspect-[3/2] lg:aspect-[16/9] bg-gradient-to-br from-orange-400 to-orange-600 rounded-t-xl overflow-hidden">
-            <img 
+        {/* Image Container - Always Visible */}
+        <div className="relative w-full aspect-[4/3] sm:aspect-[3/2] lg:aspect-[16/9] bg-gradient-to-br from-orange-400 to-orange-600 rounded-t-xl overflow-hidden">
+          {currentImage && !recipe.imageLoading ? (
+            /* Actual Image */
+            <motion.img 
               src={currentImage} 
               alt={recipe.title}
               className="w-full h-full object-cover"
               loading="eager"
               style={{ objectPosition: 'center' }}
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
               onLoad={() => {
                 console.log('✅ Image loaded successfully:', currentImage);
-                setImageLoading(false); // Clear loading state when image loads
-                // Scroll to absolute top after image loads
+                setImageLoading(false);
                 window.scrollTo(0, 0);
                 document.documentElement.scrollTop = 0;
                 document.body.scrollTop = 0;
               }}
               onError={(e) => {
                 console.log('❌ Image failed to load:', currentImage);
-                setImageLoading(false); // Clear loading state on error
-                // Don't hide the image container, just show fallback
+                setImageLoading(false);
                 e.currentTarget.style.display = 'none';
-                // Show the fallback gradient container
                 const container = e.currentTarget.parentElement;
                 if (container) {
                   container.style.background = 'linear-gradient(to bottom right, #fb923c, #ea580c)';
                 }
               }}
             />
-            {/* Minimal overlay for mobile readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent sm:bg-black/30" />
-            
-            {/* Mobile: Only title overlay, Desktop: Title + description overlay */}
-            <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-6 text-white">
-              <h1 className="font-bold mb-1 sm:mb-2 text-shadow-lg text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight break-words hyphens-auto text-wrap-balance">
-                {recipe.title}
-              </h1>
+          ) : (
+            /* Elegant Loading Placeholder */
+            <div className="w-full h-full relative bg-gradient-to-br from-orange-300 to-orange-500">
+              {/* Shimmer Effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+              
+              {/* Loading Content */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-white/90 px-4">
+                  <motion.div 
+                    className="inline-block"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  >
+                    <ChefHat className="w-8 h-8 sm:w-10 sm:h-10 mb-3" />
+                  </motion.div>
+                  
+                  <motion.p 
+                    className="text-sm sm:text-base font-medium"
+                    animate={{ opacity: [1, 0.6, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    Creating your recipe image...
+                  </motion.p>
+                </div>
+              </div>
+              
+              {/* Subtle gradient overlay for text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
             </div>
-            
-            {/* Action Buttons - Top Right Corner */}
-            <div className="absolute top-2 right-2 flex items-center gap-0.5 sm:gap-1 md:gap-2 flex-wrap z-10">
-              <SaveButton />
-              
-              <Button
-                onClick={handleCopyIngredients}
-                size="sm"
-                variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer"
-                style={{ pointerEvents: 'auto' }}
-              >
-                <Copy className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
-                <span className="text-xs font-medium">Copy</span>
-              </Button>
-              
-              <Button
-                onClick={handleReroll}
-                disabled={isRerolling || !generationParams}
-                size="sm"
-                variant="secondary"
-                className="bg-orange-500/80 hover:bg-orange-500/90 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer"
-                style={{ pointerEvents: 'auto' }}
-              >
-                {isRerolling ? (
-                  <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin mr-0.5 sm:mr-1" />
-                ) : (
-                  <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
-                )}
-                <span className="text-xs font-medium">Reroll</span>
-              </Button>
-              
-              <Button
-                onClick={handleStartAgain}
-                size="sm"
-                variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer"
-                style={{ pointerEvents: 'auto' }}
-              >
-                <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
-                <span className="text-xs font-medium">Start Over</span>
-              </Button>
-            </div>
+          )}
+          
+          {/* Overlay for mobile readability - always present */}
+          {currentImage && <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent sm:bg-black/30" />}
+          
+          {/* Mobile: Only title overlay, Desktop: Title + description overlay */}
+          <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-6 text-white">
+            <h1 className="font-bold mb-1 sm:mb-2 text-shadow-lg text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight break-words hyphens-auto text-wrap-balance">
+              {recipe.title}
+            </h1>
           </div>
-        ) : (
-          <div className="relative w-full aspect-[4/3] sm:aspect-[3/2] lg:aspect-[16/9] bg-gradient-to-br from-orange-400 to-orange-600 rounded-t-xl overflow-hidden flex items-center justify-center">
-            <div className="text-center p-6 text-white">
-              <h1 className="font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight break-words mb-2">
-                {recipe.title}
-              </h1>
-              <div className="mt-4 text-xs text-white/60 animate-pulse">
-              {isRerolling ? "🔄 Creating new recipe and image..." : "✨ Generating beautiful food image..."}
-            </div>
-            </div>
+          
+          {/* Action Buttons - Top Right Corner */}
+          <div className="absolute top-2 right-2 flex items-center gap-0.5 sm:gap-1 md:gap-2 flex-wrap z-10">
+            <SaveButton />
             
-            {/* Action Buttons - Top Right Corner (for no image state) */}
-            <div className="absolute top-2 right-2 flex items-center gap-0.5 sm:gap-1 md:gap-2 flex-wrap z-10">
-              <SaveButton />
-              
-              <Button
-                onClick={handleCopyIngredients}
-                size="sm"
-                variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer"
-                style={{ pointerEvents: 'auto' }}
-              >
-                <Copy className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
-                <span className="text-xs font-medium">Copy</span>
-              </Button>
-              
-              <Button
-                onClick={handleReroll}
-                disabled={isRerolling || !generationParams}
-                size="sm"
-                variant="secondary"
-                className="bg-orange-500/80 hover:bg-orange-500/90 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer"
-                style={{ pointerEvents: 'auto' }}
-              >
-                {isRerolling ? (
-                  <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin mr-0.5 sm:mr-1" />
-                ) : (
-                  <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
-                )}
-                <span className="text-xs font-medium">Reroll</span>
-              </Button>
-              
-              <Button
-                onClick={handleStartAgain}
-                size="sm"
-                variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer"
-                style={{ pointerEvents: 'auto' }}
-              >
-                <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
-                <span className="text-xs font-medium">Start Over</span>
-              </Button>
-            </div>
+            <Button
+              onClick={handleCopyIngredients}
+              size="sm"
+              variant="secondary"
+              className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer"
+              style={{ pointerEvents: 'auto' }}
+            >
+              <Copy className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+              <span className="text-xs font-medium">Copy</span>
+            </Button>
+            
+            <Button
+              onClick={handleReroll}
+              disabled={isRerolling || !generationParams}
+              size="sm"
+              variant="secondary"
+              className="bg-orange-500/80 hover:bg-orange-500/90 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer"
+              style={{ pointerEvents: 'auto' }}
+            >
+              {isRerolling ? (
+                <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin mr-0.5 sm:mr-1" />
+              ) : (
+                <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+              )}
+              <span className="text-xs font-medium">Reroll</span>
+            </Button>
+            
+            <Button
+              onClick={handleStartAgain}
+              size="sm"
+              variant="secondary"
+              className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer"
+              style={{ pointerEvents: 'auto' }}
+            >
+              <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+              <span className="text-xs font-medium">Start Over</span>
+            </Button>
           </div>
-        )}
-        
-
+        </div>
       </div>
 
       {/* Description - Show full description below image on all devices */}
@@ -540,43 +448,35 @@ Created with Flavr AI`;
         </div>
 
         {/* Servings Slider */}
-        <div className="space-y-4">
-          <div className="text-center">
-            <Badge variant="secondary" className="bg-orange-500/20 text-orange-200 px-4 py-2 text-lg border border-orange-400/30">
-              Serves {localServings}
-            </Badge>
+        <div className="mt-3 md:mt-4">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-sm text-slate-400 min-w-[20px]">1</span>
+            <Slider
+              value={[localServings]}
+              onValueChange={(value) => {
+                const newServings = value[0];
+                setLocalServings(newServings);
+                
+                // Update the recipe store immediately for live ingredient scaling
+                const recipeStore = useRecipeStore.getState();
+                useRecipeStore.setState({
+                  ...recipeStore,
+                  servings: newServings
+                });
+                
+                if (onServingsChange) {
+                  onServingsChange(newServings);
+                }
+              }}
+              min={1}
+              max={12}
+              step={1}
+              className="flex-1"
+            />
+            <span className="text-sm text-slate-400 min-w-[20px]">12</span>
           </div>
-          
-          <div className="max-w-xs mx-auto space-y-3">
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-slate-400 min-w-[20px]">1</span>
-              <Slider
-                value={[localServings]}
-                onValueChange={(value) => {
-                  const newServings = value[0];
-                  setLocalServings(newServings);
-                  
-                  // Update the recipe store immediately for live ingredient scaling
-                  const recipeStore = useRecipeStore.getState();
-                  useRecipeStore.setState({
-                    ...recipeStore,
-                    servings: newServings
-                  });
-                  
-                  if (onServingsChange) {
-                    onServingsChange(newServings);
-                  }
-                }}
-                min={1}
-                max={12}
-                step={1}
-                className="flex-1"
-              />
-              <span className="text-sm text-slate-400 min-w-[20px]">12</span>
-            </div>
-            <div className="text-center">
-              <span className="text-xs text-slate-500">Adjust servings to scale ingredients</span>
-            </div>
+          <div className="text-center">
+            <span className="text-xs text-slate-500">Adjust servings to scale ingredients</span>
           </div>
         </div>
       </div>
