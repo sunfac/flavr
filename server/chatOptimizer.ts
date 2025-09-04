@@ -149,6 +149,23 @@ Respond with JSON: {
       };
     }
 
+    // Recipe suggestion patterns (should generate recipe options)
+    if (lower.includes('dinner suggestion') ||
+        lower.includes('recipe suggestion') ||
+        lower.includes('suggest') ||
+        lower.includes('recommendation') ||
+        lower.includes('ideas for') ||
+        lower.includes('what should i cook') ||
+        lower.includes('what can i make')) {
+      return {
+        intent: 'recipe_request',
+        confidence: 0.9,
+        specificity: 'somewhat_vague',
+        modelRecommendation: 'gpt-4o-mini',
+        estimatedCost: 0.003
+      };
+    }
+
     // Clear conversational patterns
     if (lower.includes('how do i') ||
         lower.includes('what is') ||
