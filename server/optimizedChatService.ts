@@ -113,7 +113,8 @@ export class OptimizedChatService {
         metadata: {
           modelUsed: intentResult.modelRecommendation,
           processingTimeMs: processingTime,
-          tokenCount
+          tokenCount,
+          estimatedCost: intentResult.estimatedCost || 0.01
         }
       };
 
