@@ -56,6 +56,51 @@ interface SeedPacks {
 // Anti-repetition memory - rolling window of last 5 outputs
 let recentOutputs: Array<{protein: string, technique: string, flavour: string}> = [];
 
+// Word variety tracking for Inspire Me titles
+const titleWordTracker = new Map<string, string[]>(); // clientId -> recent words
+const MAX_TRACKED_WORDS = 15; // Track last 15 descriptive words per user
+
+function trackTitleWords(clientId: string, title: string) {
+  if (!clientId) return;
+  
+  // Extract descriptive words (ignore common words)
+  const commonWords = new Set(['with', 'and', 'the', 'a', 'an', 'in', 'on', 'for', 'to', 'of', 'by']);
+  const words = title.toLowerCase().split(/[\s-]+/)
+    .filter(word => word.length > 2 && !commonWords.has(word))
+    .filter(word => /^[a-z]+$/.test(word)); // Only alphabetic words
+  
+  if (!titleWordTracker.has(clientId)) {
+    titleWordTracker.set(clientId, []);
+  }
+  
+  const userWords = titleWordTracker.get(clientId)!;
+  userWords.push(...words);
+  
+  // Keep only the most recent words
+  if (userWords.length > MAX_TRACKED_WORDS) {
+    userWords.splice(0, userWords.length - MAX_TRACKED_WORDS);
+  }
+}
+
+function getRecentWords(clientId: string): string[] {
+  return titleWordTracker.get(clientId) || [];
+}
+
+function getAvoidWords(clientId: string): string[] {
+  const recentWords = getRecentWords(clientId);
+  const wordCounts = new Map<string, number>();
+  
+  // Count frequency of recent words
+  recentWords.forEach(word => {
+    wordCounts.set(word, (wordCounts.get(word) || 0) + 1);
+  });
+  
+  // Return words that appear 2+ times recently
+  return Array.from(wordCounts.entries())
+    .filter(([word, count]) => count >= 2)
+    .map(([word]) => word);
+}
+
 // Add helper functions from original
 function selectStylePacks(seeds: SeedPacks, userIntent: string, clientId: string) {
   const seededRandom = (seed: number, array: any[]) => {
@@ -427,6 +472,19 @@ FOCUS: Dishes that create the right mood and satisfy the specific craving or occ
 STYLE: Emphasize what makes this dish special and appealing.`;
     }
 
+    // Get words to avoid for variety
+    const avoidWords = getAvoidWords(data.clientId || '');
+    const recentWords = getRecentWords(data.clientId || '');
+    
+    let varietyNotes = '';
+    if (avoidWords.length > 0) {
+      varietyNotes = `\nVARIETY NOTES: Avoid overused words: ${avoidWords.join(', ')}. Use fresh, creative descriptors.`;
+    } else if (recentWords.length > 3) {
+      // If we have history but no repeated words, still encourage variety
+      const recentSample = recentWords.slice(-5);
+      varietyNotes = `\nVARIETY NOTES: Recent words used: ${recentSample.join(', ')}. Use different descriptive language.`;
+    }
+
     const systemMessage = `You are Zest, a creative culinary inspiration expert. Create enticing, flavorful recipe titles that spark foodie excitement while remaining approachable for home cooks.
 
 CORE MISSION:
@@ -440,6 +498,7 @@ CREATIVE FREEDOM:
 - Combine traditional dishes with modern twists when appropriate
 - Emphasize flavor-building techniques: caramelization, browning, layering
 - Include seasonal ingredients and complementary flavor pairings
+- Use varied, creative descriptors - avoid repetitive adjectives${varietyNotes}
 
 OUTPUT FORMAT: JSON with "title" field only. Keep titles 4-8 words, appetizing and clear.`;
 
@@ -451,7 +510,7 @@ ${inspirationPrompt}
 
 CREATE A RECIPE TITLE THAT:
 - Sounds delicious and makes people want to cook it
-- Uses clear, appetizing language ("golden", "crispy", "tender", "aromatic")
+- Uses varied, appetizing descriptors (avoid overused words like "golden")
 - Showcases the main ingredient and key cooking technique
 - Feels special but achievable for home cooks
 - Respects any ingredient restrictions
@@ -478,6 +537,12 @@ JSON OUTPUT: {"title": "Your Creative Recipe Title"}`;
 
       console.log("Raw inspire response:", content);
       const parsedResult = JSON.parse(content);
+      const generatedTitle = parsedResult.title || "Delicious Home-Cooked Recipe";
+      
+      // Track words for variety (before returning)
+      if (data.clientId) {
+        trackTitleWords(data.clientId, generatedTitle);
+      }
       
       // Record inspire title generation for variety tracking
       if (inspirationAnalysis.vaguePromptSignature && data.clientId) {
@@ -490,19 +555,22 @@ JSON OUTPUT: {"title": "Your Creative Recipe Title"}`;
       }
       
       return {
-        title: parsedResult.title || "Delicious Home-Cooked Recipe"
+        title: generatedTitle
       };
 
     } catch (error) {
       console.error("Inspire title generation error:", error);
       
-      // Fallback title generation
+      // Fallback title generation with variety
       const fallbackTitles = [
-        "Golden Pan-Seared Chicken with Herbs",
+        "Herb-Crusted Pan-Seared Chicken",
         "Crispy-Skinned Salmon with Lemon Butter", 
         "Slow-Braised Beef with Rich Gravy",
         "Fresh Pasta with Garlic and Parmesan",
-        "Aromatic Spiced Rice with Vegetables"
+        "Fragrant Spiced Rice with Vegetables",
+        "Rustic Mushroom and Thyme Risotto",
+        "Tender Lamb with Mint and Cumin",
+        "Smoky Paprika-Rubbed Pork Chops"
       ];
       const fallbackTitle = fallbackTitles[Math.floor(Math.random() * fallbackTitles.length)];
       
