@@ -1,0 +1,269 @@
+import OpenAI from "openai";
+import crypto from "crypto";
+
+const openai = new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY 
+});
+
+// Style pack definitions for deterministic variation
+const TECHNIQUE_PACK = [
+  "rustic-braise", "quick-sear-roast", "pan-sauce-reduction", "grill-marinade",
+  "shallow-fry-crisp", "steam-then-sear", "gentle-poach", "emulsion-building",
+  "sheet-pan-oven", "pressure-cooker", "confit-style-fat", "sous-vide-then-sear",
+  "smoker-style-rub(oven-alt)", "dough/lamination", "cure-then-cook(fast)"
+];
+
+const SIMPLICITY_PACK = [
+  "one-pan", "≤30-min-target", "6–10-ingredients-prefer", "batch-friendly", "minimal-chop",
+  "low-mess", "child-friendly-heat", "make-ahead-marinade", "freezer-friendly",
+  "salad-plus-protein", "carb-base-rotation", "sauce-led", "broth-led",
+  "grilling-bias", "sheet-tray-bias"
+];
+
+const CREATIVITY_PACK = [
+  "strictly-classic", "classic-with-garnish-twist", "classic-with-sauce-twist", "herb/aroma-experimentation",
+  "spice-driven", "acidity-forward", "smoke/char-emphasis", "modern-plating-logic"
+];
+
+const SEASON_PACK = [
+  "spring-greens/herbs", "summer-grill/fresh-veg", "early-autumn-roasts", "winter-braise/roots",
+  "shoulder-season-light-roast", "year-round-neutral"
+];
+
+const TEXTURE_PACK = [
+  "crisp-vs-tender", "creamy-vs-crunchy", "layered-crisp+silky", "juicy-with-crackling",
+  "glazed-sticky+fresh-bite", "charred-edges+soft-centre", "crumbed-crust+smooth-puréé",
+  "brothy+crunchy-topping", "light/aerated", "pastry/flaky-emphasis"
+];
+
+const FLAVOUR_PACK = [
+  "umami-layering", "heat-ladder(mild→med)", "citrus-acid-balance", "herbaceous-lift",
+  "nutty-browning", "aromatic-spice-base", "garlicky-comfort", "sweet-salty-contrast",
+  "smoke&char", "pickled-accent", "fermented-depth", "peppery-bite"
+];
+
+// Anti-repetition memory - rolling window of last 5 outputs
+let recentOutputs: Array<{protein: string, technique: string, flavour: string}> = [];
+
+// Helper function to provide brief explanations for potentially unfamiliar dishes
+function getRecipeExplanation(title: string): string | null {
+  const lowerTitle = title.toLowerCase();
+  
+  // Dictionary of dish explanations for potentially unfamiliar terms
+  const explanations: Record<string, string> = {
+    // Middle Eastern & North African
+    'tagine': 'slow-cooked Moroccan stew',
+    'shakshuka': 'eggs in tomato sauce',
+    'falafel': 'Middle Eastern chickpea fritters',
+    'fattoush': 'mixed herb salad',
+    'shawarma': 'roasted meat wrap',
+    'hummus': 'chickpea dip',
+    'baba ganoush': 'smoky eggplant dip',
+    'tabbouleh': 'fresh parsley salad',
+    
+    // Asian (only less familiar dishes)
+    'bulgogi': 'Korean BBQ beef',
+    'rogan josh': 'spiced lamb curry',
+    'okonomiyaki': 'savory pancake',
+    'som tam': 'spicy papaya salad',
+    'laksa': 'spicy coconut noodle soup',
+    'rendang': 'slow-cooked spiced beef',
+    'chả cá': 'Vietnamese turmeric fish',
+    'bánh mì': 'Vietnamese sandwich',
+    'bánh xèo': 'Vietnamese crepe',
+    'bún bò huế': 'spicy beef noodle soup',
+    'gỏi cuốn': 'fresh spring rolls',
+    'cà ri': 'Vietnamese curry',
+    
+    // European (only less familiar dishes)
+    'moussaka': 'Greek layered casserole',
+    'souvlaki': 'Greek grilled skewers',
+    'pörkölt': 'Hungarian slow-cooked stew',
+    'nokedli': 'Hungarian dumplings',
+    'bigos': 'hunter\'s stew',
+    'ratatouille': 'vegetable stew',
+    'bouillabaisse': 'fish stew',
+    'bourride': 'Provençal fish stew with aioli',
+    'cassoulet': 'white bean stew',
+    'osso buco': 'braised veal shanks',
+    'sauerbraten': 'marinated roast beef',
+    'pot-au-feu': 'French boiled dinner',
+    'choucroute': 'Alsatian sauerkraut stew',
+    'confit': 'slow-cooked preserved meat',
+    'brandade': 'salt cod puree',
+    'aligot': 'French cheesy mashed potatoes',
+    'tapenade': 'olive spread',
+    'pissaladière': 'French onion tart',
+    'açorda': 'Portuguese bread soup',
+    'bacalhau': 'Portuguese salt cod',
+    'francesinha': 'Portuguese sandwich',
+    'caldo verde': 'Portuguese kale soup',
+    'stroganina': 'Siberian frozen fish slices',
+    'borscht': 'beet soup',
+    'pierogi': 'Polish dumplings',
+    'schnitzel': 'breaded cutlet',
+    'sauerkraut': 'fermented cabbage',
+    'spätzle': 'German egg noodles',
+    
+    // Latin American
+    'enchiladas': 'Mexican rolled tortillas',
+    'quesadillas': 'grilled cheese tortillas',
+    'ceviche': 'citrus-cured fish',
+    'mole': 'complex chocolate sauce',
+    'cochinita pibil': 'slow-roasted pork',
+    'empanadas': 'stuffed pastries',
+    'chimichurri': 'herb sauce',
+    'anticuchos': 'grilled skewers',
+    'carapulcra': 'Peruvian potato and pork stew',
+    'aji de gallina': 'Peruvian creamy chicken',
+    'lomo saltado': 'Peruvian stir-fried beef',
+    'causa': 'Peruvian layered potato dish',
+    'tacu tacu': 'Peruvian rice and beans',
+    'arroz con pollo': 'rice with chicken',
+    'bandeja paisa': 'Colombian platter',
+    'arepas': 'corn cakes',
+    'cachapa': 'Venezuelan corn pancake',
+    'pupusas': 'stuffed corn tortillas',
+    'tamales': 'steamed corn dough',
+    'pozole': 'Mexican hominy soup',
+    'chiles rellenos': 'stuffed peppers',
+    'mofongo': 'fried plantain dish',
+    
+    // African
+    'bobotie': 'spiced meat casserole',
+    'bunny chow': 'curry in bread bowl',
+    'jollof': 'spiced rice dish',
+    'injera': 'spongy flatbread',
+    'doro wat': 'Ethiopian chicken stew',
+    'aliche wat': 'Ethiopian fish stew',
+    'kitfo': 'Ethiopian steak tartare',
+    'berbere': 'Ethiopian spice blend',
+    'fufu': 'starchy side dish',
+    
+    // General terms
+    'satay': 'grilled skewers',
+    'chili con carne': 'spicy beef stew'
+  };
+  
+  // Check if title contains any terms that need explanation
+  for (const [term, explanation] of Object.entries(explanations)) {
+    if (lowerTitle.includes(term)) {
+      return explanation;
+    }
+  }
+  
+  return null;
+}
+
+interface SeedPacks {
+  randomSeed: number;
+  complexityLevel: number;
+  simpleStyle: number;
+  creativityMode: number;
+  seasonalFocus: number;
+  textureTheme: number;
+  flavorProfile: number;
+}
+
+interface StylePacks {
+  techniquePack: string;
+  simplicityPack: string;
+  creativityPack: string;
+  seasonPack: string;
+  texturePack: string;
+  flavourPack: string;
+}
+
+// Deterministic pack selection with anti-repetition
+function selectStylePacks(seeds: SeedPacks, userIntent: string = "", clientId: string = ""): StylePacks {
+  // Hash-based deterministic selection
+  const userIntentHash = hashString(userIntent.toLowerCase() || "");
+  const epochDay = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+  const sessionSalt = hashString(clientId || "anonymous") ^ hashString(epochDay.toString());
+  
+  const combinedSeed = seeds.randomSeed ^ userIntentHash ^ sessionSalt;
+  
+  // Use PRNG for deterministic selection
+  let prngState = combinedSeed;
+  
+  const selectFromPack = (pack: string[]) => {
+    prngState = (prngState * 1664525 + 1013904223) % (2**32);
+    return pack[Math.abs(prngState) % pack.length];
+  };
+  
+  let flavourPack = selectFromPack(FLAVOUR_PACK);
+  
+  // Anti-repetition check
+  const techniqueCandidate = selectFromPack(TECHNIQUE_PACK);
+  const currentCombo = { technique: techniqueCandidate, flavour: flavourPack };
+  
+  // If this combination was used recently, rotate flavour pack
+  if (recentOutputs.some(output => 
+    output.technique === currentCombo.technique && output.flavour === currentCombo.flavour)) {
+    // Find unused flavour option
+    const unusedFlavours = FLAVOUR_PACK.filter(f => 
+      !recentOutputs.some(output => output.flavour === f));
+    if (unusedFlavours.length > 0) {
+      flavourPack = unusedFlavours[0];
+    }
+  }
+  
+  return {
+    techniquePack: techniqueCandidate,
+    simplicityPack: selectFromPack(SIMPLICITY_PACK),
+    creativityPack: selectFromPack(CREATIVITY_PACK),
+    seasonPack: selectFromPack(SEASON_PACK),
+    texturePack: selectFromPack(TEXTURE_PACK),
+    flavourPack
+  };
+}
+
+// Simple hash function
+function hashString(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash);
+}
+
+// Coherence guardrails
+function applyCoherenceGuardrails(packs: StylePacks, timeBudget: number | null): {packs: StylePacks, adjustments: string[]} {
+  const adjustments: string[] = [];
+  const newPacks = { ...packs };
+  
+  // A. Technique/time compatibility
+  if (packs.simplicityPack === "≤30-min-target") {
+    const forbiddenTechniques = ["sous-vide-then-sear", "cure-then-cook(fast)", "confit-style-fat", "pressure-cooker"];
+    if (forbiddenTechniques.includes(packs.techniquePack)) {
+      const alternatives = ["quick-sear-roast", "one-pan", "sheet-pan-oven"];
+      newPacks.techniquePack = alternatives[0];
+      adjustments.push("Adjusted technique to quick-sear-roast due to 30-min target");
+    }
+  }
+  
+  if (["sous-vide-then-sear", "cure-then-cook(fast)"].includes(packs.techniquePack) && timeBudget && timeBudget < 75) {
+    newPacks.techniquePack = "gentle-poach";
+    adjustments.push("Adjusted sous-vide to gentle poach due to time constraint");
+  }
+  
+  // B. Season/simplicity compatibility
+  if (packs.seasonPack === "winter-braise/roots" && packs.simplicityPack === "one-pan") {
+    adjustments.push("Adapted winter braise for single-vessel oven cooking");
+  }
+  
+  return { packs: newPacks, adjustments };
+}
+
+// Generate dynamic target range for ingredients
+function getDynamicTargetRange(simplicityPack: string): string {
+  if (["one-pan", "≤30-min-target", "6–10-ingredients-prefer"].includes(simplicityPack)) {
+    return "6–10 items";
+  }
+  return "8–16 items";
+}
+
+export class ChefAssistGPT5 {
+  
