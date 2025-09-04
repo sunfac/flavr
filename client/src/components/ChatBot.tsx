@@ -164,9 +164,9 @@ export default function ChatBot({
 
   // General cooking help suggestions (when no recipe exists)
   const generalCookingChips = [
-    { text: "Dinner suggestion", icon: iconMap.clock, updatesRecipe: false },
+    { text: "Show me dinner recipe options", icon: iconMap.clock, updatesRecipe: false },
     { text: "What can I make with pasta?", icon: iconMap.utensilsCrossed, updatesRecipe: false },
-    { text: "Suggest a healthy breakfast", icon: iconMap.coffee, updatesRecipe: false },
+    { text: "Give me breakfast recipe ideas", icon: iconMap.coffee, updatesRecipe: false },
     { text: "Easy recipes for beginners", icon: iconMap.smile, updatesRecipe: false },
     { text: "What's good for meal prep?", icon: iconMap.calendar, updatesRecipe: false },
     { text: "I have chicken, what to make?", icon: iconMap.beef, updatesRecipe: false },

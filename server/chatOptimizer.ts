@@ -156,10 +156,10 @@ Respond with JSON: {
     }
 
     // Recipe suggestion patterns (should generate recipe options)
-    if (lower === 'dinner suggestion' ||
+    if (lower.includes('show me') && lower.includes('recipe') ||
+        lower.includes('give me') && lower.includes('recipe') ||
+        lower === 'dinner suggestion' ||
         lower === 'recipe suggestion' ||
-        lower === 'breakfast suggestion' ||
-        lower === 'lunch suggestion' ||
         lower.includes('what should i cook') ||
         lower.includes('what can i make')) {
       return {
