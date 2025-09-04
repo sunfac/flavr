@@ -74,11 +74,28 @@ const SubscribeForm = () => {
         variant: "destructive",
       });
     } else {
-      toast({
-        title: "Welcome to Flavr+!",
-        description: "You now have unlimited access to recipes.",
-      });
-      navigate("/settings");
+      // Wait a moment for webhook processing, then refresh subscription status
+      setTimeout(async () => {
+        try {
+          // Force refresh subscription status by fetching fresh data
+          await queryClient.refetchQueries({ queryKey: ['/api/subscription-status'] });
+          await queryClient.invalidateQueries({ queryKey: ['/api/me'] });
+          
+          toast({
+            title: "Welcome to Flavr+!",
+            description: "You now have unlimited access to recipes.",
+          });
+          navigate("/settings");
+        } catch (error) {
+          console.error("Error refreshing subscription status:", error);
+          // Still navigate but with a warning
+          toast({
+            title: "Payment Processed",
+            description: "Your payment was successful. Your account will update shortly.",
+          });
+          navigate("/settings");
+        }
+      }, 2000); // Wait 2 seconds for webhook processing
     }
   };
 

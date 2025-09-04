@@ -150,8 +150,11 @@ function EnhancedRecipeCard({
         });
       }
       
-      // Force component re-render
-      setKey(prev => prev + 1);
+      // Only force re-render if recipe actually changed
+      if (event.detail.recipe.title !== recipe.title || 
+          event.detail.recipe.ingredients?.length !== recipe.ingredients?.length) {
+        setKey(prev => prev + 1);
+      }
       
       // Scroll to absolute top of page after update
       setTimeout(() => {
