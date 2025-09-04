@@ -268,15 +268,31 @@ export class ChefAssistGPT5 {
       } catch (parseError) {
         console.error("JSON parse error, attempting advanced repair:", parseError);
         
-        // Advanced JSON repair
+        // Advanced JSON repair - fix common AI JSON issues
         content = content
-          .replace(/,\s*}/g, '}')
-          .replace(/,\s*]/g, ']')
-          .replace(/([^"]),( s*[}\]])/g, '$1$2')
-          .replace(/}\ s*{/g, '},{')
-          .replace(/]\ s*\[/g, '],[');
+          .replace(/,\s*}/g, '}')                    // Remove trailing commas before }
+          .replace(/,\s*]/g, ']')                    // Remove trailing commas before ]
+          .replace(/([^"]),(\s*[}\]])/g, '$1$2')     // Fix comma spacing issues
+          .replace(/}\s*{/g, '},{')                  // Fix missing commas between objects
+          .replace(/]\s*\[/g, '],[')                 // Fix missing commas between arrays
+          .replace(/:\s*"([^"]*[^\\])"\s*([,}\]])/g, ': "$1"$2') // Fix quote issues
+          .replace(/"\s*:\s*""/g, '": ""')           // Fix empty string values
+          .replace(/:\s*,/g, ': "",')                // Fix missing values
+          .replace(/,\s*,/g, ',');                   // Remove duplicate commas
           
-        recipe = JSON.parse(content);
+        try {
+          recipe = JSON.parse(content);
+        } catch (secondError) {
+          console.error("Advanced repair failed, trying fallback:", secondError);
+          
+          // Extract just the JSON part if there's extra text
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            recipe = JSON.parse(jsonMatch[0]);
+          } else {
+            throw new Error("Could not repair JSON response");
+          }
+        }
       }
       
       console.log("Recipe parsed successfully:", recipe.title);

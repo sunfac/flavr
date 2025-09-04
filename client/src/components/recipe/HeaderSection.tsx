@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, ChefHat, Clock, RotateCcw, Heart, RefreshCw, Loader2, Copy } from 'lucide-react';
+import { Users, ChefHat, Clock, RotateCcw, Heart, RefreshCw, Loader2, Copy, BookOpen } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
