@@ -5,6 +5,7 @@ import { requireAuth } from "./authRoutes";
 import { insertChatMessageSchema } from "@shared/schema";
 import { logGPTInteraction, logSimpleGPTInteraction } from "../developerLogger";
 import { ZestService } from "../zestService";
+import { OptimizedChatService } from "../optimizedChatService";
 
 // Session type extension
 declare module 'express-session' {
@@ -101,6 +102,96 @@ function selectAppropriateInspiration(message: string, allChefs: string[], allRe
 
 export function registerChatRoutes(app: Express) {
   const zestService = new ZestService();
+
+  // NEW: Optimized chat endpoint (cost-efficient)
+  app.post("/api/chat/optimized", async (req, res) => {
+    try {
+      const { message, conversationHistory = [], currentRecipe } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ error: "Message is required" });
+      }
+
+      // Check quota first (same as other endpoints)
+      try {
+        if (req.session?.userId) {
+          const user = await storage.getUserById(req.session.userId);
+          if (!user?.hasFlavrPlus && (user?.recipesThisMonth || 0) >= 3) {
+            return res.status(403).json({
+              error: "You have no free recipes remaining this month. Sign up for Flavr+ to get unlimited recipes!",
+              recipesUsed: user.recipesThisMonth || 0,
+              recipesLimit: 3,
+              hasFlavrPlus: false
+            });
+          }
+        } else {
+          const pseudoId = req.body.pseudoUserId;
+          if (pseudoId) {
+            let pseudoUser = await storage.getPseudoUser(pseudoId);
+            if (!pseudoUser) {
+              pseudoUser = await storage.createPseudoUser({ pseudoId });
+            }
+            
+            if ((pseudoUser.recipesThisMonth || 0) >= 3) {
+              return res.status(403).json({
+                error: "You have no free recipes remaining this month. Sign up for Flavr+ to get unlimited recipes!",
+                recipesUsed: pseudoUser.recipesThisMonth || 0,
+                recipesLimit: 3,
+                hasFlavrPlus: false
+              });
+            }
+          }
+        }
+      } catch (quotaError) {
+        console.error('Error checking quota:', quotaError);
+        // Continue without quota check if quota service fails
+      }
+
+      const userContext = {
+        userId: req.session?.userId,
+        pseudoUserId: req.body.pseudoUserId,
+        isAuthenticated: !!req.session?.userId
+      };
+
+      console.log('⚡ Optimized chat request:', { 
+        message: message.substring(0, 50) + '...', 
+        userId: userContext.userId,
+        hasCurrentRecipe: !!currentRecipe
+      });
+
+      // Process with optimized service
+      const result = await OptimizedChatService.processMessage({
+        message,
+        conversationHistory,
+        currentRecipe,
+        userContext
+      });
+
+      console.log('⚡ Optimized chat result:', {
+        intent: result.intent,
+        confidence: result.confidence,
+        estimatedCost: result.estimatedCost,
+        modelUsed: result.metadata.modelUsed,
+        processingTime: result.metadata.processingTimeMs
+      });
+
+      res.json({
+        message: result.message,
+        intent: result.intent,
+        confidence: result.confidence,
+        suggestedActions: result.suggestedActions,
+        isOptimized: true,
+        metadata: result.metadata
+      });
+
+    } catch (error) {
+      console.error('❌ Optimized chat error:', error);
+      res.status(500).json({ 
+        error: "Failed to process chat message",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
 
   // Enhanced Zest chat endpoint with user memory and intent detection
   app.post("/api/zest/chat", async (req, res) => {
@@ -1434,6 +1525,115 @@ Guidelines:
       console.error("Voice realtime error:", error);
       res.status(500).json({ 
         error: "Failed to process voice message",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // NEW: Optimized recipe generation from chat suggestions
+  app.post("/api/chat/optimized/recipe", async (req, res) => {
+    try {
+      const { suggestedTitle, originalMessage, type = 'full' } = req.body;
+      
+      if (!suggestedTitle) {
+        return res.status(400).json({ error: "Recipe title is required" });
+      }
+
+      // Check quota
+      try {
+        if (req.session?.userId) {
+          const user = await storage.getUserById(req.session.userId);
+          if (!user?.hasFlavrPlus && (user?.recipesThisMonth || 0) >= 3) {
+            return res.status(403).json({
+              error: "You have no free recipes remaining this month. Sign up for Flavr+ to get unlimited recipes!",
+              recipesUsed: user.recipesThisMonth || 0,
+              recipesLimit: 3,
+              hasFlavrPlus: false
+            });
+          }
+        } else {
+          const pseudoId = req.body.pseudoUserId;
+          if (pseudoId) {
+            let pseudoUser = await storage.getPseudoUser(pseudoId);
+            if (!pseudoUser) {
+              pseudoUser = await storage.createPseudoUser({ pseudoId });
+            }
+            
+            if ((pseudoUser.recipesThisMonth || 0) >= 3) {
+              return res.status(403).json({
+                error: "You have no free recipes remaining this month. Sign up for Flavr+ to get unlimited recipes!",
+                recipesUsed: pseudoUser.recipesThisMonth || 0,
+                recipesLimit: 3,
+                hasFlavrPlus: false
+              });
+            }
+          }
+        }
+      } catch (quotaError) {
+        console.error('Error checking quota:', quotaError);
+      }
+
+      console.log('⚡ Optimized recipe generation:', { 
+        title: suggestedTitle,
+        type,
+        originalMessage: originalMessage?.substring(0, 50) + '...'
+      });
+
+      const userContext = {
+        userId: req.session?.userId,
+        pseudoUserId: req.body.pseudoUserId,
+        isAuthenticated: !!req.session?.userId
+      };
+
+      // Use ZestService for recipe generation (leverages Chef Assist quality)
+      const localZestService = new ZestService();
+      const recipe = await localZestService.generateRecipe(suggestedTitle, userContext);
+
+      if (recipe) {
+        // Save recipe and increment usage counter
+        if (req.session?.userId) {
+          await storage.incrementRecipeUsage(req.session.userId);
+          
+          // Save the recipe
+          const savedRecipe = await storage.createRecipe({
+            userId: req.session.userId,
+            title: recipe.title,
+            ingredients: recipe.ingredients,
+            instructions: recipe.instructions,
+            servings: recipe.servings,
+            cookTime: recipe.cookTime,
+            difficulty: recipe.difficulty,
+            cuisine: recipe.cuisine,
+            tips: recipe.tips,
+            mode: 'chat-optimized'
+          });
+
+          console.log('✅ Recipe saved with ID:', savedRecipe.id);
+        } else {
+          // For anonymous users, increment pseudo user usage
+          const pseudoId = req.body.pseudoUserId;
+          if (pseudoId) {
+            await storage.incrementPseudoUserRecipeUsage(pseudoId);
+          }
+        }
+
+        res.json({
+          recipe,
+          isOptimized: true,
+          metadata: {
+            generationType: type,
+            source: 'chat-optimized',
+            originalSuggestion: suggestedTitle
+          }
+        });
+      } else {
+        res.status(500).json({ error: "Failed to generate recipe" });
+      }
+
+    } catch (error) {
+      console.error('❌ Optimized recipe generation error:', error);
+      res.status(500).json({ 
+        error: "Failed to generate recipe",
         details: error instanceof Error ? error.message : "Unknown error"
       });
     }

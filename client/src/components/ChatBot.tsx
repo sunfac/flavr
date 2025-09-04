@@ -29,6 +29,17 @@ interface ChatMessage {
   savedRecipeId?: number;
   waitingForAlternative?: boolean;
   originalContext?: string;
+  suggestedActions?: Array<{
+    type: 'quick_recipe' | 'full_recipe' | 'continue_chat';
+    label: string;
+    data?: any;
+  }>;
+  isOptimized?: boolean;
+  metadata?: {
+    modelUsed: string;
+    processingTimeMs: number;
+    estimatedCost: number;
+  };
 }
 
 interface Recipe {
@@ -369,6 +380,163 @@ export default function ChatBot({
     }
   });
 
+  // NEW: Optimized chat mutation (cost-efficient with action buttons)
+  const optimizedChatMutation = useMutation({
+    mutationFn: async (data: { message: string; currentRecipe?: Recipe; mode?: string }) => {
+      // Build conversation history from local messages
+      const conversationHistory = localMessages.map(msg => ({
+        role: msg.isUser ? 'user' : 'assistant',
+        content: msg.isUser ? msg.message : msg.response
+      }));
+
+      const response = await fetch("/api/chat/optimized", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: data.message,
+          conversationHistory,
+          currentRecipe: getCurrentRecipeContext().recipe,
+          pseudoUserId: !isAuthenticated ? 'anon-' + Date.now() : undefined
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Optimized chat request failed: ${response.statusText}`);
+      }
+
+      return response.json();
+    },
+    onSuccess: (result, variables) => {
+      console.log('⚡ Optimized chat result:', {
+        intent: result.intent,
+        confidence: result.confidence,
+        estimatedCost: result.metadata?.estimatedCost,
+        modelUsed: result.metadata?.modelUsed,
+        processingTime: result.metadata?.processingTimeMs
+      });
+
+      // Create optimized chat message with action buttons
+      const optimizedMessage: ChatMessage = {
+        id: Date.now(),
+        message: variables.message,
+        response: result.message,
+        isUser: false,
+        text: result.message,
+        timestamp: new Date(),
+        suggestedActions: result.suggestedActions,
+        isOptimized: true,
+        metadata: result.metadata
+      };
+
+      setLocalMessages(prev => [...prev, optimizedMessage]);
+      setMessage("");
+    },
+    onError: (error) => {
+      console.error('⚡ Optimized chat error:', error);
+      
+      const errorMessage: ChatMessage = {
+        id: Date.now(),
+        message: "",
+        response: "❌ Sorry, I'm having trouble processing your message right now. Please try again in a moment.",
+        isUser: false,
+        text: "❌ Sorry, I'm having trouble processing your message right now. Please try again in a moment.",
+        timestamp: new Date(),
+      };
+      
+      setLocalMessages(prev => [...prev, errorMessage]);
+    }
+  });
+
+  // Optimized recipe generation mutation
+  const optimizedRecipeMutation = useMutation({
+    mutationFn: async (data: { 
+      suggestedTitle: string;
+      originalMessage?: string;
+      type?: 'quick' | 'full';
+    }) => {
+      const response = await fetch("/api/chat/optimized/recipe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          suggestedTitle: data.suggestedTitle,
+          originalMessage: data.originalMessage,
+          type: data.type || 'full',
+          pseudoUserId: !isAuthenticated ? 'anon-' + Date.now() : undefined
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Optimized recipe generation failed: ${response.statusText}`);
+      }
+
+      return response.json();
+    },
+    onSuccess: (result, variables) => {
+      console.log('⚡ Optimized recipe generated:', result.recipe?.title);
+      
+      if (result.recipe) {
+        // Update recipe store
+        const ingredients = (result.recipe.ingredients || []).map((ingredient: string, index: number) => ({
+          id: (index + 1).toString(),
+          text: ingredient,
+          checked: false
+        }));
+        
+        const steps = (result.recipe.instructions || []).map((instruction: string, index: number) => ({
+          id: (index + 1).toString(),
+          title: `Step ${index + 1}`,
+          description: instruction,
+          completed: false
+        }));
+        
+        recipeActions.updateActiveRecipe({
+          title: result.recipe.title,
+          description: result.recipe.description || '',
+          cookTime: result.recipe.cookTime || 30,
+          servings: result.recipe.servings || 4,
+          difficulty: result.recipe.difficulty || 'medium',
+          cuisine: result.recipe.cuisine || '',
+          ingredients: ingredients,
+          instructions: steps,
+          tips: result.recipe.tips || ''
+        });
+        
+        // Add success message
+        const successMessage: ChatMessage = {
+          id: Date.now(),
+          message: "",
+          response: `✅ Success! ${result.recipe.title} has been created and is ready to cook.`,
+          isUser: false,
+          text: `✅ Success! ${result.recipe.title} has been created and is ready to cook.`,
+          timestamp: new Date(),
+          isRecipeCreated: true,
+          recipeTitle: result.recipe.title,
+          isOptimized: true
+        };
+        
+        setLocalMessages(prev => [...prev, successMessage]);
+      }
+    },
+    onError: (error) => {
+      console.error('⚡ Optimized recipe generation error:', error);
+      
+      const errorMessage: ChatMessage = {
+        id: Date.now(),
+        message: "",
+        response: "❌ Sorry, I couldn't create the recipe right now. Please try again or check your subscription status.",
+        isUser: false,
+        text: "❌ Sorry, I couldn't create the recipe right now. Please try again or check your subscription status.",
+        timestamp: new Date(),
+      };
+      
+      setLocalMessages(prev => [...prev, errorMessage]);
+    }
+  });
+
   // Recipe generation mutation for confirmed intent
   const generateRecipeMutation = useMutation({
     mutationFn: async (data: { 
@@ -605,7 +773,7 @@ export default function ChatBot({
     }
   }, [actualIsOpen, chatHistory, hasInitialized]);
 
-  const handleSend = (messageText?: string) => {
+  const handleSend = (messageText?: string, useOptimized: boolean = true) => {
     const textToSend = messageText || message;
     if (!textToSend.trim()) return;
 
@@ -622,12 +790,21 @@ export default function ChatBot({
     setLocalMessages(prev => [...prev, userMessage]);
     setShowSuggestions(false);
 
-    // Send to API with enhanced context - let backend handle alternative suggestions
-    sendMessageMutation.mutate({ 
-      message: textToSend,
-      currentRecipe,
-      mode: detectedMode
-    });
+    // Use optimized chat by default for cost efficiency
+    if (useOptimized) {
+      optimizedChatMutation.mutate({ 
+        message: textToSend,
+        currentRecipe,
+        mode: detectedMode
+      });
+    } else {
+      // Fallback to original chat for complex cases
+      sendMessageMutation.mutate({ 
+        message: textToSend,
+        currentRecipe,
+        mode: detectedMode
+      });
+    }
     
     if (!messageText) {
       setMessage("");
@@ -796,6 +973,87 @@ export default function ChatBot({
                       </Button>
                     </div>
                   )}
+
+                  {/* NEW: Optimized chat action buttons */}
+                  {msg.suggestedActions && msg.suggestedActions.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {msg.suggestedActions.map((action, actionIndex) => {
+                        if (action.type === 'quick_recipe') {
+                          return (
+                            <Button
+                              key={actionIndex}
+                              size="sm"
+                              onClick={() => {
+                                // Generate quick recipe directly in chat
+                                handleSend(`Quick recipe for: ${action.data?.title || 'recipe'}`, false);
+                              }}
+                              disabled={sendMessageMutation.isPending}
+                              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-3 py-1"
+                            >
+                              {action.label}
+                            </Button>
+                          );
+                        } else if (action.type === 'full_recipe') {
+                          return (
+                            <Button
+                              key={actionIndex}
+                              size="sm"
+                              onClick={() => {
+                                optimizedRecipeMutation.mutate({
+                                  suggestedTitle: action.data?.title,
+                                  originalMessage: action.data?.originalMessage,
+                                  type: 'full'
+                                });
+                              }}
+                              disabled={optimizedRecipeMutation.isPending}
+                              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs px-3 py-1"
+                            >
+                              {optimizedRecipeMutation.isPending ? "Creating..." : action.label}
+                            </Button>
+                          );
+                        } else if (action.type === 'continue_chat') {
+                          return (
+                            <Button
+                              key={actionIndex}
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                // Continue conversation or ask for alternatives
+                                if (action.data?.alternatives) {
+                                  // Show alternatives
+                                  const altMessage = `Here are some other ideas: ${action.data.alternatives.slice(0, 2).join(', ')}. Would you like one of these instead?`;
+                                  setLocalMessages(prev => [...prev, {
+                                    id: Date.now(),
+                                    message: "",
+                                    response: altMessage,
+                                    isUser: false,
+                                    text: altMessage,
+                                    timestamp: new Date(),
+                                  }]);
+                                } else {
+                                  handleSend("Could you suggest something different?");
+                                }
+                              }}
+                              className="text-orange-500 border-orange-500 hover:bg-orange-500 hover:text-white text-xs px-3 py-1"
+                            >
+                              {action.label}
+                            </Button>
+                          );
+                        }
+                        return null;
+                      })}
+                      
+                      {/* Show optimization info for developers */}
+                      {msg.isOptimized && msg.metadata && (
+                        <div className="w-full mt-2 text-xs text-slate-400 flex items-center gap-2">
+                          <iconMap.zap className="w-3 h-3 text-green-400" />
+                          <span>
+                            Optimized • {msg.metadata.modelUsed} • {msg.metadata.processingTimeMs}ms • ~${msg.metadata.estimatedCost.toFixed(4)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   
                   {/* View Recipe Card button after successful generation */}
                   {msg.isRecipeCreated && (
@@ -840,7 +1098,7 @@ export default function ChatBot({
                 </div>
               </div>
             ))}
-            {(sendMessageMutation.isPending || generateRecipeMutation.isPending) && (
+            {(sendMessageMutation.isPending || generateRecipeMutation.isPending || optimizedChatMutation.isPending || optimizedRecipeMutation.isPending) && (
               <div className="text-left">
                 <div className="inline-block px-4 py-2 rounded-xl bg-slate-700/90 backdrop-blur-sm border border-slate-600/50">
                   <div className="flex items-center space-x-2">
@@ -848,8 +1106,10 @@ export default function ChatBot({
                     <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
                     <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                     <span className="text-slate-300 text-sm ml-2">
-                      {generateRecipeMutation.isPending 
+                      {generateRecipeMutation.isPending || optimizedRecipeMutation.isPending
                         ? "Creating your recipe..." 
+                        : optimizedChatMutation.isPending
+                        ? "Zest is thinking (optimized)..."
                         : hasCurrentRecipe 
                         ? "Updating your recipe..." 
                         : "Zest is thinking..."}
