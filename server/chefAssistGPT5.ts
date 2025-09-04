@@ -489,7 +489,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_tokens: 4500,  // Increased further to ensure complete recipes with plating
+        max_tokens: 4096,  // Reduced to avoid token limit issues
         response_format: { type: "json_object" }
       });
       
@@ -576,7 +576,23 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
       console.log("Content length:", content.length);
       
       // Clean up any bad control characters before parsing
-      content = content.replace(/[\x00-\x1F\x7F-\x9F]/g, ' ');
+      content = content.replace(/[\x00-\x1F\x7F-\x9F]/g, ' ').trim();
+      
+      // Remove any markdown formatting that might have slipped through
+      content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+      
+      // Ensure the JSON is properly closed if truncated
+      if (!content.endsWith('}')) {
+        // Count open braces to close properly
+        const openBraces = (content.match(/{/g) || []).length;
+        const closeBraces = (content.match(/}/g) || []).length;
+        const missingBraces = openBraces - closeBraces;
+        
+        if (missingBraces > 0) {
+          // Remove any trailing comma and add missing closing braces
+          content = content.replace(/,\s*$/, '') + '}'.repeat(missingBraces);
+        }
+      }
       
       // Try to parse the recipe
       let recipe;
@@ -584,23 +600,56 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
         recipe = JSON.parse(content);
       } catch (parseError) {
         console.error("JSON parse error, attempting to fix:", parseError);
-        // Try to fix common JSON issues
+        console.error("Content around error:", content.substring(Math.max(0, content.length - 500)));
+        
+        // More aggressive JSON fixing
         content = content
-          .replace(/,\s*}/g, '}') // Remove trailing commas
-          .replace(/,\s*]/g, ']') // Remove trailing commas in arrays
-          .replace(/\n/g, ' ') // Replace newlines with spaces
-          .replace(/\t/g, ' ') // Replace tabs with spaces
+          .replace(/,\s*}/g, '}') // Remove trailing commas from objects
+          .replace(/,\s*]/g, ']') // Remove trailing commas from arrays
           .replace(/([^"]),(\s*[}\]])/g, '$1$2') // Remove trailing commas before closing brackets
-          .replace(/(['"])\s*:\s*(['"])/g, '$1:$2') // Fix spacing around colons
           .replace(/}\s*{/g, '},{') // Fix missing commas between objects
-          .replace(/]\s*\[/g, '],['); // Fix missing commas between arrays
+          .replace(/]\s*\[/g, '],[') // Fix missing commas between arrays
+          .replace(/([}\]])\s*([^,}\]\s])/g, '$1,$2') // Add missing commas after closing brackets
+          .replace(/([^,{\[\s])\s*([{\[])/g, '$1,$2'); // Add missing commas before opening brackets
         
         try {
           recipe = JSON.parse(content);
         } catch (secondError) {
           console.error("Second JSON parse attempt failed:", secondError);
-          console.error("Problematic content:", content.substring(0, 500) + "...");
-          throw new Error("Failed to parse recipe JSON after multiple attempts");
+          console.error("Final problematic content:", content.substring(Math.max(0, content.length - 1000)));
+          
+          // Create a simplified fallback recipe to prevent total failure
+          const titleMatch = content.match(/"title"\s*:\s*"([^"]+)"/); 
+          const servingsMatch = content.match(/"servings"\s*:\s*(\d+)/);
+          
+          if (titleMatch && servingsMatch) {
+            console.log("Creating fallback recipe with extracted title and servings");
+            recipe = {
+              title: titleMatch[1] + " (Simplified)",
+              servings: parseInt(servingsMatch[1]),
+              time: { prep_min: 15, cook_min: 30, total_min: 45 },
+              cuisine: "International",
+              style_notes: ["Recipe generation incomplete - please try regenerating for full recipe"],
+              equipment: ["pan", "oven"],
+              ingredients: [{
+                section: "Main",
+                items: [{ item: "Recipe incomplete", qty: 1, unit: "x", notes: "Please regenerate for full ingredients list" }]
+              }],
+              method: [{
+                step: 1,
+                instruction: "Recipe generation was incomplete. Please try generating this recipe again for the full method and ingredients.",
+                why_it_matters: "Complete recipe needed for cooking"
+              }],
+              finishing_touches: ["Please regenerate recipe"],
+              flavour_boosts: ["Complete recipe needed"],
+              make_ahead_leftovers: "Please regenerate for complete information",
+              allergens: ["Unknown - regenerate recipe"],
+              shopping_list: [],
+              side_dishes: []
+            };
+          } else {
+            throw new Error("Failed to parse recipe JSON and unable to create fallback");
+          }
         }
       }
       console.log("Recipe parsed successfully");
