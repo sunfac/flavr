@@ -622,11 +622,6 @@ export default function ChatBot({
     const textToSend = messageText || message;
     if (!textToSend.trim()) return;
 
-    // Check if we're responding to an alternative recipe request
-    const lastBotMessage = localMessages.filter(m => !m.isUser).slice(-1)[0];
-    const isRespondingToAlternative = lastBotMessage?.waitingForAlternative && 
-      (textToSend.toLowerCase().includes('yes') || textToSend.toLowerCase() === 'y');
-
     // Add user message immediately
     const userMessage: ChatMessage = {
       id: Date.now(),
@@ -640,27 +635,12 @@ export default function ChatBot({
     setLocalMessages(prev => [...prev, userMessage]);
     setShowSuggestions(false);
 
-    // If user is saying yes to alternative recipe, trigger recipe generation
-    if (isRespondingToAlternative && lastBotMessage?.originalContext) {
-      console.log('🎯 User confirmed alternative recipe request, generating new recipe...');
-      generateRecipeMutation.mutate({ 
-        message: lastBotMessage.originalContext,
-        suggestedRecipeTitle: undefined, // Generate new suggestion
-        isFlavorMaximized: false,
-        selectedInspiration: undefined,
-        originalMessage: lastBotMessage.originalContext
-      });
-      
-      // Remove the waiting message
-      setLocalMessages(prev => prev.filter(m => !m.waitingForAlternative));
-    } else {
-      // Send to API with enhanced context
-      sendMessageMutation.mutate({ 
-        message: textToSend,
-        currentRecipe,
-        mode: detectedMode
-      });
-    }
+    // Send to API with enhanced context - let backend handle alternative suggestions
+    sendMessageMutation.mutate({ 
+      message: textToSend,
+      currentRecipe,
+      mode: detectedMode
+    });
     
     if (!messageText) {
       setMessage("");
