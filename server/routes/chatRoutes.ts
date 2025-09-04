@@ -1587,7 +1587,11 @@ Guidelines:
 
       // Use ZestService for recipe generation (leverages Chef Assist quality)
       const localZestService = new ZestService();
-      const recipe = await localZestService.generateRecipe(suggestedTitle, userContext);
+      
+      // Load user memory to ensure preferences are available
+      const userMemory = await localZestService.getUserMemory(userContext);
+      
+      const recipe = await localZestService.generateRecipe(suggestedTitle, userContext, userMemory);
 
       if (recipe) {
         // Save recipe and increment usage counter
