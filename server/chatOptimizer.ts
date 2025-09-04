@@ -64,6 +64,11 @@ SPECIFICITY LEVELS:
 - "somewhat_vague": General category (e.g., "dinner", "dessert", "healthy meal")
 - "very_vague": Unclear request (e.g., "what should I cook?", "I'm hungry")
 
+SPECIAL PATTERNS FOR RECIPE REQUESTS:
+- "Dinner suggestion" = recipe_request (user wants recipe options)
+- "Recipe suggestion" = recipe_request (user wants recipe options)
+- "[meal] suggestion" = recipe_request (user wants recipe options)
+
 CONTEXT: ${context.currentRecipe ? 'User has current recipe: ' + context.currentRecipe.title : 'No current recipe'}
 
 Respond with JSON: {
