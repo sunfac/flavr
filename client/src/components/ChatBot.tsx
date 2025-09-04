@@ -164,7 +164,7 @@ export default function ChatBot({
 
   // General cooking help suggestions (when no recipe exists)
   const generalCookingChips = [
-    { text: "I need a quick dinner idea", icon: iconMap.clock, updatesRecipe: false },
+    { text: "Dinner suggestion", icon: iconMap.clock, updatesRecipe: false },
     { text: "What can I make with pasta?", icon: iconMap.utensilsCrossed, updatesRecipe: false },
     { text: "Suggest a healthy breakfast", icon: iconMap.coffee, updatesRecipe: false },
     { text: "Easy recipes for beginners", icon: iconMap.smile, updatesRecipe: false },
@@ -1043,16 +1043,6 @@ export default function ChatBot({
                         return null;
                       })}
                       
-                      {/* Show optimization info for developers */}
-                      {msg.isOptimized && msg.metadata && (
-                        <div className="w-full mt-2 text-xs text-slate-400 flex items-center gap-2">
-                          <iconMap.zap className="w-3 h-3 text-green-400" />
-                          <span>
-                            Optimized • {msg.metadata.modelUsed} • {msg.metadata.processingTimeMs}ms
-                            {msg.metadata.estimatedCost && ` • ~$${msg.metadata.estimatedCost.toFixed(4)}`}
-                          </span>
-                        </div>
-                      )}
                     </div>
                   )}
                   
