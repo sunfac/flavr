@@ -362,7 +362,7 @@ Focus on extracting actual mentions and clear implications only.`;
       specificity: InputSpecificity.CRYSTAL_CLEAR,
       extractedElements,
       promptStrategy: {
-        tokenBudget: 1200,
+        tokenBudget: 2000,
         modelRecommendation: 'gpt-4o-mini',
         promptFocus: foundDish ? ['dish_authenticity'] : ['chef_style'],
         creativityLevel: 'low'
@@ -389,7 +389,7 @@ Focus on extracting actual mentions and clear implications only.`;
       specificity: InputSpecificity.MODERATELY_CLEAR,
       extractedElements: {},
       promptStrategy: {
-        tokenBudget: 1800,
+        tokenBudget: 2000,
         modelRecommendation: 'gpt-4o-mini',
         promptFocus: ['balanced_approach'],
         creativityLevel: 'medium'

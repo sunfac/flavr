@@ -278,7 +278,11 @@ export class ChefAssistGPT5 {
           .replace(/:\s*"([^"]*[^\\])"\s*([,}\]])/g, ': "$1"$2') // Fix quote issues
           .replace(/"\s*:\s*""/g, '": ""')           // Fix empty string values
           .replace(/:\s*,/g, ': "",')                // Fix missing values
-          .replace(/,\s*,/g, ',');                   // Remove duplicate commas
+          .replace(/,\s*,/g, ',')                    // Remove duplicate commas
+          .replace(/:\s*"[^"]*$/, ': ""')            // Fix unterminated strings at end
+          .replace(/"[^"]*$/, '""')                  // Fix incomplete strings at end
+          .replace(/,\s*$/, '')                      // Remove trailing comma at end
+          .replace(/([}\]]),?\s*$/, '$1');           // Ensure proper ending
           
         try {
           recipe = JSON.parse(content);
