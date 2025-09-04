@@ -109,7 +109,8 @@ function SaveButton() {
         isSaved 
           ? 'bg-red-500/20 border-red-500 text-red-300 hover:bg-red-500/30' 
           : 'bg-black/40 hover:bg-black/60 text-white'
-      } backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs`}
+      } backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer`}
+      style={{ pointerEvents: 'auto' }}
     >
       <Heart className={`w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1 ${isSaved ? 'fill-current' : ''}`} />
       <span className="text-xs font-medium">{isSaved ? 'Saved' : 'Save'}</span>
@@ -401,14 +402,15 @@ Created with Flavr AI`;
             </div>
             
             {/* Action Buttons - Top Right Corner */}
-            <div className="absolute top-2 right-2 flex items-center gap-0.5 sm:gap-1 md:gap-2 flex-wrap">
+            <div className="absolute top-2 right-2 flex items-center gap-0.5 sm:gap-1 md:gap-2 flex-wrap z-10">
               <SaveButton />
               
               <Button
                 onClick={handleCopyIngredients}
                 size="sm"
                 variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs"
+                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer"
+                style={{ pointerEvents: 'auto' }}
               >
                 <Copy className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
                 <span className="text-xs font-medium">Copy</span>
@@ -419,7 +421,8 @@ Created with Flavr AI`;
                 disabled={isRerolling || !generationParams}
                 size="sm"
                 variant="secondary"
-                className="bg-orange-500/80 hover:bg-orange-500/90 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs"
+                className="bg-orange-500/80 hover:bg-orange-500/90 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer"
+                style={{ pointerEvents: 'auto' }}
               >
                 {isRerolling ? (
                   <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin mr-0.5 sm:mr-1" />
@@ -433,7 +436,8 @@ Created with Flavr AI`;
                 onClick={handleStartAgain}
                 size="sm"
                 variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs"
+                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer"
+                style={{ pointerEvents: 'auto' }}
               >
                 <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
                 <span className="text-xs font-medium">Start Over</span>
@@ -452,14 +456,15 @@ Created with Flavr AI`;
             </div>
             
             {/* Action Buttons - Top Right Corner (for no image state) */}
-            <div className="absolute top-2 right-2 flex items-center gap-0.5 sm:gap-1 md:gap-2 flex-wrap">
+            <div className="absolute top-2 right-2 flex items-center gap-0.5 sm:gap-1 md:gap-2 flex-wrap z-10">
               <SaveButton />
               
               <Button
                 onClick={handleCopyIngredients}
                 size="sm"
                 variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs"
+                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer"
+                style={{ pointerEvents: 'auto' }}
               >
                 <Copy className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
                 <span className="text-xs font-medium">Copy</span>
@@ -470,7 +475,8 @@ Created with Flavr AI`;
                 disabled={isRerolling || !generationParams}
                 size="sm"
                 variant="secondary"
-                className="bg-orange-500/80 hover:bg-orange-500/90 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs"
+                className="bg-orange-500/80 hover:bg-orange-500/90 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer"
+                style={{ pointerEvents: 'auto' }}
               >
                 {isRerolling ? (
                   <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin mr-0.5 sm:mr-1" />
@@ -484,7 +490,8 @@ Created with Flavr AI`;
                 onClick={handleStartAgain}
                 size="sm"
                 variant="secondary"
-                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs"
+                className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer"
+                style={{ pointerEvents: 'auto' }}
               >
                 <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
                 <span className="text-xs font-medium">Start Over</span>
