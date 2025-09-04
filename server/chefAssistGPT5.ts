@@ -268,7 +268,92 @@ function getDynamicTargetRange(simplicityPack: string): string {
 
 export class ChefAssistGPT5 {
   
-  // Generate full recipe using GPT-5
+  // Simple in-memory cache for performance optimization
+  private static recipeCache = new Map<string, any>();
+  private static cacheMaxSize = 100;
+  
+  // Cache key generator
+  static generateCacheKey(data: any): string {
+    const keyParts = [
+      data.userIntent.toLowerCase().trim(),
+      data.servings || '4',
+      data.timeBudget || 'flexible',
+      (data.dietaryNeeds || []).sort().join(','),
+      (data.mustUse || []).sort().join(','),
+      (data.avoid || []).sort().join(',')
+    ];
+    return keyParts.join('|');
+  }
+  
+  // Cache management
+  static getCachedRecipe(key: string) {
+    return this.recipeCache.get(key);
+  }
+  
+  static setCachedRecipe(key: string, recipe: any) {
+    if (this.recipeCache.size >= this.cacheMaxSize) {
+      const firstKey = this.recipeCache.keys().next().value;
+      this.recipeCache.delete(firstKey);
+    }
+    this.recipeCache.set(key, recipe);
+  }
+  
+  // Enhanced JSON cleaning and validation utility
+  static cleanAndValidateJSON(content: string): string {
+    // Clean up control characters and markdown
+    content = content.replace(/[\x00-\x1F\x7F-\x9F]/g, ' ').trim();
+    content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+    
+    // Ensure proper JSON structure
+    if (!content.startsWith('{')) {
+      const jsonStart = content.indexOf('{');
+      if (jsonStart > -1) {
+        content = content.substring(jsonStart);
+      }
+    }
+    
+    // Handle truncated JSON
+    if (!content.endsWith('}')) {
+      const openBraces = (content.match(/{/g) || []).length;
+      const closeBraces = (content.match(/}/g) || []).length;
+      const missingBraces = openBraces - closeBraces;
+      
+      if (missingBraces > 0) {
+        content = content.replace(/,\s*$/, '') + '}'.repeat(missingBraces);
+      }
+    }
+    
+    // Advanced JSON repair patterns
+    content = content
+      .replace(/,\s*}/g, '}') // Remove trailing commas in objects
+      .replace(/,\s*]/g, ']') // Remove trailing commas in arrays
+      .replace(/([^"]),(\s*[}\]])/g, '$1$2') // Remove trailing commas before closing
+      .replace(/}\s*{/g, '},{') // Fix missing commas between objects
+      .replace(/]\s*\[/g, '],[') // Fix missing commas between arrays
+      .replace(/([}\]])\s*([^,}\]\s])/g, '$1,$2') // Add missing commas after closing
+      .replace(/([^,{\[\s])\s*([{\[])/g, '$1,$2') // Add missing commas before opening
+      .replace(/"([^"]*)":\s*"([^"]*)"([^,}]*)/g, '"$1":"$2"$3'); // Fix malformed string values
+    
+    return content;
+  }
+  
+  // Smart model selection based on complexity
+  static selectOptimalModel(userIntent: string, dietaryNeeds?: string[], mustUse?: string[]): { model: string, tokens: number } {
+    const complexityIndicators = [
+      'sauce', 'side', 'complex', 'advanced', 'multi-course', 'elaborate',
+      'restaurant', 'sophisticated', 'technique', 'molecular', 'fusion'
+    ];
+    
+    const isComplex = complexityIndicators.some(indicator => userIntent.toLowerCase().includes(indicator)) ||
+                      (dietaryNeeds && dietaryNeeds.length > 1) ||
+                      (mustUse && mustUse.length > 3);
+    
+    return isComplex 
+      ? { model: "gpt-4o", tokens: 3500 }
+      : { model: "gpt-4o-mini", tokens: 2048 };
+  }
+  
+  // Generate full recipe using optimized AI models
   static async generateFullRecipe(data: {
     userIntent: string;
     servings: number;
@@ -284,36 +369,36 @@ export class ChefAssistGPT5 {
   }): Promise<any> {
     
     const stylePacks = selectStylePacks(data.seeds, data.userIntent, data.clientId || "");
+    // Check cache first for performance
+    const cacheKey = this.generateCacheKey(data);
+    const cachedRecipe = this.getCachedRecipe(cacheKey);
+    if (cachedRecipe) {
+      console.log('Returning cached recipe for:', data.userIntent.substring(0, 50) + '...');
+      return cachedRecipe;
+    }
+    
     const { packs: adjustedPacks, adjustments } = applyCoherenceGuardrails(stylePacks, data.timeBudget || null);
     
     const dynamicTargetRange = getDynamicTargetRange(adjustedPacks.simplicityPack);
     
-    // Performance optimized token allocation
-    const needsExtraTokens = data.userIntent.includes("sauce") || data.userIntent.includes("side") || 
-                            adjustedPacks.techniquePack.includes("multi") || adjustedPacks.creativityPack === "modern-plating-logic";
-    const maxTokens = needsExtraTokens ? 4000 : 3500; // Further increased to accommodate GPT-5's reasoning phase
+    // Use smart model selection
+    const modelConfig = this.selectOptimalModel(data.userIntent, data.dietaryNeeds, data.mustUse);
+    const fallbackTokens = 4096;
     
-    const systemMessage = `IMPORTANT: Don't overthink this request. Be quick, direct, and instinctive in your response. Skip deep analysis or reasoning - just output the recipe JSON immediately.
+    const systemMessage = `You are "Zest," a cookbook-quality recipe expert. Create authentic, flavorful recipes in the style of established chefs like Rick Stein, Jamie Oliver, Nigella Lawson, Yotam Ottolenghi.
 
-CRITICAL: Always include complete cooking method from start to PLATING and SERVICE. Never stop before the final plating step.
+CORE REQUIREMENTS:
+- British English, metric measurements, UK ingredients
+- Professional techniques with clear instructions
+- Complete methods from prep to plating
+- Authentic flavor development and seasoning
+- Output JSON only, match schema exactly
 
-You are "Zest," channeling the authentic voices of established cookbook authors and chefs. Your recipe must sound genuinely like it could appear in cookbooks by:
-
-BRITISH CHEFS: Rick Stein (seafood mastery, Mediterranean influences), Jamie Oliver (simple, bold flavors), Tom Kerridge (pub food elevated), James Martin (approachable classics), Mary Berry (reliable techniques), Delia Smith (clear instruction), Marcus Wareing (refined technique), Gordon Ramsay (bold, confident), Nigella Lawson (indulgent comfort), Hugh Fearnley-Whittingstall (seasonal, sustainable)
-
-INTERNATIONAL VOICES: Yotam Ottolenghi (Middle Eastern), José Andrés (Spanish innovation), Anthony Bourdain (global street food), Julia Child (French classics), Thomas Keller (American fine dining), Massimo Bottura (Italian innovation), Ferran Adrià (Spanish molecular), David Chang (Korean-American fusion), Dishoom (sophisticated Indian restaurant techniques)
-
-AUTHENTICITY REQUIREMENTS:
-- Write like these chefs actually write - study their voice, technique explanations, ingredient choices
-- Use British English and metric measurements
-- Assume UK supermarket availability
-- Match the confidence and style of established cookbook authors
-- Avoid pretentious language - be direct and practical
-- If it doesn't sound like something these chefs would write, revise it
-
-For Chef Assist, output strictly as JSON matching the provided schema. Do not include any text outside JSON.
-
-IMPORTANT: Never instruct users to make basic pantry staples from scratch (tomato paste, soy sauce, vinegar, etc.). Use store-bought versions and focus on cooking techniques instead.
+RECIPE STANDARDS:
+- Use supermarket ingredients, avoid making basics from scratch
+- Focus on technique and flavor layering
+- Include proper timing and temperature guidance
+- Ensure dietary requirements are strictly followed
 
 INTENT INTERPRETATION PROTOCOL (do this silently; do NOT print your reasoning):
 • Read USER REQUEST and classify one of:
@@ -409,7 +494,7 @@ NOTES FIELDING:
 • Explain technique only where it unlocks flavour (one short clause).
 • Return JSON only; no extra prose.`;
 
-    const userMessage = `CRITICAL: Use 80% of your 2000 token limit on output. Don't overthink - respond immediately with JSON only.
+    const userMessage = `Generate complete recipe JSON immediately. Focus on flavor and clear instructions.
 
 USER REQUEST (non-optional - base the recipe on this request): "${data.userIntent}"
 
@@ -475,7 +560,7 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
 }`;
 
     try {
-      console.log(`Calling GPT-5 for full recipe with max_completion_tokens: ${maxTokens}`);
+      console.log(`Calling ${modelConfig.model} for full recipe with max_completion_tokens: ${modelConfig.tokens}`);
       const startTime = Date.now();
       
       // Add timeout wrapper for 35 seconds
@@ -484,12 +569,12 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
       );
       
       const completionPromise = openai.chat.completions.create({
-        model: "gpt-4o",  // Using standard model for reliable output
+        model: modelConfig.model,  // Intelligent model selection
         messages: [
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
         ],
-        max_tokens: 4096,  // Reduced to avoid token limit issues
+        max_tokens: modelConfig.tokens,  // Optimized token allocation
         response_format: { type: "json_object" }
       });
       
@@ -500,13 +585,14 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
         console.log("First attempt timed out, retrying with reduced verbosity...");
         
         // Retry with reduced tokens
+        // Fallback to more powerful model with increased tokens
         completion = await openai.chat.completions.create({
           model: "gpt-4o",
           messages: [
             { role: "system", content: systemMessage },
             { role: "user", content: userMessage }
           ],
-          max_tokens: 1200,
+          max_tokens: fallbackTokens,
           response_format: { type: "json_object" }
         });
       }
@@ -575,24 +661,8 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
 
       console.log("Content length:", content.length);
       
-      // Clean up any bad control characters before parsing
-      content = content.replace(/[\x00-\x1F\x7F-\x9F]/g, ' ').trim();
-      
-      // Remove any markdown formatting that might have slipped through
-      content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-      
-      // Ensure the JSON is properly closed if truncated
-      if (!content.endsWith('}')) {
-        // Count open braces to close properly
-        const openBraces = (content.match(/{/g) || []).length;
-        const closeBraces = (content.match(/}/g) || []).length;
-        const missingBraces = openBraces - closeBraces;
-        
-        if (missingBraces > 0) {
-          // Remove any trailing comma and add missing closing braces
-          content = content.replace(/,\s*$/, '') + '}'.repeat(missingBraces);
-        }
-      }
+      // Enhanced JSON cleaning and validation
+      content = this.cleanAndValidateJSON(content);
       
       // Try to parse the recipe
       let recipe;
@@ -675,6 +745,9 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
       if (recentOutputs.length > 5) {
         recentOutputs = recentOutputs.slice(-5);
       }
+      
+      // Cache the generated recipe for performance
+      this.setCachedRecipe(cacheKey, recipe);
       
       return recipe;
       
