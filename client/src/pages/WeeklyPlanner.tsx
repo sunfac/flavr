@@ -13,6 +13,7 @@ import { Calendar, Clock, Users, ShoppingCart, Download, RefreshCw } from "lucid
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
+import WeeklyPlannerOnboarding from "@/components/WeeklyPlannerOnboarding";
 
 export default function WeeklyPlanner() {
   const [showNavigation, setShowNavigation] = useState(false);
@@ -47,7 +48,7 @@ export default function WeeklyPlanner() {
   const isAuthenticated = !!user?.user;
 
   // Get user's weekly planning preferences
-  const { data: preferences, isLoading: preferencesLoading } = useQuery({
+  const { data: preferences, isLoading: preferencesLoading, refetch: refetchPreferences } = useQuery({
     queryKey: ["/api/weekly-plan-preferences"],
     enabled: isAuthenticated,
     retry: false,
@@ -234,22 +235,25 @@ export default function WeeklyPlanner() {
         <GlobalHeader onMenuClick={(menu) => openMenu(menu)} />
         
         <main className="pt-20 pb-24">
-          <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-            <Calendar className="w-16 h-16 text-orange-400 mx-auto mb-6" />
-            <h1 className="text-3xl font-bold text-white mb-4">Set Up Your Weekly Planner</h1>
-            <p className="text-slate-300 mb-8">
-              Tell us about your household and cooking preferences to get personalized weekly meal plans.
-            </p>
+          <div className="max-w-4xl mx-auto px-4 py-16">
+            <div className="text-center mb-8">
+              <Calendar className="w-16 h-16 text-orange-400 mx-auto mb-6" />
+              <h1 className="text-3xl font-bold text-white mb-4">Set Up Your Weekly Planner</h1>
+              <p className="text-slate-300 mb-8">
+                Tell us about your household and cooking preferences to get personalized weekly meal plans.
+              </p>
+            </div>
             
-            {/* TODO: Add onboarding form here */}
-            <Card className="bg-slate-800/50 border-slate-700 max-w-2xl mx-auto">
-              <CardHeader>
-                <CardTitle className="text-white">Quick Setup Required</CardTitle>
-              </CardHeader>
-              <CardContent className="text-slate-300">
-                <p>Coming soon: Personalized onboarding flow</p>
-              </CardContent>
-            </Card>
+            <WeeklyPlannerOnboarding 
+              onComplete={() => {
+                refetchPreferences();
+                refetchPlans();
+                toast({
+                  title: "Setup Complete!",
+                  description: "You're ready to generate your first weekly meal plan.",
+                });
+              }} 
+            />
           </div>
         </main>
 

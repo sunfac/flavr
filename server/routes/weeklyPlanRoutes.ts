@@ -124,7 +124,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
       });
 
       res.json(weeklyPlan);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating weekly plan:", error);
       res.status(500).json({ error: "Failed to generate weekly plan" });
     }
@@ -182,7 +182,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
       
       const updatedPlan = await WeeklyPlannerService.acceptWeeklyPlan(planId, userId);
       res.json(updatedPlan);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error accepting weekly plan:", error);
       res.status(500).json({ error: error.message || "Failed to accept plan" });
     }
@@ -205,7 +205,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
       
       const updatedPlan = await WeeklyPlannerService.skipWeeklyPlan(planId, userId, reason);
       res.json(updatedPlan);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error skipping weekly plan:", error);
       res.status(500).json({ error: error.message || "Failed to skip plan" });
     }
@@ -227,7 +227,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
         newCuisineWeighting
       });
       res.json(updatedPlan);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adjusting weekly plan:", error);
       res.status(500).json({ error: error.message || "Failed to adjust plan" });
     }
