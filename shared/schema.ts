@@ -315,6 +315,129 @@ export const insertAiCostSchema = createInsertSchema(aiCosts).omit({
   timestamp: true,
 });
 
+// Weekly meal plans for Flavr+ subscription feature
+export const weeklyPlans = pgTable("weekly_plans", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  
+  // Plan identification
+  weekStartDate: timestamp("week_start_date").notNull(), // Monday of the week
+  weekEndDate: timestamp("week_end_date").notNull(), // Sunday of the week
+  planStatus: text("plan_status").notNull().default("pending"), // "pending", "accepted", "adjusted", "skipped"
+  
+  // Plan generation metadata
+  generatedAt: timestamp("generated_at").defaultNow(),
+  acceptedAt: timestamp("accepted_at"),
+  adjustedAt: timestamp("adjusted_at"),
+  skipReason: text("skip_reason"),
+  
+  // Meal assignments (IDs of recipes in the plan)
+  plannedRecipes: jsonb("planned_recipes").$type<Array<{
+    day: string; // "monday", "tuesday", etc.
+    mealType: string; // "dinner" primarily, could expand to "lunch"
+    recipeId: number;
+    recipeTitle: string;
+    cookTime: number;
+    servings: number;
+    isFlexible: boolean; // can be swapped easily
+  }>>().notNull(),
+  
+  // User preferences snapshot for this plan
+  preferencesSnapshot: jsonb("preferences_snapshot").$type<{
+    householdSize: { adults: number; kids: number };
+    cookingFrequency: number; // meals per week
+    timeComfort: { weeknight: number; weekend: number };
+    cuisineWeighting: Record<string, number>; // e.g. {"italian": 40, "asian": 20}
+    ambitionLevel: string;
+    dietaryNeeds: string[];
+    budgetPerServing?: number; // Flavr+ only
+  }>(),
+  
+  // Shopping list and logistics
+  consolidatedShoppingList: jsonb("consolidated_shopping_list").$type<Array<{
+    ingredient: string;
+    quantity: string;
+    aisle: string;
+    recipes: string[]; // which recipes need this ingredient
+  }>>(),
+  
+  // Export and calendar integration
+  icsExported: boolean("ics_exported").default(false),
+  icsExportedAt: timestamp("ics_exported_at"),
+  calendarData: jsonb("calendar_data").$type<{
+    events: Array<{
+      title: string;
+      date: string;
+      time: string;
+      duration: number;
+    }>;
+  }>(),
+  
+  // Analytics and engagement
+  viewedAt: timestamp("viewed_at"),
+  lastInteractedAt: timestamp("last_interacted_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User onboarding and weekly planning preferences
+export const weeklyPlanPreferences = pgTable("weekly_plan_preferences", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull().unique(),
+  
+  // Core onboarding data
+  householdSize: jsonb("household_size").$type<{
+    adults: number;
+    kids: number;
+  }>().notNull(),
+  
+  cookingFrequency: integer("cooking_frequency").notNull(), // meals per week (2, 4, 6)
+  
+  timeComfort: jsonb("time_comfort").$type<{
+    weeknight: number; // max minutes 20-30
+    weekend: number; // max minutes 45-60
+  }>().notNull(),
+  
+  ambitionLevel: text("ambition_level").notNull(), // "quick_simple", "balanced", "experimental_creative"
+  
+  // Dietary and restrictions
+  dietaryNeeds: jsonb("dietary_needs").$type<string[]>().notNull().default([]),
+  
+  // Flavr+ premium preferences
+  cuisineWeighting: jsonb("cuisine_weighting").$type<Record<string, number>>(), // {"italian": 40, "asian": 20, etc}
+  budgetPerServing: integer("budget_per_serving"), // in pence, Flavr+ only
+  
+  // Auto-generation settings
+  autoGenerateEnabled: boolean("auto_generate_enabled").default(true),
+  generationDay: text("generation_day").default("sunday"), // when to auto-generate
+  generationTime: text("generation_time").default("09:00"), // time to auto-generate
+  
+  // Notification preferences
+  planReadyNotifications: boolean("plan_ready_notifications").default(true),
+  cookingReminders: boolean("cooking_reminders").default(true),
+  shoppingListReminders: boolean("shopping_list_reminders").default(true),
+  
+  // Onboarding completion
+  onboardingCompleted: boolean("onboarding_completed").default(false),
+  onboardingCompletedAt: timestamp("onboarding_completed_at"),
+  
+  // Metadata
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertWeeklyPlanSchema = createInsertSchema(weeklyPlans).omit({
+  id: true,
+  createdAt: true,
+  generatedAt: true,
+});
+
+export const insertWeeklyPlanPreferencesSchema = createInsertSchema(weeklyPlanPreferences).omit({
+  id: true,
+  createdAt: true,
+  lastUpdated: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertPseudoUser = z.infer<typeof insertPseudoUserSchema>;
@@ -333,3 +456,7 @@ export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
 export type UserPreferences = typeof userPreferences.$inferSelect;
 export type InsertAiCost = z.infer<typeof insertAiCostSchema>;
 export type AiCost = typeof aiCosts.$inferSelect;
+export type InsertWeeklyPlan = z.infer<typeof insertWeeklyPlanSchema>;
+export type WeeklyPlan = typeof weeklyPlans.$inferSelect;
+export type InsertWeeklyPlanPreferences = z.infer<typeof insertWeeklyPlanPreferencesSchema>;
+export type WeeklyPlanPreferences = typeof weeklyPlanPreferences.$inferSelect;

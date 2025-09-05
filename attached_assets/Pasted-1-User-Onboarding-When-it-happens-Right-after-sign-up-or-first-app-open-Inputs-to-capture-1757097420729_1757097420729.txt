@@ -1,0 +1,59 @@
+1. User Onboarding
+	•	When it happens: Right after sign-up (or first app open).
+	•	Inputs to capture:
+	•	Household size (adults/kids).
+	•	Dietary needs (allergies, vegetarian, halal, etc.).
+	•	Cooking frequency (e.g. 2, 4, 6 dinners/week).
+	•	Time comfort (weeknight max: 20–30 min, weekend OK: 45–60 min).
+	•	Ambition slider (Quick & Simple → Experimental & Creative).
+	•	Storage: Persist in user profile → feeds into every plan.
+	•	Adjustment: Always editable in Settings → Preferences.
+
+⸻
+
+2. Plan Customisation
+	•	Default: Every Sunday, Flavr generates a plan based on saved prefs.
+	•	User control:
+	•	Accept (1-tap lock-in).
+	•	Adjust (swap 1–2 recipes, re-roll cuisines).
+	•	Skip (give reason: leftovers, eating out, busy week).
+	•	Constraints available:
+	•	Cuisine weighting (e.g. 40% Italian, 20% Asian, 20% British, 20% Wild Card).
+	•	Cooking time filters (e.g. max 30 mins Mon–Thu, free at weekends).
+	•	Budget per serving (only editable in Flavr+).
+	•	Balance: Core weekly plan is mostly auto-pilot; deeper control lives in Flavr+.
+
+⸻
+
+3. Integration Points
+	•	Shopping Mode:
+	•	Weekly plan auto-exports to a consolidated shopping list (grouped by aisle).
+	•	SmartList v1 builds on existing Shopping Mode output → no duplicate logic.
+	•	Fridge Mode:
+	•	If user skips a meal, Flavr prompts: “Want me to rescue with what’s in the fridge?”
+	•	Uses same backend, but in reverse: Fridge → Recipe Rescue → logs into weekly plan.
+	•	Consistency: All recipes (weekly, fridge, ad-hoc) share same card format, storage, and save/share flow.
+
+⸻
+
+4. Subscription Gating
+	•	Free Tier (sticky preview):
+	•	2 planned meals per week.
+	•	SmartList v1 (basic aisle grouping).
+	•	Cook Mode (no photo log).
+	•	Savings/Waste meter (basic).
+	•	Flavr+ (monetisation driver):
+	•	Unlimited weekly meals.
+	•	Plan Adjust with cuisine weighting & budget filter.
+	•	SmartList v2 (QuickSwitch swaps + price memory).
+	•	Cook Mode photo log & streak freeze.
+	•	Receipt Snap + detailed savings dashboard.
+	•	Taste Portrait + Private Circles.
+
+👉 Free users feel the loop but hit frustration points → easy upsell.
+
+⸻
+
+Your Question: Should we start with Sunday auto-generation + plan interface?
+
+Yes. That’s the keystone feature. Without it, there’s no ritual, no accountability, no repeat logins. It’s where Gousto-like stickiness begins.

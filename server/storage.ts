@@ -1,4 +1,4 @@
-import { users, recipes, chatMessages, developerLogs, pseudoUsers, interactionLogs, type User, type InsertUser, type Recipe, type InsertRecipe, type ChatMessage, type InsertChatMessage, type DeveloperLog, type InsertDeveloperLog, type PseudoUser, type InsertPseudoUser, recipeGenerationLogs, type RecipeGenerationLog, type InsertRecipeGenerationLog, type InteractionLog, type InsertInteractionLog } from "@shared/schema";
+import { users, recipes, chatMessages, developerLogs, pseudoUsers, interactionLogs, weeklyPlans, weeklyPlanPreferences, type User, type InsertUser, type Recipe, type InsertRecipe, type ChatMessage, type InsertChatMessage, type DeveloperLog, type InsertDeveloperLog, type PseudoUser, type InsertPseudoUser, recipeGenerationLogs, type RecipeGenerationLog, type InsertRecipeGenerationLog, type InteractionLog, type InsertInteractionLog, type WeeklyPlan, type InsertWeeklyPlan, type WeeklyPlanPreferences, type InsertWeeklyPlanPreferences } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, or, and } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -73,6 +73,20 @@ export interface IStorage {
   // Sub-recipe operations
   getSubRecipes(parentRecipeId: number): Promise<Recipe[]>;
   getParentRecipe(subRecipeId: number): Promise<Recipe | undefined>;
+  
+  // Weekly planning operations
+  createWeeklyPlan(plan: InsertWeeklyPlan): Promise<WeeklyPlan>;
+  getWeeklyPlan(id: number): Promise<WeeklyPlan | undefined>;
+  getWeeklyPlansByUser(userId: number, limit?: number): Promise<WeeklyPlan[]>;
+  getCurrentWeekPlan(userId: number, weekStartDate: Date): Promise<WeeklyPlan | undefined>;
+  updateWeeklyPlan(id: number, updates: Partial<WeeklyPlan>): Promise<WeeklyPlan>;
+  updateWeeklyPlanStatus(id: number, status: string, metadata?: any): Promise<WeeklyPlan>;
+  
+  // Weekly planning preferences
+  createWeeklyPlanPreferences(preferences: InsertWeeklyPlanPreferences): Promise<WeeklyPlanPreferences>;
+  getWeeklyPlanPreferences(userId: number): Promise<WeeklyPlanPreferences | undefined>;
+  updateWeeklyPlanPreferences(userId: number, updates: Partial<WeeklyPlanPreferences>): Promise<WeeklyPlanPreferences>;
+  completeOnboarding(userId: number): Promise<WeeklyPlanPreferences>;
 }
 
 
@@ -447,6 +461,92 @@ export class DatabaseStorage implements IStorage {
       return await this.getRecipe(subRecipe.parentRecipeId);
     }
     return undefined;
+  }
+
+  // Weekly planning operations
+  async createWeeklyPlan(plan: InsertWeeklyPlan): Promise<WeeklyPlan> {
+    const [newPlan] = await db.insert(weeklyPlans).values(plan).returning();
+    return newPlan;
+  }
+
+  async getWeeklyPlan(id: number): Promise<WeeklyPlan | undefined> {
+    const [plan] = await db.select().from(weeklyPlans).where(eq(weeklyPlans.id, id));
+    return plan;
+  }
+
+  async getWeeklyPlansByUser(userId: number, limit: number = 10): Promise<WeeklyPlan[]> {
+    return await db.select().from(weeklyPlans)
+      .where(eq(weeklyPlans.userId, userId))
+      .orderBy(desc(weeklyPlans.weekStartDate))
+      .limit(limit);
+  }
+
+  async getCurrentWeekPlan(userId: number, weekStartDate: Date): Promise<WeeklyPlan | undefined> {
+    const [plan] = await db.select().from(weeklyPlans)
+      .where(and(
+        eq(weeklyPlans.userId, userId),
+        eq(weeklyPlans.weekStartDate, weekStartDate)
+      ));
+    return plan;
+  }
+
+  async updateWeeklyPlan(id: number, updates: Partial<WeeklyPlan>): Promise<WeeklyPlan> {
+    const [updatedPlan] = await db.update(weeklyPlans)
+      .set(updates)
+      .where(eq(weeklyPlans.id, id))
+      .returning();
+    return updatedPlan;
+  }
+
+  async updateWeeklyPlanStatus(id: number, status: string, metadata?: any): Promise<WeeklyPlan> {
+    const updateData: any = { planStatus: status };
+    
+    if (status === 'accepted') {
+      updateData.acceptedAt = new Date();
+    } else if (status === 'adjusted') {
+      updateData.adjustedAt = new Date();
+    } else if (status === 'skipped' && metadata?.skipReason) {
+      updateData.skipReason = metadata.skipReason;
+    }
+
+    const [updatedPlan] = await db.update(weeklyPlans)
+      .set(updateData)
+      .where(eq(weeklyPlans.id, id))
+      .returning();
+    return updatedPlan;
+  }
+
+  // Weekly planning preferences
+  async createWeeklyPlanPreferences(preferences: InsertWeeklyPlanPreferences): Promise<WeeklyPlanPreferences> {
+    const [newPreferences] = await db.insert(weeklyPlanPreferences).values(preferences).returning();
+    return newPreferences;
+  }
+
+  async getWeeklyPlanPreferences(userId: number): Promise<WeeklyPlanPreferences | undefined> {
+    const [preferences] = await db.select().from(weeklyPlanPreferences)
+      .where(eq(weeklyPlanPreferences.userId, userId));
+    return preferences;
+  }
+
+  async updateWeeklyPlanPreferences(userId: number, updates: Partial<WeeklyPlanPreferences>): Promise<WeeklyPlanPreferences> {
+    updates.lastUpdated = new Date();
+    const [updatedPreferences] = await db.update(weeklyPlanPreferences)
+      .set(updates)
+      .where(eq(weeklyPlanPreferences.userId, userId))
+      .returning();
+    return updatedPreferences;
+  }
+
+  async completeOnboarding(userId: number): Promise<WeeklyPlanPreferences> {
+    const [updatedPreferences] = await db.update(weeklyPlanPreferences)
+      .set({
+        onboardingCompleted: true,
+        onboardingCompletedAt: new Date(),
+        lastUpdated: new Date()
+      })
+      .where(eq(weeklyPlanPreferences.userId, userId))
+      .returning();
+    return updatedPreferences;
   }
 }
 
