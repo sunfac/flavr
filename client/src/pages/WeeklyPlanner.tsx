@@ -57,7 +57,7 @@ export default function WeeklyPlanner() {
   // Get current week's plan
   const { data: weeklyPlans, refetch: refetchPlans } = useQuery({
     queryKey: ["/api/weekly-plans"],
-    enabled: isAuthenticated && preferences && !preferences.onboardingRequired,
+    enabled: isAuthenticated && !!preferences && !preferences?.onboardingRequired,
     retry: false,
   });
 

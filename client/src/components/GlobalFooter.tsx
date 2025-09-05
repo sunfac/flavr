@@ -67,6 +67,12 @@ export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
       icon: iconMap.bookOpen,
       path: "/cookbook",
     },
+    {
+      id: "weekly-planner",
+      label: "Weekly Planner",
+      icon: iconMap.calendar,
+      path: "/weekly-planner",
+    },
   ];
 
   return (
