@@ -47,14 +47,13 @@ const modes: ModeCard[] = [
     isPremium: true
   },
   {
-    title: "Meal Planner",
+    title: "Weekly Planner",
     description: "Plan your week with AI-generated meal schedules and smart shopping lists",
     icon: <CalendarDays className="w-12 h-12" />,
     color: "text-purple-500 dark:text-purple-400",
-    route: "/meal-planner",
+    route: "/weekly-planner",
     gradient: "from-purple-500/10 to-purple-600/10 dark:from-purple-500/20 dark:to-purple-600/20",
-    isPremium: true,
-    isComingSoon: true
+    isPremium: true
   }
 ];
 
