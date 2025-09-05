@@ -123,7 +123,6 @@ Respond with JSON: {
   ): ChatIntentResult | null {
     
     const lower = message.toLowerCase().trim();
-    console.log(`🔍 Quick pattern check: "${message}" -> "${lower}"`);
     
     // Quick recipe request pattern
     if (lower.startsWith('quick recipe for:')) {

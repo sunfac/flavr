@@ -67,12 +67,14 @@ interface ChatBotProps {
   currentRecipe?: Recipe;
   onRecipeUpdate?: (updatedRecipe: Recipe) => void;
   currentMode?: "shopping" | "fridge" | "chef";
+  chatContext?: "cooking" | "recipe-editing"; // New prop to distinguish context
 }
 
 export default function ChatBot({ 
   currentRecipe, 
   onRecipeUpdate, 
   currentMode,
+  chatContext = "cooking", // Default to cooking mode
   isOpen = true,
   onClose
 }: ChatBotProps & { isOpen?: boolean; onClose?: () => void }) {
@@ -228,10 +230,23 @@ export default function ChatBot({
   // Extract history from response
   const chatHistory = Array.isArray(historyData) ? historyData : (historyData as any)?.history || [];
 
-  // Load chat history when component mounts - use stable key that doesn't change during modifications
+  // Load chat history when component mounts - use context-aware keys
   useEffect(() => {
     if (localMessages.length === 0) { // Only load if chat is empty
-      const stableKey = currentRecipe?.id ? `recipe-${currentRecipe.id}` : 'general-chat';
+      let stableKey: string;
+      
+      if (chatContext === "recipe-editing" && currentRecipe?.id) {
+        // Recipe editing mode: load recipe-specific chat
+        stableKey = `recipe-edit-${currentRecipe.id}`;
+      } else if (chatContext === "cooking") {
+        // Cooking mode: always start fresh, don't load history
+        stableKey = `cooking-session-${Date.now()}`; // Always unique to start fresh
+        return; // Don't load any history for cooking mode
+      } else {
+        // Fallback to general chat
+        stableKey = 'general-chat';
+      }
+      
       const saved = localStorage.getItem(`chat-history-${stableKey}`);
       if (saved) {
         try {
@@ -242,16 +257,27 @@ export default function ChatBot({
         }
       }
     }
-  }, [currentRecipe?.id]); // Only depend on stable recipe ID
+  }, [currentRecipe?.id, chatContext]); // Depend on context too
   
   // Save chat history whenever localMessages changes
   useEffect(() => {
     if (localMessages.length > 0) {
-      // Save to a stable key that doesn't change during recipe modifications
-      const stableKey = currentRecipe?.id ? `recipe-${currentRecipe.id}` : 'general-chat';
+      let stableKey: string;
+      
+      if (chatContext === "recipe-editing" && currentRecipe?.id) {
+        // Recipe editing mode: save recipe-specific chat
+        stableKey = `recipe-edit-${currentRecipe.id}`;
+      } else if (chatContext === "cooking") {
+        // Cooking mode: use temporary key (will be cleared on new session)
+        stableKey = `cooking-session-temp`;
+      } else {
+        // Fallback to general chat
+        stableKey = 'general-chat';
+      }
+      
       localStorage.setItem(`chat-history-${stableKey}`, JSON.stringify(localMessages));
     }
-  }, [localMessages, currentRecipe?.id]);
+  }, [localMessages, currentRecipe?.id, chatContext]);
 
 
   // Enhanced Zest chat with user memory and intent detection
@@ -403,8 +429,9 @@ export default function ChatBot({
         },
         body: JSON.stringify({
           message: data.message,
-          conversationHistory,
-          currentRecipe: getCurrentRecipeContext().recipe,
+          conversationHistory: chatContext === "cooking" ? [] : conversationHistory, // Fresh context for cooking mode
+          currentRecipe: chatContext === "recipe-editing" ? getCurrentRecipeContext().recipe : null, // Only pass recipe in editing mode
+          chatContext: chatContext, // Pass the context mode
           pseudoUserId: !isAuthenticated ? 'anon-' + Date.now() : undefined
         }),
       });
@@ -1055,43 +1082,50 @@ export default function ChatBot({
                     </div>
                   )}
 
-                  {/* NEW: Intent clarification options */}
+                  {/* NEW: Intent clarification options with radio buttons */}
                   {msg.requiresIntentClarification && msg.clarificationOptions && (
-                    <div className="mt-3 space-y-2">
-                      {msg.clarificationOptions.map((option, optionIndex) => (
-                        <Button
-                          key={optionIndex}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            const originalMessage = msg.message;
-                            
-                            if (option.type === 'quick_recipe') {
-                              // Send request for quick recipe in chat
-                              optimizedChatMutation.mutate({ message: `Quick recipe for: ${originalMessage}` });
-                            } else if (option.type === 'full_recipe') {
-                              // Generate full recipe card
-                              optimizedRecipeMutation.mutate({
-                                suggestedTitle: originalMessage,
-                                originalMessage: originalMessage,
-                                type: 'full'
-                              });
-                            } else if (option.type === 'recipe_options') {
-                              // Show 3 recipe options
-                              optimizedChatMutation.mutate({ message: `Show me 3 recipe options for: ${originalMessage}` });
-                            }
-                          }}
-                          className="w-full justify-start text-left p-3 h-auto border-slate-700 hover:bg-slate-700"
-                        >
-                          <div className="flex items-start space-x-3">
-                            <span className="text-lg">{option.icon}</span>
-                            <div>
-                              <div className="font-medium text-white">{option.label}</div>
-                              <div className="text-sm text-slate-400">{option.description}</div>
+                    <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                      <h4 className="text-sm font-medium text-white mb-3">How would you like your recipe?</h4>
+                      <div className="space-y-3">
+                        {msg.clarificationOptions.map((option, optionIndex) => (
+                          <label
+                            key={optionIndex}
+                            className="flex items-start space-x-3 p-3 rounded-lg border border-slate-600 hover:border-orange-500 hover:bg-slate-700/50 cursor-pointer transition-all"
+                          >
+                            <input
+                              type="radio"
+                              name={`clarification-${msg.id}`}
+                              value={option.type}
+                              className="mt-1 text-orange-500 focus:ring-orange-500 focus:ring-2"
+                              onChange={() => {
+                                const originalMessage = msg.message;
+                                
+                                if (option.type === 'quick_recipe') {
+                                  // Send request for quick recipe in chat
+                                  optimizedChatMutation.mutate({ message: `Quick recipe for: ${originalMessage}` });
+                                } else if (option.type === 'full_recipe') {
+                                  // Generate full recipe card
+                                  optimizedRecipeMutation.mutate({
+                                    suggestedTitle: originalMessage,
+                                    originalMessage: originalMessage,
+                                    type: 'full'
+                                  });
+                                } else if (option.type === 'recipe_options') {
+                                  // Show 3 recipe options
+                                  optimizedChatMutation.mutate({ message: `Show me 3 recipe options for: ${originalMessage}` });
+                                }
+                              }}
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2">
+                                <span className="text-lg">{option.icon}</span>
+                                <span className="font-medium text-white">{option.label}</span>
+                              </div>
+                              <p className="text-sm text-slate-400 mt-1">{option.description}</p>
                             </div>
-                          </div>
-                        </Button>
-                      ))}
+                          </label>
+                        ))}
+                      </div>
                     </div>
                   )}
                   

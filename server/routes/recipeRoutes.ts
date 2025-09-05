@@ -683,14 +683,16 @@ Return a JSON object with this structure:
         // Build user context
         const userContext = {
           userId: req.session?.userId,
-          pseudoUserId: req.headers['x-pseudo-user-id'] as string || req.session?.id,
+          pseudoUserId: parseInt(req.headers['x-pseudo-user-id'] as string) || undefined,
           isAuthenticated: !!req.session?.userId
         };
 
         // Build memory context (simplified for this endpoint)
         const memory = {
           preferences: null,
-          conversationHistory: [],
+          recentConversations: [],
+          lastInteractionTopics: [],
+          mentionedPreferences: {},
           cookingHistory: []
         };
 

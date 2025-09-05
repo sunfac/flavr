@@ -56,12 +56,10 @@ export class OptimizedChatService {
         currentRecipe: request.currentRecipe
       });
 
-      console.log('🎯 Optimized intent classification:', {
-        intent: intentResult.intent,
-        confidence: intentResult.confidence,
-        model: intentResult.modelRecommendation,
-        estimatedCost: intentResult.estimatedCost
-      });
+      // Log for development monitoring only
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🎯 Intent classified:', intentResult.intent, intentResult.confidence);
+      }
 
       // Phase 2: Generate appropriate response based on intent
       let response: string;
@@ -340,20 +338,20 @@ Provide clear, specific modification advice. Be concise and practical.`
     const clarificationOptions = [
       {
         type: 'quick_recipe' as const,
-        label: '💬 Quick recipe in chat',
-        description: 'Get a simple recipe right here in our conversation',
+        label: 'Quick recipe in chat',
+        description: 'Get a simple 2-3 step recipe right here in our conversation - perfect for quick cooking',
         icon: '💬'
       },
       {
         type: 'full_recipe' as const,
-        label: '📋 Complete recipe card',
-        description: 'Generate a detailed recipe with ingredients, steps, and timing',
+        label: 'Complete recipe card',
+        description: 'Generate a detailed recipe card with ingredients list, step-by-step instructions, timing, and servings',
         icon: '📋'
       },
       {
         type: 'recipe_options' as const,
-        label: '🎯 Show me 3 options',
-        description: 'See 3 different recipe suggestions to choose from',
+        label: 'Browse 3 recipe options',
+        description: 'See 3 different recipe suggestions to pick from, then choose your favorite for the full recipe',
         icon: '🎯'
       }
     ];

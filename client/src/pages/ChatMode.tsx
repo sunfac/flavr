@@ -30,6 +30,7 @@ export default function ChatMode() {
         <div className="h-full">
           <ChatBot 
             currentMode="chef"
+            chatContext="cooking"
             isOpen={true}
             onClose={handleChatClose}
           />
