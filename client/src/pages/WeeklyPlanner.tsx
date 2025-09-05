@@ -32,6 +32,11 @@ export default function WeeklyPlanner() {
     setShowUserMenu(false);
   };
 
+  // Close all menus on component mount to prevent stuck menus
+  useEffect(() => {
+    closeAllMenus();
+  }, []);
+
   // Open specific menu and close others
   const openMenu = (menuType: 'navigation' | 'settings' | 'userMenu') => {
     closeAllMenus();
@@ -194,7 +199,7 @@ export default function WeeklyPlanner() {
           </div>
         </main>
 
-        <GlobalFooter />
+        <GlobalFooter currentMode="weekly-planner" />
         <GlobalNavigation 
           isOpen={showNavigation}
           onClose={closeAllMenus}
@@ -257,7 +262,7 @@ export default function WeeklyPlanner() {
           </div>
         </main>
 
-        <GlobalFooter />
+        <GlobalFooter currentMode="weekly-planner" />
         <GlobalNavigation isOpen={showNavigation} onClose={closeAllMenus} />
         <SettingsPanel isOpen={showSettings} onClose={closeAllMenus} />
         <UserMenu isOpen={showUserMenu} onClose={closeAllMenus} />

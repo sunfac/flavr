@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 
 interface GlobalFooterProps {
-  currentMode?: "fridge2fork" | "chef-assist" | "cookbook" | "chat";
+  currentMode?: "fridge2fork" | "chef-assist" | "cookbook" | "chat" | "weekly-planner";
 }
 
 export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
