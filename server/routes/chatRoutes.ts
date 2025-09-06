@@ -358,7 +358,8 @@ Be warm and encouraging like Zest, but keep it concise for easy chat reading.`
           const inspiration = await ChefAssistGPT5.generateInspireTitle({
             seeds: seedPacks,
             userIntent: originalContext,
-            clientId
+            clientId,
+            userId: userContext.userId // Added for smart profiling
           });
 
           if (!inspiration?.title) {
@@ -783,6 +784,7 @@ Respond with ONLY the recipe title, nothing else.`
             clientId: clientId,
             cuisinePreference: cuisinePreference,
             avoid: avoidTerms,
+            userId: userContext.userId, // Added for smart profiling
             seeds: {
               randomSeed: Math.floor(Math.random() * 10000),
               complexityLevel: Math.floor(Math.random() * 15) + 1,

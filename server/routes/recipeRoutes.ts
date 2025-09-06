@@ -649,7 +649,8 @@ Return a JSON object with this structure:
         userIntent: req.body.userIntent || "",
         cuisinePreference: req.body.cuisinePreference,
         avoid: combinedDietaryNeeds,
-        clientId
+        clientId,
+        userId: req.session?.userId // Added for smart profiling
       });
       
       // Log the interaction for developer insights
@@ -892,7 +893,8 @@ Return a JSON object with this structure:
         budgetNote: req.body.budgetNote,
         cuisinePreference: req.body.cuisinePreference,
         seeds,
-        clientId
+        clientId,
+        userId: req.session?.userId // Added for smart profiling
       });
 
         // GPT-5 returns the recipe directly, not wrapped

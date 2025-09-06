@@ -313,7 +313,9 @@ export function registerWeeklyPlanRoutes(app: Express) {
       // Generate titles only
       const titleProposal = await WeeklyPlannerService.generateWeeklyTitles(
         mealCount || 7,
-        preferences
+        preferences,
+        undefined, // avoidSimilarTo
+        userId // Added for smart profiling
       );
 
       res.json(titleProposal);
@@ -429,7 +431,8 @@ export function registerWeeklyPlanRoutes(app: Express) {
       const singleTitleProposal = await WeeklyPlannerService.generateWeeklyTitles(
         1, 
         preferences,
-        currentTitle ? `AVOID: Do not generate anything similar to "${currentTitle}". Create something completely different in cuisine, cooking method, or main ingredient.` : undefined
+        currentTitle ? `AVOID: Do not generate anything similar to "${currentTitle}". Create something completely different in cuisine, cooking method, or main ingredient.` : undefined,
+        userId // Added for smart profiling
       );
       
       const newTitle = {
