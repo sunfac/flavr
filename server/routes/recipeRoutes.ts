@@ -205,10 +205,26 @@ async function incrementUsageCounter(req: any): Promise<void> {
   }
 }
 
-// Generate recipe image using DALL-E 3 and store locally
-async function generateRecipeImage(recipeTitle: string, cuisine: string, recipeId?: number): Promise<string | null> {
+// Generate recipe image using DALL-E 3 and store locally (Flavr+ only)
+async function generateRecipeImage(recipeTitle: string, cuisine: string, recipeId?: number, userId?: number): Promise<string | null> {
   try {
-    console.log('🎨 Generating recipe image with DALL-E 3...');
+    // Check if user has Flavr+ subscription for image generation
+    if (userId) {
+      const user = await storage.getUser(userId);
+      const isDeveloper = user?.email === "william@blycontracting.co.uk";
+      const hasFlavrPlus = user?.hasFlavrPlus || isDeveloper;
+      
+      if (!hasFlavrPlus) {
+        console.log('🚫 Image generation restricted to Flavr+ users');
+        return null; // No image for free users
+      }
+    } else {
+      // Pseudo users (not logged in) don't get images
+      console.log('🚫 Image generation requires Flavr+ subscription');
+      return null;
+    }
+    
+    console.log('🎨 Generating recipe image with DALL-E 3 (Flavr+ user)...');
     
     // Enhanced prompt to avoid whole animals unless specifically mentioned
     const shouldShowWholeAnimal = recipeTitle.toLowerCase().includes('whole') || 
@@ -710,7 +726,7 @@ Return a JSON object with this structure:
         console.log('🎨 Starting parallel image generation for better UX...');
         
         // Start image generation in background
-        const imageGenerationPromise = generateRecipeImage(convertedRecipe.title, convertedRecipe.cuisine, tempRecipeId)
+        const imageGenerationPromise = generateRecipeImage(convertedRecipe.title, convertedRecipe.cuisine, tempRecipeId, userId)
           .then(imageUrl => {
             if (imageUrl) {
               console.log('✅ Parallel image generated successfully:', imageUrl);
@@ -814,7 +830,7 @@ Return a JSON object with this structure:
       console.log('🎨 Starting parallel image generation for faster response...');
       
       // Start image generation in background
-      generateRecipeImage(recipe.title, recipe.cuisine, tempRecipeId)
+      generateRecipeImage(recipe.title, recipe.cuisine, tempRecipeId, userId)
         .then(imageUrl => {
           if (imageUrl) {
             console.log('✅ Parallel image generated successfully:', imageUrl);
@@ -960,7 +976,7 @@ Return a JSON object with this structure:
       } else if (!recipe.imageUrl) {
         // Generate a new image for the saved recipe
         console.log('🎨 Generating new image for saved recipe...');
-        const imageUrl = await generateRecipeImage(recipe.title, recipe.cuisine || 'international', savedRecipe.id);
+        const imageUrl = await generateRecipeImage(recipe.title, recipe.cuisine || 'international', savedRecipe.id, userId);
         
         if (imageUrl) {
           console.log('✅ New image generated and stored:', imageUrl);
