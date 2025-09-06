@@ -395,7 +395,7 @@ Focus on clear, practical instructions that home cooks can follow confidently.`;
               title: originalRecipe.title,
               description: originalRecipe.description,
               cookTime: originalRecipe.cookTime,
-              servings: originalRecipe.servings,
+              servings: preferences.householdSize.adults + preferences.householdSize.kids,
               difficulty: originalRecipe.difficulty,
               cuisine: originalRecipe.cuisine,
               mode: "weekly",
@@ -409,7 +409,8 @@ Focus on clear, practical instructions that home cooks can follow confidently.`;
 
             clonedMeals.push({
               ...cachedMeal,
-              recipeId: clonedRecipe.id
+              recipeId: clonedRecipe.id,
+              servings: clonedRecipe.servings
             });
           }
         } catch (error) {
