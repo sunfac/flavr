@@ -9,7 +9,6 @@ import LandingPage from "@/pages/LandingPage";
 import LoginPage from "@/pages/LoginPage";
 import ModeSelection from "@/pages/ModeSelection";
 import ShoppingMode from "@/pages/ShoppingMode";
-import FridgeMode from "@/pages/FridgeMode";
 import ChefAssistMode from "@/pages/ChefAssistMode";
 import FlavrRituals from "@/pages/FlavrRituals";
 import FlavrRitualsPhase2 from "@/pages/FlavrRitualsPhase2";
@@ -47,10 +46,8 @@ function Router() {
       <Route path="/login" component={LoginPage} />
       <Route path="/app" component={ModeSelection} />
       <Route path="/app/shopping" component={ShoppingMode} />
-      <Route path="/app/fridge" component={FridgeMode} />
       <Route path="/app/chef" component={ChefAssistMode} />
       <Route path="/shopping" component={ShoppingMode} />
-      <Route path="/fridge" component={FridgeMode} />
       <Route path="/chef" component={ChefAssistMode} />
       <Route path="/rituals" component={FlavrRituals} />
       <Route path="/flavr-rituals" component={FlavrRituals} />

@@ -342,7 +342,7 @@ export default function LandingPage() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight"
             >
-              Two Simple Ways
+              Three Powerful Ways
               <br />
               <span className="bg-gradient-to-r from-orange-400 via-amber-400 to-orange-300 bg-clip-text text-transparent">
                 To Create Magic
@@ -354,29 +354,29 @@ export default function LandingPage() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-xl md:text-2xl text-slate-300 font-light max-w-3xl mx-auto leading-relaxed"
             >
-              Whether you're staring at your fridge or dreaming of the perfect dish, Flavr's AI transforms your moment into a personalized culinary experience.
+              Whether you need a recipe right now, want to plan your week, or seek culinary inspiration, Flavr's AI transforms your cooking experience.
             </motion.p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             {[
               {
-                icon: iconMap.refrigerator,
-                title: "Fridge2Fork Magic",
-                description: "Snap a photo of your ingredients or simply list what you have. Our AI instantly creates personalized recipes that turn your available ingredients into restaurant-quality dishes.",
-                gradient: "from-green-500/20 to-emerald-500/20"
-              },
-              {
                 icon: iconMap.chefHat,
-                title: "Chef Assist Inspiration",
-                description: "Tell us what you're craving or let our AI inspire you with creative suggestions. From comfort food to gourmet masterpieces, your perfect dish is just one conversation away.",
+                title: "Chat Mode",
+                description: "Tell your AI chef what you're craving and get the perfect recipe instantly. From comfort food to gourmet masterpieces, your ideal dish is just one conversation away.",
                 gradient: "from-orange-500/20 to-amber-500/20"
               },
               {
-                icon: iconMap.sparkles,
-                title: "Instant Customization",
-                description: "Every recipe adapts in real-time. Change portions, swap ingredients, adjust difficulty, or modify cooking methods—your AI chef refines each dish to match your exact preferences.",
+                icon: iconMap.calendar,
+                title: "Weekly Planner",
+                description: "Plan your entire week with AI-generated meal schedules and smart shopping lists. Save time, reduce waste, and never wonder 'what's for dinner?' again.",
                 gradient: "from-purple-500/20 to-pink-500/20"
+              },
+              {
+                icon: iconMap.sparkles,
+                title: "Inspire Me",
+                description: "Discover amazing recipes from world cuisines with our smart suggestion engine. Each recipe adapts in real-time to your preferences and dietary needs.",
+                gradient: "from-blue-500/20 to-cyan-500/20"
               }
             ].map((feature, index) => (
               <motion.div
