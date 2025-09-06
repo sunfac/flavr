@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronRight, Refrigerator, ChefHat, CalendarDays, Lock, Camera, ShoppingCart, DollarSign } from "lucide-react";
+import { ChevronRight, ChefHat, CalendarDays, Lock, Camera, ShoppingCart, DollarSign } from "lucide-react";
 import { useLocation } from "wouter";
 import { PageLayout } from "@/components/PageLayout";
 import { cn } from "@/lib/utils";
@@ -22,20 +22,21 @@ interface ModeCard {
 
 const modes: ModeCard[] = [
   {
-    title: "Fridge2Fork", 
-    description: "Snap a photo or list your ingredients - instant recipes tailored to what you have",
-    icon: <Refrigerator className="w-12 h-12" />,
-    color: "text-green-500 dark:text-green-400",
-    route: "/fridge2fork",
-    gradient: "from-green-500/10 to-green-600/10 dark:from-green-500/20 dark:to-green-600/20"
-  },
-  {
     title: "Chef Assist",
-    description: "Tell us what you're craving - get personalized recipes in seconds",
+    description: "Tell me what you want to cook, I'll create the perfect recipe just for you",
     icon: <ChefHat className="w-12 h-12" />,
     color: "text-orange-500 dark:text-orange-400",
     route: "/chef-assist",
     gradient: "from-orange-500/10 to-orange-600/10 dark:from-orange-500/20 dark:to-orange-600/20"
+  },
+  {
+    title: "Weekly Planner",
+    description: "Plan your week with AI-generated meal plans and smart shopping lists",
+    icon: <CalendarDays className="w-12 h-12" />,
+    color: "text-purple-500 dark:text-purple-400",
+    route: "/weekly-planner",
+    gradient: "from-purple-500/10 to-purple-600/10 dark:from-purple-500/20 dark:to-purple-600/20",
+    isPremium: true
   },
   {
     title: "Photo to Recipe",
@@ -44,15 +45,6 @@ const modes: ModeCard[] = [
     color: "text-blue-500 dark:text-blue-400",
     route: "/photo-to-recipe",
     gradient: "from-blue-500/10 to-blue-600/10 dark:from-blue-500/20 dark:to-blue-600/20",
-    isPremium: true
-  },
-  {
-    title: "Weekly Planner",
-    description: "Plan your week with AI-generated meal schedules and smart shopping lists",
-    icon: <CalendarDays className="w-12 h-12" />,
-    color: "text-purple-500 dark:text-purple-400",
-    route: "/weekly-planner",
-    gradient: "from-purple-500/10 to-purple-600/10 dark:from-purple-500/20 dark:to-purple-600/20",
     isPremium: true
   }
 ];
@@ -80,7 +72,7 @@ export default function ModeSelection() {
             What's Cooking?
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-4 md:mb-6">
-            Choose how you'd like to discover your next delicious meal
+            Your AI culinary companion for personalized recipes and meal planning
           </p>
           <div className="flex justify-center">
             <QuotaCounter showUpgradeHint={true} />
@@ -128,10 +120,9 @@ export default function ModeSelection() {
                     "p-2 sm:p-3 md:p-4 rounded-full bg-background/80 backdrop-blur-sm inline-flex mx-auto mb-2 sm:mb-3 md:mb-4 border-2 border-current/20", 
                     mode.color
                   )}>
-                    <Refrigerator className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Fridge2Fork" ? "" : "hidden")} />
                     <ChefHat className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Chef Assist" ? "" : "hidden")} />
                     <Camera className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Photo to Recipe" ? "" : "hidden")} />
-                    <CalendarDays className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Meal Planner" ? "" : "hidden")} />
+                    <CalendarDays className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Weekly Planner" ? "" : "hidden")} />
                   </div>
                   <div className="flex items-center justify-center gap-2 mb-2 sm:mb-3">
                     <CardTitle className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold">{mode.title}</CardTitle>
