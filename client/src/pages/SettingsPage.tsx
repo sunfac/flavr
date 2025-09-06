@@ -46,6 +46,12 @@ export default function SettingsPage() {
     enabled: !!user?.user,
   });
 
+  // Get subscription status - moved before conditional returns
+  const { data: subscriptionStatus } = useQuery({
+    queryKey: ["/api/subscription-status"],
+    enabled: !!user?.user,
+  });
+
   const logoutMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/logout"),
     onSuccess: () => {
@@ -58,6 +64,10 @@ export default function SettingsPage() {
     },
   });
 
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
+
   if (userLoading) {
     return <Loading message="Loading your settings..." />;
   }
@@ -66,16 +76,6 @@ export default function SettingsPage() {
     navigate("/");
     return null;
   }
-
-  const handleLogout = () => {
-    logoutMutation.mutate();
-  };
-
-  // Get subscription status
-  const { data: subscriptionStatus } = useQuery({
-    queryKey: ["/api/subscription-status"],
-    enabled: !!user?.user,
-  });
 
   const handleUpgrade = () => {
     navigate("/subscribe");
