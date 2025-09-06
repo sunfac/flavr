@@ -70,6 +70,9 @@ export interface IStorage {
   getAllRecipes(): Promise<Recipe[]>;
   deleteRecipe(id: number): Promise<void>;
   
+  // Raw query execution for complex operations
+  executeRawQuery(query: string, params?: any[]): Promise<{ rows: any[] }>;
+  
   // Sub-recipe operations
   getSubRecipes(parentRecipeId: number): Promise<Recipe[]>;
   getParentRecipe(subRecipeId: number): Promise<Recipe | undefined>;
@@ -414,6 +417,19 @@ export class DatabaseStorage implements IStorage {
     } else {
       // Admin delete - delete any recipe
       await db.delete(recipes).where(eq(recipes.id, id));
+    }
+  }
+
+  async executeRawQuery(query: string, params?: any[]): Promise<{ rows: any[] }> {
+    try {
+      const result = await db.execute({
+        sql: query,
+        args: params || []
+      });
+      return { rows: result.rows || [] };
+    } catch (error) {
+      console.error('❌ Raw query execution failed:', error);
+      throw error;
     }
   }
 
