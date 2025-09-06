@@ -182,8 +182,23 @@ export const useRecipeStore = create<RecipeStore>()(
         // Transform complex API response structure to simple format
         let ingredients: Ingredient[] = [];
         if (recipe.ingredients && Array.isArray(recipe.ingredients)) {
+          console.log('🔍 INGREDIENT DETECTION:', {
+            hasIngredients: true,
+            isArray: true,
+            firstElementType: typeof recipe.ingredients[0],
+            hasSection: recipe.ingredients[0]?.section ? 'yes' : 'no',
+            hasId: recipe.ingredients[0]?.id ? 'yes' : 'no',
+            hasText: recipe.ingredients[0]?.text ? 'yes' : 'no',
+            sampleData: recipe.ingredients.slice(0, 2)
+          });
+          
+          // Check if ingredients are already in the correct format (id, text, checked)
+          if (recipe.ingredients.length > 0 && recipe.ingredients[0] && typeof recipe.ingredients[0] === 'object' && recipe.ingredients[0].id && recipe.ingredients[0].text) {
+            console.log('✅ Ingredients already in correct format');
+            ingredients = recipe.ingredients;
+          }
           // Check if first element has sections structure (complex API format)
-          if (recipe.ingredients.length > 0 && recipe.ingredients[0] && typeof recipe.ingredients[0] === 'object' && recipe.ingredients[0].section) {
+          else if (recipe.ingredients.length > 0 && recipe.ingredients[0] && typeof recipe.ingredients[0] === 'object' && recipe.ingredients[0].section) {
             // Handle complex API structure with sections
             recipe.ingredients.forEach((section: any) => {
               if (section.items && Array.isArray(section.items)) {
@@ -202,11 +217,25 @@ export const useRecipeStore = create<RecipeStore>()(
             });
           } else {
             // Handle simple string array format from chat updates
-            ingredients = recipe.ingredients.map((ing: any, index: number) => ({
-              id: `ingredient-${index}`,
-              text: typeof ing === 'string' ? ing : `${ing.amount || ''} ${ing.name || ing}`.trim(),
-              checked: false
-            }));
+            console.log('🔍 Transforming ingredients:', recipe.ingredients.slice(0, 3));
+            ingredients = recipe.ingredients.map((ing: any, index: number) => {
+              let text = '';
+              if (typeof ing === 'string') {
+                text = ing;
+              } else if (typeof ing === 'object') {
+                // Handle object format - could be {text: "..."} or {amount: "...", name: "..."}
+                text = ing.text || ing.name || `${ing.amount || ''} ${ing.name || ing}`.trim() || ing.toString();
+              } else {
+                text = String(ing);
+              }
+              
+              return {
+                id: `ingredient-${index}`,
+                text: text,
+                checked: false
+              };
+            });
+            console.log('🔍 Transformed ingredients:', ingredients.slice(0, 3));
           }
         }
         
