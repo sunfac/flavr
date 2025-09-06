@@ -311,26 +311,21 @@ Provide clear, specific modification advice. Be concise and practical.`
     return "I'd love to help! Could you tell me more about what you're looking to cook or any cooking questions you have?";
   }
 
-  // Check if intent clarification is needed
+  // Check if intent clarification is needed - be less aggressive
   private static shouldClarifyIntent(message: string, intentResult: any): boolean {
     const lower = message.toLowerCase().trim();
     
-    // Clarify for common ambiguous recipe requests
-    const ambiguousPatterns = [
-      'quick recipe',
-      'dinner recipe',
-      'breakfast recipe', 
-      'lunch recipe',
-      'easy recipe',
-      'recipe for',
-      'recipe suggestion',
-      'give me a recipe',
-      'show me a recipe',
-      'i want a recipe'
+    // Only clarify for extremely vague requests with very low confidence
+    const extremelyVaguePatterns = [
+      'help me cook',
+      'what should i cook',
+      'cooking help',
+      'food advice'
     ];
 
-    return ambiguousPatterns.some(pattern => lower.includes(pattern)) && 
-           intentResult.confidence < 0.95;
+    // For recipe requests like "dinner recipe options", provide direct options instead of clarifying
+    return extremelyVaguePatterns.some(pattern => lower.includes(pattern)) && 
+           intentResult.confidence < 0.7; // Much lower threshold
   }
 
   // Generate intent clarification response
