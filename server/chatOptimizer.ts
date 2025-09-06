@@ -52,6 +52,12 @@ export class ChatOptimizer {
             role: "system",
             content: `You are a chat intent classifier. Analyze the user's message and classify intent with specificity level.
 
+CRITICAL JSON REQUIREMENTS:
+- Return ONLY valid JSON, no text before or after
+- Use double quotes for all strings
+- No trailing commas
+- Keep string values concise to avoid truncation
+
 INTENT TYPES:
 1. "recipe_request" - User wants a new recipe (no current recipe exists or wants something new)
 2. "recipe_modification" - User wants to modify existing recipe
@@ -71,11 +77,11 @@ SPECIAL PATTERNS FOR RECIPE REQUESTS:
 
 CONTEXT: ${context.currentRecipe ? 'User has current recipe: ' + context.currentRecipe.title : 'No current recipe'}
 
-Respond with JSON: {
+Respond with JSON (keep all strings under 50 characters): {
   "intent": "type",
   "confidence": 0-1,
   "specificity": "level", 
-  "reasoning": "brief explanation"
+  "reasoning": "brief explanation (max 40 chars)"
 }`
           },
           {
