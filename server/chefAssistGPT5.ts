@@ -500,6 +500,7 @@ export class ChefAssistGPT5 {
     cuisinePreference?: string;
     avoid?: string[];
     clientId?: string;
+    userId?: number; // Added for smart profiling
   }): Promise<{ title: string }> {
     
     // NEW: Use input analysis for Inspire Me optimization
@@ -515,6 +516,45 @@ export class ChefAssistGPT5 {
     
     console.log(`Inspire Me - Input specificity: ${inspirationAnalysis.specificity}, Model: ${inspirationAnalysis.promptStrategy.modelRecommendation}`);
     
+    // SMART PROFILING: Enhance Inspire Me with user preferences
+    let smartProfileLog = "No user profiling applied (Inspire Me)";
+    let enhancedCuisinePreference = data.cuisinePreference;
+    
+    if (data.userId) {
+      try {
+        const generationContext: RecipeGenerationContext = {
+          mode: 'inspire-me',
+          originalPrompt: data.userIntent || 'inspire me',
+          userPreferences: {
+            cuisinePreference: data.cuisinePreference
+          }
+        };
+        
+        const smartEnhancement = await smartProfilingService.enhanceRecipeGeneration(
+          data.userId,
+          generationContext
+        );
+        
+        // For Inspire Me, we use profiling more conservatively to maintain discovery
+        if (smartEnhancement.confidenceLevel === 'high') {
+          // Extract cuisine suggestions from the enhanced prompt
+          const cuisineMatch = smartEnhancement.enhancedPrompt.match(/cuisine.*?:?\s*(\w+)/i);
+          if (cuisineMatch) {
+            enhancedCuisinePreference = cuisineMatch[1];
+          }
+          smartProfileLog = `Profile lightly applied (${smartEnhancement.confidenceLevel} confidence): ${smartEnhancement.reasoning.slice(0, 2).join(', ')}`;
+        } else {
+          smartProfileLog = `Profile not used for discovery: ${smartEnhancement.reasoning[0]}`;
+        }
+        
+        console.log(`🧠 Inspire Me Smart Profiling: ${smartProfileLog}`);
+        
+      } catch (error) {
+        console.error("Smart profiling failed for Inspire Me:", error);
+        smartProfileLog = "Profiling error - using random inspiration";
+      }
+    }
+    
     // Enhanced cuisine selection for variety
     const cuisineContexts = [
       "British", "Italian", "French", "Thai", "Greek", "Japanese", "Indian", 
@@ -529,8 +569,8 @@ export class ChefAssistGPT5 {
     if (varietyGuidance.suggestCuisine) {
       selectedCuisine = varietyGuidance.suggestCuisine;
       console.log(`Using variety guidance cuisine: ${selectedCuisine} (avoiding: ${varietyGuidance.avoidCuisines.join(', ')})`);
-    } else if (data.cuisinePreference) {
-      selectedCuisine = cuisineContexts.find(c => c.toLowerCase().includes(data.cuisinePreference!.toLowerCase())) || "British";
+    } else if (enhancedCuisinePreference) {
+      selectedCuisine = cuisineContexts.find(c => c.toLowerCase().includes(enhancedCuisinePreference!.toLowerCase())) || "British";
     } else {
       // Smart randomization for first-time or non-tracked requests
       const hashCode = (s: string) => s.split('').reduce((a, b) => (((a << 5) - a) + b.charCodeAt(0)) | 0, 0);
