@@ -285,6 +285,16 @@ export default function Subscribe() {
           
           console.log("Setting clientSecret:", data.clientSecret ? "present" : "missing");
           setClientSecret(data.clientSecret);
+          
+          // Provide feedback that payment form is ready
+          if (data.clientSecret) {
+            setTimeout(() => {
+              toast({
+                title: "Payment Form Ready! 💳",
+                description: "Complete your Flavr+ subscription below",
+              });
+            }, 1000);
+          }
         })
         .catch((error) => {
           console.error("Failed to create subscription:", error);
@@ -400,7 +410,13 @@ export default function Subscribe() {
           onClose={() => setShowAuthModal(false)}
           onSuccess={() => {
             setShowAuthModal(false);
-            // After successful auth, the component will re-render and show the payment form
+            // Give additional feedback about the subscription flow
+            setTimeout(() => {
+              toast({
+                title: "Ready for Flavr+! 🚀",
+                description: "Setting up your premium subscription...",
+              });
+            }, 1500); // Wait for the auth success message to show first
           }}
           title="Join Flavr+"
           description="Create your account to subscribe to premium features"
