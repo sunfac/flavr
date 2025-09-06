@@ -96,7 +96,8 @@ export class WeeklyPlannerService {
    */
   static async generateWeeklyTitles(
     mealCount: number,
-    preferences: WeeklyPlanPreferences
+    preferences: WeeklyPlanPreferences,
+    avoidSimilarTo?: string
   ): Promise<WeeklyTitleProposal> {
     
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -129,7 +130,8 @@ OUTPUT FORMAT - JSON object with this EXACT structure:
 }
 
 Make titles interesting and flavorful, avoid repetitive words like "herb-infused" or "bliss".
-Focus on practical, family-friendly recipes that sound delicious and achievable.`;
+Focus on practical, family-friendly recipes that sound delicious and achievable.
+${avoidSimilarTo ? `\n\nIMPORTANT: ${avoidSimilarTo}` : ''}`;
 
     const userMessage = `Generate ${mealCount} varied dinner recipe titles for the week. Make them sound appealing and achievable for home cooking.`;
 
@@ -152,7 +154,7 @@ Focus on practical, family-friendly recipes that sound delicious and achievable.
           { role: "user", content: userMessage }
         ],
         max_tokens: 800, // Reduced token limit for titles only
-        temperature: 0.8, // Higher creativity for variety
+        temperature: avoidSimilarTo ? 1.0 : 0.8, // Maximum creativity when avoiding similar recipes
         response_format: { type: "json_object" }
       });
 

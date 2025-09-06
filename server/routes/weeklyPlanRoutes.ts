@@ -404,8 +404,12 @@ export function registerWeeklyPlanRoutes(app: Express) {
         }
       }
 
-      // Generate a new title for this specific day
-      const singleTitleProposal = await WeeklyPlannerService.generateWeeklyTitles(1, preferences);
+      // Generate a completely different title for this specific day
+      const singleTitleProposal = await WeeklyPlannerService.generateWeeklyTitles(
+        1, 
+        preferences,
+        currentTitle ? `AVOID: Do not generate anything similar to "${currentTitle}". Create something completely different in cuisine, cooking method, or main ingredient.` : undefined
+      );
       
       const newTitle = {
         ...singleTitleProposal.titles[0],
