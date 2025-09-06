@@ -335,13 +335,20 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                                     onRecipeUpdate(result.recipe);
                                   }
                                   
-                                  // Add a success message to chat
+                                  // Add a success message to chat with navigation option
                                   const successMessage: Message = {
                                     id: Date.now().toString(),
                                     text: `✅ Generated full recipe: "${result.recipe.title}"`,
                                     sender: 'assistant',
                                     timestamp: new Date(),
-                                    isStreaming: false
+                                    isStreaming: false,
+                                    suggestedActions: [
+                                      {
+                                        type: 'view_recipe',
+                                        label: '👀 View Recipe Card',
+                                        data: { recipeId: result.recipe.id }
+                                      }
+                                    ]
                                   };
                                   setMessages(prev => [...prev, successMessage]);
                                 }
@@ -359,13 +366,21 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                               };
                               setMessages(prev => [...prev, errorMessage]);
                             }
+                          } else if (action.type === 'view_recipe' && action.data?.recipeId) {
+                            // Navigate to recipe card view
+                            console.log('🔗 Navigating to recipe card:', action.data.recipeId);
+                            // Use window.location for navigation (works in all contexts)
+                            if (typeof window !== 'undefined') {
+                              window.location.href = `/recipe`;
+                            }
                           }
                         }}
                         className="w-full justify-start text-left bg-slate-600/50 border-slate-500 text-white hover:bg-orange-500/20 hover:border-orange-500"
                       >
                         <span className="text-xs mr-2">
                           {action.type === 'quick_recipe' ? '🍽️' : 
-                           action.type === 'full_recipe' ? '📋' : '💬'}
+                           action.type === 'full_recipe' ? '📋' :
+                           action.type === 'view_recipe' ? '👀' : '💬'}
                         </span>
                         {action.label}
                       </Button>
