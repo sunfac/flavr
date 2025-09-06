@@ -26,6 +26,8 @@ export default function WeeklyPlanner() {
   const [isGenerating, setIsGenerating] = useState(false);
   
   // Two-step generation states
+  const [showMealCountSelection, setShowMealCountSelection] = useState(false);
+  const [selectedMealCount, setSelectedMealCount] = useState<number>(7);
   const [showTitleReview, setShowTitleReview] = useState(false);
   const [proposedTitles, setProposedTitles] = useState<any[]>([]);
   const [isGeneratingTitles, setIsGeneratingTitles] = useState(false);
@@ -98,9 +100,8 @@ export default function WeeklyPlanner() {
 
     setIsGeneratingTitles(true);
     try {
-      const mealCount = preferences.isFlavrPlus ? 7 : 2;
       const response = await apiRequest("POST", "/api/generate-weekly-titles", {
-        mealCount
+        mealCount: selectedMealCount
       });
       
       if (!response.ok) {
@@ -193,14 +194,22 @@ export default function WeeklyPlanner() {
     }
   };
 
-  // Legacy function for backwards compatibility (now triggers title generation)
-  const handleGenerateWeeklyPlan = async () => {
+  // Show meal count selection before generating
+  const handleGenerateWeeklyPlan = () => {
+    setShowMealCountSelection(true);
+  };
+
+  // Start title generation with selected meal count
+  const handleStartTitleGeneration = async () => {
+    setShowMealCountSelection(false);
     await handleGenerateWeeklyTitles();
   };
 
   // Reset all states to start fresh
   const handleStartAgain = () => {
     setCurrentWeekPlan(null);
+    setShowMealCountSelection(false);
+    setSelectedMealCount(7);
     setShowTitleReview(false);
     setProposedTitles([]);
     setIsGenerating(false);
@@ -679,6 +688,66 @@ export default function WeeklyPlanner() {
                       </Button>
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            </div>
+          ) : showMealCountSelection ? (
+            /* Meal Count Selection */
+            <div className="max-w-2xl mx-auto">
+              <Card className="bg-slate-800/50 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white text-xl text-center">
+                    How many recipes would you like this week?
+                  </CardTitle>
+                  <p className="text-slate-300 text-center">
+                    Choose the number of dinner recipes for your weekly plan
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    {[2, 3, 5, 7].map((count) => (
+                      <Button
+                        key={count}
+                        variant={selectedMealCount === count ? "default" : "outline"}
+                        onClick={() => setSelectedMealCount(count)}
+                        className={selectedMealCount === count 
+                          ? "bg-orange-500 hover:bg-orange-600 text-white border-orange-500" 
+                          : "border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-orange-500"
+                        }
+                      >
+                        <span className="text-lg font-bold">{count}</span>
+                        <span className="text-xs ml-2">
+                          {count === 2 ? "recipes" : count === 7 ? "full week" : "recipes"}
+                        </span>
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  <div className="flex gap-3 justify-center">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowMealCountSelection(false)}
+                      className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleStartTitleGeneration}
+                      disabled={isGeneratingTitles}
+                      className="bg-orange-500 hover:bg-orange-600 text-white px-8"
+                    >
+                      {isGeneratingTitles ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          Generate {selectedMealCount} Recipes
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </div>
