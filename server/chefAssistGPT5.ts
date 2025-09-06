@@ -502,10 +502,14 @@ export class ChefAssistGPT5 {
       ];
       const selectedStyle = chefStyles[Math.floor(Math.random() * chefStyles.length)];
       
+      // Extract chef name from the selected style for proper formatting
+      const chefName = selectedStyle.split("'s")[0]; // "Gordon Ramsay's bold techniques" -> "Gordon Ramsay"
+      
       inspirationPrompt = `Create a ${selectedCuisine} recipe title inspired by ${selectedStyle}.
       
 FOCUS: Signature techniques and flavor combinations that create memorable, delicious dishes for home cooks.
-STYLE: Use "Chef Name-Inspired" format to show inspiration without claiming authenticity.`;
+STYLE: Use exactly "${chefName}-Inspired" format (e.g., "Gordon Ramsay-Inspired Beef Wellington"). Always use the full chef name followed by "-Inspired".
+EXAMPLE: "${chefName}-Inspired [Recipe Name]"`;
 
     } else if (inspirationType === 1) {
       // Restaurant-style excellence  
