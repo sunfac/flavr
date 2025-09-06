@@ -312,6 +312,16 @@ AUTHENTICITY REQUIREMENTS:
 
 For Chef Assist, output strictly as JSON matching the provided schema. Do not include any text outside JSON.
 
+CRITICAL JSON REQUIREMENTS:
+- Return ONLY valid JSON, no text before or after
+- Use double quotes for all strings
+- No trailing commas
+- Keep string values concise to avoid truncation
+- Total response must be under 3000 characters
+- Each ingredient item max 50 chars
+- Each instruction max 150 chars
+- Each note/explanation max 30 chars
+
 INTENT INTERPRETATION PROTOCOL (do this silently; do NOT print your reasoning):
 • Read USER REQUEST and classify one of:
   - exact_named_dish: a canonical, named dish (e.g., "spaghetti carbonara", "coq au vin").
