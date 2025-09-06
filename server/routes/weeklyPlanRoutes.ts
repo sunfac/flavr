@@ -106,6 +106,9 @@ export function registerWeeklyPlanRoutes(app: Express) {
           // Handle date fields properly
           if (key.includes('Date') || key.includes('At')) {
             cleanedData[key] = value ? new Date(value as string) : null;
+          } else if (key === 'dietaryNeeds' || key === 'cuisinePreferences') {
+            // Ensure these are always arrays
+            cleanedData[key] = Array.isArray(value) ? value : (value ? [value] : []);
           } else {
             cleanedData[key] = value;
           }

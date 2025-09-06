@@ -113,7 +113,7 @@ REQUIREMENTS:
 - Time preference: ${preferences.timeComfort.weeknight} minutes weeknights, ${preferences.timeComfort.weekend} minutes weekends
 - Ambition level: ${preferences.ambitionLevel}
 - Budget per serving: ${preferences.budgetPerServing ? `£${(preferences.budgetPerServing / 100).toFixed(2)}` : 'flexible'}
-${preferences.dietaryNeeds?.length ? `- Dietary needs: ${preferences.dietaryNeeds.join(', ')}` : ''}
+${preferences.dietaryNeeds && Array.isArray(preferences.dietaryNeeds) && preferences.dietaryNeeds.length ? `- Dietary needs: ${preferences.dietaryNeeds.join(', ')}` : ''}
 ${cuisines.length ? `- Preferred cuisines: ${cuisines.join(', ')}` : ''}
 
 OUTPUT FORMAT - JSON object with this EXACT structure:
