@@ -342,7 +342,7 @@ export default function LandingPage() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight"
             >
-              Three Powerful Ways
+              Four Magical Ways
               <br />
               <span className="bg-gradient-to-r from-orange-400 via-amber-400 to-orange-300 bg-clip-text text-transparent">
                 To Create Magic
@@ -358,13 +358,19 @@ export default function LandingPage() {
             </motion.p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {[
               {
-                icon: iconMap.chefHat,
+                icon: iconMap.messageCircle,
                 title: "Chat Mode",
                 description: "Tell your AI chef what you're craving and get the perfect recipe instantly. From comfort food to gourmet masterpieces, your ideal dish is just one conversation away.",
                 gradient: "from-orange-500/20 to-amber-500/20"
+              },
+              {
+                icon: iconMap.chefHat,
+                title: "Chef Assist",
+                description: "Professional culinary guidance with personalized recipe suggestions. Get expert advice and techniques to elevate your cooking skills.",
+                gradient: "from-green-500/20 to-emerald-500/20"
               },
               {
                 icon: iconMap.calendar,
@@ -373,9 +379,9 @@ export default function LandingPage() {
                 gradient: "from-purple-500/20 to-pink-500/20"
               },
               {
-                icon: iconMap.sparkles,
-                title: "Inspire Me",
-                description: "Discover amazing recipes from world cuisines with our smart suggestion engine. Each recipe adapts in real-time to your preferences and dietary needs.",
+                icon: iconMap.camera,
+                title: "Photo to Recipe",
+                description: "Transform cookbook photos into interactive digital recipe cards. Upload any recipe image and get editable, structured cooking instructions.",
                 gradient: "from-blue-500/20 to-cyan-500/20"
               }
             ].map((feature, index) => (
