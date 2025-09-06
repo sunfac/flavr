@@ -82,6 +82,20 @@ export default function WeeklyPlanner() {
     retry: false,
   });
 
+  // Get user's savings metrics
+  const { data: savingsData } = useQuery({
+    queryKey: ["/api/analytics/my-savings"],
+    enabled: isAuthenticated && (user as any)?.user?.hasFlavrPlus,
+    retry: false,
+  });
+
+  // Get user's taste profile
+  const { data: tasteData } = useQuery({
+    queryKey: ["/api/analytics/my-taste-profile"],
+    enabled: isAuthenticated && (user as any)?.user?.hasFlavrPlus,
+    retry: false,
+  });
+
   useEffect(() => {
     if (weeklyPlans && (weeklyPlans as any).length > 0) {
       const plans = weeklyPlans as any[];
@@ -539,16 +553,28 @@ export default function WeeklyPlanner() {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-slate-300 text-sm">vs Takeaway</span>
-                        <span className="text-green-400 font-bold">£127 saved</span>
+                        <span className="text-green-400 font-bold">
+                          £{savingsData?.weeklyHomeCookingSavings || 0} saved
+                        </span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-slate-300 text-sm">Food Waste Avoided</span>
-                        <span className="text-green-400 font-bold">2.4kg this week</span>
+                        <span className="text-green-400 font-bold">
+                          {savingsData?.estimatedFoodWasteAvoided || 0}kg this week
+                        </span>
                       </div>
                       <div className="w-full bg-slate-700 rounded-full h-2">
-                        <div className="bg-green-400 h-2 rounded-full w-3/4"></div>
+                        <div 
+                          className="bg-green-400 h-2 rounded-full transition-all duration-500" 
+                          style={{ width: `${savingsData?.efficiencyScore || 0}%` }}
+                        ></div>
                       </div>
-                      <p className="text-xs text-slate-400">You're 75% more efficient than average!</p>
+                      <p className="text-xs text-slate-400">
+                        {savingsData?.efficiencyScore > 0 
+                          ? `You're ${savingsData.efficiencyScore}% more efficient than average!`
+                          : "Start cooking to see your savings!"
+                        }
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
@@ -563,23 +589,36 @@ export default function WeeklyPlanner() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-300 text-sm">Mediterranean</span>
-                        <span className="text-purple-400 font-semibold">38%</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-300 text-sm">Asian Fusion</span>
-                        <span className="text-purple-400 font-semibold">24%</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-300 text-sm">Comfort Food</span>
-                        <span className="text-purple-400 font-semibold">19%</span>
-                      </div>
+                      {tasteData?.cuisinePreferences?.length > 0 ? (
+                        <>
+                          {tasteData.cuisinePreferences.slice(0, 3).map((cuisine: any, index: number) => (
+                            <div key={cuisine.cuisine} className="flex justify-between items-center">
+                              <span className="text-slate-300 text-sm capitalize">{cuisine.cuisine}</span>
+                              <span className="text-purple-400 font-semibold">{cuisine.percentage}%</span>
+                            </div>
+                          ))}
+                        </>
+                      ) : (
+                        <div className="text-center py-2">
+                          <p className="text-slate-400 text-sm">Generate more recipes to see your taste profile!</p>
+                        </div>
+                      )}
+                      
                       <div className="flex items-center gap-2 mt-3">
                         <Button
                           variant="outline"
                           size="sm"
                           className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10 text-xs"
+                          onClick={() => {
+                            if (tasteData?.cuisinePreferences?.length > 0) {
+                              const shareText = `My Flavr cooking style: ${tasteData.cuisinePreferences.slice(0, 3).map((c: any) => `${c.cuisine} ${c.percentage}%`).join(', ')}`;
+                              navigator.clipboard.writeText(shareText);
+                              toast({
+                                title: "Taste Portrait Copied!",
+                                description: "Your cooking style has been copied to clipboard."
+                              });
+                            }
+                          }}
                         >
                           <Share2 className="w-3 h-3 mr-1" />
                           Share Portrait
@@ -593,6 +632,12 @@ export default function WeeklyPlanner() {
                           Full Report
                         </Button>
                       </div>
+                      
+                      {tasteData?.confidenceScore !== undefined && (
+                        <p className="text-xs text-slate-500 mt-2">
+                          Profile confidence: {tasteData.confidenceScore}%
+                        </p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
