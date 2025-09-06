@@ -523,11 +523,59 @@ export class ChefAssistGPT5 {
       // Extract chef name from the selected style for proper formatting
       const chefName = selectedStyle.split("'s")[0]; // "Gordon Ramsay's bold techniques" -> "Gordon Ramsay"
       
-      inspirationPrompt = `Create a ${selectedCuisine} recipe title inspired by ${selectedStyle}.
+      // Match chef to appropriate cuisine for authenticity
+      const chefCuisineMap: Record<string, string[]> = {
+        "Gordon Ramsay": ["British", "French"],
+        "Jamie Oliver": ["British", "Italian"],
+        "Nigella Lawson": ["British"],
+        "Yotam Ottolenghi": ["Mediterranean", "Lebanese", "Israeli"],
+        "José Andrés": ["Spanish"],
+        "Rick Stein": ["British", "French"],
+        "Mary Berry": ["British"],
+        "Tom Kerridge": ["British"],
+        "David Chang": ["Korean", "Chinese", "Japanese"],
+        "Julia Child": ["French"],
+        "Anthony Bourdain": ["British", "French", "Vietnamese", "Chinese"],
+        "Marcus Wareing": ["British", "French"]
+      };
+      
+      // Check if the selected chef matches the cuisine, if not pick appropriate chef for cuisine
+      const appropriateCuisines = chefCuisineMap[chefName] || ["British"];
+      const shouldMatchChefToCuisine = !appropriateCuisines.includes(selectedCuisine);
+      
+      if (shouldMatchChefToCuisine) {
+        // Find chefs that match the selected cuisine
+        const matchingChefs = Object.entries(chefCuisineMap)
+          .filter(([_, cuisines]) => cuisines.includes(selectedCuisine))
+          .map(([chef, _]) => chef);
+          
+        if (matchingChefs.length > 0) {
+          const newChef = matchingChefs[Math.floor(Math.random() * matchingChefs.length)];
+          console.log(`🔄 Switched from ${chefName} to ${newChef} for ${selectedCuisine} cuisine authenticity`);
+          const newChefName = newChef;
+          
+          inspirationPrompt = `Create a ${selectedCuisine} recipe title inspired by ${newChef}'s signature techniques.
+      
+FOCUS: Authentic ${selectedCuisine} dishes with professional flavor techniques that ${newChef} is known for.
+STYLE: Use exactly "${newChefName}-Inspired" format (e.g., "Gordon Ramsay-Inspired Beef Wellington"). Always use the full chef name followed by "-Inspired".
+EXAMPLE: "${newChefName}-Inspired [Recipe Name]"
+MEAT PREFERENCE: Unless specifically vegan/vegetarian, strongly favor meat-based dishes as the main protein.`;
+        } else {
+          // Fallback to restaurant style if no matching chef
+          inspirationPrompt = `Create an authentic ${selectedCuisine} recipe title inspired by traditional restaurant techniques.
+      
+FOCUS: Professional ${selectedCuisine} cooking methods and authentic flavor combinations.
+STYLE: Traditional restaurant-quality dishes adapted for home cooking.
+MEAT PREFERENCE: Unless specifically vegan/vegetarian, strongly favor meat-based dishes as the main protein.`;
+        }
+      } else {
+        inspirationPrompt = `Create a ${selectedCuisine} recipe title inspired by ${selectedStyle}.
       
 FOCUS: Signature techniques and flavor combinations that create memorable, delicious dishes for home cooks.
 STYLE: Use exactly "${chefName}-Inspired" format (e.g., "Gordon Ramsay-Inspired Beef Wellington"). Always use the full chef name followed by "-Inspired".
-EXAMPLE: "${chefName}-Inspired [Recipe Name]"`;
+EXAMPLE: "${chefName}-Inspired [Recipe Name]"
+MEAT PREFERENCE: Unless specifically vegan/vegetarian, strongly favor meat-based dishes as the main protein.`;
+      }
 
     } else if (inspirationType === 1) {
       // Restaurant-style excellence  
@@ -542,7 +590,8 @@ EXAMPLE: "${chefName}-Inspired [Recipe Name]"`;
       inspirationPrompt = `Create a ${selectedCuisine} recipe title inspired by ${selectedType}.
       
 FOCUS: Restaurant-quality flavor techniques adapted for confident home cooking.
-STYLE: Capture the essence of professional cooking in accessible format.`;
+STYLE: Capture the essence of professional cooking in accessible format.
+MEAT PREFERENCE: Unless specifically vegan/vegetarian, strongly favor meat-based dishes as the main protein.`;
 
     } else {
       // Occasion and mood-based creativity
@@ -557,7 +606,8 @@ STYLE: Capture the essence of professional cooking in accessible format.`;
       inspirationPrompt = `Create a ${selectedCuisine} recipe title perfect for ${selectedOccasion}.
       
 FOCUS: Dishes that create the right mood and satisfy the specific craving or occasion.
-STYLE: Emphasize what makes this dish special and appealing.`;
+STYLE: Emphasize what makes this dish special and appealing.
+MEAT PREFERENCE: Unless specifically vegan/vegetarian, strongly favor meat-based dishes as the main protein.`;
     }
 
     // Get words to avoid for variety

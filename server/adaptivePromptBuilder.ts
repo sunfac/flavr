@@ -204,6 +204,9 @@ RECIPE STANDARDS:
     
     if (recipeData.dietaryNeeds?.length) {
       message += `\n- Dietary requirements: ${recipeData.dietaryNeeds.join(", ")} (STRICT)`;
+    } else {
+      // MEAT PREFERENCE: When no dietary restrictions are specified, favor meat-based dishes
+      message += `\n- Protein preference: Strongly favor meat-based dishes as the main protein (beef, pork, lamb, chicken, etc.) unless specifically requested otherwise`;
     }
     
     if (recipeData.mustUse?.length) {
