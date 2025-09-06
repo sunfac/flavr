@@ -86,6 +86,18 @@ function trackTitleWords(clientId: string, title: string) {
   if (titleLower.includes('perfect')) phrases.push('perfect');
   if (titleLower.includes('ultimate')) phrases.push('ultimate');
   
+  // Track specific classic dishes that are over-suggested
+  if (titleLower.includes('osso buco')) phrases.push('osso-buco');
+  if (titleLower.includes('coq au vin')) phrases.push('coq-au-vin');
+  if (titleLower.includes('wellington')) phrases.push('wellington');
+  if (titleLower.includes('beef wellington')) phrases.push('beef-wellington');
+  if (titleLower.includes('rogan josh')) phrases.push('rogan-josh');
+  if (titleLower.includes('bourguignon')) phrases.push('bourguignon');
+  if (titleLower.includes('cassoulet')) phrases.push('cassoulet');
+  if (titleLower.includes('bouillabaisse')) phrases.push('bouillabaisse');
+  if (titleLower.includes('tagine')) phrases.push('tagine');
+  if (titleLower.includes('carbonara')) phrases.push('carbonara');
+  
   if (!titleWordTracker.has(clientId)) {
     titleWordTracker.set(clientId, []);
   }

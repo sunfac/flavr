@@ -42,6 +42,67 @@ const FLAVOUR_PACK = [
   "smoke&char", "pickled-accent", "fermented-depth", "peppery-bite"
 ];
 
+// Add variety tracking for titles
+const titleWordTracker = new Map<string, string[]>(); // clientId -> recent words
+const MAX_TRACKED_WORDS = 15; // Track last 15 descriptive words per user
+
+function trackTitleWords(clientId: string, title: string) {
+  if (!clientId) return;
+  
+  // Extract descriptive words and phrases (ignore common words)
+  const commonWords = new Set(['with', 'and', 'the', 'a', 'an', 'in', 'on', 'for', 'to', 'of', 'by']);
+  const titleLower = title.toLowerCase();
+  
+  // Track both individual words and common culinary phrases
+  const words = titleLower.split(/[\s-]+/)
+    .filter(word => word.length > 2 && !commonWords.has(word))
+    .filter(word => /^[a-z]+$/.test(word)); // Only alphabetic words
+  
+  // Track specific classic dishes that are over-suggested
+  const phrases = [];
+  if (titleLower.includes('osso buco')) phrases.push('osso-buco');
+  if (titleLower.includes('coq au vin')) phrases.push('coq-au-vin');
+  if (titleLower.includes('wellington')) phrases.push('wellington');
+  if (titleLower.includes('beef wellington')) phrases.push('beef-wellington');
+  if (titleLower.includes('rogan josh')) phrases.push('rogan-josh');
+  if (titleLower.includes('bourguignon')) phrases.push('bourguignon');
+  if (titleLower.includes('cassoulet')) phrases.push('cassoulet');
+  if (titleLower.includes('bouillabaisse')) phrases.push('bouillabaisse');
+  if (titleLower.includes('tagine')) phrases.push('tagine');
+  if (titleLower.includes('carbonara')) phrases.push('carbonara');
+  
+  if (!titleWordTracker.has(clientId)) {
+    titleWordTracker.set(clientId, []);
+  }
+  
+  const userWords = titleWordTracker.get(clientId)!;
+  userWords.push(...words, ...phrases); // Track both words and phrases
+  
+  // Keep only the most recent words
+  if (userWords.length > MAX_TRACKED_WORDS) {
+    userWords.splice(0, userWords.length - MAX_TRACKED_WORDS);
+  }
+}
+
+function getRecentWords(clientId: string): string[] {
+  return titleWordTracker.get(clientId) || [];
+}
+
+function getAvoidWords(clientId: string): string[] {
+  const recentWords = getRecentWords(clientId);
+  const wordCounts = new Map<string, number>();
+  
+  // Count frequency of recent words
+  recentWords.forEach(word => {
+    wordCounts.set(word, (wordCounts.get(word) || 0) + 1);
+  });
+  
+  // Return words that appear 2+ times recently
+  return Array.from(wordCounts.entries())
+    .filter(([word, count]) => count >= 2)
+    .map(([word]) => word);
+}
+
 // Anti-repetition memory - rolling window of last 5 outputs
 let recentOutputs: Array<{protein: string, technique: string, flavour: string}> = [];
 
@@ -751,7 +812,12 @@ CHEF ASSIST JSON SCHEMA (return ONLY this):
       (cuisineContexts.find(c => c.toLowerCase().includes(data.cuisinePreference!.toLowerCase())) || "British") :
       cuisineContexts[seededRandom(rngSeed + mathRandom1, cuisineContexts.length)];
 
-    const systemMessage = `Create appealing recipe titles that draw inspiration from famous chefs, renowned restaurants, or authentic world cuisine. Add brief descriptions for dishes that might be unfamiliar to home cooks.`;
+    // Track recently used dishes to avoid repetition
+    const avoidWords = getAvoidWords(data.clientId || '');
+    const varietyNotes = avoidWords.length > 0 ? 
+      `\nVARIETY NOTES: AVOID these overused dishes/words: ${avoidWords.join(', ')}. Create fresh alternatives.` : '';
+
+    const systemMessage = `Create appealing recipe titles that draw inspiration from famous chefs, renowned restaurants, or authentic world cuisine. Add brief descriptions for dishes that might be unfamiliar to home cooks.${varietyNotes}`;
 
     // Enhanced variety with better distribution across categories
     // Add more entropy to prevent repetition - use milliseconds for uniqueness
@@ -1190,6 +1256,9 @@ OUTPUT: JSON with "title" key only. Make it sophisticated and flavor-packed.`;
         title = `${title} (${explanation})`;
       }
       
+      // Track this title to avoid future repetition
+      trackTitleWords(data.clientId || '', title);
+      
       return { title };
       
     } catch (error) {
@@ -1211,6 +1280,8 @@ OUTPUT: JSON with "title" key only. Make it sophisticated and flavor-packed.`;
         if (retryContent) {
           const retryParsed = JSON.parse(retryContent);
           if (retryParsed.title) {
+            // Track this title to avoid future repetition
+            trackTitleWords(data.clientId || '', retryParsed.title);
             return { title: retryParsed.title };
           }
         }
