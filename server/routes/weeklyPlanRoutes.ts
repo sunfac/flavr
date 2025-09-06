@@ -441,25 +441,69 @@ export function registerWeeklyPlanRoutes(app: Express) {
 
 // Helper function to consolidate shopping list ingredients
 function consolidateShoppingList(allIngredients: string[]): string[] {
-  const ingredientMap = new Map<string, number>();
+  const ingredientMap = new Map<string, { count: number; original: string }>();
   
   for (const ingredient of allIngredients) {
-    const normalized = ingredient.toLowerCase().trim();
-    const existing = ingredientMap.get(normalized) || 0;
-    ingredientMap.set(normalized, existing + 1);
+    const normalized = normalizeIngredient(ingredient);
+    const existing = ingredientMap.get(normalized);
+    
+    if (existing) {
+      existing.count += 1;
+    } else {
+      ingredientMap.set(normalized, { count: 1, original: ingredient.trim() });
+    }
   }
   
   // Return consolidated list with quantities
   const consolidated: string[] = [];
-  for (const [ingredient, count] of ingredientMap.entries()) {
-    if (count > 1) {
-      consolidated.push(`${ingredient} (${count}x)`);
+  for (const [normalizedName, data] of ingredientMap.entries()) {
+    if (data.count > 1) {
+      consolidated.push(`${data.original} (${data.count}x)`);
     } else {
-      consolidated.push(ingredient);
+      consolidated.push(data.original);
     }
   }
   
   return consolidated.sort();
+}
+
+// Enhanced ingredient normalization to better match similar items
+function normalizeIngredient(ingredient: string): string {
+  let normalized = ingredient.toLowerCase().trim();
+  
+  // Remove common quantity prefixes
+  normalized = normalized.replace(/^\d+\s*(cups?|tbsp|tsp|oz|pounds?|lbs?|grams?|g|ml|l|liters?)\s+/i, '');
+  normalized = normalized.replace(/^(a|an|some|fresh|dried|chopped|sliced|diced|minced)\s+/i, '');
+  
+  // Standardize common ingredient variations
+  const variations: { [key: string]: string } = {
+    'onions': 'onion',
+    'tomatoes': 'tomato',
+    'potatoes': 'potato',
+    'carrots': 'carrot',
+    'garlic cloves': 'garlic',
+    'olive oil': 'olive oil',
+    'vegetable oil': 'vegetable oil',
+    'chicken breast': 'chicken breast',
+    'chicken thighs': 'chicken thighs',
+    'ground beef': 'ground beef',
+    'bell peppers': 'bell pepper',
+    'red peppers': 'bell pepper',
+    'green peppers': 'bell pepper',
+    'mushrooms': 'mushroom',
+    'lemons': 'lemon',
+    'limes': 'lime'
+  };
+  
+  // Check for variations
+  for (const [variant, standard] of Object.entries(variations)) {
+    if (normalized.includes(variant)) {
+      normalized = normalized.replace(variant, standard);
+      break;
+    }
+  }
+  
+  return normalized.trim();
 }
 
 // Helper function to generate ICS calendar data
