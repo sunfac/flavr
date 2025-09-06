@@ -754,7 +754,7 @@ Return a JSON object with this structure:
         console.log('🎨 Starting parallel image generation for better UX...');
         
         // Start image generation in background
-        const imageGenerationPromise = generateRecipeImage(convertedRecipe.title, convertedRecipe.cuisine, tempRecipeId, userId)
+        const imageGenerationPromise = generateRecipeImage(convertedRecipe.title, convertedRecipe.cuisine, tempRecipeId, req.session?.userId)
           .then(imageUrl => {
             if (imageUrl) {
               console.log('✅ Parallel image generated successfully:', imageUrl);
@@ -913,15 +913,15 @@ Return a JSON object with this structure:
         clientId
       });
 
-      // GPT-5 returns the recipe directly, not wrapped
-      const recipe = result;
+        // GPT-5 returns the recipe directly, not wrapped
+        recipe = result;
       
       // Start parallel image generation (don't wait for it)
       const tempRecipeId = Date.now();
       console.log('🎨 Starting parallel image generation for faster response...');
       
       // Start image generation in background
-      generateRecipeImage(recipe.title, recipe.cuisine, tempRecipeId, userId)
+      generateRecipeImage(recipe.title, recipe.cuisine, tempRecipeId, req.session?.userId)
         .then(imageUrl => {
           if (imageUrl) {
             console.log('✅ Parallel image generated successfully:', imageUrl);
@@ -944,6 +944,7 @@ Return a JSON object with this structure:
 
       // Increment usage counter after successful generation
       incrementUsageCounter(req).catch(err => console.error('Failed to increment usage:', err));
+      }
 
       // No longer need background image generation since we do it upfront
       /*generateRecipeImage(recipe.title, recipe.cuisine, tempRecipeId).then(imageUrl => {
