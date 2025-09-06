@@ -1041,7 +1041,7 @@ Return a JSON object with this structure:
 
       // Generate a simple, contextual substitute using OpenAI
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o", // Use gpt-4o for better JSON compliance
+        model: "gpt-4o-mini", // Cost-optimized model for JSON compliance
         messages: [
           {
             role: "system", 

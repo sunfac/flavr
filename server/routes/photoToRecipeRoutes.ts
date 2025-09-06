@@ -97,7 +97,7 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
           const base64Image = imageBytes.toString("base64");
           
           const response = await openai.chat.completions.create({
-            model: "gpt-4o", // using gpt-4o for cost efficiency as requested
+            model: "gpt-4o-mini", // using gpt-4o-mini for cost efficiency
             messages: [
               {
                 role: "user",
@@ -170,7 +170,7 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
           const base64Image = imageBytes.toString("base64");
           
           const response = await openai.chat.completions.create({
-            model: "gpt-4o", // using gpt-4o for cost efficiency as requested
+            model: "gpt-4o-mini", // using gpt-4o-mini for cost efficiency
             messages: [
               {
                 role: "user",

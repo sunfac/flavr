@@ -132,7 +132,7 @@ export async function processBudgetPlannerInput(
     console.log('🔍 Budget planner messages:', messages.map(m => ({ role: m.role, contentLength: m.content?.length })));
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: messages as any,
       temperature: 0.8, // Higher temperature for creativity and randomness
       max_tokens: 2000,
@@ -198,7 +198,7 @@ export async function generateBudgetPlan(inputs: BudgetPlannerInputs): Promise<{
 Format as Message 1 with supermarket sections, estimated prices, and cost-saving tips.`;
 
     const shoppingListCompletion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         { role: 'system', content: BUDGET_PLANNER_SYSTEM_PROMPT },
         { role: 'user', content: shoppingListPrompt }
@@ -213,7 +213,7 @@ Format as Message 1 with supermarket sections, estimated prices, and cost-saving
     const mealPlanPrompt = `Generate a weekly meal plan for the same inputs. Assign specific meals to days with variety and randomness. Format as Message 2.`;
 
     const mealPlanCompletion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         { role: 'system', content: BUDGET_PLANNER_SYSTEM_PROMPT },
         { role: 'user', content: `${shoppingListPrompt}\n\n${mealPlanPrompt}` }
@@ -228,7 +228,7 @@ Format as Message 1 with supermarket sections, estimated prices, and cost-saving
     const recipesPrompt = `Generate detailed, authentic recipes for all meals in the plan. Include prep times, techniques, and chef tips. Format as Message 3.`;
 
     const recipesCompletion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         { role: 'system', content: BUDGET_PLANNER_SYSTEM_PROMPT },
         { role: 'user', content: `${shoppingListPrompt}\n\n${mealPlanPrompt}\n\n${recipesPrompt}` }

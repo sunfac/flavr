@@ -241,7 +241,7 @@ export function registerChatRoutes(app: Express) {
         const contextPrompt = zestService.buildZestContext(userMemory, currentRecipe);
         
         const quickRecipeResponse = await openai.chat.completions.create({
-          model: "gpt-4o",
+          model: "gpt-4o-mini",
           messages: [
             { 
               role: "system", 
@@ -447,7 +447,7 @@ Be warm and encouraging like Zest, but keep it concise for easy chat reading.`
         const contextPrompt = zestService.buildZestContext(userMemory, currentRecipe);
         
         const quickResponse = await openai.chat.completions.create({
-          model: "gpt-4o",
+          model: "gpt-4o-mini",
           messages: [
             { role: "system", content: contextPrompt + `
 
@@ -506,7 +506,7 @@ Be warm like Zest - acknowledge the conversation context and provide practical, 
         console.log('🧠 Analyzing user intent for bypass potential:', message);
         
         const intentAnalysis = await openai.chat.completions.create({
-          model: "gpt-4o",
+          model: "gpt-4o-mini",
           messages: [
             {
               role: "system",
@@ -582,7 +582,7 @@ Respond with JSON: {"shouldBypass": true/false, "confidence": 0-1, "reasoning": 
             
             // Generate enhanced title that preserves intent but adds flair
             const titleResponse = await openai.chat.completions.create({
-              model: "gpt-4o",
+              model: "gpt-4o-mini",
               messages: [
                 {
                   role: "system",
@@ -745,7 +745,7 @@ Respond with ONLY the enhanced title.`
           
           // For specific ingredient requests, use a direct OpenAI call to ensure relevance
           const ingredientResponse = await openai.chat.completions.create({
-            model: "gpt-4o",
+            model: "gpt-4o-mini",
             messages: [
               { 
                 role: "system", 
@@ -799,7 +799,7 @@ Respond with ONLY the recipe title, nothing else.`
         
         // Create an engaging description of the inspired dish
         const suggestionResponse = await openai.chat.completions.create({
-          model: "gpt-4o",
+          model: "gpt-4o-mini",
           messages: [
             { 
               role: "system", 
@@ -856,7 +856,7 @@ IMPORTANT: Write like a real chef talking to a friend - NO ** formatting, NO mar
         
         // Use AI to intelligently detect if this is a recipe modification request
         const modificationDetectionResponse = await openai.chat.completions.create({
-          model: "gpt-4o",
+          model: "gpt-4o-mini",
           messages: [
             {
               role: "system",

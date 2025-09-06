@@ -100,7 +100,7 @@ export class ZestService {
   }> {
     try {
       const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
@@ -180,7 +180,7 @@ Respond with JSON: {"isRecipeIntent": boolean, "confidence": 0.0-1.0, "suggested
       const preferencesContext = this.buildPreferencesContext(memory);
       
       const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
@@ -497,7 +497,7 @@ CRITICAL: Respond with ONLY a valid JSON object. Do NOT use markdown formatting,
       });
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4o", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+        model: "gpt-4o-mini", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
         messages: [
           { role: "system", content: prompt },
           { role: "user", content: modificationRequest }
@@ -574,7 +574,7 @@ CRITICAL: Respond with ONLY a valid JSON object. Do NOT use markdown formatting,
       console.log(`🎲 Selected ${inspirationType} inspiration for full recipe: ${selectedInspiration}`);
       
       const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",

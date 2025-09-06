@@ -196,7 +196,7 @@ export class ChefAssistGPT5 {
                       (mustUse && mustUse.length > 3);
     
     return isComplex 
-      ? { model: "gpt-4o", tokens: 3500 }
+      ? { model: "gpt-4o-mini", tokens: 3500 }
       : { model: "gpt-4o-mini", tokens: 2048 };
   }
 
@@ -287,7 +287,7 @@ export class ChefAssistGPT5 {
         console.log("First attempt timed out, retrying with fallback model...");
         
         completion = await openai.chat.completions.create({
-          model: "gpt-4o",
+          model: "gpt-4o-mini",
           messages: [
             { role: "system", content: systemMessage },
             { role: "user", content: userMessage }
