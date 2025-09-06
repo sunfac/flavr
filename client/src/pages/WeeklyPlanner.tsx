@@ -374,9 +374,34 @@ export default function WeeklyPlanner() {
       
       if (response.ok) {
         const shoppingData = await response.json();
-        toast({
-          title: "Shopping List",
-          description: `Shopping list with ${shoppingData.items?.length || 0} items generated!`
+        const shoppingList = shoppingData.shoppingList || [];
+        
+        if (shoppingList.length === 0) {
+          toast({
+            title: "Shopping List Empty",
+            description: "No ingredients found. Make sure your recipes have been fully generated.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        // Create a formatted shopping list display
+        const listText = shoppingList.map((item: string, index: number) => 
+          `${index + 1}. ${item}`
+        ).join('\n');
+        
+        // Copy to clipboard and show success
+        navigator.clipboard.writeText(listText).then(() => {
+          toast({
+            title: "Shopping List Copied!",
+            description: `${shoppingList.length} ingredients copied to clipboard. Check your planned recipes for the full list.`,
+          });
+        }).catch(() => {
+          toast({
+            title: "Shopping List Ready",
+            description: `${shoppingList.length} ingredients ready. Check your browser console for the full list.`,
+          });
+          console.log("🛒 SHOPPING LIST:", listText);
         });
         
         console.log("Shopping list:", shoppingData);
