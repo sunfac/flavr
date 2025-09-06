@@ -40,6 +40,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
         ambitionLevel,
         dietaryNeeds,
         cuisineWeighting,
+        cuisinePreferences,
         budgetPerServing
       } = req.body;
 
@@ -59,6 +60,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
           ambitionLevel,
           dietaryNeeds: dietaryNeeds || [],
           cuisineWeighting,
+          cuisinePreferences: cuisinePreferences || [],
           budgetPerServing,
           onboardingCompleted: true,
           onboardingCompletedAt: new Date()
@@ -74,6 +76,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
           ambitionLevel,
           dietaryNeeds: dietaryNeeds || [],
           cuisineWeighting,
+          cuisinePreferences: cuisinePreferences || [],
           budgetPerServing,
           onboardingCompleted: true,
           onboardingCompletedAt: new Date()
@@ -83,6 +86,29 @@ export function registerWeeklyPlanRoutes(app: Express) {
     } catch (error) {
       console.error("Error saving weekly plan preferences:", error);
       res.status(500).json({ error: "Failed to save preferences" });
+    }
+  });
+
+  // Update existing weekly planning preferences
+  app.put("/api/weekly-plan-preferences", async (req, res) => {
+    try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const userId = req.session!.userId!;
+      const updateData = req.body;
+
+      // Remove any undefined fields
+      const cleanedData = Object.fromEntries(
+        Object.entries(updateData).filter(([_, value]) => value !== undefined)
+      );
+
+      const updatedPreferences = await storage.updateWeeklyPlanPreferences(userId, cleanedData);
+      res.json(updatedPreferences);
+    } catch (error) {
+      console.error("Error updating weekly plan preferences:", error);
+      res.status(500).json({ error: "Failed to update preferences" });
     }
   });
 
