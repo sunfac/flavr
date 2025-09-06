@@ -352,9 +352,10 @@ export default function WeeklyPlanner() {
               {/* Plan Status */}
               <Card className="bg-slate-800/50 border-slate-700">
                 <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <CardTitle className="text-white">
+                  {/* Header with title and status */}
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      <CardTitle className="text-white text-xl">
                         Week of {formatDate(currentWeekPlan.weekStartDate)}
                       </CardTitle>
                       <Badge 
@@ -370,6 +371,10 @@ export default function WeeklyPlanner() {
                         {currentWeekPlan.planStatus}
                       </Badge>
                     </div>
+                  </div>
+                  
+                  {/* Action buttons - distributed across the width */}
+                  <div className="flex flex-wrap justify-center lg:justify-between gap-3">
                     <div className="flex flex-wrap gap-2">
                       <Button
                         variant="outline"
@@ -388,6 +393,28 @@ export default function WeeklyPlanner() {
                       >
                         <ShoppingCart className="w-4 h-4 mr-2" />
                         Shopping List
+                      </Button>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleGenerateWeeklyPlan}
+                        disabled={isGenerating}
+                        className="border-orange-500 text-orange-400 hover:bg-orange-500/10"
+                      >
+                        {isGenerating ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Start Again
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>
