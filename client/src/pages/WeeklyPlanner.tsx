@@ -53,7 +53,7 @@ export default function WeeklyPlanner() {
     queryKey: ["/api/me"],
     retry: false,
   });
-  const isAuthenticated = !!user?.user;
+  const isAuthenticated = !!(user as any)?.user;
 
   // Close all menus on component mount
   useEffect(() => {
@@ -78,13 +78,13 @@ export default function WeeklyPlanner() {
   // Get current week's plan
   const { data: weeklyPlans, refetch: refetchPlans } = useQuery({
     queryKey: ["/api/weekly-plans"],
-    enabled: isAuthenticated && !!preferences && !preferences?.onboardingRequired,
+    enabled: isAuthenticated && !!preferences && !(preferences as any)?.onboardingRequired,
     retry: false,
   });
 
   useEffect(() => {
-    if (weeklyPlans && weeklyPlans.length > 0) {
-      setCurrentWeekPlan(weeklyPlans[0]);
+    if (weeklyPlans && (weeklyPlans as any).length > 0) {
+      setCurrentWeekPlan((weeklyPlans as any)[0]);
     }
   }, [weeklyPlans]);
 
@@ -95,7 +95,7 @@ export default function WeeklyPlanner() {
       return;
     }
 
-    if (!preferences || preferences?.onboardingRequired) {
+    if (!preferences || (preferences as any)?.onboardingRequired) {
       toast({
         title: "Setup Required",
         description: "Please complete your weekly planning preferences first.",
@@ -746,7 +746,7 @@ export default function WeeklyPlanner() {
                       <Label htmlFor="householdSize" className="text-slate-200">Household Size</Label>
                       <Select
                         value={editingPreferences?.householdSize?.toString() || "2"}
-                        onValueChange={(value) => setEditingPreferences(prev => ({ ...prev, householdSize: parseInt(value) }))}
+                        onValueChange={(value) => setEditingPreferences((prev: any) => ({ ...prev, householdSize: parseInt(value) }))}
                       >
                         <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                           <SelectValue />
@@ -772,7 +772,7 @@ export default function WeeklyPlanner() {
                         min="1"
                         max="20"
                         value={editingPreferences?.budgetPerServing || ""}
-                        onChange={(e) => setEditingPreferences(prev => ({ ...prev, budgetPerServing: parseFloat(e.target.value) }))}
+                        onChange={(e) => setEditingPreferences((prev: any) => ({ ...prev, budgetPerServing: parseFloat(e.target.value) }))}
                         className="bg-slate-700 border-slate-600 text-white"
                         placeholder="4.50"
                       />
@@ -783,7 +783,7 @@ export default function WeeklyPlanner() {
                       <Label className="text-slate-200">Cooking Ambition</Label>
                       <Select
                         value={editingPreferences?.ambitionLevel || "medium"}
-                        onValueChange={(value) => setEditingPreferences(prev => ({ ...prev, ambitionLevel: value }))}
+                        onValueChange={(value) => setEditingPreferences((prev: any) => ({ ...prev, ambitionLevel: value }))}
                       >
                         <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                           <SelectValue />
@@ -801,7 +801,7 @@ export default function WeeklyPlanner() {
                       <Label className="text-slate-200">Cuisine Focus</Label>
                       <Select
                         value={editingPreferences?.cuisineWeighting || "balanced"}
-                        onValueChange={(value) => setEditingPreferences(prev => ({ ...prev, cuisineWeighting: value }))}
+                        onValueChange={(value) => setEditingPreferences((prev: any) => ({ ...prev, cuisineWeighting: value }))}
                       >
                         <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                           <SelectValue />
@@ -822,7 +822,7 @@ export default function WeeklyPlanner() {
                     <Textarea
                       id="dietaryNeeds"
                       value={editingPreferences?.dietaryNeeds || ""}
-                      onChange={(e) => setEditingPreferences(prev => ({ ...prev, dietaryNeeds: e.target.value }))}
+                      onChange={(e) => setEditingPreferences((prev: any) => ({ ...prev, dietaryNeeds: e.target.value }))}
                       className="bg-slate-700 border-slate-600 text-white min-h-[80px]"
                       placeholder="e.g., vegetarian, gluten-free, no nuts, loves spicy food..."
                     />
@@ -940,7 +940,7 @@ export default function WeeklyPlanner() {
 
       <GlobalFooter />
       <GlobalNavigation isOpen={showNavigation} onClose={closeAllMenus} />
-      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} onSuccess={() => setShowAuthModal(false)} />
       <FlavrPlusUpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
     </div>
   );
