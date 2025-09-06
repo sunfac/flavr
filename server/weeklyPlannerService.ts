@@ -21,6 +21,58 @@ export interface PlannedMeal {
 
 export class WeeklyPlannerService {
   
+  // OPTIMIZATION: Smart caching for weekly plans by preference fingerprint
+  private static weeklyPlanCache = new Map<string, any>();
+  private static cacheMaxSize = 50; // Store 50 preference combinations
+  
+  /**
+   * Generate cache key from user preferences for intelligent caching
+   */
+  private static generatePreferenceCacheKey(preferences: WeeklyPlanPreferences, mealCount: number): string {
+    const keyParts = [
+      preferences.householdSize.adults,
+      preferences.householdSize.kids,
+      preferences.cookingFrequency,
+      preferences.timeComfort,
+      preferences.ambitionLevel,
+      JSON.stringify(preferences.cuisineWeighting || {}),
+      JSON.stringify(preferences.dietaryNeeds || []),
+      preferences.budgetPerServing || "standard",
+      mealCount
+    ];
+    return keyParts.join('|');
+  }
+  
+  /**
+   * Check if cached plan exists for these preferences
+   */
+  private static getCachedPlan(cacheKey: string): PlannedMeal[] | null {
+    const cached = this.weeklyPlanCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < 24 * 60 * 60 * 1000) { // 24 hour cache
+      console.log('Using cached weekly plan for preferences:', cacheKey.substring(0, 50) + '...');
+      return cached.meals;
+    }
+    return null;
+  }
+  
+  /**
+   * Cache plan for future use
+   */
+  private static setCachedPlan(cacheKey: string, meals: PlannedMeal[]): void {
+    // Implement LRU cache eviction
+    if (this.weeklyPlanCache.size >= this.cacheMaxSize) {
+      const firstKey = this.weeklyPlanCache.keys().next().value;
+      if (firstKey) {
+        this.weeklyPlanCache.delete(firstKey);
+      }
+    }
+    
+    this.weeklyPlanCache.set(cacheKey, {
+      meals: meals,
+      timestamp: Date.now()
+    });
+  }
+  
   /**
    * Generate a complete weekly meal plan for a user
    */
@@ -69,7 +121,7 @@ export class WeeklyPlannerService {
   }
   
   /**
-   * Create high-quality planned meals using optimized batch generation
+   * Create high-quality planned meals using optimized batch generation with smart caching
    */
   private static async createQualityPlannedMeals(
     userId: number,
@@ -80,6 +132,53 @@ export class WeeklyPlannerService {
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
     const selectedDays = days.slice(0, mealCount);
     
+    // OPTIMIZATION: Check cache first
+    const cacheKey = this.generatePreferenceCacheKey(preferences, mealCount);
+    const cachedPlan = this.getCachedPlan(cacheKey);
+    
+    if (cachedPlan) {
+      // Clone cached recipes for this user
+      const clonedMeals: PlannedMeal[] = [];
+      for (const cachedMeal of cachedPlan) {
+        try {
+          // Get the recipe from storage and clone it for the new user
+          const originalRecipe = await storage.getRecipe(cachedMeal.recipeId);
+          if (originalRecipe) {
+            const clonedRecipe = await storage.createRecipe({
+              userId,
+              title: originalRecipe.title,
+              description: originalRecipe.description,
+              cookTime: originalRecipe.cookTime,
+              servings: originalRecipe.servings,
+              difficulty: originalRecipe.difficulty,
+              cuisine: originalRecipe.cuisine,
+              mode: "weekly",
+              ingredients: originalRecipe.ingredients,
+              instructions: originalRecipe.instructions,
+              dietary: preferences.dietaryNeeds,
+              ambition: preferences.ambitionLevel,
+              cookingTime: originalRecipe.cookingTime,
+              originalPrompt: originalRecipe.originalPrompt
+            });
+
+            clonedMeals.push({
+              ...cachedMeal,
+              recipeId: clonedRecipe.id
+            });
+          }
+        } catch (error) {
+          console.error("Error cloning cached recipe:", error);
+          // Fall through to generate fresh if cache fails
+          break;
+        }
+      }
+      
+      if (clonedMeals.length === mealCount) {
+        console.log(`Returning ${clonedMeals.length} cached recipes for user ${userId}`);
+        return clonedMeals;
+      }
+    }
+
     // Build optimized quiz data from preferences
     const cuisines = Object.keys(preferences.cuisineWeighting || {});
     const baseData = {
@@ -88,7 +187,8 @@ export class WeeklyPlannerService {
       dietaryNeeds: preferences.dietaryNeeds || [],
       budgetNote: preferences.budgetPerServing ? `${preferences.budgetPerServing} per serving` : "Quality-focused",
       equipment: ["Standard kitchen"],
-      cuisinePreference: cuisines.length > 0 ? cuisines.join(", ") : "International"
+      cuisinePreference: cuisines.length > 0 ? cuisines.join(", ") : "International",
+      ambitionLevel: preferences.ambitionLevel
     };
 
     try {
@@ -133,6 +233,12 @@ export class WeeklyPlannerService {
       });
 
       const plannedMeals = await Promise.all(recipePromises);
+      
+      // OPTIMIZATION: Cache successful plans for future use
+      if (plannedMeals.length === mealCount) {
+        this.setCachedPlan(cacheKey, plannedMeals);
+      }
+      
       return plannedMeals;
       
     } catch (error) {
