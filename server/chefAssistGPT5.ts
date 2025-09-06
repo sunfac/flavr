@@ -487,8 +487,10 @@ export class ChefAssistGPT5 {
       selectedCuisine = cuisineContexts[seededRandom(rngSeed, cuisineContexts.length)];
     }
 
-    // Enhanced inspiration categories with creative freedom
-    const inspirationType = Math.floor(Math.random() * 3); // Equal distribution
+    // Enhanced inspiration categories with chef/restaurant focus
+    // 50% chef, 35% restaurant, 15% occasion for better chef/restaurant visibility
+    const rand = Math.random();
+    const inspirationType = rand < 0.5 ? 0 : (rand < 0.85 ? 1 : 2);
     
     let inspirationPrompt = "";
     
