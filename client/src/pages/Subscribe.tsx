@@ -14,6 +14,7 @@ import GlobalFooter from "@/components/GlobalFooter";
 import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
 import Loading from "@/components/Loading";
+import AuthModal from "@/components/AuthModal";
 import { Crown } from "lucide-react";
 
 // Make sure to call `loadStripe` outside of a component's render to avoid
@@ -240,16 +241,14 @@ export default function Subscribe() {
     },
   });
 
+  // Add auth modal state
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
   // Fetch payment intent when component mounts
   useEffect(() => {
-    // If user is not authenticated, don't try to create subscription
+    // If user is not authenticated, we'll show the auth modal instead of redirecting
     if (!user && !isLoading) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to subscribe to Flavr+",
-        variant: "destructive",
-      });
-      navigate("/");
+      // Don't redirect or show error - let the user see the subscription page and signup
       return;
     }
     
@@ -306,9 +305,109 @@ export default function Subscribe() {
     return <Loading message="Loading your account..." />;
   }
 
-  // Redirect non-authenticated users
+  // Show subscription page with signup option for non-authenticated users
   if (!user && !isLoading) {
-    return null; // The useEffect will handle the redirect
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black">
+        <GlobalHeader 
+          onMenuClick={() => openMenu('navigation')}
+          onSettingsClick={() => openMenu('settings')}
+          onAuthRequired={() => setShowAuthModal(true)}
+        />
+        
+        <main className="container mx-auto px-4 py-6 pt-24">
+          <div className="max-w-md mx-auto">
+            <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20">
+              <CardHeader className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Crown className="text-white w-8 h-8" />
+                </div>
+                <CardTitle className="font-playfair text-2xl text-orange-400">Join Flavr+</CardTitle>
+                <p className="text-gray-300">
+                  Unlimited AI-powered recipes and premium features
+                </p>
+              </CardHeader>
+              
+              <CardContent className="space-y-6">
+                {/* Premium Features */}
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 text-sm text-gray-300">
+                    <span className="text-green-400">✓</span>
+                    <span>Unlimited AI recipe generation</span>
+                  </div>
+                  <div className="flex items-center space-x-3 text-sm text-gray-300">
+                    <span className="text-green-400">✓</span>
+                    <span>HD recipe images</span>
+                  </div>
+                  <div className="flex items-center space-x-3 text-sm text-gray-300">
+                    <span className="text-green-400">✓</span>
+                    <span>All cooking modes</span>
+                  </div>
+                  <div className="flex items-center space-x-3 text-sm text-gray-300">
+                    <span className="text-green-400">✓</span>
+                    <span>Recipe history & sharing</span>
+                  </div>
+                  <div className="flex items-center space-x-3 text-sm text-gray-300">
+                    <span className="text-green-400">✓</span>
+                    <span>Photo-to-Recipe conversion</span>
+                  </div>
+                </div>
+
+                <div className="text-center space-y-4">
+                  <p className="text-2xl font-bold text-white">£9.99/month</p>
+                  <Button 
+                    onClick={() => setShowAuthModal(true)}
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-lg py-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  >
+                    <Crown className="w-5 h-5 mr-2" />
+                    Get Started with Flavr+
+                  </Button>
+                  <p className="text-xs text-gray-400">
+                    Sign up now and start your premium cooking journey
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+
+        <GlobalFooter />
+
+        {/* Navigation Menu */}
+        {showNavigation && (
+          <GlobalNavigation 
+            onClose={() => setShowNavigation(false)}
+          />
+        )}
+
+        {/* Settings Panel */}
+        {showSettings && (
+          <SettingsPanel 
+            onClose={() => setShowSettings(false)}
+          />
+        )}
+
+        {/* User Menu */}
+        {showUserMenu && (
+          <UserMenu 
+            onClose={() => setShowUserMenu(false)}
+          />
+        )}
+
+        {/* Auth Modal for signup/login */}
+        <AuthModal 
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={() => {
+            setShowAuthModal(false);
+            // After successful auth, the component will re-render and show the payment form
+          }}
+          title="Join Flavr+"
+          description="Create your account to subscribe to premium features"
+          initialMode="signup"
+        />
+      </div>
+    );
   }
 
   // Show subscription management for existing Flavr+ users

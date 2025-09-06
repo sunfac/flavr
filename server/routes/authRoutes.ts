@@ -34,6 +34,13 @@ export function registerAuthRoutes(app: Express) {
 
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
+        // For test users, provide a helpful message with suggested alternatives
+        if (email.includes('@test.') || email.includes('test@')) {
+          return res.status(400).json({ 
+            message: "Test user already exists", 
+            suggestion: "Try a different test email like test2@test.com or test@example.org" 
+          });
+        }
         return res.status(400).json({ message: "User already exists" });
       }
 
