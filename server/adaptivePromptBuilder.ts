@@ -126,7 +126,7 @@ RECIPE STANDARDS:
       ? '\n\n' + specificGuidance.join('\n\n')
       : '';
     
-    return baseCore + guidanceText + '\n\nOUTPUT: Return ONLY JSON matching the provided schema. No extra text.';
+    return baseCore + guidanceText + '\n\nCRITICAL JSON REQUIREMENTS:\n- Return ONLY valid JSON, no text before or after\n- Use double quotes for all strings\n- No trailing commas\n- Ensure all strings are properly closed with quotes\n- Keep string values concise to avoid truncation\n- If unsure, use shorter descriptions and instructions\n\nOUTPUT: Return ONLY JSON matching the provided schema.';
   }
   
   /**
@@ -244,6 +244,9 @@ RECIPE STANDARDS:
       message += `\n- Ensure reliable, delicious results for home cooks`;
     }
     
+    // Critical: Add JSON size constraint to prevent parsing errors at position 3630+
+    message += `\n\nCRITICAL: Keep total JSON response under 3000 characters to prevent truncation and parsing errors.`;
+    
     // Schema (simplified for very clear inputs)
     const schemaText = this.buildSchemaText(specificity);
     message += `\n\n${schemaText}`;
@@ -258,43 +261,43 @@ RECIPE STANDARDS:
     
     if (specificity === InputSpecificity.CRYSTAL_CLEAR) {
       // Minimal schema for clear inputs (note: title will be set via prompt instruction)
-      return `JSON SCHEMA:
+      return `JSON SCHEMA (REQUIRED - keep ALL strings under 200 characters):
 {
   "title": "Use the exact title specified in the prompt above",
   "servings": number,
   "time": { "prep_min": number, "cook_min": number, "total_min": number },
-  "cuisine": "cuisine type",
-  "ingredients": [{ "section": "Main", "items": [{ "item": "...", "qty": number, "unit": "g|ml|tbsp", "notes": "" }] }],
-  "method": [{ "step": number, "instruction": "Clear step", "why_it_matters": "Brief reason" }],
-  "finishing_touches": ["..."],
-  "flavour_boosts": ["..."],
-  "make_ahead_leftovers": "Brief note",
-  "allergens": ["..."],
-  "shopping_list": [{ "item": "...", "qty": number, "unit": "..." }]
+  "cuisine": "cuisine type (max 20 chars)",
+  "ingredients": [{ "section": "Main", "items": [{ "item": "ingredient name (max 50 chars)", "qty": number, "unit": "g|ml|tbsp|tsp|x", "notes": "optional (max 30 chars)" }] }],
+  "method": [{ "step": number, "instruction": "Clear concise step (max 150 chars)", "why_it_matters": "Brief reason (max 80 chars)" }],
+  "finishing_touches": ["concise tip (max 80 chars each)"],
+  "flavour_boosts": ["flavor tip (max 80 chars each)"],
+  "make_ahead_leftovers": "Brief storage note (max 120 chars)",
+  "allergens": ["allergen names (max 20 chars each)"],
+  "shopping_list": [{ "item": "item name (max 40 chars)", "qty": number, "unit": "g|ml|tbsp|tsp|x" }]
 }`;
     } else {
       // Full schema for other inputs
-      return `JSON SCHEMA:
+      return `JSON SCHEMA (REQUIRED - keep ALL strings under 200 characters):
 {
-  "title": "Appetizing dish name (4-8 words)",
+  "title": "Appetizing dish name (4-8 words, max 60 chars)",
   "servings": number,
   "time": { "prep_min": number, "cook_min": number, "total_min": number },
-  "cuisine": "cuisine type",
-  "style_notes": ["any adjustments made"],
-  "equipment": ["required equipment"],
+  "cuisine": "cuisine type (max 20 chars)",
+  "style_notes": ["adjustment note (max 60 chars each)"],
+  "equipment": ["equipment name (max 30 chars each)"],
   "ingredients": [
-    { "section": "Main", "items": [{ "item": "...", "qty": number, "unit": "g|ml|tbsp", "notes": "" }] },
-    { "section": "Seasoning", "items": [{ "item": "...", "qty": number, "unit": "...", "notes": "" }] }
+    { "section": "Main", "items": [{ "item": "ingredient name (max 50 chars)", "qty": number, "unit": "g|ml|tbsp|tsp|x", "notes": "optional (max 30 chars)" }] },
+    { "section": "Seasoning", "items": [{ "item": "ingredient name (max 50 chars)", "qty": number, "unit": "g|ml|tbsp|tsp|x", "notes": "optional (max 30 chars)" }] }
   ],
   "method": [
-    { "step": number, "instruction": "Clear step with technique", "why_it_matters": "Brief reason" }
+    { "step": number, "instruction": "Clear concise step (max 150 chars)", "why_it_matters": "Brief reason (max 80 chars)" }
   ],
-  "finishing_touches": ["restaurant-quality finishing elements"],
-  "flavour_boosts": ["ways to enhance flavor"],
-  "make_ahead_leftovers": "Storage and reheating guidance",
-  "allergens": ["potential allergens"],
-  "shopping_list": [{ "item": "...", "qty": number, "unit": "..." }],
-  "side_dishes": [{ "name": "...", "description": "...", "quick_method": "..." }]
+  "finishing_touches": ["concise finishing tip (max 80 chars each)"],
+  "flavour_boosts": ["flavor enhancement tip (max 80 chars each)"],
+  "make_ahead_leftovers": "Storage and reheating note (max 120 chars)",
+  "allergens": ["allergen names (max 20 chars each)"],
+  "shopping_list": [{ "item": "item name (max 40 chars)", "qty": number, "unit": "g|ml|tbsp|tsp|x" }],
+  "side_dishes": [{ "name": "side name (max 30 chars)", "description": "brief desc (max 60 chars)", "quick_method": "method (max 80 chars)" }]
 }`;
     }
   }
