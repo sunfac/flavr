@@ -99,10 +99,18 @@ export function registerWeeklyPlanRoutes(app: Express) {
       const userId = req.session!.userId!;
       const updateData = req.body;
 
-      // Remove any undefined fields
-      const cleanedData = Object.fromEntries(
-        Object.entries(updateData).filter(([_, value]) => value !== undefined)
-      );
+      // Remove any undefined fields and handle date fields properly
+      const cleanedData: any = {};
+      for (const [key, value] of Object.entries(updateData)) {
+        if (value !== undefined) {
+          // Handle date fields properly
+          if (key.includes('Date') || key.includes('At')) {
+            cleanedData[key] = value ? new Date(value as string) : null;
+          } else {
+            cleanedData[key] = value;
+          }
+        }
+      }
 
       const updatedPreferences = await storage.updateWeeklyPlanPreferences(userId, cleanedData);
       res.json(updatedPreferences);

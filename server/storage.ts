@@ -477,7 +477,7 @@ export class DatabaseStorage implements IStorage {
   async getWeeklyPlansByUser(userId: number, limit: number = 10): Promise<WeeklyPlan[]> {
     return await db.select().from(weeklyPlans)
       .where(eq(weeklyPlans.userId, userId))
-      .orderBy(desc(weeklyPlans.weekStartDate))
+      .orderBy(desc(weeklyPlans.generatedAt), desc(weeklyPlans.weekStartDate))
       .limit(limit);
   }
 

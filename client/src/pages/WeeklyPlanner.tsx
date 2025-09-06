@@ -84,19 +84,11 @@ export default function WeeklyPlanner() {
 
   useEffect(() => {
     if (weeklyPlans && (weeklyPlans as any).length > 0) {
-      // Show the most recent plan (first in the array since it's ordered by date desc)
-      // Or find the current week's plan if it exists
       const plans = weeklyPlans as any[];
-      const currentWeekPlan = plans.find(plan => {
-        const planDate = new Date(plan.weekStartDate);
-        const now = new Date();
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - now.getDay() + 1); // Monday of current week
-        return planDate.toDateString() === weekStart.toDateString();
-      });
       
-      // Use current week's plan if available, otherwise most recent
-      setCurrentWeekPlan(currentWeekPlan || plans[0]);
+      // Always show the most recently generated plan (first in array since ordered by generatedAt desc)
+      // This ensures users see their latest creation after app restart
+      setCurrentWeekPlan(plans[0]);
     }
   }, [weeklyPlans]);
 
