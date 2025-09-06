@@ -104,7 +104,7 @@ export function generateVarietyNotes(clientId: string, mode?: string): string {
   const globalAvoid = getAvoidWords(clientId);
   const modeAvoid = mode ? getModeSpecificAvoidWords(clientId, mode) : [];
   
-  const allAvoid = [...new Set([...globalAvoid, ...modeAvoid])];
+  const allAvoid = Array.from(new Set([...globalAvoid, ...modeAvoid]));
   
   if (allAvoid.length === 0) return '';
   
@@ -171,9 +171,9 @@ export function getVarietyAnalytics(clientId: string) {
   const globalWords = globalTitleWordTracker.get(clientId) || [];
   const modeBreakdown: Record<string, string[]> = {};
   
-  for (const [mode, tracker] of modeSpecificTracker.entries()) {
+  Array.from(modeSpecificTracker.entries()).forEach(([mode, tracker]) => {
     modeBreakdown[mode] = tracker.get(clientId) || [];
-  }
+  });
   
   return {
     totalTrackedWords: globalWords.length,
