@@ -30,7 +30,7 @@ export default function WeeklyPlanner() {
   const [proposedTitles, setProposedTitles] = useState<any[]>([]);
   const [isGeneratingTitles, setIsGeneratingTitles] = useState(false);
   const [isGeneratingRecipes, setIsGeneratingRecipes] = useState(false);
-  const [estimatedCost, setEstimatedCost] = useState<number>(0);
+  // Removed estimatedCost state - users shouldn't see internal costs
   const { toast } = useToast();
 
   // Close all menus
@@ -110,7 +110,7 @@ export default function WeeklyPlanner() {
       
       const titleProposal = await response.json();
       setProposedTitles(titleProposal.titles);
-      setEstimatedCost(titleProposal.totalEstimatedCost);
+      // Cost removed from UI
       setShowTitleReview(true);
       
       toast({
@@ -435,7 +435,6 @@ export default function WeeklyPlanner() {
                   </CardTitle>
                   <p className="text-slate-300">
                     Review and customize your recipe selections before generating the full meal plan.
-                    Estimated cost for full recipes: <span className="text-orange-400 font-semibold">${estimatedCost.toFixed(2)}</span>
                   </p>
                 </CardHeader>
                 <CardContent>
@@ -493,7 +492,7 @@ export default function WeeklyPlanner() {
                         </>
                       ) : (
                         <>
-                          Generate Full Recipes (${estimatedCost.toFixed(2)})
+                          Generate Full Recipes
                         </>
                       )}
                     </Button>

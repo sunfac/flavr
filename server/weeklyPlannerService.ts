@@ -107,7 +107,7 @@ export class WeeklyPlannerService {
     const systemMessage = `You are a meal planning expert. Generate diverse, appealing dinner recipe titles for a weekly meal plan.
 
 REQUIREMENTS:
-- Generate ${mealCount} different dinner recipes for: ${selectedDays.join(', ')}
+- Generate exactly ${mealCount} different dinner recipes for: ${selectedDays.join(', ')}
 - Vary cuisines, proteins, and cooking methods across the week
 - Consider household: ${preferences.householdSize.adults} adults, ${preferences.householdSize.kids} kids
 - Time preference: ${preferences.timeComfort} minutes per meal
@@ -115,13 +115,19 @@ REQUIREMENTS:
 ${preferences.dietaryNeeds?.length ? `- Dietary needs: ${preferences.dietaryNeeds.join(', ')}` : ''}
 ${cuisines.length ? `- Preferred cuisines: ${cuisines.join(', ')}` : ''}
 
-OUTPUT: JSON array with objects containing:
-- day: day name
-- title: appealing recipe title (4-8 words)
-- cuisine: cuisine type
-- estimatedTime: cooking time in minutes
-- description: one sentence describing the dish
+OUTPUT FORMAT - JSON object with this EXACT structure:
+{
+  "recipes": [
+    {
+      "title": "Recipe Name Here",
+      "cuisine": "Cuisine Type", 
+      "estimatedTime": 45,
+      "description": "Brief appealing description"
+    }
+  ]
+}
 
+Make titles interesting and flavorful, avoid repetitive words like "herb-infused" or "bliss".
 Focus on practical, family-friendly recipes that sound delicious and achievable.`;
 
     const userMessage = `Generate ${mealCount} varied dinner recipe titles for the week. Make them sound appealing and achievable for home cooking.`;
@@ -157,9 +163,6 @@ Focus on practical, family-friendly recipes that sound delicious and achievable.
         throw new Error("Invalid response format for recipe titles");
       }
 
-      // Estimate cost for full recipe generation
-      const estimatedCost = titles.length * 0.025; // ~$0.025 per full recipe with mini model
-
       return {
         titles: titles.slice(0, mealCount).map((title: any, index: number) => ({
           day: selectedDays[index],
@@ -167,8 +170,7 @@ Focus on practical, family-friendly recipes that sound delicious and achievable.
           cuisine: title.cuisine || "International",
           estimatedTime: title.estimatedTime || parseInt(preferences.timeComfort) || 45,
           description: title.description || "Delicious homemade dinner"
-        })),
-        totalEstimatedCost: estimatedCost
+        }))
       };
 
     } catch (error) {
@@ -184,8 +186,7 @@ Focus on practical, family-friendly recipes that sound delicious and achievable.
       }));
 
       return {
-        titles: fallbackTitles,
-        totalEstimatedCost: 0.20
+        titles: fallbackTitles
       };
     }
   }
