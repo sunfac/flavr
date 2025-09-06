@@ -323,6 +323,7 @@ Focus on clear, practical instructions that home cooks can follow confidently.`;
         cookingFrequency: preferences.cookingFrequency,
         timeComfort: preferences.timeComfort,
         cuisineWeighting: preferences.cuisineWeighting || {},
+        cuisinePreferences: preferences.cuisinePreferences || [],
         ambitionLevel: preferences.ambitionLevel,
         dietaryNeeds: preferences.dietaryNeeds || [],
         budgetPerServing: preferences.budgetPerServing

@@ -747,24 +747,58 @@ export default function WeeklyPlanner() {
                 <CardContent className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     {/* Household Size */}
-                    <div className="space-y-2">
-                      <Label htmlFor="householdSize" className="text-slate-200">Household Size</Label>
-                      <Select
-                        value={editingPreferences?.householdSize?.toString() || "2"}
-                        onValueChange={(value) => setEditingPreferences((prev: any) => ({ ...prev, householdSize: parseInt(value) }))}
-                      >
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="1">1 person</SelectItem>
-                          <SelectItem value="2">2 people</SelectItem>
-                          <SelectItem value="3">3 people</SelectItem>
-                          <SelectItem value="4">4 people</SelectItem>
-                          <SelectItem value="5">5 people</SelectItem>
-                          <SelectItem value="6">6+ people</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="space-y-3">
+                      <Label className="text-slate-200">Household Size</Label>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="adults" className="text-slate-300 text-sm">Adults</Label>
+                          <Select
+                            value={editingPreferences?.householdSize?.adults?.toString() || "2"}
+                            onValueChange={(value) => setEditingPreferences((prev: any) => ({ 
+                              ...prev, 
+                              householdSize: { 
+                                ...prev?.householdSize, 
+                                adults: parseInt(value) 
+                              } 
+                            }))}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1">1 adult</SelectItem>
+                              <SelectItem value="2">2 adults</SelectItem>
+                              <SelectItem value="3">3 adults</SelectItem>
+                              <SelectItem value="4">4 adults</SelectItem>
+                              <SelectItem value="5">5+ adults</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="kids" className="text-slate-300 text-sm">Children</Label>
+                          <Select
+                            value={editingPreferences?.householdSize?.kids?.toString() || "0"}
+                            onValueChange={(value) => setEditingPreferences((prev: any) => ({ 
+                              ...prev, 
+                              householdSize: { 
+                                ...prev?.householdSize, 
+                                kids: parseInt(value) 
+                              } 
+                            }))}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="0">No children</SelectItem>
+                              <SelectItem value="1">1 child</SelectItem>
+                              <SelectItem value="2">2 children</SelectItem>
+                              <SelectItem value="3">3 children</SelectItem>
+                              <SelectItem value="4">4+ children</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Budget Per Serving */}
