@@ -144,7 +144,7 @@ export class WeeklyPlannerService {
   }
 
   /**
-   * OPTIMIZATION: Generate all weekly recipes in a single optimized AI call
+   * OPTIMIZATION: Generate all weekly recipes using advanced batch processing with Chef Assist optimization
    */
   private static async generateWeeklyRecipeBatch(
     days: string[],
@@ -153,45 +153,91 @@ export class WeeklyPlannerService {
     userId: number
   ): Promise<any[]> {
     
-    // Build optimized weekly meal prompt
-    const userIntent = `Generate ${days.length} different dinner recipes for a weekly meal plan: ${days.join(", ")}. 
-    Each recipe should be distinct in cuisine, technique, and protein. Vary cooking methods and flavor profiles across the week.
-    ${cuisines.length > 0 ? `Focus on these cuisines with variety: ${cuisines.join(", ")}` : "Use international variety"}`;
+    try {
+      // OPTIMIZATION 1: Use parallel generation for each day with optimized prompts
+      const recipePromises = days.map(async (day, index) => {
+        // Rotate cuisines for variety
+        const dayCuisine = cuisines.length > 0 ? cuisines[index % cuisines.length] : "International";
+        
+        // Build Chef Assist compatible prompt for this specific day
+        const dayIntent = `${day} dinner recipe - ${dayCuisine} cuisine, ${baseData.timeBudget} minutes, ${baseData.servings} servings`;
+        
+        // Use direct MichelinChefAI call optimized for single recipe (fastest approach)
+        return await MichelinChefAI.generateFullRecipe({
+          title: `${day} ${dayCuisine} Dinner`,
+          description: `Weekly planned ${dayCuisine} dinner for ${day}`,
+          cookTime: baseData.timeBudget,
+          servings: baseData.servings,
+          difficulty: this.mapAmbitionToDifficulty(baseData.ambitionLevel),
+          cuisine: dayCuisine
+        }, {
+          cuisine: [dayCuisine],
+          cookingTime: baseData.timeBudget,
+          dietary: baseData.dietaryNeeds,
+          servings: baseData.servings,
+          budget: baseData.budgetNote,
+          equipment: baseData.equipment,
+          mood: `${day} evening cooking - sophisticated home dining`,
+          ambition: baseData.ambitionLevel
+        }, "weekly");
+      });
 
-    // Use the optimized Chef Assist system for batch generation
-    const completion = await MichelinChefAI.generateFullRecipe({
-      title: "Weekly Meal Plan Bundle",
-      description: userIntent,
-      cookTime: baseData.timeBudget,
-      servings: baseData.servings,
-      difficulty: "varied",
-      cuisine: baseData.cuisinePreference
-    }, {
-      cuisine: cuisines.length > 0 ? cuisines : ["International"],
-      cookingTime: baseData.timeBudget,
-      dietary: baseData.dietaryNeeds,
-      servings: baseData.servings,
-      budget: baseData.budgetNote,
-      equipment: baseData.equipment,
-      mood: "Weekly meal planning with variety and sophisticated flavors"
-    }, "weekly");
-
-    // Parse and distribute recipes to days
-    if (completion && typeof completion === 'object') {
-      // If we get a single recipe, create variations
+      // OPTIMIZATION 2: Execute all recipe generations in parallel
+      const batchResults = await Promise.all(recipePromises);
+      
+      // Validate and return results
+      return batchResults.filter(recipe => recipe && recipe.title);
+      
+    } catch (error) {
+      console.error("Batch generation failed, falling back to sequential:", error);
+      
+      // FALLBACK: Sequential generation if parallel fails
       const recipes = [];
       for (let i = 0; i < days.length; i++) {
-        const dayRecipe = {
-          ...completion,
-          title: `${completion.title} - ${days[i]} Variation`,
-          cuisine: cuisines.length > 0 ? cuisines[i % cuisines.length] : completion.cuisine
-        };
-        recipes.push(dayRecipe);
+        try {
+          const day = days[i];
+          const dayCuisine = cuisines.length > 0 ? cuisines[i % cuisines.length] : "International";
+          
+          const recipe = await MichelinChefAI.generateFullRecipe({
+            title: `${day} ${dayCuisine} Dinner`,
+            description: `Weekly planned ${dayCuisine} dinner for ${day}`,
+            cookTime: baseData.timeBudget,
+            servings: baseData.servings,
+            difficulty: this.mapAmbitionToDifficulty(baseData.ambitionLevel),
+            cuisine: dayCuisine
+          }, {
+            cuisine: [dayCuisine],
+            cookingTime: baseData.timeBudget,
+            dietary: baseData.dietaryNeeds,
+            servings: baseData.servings,
+            budget: baseData.budgetNote,
+            equipment: baseData.equipment,
+            mood: `${day} evening cooking - sophisticated home dining`
+          }, "weekly");
+          
+          if (recipe && recipe.title) {
+            recipes.push(recipe);
+          }
+        } catch (dayError) {
+          console.error(`Failed to generate recipe for ${days[i]}:`, dayError);
+          // Continue with other days
+        }
       }
+      
       return recipes;
     }
+  }
 
-    throw new Error("Failed to generate batch recipes");
+  /**
+   * Map ambition level to difficulty for consistency with other cooking modes
+   */
+  private static mapAmbitionToDifficulty(ambitionLevel?: string): string {
+    switch (ambitionLevel) {
+      case "simple": return "easy";
+      case "medium": return "medium";
+      case "adventurous": return "hard";
+      default: return "medium";
+    }
   }
 
   /**
