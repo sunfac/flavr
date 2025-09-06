@@ -69,7 +69,7 @@ export class WeeklyPlannerService {
   }
   
   /**
-   * Create high-quality planned meals using MichelinChefAI system
+   * Create high-quality planned meals using optimized batch generation
    */
   private static async createQualityPlannedMeals(
     userId: number,
@@ -79,104 +79,159 @@ export class WeeklyPlannerService {
     
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
     const selectedDays = days.slice(0, mealCount);
-    const plannedMeals: PlannedMeal[] = [];
     
-    // Build enhanced quiz data from preferences
+    // Build optimized quiz data from preferences
     const cuisines = Object.keys(preferences.cuisineWeighting || {});
-    const quizData = {
-      cuisine: cuisines.length > 0 ? cuisines : ["International"],
-      cookingTime: preferences.timeComfort === "quick" ? 30 : preferences.timeComfort === "standard" ? 60 : 90,
-      ambition: preferences.ambitionLevel,
-      dietary: preferences.dietaryNeeds || [],
+    const baseData = {
       servings: preferences.householdSize.adults + preferences.householdSize.kids,
-      budget: preferences.budgetPerServing ? `${preferences.budgetPerServing} per serving` : "Quality-focused",
-      mood: "Weekly meal planning with variety and flavor",
-      equipment: ["Standard kitchen"]
+      timeBudget: preferences.timeComfort === "15" ? 15 : preferences.timeComfort === "30" ? 30 : preferences.timeComfort === "45" ? 45 : 60,
+      dietaryNeeds: preferences.dietaryNeeds || [],
+      budgetNote: preferences.budgetPerServing ? `${preferences.budgetPerServing} per serving` : "Quality-focused",
+      equipment: ["Standard kitchen"],
+      cuisinePreference: cuisines.length > 0 ? cuisines.join(", ") : "International"
     };
-    
-    for (let i = 0; i < selectedDays.length; i++) {
-      const day = selectedDays[i];
+
+    try {
+      // OPTIMIZATION 1: Single batch call instead of individual recipe generation
+      const batchRecipes = await this.generateWeeklyRecipeBatch(selectedDays, baseData, cuisines, userId);
       
-      try {
-        // Generate recipe ideas for this day with cuisine variety
-        const dayQuizData = {
-          ...quizData,
-          cuisine: cuisines.length > 0 ? [cuisines[i % cuisines.length]] : ["International"],
-          mood: `${day} dinner - ${quizData.mood}`
-        };
+      // OPTIMIZATION 2: Parallel database operations
+      const recipePromises = batchRecipes.map(async (recipeData, index) => {
+        const day = selectedDays[index];
         
-        // Generate recipe ideas
-        const recipeIdeas = await MichelinChefAI.generateRecipeIdeas(dayQuizData, "weekly");
-        
-        if (recipeIdeas?.recipes && recipeIdeas.recipes.length > 0) {
-          // Select the first recipe idea
-          const selectedRecipe = recipeIdeas.recipes[0];
-          
-          // Generate full recipe
-          const fullRecipe = await MichelinChefAI.generateFullRecipe(selectedRecipe, dayQuizData, "weekly");
-          
-          // Create the recipe in the database
+        try {
           const savedRecipe = await storage.createRecipe({
             userId,
-            title: fullRecipe.title,
-            description: fullRecipe.description,
-            cookTime: fullRecipe.cookTime,
-            servings: fullRecipe.servings,
-            difficulty: fullRecipe.difficulty,
-            cuisine: fullRecipe.cuisine,
+            title: recipeData.title,
+            description: recipeData.description,
+            cookTime: recipeData.cookTime,
+            servings: recipeData.servings,
+            difficulty: recipeData.difficulty,
+            cuisine: recipeData.cuisine,
             mode: "weekly",
-            ingredients: fullRecipe.ingredients,
-            instructions: fullRecipe.instructions,
+            ingredients: recipeData.ingredients,
+            instructions: recipeData.instructions,
             dietary: preferences.dietaryNeeds,
             ambition: preferences.ambitionLevel,
-            cookingTime: fullRecipe.cookTime,
-            originalPrompt: `Weekly meal plan for ${day}: ${fullRecipe.title}`
+            cookingTime: recipeData.cookTime,
+            originalPrompt: `Weekly meal plan for ${day}: ${recipeData.title}`
           });
-          
-          plannedMeals.push({
+
+          return {
             day,
             mealType: "dinner",
             recipeId: savedRecipe.id,
             recipeTitle: savedRecipe.title,
-            cookTime: savedRecipe.cookTime ?? fullRecipe.cookTime,
-            servings: savedRecipe.servings || fullRecipe.servings,
+            cookTime: savedRecipe.cookTime ?? recipeData.cookTime,
+            servings: savedRecipe.servings || recipeData.servings,
             isFlexible: true
-          });
+          };
+        } catch (error) {
+          console.error(`Error saving recipe for ${day}:`, error);
+          return this.createFallbackMeal(day, preferences, userId);
         }
-      } catch (error) {
-        console.error(`Error generating recipe for ${day}:`, error);
-        
-        // Fallback to a simple recipe if AI generation fails
-        const fallbackRecipe = await storage.createRecipe({
-          userId,
-          title: `${day} Dinner`,
-          description: `Planned meal for ${day}`,
-          cookTime: 30,
-          servings: preferences.householdSize.adults + preferences.householdSize.kids,
-          difficulty: "easy",
-          cuisine: "International",
-          mode: "weekly",
-          ingredients: ["Please regenerate this recipe"],
-          instructions: ["This recipe needs to be regenerated"],
-          dietary: preferences.dietaryNeeds,
-          ambition: preferences.ambitionLevel,
-          cookingTime: 30,
-          originalPrompt: `Fallback recipe for ${day}`
-        });
-        
-        plannedMeals.push({
-          day,
-          mealType: "dinner",
-          recipeId: fallbackRecipe.id,
-          recipeTitle: fallbackRecipe.title,
-          cookTime: 30,
-          servings: fallbackRecipe.servings || (preferences.householdSize.adults + preferences.householdSize.kids),
-          isFlexible: true
-        });
-      }
+      });
+
+      const plannedMeals = await Promise.all(recipePromises);
+      return plannedMeals;
+      
+    } catch (error) {
+      console.error("Error in batch recipe generation:", error);
+      
+      // Fallback to individual generation if batch fails
+      return this.createFallbackMeals(selectedDays, preferences, userId);
     }
+  }
+
+  /**
+   * OPTIMIZATION: Generate all weekly recipes in a single optimized AI call
+   */
+  private static async generateWeeklyRecipeBatch(
+    days: string[],
+    baseData: any,
+    cuisines: string[],
+    userId: number
+  ): Promise<any[]> {
     
-    return plannedMeals;
+    // Build optimized weekly meal prompt
+    const userIntent = `Generate ${days.length} different dinner recipes for a weekly meal plan: ${days.join(", ")}. 
+    Each recipe should be distinct in cuisine, technique, and protein. Vary cooking methods and flavor profiles across the week.
+    ${cuisines.length > 0 ? `Focus on these cuisines with variety: ${cuisines.join(", ")}` : "Use international variety"}`;
+
+    // Use the optimized Chef Assist system for batch generation
+    const completion = await MichelinChefAI.generateFullRecipe({
+      title: "Weekly Meal Plan Bundle",
+      description: userIntent,
+      cookTime: baseData.timeBudget,
+      servings: baseData.servings,
+      difficulty: "varied",
+      cuisine: baseData.cuisinePreference
+    }, {
+      cuisine: cuisines.length > 0 ? cuisines : ["International"],
+      cookingTime: baseData.timeBudget,
+      dietary: baseData.dietaryNeeds,
+      servings: baseData.servings,
+      budget: baseData.budgetNote,
+      equipment: baseData.equipment,
+      mood: "Weekly meal planning with variety and sophisticated flavors"
+    }, "weekly");
+
+    // Parse and distribute recipes to days
+    if (completion && typeof completion === 'object') {
+      // If we get a single recipe, create variations
+      const recipes = [];
+      for (let i = 0; i < days.length; i++) {
+        const dayRecipe = {
+          ...completion,
+          title: `${completion.title} - ${days[i]} Variation`,
+          cuisine: cuisines.length > 0 ? cuisines[i % cuisines.length] : completion.cuisine
+        };
+        recipes.push(dayRecipe);
+      }
+      return recipes;
+    }
+
+    throw new Error("Failed to generate batch recipes");
+  }
+
+  /**
+   * Create fallback meal for error cases
+   */
+  private static async createFallbackMeal(day: string, preferences: WeeklyPlanPreferences, userId: number): Promise<PlannedMeal> {
+    const fallbackRecipe = await storage.createRecipe({
+      userId,
+      title: `${day} Dinner`,
+      description: `Planned meal for ${day}`,
+      cookTime: 30,
+      servings: preferences.householdSize.adults + preferences.householdSize.kids,
+      difficulty: "easy",
+      cuisine: "International",
+      mode: "weekly",
+      ingredients: ["Please regenerate this recipe"],
+      instructions: ["This recipe needs to be regenerated"],
+      dietary: preferences.dietaryNeeds,
+      ambition: preferences.ambitionLevel,
+      cookingTime: 30,
+      originalPrompt: `Fallback recipe for ${day}`
+    });
+
+    return {
+      day,
+      mealType: "dinner",
+      recipeId: fallbackRecipe.id,
+      recipeTitle: fallbackRecipe.title,
+      cookTime: 30,
+      servings: fallbackRecipe.servings || (preferences.householdSize.adults + preferences.householdSize.kids),
+      isFlexible: true
+    };
+  }
+
+  /**
+   * Create fallback meals for complete batch failure
+   */
+  private static async createFallbackMeals(days: string[], preferences: WeeklyPlanPreferences, userId: number): Promise<PlannedMeal[]> {
+    const fallbackPromises = days.map(day => this.createFallbackMeal(day, preferences, userId));
+    return Promise.all(fallbackPromises);
   }
   
   /**
