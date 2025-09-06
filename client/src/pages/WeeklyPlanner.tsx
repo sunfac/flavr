@@ -119,6 +119,7 @@ export default function WeeklyPlanner() {
       setProposedTitles(titleProposal.titles);
       // Cost removed from UI
       setShowTitleReview(true);
+      setShowMealCountSelection(false); // Ensure we stay on title review
       
       toast({
         title: "Recipe Ideas Generated!",
@@ -239,7 +240,7 @@ export default function WeeklyPlanner() {
 
   // Start title generation with selected meal count
   const handleStartTitleGeneration = async () => {
-    setShowMealCountSelection(false);
+    // Don't hide meal count selection until titles are ready
     await handleGenerateWeeklyTitles();
   };
 

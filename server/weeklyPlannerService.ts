@@ -101,7 +101,7 @@ export class WeeklyPlannerService {
     
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
     const selectedDays = days.slice(0, mealCount);
-    const cuisines = Object.keys(preferences.cuisineWeighting || {});
+    const cuisines = preferences.cuisinePreferences || [];
     
     // Build cost-optimized prompt for title generation
     const systemMessage = `You are a meal planning expert. Generate diverse, appealing dinner recipe titles for a weekly meal plan.
