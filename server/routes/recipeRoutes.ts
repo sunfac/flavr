@@ -124,53 +124,35 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
-// Helper function to check and enforce usage limits
-async function checkAndEnforceUsageLimit(req: any): Promise<{ allowed: boolean; error?: any }> {
+// Helper function to check and enforce usage limits with cache optimization
+async function checkAndEnforceUsageLimit(req: any, isUsingCache: boolean = false): Promise<{ allowed: boolean; error?: any }> {
   const userId = req.session?.userId;
   const pseudoId = req.headers['x-pseudo-user-id'] as string || req.session?.id || 'anonymous';
   
   try {
-    if (userId) {
-      const user = await storage.getUser(userId);
-      if (user) {
-        // Check if this is the developer account - grant unlimited access
-        const isDeveloper = user.email === "william@blycontracting.co.uk";
-        const hasUnlimitedAccess = user.hasFlavrPlus || isDeveloper;
+    const limitCheck = await storage.checkUsageLimit(
+      userId || pseudoId, 
+      !!userId, 
+      isUsingCache
+    );
+    
+    if (!limitCheck.canGenerate) {
+      const errorMessage = isUsingCache 
+        ? "This shouldn't happen - cached recipes should be unlimited for free users"
+        : "You have no free recipes remaining this month. Sign up for Flavr+ to get unlimited recipes!";
         
-
-        
-        if (!hasUnlimitedAccess && (user.recipesThisMonth || 0) >= 3) {
-          return { 
-            allowed: false, 
-            error: { 
-              error: "You have no free recipes remaining this month. Sign up for Flavr+ to get unlimited recipes!", 
-              recipesUsed: user.recipesThisMonth || 0,
-              recipesLimit: 3,
-              hasFlavrPlus: false
-            }
-          };
+      return { 
+        allowed: false, 
+        error: { 
+          error: errorMessage,
+          recipesUsed: limitCheck.recipesUsed,
+          recipesLimit: limitCheck.recipesLimit,
+          hasFlavrPlus: limitCheck.hasFlavrPlus
         }
-      }
-      return { allowed: true };
-    } else {
-      let pseudoUser = await storage.getPseudoUser(pseudoId);
-      if (!pseudoUser) {
-        pseudoUser = await storage.createPseudoUser({ pseudoId });
-      }
-      
-      if ((pseudoUser.recipesThisMonth || 0) >= 3) {
-        return { 
-          allowed: false, 
-          error: { 
-            error: "You have no free recipes remaining this month. Sign up for Flavr+ to get unlimited recipes!", 
-            recipesUsed: pseudoUser.recipesThisMonth || 0,
-            recipesLimit: 3,
-            hasFlavrPlus: false
-          }
-        };
-      }
-      return { allowed: true };
+      };
     }
+    
+    return { allowed: true };
   } catch (error) {
     console.error("Error checking usage limit:", error);
     return { allowed: true }; // Allow if check fails

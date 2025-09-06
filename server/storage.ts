@@ -32,10 +32,18 @@ export interface IStorage {
   incrementUsageCounter(userIdOrPseudoId: string | number, isAuthenticated: boolean): Promise<void>;
   
   // Usage checking for gating
-  checkUsageLimit(userIdOrPseudoId: string | number, isAuthenticated: boolean): Promise<{
+  checkUsageLimit(userIdOrPseudoId: string | number, isAuthenticated: boolean, isUsingCache?: boolean): Promise<{
     canGenerate: boolean;
     recipesUsed: number;
     recipesLimit: number;
+    hasFlavrPlus: boolean;
+  }>;
+  
+  // Weekly plan usage tracking for premium users
+  checkWeeklyPlanLimit(userId: number): Promise<{
+    canGenerate: boolean;
+    plansUsed: number;
+    plansLimit: number;
     hasFlavrPlus: boolean;
   }>;
   
@@ -256,7 +264,7 @@ export class DatabaseStorage implements IStorage {
     return pseudoUser;
   }
 
-  async checkUsageLimit(userIdOrPseudoId: string | number, isAuthenticated: boolean): Promise<{
+  async checkUsageLimit(userIdOrPseudoId: string | number, isAuthenticated: boolean, isUsingCache: boolean = false): Promise<{
     canGenerate: boolean;
     recipesUsed: number;
     recipesLimit: number;
@@ -272,6 +280,17 @@ export class DatabaseStorage implements IStorage {
       const isDeveloper = user.email === 'william@blycontracting.co.uk';
       const hasAccess = user.hasFlavrPlus || isDeveloper;
       
+      // 💰 COST OPTIMIZATION: Free users get unlimited cached recipes
+      if (!hasAccess && isUsingCache) {
+        console.log('🎯 Free user using cached recipe - no limits applied');
+        return {
+          canGenerate: true,
+          recipesUsed: 0, // Don't count cached recipes
+          recipesLimit: 999, // Unlimited for cached
+          hasFlavrPlus: false
+        };
+      }
+      
       return {
         canGenerate: hasAccess || (user.recipesThisMonth || 0) < (user.monthlyRecipeLimit || 3),
         recipesUsed: hasAccess ? -1 : (user.recipesThisMonth || 0), // -1 indicates unlimited
@@ -284,6 +303,17 @@ export class DatabaseStorage implements IStorage {
         throw new Error('Pseudo user not found');
       }
 
+      // 💰 COST OPTIMIZATION: Free pseudo users get unlimited cached recipes
+      if (isUsingCache) {
+        console.log('🎯 Pseudo user using cached recipe - no limits applied');
+        return {
+          canGenerate: true,
+          recipesUsed: 0, // Don't count cached recipes
+          recipesLimit: 999, // Unlimited for cached
+          hasFlavrPlus: false
+        };
+      }
+
       return {
         canGenerate: (pseudoUser.recipesThisMonth || 0) < (pseudoUser.monthlyRecipeLimit || 3),
         recipesUsed: pseudoUser.recipesThisMonth || 0,
@@ -291,6 +321,61 @@ export class DatabaseStorage implements IStorage {
         hasFlavrPlus: false
       };
     }
+  }
+
+  async checkWeeklyPlanLimit(userId: number): Promise<{
+    canGenerate: boolean;
+    plansUsed: number;
+    plansLimit: number;
+    hasFlavrPlus: boolean;
+  }> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Developer account gets unlimited access
+    const isDeveloper = user.email === 'william@blycontracting.co.uk';
+    if (isDeveloper) {
+      return {
+        canGenerate: true,
+        plansUsed: -1, // Unlimited indicator
+        plansLimit: 999,
+        hasFlavrPlus: true
+      };
+    }
+
+    // Premium users: 1 weekly plan per month
+    if (user.hasFlavrPlus) {
+      // Count weekly plans generated this month
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const monthlyPlans = await this.executeRawQuery(`
+        SELECT COUNT(*) as count 
+        FROM weekly_plans 
+        WHERE user_id = $1 
+          AND generated_at >= $2
+      `, [userId, startOfMonth]);
+
+      const plansThisMonth = parseInt(monthlyPlans.rows?.[0]?.count || 0);
+      
+      return {
+        canGenerate: plansThisMonth < 1,
+        plansUsed: plansThisMonth,
+        plansLimit: 1,
+        hasFlavrPlus: true
+      };
+    }
+
+    // Free users: No weekly plans allowed (they get cached recipes instead)
+    return {
+      canGenerate: false,
+      plansUsed: 0,
+      plansLimit: 0,
+      hasFlavrPlus: false
+    };
   }
 
   async createRecipe(insertRecipe: InsertRecipe): Promise<Recipe> {

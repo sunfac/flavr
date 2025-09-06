@@ -146,6 +146,27 @@ export function registerWeeklyPlanRoutes(app: Express) {
       const user = await storage.getUser(userId);
       const isFlavrPlus = user?.hasFlavrPlus || false;
 
+      // 🎯 SUBSCRIPTION LIMITS: Check weekly plan limits
+      const planLimitCheck = await storage.checkWeeklyPlanLimit(userId);
+      if (!planLimitCheck.canGenerate) {
+        const errorMessage = user?.hasFlavrPlus 
+          ? `You've reached your monthly limit of ${planLimitCheck.plansLimit} weekly plan. Your limit resets at the beginning of next month.`
+          : "Weekly meal planning is a premium feature. Upgrade to Flavr+ to generate custom weekly plans, or use individual recipe generation with our quality database recipes.";
+        
+        return res.status(403).json({ 
+          error: errorMessage,
+          plansUsed: planLimitCheck.plansUsed,
+          plansLimit: planLimitCheck.plansLimit,
+          hasFlavrPlus: planLimitCheck.hasFlavrPlus
+        });
+      }
+
+      console.log('✅ Weekly plan limit check passed:', {
+        plansUsed: planLimitCheck.plansUsed,
+        plansLimit: planLimitCheck.plansLimit,
+        hasFlavrPlus: planLimitCheck.hasFlavrPlus
+      });
+
       // Convert string date to Date object
       const startDate = weekStartDate ? new Date(weekStartDate) : new Date();
       
