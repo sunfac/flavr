@@ -787,8 +787,7 @@ CRITICAL REQUIREMENTS:
 
 USER PREFERENCES (enhance suggestions with these):
 ${userPreferences ? `
-- Cooking ambition: ${userPreferences.ambitionLevel || 'balanced'} (simple = quick & easy, adventurous = complex techniques)
-- Time preference: ${userPreferences.timePreference ? `around ${userPreferences.timePreference} minutes` : 'flexible'}
+- Cooking ambition: ${userPreferences.ambitionLevel || 'balanced'} (simple = approachable techniques, adventurous = complex techniques)
 - Skill level: ${userPreferences.skillLevel || 'intermediate'}
 ${userPreferences.budgetPreference ? `- Budget preference: ${userPreferences.budgetPreference}` : ''}
 ` : '- No user preferences available'}
@@ -817,13 +816,9 @@ Respond with ONLY the recipe title, nothing else.`
             const preferenceHints = [];
             
             if (userPreferences.ambitionLevel === "simple") {
-              preferenceHints.push("keep it simple and quick");
+              preferenceHints.push("keep it simple and approachable");
             } else if (userPreferences.ambitionLevel === "adventurous") {
               preferenceHints.push("try something creative and challenging");
-            }
-            
-            if (userPreferences.timePreference && userPreferences.timePreference <= 30) {
-              preferenceHints.push("under 30 minutes");
             }
             
             if (userPreferences.preferredCuisines && userPreferences.preferredCuisines.length > 0 && !cuisinePreference) {

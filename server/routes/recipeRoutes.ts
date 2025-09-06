@@ -667,13 +667,9 @@ Return a JSON object with this structure:
         const preferenceHints = [];
         
         if (userPreferences.ambitionLevel === "simple") {
-          preferenceHints.push("keep it simple and quick");
+          preferenceHints.push("keep it simple and approachable");
         } else if (userPreferences.ambitionLevel === "adventurous") {
           preferenceHints.push("try something creative and challenging");
-        }
-        
-        if (userPreferences.timePreference && userPreferences.timePreference <= 30) {
-          preferenceHints.push("under 30 minutes");
         }
         
         if (userPreferences.preferredCuisines && userPreferences.preferredCuisines.length > 0) {
