@@ -105,11 +105,18 @@ export class WeeklyPlannerService {
     const cuisines = preferences.cuisinePreferences || [];
     
     // Build cost-optimized prompt for title generation
-    const systemMessage = `You are a meal planning expert. Generate diverse, appealing dinner recipe titles for a weekly meal plan.
+    const systemMessage = `You are a meal planning expert. Generate MASSIVELY DIVERSE, appealing dinner recipe titles for a weekly meal plan.
 
-REQUIREMENTS:
-- Generate exactly ${mealCount} different dinner recipes for: ${selectedDays.join(', ')}
-- Vary cuisines, proteins, and cooking methods across the week
+CRITICAL DIVERSITY REQUIREMENTS:
+- Generate exactly ${mealCount} COMPLETELY DIFFERENT dinner recipes for: ${selectedDays.join(', ')}
+- MANDATORY: Each recipe must use DIFFERENT cuisine, cooking method, and main protein
+- MANDATORY: No two recipes should feel similar - maximize contrast between all dishes
+- VARIED CUISINES: Mix from different continents (Asian, European, Latin American, Middle Eastern, African, etc.)
+- VARIED PROTEINS: Fish, chicken, beef, pork, lamb, vegetarian, seafood - never repeat
+- VARIED COOKING METHODS: Grilling, roasting, stir-frying, braising, baking, simmering, etc.
+- VARIED FLAVORS: Spicy, mild, tangy, rich, fresh, smoky - create flavor contrast
+
+HOUSEHOLD SPECS:
 - Consider household: ${preferences.householdSize.adults} adults, ${preferences.householdSize.kids} kids
 - Time preference: ${preferences.timeComfort.weeknight} minutes weeknights, ${preferences.timeComfort.weekend} minutes weekends
 - Ambition level: ${preferences.ambitionLevel}
@@ -129,11 +136,12 @@ OUTPUT FORMAT - JSON object with this EXACT structure:
   ]
 }
 
+DIVERSITY MANDATE: Ensure maximum contrast between all recipes. Think "global food tour" - each day should transport the family to a completely different culinary world.
 Make titles interesting and flavorful, avoid repetitive words like "herb-infused" or "bliss".
 Focus on practical, family-friendly recipes that sound delicious and achievable.
 ${avoidSimilarTo ? `\n\nIMPORTANT: ${avoidSimilarTo}` : ''}`;
 
-    const userMessage = `Generate ${mealCount} varied dinner recipe titles for the week. Make them sound appealing and achievable for home cooking.`;
+    const userMessage = `Generate ${mealCount} DRAMATICALLY DIFFERENT dinner recipe titles for the week. Each should feel like a completely different cuisine and cooking style. Maximum variety is essential - think global diversity across continents and cooking methods.`;
 
     try {
       console.log('Generating cost-optimized recipe titles...');
@@ -154,7 +162,7 @@ ${avoidSimilarTo ? `\n\nIMPORTANT: ${avoidSimilarTo}` : ''}`;
           { role: "user", content: userMessage }
         ],
         max_tokens: 800, // Reduced token limit for titles only
-        temperature: avoidSimilarTo ? 1.0 : 0.8, // Maximum creativity when avoiding similar recipes
+        temperature: avoidSimilarTo ? 1.0 : 0.9, // High creativity for initial generation, maximum for regeneration
         response_format: { type: "json_object" }
       });
 
