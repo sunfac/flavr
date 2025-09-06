@@ -1,6 +1,11 @@
 import { storage } from "./storage";
 import type { WeeklyPlan, WeeklyPlanPreferences, InsertWeeklyPlan } from "@shared/schema";
 import { MichelinChefAI } from "./openaiService";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export interface WeeklyPlanGenerationRequest {
   userId: number;
@@ -17,6 +22,19 @@ export interface PlannedMeal {
   cookTime: number;
   servings: number;
   isFlexible: boolean;
+}
+
+export interface ProposedRecipeTitle {
+  day: string;
+  title: string;
+  cuisine: string;
+  estimatedTime: number;
+  description: string;
+}
+
+export interface WeeklyTitleProposal {
+  titles: ProposedRecipeTitle[];
+  totalEstimatedCost: number;
 }
 
 export class WeeklyPlannerService {
@@ -73,6 +91,201 @@ export class WeeklyPlannerService {
     });
   }
   
+  /**
+   * STEP 1: Generate cost-optimized recipe titles for user review
+   */
+  static async generateWeeklyTitles(
+    mealCount: number,
+    preferences: WeeklyPlanPreferences
+  ): Promise<WeeklyTitleProposal> {
+    
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const selectedDays = days.slice(0, mealCount);
+    const cuisines = Object.keys(preferences.cuisineWeighting || {});
+    
+    // Build cost-optimized prompt for title generation
+    const systemMessage = `You are a meal planning expert. Generate diverse, appealing dinner recipe titles for a weekly meal plan.
+
+REQUIREMENTS:
+- Generate ${mealCount} different dinner recipes for: ${selectedDays.join(', ')}
+- Vary cuisines, proteins, and cooking methods across the week
+- Consider household: ${preferences.householdSize.adults} adults, ${preferences.householdSize.kids} kids
+- Time preference: ${preferences.timeComfort} minutes per meal
+- Ambition level: ${preferences.ambitionLevel}
+${preferences.dietaryNeeds?.length ? `- Dietary needs: ${preferences.dietaryNeeds.join(', ')}` : ''}
+${cuisines.length ? `- Preferred cuisines: ${cuisines.join(', ')}` : ''}
+
+OUTPUT: JSON array with objects containing:
+- day: day name
+- title: appealing recipe title (4-8 words)
+- cuisine: cuisine type
+- estimatedTime: cooking time in minutes
+- description: one sentence describing the dish
+
+Focus on practical, family-friendly recipes that sound delicious and achievable.`;
+
+    const userMessage = `Generate ${mealCount} varied dinner recipe titles for the week. Make them sound appealing and achievable for home cooking.`;
+
+    try {
+      console.log('Generating cost-optimized recipe titles...');
+      const startTime = Date.now();
+      
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini", // Cost-optimized model
+        messages: [
+          { role: "system", content: systemMessage },
+          { role: "user", content: userMessage }
+        ],
+        max_tokens: 800, // Reduced token limit for titles only
+        temperature: 0.8, // Higher creativity for variety
+        response_format: { type: "json_object" }
+      });
+
+      const duration = Date.now() - startTime;
+      console.log(`Title generation completed in ${duration}ms`);
+
+      const responseContent = completion.choices[0]?.message?.content;
+      if (!responseContent) {
+        throw new Error("No response content from OpenAI");
+      }
+
+      // Parse and validate response
+      const parsedResponse = JSON.parse(responseContent);
+      const titles = parsedResponse.recipes || parsedResponse.titles || parsedResponse;
+      
+      if (!Array.isArray(titles) || titles.length === 0) {
+        throw new Error("Invalid response format for recipe titles");
+      }
+
+      // Estimate cost for full recipe generation
+      const estimatedCost = titles.length * 0.025; // ~$0.025 per full recipe with mini model
+
+      return {
+        titles: titles.slice(0, mealCount).map((title: any, index: number) => ({
+          day: selectedDays[index],
+          title: title.title || `${selectedDays[index]} Dinner`,
+          cuisine: title.cuisine || "International",
+          estimatedTime: title.estimatedTime || parseInt(preferences.timeComfort) || 45,
+          description: title.description || "Delicious homemade dinner"
+        })),
+        totalEstimatedCost: estimatedCost
+      };
+
+    } catch (error) {
+      console.error("Error generating recipe titles:", error);
+      
+      // Fallback titles if AI generation fails
+      const fallbackTitles = selectedDays.map((day, index) => ({
+        day,
+        title: `${day} Family Dinner`,
+        cuisine: cuisines.length > 0 ? cuisines[index % cuisines.length] : "International",
+        estimatedTime: parseInt(preferences.timeComfort) || 45,
+        description: "A delicious family-friendly meal"
+      }));
+
+      return {
+        titles: fallbackTitles,
+        totalEstimatedCost: 0.20
+      };
+    }
+  }
+
+  /**
+   * STEP 2: Generate full recipes only for approved titles
+   */
+  static async generateSelectiveRecipes(
+    approvedTitles: ProposedRecipeTitle[],
+    preferences: WeeklyPlanPreferences,
+    userId: number
+  ): Promise<PlannedMeal[]> {
+    
+    console.log(`Generating ${approvedTitles.length} full recipes from approved titles...`);
+    
+    // Generate recipes in parallel but with cost-optimized model
+    const recipePromises = approvedTitles.map(async (titleData) => {
+      try {
+        // Build focused prompt with specific title
+        const systemMessage = `You are a professional chef creating a complete recipe. Generate a detailed, practical recipe for home cooking.
+
+RECIPE SPECIFICATIONS:
+- Title: "${titleData.title}"
+- Cuisine: ${titleData.cuisine}
+- Target time: ${titleData.estimatedTime} minutes
+- Servings: ${preferences.householdSize.adults + preferences.householdSize.kids}
+${preferences.dietaryNeeds?.length ? `- Dietary requirements: ${preferences.dietaryNeeds.join(', ')}` : ''}
+
+OUTPUT: JSON object with:
+- title: exact recipe title
+- description: brief description 
+- cookTime: total minutes
+- servings: number of servings
+- difficulty: easy/medium/hard
+- cuisine: cuisine type
+- ingredients: array of ingredient strings
+- instructions: array of step strings
+
+Focus on clear, practical instructions that home cooks can follow confidently.`;
+
+        const userMessage = `Create a complete recipe for "${titleData.title}" - a ${titleData.cuisine} dish taking about ${titleData.estimatedTime} minutes.`;
+
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o-mini", // Cost-optimized
+          messages: [
+            { role: "system", content: systemMessage },
+            { role: "user", content: userMessage }
+          ],
+          max_tokens: 1200, // Focused on recipe details
+          temperature: 0.3, // Lower temperature for consistency
+          response_format: { type: "json_object" }
+        });
+
+        const responseContent = completion.choices[0]?.message?.content;
+        if (!responseContent) {
+          throw new Error(`No response for ${titleData.title}`);
+        }
+
+        const recipe = JSON.parse(responseContent);
+        
+        // Save recipe to database
+        const savedRecipe = await storage.createRecipe({
+          userId,
+          title: recipe.title || titleData.title,
+          description: recipe.description || titleData.description,
+          cookTime: recipe.cookTime || titleData.estimatedTime,
+          servings: recipe.servings || (preferences.householdSize.adults + preferences.householdSize.kids),
+          difficulty: recipe.difficulty || "medium",
+          cuisine: recipe.cuisine || titleData.cuisine,
+          mode: "weekly",
+          ingredients: recipe.ingredients || [],
+          instructions: recipe.instructions || [],
+          dietary: preferences.dietaryNeeds,
+          ambition: preferences.ambitionLevel,
+          cookingTime: recipe.cookTime || titleData.estimatedTime,
+          originalPrompt: `Weekly meal plan: ${titleData.title}`
+        });
+
+        return {
+          day: titleData.day,
+          mealType: "dinner",
+          recipeId: savedRecipe.id,
+          recipeTitle: savedRecipe.title,
+          cookTime: savedRecipe.cookTime ?? titleData.estimatedTime,
+          servings: savedRecipe.servings || (preferences.householdSize.adults + preferences.householdSize.kids),
+          isFlexible: true
+        };
+
+      } catch (error) {
+        console.error(`Error generating recipe for ${titleData.title}:`, error);
+        return this.createFallbackMeal(titleData.day, preferences, userId);
+      }
+    });
+
+    const plannedMeals = await Promise.all(recipePromises);
+    console.log(`Successfully generated ${plannedMeals.length} recipes`);
+    
+    return plannedMeals;
+  }
+
   /**
    * Generate a complete weekly meal plan for a user
    */

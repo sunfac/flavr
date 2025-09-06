@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { storage } from "../storage";
-import { WeeklyPlannerService } from "../weeklyPlannerService";
+import { WeeklyPlannerService, type ProposedRecipeTitle } from "../weeklyPlannerService";
 
 export function registerWeeklyPlanRoutes(app: Express) {
   
@@ -230,6 +230,151 @@ export function registerWeeklyPlanRoutes(app: Express) {
     } catch (error: any) {
       console.error("Error adjusting weekly plan:", error);
       res.status(500).json({ error: error.message || "Failed to adjust plan" });
+    }
+  });
+
+  // STEP 1: Generate recipe titles for review (cost-optimized)
+  app.post("/api/generate-weekly-titles", async (req, res) => {
+    try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const userId = req.session!.userId!;
+      const { mealCount } = req.body;
+
+      // Get user preferences
+      const preferences = await storage.getWeeklyPlanPreferences(userId);
+      if (!preferences) {
+        return res.status(400).json({ error: "Please complete your weekly planning setup first" });
+      }
+
+      // Generate titles only
+      const titleProposal = await WeeklyPlannerService.generateWeeklyTitles(
+        mealCount || 7,
+        preferences
+      );
+
+      res.json(titleProposal);
+    } catch (error: any) {
+      console.error("Error generating weekly titles:", error);
+      res.status(500).json({ error: error.message || "Failed to generate recipe titles" });
+    }
+  });
+
+  // STEP 2: Generate full recipes from approved titles
+  app.post("/api/generate-from-titles", async (req, res) => {
+    try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const userId = req.session!.userId!;
+      const { approvedTitles, weekStartDate } = req.body;
+
+      if (!approvedTitles || !Array.isArray(approvedTitles)) {
+        return res.status(400).json({ error: "Approved titles array required" });
+      }
+
+      // Get user preferences
+      const preferences = await storage.getWeeklyPlanPreferences(userId);
+      if (!preferences) {
+        return res.status(400).json({ error: "User preferences not found" });
+      }
+
+      // Generate full recipes for approved titles
+      const plannedMeals = await WeeklyPlannerService.generateSelectiveRecipes(
+        approvedTitles,
+        preferences,
+        userId
+      );
+
+      // Create the weekly plan
+      const weekStart = new Date(weekStartDate);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+
+      // Calculate meal count based on user's subscription
+      const user = await storage.getUser(userId);
+      const subscriptionStatus = await storage.getSubscriptionStatus(userId);
+      const isFlavrPlus = subscriptionStatus?.hasFlavrPlus || false;
+      const mealCount = isFlavrPlus ? plannedMeals.length : Math.min(plannedMeals.length, 2);
+
+      // Generate consolidated shopping list
+      const allIngredients: string[] = [];
+      for (const meal of plannedMeals.slice(0, mealCount)) {
+        try {
+          const recipe = await storage.getRecipe(meal.recipeId);
+          if (recipe && recipe.ingredients) {
+            allIngredients.push(...recipe.ingredients);
+          }
+        } catch (error) {
+          console.error(`Error fetching recipe ${meal.recipeId}:`, error);
+        }
+      }
+
+      const consolidatedShoppingList = consolidateShoppingList(allIngredients);
+
+      const weeklyPlanData = {
+        userId,
+        weekStartDate: weekStart,
+        weekEndDate: weekEnd,
+        mealCount,
+        planStatus: "pending" as const,
+        plannedRecipes: plannedMeals.slice(0, mealCount),
+        consolidatedShoppingList,
+        totalEstimatedCost: 0,
+        generatedAt: new Date()
+      };
+
+      const newPlan = await storage.createWeeklyPlan(weeklyPlanData);
+      res.json(newPlan);
+
+    } catch (error: any) {
+      console.error("Error generating recipes from titles:", error);
+      res.status(500).json({ error: error.message || "Failed to generate recipes" });
+    }
+  });
+
+  // Regenerate single recipe title
+  app.post("/api/regenerate-title", async (req, res) => {
+    try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const userId = req.session!.userId!;
+      const { day, currentTitle, preferences: userPrefs } = req.body;
+
+      if (!day) {
+        return res.status(400).json({ error: "Day parameter required" });
+      }
+
+      // Get user preferences if not provided
+      let preferences = userPrefs;
+      if (!preferences) {
+        preferences = await storage.getWeeklyPlanPreferences(userId);
+        if (!preferences) {
+          return res.status(400).json({ error: "User preferences not found" });
+        }
+      }
+
+      // Generate a new title for this specific day
+      const singleTitleProposal = await WeeklyPlannerService.generateWeeklyTitles(1, preferences);
+      
+      const newTitle = {
+        ...singleTitleProposal.titles[0],
+        day: day
+      };
+
+      res.json({ 
+        title: newTitle,
+        estimatedCost: 0.025 // Cost for one recipe generation
+      });
+
+    } catch (error: any) {
+      console.error("Error regenerating title:", error);
+      res.status(500).json({ error: error.message || "Failed to regenerate title" });
     }
   });
 
