@@ -355,7 +355,7 @@ Respond with JSON: {
 
         const result = await ChefAssistGPT5.generateInspireTitle({
           seeds,
-          userIntent: message,
+          userIntent: `Simple, everyday ${selectedCuisine.toLowerCase()} dinner that's easy to make at home - ${message}`,
           cuisinePreference: selectedCuisine,
           clientId: clientId, // Use same clientId for variety tracking
         });
@@ -369,12 +369,12 @@ Respond with JSON: {
       }
     }
 
-    // Fallback suggestions if generation fails
+    // Fallback suggestions if generation fails - simple, practical options
     if (suggestions.length === 0) {
       return [
-        "Herb-Crusted Chicken with Lemon",
-        "Rustic Vegetable Pasta Bake", 
-        "Spiced Salmon with Coconut Rice"
+        "Simple Chicken Stir-Fry with Vegetables",
+        "Classic Spaghetti with Tomato Sauce", 
+        "Easy Beef and Vegetable Curry"
       ];
     }
 
