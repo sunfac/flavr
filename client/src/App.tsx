@@ -37,6 +37,7 @@ import LoadingPage from "@/pages/LoadingPage";
 import PublicRecipeView from "./pages/PublicRecipeView";
 import TempRecipe from "@/pages/TempRecipe";
 import WeeklyPlanner from "@/pages/WeeklyPlanner";
+import WelcomePreferences from "@/pages/WelcomePreferences";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 
 function Router() {
@@ -58,6 +59,7 @@ function Router() {
       <Route path="/recipe-test" component={RecipeCardTest} />
       <Route path="/settings" component={SettingsPage} />
       <Route path="/subscribe" component={Subscribe} />
+      <Route path="/welcome-preferences" component={WelcomePreferences} />
       <Route path="/developer-logs" component={DeveloperLogs} />
       <Route path="/developer-recipes" component={DeveloperRecipes} />
       <Route path="/image-migration" component={ImageMigration} />

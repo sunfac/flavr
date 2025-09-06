@@ -68,7 +68,7 @@ const SubscribeForm = () => {
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: window.location.origin + "/",
+        return_url: window.location.origin + "/welcome-preferences",
       },
     });
 
@@ -81,15 +81,15 @@ const SubscribeForm = () => {
         variant: "destructive",
       });
     } else {
-      // Payment successful - navigate immediately and let the app refresh naturally
+      // Payment successful - navigate to preferences setup
       toast({
-        title: "Welcome to Flavr+!",
-        description: "You now have unlimited access to recipes.",
+        title: "Payment Successful!",
+        description: "Let's set up your cooking preferences.",
       });
       
       // Navigate after a brief delay to let the toast show
       setTimeout(() => {
-        navigate("/settings");
+        navigate("/welcome-preferences");
       }, 1000);
     }
   };
