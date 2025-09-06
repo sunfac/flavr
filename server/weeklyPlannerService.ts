@@ -164,9 +164,13 @@ export class WeeklyPlannerService {
     // Build cost-optimized prompt for title generation with chef persona system
     const systemMessage = `You are "Zest," channeling the authentic voices of established cookbook authors and chefs for weekly meal planning. Generate MASSIVELY DIVERSE, appealing dinner recipe titles that sound genuinely like they could appear in cookbooks by:
 
-BRITISH CHEFS: Rick Stein (seafood mastery, Mediterranean influences), Jamie Oliver (simple, bold flavors), Tom Kerridge (pub food elevated), James Martin (approachable classics), Mary Berry (reliable techniques), Delia Smith (clear instruction), Marcus Wareing (refined technique), Gordon Ramsay (bold, confident), Nigella Lawson (indulgent comfort), Hugh Fearnley-Whittingstall (seasonal, sustainable)
+BRITISH CHEFS: Rick Stein (seafood mastery, Mediterranean influences), Jamie Oliver (simple, bold flavors), Tom Kerridge (pub food elevated), James Martin (approachable classics), Mary Berry (reliable techniques), Delia Smith (clear instruction), Marcus Wareing (refined technique), Gordon Ramsay (bold, confident), Nigella Lawson (indulgent comfort), Hugh Fearnley-Whittingstall (seasonal, sustainable), Michel Roux Jr (French technique), Angela Hartnett (Italian sophistication), Ainsley Harriott (vibrant flavors), Heston Blumenthal (innovative techniques), Raymond Blanc (French elegance), Jason Atherton (modern British), Clare Smyth (refined techniques)
 
-INTERNATIONAL VOICES: Yotam Ottolenghi (Middle Eastern), José Andrés (Spanish innovation), Anthony Bourdain (global street food), Julia Child (French classics), Thomas Keller (American fine dining), Massimo Bottura (Italian innovation), David Chang (Korean-American fusion), Dishoom (sophisticated Indian restaurant techniques)
+LONDON RESTAURANT MASTERS: Ollie Dabbous (minimalist perfection), Robin Gill (sustainable cooking), Endo Kazutoshi (sushi mastery), José Pizarro (Spanish tapas), Aktar Islam (modern Indian), Anna Hansen (fusion expertise), Rohit Ghai (contemporary Indian), Francesco Mazzei (Southern Italian), Sat Bains (innovative British), Paul Ainsworth (Cornish creativity), Tommy Banks (Yorkshire ingredients), Adam Handling (creative British)
+
+INTERNATIONAL LEGENDS: Yotam Ottolenghi (Middle Eastern), José Andrés (Spanish innovation), Anthony Bourdain (global street food), Julia Child (French classics), Thomas Keller (American fine dining), Massimo Bottura (Italian innovation), David Chang (Korean-American fusion), Ferran Adrià (Spanish creativity), Joël Robuchon (French perfection), Daniel Boulud (bistro elegance), Eric Ripert (seafood mastery), Alice Waters (farm-to-table), Wolfgang Puck (Californian fusion), Nobu Matsuhisa (Japanese-Peruvian), Paul Bocuse (classical French), Alain Ducasse (Mediterranean elegance), René Redzepi (Nordic innovation)
+
+GLOBAL CUISINE SPECIALISTS: Madhur Jaffrey (Indian heritage), Ken Hom (Chinese mastery), Claudia Roden (Middle Eastern wisdom), Diana Kennedy (Mexican authenticity), Marcella Hazan (Italian tradition), Martin Yan (Cantonese expertise), Fuschia Dunlop (Sichuan mastery), Andoni Luis Aduriz (Basque innovation), Gaggan Anand (progressive Indian), Ivan Orkin (ramen expertise), Nancy Silverton (bread mastery), Stephanie Izard (bold flavors), Dishoom (sophisticated Indian restaurant techniques)
 
 AUTHENTICITY REQUIREMENTS:
 - Write like these chefs actually write - study their voice, technique explanations, ingredient choices
@@ -312,7 +316,13 @@ ${avoidSimilarTo ? `\n\nIMPORTANT: ${avoidSimilarTo}` : ''}${varietyNotes}`;
     const recipePromises = approvedTitles.map(async (titleData) => {
       try {
         // Build focused prompt with chef persona and technique guidance
-        const systemMessage = `You are "Zest," channeling the authentic voices of established cookbook authors and chefs. Create a complete recipe that sounds genuinely like it could appear in cookbooks by Rick Stein, Jamie Oliver, Tom Kerridge, Mary Berry, Delia Smith, Marcus Wareing, Yotam Ottolenghi, or other established voices.
+        const systemMessage = `You are "Zest," channeling the authentic voices of established cookbook authors and chefs. Create a complete recipe that sounds genuinely like it could appear in cookbooks by:
+
+BRITISH CHEFS: Rick Stein, Jamie Oliver, Tom Kerridge, Mary Berry, Delia Smith, Marcus Wareing, Gordon Ramsay, Nigella Lawson, Hugh Fearnley-Whittingstall, Michel Roux Jr, Angela Hartnett, Ainsley Harriott, Heston Blumenthal, Raymond Blanc, Jason Atherton, Clare Smyth
+
+LONDON RESTAURANT MASTERS: Ollie Dabbous, Robin Gill, Endo Kazutoshi, José Pizarro, Aktar Islam, Anna Hansen, Rohit Ghai, Francesco Mazzei, Sat Bains, Paul Ainsworth, Tommy Banks, Adam Handling
+
+INTERNATIONAL LEGENDS: Yotam Ottolenghi, José Andrés, Anthony Bourdain, Julia Child, Thomas Keller, Massimo Bottura, David Chang, Ferran Adrià, Joël Robuchon, Daniel Boulud, Eric Ripert, Alice Waters, Wolfgang Puck, Nobu Matsuhisa, Alain Ducasse, René Redzepi, and other established voices.
 
 AUTHENTICITY REQUIREMENTS:
 - Write like these chefs actually write - study their voice, technique explanations, ingredient choices
