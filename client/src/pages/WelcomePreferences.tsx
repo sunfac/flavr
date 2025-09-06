@@ -58,7 +58,8 @@ export default function WelcomePreferences() {
   const onSubmit = async (data: PreferencesFormData) => {
     setIsSubmitting(true);
     try {
-      const preferences = {
+      // Save to weekly plan preferences (existing system)
+      const weeklyPlanPreferences = {
         ...data,
         cookingFrequency: 3, // Default for new subscribers
         cuisineWeighting: {}, // Can be set later
@@ -66,7 +67,22 @@ export default function WelcomePreferences() {
         createdAt: new Date().toISOString(),
       };
 
-      await apiRequest("POST", "/api/weekly-plan-preferences", preferences);
+      // Save to general user preferences (for Chat Mode and Chef Assist)
+      const userPreferences = {
+        dietaryRestrictions: data.dietaryNeeds || [],
+        timePreference: parseInt(data.timeComfort),
+        ambitionLevel: data.ambitionLevel,
+        budgetPreference: data.budgetPerServing && data.budgetPerServing <= 5 ? "budget" : 
+                          data.budgetPerServing && data.budgetPerServing <= 15 ? "moderate" : "premium",
+        skillLevel: data.ambitionLevel === "simple" ? "beginner" :
+                   data.ambitionLevel === "adventurous" ? "advanced" : "intermediate"
+      };
+
+      // Save to both systems in parallel
+      await Promise.all([
+        apiRequest("POST", "/api/weekly-plan-preferences", weeklyPlanPreferences),
+        apiRequest("POST", "/api/user-preferences", userPreferences)
+      ]);
       
       toast({
         title: "Welcome to Flavr+! 🎉",

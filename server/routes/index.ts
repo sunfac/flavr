@@ -19,6 +19,7 @@ import { registerBiometricAuthRoutes } from "./biometricAuthRoutes";
 import { registerSubRecipeRoutes } from "./subRecipeRoutes";
 import { registerWeeklyPlanRoutes } from "./weeklyPlanRoutes";
 import { registerAnalyticsRoutes } from "./analyticsRoutes";
+import { registerUserPreferencesRoutes } from "./userPreferencesRoutes";
 import { initializeOAuthStrategies } from "../oauthStrategies";
 import passport from "passport";
 
@@ -67,6 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerSubRecipeRoutes(app);
   registerWeeklyPlanRoutes(app);
   registerAnalyticsRoutes(app);
+  registerUserPreferencesRoutes(app);
 
   // Additional utility routes
   

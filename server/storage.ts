@@ -1,4 +1,4 @@
-import { users, recipes, chatMessages, developerLogs, pseudoUsers, interactionLogs, weeklyPlans, weeklyPlanPreferences, type User, type InsertUser, type Recipe, type InsertRecipe, type ChatMessage, type InsertChatMessage, type DeveloperLog, type InsertDeveloperLog, type PseudoUser, type InsertPseudoUser, recipeGenerationLogs, type RecipeGenerationLog, type InsertRecipeGenerationLog, type InteractionLog, type InsertInteractionLog, type WeeklyPlan, type InsertWeeklyPlan, type WeeklyPlanPreferences, type InsertWeeklyPlanPreferences } from "@shared/schema";
+import { users, recipes, chatMessages, developerLogs, pseudoUsers, interactionLogs, weeklyPlans, weeklyPlanPreferences, userPreferences, type User, type InsertUser, type Recipe, type InsertRecipe, type ChatMessage, type InsertChatMessage, type DeveloperLog, type InsertDeveloperLog, type PseudoUser, type InsertPseudoUser, recipeGenerationLogs, type RecipeGenerationLog, type InsertRecipeGenerationLog, type InteractionLog, type InsertInteractionLog, type WeeklyPlan, type InsertWeeklyPlan, type WeeklyPlanPreferences, type InsertWeeklyPlanPreferences, type UserPreferences, type InsertUserPreferences } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, or, and } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -98,6 +98,12 @@ export interface IStorage {
   getWeeklyPlanPreferences(userId: number): Promise<WeeklyPlanPreferences | undefined>;
   updateWeeklyPlanPreferences(userId: number, updates: Partial<WeeklyPlanPreferences>): Promise<WeeklyPlanPreferences>;
   completeOnboarding(userId: number): Promise<WeeklyPlanPreferences>;
+  
+  // User preferences for general personalization
+  createUserPreferences(preferences: InsertUserPreferences): Promise<UserPreferences>;
+  getUserPreferences(userId: number): Promise<UserPreferences | undefined>;
+  updateUserPreferences(userId: number, updates: Partial<UserPreferences>): Promise<UserPreferences>;
+  upsertUserPreferences(userId: number, preferences: Partial<UserPreferences>): Promise<UserPreferences>;
 }
 
 
@@ -648,6 +654,40 @@ export class DatabaseStorage implements IStorage {
       .where(eq(weeklyPlanPreferences.userId, userId))
       .returning();
     return updatedPreferences;
+  }
+
+  // User preferences implementation
+  async createUserPreferences(preferences: InsertUserPreferences): Promise<UserPreferences> {
+    const [newPreferences] = await db.insert(userPreferences).values(preferences).returning();
+    return newPreferences;
+  }
+
+  async getUserPreferences(userId: number): Promise<UserPreferences | undefined> {
+    const [preferences] = await db.select().from(userPreferences)
+      .where(eq(userPreferences.userId, userId));
+    return preferences;
+  }
+
+  async updateUserPreferences(userId: number, updates: Partial<UserPreferences>): Promise<UserPreferences> {
+    updates.lastUpdated = new Date();
+    const [updatedPreferences] = await db.update(userPreferences)
+      .set(updates)
+      .where(eq(userPreferences.userId, userId))
+      .returning();
+    return updatedPreferences;
+  }
+
+  async upsertUserPreferences(userId: number, preferences: Partial<UserPreferences>): Promise<UserPreferences> {
+    const existing = await this.getUserPreferences(userId);
+    
+    if (existing) {
+      return this.updateUserPreferences(userId, preferences);
+    } else {
+      return this.createUserPreferences({
+        userId,
+        ...preferences
+      } as InsertUserPreferences);
+    }
   }
 }
 
