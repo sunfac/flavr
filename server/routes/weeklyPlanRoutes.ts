@@ -58,7 +58,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
           cookingFrequency,
           timeComfort,
           ambitionLevel,
-          dietaryNeeds: dietaryNeeds || [],
+          dietaryNeeds: dietaryNeeds || "",
           cuisineWeighting,
           cuisinePreferences: cuisinePreferences || [],
           budgetPerServing,
@@ -74,7 +74,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
           cookingFrequency,
           timeComfort,
           ambitionLevel,
-          dietaryNeeds: dietaryNeeds || [],
+          dietaryNeeds: dietaryNeeds || "",
           cuisineWeighting,
           cuisinePreferences: cuisinePreferences || [],
           budgetPerServing,
@@ -106,9 +106,12 @@ export function registerWeeklyPlanRoutes(app: Express) {
           // Handle date fields properly
           if (key.includes('Date') || key.includes('At')) {
             cleanedData[key] = value ? new Date(value as string) : null;
-          } else if (key === 'dietaryNeeds' || key === 'cuisinePreferences') {
-            // Ensure these are always arrays
+          } else if (key === 'cuisinePreferences') {
+            // Ensure cuisinePreferences is always an array
             cleanedData[key] = Array.isArray(value) ? value : (value ? [value] : []);
+          } else if (key === 'dietaryNeeds') {
+            // Ensure dietaryNeeds is always a string
+            cleanedData[key] = typeof value === 'string' ? value : (value ? String(value) : "");
           } else {
             cleanedData[key] = value;
           }
