@@ -585,11 +585,14 @@ CRITICAL AUTHENTICITY RULES:
 - ONLY use dishes that authentically exist in the specified cuisine
 - Italian: pasta, risotto, osso buco, saltimbocca, bruschetta, polenta - NOT beef pies, fish & chips
 - British: shepherd's pie, beef wellington, fish & chips, bangers & mash - NOT tacos, pad thai
-- French: coq au vin, bouillabaisse, cassoulet, ratatouille - NOT curry, stir-fry
+- French: coq au vin, bouillabaisse, cassoulet, ratatouille - NOT curry, stir-fry, pho-infused anything
 - Thai: pad thai, tom yum, green curry, som tam - NOT fish & chips, shepherd's pie
 - Indian: curry, biryani, dal, tandoori - NOT pizza, fish & chips
 - Chinese: stir-fry, dumplings, hot pot, kung pao - NOT shepherd's pie, cassoulet
-- Never create impossible combinations like "Italian beef pie" or "Thai shepherd's pie"
+- Vietnamese: pho, banh mi, spring rolls - NOT bourguignon, fish & chips
+- NEVER mix cuisine styles: no "pho-infused" French dishes, no "curry" Italian pasta, no "kimchi" Mexican tacos
+- NEVER create impossible combinations like "Italian beef pie", "Thai shepherd's pie", or "Pho-Infused Beef Bourguignon"
+- Each dish must be authentically from ONE cuisine tradition
 
 CREATIVE FREEDOM:
 - Draw from authentic global cuisines, chef techniques, and restaurant inspirations

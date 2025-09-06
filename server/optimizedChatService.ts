@@ -230,11 +230,14 @@ Be concise but complete. Use friendly, encouraging tone.`
     // Generate suggestions using Chef Assist's optimized system
     let suggestions: string[];
     try {
-      suggestions = await ChatOptimizer.generateRecipeSuggestions(
+      const rawSuggestions = await ChatOptimizer.generateRecipeSuggestions(
         request.message,
         clientId,
         3
       );
+      
+      // Validate and filter out inappropriate fusion combinations
+      suggestions = this.validateRecipeSuggestions(rawSuggestions);
       console.log('✅ Recipe suggestions generated:', suggestions);
     } catch (error) {
       console.error('❌ Recipe suggestions generation failed:', error);
@@ -321,6 +324,60 @@ Provide clear, specific modification advice. Be concise and practical.`
   // Fallback handler
   private static async handleFallback(request: OptimizedChatRequest): Promise<string> {
     return "I'd love to help! Could you tell me more about what you're looking to cook or any cooking questions you have?";
+  }
+
+  // Validate recipe suggestions to prevent inappropriate fusion combinations
+  private static validateRecipeSuggestions(suggestions: string[]): string[] {
+    const problematicPatterns = [
+      // Cross-cuisine fusion patterns that don't make sense
+      /pho.*bourguignon|bourguignon.*pho/i,
+      /curry.*fish.*chips|fish.*chips.*curry/i,
+      /kimchi.*tacos|tacos.*kimchi/i,
+      /pasta.*pad.*thai|pad.*thai.*pasta/i,
+      /sushi.*shepherd.*pie|shepherd.*pie.*sushi/i,
+      /pho.*infused.*french|french.*pho.*infused/i,
+      /thai.*infused.*british|british.*thai.*infused/i,
+      /italian.*infused.*chinese|chinese.*infused.*italian/i,
+      /indian.*infused.*mexican|mexican.*infused.*indian/i,
+      
+      // Other nonsensical combinations
+      /molecular.*gastronomy/i,
+      /spherification/i,
+      /liquid.*nitrogen/i
+    ];
+    
+    const validSuggestions = suggestions.filter(suggestion => {
+      const isProblematic = problematicPatterns.some(pattern => 
+        pattern.test(suggestion)
+      );
+      
+      if (isProblematic) {
+        console.log(`🚫 Filtered out inappropriate fusion: ${suggestion}`);
+        return false;
+      }
+      return true;
+    });
+    
+    // If we filtered out too many, add some safe fallbacks
+    if (validSuggestions.length < 2) {
+      const fallbacks = [
+        "Classic Pan-Seared Chicken with Herbs",
+        "Traditional Beef Stew with Vegetables", 
+        "Simple Pasta with Garlic and Olive Oil",
+        "Fresh Salmon with Lemon Butter",
+        "Homestyle Vegetable Stir-Fry"
+      ];
+      
+      // Add fallbacks until we have at least 3 suggestions
+      while (validSuggestions.length < 3) {
+        const fallback = fallbacks[validSuggestions.length % fallbacks.length];
+        if (!validSuggestions.includes(fallback)) {
+          validSuggestions.push(fallback);
+        }
+      }
+    }
+    
+    return validSuggestions;
   }
 
   // Check if intent clarification is needed - be less aggressive
