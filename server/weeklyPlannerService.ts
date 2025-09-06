@@ -2,6 +2,7 @@ import { storage } from "./storage";
 import type { WeeklyPlan, WeeklyPlanPreferences, InsertWeeklyPlan } from "@shared/schema";
 import { MichelinChefAI } from "./openaiService";
 import OpenAI from "openai";
+import { smartProfilingService, type RecipeGenerationContext } from './services/smartProfilingService';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -97,12 +98,61 @@ export class WeeklyPlannerService {
   static async generateWeeklyTitles(
     mealCount: number,
     preferences: WeeklyPlanPreferences,
-    avoidSimilarTo?: string
+    avoidSimilarTo?: string,
+    userId?: number // Added for smart profiling
   ): Promise<WeeklyTitleProposal> {
     
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
     const selectedDays = days.slice(0, mealCount);
-    const cuisines = preferences.cuisinePreferences || [];
+    let cuisines = preferences.cuisinePreferences || [];
+    
+    // SMART PROFILING: Enhance Weekly Planner with user preferences
+    let smartProfileLog = "No user profiling applied (Weekly Planner)";
+    let enhancedPreferences = preferences;
+    
+    if (userId) {
+      try {
+        const generationContext: RecipeGenerationContext = {
+          mode: 'weekly-planner',
+          originalPrompt: `Weekly meal plan for ${mealCount} meals`,
+          userPreferences: {
+            cuisinePreference: cuisines.join(', '),
+            timeBudget: preferences.timeComfort?.weeknight,
+            dietaryNeeds: Array.isArray(preferences.dietaryNeeds) ? preferences.dietaryNeeds : [preferences.dietaryNeeds].filter(Boolean),
+            servings: preferences.householdSize.adults + preferences.householdSize.kids
+          }
+        };
+        
+        const smartEnhancement = await smartProfilingService.enhanceRecipeGeneration(
+          userId,
+          generationContext
+        );
+        
+        // For Weekly Planner, use profiling more aggressively since it's a planning tool
+        if (smartEnhancement.confidenceLevel !== 'low') {
+          // Extract cuisine suggestions from enhanced prompt
+          const cuisineMatches = smartEnhancement.enhancedPrompt.match(/prefer\s+(\w+(?:\s+\w+)*)\s+cuisine/gi);
+          if (cuisineMatches && cuisineMatches.length > 0) {
+            const suggestedCuisines = cuisineMatches.map(match => {
+              const cuisine = match.replace(/prefer\s+|cuisine/gi, '').trim();
+              return cuisine.charAt(0).toUpperCase() + cuisine.slice(1);
+            });
+            // Merge with existing preferences, giving weight to user profile
+            cuisines = [...new Set([...suggestedCuisines, ...cuisines])];
+          }
+          
+          smartProfileLog = `Profile applied (${smartEnhancement.confidenceLevel} confidence, ${smartEnhancement.diversityBoost}% diversity): ${smartEnhancement.reasoning.slice(0, 2).join(', ')}`;
+        } else {
+          smartProfileLog = `Profile not used: ${smartEnhancement.reasoning[0]}`;
+        }
+        
+        console.log(`🧠 Weekly Planner Smart Profiling: ${smartProfileLog}`);
+        
+      } catch (error) {
+        console.error("Smart profiling failed for Weekly Planner:", error);
+        smartProfileLog = "Profiling error - using original preferences";
+      }
+    }
     
     // Build cost-optimized prompt for title generation
     const systemMessage = `You are a meal planning expert. Generate MASSIVELY DIVERSE, appealing dinner recipe titles for a weekly meal plan.
