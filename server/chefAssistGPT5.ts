@@ -63,18 +63,34 @@ const MAX_TRACKED_WORDS = 15; // Track last 15 descriptive words per user
 function trackTitleWords(clientId: string, title: string) {
   if (!clientId) return;
   
-  // Extract descriptive words (ignore common words)
+  // Extract descriptive words and phrases (ignore common words)
   const commonWords = new Set(['with', 'and', 'the', 'a', 'an', 'in', 'on', 'for', 'to', 'of', 'by']);
-  const words = title.toLowerCase().split(/[\s-]+/)
+  const titleLower = title.toLowerCase();
+  
+  // Track both individual words and common culinary phrases
+  const words = titleLower.split(/[\s-]+/)
     .filter(word => word.length > 2 && !commonWords.has(word))
     .filter(word => /^[a-z]+$/.test(word)); // Only alphabetic words
+  
+  // Track common culinary phrases that get overused
+  const phrases = [];
+  if (titleLower.includes('herb-infused') || titleLower.includes('herb infused')) phrases.push('herb-infused');
+  if (titleLower.includes('bliss')) phrases.push('bliss');
+  if (titleLower.includes('golden')) phrases.push('golden');
+  if (titleLower.includes('crispy')) phrases.push('crispy');
+  if (titleLower.includes('rustic')) phrases.push('rustic');
+  if (titleLower.includes('silky')) phrases.push('silky');
+  if (titleLower.includes('heavenly')) phrases.push('heavenly');
+  if (titleLower.includes('divine')) phrases.push('divine');
+  if (titleLower.includes('perfect')) phrases.push('perfect');
+  if (titleLower.includes('ultimate')) phrases.push('ultimate');
   
   if (!titleWordTracker.has(clientId)) {
     titleWordTracker.set(clientId, []);
   }
   
   const userWords = titleWordTracker.get(clientId)!;
-  userWords.push(...words);
+  userWords.push(...words, ...phrases); // Track both words and phrases
   
   // Keep only the most recent words
   if (userWords.length > MAX_TRACKED_WORDS) {
@@ -582,6 +598,14 @@ CREATIVE FREEDOM:
 - Include seasonal ingredients and complementary flavor pairings
 - Use varied, creative descriptors - avoid repetitive adjectives${varietyNotes}
 
+AVOID OVERUSED WORDS:
+- Instead of "herb-infused": use aromatic, fragrant, scented, perfumed, botanical
+- Instead of "bliss": use delight, heaven, paradise, nirvana, euphoria
+- Instead of "golden": use amber, burnished, caramelized, bronzed, sun-kissed
+- Instead of "crispy": use crunchy, crackling, brittle, crisp, textured
+- Instead of "rustic": use farmhouse, country-style, traditional, homestyle, artisanal
+- Instead of "heavenly/divine": use sublime, exquisite, magnificent, extraordinary
+
 OUTPUT FORMAT: JSON with "title" field only. Keep titles 4-8 words, appetizing and clear.`;
 
     const userMessage = `USER INSPIRATION: "${data.userIntent || 'delicious cooking'}"
@@ -645,12 +669,12 @@ JSON OUTPUT: {"title": "Your Creative Recipe Title"}`;
       
       // Fallback title generation with variety
       const fallbackTitles = [
-        "Herb-Crusted Pan-Seared Chicken",
-        "Crispy-Skinned Salmon with Lemon Butter", 
+        "Pan-Seared Chicken with Aromatic Crust",
+        "Bronzed Salmon with Lemon Butter", 
         "Slow-Braised Beef with Rich Gravy",
         "Fresh Pasta with Garlic and Parmesan",
         "Fragrant Spiced Rice with Vegetables",
-        "Rustic Mushroom and Thyme Risotto",
+        "Traditional Mushroom and Thyme Risotto",
         "Tender Lamb with Mint and Cumin",
         "Smoky Paprika-Rubbed Pork Chops"
       ];
