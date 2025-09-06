@@ -63,8 +63,8 @@ export default function FlavrPlus() {
     },
     {
       icon: <Calendar className="w-5 h-5 text-orange-400" />,
-      title: "Flavr Rituals",
-      description: "Weekly curated meal plans and cooking challenges"
+      title: "Weekly Planner",
+      description: "AI-generated meal plans with shopping lists and .ics export"
     }
   ];
 
@@ -97,11 +97,11 @@ export default function FlavrPlus() {
                 Enjoy unlimited recipes, premium features, and exclusive content.
               </p>
               <Button 
-                onClick={() => navigate('/flavr-rituals')}
+                onClick={() => navigate('/weekly-planner')}
                 className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold"
               >
                 <Calendar className="w-4 h-4 mr-2" />
-                Explore Flavr Rituals
+                Open Weekly Planner
               </Button>
             </div>
           </div>
@@ -250,7 +250,15 @@ export default function FlavrPlus() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-green-400" />
-                    Flavr Rituals access
+                    Weekly Planner with analytics
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-green-400" />
+                    Savings & Waste Meter
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-green-400" />
+                    Monthly Taste Portrait
                   </li>
                 </ul>
               </div>
