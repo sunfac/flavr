@@ -804,8 +804,8 @@ export default function WeeklyPlanner() {
                     {/* Cuisine Preferences */}
                     <div className="space-y-2">
                       <Label className="text-slate-200">Cuisine Preferences</Label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {['British', 'Mediterranean', 'Asian', 'Indian', 'Mexican', 'Italian'].map((cuisine) => {
+                      <div className="grid grid-cols-3 gap-2">
+                        {['British', 'Mediterranean', 'Asian', 'Indian', 'Mexican', 'Italian', 'French', 'Thai', 'Chinese', 'Japanese', 'Greek', 'Middle Eastern'].map((cuisine) => {
                           const cuisineKey = cuisine.toLowerCase();
                           const currentPrefs = editingPreferences?.cuisinePreferences || [];
                           const isSelected = currentPrefs.includes(cuisineKey);
