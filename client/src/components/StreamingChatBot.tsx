@@ -13,6 +13,11 @@ interface Message {
   sender: 'user' | 'assistant';
   timestamp: Date;
   isStreaming?: boolean;
+  suggestedActions?: Array<{
+    type: 'quick_recipe' | 'full_recipe' | 'continue_chat';
+    label: string;
+    data?: any;
+  }>;
 }
 
 interface StreamingChatBotProps {
@@ -122,8 +127,8 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
     setMessages(prev => [...prev, assistantMessage]);
 
     try {
-      // Use streaming endpoint for enhanced conversational memory
-      const response = await fetch('/api/chat/stream', {
+      // Use optimized endpoint for suggestedActions support
+      const response = await fetch('/api/chat/optimized', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -131,12 +136,7 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
         body: JSON.stringify({
           message: currentMessage,
           currentRecipe,
-          conversationHistory: updatedHistory,
-          openAIContext: {
-            quizData: currentRecipe?.quizData,
-            originalPrompt: currentRecipe?.originalPrompt,
-            userPreferences: currentRecipe?.userPreferences
-          }
+          conversationHistory: updatedHistory
         }),
       });
 
@@ -144,89 +144,22 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
         throw new Error('Failed to send message');
       }
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let fullResponse = '';
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n');
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const data = JSON.parse(line.slice(6));
-                
-                if (data.content && !data.done) {
-                  fullResponse += data.content;
-                  // Update streaming message
-                  setMessages(prev => prev.map(msg => 
-                    msg.id === assistantMessage.id 
-                      ? { ...msg, text: fullResponse }
-                      : msg
-                  ));
-                } else if (data.type === 'recipeUpdate') {
-                  // Live recipe card refresh - force immediate update
-                  console.log('🔄 Received recipe update from stream:', data.recipe);
-                  
-                  // Create updated recipe with proper structure
-                  const updatedRecipe = {
-                    ...currentRecipe,
-                    ...data.recipe,
-                    id: currentRecipe?.id || data.recipe.id,
-                    lastUpdated: Date.now()
-                  };
-                  
-                  console.log('📝 Updating recipe store with:', updatedRecipe);
-                  
-                  // Force recipe store update with complete data
-                  console.log('🔄 Updating recipe store with new data');
-                  updateActiveRecipe(updatedRecipe);
-                  
-                  // Trigger parent callback with complete recipe data
-                  if (onRecipeUpdate) {
-                    console.log('📤 Triggering parent callback with recipe update');
-                    onRecipeUpdate(updatedRecipe);
-                  }
-                  
-                  // Force a DOM refresh to ensure visual updates
-                  setTimeout(() => {
-                    window.dispatchEvent(new CustomEvent('recipe-updated', { 
-                      detail: { recipe: updatedRecipe }
-                    }));
-                  }, 100);
-                  
-                  // Add confirmation message
-                  fullResponse += `\n\n✅ Recipe updated: "${data.recipe.title}"`;
-                  setMessages(prev => prev.map(msg => 
-                    msg.id === assistantMessage.id 
-                      ? { ...msg, text: fullResponse }
-                      : msg
-                  ));
-                } else if (data.done) {
-                  setIsStreaming(false);
-                  // Mark message as complete
-                  setMessages(prev => prev.map(msg => 
-                    msg.id === assistantMessage.id 
-                      ? { ...msg, isStreaming: false }
-                      : msg
-                  ));
-                  
-                  // TTS disabled - no auto-speak
-                } else if (data.type === 'error') {
-                  throw new Error(data.message);
-                }
-              } catch (error) {
-                console.error('Error parsing streaming data:', error);
-              }
+      const data = await response.json();
+      console.log('⚡ Optimized chat result:', data);
+      
+      // Update the assistant message with the response and suggestedActions
+      setMessages(prev => prev.map(msg => 
+        msg.id === assistantMessage.id 
+          ? { 
+              ...msg, 
+              text: data.message, 
+              isStreaming: false,
+              suggestedActions: data.suggestedActions 
             }
-          }
-        }
-      }
+          : msg
+      ));
+      
+      setIsStreaming(false);
     } catch (error: any) {
       console.error('Streaming chat error:', error);
       setMessages(prev => prev.map(msg => 
@@ -353,6 +286,46 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                   <span className="inline-block w-1 h-3 bg-current ml-1 animate-pulse" />
                 )}
               </p>
+              
+              {/* Recipe Option Radio Buttons */}
+              {message.suggestedActions && message.suggestedActions.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  <p className="text-xs text-white/70 mb-2">Choose an option:</p>
+                  <div className="space-y-2">
+                    {message.suggestedActions.map((action, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (action.type === 'quick_recipe' && action.data?.title) {
+                            setInputValue(`Quick recipe for: ${action.data.title}`);
+                            // Auto-submit the request
+                            setTimeout(() => {
+                              const submitEvent = new KeyboardEvent('keypress', { key: 'Enter' });
+                              handleKeyPress(submitEvent as any);
+                            }, 100);
+                          } else if (action.type === 'full_recipe' && action.data?.title) {
+                            setInputValue(`Full recipe for: ${action.data.title}`);
+                            setTimeout(() => {
+                              const submitEvent = new KeyboardEvent('keypress', { key: 'Enter' });
+                              handleKeyPress(submitEvent as any);
+                            }, 100);
+                          }
+                        }}
+                        className="w-full justify-start text-left bg-slate-600/50 border-slate-500 text-white hover:bg-orange-500/20 hover:border-orange-500"
+                      >
+                        <span className="text-xs mr-2">
+                          {action.type === 'quick_recipe' ? '🍽️' : 
+                           action.type === 'full_recipe' ? '📋' : '💬'}
+                        </span>
+                        {action.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <p className="text-xs opacity-60 mt-1">
                 {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
