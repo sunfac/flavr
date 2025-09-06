@@ -38,7 +38,7 @@ export default function RecipeView() {
 
   // Fetch recipe data
   const { data: recipeData, isLoading, error } = useQuery<{ recipe: Recipe }>({
-    queryKey: [`/api/recipe/${recipeId}`],
+    queryKey: [`/api/recipes/${recipeId}`],
     enabled: !!recipeId,
   });
 
@@ -47,7 +47,7 @@ export default function RecipeView() {
     mutationFn: (data: { id: number; isShared: boolean }) =>
       apiRequest("POST", "/api/toggle-recipe-share", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/recipe/${recipeId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/recipes/${recipeId}`] });
     },
   });
 
