@@ -63,7 +63,7 @@ export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
     },
     {
       id: "weekly-planner",
-      label: "Weekly Planner",
+      label: "Planner",
       icon: iconMap.calendar,
       path: "/weekly-planner",
     },
