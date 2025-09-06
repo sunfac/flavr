@@ -78,10 +78,10 @@ export default function WeeklyPlanner() {
       return;
     }
 
-    if (preferences?.onboardingRequired) {
+    if (!preferences || preferences?.onboardingRequired) {
       toast({
-        title: "Onboarding Required",
-        description: "Please complete your weekly planning setup first.",
+        title: "Setup Required",
+        description: "Please complete your weekly planning preferences first.",
         variant: "destructive"
       });
       return;
@@ -93,6 +93,11 @@ export default function WeeklyPlanner() {
         weekStartDate: getThisMonday().toISOString()
       });
       
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate plan');
+      }
+      
       const newPlan = await response.json();
       setCurrentWeekPlan(newPlan);
       refetchPlans();
@@ -101,11 +106,11 @@ export default function WeeklyPlanner() {
         title: "Weekly Plan Generated!",
         description: "Your personalized meal plan is ready. Review and accept or make adjustments.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating weekly plan:", error);
       toast({
         title: "Generation Failed",
-        description: "Failed to generate your weekly plan. Please try again.",
+        description: error.message || "Failed to generate your weekly plan. Please try again.",
         variant: "destructive"
       });
     } finally {
