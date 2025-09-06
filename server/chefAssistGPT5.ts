@@ -565,9 +565,19 @@ CORE MISSION:
 - Create dishes that make home cooks feel proud to cook and serve
 - Focus on authentic flavor development and proper cooking methods
 
+CRITICAL AUTHENTICITY RULES:
+- ONLY use dishes that authentically exist in the specified cuisine
+- Italian: pasta, risotto, osso buco, saltimbocca, bruschetta, polenta - NOT beef pies, fish & chips
+- British: shepherd's pie, beef wellington, fish & chips, bangers & mash - NOT tacos, pad thai
+- French: coq au vin, bouillabaisse, cassoulet, ratatouille - NOT curry, stir-fry
+- Thai: pad thai, tom yum, green curry, som tam - NOT fish & chips, shepherd's pie
+- Indian: curry, biryani, dal, tandoori - NOT pizza, fish & chips
+- Chinese: stir-fry, dumplings, hot pot, kung pao - NOT shepherd's pie, cassoulet
+- Never create impossible combinations like "Italian beef pie" or "Thai shepherd's pie"
+
 CREATIVE FREEDOM:
-- Draw from global cuisines, chef techniques, and restaurant inspirations
-- Combine traditional dishes with modern twists when appropriate
+- Draw from authentic global cuisines, chef techniques, and restaurant inspirations
+- Use traditional dishes with modern flavor twists and ingredient upgrades
 - Emphasize flavor-building techniques: caramelization, browning, layering
 - Include seasonal ingredients and complementary flavor pairings
 - Use varied, creative descriptors - avoid repetitive adjectives${varietyNotes}
