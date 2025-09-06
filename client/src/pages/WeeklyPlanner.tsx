@@ -704,8 +704,8 @@ export default function WeeklyPlanner() {
                   </p>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    {[2, 3, 5, 7].map((count) => (
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                    {[2, 3, 4, 5, 7].map((count) => (
                       <Button
                         key={count}
                         variant={selectedMealCount === count ? "default" : "outline"}
