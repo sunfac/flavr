@@ -35,6 +35,7 @@ import {
   AUTHENTICITY_ENHANCEMENT 
 } from "../flavorMaximizationPrompts";
 import { ImageStorage } from "../imageStorage";
+import { analyzeForTemplate, generateTemplateRecipe, calculateCostSavings, TemplateAnalytics } from "../templateRecipeSystem";
 
 // Configure multer for file uploads
 const upload = multer({ 
@@ -560,8 +561,33 @@ Return a JSON object with this structure:
         ...(req.body.quizData?.nutritionalGoals || [])
       ];
 
-      // Use GPT-5 with MichelinChefAI for enhanced recipe generation
-      const response = await MichelinChefAI.generateRecipeIdeas({
+      // Check if we can use template-based generation for cost optimization
+      const userInput = `recipe using ${ingredients.join(', ')}`;
+      const templateAnalysis = await analyzeForTemplate(userInput);
+      
+      let response;
+      
+      if (templateAnalysis.useTemplate && templateAnalysis.templateMatch) {
+        console.log(`🎯 Using template-based generation: ${templateAnalysis.templateMatch.name} (saving $${templateAnalysis.costSavings?.toFixed(4)})`);
+        
+        // Generate using cost-optimized template
+        const templateRecipe = await generateTemplateRecipe(
+          templateAnalysis.templateMatch,
+          userInput,
+          ingredients,
+          servings
+        );
+        
+        // Track template usage for analytics
+        TemplateAnalytics.recordTemplateUsage(
+          templateAnalysis.templateMatch.name, 
+          templateAnalysis.costSavings || 0
+        );
+        
+        response = { recipes: [templateRecipe] };
+      } else {
+        // Use GPT-5 with MichelinChefAI for enhanced recipe generation
+        response = await MichelinChefAI.generateRecipeIdeas({
         ingredients,
         servings,
         cookingTime,
@@ -570,9 +596,10 @@ Return a JSON object with this structure:
         dietary: combinedDietaryNeeds,
         ingredientFlexibility
       }, "Fridge Mode", req.session?.userId);
+      }
 
       // GPT-5 response is already parsed JSON
-      console.log('🍽️ Fridge2Fork recipes generated via GPT-5:', response.recipes?.length || 0);
+      console.log('🍽️ Fridge2Fork recipes generated:', response.recipes?.length || 0);
       
       // Log the interaction using simplified logging
       await logSimpleGPTInteraction({

@@ -199,17 +199,17 @@ Focus on extracting actual mentions and clear implications only.`;
         break;
       case InputSpecificity.MODERATELY_CLEAR:
         tokenBudget = 1800;
-        modelRecommendation = aiResult.creativityNeeded === 'high' ? 'gpt-4o' : 'gpt-4o-mini';
+        modelRecommendation = 'gpt-4o-mini'; // Cost optimization: always use mini model
         creativityLevel = 'medium';
         break;
       case InputSpecificity.SOMEWHAT_VAGUE:
         tokenBudget = 2400;
-        modelRecommendation = 'gpt-4o';
+        modelRecommendation = 'gpt-4o-mini'; // Cost optimization: always use mini model
         creativityLevel = 'medium';
         break;
       default: // VERY_VAGUE
         tokenBudget = 3000;
-        modelRecommendation = 'gpt-4o';
+        modelRecommendation = 'gpt-4o-mini'; // Cost optimization: always use mini model
         creativityLevel = 'high';
         break;
     }
