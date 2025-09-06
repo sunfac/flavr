@@ -1596,7 +1596,7 @@ Guidelines:
       if (recipe) {
         // Save recipe and increment usage counter
         if (req.session?.userId) {
-          await storage.incrementRecipeUsage(req.session.userId);
+          await storage.incrementUsage(req.session.userId);
           
           // Save the recipe
           const savedRecipe = await storage.createRecipe({
@@ -1617,7 +1617,8 @@ Guidelines:
           // For anonymous users, increment pseudo user usage
           const pseudoId = req.body.pseudoUserId;
           if (pseudoId) {
-            await storage.incrementPseudoUserRecipeUsage(pseudoId);
+            const currentUsage = await storage.getPseudoUserUsageCount(pseudoId);
+            await storage.updatePseudoUserUsage(pseudoId, currentUsage + 1);
           }
         }
 
