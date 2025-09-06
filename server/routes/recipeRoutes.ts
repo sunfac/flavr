@@ -841,8 +841,8 @@ Return a JSON object with this structure:
       const isAuthenticatedUser = !!req.session?.userId;
       let userHasFlavrPlus = false;
       
-      if (isAuthenticatedUser && userId) {
-        const user = await storage.getUser(userId);
+      if (isAuthenticatedUser && req.session?.userId) {
+        const user = await storage.getUser(req.session.userId);
         const isDeveloper = user?.email === "william@blycontracting.co.uk";
         userHasFlavrPlus = user?.hasFlavrPlus || isDeveloper || false;
       }
@@ -864,7 +864,7 @@ Return a JSON object with this structure:
           };
 
           const cachedRecipes = await RecipeCacheService.getCachedRecipesForFreeUser(
-            userId || 0, // Use 0 for pseudo users
+            req.session?.userId || 0, // Use 0 for pseudo users
             cacheQuery,
             1 // Only need one recipe
           );
@@ -1068,7 +1068,7 @@ Return a JSON object with this structure:
       } else if (!recipe.imageUrl) {
         // Generate a new image for the saved recipe
         console.log('🎨 Generating new image for saved recipe...');
-        const imageUrl = await generateRecipeImage(recipe.title, recipe.cuisine || 'international', savedRecipe.id, userId);
+        const imageUrl = await generateRecipeImage(recipe.title, recipe.cuisine || 'international', savedRecipe.id, req.session?.userId);
         
         if (imageUrl) {
           console.log('✅ New image generated and stored:', imageUrl);
