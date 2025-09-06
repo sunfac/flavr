@@ -249,7 +249,7 @@ export class ChefAssistGPT5 {
     cuisinePreference?: string;
     seeds: SeedPacks;
     clientId?: string;
-    userId?: number; // Added for smart profiling
+    userId?: number; // Keep for analytics/logging but not used for smart profiling
   }): Promise<any> {
     
     // Check cache first for performance
@@ -273,43 +273,10 @@ export class ChefAssistGPT5 {
     // Get variety guidance for vague prompts
     const varietyGuidance = UserInputAnalyzer.getVarietyGuidance(inputAnalysis, data.clientId);
     
-    // SMART PROFILING: Enhance with user preferences for personalized generation
-    let enhancedUserIntent = data.userIntent;
-    let smartProfileLog = "No user profiling applied";
-    
-    if (data.userId) {
-      try {
-        const generationContext: RecipeGenerationContext = {
-          mode: 'chef', // Could be 'weekly-planner', 'inspire-me', etc.
-          originalPrompt: data.userIntent,
-          userPreferences: {
-            servings: data.servings,
-            timeBudget: data.timeBudget,
-            dietaryNeeds: data.dietaryNeeds,
-            cuisinePreference: data.cuisinePreference
-          }
-        };
-        
-        const smartEnhancement = await smartProfilingService.enhanceRecipeGeneration(
-          data.userId,
-          generationContext
-        );
-        
-        // Use enhanced prompt if confidence is sufficient
-        if (smartEnhancement.confidenceLevel !== 'low') {
-          enhancedUserIntent = smartEnhancement.enhancedPrompt;
-          smartProfileLog = `Profile applied (${smartEnhancement.confidenceLevel} confidence, ${smartEnhancement.diversityBoost}% diversity): ${smartEnhancement.reasoning.join(', ')}`;
-        } else {
-          smartProfileLog = `Profile not used: ${smartEnhancement.reasoning.join(', ')}`;
-        }
-        
-        console.log(`🧠 Smart Profiling: ${smartProfileLog}`);
-        
-      } catch (error) {
-        console.error("Smart profiling failed, using original prompt:", error);
-        smartProfileLog = "Profiling error - using original prompt";
-      }
-    }
+    // RECIPE AUTHENTICITY: Use original user intent to preserve dish authenticity
+    // Smart profiling should only be applied in title generation phase, not full recipe creation
+    const enhancedUserIntent = data.userIntent;
+    console.log(`🍽️ Recipe Generation: Using authentic approach for "${data.userIntent}" - no preference interference`);
     
     // Build adaptive prompt based on analysis (now using enhanced intent)
     const promptResult = AdaptivePromptBuilder.buildOptimizedPrompt(
