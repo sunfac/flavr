@@ -262,16 +262,31 @@ export function registerStripeRoutes(app: Express) {
         try {
           const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
           
-          // Update local database with latest status
-          const isActive = subscription.status === 'active' || subscription.status === 'trialing';
+          // In development/test environment, prioritize manually set database values
+          // Only update if Stripe shows active/trialing, not if it shows incomplete
+          const isStripeActive = subscription.status === 'active' || subscription.status === 'trialing';
+          const isDevelopment = process.env.NODE_ENV === 'development';
+          
+          // If in development and user has manually set hasFlavrPlus to true, keep it
+          if (isDevelopment && user.hasFlavrPlus && subscription.status === 'incomplete') {
+            console.log(`🧪 Development mode: Keeping manually set Flavr+ status for user ${user.id}`);
+            return res.json({
+              hasFlavrPlus: true,
+              subscriptionStatus: 'active', // Override for test environment
+              currentPeriodEnd: (subscription as any).current_period_end,
+              cancelAtPeriodEnd: subscription.cancel_at_period_end,
+            });
+          }
+          
+          // Update local database with latest status from Stripe
           await storage.updateUserSubscription(user.id, {
-            hasFlavrPlus: isActive,
+            hasFlavrPlus: isStripeActive,
             subscriptionStatus: subscription.status,
             subscriptionEndDate: (subscription as any).current_period_end ? new Date((subscription as any).current_period_end * 1000) : null,
           });
 
           return res.json({
-            hasFlavrPlus: isActive,
+            hasFlavrPlus: isStripeActive,
             subscriptionStatus: subscription.status,
             currentPeriodEnd: (subscription as any).current_period_end,
             cancelAtPeriodEnd: subscription.cancel_at_period_end,
