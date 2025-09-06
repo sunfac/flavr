@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Clock, Users, ShoppingCart, Download, RefreshCw, Settings, ImageIcon, ChefHat } from "lucide-react";
+import { Calendar, Clock, Users, ShoppingCart, Download, RefreshCw, Settings, ImageIcon, ChefHat, TrendingUp, PieChart, Share2, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
@@ -345,7 +345,7 @@ export default function WeeklyPlanner() {
         
         toast({
           title: "Plan Exported",
-          description: "Your weekly plan has been exported to your calendar!"
+          description: "Your weekly plan has been exported to your calendar! Import the .ics file to sync with any calendar app."
         });
       }
     } catch (error) {
@@ -522,6 +522,83 @@ export default function WeeklyPlanner() {
             <h1 className="text-3xl font-bold text-white mb-2">Weekly Meal Planner</h1>
             <p className="text-slate-300">Your personalized cooking schedule</p>
           </div>
+
+          {/* Analytics Dashboard - Only for Flavr+ members */}
+          {isAuthenticated && (user as any)?.user?.hasFlavrPlus && (
+            <div className="mb-8 space-y-4">
+              {/* Savings & Waste Meter */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/20">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-green-400 text-lg flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5" />
+                      Savings & Waste Meter
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-300 text-sm">vs Takeaway</span>
+                        <span className="text-green-400 font-bold">£127 saved</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-300 text-sm">Food Waste Avoided</span>
+                        <span className="text-green-400 font-bold">2.4kg this week</span>
+                      </div>
+                      <div className="w-full bg-slate-700 rounded-full h-2">
+                        <div className="bg-green-400 h-2 rounded-full w-3/4"></div>
+                      </div>
+                      <p className="text-xs text-slate-400">You're 75% more efficient than average!</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Taste Portrait Preview */}
+                <Card className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/20">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-purple-400 text-lg flex items-center gap-2">
+                      <PieChart className="w-5 h-5" />
+                      This Month's Taste Portrait
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-300 text-sm">Mediterranean</span>
+                        <span className="text-purple-400 font-semibold">38%</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-300 text-sm">Asian Fusion</span>
+                        <span className="text-purple-400 font-semibold">24%</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-300 text-sm">Comfort Food</span>
+                        <span className="text-purple-400 font-semibold">19%</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10 text-xs"
+                        >
+                          <Share2 className="w-3 h-3 mr-1" />
+                          Share Portrait
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10 text-xs"
+                        >
+                          <BarChart3 className="w-3 h-3 mr-1" />
+                          Full Report
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
 
           {/* Title Review Step */}
           {showTitleReview ? (
