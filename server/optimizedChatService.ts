@@ -228,11 +228,23 @@ Be concise but complete. Use friendly, encouraging tone.`
     const clientId = request.userContext.userId?.toString() || 'anonymous';
     
     // Generate suggestions using Chef Assist's optimized system
-    const suggestions = await ChatOptimizer.generateRecipeSuggestions(
-      request.message,
-      clientId,
-      3
-    );
+    let suggestions: string[];
+    try {
+      suggestions = await ChatOptimizer.generateRecipeSuggestions(
+        request.message,
+        clientId,
+        3
+      );
+      console.log('✅ Recipe suggestions generated:', suggestions);
+    } catch (error) {
+      console.error('❌ Recipe suggestions generation failed:', error);
+      // Use fallback suggestions
+      suggestions = [
+        "Herb-Crusted Chicken with Lemon",
+        "Rustic Vegetable Pasta Bake", 
+        "Spiced Salmon with Coconut Rice"
+      ];
+    }
 
     // For clear requests, provide direct suggestion
     if (intentResult.specificity === 'crystal_clear' || intentResult.specificity === 'moderately_clear') {
