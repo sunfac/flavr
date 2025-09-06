@@ -174,14 +174,21 @@ HOUSEHOLD SPECS:
 ${preferences.dietaryNeeds ? `- Dietary needs: ${Array.isArray(preferences.dietaryNeeds) ? preferences.dietaryNeeds.join(', ') : preferences.dietaryNeeds}` : ''}
 ${cuisines.length ? `- Preferred cuisines: ${cuisines.join(', ')}` : ''}
 
-OUTPUT FORMAT - JSON object with this EXACT structure:
+CRITICAL JSON REQUIREMENTS:
+- Return ONLY valid JSON, no text before or after
+- Use double quotes for all strings
+- No trailing commas
+- Keep string values concise to avoid truncation
+- Total response must be under 800 characters
+
+OUTPUT FORMAT - JSON object with this EXACT structure (keep ALL strings under 50 characters):
 {
   "recipes": [
     {
-      "title": "Recipe Name Here",
-      "cuisine": "Cuisine Type", 
+      "title": "Recipe Name Here (max 40 chars)",
+      "cuisine": "Cuisine Type (max 20 chars)", 
       "estimatedTime": 45,
-      "description": "Brief appealing description"
+      "description": "Brief description (max 60 chars)"
     }
   ]
 }
@@ -284,15 +291,22 @@ RECIPE SPECIFICATIONS:
 - Servings: ${preferences.householdSize.adults + preferences.householdSize.kids}
 ${preferences.dietaryNeeds?.length ? `- Dietary requirements: ${preferences.dietaryNeeds.join(', ')}` : ''}
 
-OUTPUT: JSON object with:
-- title: exact recipe title
-- description: brief description 
+CRITICAL JSON REQUIREMENTS:
+- Return ONLY valid JSON, no text before or after
+- Use double quotes for all strings
+- No trailing commas
+- Keep string values concise to avoid truncation
+- Total response must be under 1200 characters
+
+OUTPUT: JSON object with these exact fields (keep ALL strings under 80 characters):
+- title: exact recipe title (max 60 chars)
+- description: brief description (max 80 chars)
 - cookTime: total minutes
 - servings: number of servings
 - difficulty: easy/medium/hard
-- cuisine: cuisine type
-- ingredients: array of ingredient strings
-- instructions: array of step strings
+- cuisine: cuisine type (max 20 chars)
+- ingredients: array of ingredient strings (max 60 chars each)
+- instructions: array of step strings (max 120 chars each)
 
 Focus on clear, practical instructions that home cooks can follow confidently.`;
 
