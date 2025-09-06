@@ -297,7 +297,7 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                         key={index}
                         variant="outline"
                         size="sm"
-                        onClick={() => {
+                        onClick={async () => {
                           if (action.type === 'quick_recipe' && action.data?.title) {
                             setInputValue(`Quick recipe for: ${action.data.title}`);
                             // Auto-submit the request
@@ -306,11 +306,59 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                               handleKeyPress(submitEvent as any);
                             }, 100);
                           } else if (action.type === 'full_recipe' && action.data?.title) {
-                            setInputValue(`Full recipe for: ${action.data.title}`);
-                            setTimeout(() => {
-                              const submitEvent = new KeyboardEvent('keypress', { key: 'Enter' });
-                              handleKeyPress(submitEvent as any);
-                            }, 100);
+                            try {
+                              console.log('⚡ Optimized recipe generation:', action.data.title);
+                              
+                              // Make direct API call for recipe generation
+                              const response = await fetch('/api/chat/optimized/recipe', {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                  title: action.data.title,
+                                  type: 'full',
+                                  originalMessage: action.data.originalMessage || `Full recipe for: ${action.data.title}`
+                                }),
+                              });
+
+                              if (response.ok) {
+                                const result = await response.json();
+                                console.log('⚡ Optimized recipe generated:', result.recipe?.title);
+                                
+                                // Update the recipe store with the new recipe
+                                if (result.recipe && updateActiveRecipe) {
+                                  updateActiveRecipe(result.recipe);
+                                  
+                                  // Trigger parent callback if provided
+                                  if (onRecipeUpdate) {
+                                    onRecipeUpdate(result.recipe);
+                                  }
+                                  
+                                  // Add a success message to chat
+                                  const successMessage: Message = {
+                                    id: Date.now().toString(),
+                                    text: `✅ Generated full recipe: "${result.recipe.title}"`,
+                                    sender: 'assistant',
+                                    timestamp: new Date(),
+                                    isStreaming: false
+                                  };
+                                  setMessages(prev => [...prev, successMessage]);
+                                }
+                              } else {
+                                throw new Error('Failed to generate recipe');
+                              }
+                            } catch (error) {
+                              console.error('⚡ Optimized recipe generation error:', error);
+                              const errorMessage: Message = {
+                                id: Date.now().toString(),
+                                text: `❌ Sorry, I couldn't generate that recipe. Please try again.`,
+                                sender: 'assistant',
+                                timestamp: new Date(),
+                                isStreaming: false
+                              };
+                              setMessages(prev => [...prev, errorMessage]);
+                            }
                           }
                         }}
                         className="w-full justify-start text-left bg-slate-600/50 border-slate-500 text-white hover:bg-orange-500/20 hover:border-orange-500"
