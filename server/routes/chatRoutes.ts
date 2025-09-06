@@ -153,6 +153,22 @@ export function registerChatRoutes(app: Express) {
         isAuthenticated: !!req.session?.userId
       };
 
+      // Get user preferences for Chat Mode personalization
+      let userPreferences = null;
+      if (req.session?.userId) {
+        try {
+          userPreferences = await storage.getUserPreferences(req.session.userId);
+          console.log('💭 Chat Mode user preferences loaded:', {
+            hasDietaryRestrictions: !!userPreferences?.dietaryRestrictions?.length,
+            timePreference: userPreferences?.timePreference,
+            ambitionLevel: userPreferences?.ambitionLevel,
+            skillLevel: userPreferences?.skillLevel
+          });
+        } catch (error) {
+          console.log("No user preferences found for Chat Mode");
+        }
+      }
+
       console.log('⚡ Optimized chat request:', { 
         message: message.substring(0, 50) + '...', 
         userId: userContext.userId,
@@ -666,7 +682,7 @@ Respond with ONLY the enhanced title.`
           willUseFocusedMode: !!specificIngredient
         });
         
-        // Detect cuisine preferences
+        // Detect cuisine preferences (from message first, then user preferences)
         let cuisinePreference = '';
         const cuisines = ['italian', 'chinese', 'thai', 'mexican', 'indian', 'japanese', 'french', 'greek', 'spanish', 'turkish', 'lebanese', 'moroccan', 'korean', 'vietnamese'];
         for (const cuisine of cuisines) {
@@ -674,6 +690,12 @@ Respond with ONLY the enhanced title.`
             cuisinePreference = cuisine;
             break;
           }
+        }
+        
+        // Use user preference cuisine if none detected in message
+        if (!cuisinePreference && userPreferences?.preferredCuisines?.length > 0) {
+          cuisinePreference = userPreferences.preferredCuisines[0]; // Use first preferred cuisine
+          console.log('💭 Using user preferred cuisine:', cuisinePreference);
         }
         
         // Detect dietary restrictions and ingredients to avoid
@@ -763,6 +785,14 @@ CRITICAL REQUIREMENTS:
 - ${cuisinePreference ? `Make it ${cuisinePreference} cuisine focused.` : ''}
 - ${avoidTerms.length > 0 ? `Avoid these ingredients: ${avoidTerms.join(', ')}.` : ''}
 
+USER PREFERENCES (enhance suggestions with these):
+${userPreferences ? `
+- Cooking ambition: ${userPreferences.ambitionLevel || 'balanced'} (simple = quick & easy, adventurous = complex techniques)
+- Time preference: ${userPreferences.timePreference ? `around ${userPreferences.timePreference} minutes` : 'flexible'}
+- Skill level: ${userPreferences.skillLevel || 'intermediate'}
+${userPreferences.budgetPreference ? `- Budget preference: ${userPreferences.budgetPreference}` : ''}
+` : '- No user preferences available'}
+
 Examples of good format:
 - "Jamie Oliver-Inspired Creamy Carbonara with Crispy Pancetta"
 - "Dishoom-Inspired Black Daal with Fragrant Spices"
@@ -779,11 +809,37 @@ Respond with ONLY the recipe title, nothing else.`
           inspiredTitle = ingredientResponse.choices[0].message.content?.trim() || `${specificIngredient.charAt(0).toUpperCase() + specificIngredient.slice(1)} Recipe`;
         } else {
           // Use the general inspiration system for broader requests
+          // Build enhanced user intent with preferences for better Chat Mode suggestions
+          let enhancedUserIntent = message;
+          
+          // Add preference context for personalized suggestions (like Chef Assist)
+          if (userPreferences) {
+            const preferenceHints = [];
+            
+            if (userPreferences.ambitionLevel === "simple") {
+              preferenceHints.push("keep it simple and quick");
+            } else if (userPreferences.ambitionLevel === "adventurous") {
+              preferenceHints.push("try something creative and challenging");
+            }
+            
+            if (userPreferences.timePreference && userPreferences.timePreference <= 30) {
+              preferenceHints.push("under 30 minutes");
+            }
+            
+            if (userPreferences.preferredCuisines && userPreferences.preferredCuisines.length > 0 && !cuisinePreference) {
+              preferenceHints.push(`inspired by ${userPreferences.preferredCuisines.slice(0, 2).join(" or ")} cuisine`);
+            }
+            
+            if (preferenceHints.length > 0 && !enhancedUserIntent.includes(preferenceHints[0])) {
+              enhancedUserIntent = `${message}, ${preferenceHints.join(", ")}`;
+            }
+          }
+
           const titleResult = await ChefAssistGPT5.generateInspireTitle({
-            userIntent: message,
+            userIntent: enhancedUserIntent, // Use enhanced user intent with preferences
             clientId: clientId,
-            cuisinePreference: cuisinePreference,
-            avoid: avoidTerms,
+            cuisinePreference: cuisinePreference || (userPreferences?.preferredCuisines?.[0]),
+            avoid: avoidTerms, // Keep dietary restrictions for title suggestions minimal
             userId: userContext.userId, // Added for smart profiling
             seeds: {
               randomSeed: Math.floor(Math.random() * 10000),
