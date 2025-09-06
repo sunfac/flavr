@@ -325,7 +325,7 @@ export default function Subscribe() {
           onAuthRequired={() => setShowAuthModal(true)}
         />
         
-        <main className="container mx-auto px-4 py-6 pt-24 pb-8 min-h-screen">
+        <main className="container mx-auto px-4 py-6 pt-24 pb-20 min-h-screen">
           <div className="max-w-md mx-auto w-full">
             <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20 w-full">
               <CardHeader className="text-center px-4 py-6">
@@ -436,7 +436,7 @@ export default function Subscribe() {
           onAuthRequired={() => navigate("/")}
         />
         
-        <main className="container mx-auto px-4 py-6 pt-24">
+        <main className="container mx-auto px-4 py-6 pt-24 pb-20">
           <div className="max-w-md mx-auto">
             <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20">
               <CardHeader className="text-center">
