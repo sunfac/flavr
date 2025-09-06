@@ -110,8 +110,9 @@ REQUIREMENTS:
 - Generate exactly ${mealCount} different dinner recipes for: ${selectedDays.join(', ')}
 - Vary cuisines, proteins, and cooking methods across the week
 - Consider household: ${preferences.householdSize.adults} adults, ${preferences.householdSize.kids} kids
-- Time preference: ${preferences.timeComfort} minutes per meal
+- Time preference: ${preferences.timeComfort.weeknight} minutes weeknights, ${preferences.timeComfort.weekend} minutes weekends
 - Ambition level: ${preferences.ambitionLevel}
+- Budget per serving: ${preferences.budgetPerServing ? `£${(preferences.budgetPerServing / 100).toFixed(2)}` : 'flexible'}
 ${preferences.dietaryNeeds?.length ? `- Dietary needs: ${preferences.dietaryNeeds.join(', ')}` : ''}
 ${cuisines.length ? `- Preferred cuisines: ${cuisines.join(', ')}` : ''}
 
@@ -134,6 +135,14 @@ Focus on practical, family-friendly recipes that sound delicious and achievable.
 
     try {
       console.log('Generating cost-optimized recipe titles...');
+      console.log('Preferences received:', {
+        householdSize: preferences.householdSize,
+        timeComfort: preferences.timeComfort,
+        ambitionLevel: preferences.ambitionLevel,
+        dietaryNeeds: preferences.dietaryNeeds,
+        cuisinePreferences: preferences.cuisinePreferences,
+        budgetPerServing: preferences.budgetPerServing
+      });
       const startTime = Date.now();
       
       const completion = await openai.chat.completions.create({
