@@ -738,8 +738,9 @@ export class ChefAssistGPT5 {
           inspirationPrompt = `Create a ${selectedCuisine} recipe title inspired by ${newChef}'s signature techniques.
       
 FOCUS: Authentic ${selectedCuisine} dishes with professional flavor techniques that ${newChef} is known for.
-STYLE: Use exactly "${newChefName}-Inspired" format (e.g., "Gordon Ramsay-Inspired Beef Wellington"). Always use the full chef name followed by "-Inspired".
-EXAMPLE: "${newChefName}-Inspired [Recipe Name]"
+MANDATORY FORMAT: MUST start with "${newChefName}-Inspired" - THIS IS REQUIRED, NOT OPTIONAL!
+EXACT FORMAT: "${newChefName}-Inspired [Recipe Name]"
+CRITICAL: If the title doesn't start with "${newChefName}-Inspired", it will be rejected.
 MEAT PREFERENCE: Unless specifically vegan/vegetarian, strongly favor meat-based dishes as the main protein.`;
         } else {
           // Fallback to restaurant style if no matching chef
@@ -753,8 +754,9 @@ MEAT PREFERENCE: Unless specifically vegan/vegetarian, strongly favor meat-based
         inspirationPrompt = `Create a ${selectedCuisine} recipe title inspired by ${selectedStyle}.
       
 FOCUS: Signature techniques and flavor combinations that create memorable, delicious dishes for home cooks.
-STYLE: Use exactly "${chefName}-Inspired" format (e.g., "Gordon Ramsay-Inspired Beef Wellington"). Always use the full chef name followed by "-Inspired".
-EXAMPLE: "${chefName}-Inspired [Recipe Name]"
+MANDATORY FORMAT: MUST start with "${chefName}-Inspired" - THIS IS REQUIRED, NOT OPTIONAL!
+EXACT FORMAT: "${chefName}-Inspired [Recipe Name]"
+CRITICAL: If the title doesn't start with "${chefName}-Inspired", it will be rejected.
 MEAT PREFERENCE: Unless specifically vegan/vegetarian, strongly favor meat-based dishes as the main protein.`;
       }
 
@@ -787,7 +789,7 @@ MEAT PREFERENCE: Unless specifically vegan/vegetarian, strongly favor meat-based
       inspirationPrompt = `Create a ${selectedCuisine} recipe title inspired by ${selectedType}.
       
 FOCUS: Restaurant-quality flavor techniques adapted for confident home cooking.
-STYLE: Capture the essence of professional cooking in accessible format.
+RESTAURANT STYLE: Include restaurant name or style in the title when possible (e.g., "Hawksmoor-Style Steak", "Dishoom-Style Curry", "Zuma-Style Sushi").
 MEAT PREFERENCE: Unless specifically vegan/vegetarian, strongly favor meat-based dishes as the main protein.`;
 
     } else {
@@ -821,6 +823,8 @@ MEAT PREFERENCE: Unless specifically vegan/vegetarian, strongly favor meat-based
     }
 
     const systemMessage = `You are Zest, a creative culinary inspiration expert. Create enticing, flavorful recipe titles that spark foodie excitement while remaining approachable for home cooks.
+
+CRITICAL CHEF NAME RULE: When creating chef-inspired titles, you MUST start with "[Chef Name]-Inspired" - this is MANDATORY, not optional! For example: "Gordon Ramsay-Inspired Beef Wellington", "Jamie Oliver-Inspired Pasta", "Nigella Lawson-Inspired Chocolate Cake".
 
 CORE MISSION:
 - Generate cookbook-worthy titles that maximize flavor and cooking techniques
