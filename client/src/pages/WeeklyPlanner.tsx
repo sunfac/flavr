@@ -9,7 +9,11 @@ import GlobalNavigation from "@/components/GlobalNavigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Users, ShoppingCart, Download, RefreshCw } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Calendar, Clock, Users, ShoppingCart, Download, RefreshCw, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
@@ -25,13 +29,15 @@ export default function WeeklyPlanner() {
   const [currentWeekPlan, setCurrentWeekPlan] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   
-  // Two-step generation states
+  // Three-step generation states
+  const [showPreferencesReview, setShowPreferencesReview] = useState(false);
   const [showMealCountSelection, setShowMealCountSelection] = useState(false);
   const [selectedMealCount, setSelectedMealCount] = useState<number>(7);
   const [showTitleReview, setShowTitleReview] = useState(false);
   const [proposedTitles, setProposedTitles] = useState<any[]>([]);
   const [isGeneratingTitles, setIsGeneratingTitles] = useState(false);
   const [isGeneratingRecipes, setIsGeneratingRecipes] = useState(false);
+  const [editingPreferences, setEditingPreferences] = useState<any>(null);
   // Removed estimatedCost state - users shouldn't see internal costs
   const { toast } = useToast();
 
@@ -194,9 +200,36 @@ export default function WeeklyPlanner() {
     }
   };
 
-  // Show meal count selection before generating
+  // Show preferences review before meal count selection
   const handleGenerateWeeklyPlan = () => {
-    setShowMealCountSelection(true);
+    if (!preferences) return;
+    setEditingPreferences({ ...preferences });
+    setShowPreferencesReview(true);
+  };
+
+  // Save preferences and proceed to meal count selection
+  const handleSavePreferencesAndContinue = async () => {
+    if (!editingPreferences) return;
+    
+    try {
+      const response = await apiRequest("PUT", "/api/weekly-plan-preferences", editingPreferences);
+      if (!response.ok) throw new Error("Failed to update preferences");
+      
+      await refetchPreferences();
+      setShowPreferencesReview(false);
+      setShowMealCountSelection(true);
+      
+      toast({
+        title: "Preferences Updated",
+        description: "Your weekly planning preferences have been saved."
+      });
+    } catch (error: any) {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update preferences.",
+        variant: "destructive"
+      });
+    }
   };
 
   // Start title generation with selected meal count
@@ -208,6 +241,7 @@ export default function WeeklyPlanner() {
   // Reset all states to start fresh
   const handleStartAgain = () => {
     setCurrentWeekPlan(null);
+    setShowPreferencesReview(false);
     setShowMealCountSelection(false);
     setSelectedMealCount(7);
     setShowTitleReview(false);
@@ -215,6 +249,7 @@ export default function WeeklyPlanner() {
     setIsGenerating(false);
     setIsGeneratingTitles(false);
     setIsGeneratingRecipes(false);
+    setEditingPreferences(null);
     
     // Refetch fresh data
     refetchPlans();
@@ -688,6 +723,127 @@ export default function WeeklyPlanner() {
                       </Button>
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            </div>
+          ) : showPreferencesReview ? (
+            /* Preferences Review & Edit */
+            <div className="max-w-4xl mx-auto">
+              <Card className="bg-slate-800/50 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white text-xl text-center flex items-center justify-center gap-2">
+                    <Settings className="w-5 h-5" />
+                    Review Your Weekly Planning Preferences
+                  </CardTitle>
+                  <p className="text-slate-300 text-center">
+                    Make sure your preferences are up to date before generating recipes
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {/* Household Size */}
+                    <div className="space-y-2">
+                      <Label htmlFor="householdSize" className="text-slate-200">Household Size</Label>
+                      <Select
+                        value={editingPreferences?.householdSize?.toString() || "2"}
+                        onValueChange={(value) => setEditingPreferences(prev => ({ ...prev, householdSize: parseInt(value) }))}
+                      >
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">1 person</SelectItem>
+                          <SelectItem value="2">2 people</SelectItem>
+                          <SelectItem value="3">3 people</SelectItem>
+                          <SelectItem value="4">4 people</SelectItem>
+                          <SelectItem value="5">5 people</SelectItem>
+                          <SelectItem value="6">6+ people</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Budget Per Serving */}
+                    <div className="space-y-2">
+                      <Label htmlFor="budgetPerServing" className="text-slate-200">Budget Per Serving (£)</Label>
+                      <Input
+                        id="budgetPerServing"
+                        type="number"
+                        step="0.50"
+                        min="1"
+                        max="20"
+                        value={editingPreferences?.budgetPerServing || ""}
+                        onChange={(e) => setEditingPreferences(prev => ({ ...prev, budgetPerServing: parseFloat(e.target.value) }))}
+                        className="bg-slate-700 border-slate-600 text-white"
+                        placeholder="4.50"
+                      />
+                    </div>
+
+                    {/* Cooking Ambition */}
+                    <div className="space-y-2">
+                      <Label className="text-slate-200">Cooking Ambition</Label>
+                      <Select
+                        value={editingPreferences?.ambitionLevel || "medium"}
+                        onValueChange={(value) => setEditingPreferences(prev => ({ ...prev, ambitionLevel: value }))}
+                      >
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="low">Quick & Simple</SelectItem>
+                          <SelectItem value="medium">Balanced</SelectItem>
+                          <SelectItem value="high">Adventurous</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Cuisine Preferences */}
+                    <div className="space-y-2">
+                      <Label className="text-slate-200">Cuisine Focus</Label>
+                      <Select
+                        value={editingPreferences?.cuisineWeighting || "balanced"}
+                        onValueChange={(value) => setEditingPreferences(prev => ({ ...prev, cuisineWeighting: value }))}
+                      >
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="british">British Focus</SelectItem>
+                          <SelectItem value="mediterranean">Mediterranean Focus</SelectItem>
+                          <SelectItem value="asian">Asian Focus</SelectItem>
+                          <SelectItem value="balanced">Balanced Mix</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Dietary Needs */}
+                  <div className="space-y-2">
+                    <Label htmlFor="dietaryNeeds" className="text-slate-200">Dietary Requirements & Preferences</Label>
+                    <Textarea
+                      id="dietaryNeeds"
+                      value={editingPreferences?.dietaryNeeds || ""}
+                      onChange={(e) => setEditingPreferences(prev => ({ ...prev, dietaryNeeds: e.target.value }))}
+                      className="bg-slate-700 border-slate-600 text-white min-h-[80px]"
+                      placeholder="e.g., vegetarian, gluten-free, no nuts, loves spicy food..."
+                    />
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 justify-center pt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowPreferencesReview(false)}
+                      className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleSavePreferencesAndContinue}
+                      className="bg-orange-500 hover:bg-orange-600 text-white px-8"
+                    >
+                      Save & Continue
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </div>
