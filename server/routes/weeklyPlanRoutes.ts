@@ -7,7 +7,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
   // Get user's weekly planning preferences
   app.get("/api/weekly-plan-preferences", async (req, res) => {
     try {
-      if (!req.isAuthenticated()) {
+      if (!req.session?.userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
@@ -28,7 +28,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
   // Create or update weekly planning preferences (onboarding)
   app.post("/api/weekly-plan-preferences", async (req, res) => {
     try {
-      if (!req.isAuthenticated()) {
+      if (!req.session?.userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
@@ -89,7 +89,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
   // Generate weekly plan (Sunday auto-generation or manual trigger)
   app.post("/api/generate-weekly-plan", async (req, res) => {
     try {
-      if (!req.isAuthenticated()) {
+      if (!req.session?.userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
@@ -133,7 +133,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
   // Get weekly plans for a user
   app.get("/api/weekly-plans", async (req, res) => {
     try {
-      if (!req.isAuthenticated()) {
+      if (!req.session?.userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
@@ -151,7 +151,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
   // Get specific weekly plan
   app.get("/api/weekly-plans/:id", async (req, res) => {
     try {
-      if (!req.isAuthenticated()) {
+      if (!req.session?.userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
@@ -173,7 +173,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
   // Accept weekly plan
   app.post("/api/weekly-plans/:id/accept", async (req, res) => {
     try {
-      if (!req.isAuthenticated()) {
+      if (!req.session?.userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
@@ -191,7 +191,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
   // Skip weekly plan
   app.post("/api/weekly-plans/:id/skip", async (req, res) => {
     try {
-      if (!req.isAuthenticated()) {
+      if (!req.session?.userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
@@ -214,7 +214,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
   // Adjust weekly plan
   app.post("/api/weekly-plans/:id/adjust", async (req, res) => {
     try {
-      if (!req.isAuthenticated()) {
+      if (!req.session?.userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
@@ -236,7 +236,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
   // Export weekly plan to calendar (.ics)
   app.get("/api/weekly-plans/:id/export", async (req, res) => {
     try {
-      if (!req.isAuthenticated()) {
+      if (!req.session?.userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
@@ -269,7 +269,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
   // Get consolidated shopping list for a plan
   app.get("/api/weekly-plans/:id/shopping-list", async (req, res) => {
     try {
-      if (!req.isAuthenticated()) {
+      if (!req.session?.userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
