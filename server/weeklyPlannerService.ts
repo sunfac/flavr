@@ -3,6 +3,7 @@ import type { WeeklyPlan, WeeklyPlanPreferences, InsertWeeklyPlan } from "@share
 import { MichelinChefAI } from "./openaiService";
 import OpenAI from "openai";
 import { smartProfilingService, type RecipeGenerationContext } from './services/smartProfilingService';
+import { trackTitleWords, generateVarietyNotes } from './sharedVarietyTracker';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -154,6 +155,12 @@ export class WeeklyPlannerService {
       }
     }
     
+    // Get client ID for variety tracking
+    const clientId = userId?.toString() || 'anonymous';
+    
+    // Build variety notes to avoid repetition across all modes
+    const varietyNotes = generateVarietyNotes(clientId, 'weekly-planner');
+    
     // Build cost-optimized prompt for title generation with chef persona system
     const systemMessage = `You are "Zest," channeling the authentic voices of established cookbook authors and chefs for weekly meal planning. Generate MASSIVELY DIVERSE, appealing dinner recipe titles that sound genuinely like they could appear in cookbooks by:
 
@@ -208,7 +215,7 @@ OUTPUT FORMAT - JSON object with this EXACT structure (keep ALL strings under 50
 DIVERSITY MANDATE: Ensure maximum contrast between all recipes. Think "global food tour" - each day should transport the family to a completely different culinary world.
 Make titles interesting and flavorful, avoid repetitive words like "herb-infused" or "bliss".
 Focus on practical, family-friendly recipes that sound delicious and achievable.
-${avoidSimilarTo ? `\n\nIMPORTANT: ${avoidSimilarTo}` : ''}`;
+${avoidSimilarTo ? `\n\nIMPORTANT: ${avoidSimilarTo}` : ''}${varietyNotes}`;
 
     const userMessage = `Generate ${mealCount} DRAMATICALLY DIFFERENT dinner recipe titles for the week. Each should feel like a completely different cuisine and cooking style. Maximum variety is essential - think global diversity across continents and cooking methods.`;
 
@@ -251,14 +258,25 @@ ${avoidSimilarTo ? `\n\nIMPORTANT: ${avoidSimilarTo}` : ''}`;
         throw new Error("Invalid response format for recipe titles");
       }
 
+      const generatedTitles = titles.slice(0, mealCount).map((title: any, index: number) => ({
+        day: selectedDays[index],
+        title: title.title || `${selectedDays[index]} Dinner`,
+        cuisine: title.cuisine || "International",
+        estimatedTime: title.estimatedTime || parseInt(preferences.timeComfort) || 45,
+        description: title.description || "Delicious homemade dinner"
+      }));
+
+      // Track generated titles for cross-mode variety
+      generatedTitles.forEach(titleData => {
+        trackTitleWords({
+          clientId,
+          mode: 'weekly-planner',
+          title: titleData.title
+        });
+      });
+
       return {
-        titles: titles.slice(0, mealCount).map((title: any, index: number) => ({
-          day: selectedDays[index],
-          title: title.title || `${selectedDays[index]} Dinner`,
-          cuisine: title.cuisine || "International",
-          estimatedTime: title.estimatedTime || parseInt(preferences.timeComfort) || 45,
-          description: title.description || "Delicious homemade dinner"
-        }))
+        titles: generatedTitles
       };
 
     } catch (error) {
@@ -338,6 +356,9 @@ OUTPUT: JSON object with these exact fields (keep ALL strings under 80 character
 Focus on clear, practical instructions with professional techniques that home cooks can follow confidently.`;
 
         const userMessage = `Create a complete recipe for "${titleData.title}" - a ${titleData.cuisine} dish taking about ${titleData.estimatedTime} minutes.`;
+
+        // Track recipe generation for variety (titles were already tracked during title generation)
+        const clientId = userId?.toString() || 'anonymous';
 
         const completion = await openai.chat.completions.create({
           model: "gpt-4o-mini", // Cost-optimized

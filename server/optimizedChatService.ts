@@ -1,6 +1,7 @@
 import { OpenAI } from "openai";
 import { ChatOptimizer } from "./chatOptimizer";
 import { storage } from "./storage";
+import { trackTitleWords, generateVarietyNotes } from './sharedVarietyTracker';
 
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY 
@@ -204,6 +205,12 @@ Be conversational and practical. Keep responses focused and useful without being
     
     const recipeTitle = request.message.replace(/^quick recipe for:\s*/i, '').trim();
     
+    // Get client ID for variety tracking
+    const clientId = request.userContext.userId?.toString() || 'anonymous';
+    
+    // Add variety notes to the prompt
+    const varietyNotes = generateVarietyNotes(clientId, 'chat-mode');
+    
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini", // Always use mini for quick recipes
       messages: [
@@ -229,7 +236,7 @@ Format:
 
 ⏱️ **Time:** X mins | **Serves:** X
 
-Be concise but complete. Use friendly, encouraging chef's tone with technique confidence.`
+Be concise but complete. Use friendly, encouraging chef's tone with technique confidence.${varietyNotes}`
         },
         { role: "user", content: `Quick recipe for: ${recipeTitle}` }
       ],
@@ -237,7 +244,19 @@ Be concise but complete. Use friendly, encouraging chef's tone with technique co
       temperature: 0.7
     });
 
-    return response.choices[0]?.message?.content || "Here's a quick recipe idea for you!";
+    const responseContent = response.choices[0]?.message?.content || "Here's a quick recipe idea for you!";
+    
+    // Track the recipe title for variety (extract from response)
+    const titleMatch = responseContent.match(/🍽️\s*\*\*(.+?)\*\*/);
+    if (titleMatch && titleMatch[1]) {
+      trackTitleWords({
+        clientId,
+        mode: 'chat-mode',
+        title: titleMatch[1]
+      });
+    }
+    
+    return responseContent;
   }
 
   // Handle recipe requests with suggestions and actions
