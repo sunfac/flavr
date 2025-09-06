@@ -21,6 +21,7 @@ export default function WeeklyPlanner() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showAdjustModal, setShowAdjustModal] = useState(false);
   const [currentWeekPlan, setCurrentWeekPlan] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
@@ -159,6 +160,72 @@ export default function WeeklyPlanner() {
       toast({
         title: "Failed to Skip",
         description: "Could not skip the plan. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleViewRecipe = (recipeId: number) => {
+    // Navigate to recipe view page
+    window.open(`/recipe/${recipeId}`, '_blank');
+  };
+
+  const handleAdjustPlan = () => {
+    setShowAdjustModal(true);
+  };
+
+  const handleExportPlan = async () => {
+    if (!currentWeekPlan) return;
+
+    try {
+      const response = await fetch(`/api/weekly-plans/${currentWeekPlan.id}/export`);
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `flavr-weekly-plan-${currentWeekPlan.weekStartDate}.ics`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        toast({
+          title: "Plan Exported",
+          description: "Your weekly plan has been exported to your calendar!"
+        });
+      }
+    } catch (error) {
+      console.error("Error exporting plan:", error);
+      toast({
+        title: "Error",
+        description: "Failed to export plan. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleShoppingList = async () => {
+    if (!currentWeekPlan) return;
+
+    try {
+      const response = await apiRequest("GET", `/api/weekly-plans/${currentWeekPlan.id}/shopping-list`);
+      
+      if (response.ok) {
+        const shoppingData = await response.json();
+        toast({
+          title: "Shopping List",
+          description: `Shopping list with ${shoppingData.items?.length || 0} items generated!`
+        });
+        
+        console.log("Shopping list:", shoppingData);
+      }
+    } catch (error) {
+      console.error("Error getting shopping list:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate shopping list. Please try again.",
         variant: "destructive"
       });
     }
@@ -308,7 +375,7 @@ export default function WeeklyPlanner() {
                         variant="outline"
                         size="sm"
                         className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                        onClick={() => {}} // TODO: Export to calendar
+                        onClick={handleExportPlan}
                       >
                         <Download className="w-4 h-4 mr-2" />
                         Export
@@ -317,7 +384,7 @@ export default function WeeklyPlanner() {
                         variant="outline"
                         size="sm"
                         className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                        onClick={() => {}} // TODO: Shopping list view
+                        onClick={handleShoppingList}
                       >
                         <ShoppingCart className="w-4 h-4 mr-2" />
                         Shopping List
@@ -331,7 +398,8 @@ export default function WeeklyPlanner() {
                     {currentWeekPlan.plannedRecipes?.map((meal: any) => (
                       <div 
                         key={`${meal.day}-${meal.mealType}`}
-                        className="bg-slate-700/50 rounded-lg p-4 border border-slate-600"
+                        className="bg-slate-700/50 rounded-lg p-4 border border-slate-600 cursor-pointer hover:bg-slate-700/70 transition-colors"
+                        onClick={() => handleViewRecipe(meal.recipeId)}
                       >
                         <div className="flex items-center justify-between mb-2">
                           <h3 className="text-white font-semibold capitalize">{meal.day}</h3>
@@ -365,7 +433,7 @@ export default function WeeklyPlanner() {
                       </Button>
                       <Button
                         variant="outline"
-                        onClick={() => {}} // TODO: Adjust plan modal
+                        onClick={() => handleAdjustPlan()}
                         className="border-orange-500 text-orange-400 hover:bg-orange-500/10"
                       >
                         Adjust
