@@ -74,14 +74,17 @@ export default function AuthModal({
       console.log("Refetch /api/me result:", meResult);
       toast({
         title: "Welcome to Flavr! 🎉",
-        description: "Let's upgrade to premium!",
+        description: "Your culinary journey begins now",
       });
       onSuccess();
       onClose();
-      // Redirect to subscription page after successful signup
+      // Show subscription offer after a moment, but don't force redirect
       setTimeout(() => {
-        window.location.href = "/subscribe";
-      }, 1500);
+        toast({
+          title: "Upgrade to Flavr+? 🚀",
+          description: "Get unlimited recipes and premium features. Click to upgrade!",
+        });
+      }, 2000);
     },
     onError: (error: any) => {
       toast({

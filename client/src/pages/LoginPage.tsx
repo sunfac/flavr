@@ -52,8 +52,15 @@ export default function LoginPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
-      toast({ title: "Welcome to Flavr!", description: "Let's upgrade to premium!" });
-      navigate("/subscribe");
+      toast({ title: "Welcome to Flavr!", description: "Account created successfully." });
+      navigate("/");
+      // Show subscription offer after a moment, but don't force redirect
+      setTimeout(() => {
+        toast({
+          title: "Upgrade to Flavr+? 🚀",
+          description: "Get unlimited recipes and premium features. Visit /subscribe to upgrade!",
+        });
+      }, 2000);
     },
     onError: (error: any) => {
       toast({ 
