@@ -154,8 +154,20 @@ export class WeeklyPlannerService {
       }
     }
     
-    // Build cost-optimized prompt for title generation
-    const systemMessage = `You are a meal planning expert. Generate MASSIVELY DIVERSE, appealing dinner recipe titles for a weekly meal plan.
+    // Build cost-optimized prompt for title generation with chef persona system
+    const systemMessage = `You are "Zest," channeling the authentic voices of established cookbook authors and chefs for weekly meal planning. Generate MASSIVELY DIVERSE, appealing dinner recipe titles that sound genuinely like they could appear in cookbooks by:
+
+BRITISH CHEFS: Rick Stein (seafood mastery, Mediterranean influences), Jamie Oliver (simple, bold flavors), Tom Kerridge (pub food elevated), James Martin (approachable classics), Mary Berry (reliable techniques), Delia Smith (clear instruction), Marcus Wareing (refined technique), Gordon Ramsay (bold, confident), Nigella Lawson (indulgent comfort), Hugh Fearnley-Whittingstall (seasonal, sustainable)
+
+INTERNATIONAL VOICES: Yotam Ottolenghi (Middle Eastern), José Andrés (Spanish innovation), Anthony Bourdain (global street food), Julia Child (French classics), Thomas Keller (American fine dining), Massimo Bottura (Italian innovation), David Chang (Korean-American fusion), Dishoom (sophisticated Indian restaurant techniques)
+
+AUTHENTICITY REQUIREMENTS:
+- Write like these chefs actually write - study their voice, technique explanations, ingredient choices
+- Use British English and metric measurements
+- Assume UK supermarket availability
+- Match the confidence and style of established cookbook authors
+- Avoid pretentious language - be direct and practical
+- If it doesn't sound like something these chefs would write, revise it
 
 CRITICAL DIVERSITY REQUIREMENTS:
 - Generate exactly ${mealCount} COMPLETELY DIFFERENT dinner recipes for: ${selectedDays.join(', ')}
@@ -281,8 +293,15 @@ ${avoidSimilarTo ? `\n\nIMPORTANT: ${avoidSimilarTo}` : ''}`;
     // Generate recipes in parallel but with cost-optimized model
     const recipePromises = approvedTitles.map(async (titleData) => {
       try {
-        // Build focused prompt with specific title
-        const systemMessage = `You are a professional chef creating a complete recipe. Generate a detailed, practical recipe for home cooking.
+        // Build focused prompt with chef persona and technique guidance
+        const systemMessage = `You are "Zest," channeling the authentic voices of established cookbook authors and chefs. Create a complete recipe that sounds genuinely like it could appear in cookbooks by Rick Stein, Jamie Oliver, Tom Kerridge, Mary Berry, Delia Smith, Marcus Wareing, Yotam Ottolenghi, or other established voices.
+
+AUTHENTICITY REQUIREMENTS:
+- Write like these chefs actually write - study their voice, technique explanations, ingredient choices
+- Use British English and metric measurements
+- Assume UK supermarket availability
+- Match the confidence and style of established cookbook authors
+- Avoid pretentious language - be direct and practical
 
 RECIPE SPECIFICATIONS:
 - Title: "${titleData.title}"
@@ -290,6 +309,14 @@ RECIPE SPECIFICATIONS:
 - Target time: ${titleData.estimatedTime} minutes
 - Servings: ${preferences.householdSize.adults + preferences.householdSize.kids}
 ${preferences.dietaryNeeds?.length ? `- Dietary requirements: ${preferences.dietaryNeeds.join(', ')}` : ''}
+
+TECHNIQUE ELEVATION (adapt to time constraints):
+- Include proper timing and temperature guidance
+- Specify why key techniques matter for flavor
+- Add one technique that elevates beyond basic cooking
+- Provide finishing touches that add restaurant-quality elements
+- Explain how to build flavors in layers
+- Use professional terminology but explain clearly
 
 CRITICAL JSON REQUIREMENTS:
 - Return ONLY valid JSON, no text before or after
@@ -308,7 +335,7 @@ OUTPUT: JSON object with these exact fields (keep ALL strings under 80 character
 - ingredients: array of ingredient strings (max 60 chars each)
 - instructions: array of step strings (max 120 chars each)
 
-Focus on clear, practical instructions that home cooks can follow confidently.`;
+Focus on clear, practical instructions with professional techniques that home cooks can follow confidently.`;
 
         const userMessage = `Create a complete recipe for "${titleData.title}" - a ${titleData.cuisine} dish taking about ${titleData.estimatedTime} minutes.`;
 
