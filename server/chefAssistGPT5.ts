@@ -621,10 +621,37 @@ export class ChefAssistGPT5 {
     if (inspirationType === 0) {
       // Chef-inspired with global variety
       const chefStyles = [
+        // British Celebrity Chefs
         "Gordon Ramsay's bold techniques", "Jamie Oliver's approachable classics", "Nigella Lawson's comfort elegance",
-        "Yotam Ottolenghi's vibrant Mediterranean", "José Andrés' Spanish mastery", "Rick Stein's seafood expertise", 
-        "Mary Berry's reliable techniques", "Tom Kerridge's pub refinement", "David Chang's Korean-American fusion",
-        "Julia Child's French fundamentals", "Anthony Bourdain's global street food", "Marcus Wareing's precision"
+        "Rick Stein's seafood expertise", "Mary Berry's reliable techniques", "Tom Kerridge's pub refinement", 
+        "Marcus Wareing's precision", "Michel Roux Jr's French mastery", "Angela Hartnett's Italian sophistication",
+        "James Martin's hearty comfort", "Ainsley Harriott's vibrant flavors", "Delia Smith's reliable classics",
+        "Hugh Fearnley-Whittingstall's seasonal cooking", "Heston Blumenthal's innovative techniques",
+        "Raymond Blanc's French elegance", "Simon Rogan's local sourcing", "Jason Atherton's modern British",
+        "Clare Smyth's refined techniques", "Daniel Humm's plant-forward innovation", "Margot Henderson's nose-to-tail",
+        
+        // London Restaurant Masters
+        "Ollie Dabbous's minimalist perfection", "Robin Gill's sustainable cooking", "Endo Kazutoshi's sushi mastery",
+        "Ikoyi's West African spices", "José Pizarro's Spanish tapas", "Aktar Islam's modern Indian",
+        "Anna Hansen's fusion expertise", "Francis Mallmann's fire cooking", "Asma Khan's Bengali heritage",
+        "Rohit Ghai's contemporary Indian", "Francesco Mazzei's Southern Italian", "Sat Bains's innovative British",
+        "Paul Ainsworth's Cornish creativity", "Tommy Banks's Yorkshire ingredients", "Adam Handling's creative British",
+        
+        // International Legends
+        "Yotam Ottolenghi's vibrant Mediterranean", "José Andrés' Spanish mastery", "David Chang's inventive fusion",
+        "Julia Child's French fundamentals", "Anthony Bourdain's global street food", "Thomas Keller's precision",
+        "Ferran Adrià's molecular gastronomy", "Massimo Bottura's Italian innovation", "Grant Achatz's modernist cuisine",
+        "Joël Robuchon's French perfection", "Daniel Boulud's bistro elegance", "Eric Ripert's seafood mastery",
+        "Alice Waters's farm-to-table", "Wolfgang Puck's Californian fusion", "Nobu Matsuhisa's Japanese-Peruvian",
+        "Paul Bocuse's classical French", "Alain Ducasse's Mediterranean elegance", "René Redzepi's Nordic innovation",
+        
+        // Global Cuisine Masters
+        "Madhur Jaffrey's Indian heritage", "Ken Hom's Chinese mastery", "Claudia Roden's Middle Eastern wisdom", 
+        "Diana Kennedy's Mexican authenticity", "Marcella Hazan's Italian tradition", "Martin Yan's Cantonese expertise",
+        "Fuschia Dunlop's Sichuan mastery", "Andoni Luis Aduriz's Basque innovation", "Gaggan Anand's progressive Indian",
+        "Ivan Orkin's ramen expertise", "Nancy Silverton's bread mastery", "Stephanie Izard's bold flavors",
+        "Mauro Colagreco's garden-to-table", "Virgilio Martínez's Peruvian heights", "Alex Atala's Brazilian creativity",
+        "Sean Brock's Southern American", "Enrique Olvera's modern Mexican", "Niki Nakayama's kaiseki precision"
       ];
       const selectedStyle = chefStyles[Math.floor(Math.random() * chefStyles.length)];
       
@@ -633,18 +660,84 @@ export class ChefAssistGPT5 {
       
       // Match chef to appropriate cuisine for authenticity
       const chefCuisineMap: Record<string, string[]> = {
+        // British Celebrity Chefs
         "Gordon Ramsay": ["British", "French"],
         "Jamie Oliver": ["British", "Italian"],
         "Nigella Lawson": ["British"],
-        "Yotam Ottolenghi": ["Mediterranean", "Lebanese", "Israeli"],
-        "José Andrés": ["Spanish"],
         "Rick Stein": ["British", "French"],
         "Mary Berry": ["British"],
         "Tom Kerridge": ["British"],
+        "Marcus Wareing": ["British", "French"],
+        "Michel Roux Jr": ["French", "British"],
+        "Angela Hartnett": ["Italian", "British"],
+        "James Martin": ["British"],
+        "Ainsley Harriott": ["British", "Caribbean"],
+        "Delia Smith": ["British"],
+        "Hugh Fearnley-Whittingstall": ["British"],
+        "Heston Blumenthal": ["British", "French"],
+        "Raymond Blanc": ["French"],
+        "Simon Rogan": ["British"],
+        "Jason Atherton": ["British", "French"],
+        "Clare Smyth": ["British", "French"],
+        "Daniel Humm": ["French", "British"],
+        "Margot Henderson": ["British"],
+        
+        // London Restaurant Masters
+        "Ollie Dabbous": ["British", "French"],
+        "Robin Gill": ["British"],
+        "Endo Kazutoshi": ["Japanese"],
+        "Ikoyi": ["British", "Ethiopian"],
+        "José Pizarro": ["Spanish"],
+        "Aktar Islam": ["Indian", "British"],
+        "Anna Hansen": ["British", "Turkish"],
+        "Francis Mallmann": ["Argentinian"],
+        "Asma Khan": ["Indian"],
+        "Rohit Ghai": ["Indian"],
+        "Francesco Mazzei": ["Italian"],
+        "Sat Bains": ["British"],
+        "Paul Ainsworth": ["British"],
+        "Tommy Banks": ["British"],
+        "Adam Handling": ["British"],
+        
+        // International Legends
+        "Yotam Ottolenghi": ["Mediterranean", "Lebanese", "Israeli"],
+        "José Andrés": ["Spanish"],
         "David Chang": ["Korean", "Chinese", "Japanese"],
         "Julia Child": ["French"],
         "Anthony Bourdain": ["British", "French", "Vietnamese", "Chinese"],
-        "Marcus Wareing": ["British", "French"]
+        "Thomas Keller": ["French"],
+        "Ferran Adrià": ["Spanish"],
+        "Massimo Bottura": ["Italian"],
+        "Grant Achatz": ["French"],
+        "Joël Robuchon": ["French"],
+        "Daniel Boulud": ["French"],
+        "Eric Ripert": ["French"],
+        "Alice Waters": ["French"],
+        "Wolfgang Puck": ["French"],
+        "Nobu Matsuhisa": ["Japanese"],
+        "Paul Bocuse": ["French"],
+        "Alain Ducasse": ["French", "Mediterranean"],
+        "René Redzepi": ["Scandinavian"],
+        
+        // Global Cuisine Masters
+        "Madhur Jaffrey": ["Indian"],
+        "Ken Hom": ["Chinese"],
+        "Claudia Roden": ["Lebanese", "Turkish"],
+        "Diana Kennedy": ["Mexican"],
+        "Marcella Hazan": ["Italian"],
+        "Martin Yan": ["Chinese"],
+        "Fuschia Dunlop": ["Chinese"],
+        "Andoni Luis Aduriz": ["Spanish"],
+        "Gaggan Anand": ["Indian"],
+        "Ivan Orkin": ["Japanese"],
+        "Nancy Silverton": ["Italian"],
+        "Stephanie Izard": ["Greek", "Turkish"],
+        "Mauro Colagreco": ["French", "Argentinian"],
+        "Virgilio Martínez": ["Peruvian"],
+        "Alex Atala": ["Brazilian"],
+        "Sean Brock": ["British"],
+        "Enrique Olvera": ["Mexican"],
+        "Niki Nakayama": ["Japanese"]
       };
       
       // Check if the selected chef matches the cuisine, if not pick appropriate chef for cuisine
@@ -688,10 +781,27 @@ MEAT PREFERENCE: Unless specifically vegan/vegetarian, strongly favor meat-based
     } else if (inspirationType === 1) {
       // Restaurant-style excellence  
       const restaurantTypes = [
+        // London High-End Restaurants
+        "Sketch's artistic innovation", "The Ledbury's modern European", "Dinner by Heston's historical British",
+        "Restaurant Story's narrative dining", "Core by Clare Smyth's refined British", "Pollen Street Social's contemporary",
+        "Fera at Claridge's seasonal British", "Hide's multi-level sophistication", "Jamavar's Indian palace cuisine",
+        "Dishoom's Bombay café culture", "Barrafina's authentic Spanish tapas", "Padella's fresh pasta perfection",
+        "St. JOHN's nose-to-tail British", "Rules' traditional British game", "Simpson's in the Strand roasts",
+        "Hawksmoor's premium steakhouse", "Zuma's contemporary Japanese", "Nobu's Japanese-Peruvian fusion",
+        "Roka's robatayaki grilling", "Koya Bar's Japanese comfort", "Bao's Taiwanese street food",
+        "Hoppers' Sri Lankan street food", "Coya's Peruvian nikkei", "Lima's modern Peruvian",
+        "Mayfair Chippy's elevated British", "Bentley's Oyster Bar seafood", "Wright Brothers' oyster mastery",
+        
+        // International Restaurant Styles
         "British gastropub classics", "Italian trattoria warmth", "French bistro elegance", 
         "Spanish tapas creativity", "Thai street food authenticity", "Japanese izakaya comfort",
         "Indian restaurant spices", "Mexican cantina flavors", "Greek taverna traditions",
-        "Lebanese meze selections", "Korean BBQ techniques", "Vietnamese pho mastery"
+        "Lebanese meze selections", "Korean BBQ techniques", "Vietnamese pho mastery",
+        "Moroccan tagine houses", "Turkish kebab mastery", "Peruvian cevicheria freshness",
+        "Argentinian parrilla grilling", "Brazilian churrascaria cuts", "Ethiopian injera sharing",
+        "Russian caviar service", "Scandinavian hygge dining", "Austrian schnitzel houses",
+        "Portuguese seafood tavernas", "Hungarian goulash comfort", "Polish pierogi traditions",
+        "German beer hall heartiness", "Swiss fondue alpine warmth", "Belgian brasserie classics"
       ];
       const selectedType = restaurantTypes[Math.floor(Math.random() * restaurantTypes.length)];
       
