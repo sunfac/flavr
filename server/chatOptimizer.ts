@@ -355,7 +355,7 @@ Respond with JSON: {
 
         const result = await ChefAssistGPT5.generateInspireTitle({
           seeds,
-          userIntent: `Simple, everyday ${selectedCuisine.toLowerCase()} dinner that's easy to make at home - ${message}`,
+          userIntent: `Inspired by authentic ${selectedCuisine.toLowerCase()} flavors and techniques - ${message}`,
           cuisinePreference: selectedCuisine,
           clientId: clientId, // Use same clientId for variety tracking
         });
