@@ -451,7 +451,7 @@ Focus on clear, practical instructions that home cooks can follow confidently.`;
             title: recipeData.title,
             description: recipeData.description,
             cookTime: recipeData.cookTime,
-            servings: recipeData.servings,
+            servings: baseData.servings, // Use household size instead of AI default
             difficulty: recipeData.difficulty,
             cuisine: recipeData.cuisine,
             mode: "weekly",
@@ -469,7 +469,7 @@ Focus on clear, practical instructions that home cooks can follow confidently.`;
             recipeId: savedRecipe.id,
             recipeTitle: savedRecipe.title,
             cookTime: savedRecipe.cookTime ?? recipeData.cookTime,
-            servings: savedRecipe.servings || recipeData.servings,
+            servings: savedRecipe.servings || baseData.servings,
             isFlexible: true
           };
         } catch (error) {
