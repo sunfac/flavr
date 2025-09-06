@@ -405,6 +405,7 @@ export const weeklyPlanPreferences = pgTable("weekly_plan_preferences", {
   
   // Flavr+ premium preferences
   cuisineWeighting: jsonb("cuisine_weighting").$type<Record<string, number>>(), // {"italian": 40, "asian": 20, etc}
+  cuisinePreferences: jsonb("cuisine_preferences").$type<string[]>().default([]), // ["italian", "asian", "british", etc]
   budgetPerServing: integer("budget_per_serving"), // in pence, Flavr+ only
   
   // Auto-generation settings

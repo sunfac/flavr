@@ -200,8 +200,13 @@ export default function WeeklyPlanner() {
     }
   };
 
-  // Show preferences review before meal count selection
+  // Go directly to meal count selection (preferences are optional)
   const handleGenerateWeeklyPlan = () => {
+    setShowMealCountSelection(true);
+  };
+
+  // Show preferences editing as optional step
+  const handleEditPreferences = () => {
     if (!preferences) return;
     setEditingPreferences({ ...preferences });
     setShowPreferencesReview(true);
@@ -798,21 +803,37 @@ export default function WeeklyPlanner() {
 
                     {/* Cuisine Preferences */}
                     <div className="space-y-2">
-                      <Label className="text-slate-200">Cuisine Focus</Label>
-                      <Select
-                        value={editingPreferences?.cuisineWeighting || "balanced"}
-                        onValueChange={(value) => setEditingPreferences((prev: any) => ({ ...prev, cuisineWeighting: value }))}
-                      >
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="british">British Focus</SelectItem>
-                          <SelectItem value="mediterranean">Mediterranean Focus</SelectItem>
-                          <SelectItem value="asian">Asian Focus</SelectItem>
-                          <SelectItem value="balanced">Balanced Mix</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Label className="text-slate-200">Cuisine Preferences</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {['British', 'Mediterranean', 'Asian', 'Indian', 'Mexican', 'Italian'].map((cuisine) => {
+                          const cuisineKey = cuisine.toLowerCase();
+                          const currentPrefs = editingPreferences?.cuisinePreferences || [];
+                          const isSelected = currentPrefs.includes(cuisineKey);
+                          
+                          return (
+                            <Button
+                              key={cuisine}
+                              type="button"
+                              variant={isSelected ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => {
+                                const current = editingPreferences?.cuisinePreferences || [];
+                                const updated = isSelected 
+                                  ? current.filter((c: string) => c !== cuisineKey)
+                                  : [...current, cuisineKey];
+                                setEditingPreferences((prev: any) => ({ ...prev, cuisinePreferences: updated }));
+                              }}
+                              className={isSelected 
+                                ? "bg-orange-500 hover:bg-orange-600 text-white" 
+                                : "border-slate-600 text-slate-300 hover:bg-slate-700"
+                              }
+                            >
+                              {cuisine}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                      <p className="text-xs text-slate-400">Select multiple cuisines you enjoy</p>
                     </div>
                   </div>
 
@@ -879,13 +900,21 @@ export default function WeeklyPlanner() {
                     ))}
                   </div>
                   
-                  <div className="flex gap-3 justify-center">
+                  <div className="flex gap-3 justify-center flex-wrap">
                     <Button
                       variant="outline"
                       onClick={() => setShowMealCountSelection(false)}
                       className="border-slate-600 text-slate-300 hover:bg-slate-700"
                     >
                       Cancel
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleEditPreferences}
+                      className="border-orange-500 text-orange-400 hover:bg-orange-500/10"
+                    >
+                      <Settings className="w-4 h-4 mr-2" />
+                      Edit Preferences
                     </Button>
                     <Button
                       onClick={handleStartTitleGeneration}
