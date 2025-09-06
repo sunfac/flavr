@@ -261,6 +261,12 @@ export function registerStripeRoutes(app: Express) {
       if (user.stripeSubscriptionId) {
         try {
           const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+          console.log(`🔍 Stripe subscription check for user ${user.id}:`, {
+            stripeStatus: subscription.status,
+            localHasFlavrPlus: user.hasFlavrPlus,
+            localSubscriptionStatus: user.subscriptionStatus,
+            isDevelopment: process.env.NODE_ENV === 'development'
+          });
           
           // In development/test environment, prioritize manually set database values
           // Only update if Stripe shows active/trialing, not if it shows incomplete
