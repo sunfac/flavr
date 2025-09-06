@@ -52,8 +52,8 @@ export default function LoginPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
-      toast({ title: "Welcome to Flavr!", description: "Account created successfully." });
-      navigate("/");
+      toast({ title: "Welcome to Flavr!", description: "Let's upgrade to premium!" });
+      navigate("/subscribe");
     },
     onError: (error: any) => {
       toast({ 
