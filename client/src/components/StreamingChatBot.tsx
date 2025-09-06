@@ -367,11 +367,11 @@ export function StreamingChatBot({ currentRecipe, onRecipeUpdate }: StreamingCha
                               setMessages(prev => [...prev, errorMessage]);
                             }
                           } else if (action.type === 'view_recipe' && action.data?.recipeId) {
-                            // Navigate to recipe card view
+                            // Navigate to recipe card view with the recipe ID
                             console.log('🔗 Navigating to recipe card:', action.data.recipeId);
                             // Use window.location for navigation (works in all contexts)
                             if (typeof window !== 'undefined') {
-                              window.location.href = `/recipe`;
+                              window.location.href = `/recipe/${action.data.recipeId}`;
                             }
                           }
                         }}
