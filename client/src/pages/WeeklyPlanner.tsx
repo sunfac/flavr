@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Clock, Users, ShoppingCart, Download, RefreshCw, Settings } from "lucide-react";
+import { Calendar, Clock, Users, ShoppingCart, Download, RefreshCw, Settings, ImageIcon, ChefHat } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
@@ -715,29 +715,11 @@ export default function WeeklyPlanner() {
                   {/* Planned Meals */}
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {currentWeekPlan.plannedRecipes?.map((meal: any) => (
-                      <div 
+                      <RecipeCardWithImage 
                         key={`${meal.day}-${meal.mealType}`}
-                        className="bg-slate-700/50 rounded-lg p-4 border border-slate-600 cursor-pointer hover:bg-slate-700/70 transition-colors"
+                        meal={meal}
                         onClick={() => handleViewRecipe(meal.recipeId)}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="text-white font-semibold capitalize">{meal.day}</h3>
-                          <Badge variant="outline" className="border-slate-500 text-slate-300">
-                            {meal.mealType}
-                          </Badge>
-                        </div>
-                        <h4 className="text-slate-200 font-medium mb-2">{meal.recipeTitle}</h4>
-                        <div className="flex items-center gap-4 text-sm text-slate-400">
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {meal.cookTime} min
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Users className="w-3 h-3" />
-                            {meal.servings}
-                          </div>
-                        </div>
-                      </div>
+                      />
                     ))}
                   </div>
 
@@ -1043,6 +1025,88 @@ export default function WeeklyPlanner() {
       <GlobalNavigation isOpen={showNavigation} onClose={closeAllMenus} />
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} onSuccess={() => setShowAuthModal(false)} />
       <FlavrPlusUpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+    </div>
+  );
+}
+
+// Recipe Card with Image Component
+function RecipeCardWithImage({ meal, onClick }: { meal: any; onClick: () => void }) {
+  const [recipeImage, setRecipeImage] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState(true);
+
+  // Fetch recipe details to get image
+  const { data: recipe } = useQuery({
+    queryKey: ["/api/recipes", meal.recipeId],
+    enabled: !!meal.recipeId,
+    retry: false,
+  });
+
+  useEffect(() => {
+    if (recipe) {
+      const imageUrl = recipe.imageUrl || recipe.image;
+      if (imageUrl) {
+        setRecipeImage(imageUrl);
+        setImageLoading(false);
+      } else {
+        setImageLoading(false);
+      }
+    }
+  }, [recipe]);
+
+  return (
+    <div 
+      className="bg-slate-700/50 rounded-lg border border-slate-600 cursor-pointer hover:bg-slate-700/70 transition-colors overflow-hidden"
+      onClick={onClick}
+    >
+      {/* Recipe Image */}
+      <div className="relative w-full h-32 bg-gradient-to-br from-orange-400 to-orange-600">
+        {recipeImage && !imageLoading ? (
+          <img 
+            src={recipeImage} 
+            alt={meal.recipeTitle}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            onError={() => {
+              setRecipeImage(null);
+              setImageLoading(false);
+            }}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-white/80">
+            {imageLoading ? (
+              <div className="animate-pulse">
+                <ImageIcon className="w-8 h-8" />
+              </div>
+            ) : (
+              <div className="text-center">
+                <ChefHat className="w-6 h-6 mx-auto mb-1" />
+                <p className="text-xs">Recipe Image</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      
+      {/* Recipe Info */}
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-white font-semibold capitalize">{meal.day}</h3>
+          <Badge variant="outline" className="border-slate-500 text-slate-300">
+            {meal.mealType}
+          </Badge>
+        </div>
+        <h4 className="text-slate-200 font-medium mb-2 line-clamp-2">{meal.recipeTitle}</h4>
+        <div className="flex items-center gap-4 text-sm text-slate-400">
+          <div className="flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            {meal.cookTime} min
+          </div>
+          <div className="flex items-center gap-1">
+            <Users className="w-3 h-3" />
+            {meal.servings}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
