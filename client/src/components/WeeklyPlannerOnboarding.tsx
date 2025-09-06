@@ -165,7 +165,10 @@ export default function WeeklyPlannerOnboarding({ onComplete }: WeeklyPlannerOnb
                         max="10"
                         className="bg-slate-700 border-slate-600 text-white"
                         {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value))}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value);
+                          field.onChange(isNaN(value) ? 1 : value);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -186,7 +189,10 @@ export default function WeeklyPlannerOnboarding({ onComplete }: WeeklyPlannerOnb
                         max="10"
                         className="bg-slate-700 border-slate-600 text-white"
                         {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value))}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value);
+                          field.onChange(isNaN(value) ? 1 : value);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />

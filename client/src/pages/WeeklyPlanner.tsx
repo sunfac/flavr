@@ -370,7 +370,7 @@ export default function WeeklyPlanner() {
                         {currentWeekPlan.planStatus}
                       </Badge>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <Button
                         variant="outline"
                         size="sm"
@@ -394,7 +394,7 @@ export default function WeeklyPlanner() {
                 </CardHeader>
                 <CardContent>
                   {/* Planned Meals */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {currentWeekPlan.plannedRecipes?.map((meal: any) => (
                       <div 
                         key={`${meal.day}-${meal.mealType}`}
@@ -424,7 +424,7 @@ export default function WeeklyPlanner() {
 
                   {/* Action Buttons */}
                   {currentWeekPlan.planStatus === 'pending' && (
-                    <div className="flex gap-3 mt-6 justify-center">
+                    <div className="flex flex-wrap gap-3 mt-6 justify-center">
                       <Button
                         onClick={handleAcceptPlan}
                         className="bg-green-600 hover:bg-green-700 text-white"
