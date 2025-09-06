@@ -325,54 +325,54 @@ export default function Subscribe() {
           onAuthRequired={() => setShowAuthModal(true)}
         />
         
-        <main className="container mx-auto px-4 py-6 pt-24">
-          <div className="max-w-md mx-auto">
-            <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20">
-              <CardHeader className="text-center">
+        <main className="container mx-auto px-4 py-6 pt-24 pb-8 min-h-screen">
+          <div className="max-w-md mx-auto w-full">
+            <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20 w-full">
+              <CardHeader className="text-center px-4 py-6">
                 <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Crown className="text-white w-8 h-8" />
                 </div>
-                <CardTitle className="font-playfair text-2xl text-orange-400">Join Flavr+</CardTitle>
-                <p className="text-gray-300">
+                <CardTitle className="font-playfair text-xl sm:text-2xl text-orange-400">Join Flavr+</CardTitle>
+                <p className="text-gray-300 text-sm sm:text-base">
                   Unlimited AI-powered recipes and premium features
                 </p>
               </CardHeader>
               
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 px-4 py-6">
                 {/* Premium Features */}
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3 text-sm text-gray-300">
-                    <span className="text-green-400">✓</span>
+                    <span className="text-green-400 flex-shrink-0">✓</span>
                     <span>Unlimited AI recipe generation</span>
                   </div>
                   <div className="flex items-center space-x-3 text-sm text-gray-300">
-                    <span className="text-green-400">✓</span>
+                    <span className="text-green-400 flex-shrink-0">✓</span>
                     <span>HD recipe images</span>
                   </div>
                   <div className="flex items-center space-x-3 text-sm text-gray-300">
-                    <span className="text-green-400">✓</span>
+                    <span className="text-green-400 flex-shrink-0">✓</span>
                     <span>All cooking modes</span>
                   </div>
                   <div className="flex items-center space-x-3 text-sm text-gray-300">
-                    <span className="text-green-400">✓</span>
+                    <span className="text-green-400 flex-shrink-0">✓</span>
                     <span>Recipe history & sharing</span>
                   </div>
                   <div className="flex items-center space-x-3 text-sm text-gray-300">
-                    <span className="text-green-400">✓</span>
+                    <span className="text-green-400 flex-shrink-0">✓</span>
                     <span>Photo-to-Recipe conversion</span>
                   </div>
                 </div>
 
                 <div className="text-center space-y-4">
-                  <p className="text-2xl font-bold text-white">£9.99/month</p>
+                  <p className="text-xl sm:text-2xl font-bold text-white">£7.99/month</p>
                   <Button 
                     onClick={() => setShowAuthModal(true)}
-                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-lg py-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-base sm:text-lg py-4 sm:py-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                   >
-                    <Crown className="w-5 h-5 mr-2" />
+                    <Crown className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                     Get Started with Flavr+
                   </Button>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-400 px-2">
                     Sign up now and start your premium cooking journey
                   </p>
                 </div>
