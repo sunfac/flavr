@@ -115,7 +115,7 @@ export default function WeeklyPlanner() {
       
       toast({
         title: "Recipe Ideas Generated!",
-        description: `${titleProposal.titles.length} recipe titles ready for review. Estimated cost: $${titleProposal.totalEstimatedCost.toFixed(2)}`,
+        description: `${titleProposal.titles.length} recipe titles ready for review.`,
       });
     } catch (error: any) {
       console.error("Error generating titles:", error);
@@ -196,6 +196,25 @@ export default function WeeklyPlanner() {
   // Legacy function for backwards compatibility (now triggers title generation)
   const handleGenerateWeeklyPlan = async () => {
     await handleGenerateWeeklyTitles();
+  };
+
+  // Reset all states to start fresh
+  const handleStartAgain = () => {
+    setCurrentWeekPlan(null);
+    setShowTitleReview(false);
+    setProposedTitles([]);
+    setIsGenerating(false);
+    setIsGeneratingTitles(false);
+    setIsGeneratingRecipes(false);
+    
+    // Refetch fresh data
+    refetchPlans();
+    refetchPreferences();
+    
+    toast({
+      title: "Reset Complete",
+      description: "Ready to create a new weekly plan!"
+    });
   };
 
   const handleAcceptPlan = async () => {
@@ -586,7 +605,7 @@ export default function WeeklyPlanner() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={handleGenerateWeeklyPlan}
+                        onClick={handleStartAgain}
                         disabled={isGenerating}
                         className="border-orange-500 text-orange-400 hover:bg-orange-500/10"
                       >
