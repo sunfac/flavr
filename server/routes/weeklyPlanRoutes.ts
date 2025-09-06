@@ -346,17 +346,23 @@ export function registerWeeklyPlanRoutes(app: Express) {
         }
       }
 
-      const consolidatedShoppingList = consolidateShoppingList(allIngredients);
+      const simpleShoppingList = consolidateShoppingList(allIngredients);
+      
+      // Convert simple shopping list to structured format expected by schema
+      const consolidatedShoppingList = simpleShoppingList.map((item, index) => ({
+        ingredient: item,
+        quantity: "1", // Default quantity
+        aisle: "Unknown", // Default aisle
+        recipes: [] // Will be filled later if needed
+      }));
 
       const weeklyPlanData = {
         userId,
         weekStartDate: weekStart,
         weekEndDate: weekEnd,
-        mealCount,
         planStatus: "pending" as const,
         plannedRecipes: plannedMeals.slice(0, mealCount),
         consolidatedShoppingList,
-        totalEstimatedCost: 0,
         generatedAt: new Date()
       };
 
@@ -459,12 +465,15 @@ export function registerWeeklyPlanRoutes(app: Express) {
         return res.status(404).json({ error: "Plan not found" });
       }
       
+      // Convert structured shopping list back to simple format for display
+      const shoppingList = plan.consolidatedShoppingList?.map(item => item.ingredient) || [];
+      
       res.json({
         planId: plan.id,
         weekStart: plan.weekStartDate,
         weekEnd: plan.weekEndDate,
-        shoppingList: plan.consolidatedShoppingList || [],
-        totalItems: plan.consolidatedShoppingList?.length || 0
+        shoppingList,
+        totalItems: shoppingList.length
       });
     } catch (error) {
       console.error("Error fetching shopping list:", error);
@@ -490,13 +499,13 @@ function consolidateShoppingList(allIngredients: string[]): string[] {
   
   // Return consolidated list with quantities
   const consolidated: string[] = [];
-  for (const [normalizedName, data] of ingredientMap.entries()) {
+  ingredientMap.forEach((data, normalizedName) => {
     if (data.count > 1) {
       consolidated.push(`${data.original} (${data.count}x)`);
     } else {
       consolidated.push(data.original);
     }
-  }
+  });
   
   return consolidated.sort();
 }
