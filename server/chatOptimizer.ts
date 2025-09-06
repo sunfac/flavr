@@ -305,11 +305,43 @@ Respond with JSON: {
   ): Promise<string[]> {
     
     const { ChefAssistGPT5 } = await import('./chefAssistGPT5');
+    const { UserInputAnalyzer } = await import('./userInputAnalyzer');
     
     const suggestions: string[] = [];
     
+    // Analyze input for variety guidance
+    const inputAnalysis = await UserInputAnalyzer.analyzeUserInput(
+      message,
+      clientId,
+      [],
+      []
+    );
+    
+    // Get variety guidance to avoid repetition
+    const varietyGuidance = UserInputAnalyzer.getVarietyGuidance(inputAnalysis, clientId);
+    console.log('🎨 Chat variety guidance:', {
+      avoid: varietyGuidance.avoidCuisines,
+      suggest: varietyGuidance.suggestCuisine
+    });
+    
+    // Enhanced cuisine rotation for chat mode
+    const allCuisines = [
+      'Italian', 'French', 'Thai', 'Indian', 'Mexican', 'Japanese', 
+      'Chinese', 'Greek', 'Spanish', 'Middle Eastern', 'Korean', 
+      'Vietnamese', 'Turkish', 'Moroccan', 'British', 'American'
+    ];
+    
+    const availableCuisines = allCuisines.filter(cuisine => 
+      !varietyGuidance.avoidCuisines.includes(cuisine)
+    );
+    
     for (let i = 0; i < count; i++) {
       try {
+        // Use different cuisine for each suggestion
+        const selectedCuisine = availableCuisines[i % availableCuisines.length] || 
+                               varietyGuidance.suggestCuisine || 
+                               allCuisines[i % allCuisines.length];
+        
         // Generate unique seeds for variety
         const seeds = {
           randomSeed: Math.floor(Math.random() * 10000) + i * 1000,
@@ -324,11 +356,13 @@ Respond with JSON: {
         const result = await ChefAssistGPT5.generateInspireTitle({
           seeds,
           userIntent: message,
-          clientId: clientId + '_' + i, // Ensure variety
+          cuisinePreference: selectedCuisine,
+          clientId: clientId, // Use same clientId for variety tracking
         });
 
         if (result?.title) {
           suggestions.push(result.title);
+          console.log(`✅ Generated ${selectedCuisine} suggestion: ${result.title}`);
         }
       } catch (error) {
         console.error(`Error generating suggestion ${i}:`, error);
