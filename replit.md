@@ -28,12 +28,10 @@ Preferred communication style: Simple, everyday language.
 - **Core Logic**: Advanced MichelinChefAI prompting system with cookbook-quality recipes matching established chef voices (Rick Stein, Jamie Oliver, Tom Kerridge, Mary Berry, Delia Smith, Marcus Wareing, Georgina Hayden, Jose Pizarro, Dishoom, etc.); sophisticated flavor maximization; UK English ingredient terminology mappings; Enhanced Inspire Me with authentic dishes (Thai Laab, Greek Yuvetsi, French Coq au Vin, etc.) including proper timing and technique details; Comprehensive authenticity validation system blocking pretentious language, strange fusion combinations, and molecular gastronomy; AI-powered step timing; server-side image storage and serving.
 
 ### Core Cooking Modes
-- **Shopping Mode**: Generates recipes with shopping lists.
-- **Fridge Mode**: Creates recipes from available ingredients with flexibility.
-- **Chef Assist Mode**: Professional culinary guidance with dynamic suggestions.
-- **Budget Planner**: Generates full meal plans with shopping lists, optimized for budget and flavor.
-- **Flavr Rituals**: Weekly meal planning (premium).
+- **Chat Mode (Chef Assist)**: Conversational AI recipe generation with personalized suggestions and real-time modifications.
+- **Weekly Planner**: AI-generated weekly meal plans with smart shopping lists (premium).
 - **Photo-to-Recipe (Premium)**: Converts cookbook photos to editable recipe cards using Google Gemini Vision API.
+- **Inspire Me**: Smart recipe discovery system with authentic cuisine-specific dishes and cultural authenticity validation.
 
 ### User Management
 - **Authentication**: Email/password, Google OAuth.
