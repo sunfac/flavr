@@ -1,6 +1,7 @@
 import { OpenAI } from "openai";
 import { UserInputAnalyzer, UserInputAnalysis } from './userInputAnalyzer';
 import { AdaptivePromptBuilder, AdaptivePromptResult } from './adaptivePromptBuilder';
+import { smartProfilingService, type RecipeGenerationContext } from './services/smartProfilingService';
 
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY 
@@ -248,6 +249,7 @@ export class ChefAssistGPT5 {
     cuisinePreference?: string;
     seeds: SeedPacks;
     clientId?: string;
+    userId?: number; // Added for smart profiling
   }): Promise<any> {
     
     // Check cache first for performance
@@ -271,11 +273,49 @@ export class ChefAssistGPT5 {
     // Get variety guidance for vague prompts
     const varietyGuidance = UserInputAnalyzer.getVarietyGuidance(inputAnalysis, data.clientId);
     
-    // Build adaptive prompt based on analysis
+    // SMART PROFILING: Enhance with user preferences for personalized generation
+    let enhancedUserIntent = data.userIntent;
+    let smartProfileLog = "No user profiling applied";
+    
+    if (data.userId) {
+      try {
+        const generationContext: RecipeGenerationContext = {
+          mode: 'chef', // Could be 'weekly-planner', 'inspire-me', etc.
+          originalPrompt: data.userIntent,
+          userPreferences: {
+            servings: data.servings,
+            timeBudget: data.timeBudget,
+            dietaryNeeds: data.dietaryNeeds,
+            cuisinePreference: data.cuisinePreference
+          }
+        };
+        
+        const smartEnhancement = await smartProfilingService.enhanceRecipeGeneration(
+          data.userId,
+          generationContext
+        );
+        
+        // Use enhanced prompt if confidence is sufficient
+        if (smartEnhancement.confidenceLevel !== 'low') {
+          enhancedUserIntent = smartEnhancement.enhancedPrompt;
+          smartProfileLog = `Profile applied (${smartEnhancement.confidenceLevel} confidence, ${smartEnhancement.diversityBoost}% diversity): ${smartEnhancement.reasoning.join(', ')}`;
+        } else {
+          smartProfileLog = `Profile not used: ${smartEnhancement.reasoning.join(', ')}`;
+        }
+        
+        console.log(`🧠 Smart Profiling: ${smartProfileLog}`);
+        
+      } catch (error) {
+        console.error("Smart profiling failed, using original prompt:", error);
+        smartProfileLog = "Profiling error - using original prompt";
+      }
+    }
+    
+    // Build adaptive prompt based on analysis (now using enhanced intent)
     const promptResult = AdaptivePromptBuilder.buildOptimizedPrompt(
       inputAnalysis,
       {
-        userIntent: data.userIntent,
+        userIntent: enhancedUserIntent, // Using potentially enhanced version
         servings: data.servings,
         timeBudget: data.timeBudget,
         dietaryNeeds: data.dietaryNeeds,

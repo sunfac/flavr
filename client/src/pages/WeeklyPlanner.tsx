@@ -14,6 +14,40 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar, Clock, Users, ShoppingCart, Download, RefreshCw, Settings, ImageIcon, ChefHat, TrendingUp, PieChart, Share2, BarChart3 } from "lucide-react";
+
+// Analytics interfaces
+interface SavingsMetrics {
+  weeklyHomeCookingSavings: number;
+  monthlyHomeCookingSavings: number;
+  estimatedFoodWasteAvoided: number;
+  efficiencyScore: number;
+  takeawayComparison: {
+    averageRecipeCost: number;
+    averageTakeawayCost: number;
+    savingsPerMeal: number;
+  };
+}
+
+interface TasteProfile {
+  cuisinePreferences: Array<{
+    cuisine: string;
+    percentage: number;
+    recipeCount: number;
+    completionRate: number;
+  }>;
+  cookingPatterns: {
+    preferredDifficulty: string;
+    averageCookTime: number;
+    mostActiveDay: string;
+    seasonality: Record<string, number>;
+  };
+  dietaryTrends: {
+    vegetarianRecipes: number;
+    healthyRecipes: number;
+    comfortFoodRecipes: number;
+  };
+  confidenceScore: number;
+}
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
@@ -83,14 +117,14 @@ export default function WeeklyPlanner() {
   });
 
   // Get user's savings metrics
-  const { data: savingsData } = useQuery({
+  const { data: savingsData } = useQuery<SavingsMetrics>({
     queryKey: ["/api/analytics/my-savings"],
     enabled: isAuthenticated && (user as any)?.user?.hasFlavrPlus,
     retry: false,
   });
 
   // Get user's taste profile
-  const { data: tasteData } = useQuery({
+  const { data: tasteData } = useQuery<TasteProfile>({
     queryKey: ["/api/analytics/my-taste-profile"],
     enabled: isAuthenticated && (user as any)?.user?.hasFlavrPlus,
     retry: false,
