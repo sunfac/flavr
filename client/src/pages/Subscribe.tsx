@@ -19,11 +19,14 @@ import { Crown } from "lucide-react";
 
 // Make sure to call `loadStripe` outside of a component's render to avoid
 // recreating the `Stripe` object on every render.
-if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
+// Prefer testing public key when available
+const stripePublicKey = import.meta.env.TESTING_VITE_STRIPE_PUBLIC_KEY || import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+if (!stripePublicKey) {
+  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY or TESTING_VITE_STRIPE_PUBLIC_KEY');
 }
-console.log("Loading Stripe with public key:", import.meta.env.VITE_STRIPE_PUBLIC_KEY ? "Present" : "Missing");
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+console.log("Loading Stripe with public key:", stripePublicKey ? "Present" : "Missing");
+console.log("Using testing mode:", !!import.meta.env.TESTING_VITE_STRIPE_PUBLIC_KEY);
+const stripePromise = loadStripe(stripePublicKey);
 
 const SubscribeForm = () => {
   const stripe = useStripe();
