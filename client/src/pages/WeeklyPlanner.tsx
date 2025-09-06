@@ -4,7 +4,7 @@ import { apiRequest } from "@/lib/queryClient";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
 import GlobalNavigation from "@/components/GlobalNavigation";
-import SettingsPanel from "@/components/SettingsPanel";
+// import SettingsPanel from "@/components/SettingsPanel";
 // import UserMenu from "@/components/UserMenu";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -204,10 +204,6 @@ export default function WeeklyPlanner() {
           isOpen={showNavigation}
           onClose={closeAllMenus}
         />
-        <SettingsPanel 
-          isOpen={showSettings}
-          onClose={closeAllMenus}
-        />
         <AuthModal 
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
@@ -260,7 +256,6 @@ export default function WeeklyPlanner() {
 
         <GlobalFooter currentMode="weekly-planner" />
         <GlobalNavigation isOpen={showNavigation} onClose={closeAllMenus} />
-        <SettingsPanel isOpen={showSettings} onClose={closeAllMenus} />
       </div>
     );
   }
@@ -415,7 +410,6 @@ export default function WeeklyPlanner() {
 
       <GlobalFooter />
       <GlobalNavigation isOpen={showNavigation} onClose={closeAllMenus} />
-      <SettingsPanel isOpen={showSettings} onClose={closeAllMenus} />
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
       <FlavrPlusUpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
     </div>
