@@ -308,7 +308,9 @@ Focus on clear, practical instructions that home cooks can follow confidently.`;
     
     // Check if plan already exists for this week
     const existingPlan = await storage.getCurrentWeekPlan(userId, weekStartDate);
-    if (existingPlan) {
+    if (existingPlan && existingPlan.planStatus !== 'pending') {
+      // Only return existing plan if it's been accepted/finalized
+      // Allow regeneration of pending plans
       return existingPlan;
     }
     
@@ -339,6 +341,16 @@ Focus on clear, practical instructions that home cooks can follow confidently.`;
       },
       consolidatedShoppingList: []
     };
+    
+    // If there's an existing pending plan, update it instead of creating duplicate
+    if (existingPlan && existingPlan.planStatus === 'pending') {
+      const updatedPlan = await storage.updateWeeklyPlan(existingPlan.id, {
+        plannedRecipes,
+        preferencesSnapshot: weeklyPlanData.preferencesSnapshot,
+        generatedAt: new Date()
+      });
+      return updatedPlan;
+    }
     
     const newPlan = await storage.createWeeklyPlan(weeklyPlanData);
     return newPlan;
