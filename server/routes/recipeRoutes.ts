@@ -632,23 +632,64 @@ Return a JSON object with this structure:
       
       const clientId = req.session?.userId?.toString() || req.ip || "anonymous";
       
+      // Get user preferences for initial title suggestions
+      let userPreferences = null;
+      if (req.session?.userId) {
+        try {
+          userPreferences = await storage.getUserPreferences(req.session.userId);
+        } catch (error) {
+          console.log("No user preferences found for inspiration");
+        }
+      }
+      
       // Only include dietary restrictions if they are actually selected/toggled on
       const selectedDietary = req.body.dietary || [];
       const selectedNutritional = req.body.nutritionalGoals || [];
       const explicitAvoid = req.body.avoid || [];
       
-      // Combine only non-empty dietary requirements for inspire generation
-      const combinedDietaryNeeds = [
-        ...selectedDietary.filter((item: string) => item && item.trim()),
-        ...selectedNutritional.filter((item: string) => item && item.trim()),
-        ...explicitAvoid.filter((item: string) => item && item.trim())
-      ];
+      // For INSPIRE ME: Include user preferences for personalized suggestions
+      // but don't include dietary restrictions (save those for full recipe generation)
+      const preferenceContext = userPreferences ? {
+        cuisinePreferences: userPreferences.preferredCuisines || [],
+        skillLevel: userPreferences.skillLevel,
+        timePreference: userPreferences.timePreference,
+        ambitionLevel: userPreferences.ambitionLevel,
+      } : {};
+      
+      // Only avoid items explicitly selected by user (not general dietary preferences)
+      const explicitAvoidOnly = explicitAvoid.filter((item: string) => item && item.trim());
+
+      // Build enhanced user intent with preferences for better suggestions
+      let enhancedUserIntent = req.body.userIntent || "";
+      
+      // Add preference context to user intent for personalized suggestions
+      if (userPreferences) {
+        const preferenceHints = [];
+        
+        if (userPreferences.ambitionLevel === "simple") {
+          preferenceHints.push("keep it simple and quick");
+        } else if (userPreferences.ambitionLevel === "adventurous") {
+          preferenceHints.push("try something creative and challenging");
+        }
+        
+        if (userPreferences.timePreference && userPreferences.timePreference <= 30) {
+          preferenceHints.push("under 30 minutes");
+        }
+        
+        if (userPreferences.preferredCuisines && userPreferences.preferredCuisines.length > 0) {
+          preferenceHints.push(`inspired by ${userPreferences.preferredCuisines.slice(0, 2).join(" or ")} cuisine`);
+        }
+        
+        if (preferenceHints.length > 0 && !enhancedUserIntent) {
+          enhancedUserIntent = preferenceHints.join(", ");
+        }
+      }
 
       const result = await ChefAssistGPT5.generateInspireTitle({
         seeds,
-        userIntent: req.body.userIntent || "",
-        cuisinePreference: req.body.cuisinePreference,
-        avoid: combinedDietaryNeeds,
+        userIntent: enhancedUserIntent,
+        cuisinePreference: req.body.cuisinePreference || (userPreferences?.preferredCuisines?.[0]),
+        avoid: explicitAvoidOnly, // Only explicit avoid items, not dietary restrictions
         clientId,
         userId: req.session?.userId // Added for smart profiling
       });
