@@ -296,8 +296,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
 
       // Calculate meal count based on user's subscription
       const user = await storage.getUser(userId);
-      const subscriptionStatus = await storage.getSubscriptionStatus(userId);
-      const isFlavrPlus = subscriptionStatus?.hasFlavrPlus || false;
+      const isFlavrPlus = user?.hasFlavrPlus || false;
       const mealCount = isFlavrPlus ? plannedMeals.length : Math.min(plannedMeals.length, 2);
 
       // Generate consolidated shopping list
