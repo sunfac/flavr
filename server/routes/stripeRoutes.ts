@@ -12,9 +12,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 // Define subscription prices (you'll need to create these in Stripe Dashboard)
+// Prefer testing price IDs when available
 const PRICE_IDS = {
-  monthly: process.env.STRIPE_MONTHLY_PRICE_ID || '', // Set STRIPE_MONTHLY_PRICE_ID in environment
-  annual: process.env.STRIPE_ANNUAL_PRICE_ID || '', // Set STRIPE_ANNUAL_PRICE_ID in environment
+  monthly: process.env.TESTING_STRIPE_MONTHLY_PRICE_ID || process.env.STRIPE_MONTHLY_PRICE_ID || '', 
+  annual: process.env.TESTING_STRIPE_ANNUAL_PRICE_ID || process.env.STRIPE_ANNUAL_PRICE_ID || '', 
 };
 
 export function registerStripeRoutes(app: Express) {
@@ -23,6 +24,7 @@ export function registerStripeRoutes(app: Express) {
     try {
       console.log("🔔 Create subscription request received");
       console.log("Session userId:", req.session?.userId);
+      console.log("TESTING_STRIPE_MONTHLY_PRICE_ID:", process.env.TESTING_STRIPE_MONTHLY_PRICE_ID ? `Set: ${process.env.TESTING_STRIPE_MONTHLY_PRICE_ID.substring(0, 15)}...` : "Not set");
       console.log("STRIPE_MONTHLY_PRICE_ID:", process.env.STRIPE_MONTHLY_PRICE_ID ? `Set: ${process.env.STRIPE_MONTHLY_PRICE_ID.substring(0, 15)}...` : "Not set");
       
       if (!req.session?.userId) {
