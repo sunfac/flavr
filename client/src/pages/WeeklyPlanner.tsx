@@ -32,7 +32,14 @@ export default function WeeklyPlanner() {
     setShowUserMenu(false);
   };
 
-  // Close all menus on component mount to prevent stuck menus
+  // Get user authentication status
+  const { data: user } = useQuery({
+    queryKey: ["/api/me"],
+    retry: false,
+  });
+  const isAuthenticated = !!user?.user;
+
+  // Close all menus on component mount
   useEffect(() => {
     closeAllMenus();
   }, []);
@@ -44,13 +51,6 @@ export default function WeeklyPlanner() {
     if (menuType === 'settings') setShowSettings(true);
     if (menuType === 'userMenu') setShowUserMenu(true);
   };
-
-  // Get user authentication status
-  const { data: user } = useQuery({
-    queryKey: ["/api/me"],
-    retry: false,
-  });
-  const isAuthenticated = !!user?.user;
 
   // Get user's weekly planning preferences
   const { data: preferences, isLoading: preferencesLoading, refetch: refetchPreferences } = useQuery({
@@ -209,7 +209,7 @@ export default function WeeklyPlanner() {
           onClose={closeAllMenus}
         />
         <UserMenu 
-          isOpen={showUserMenu}
+          isOpen={false}
           onClose={closeAllMenus}
         />
         <AuthModal 
@@ -265,7 +265,7 @@ export default function WeeklyPlanner() {
         <GlobalFooter currentMode="weekly-planner" />
         <GlobalNavigation isOpen={showNavigation} onClose={closeAllMenus} />
         <SettingsPanel isOpen={showSettings} onClose={closeAllMenus} />
-        <UserMenu isOpen={showUserMenu} onClose={closeAllMenus} />
+        <UserMenu isOpen={false} onClose={closeAllMenus} />
       </div>
     );
   }
@@ -421,7 +421,7 @@ export default function WeeklyPlanner() {
       <GlobalFooter />
       <GlobalNavigation isOpen={showNavigation} onClose={closeAllMenus} />
       <SettingsPanel isOpen={showSettings} onClose={closeAllMenus} />
-      <UserMenu isOpen={showUserMenu} onClose={closeAllMenus} />
+      <UserMenu isOpen={false} onClose={closeAllMenus} />
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
       <FlavrPlusUpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
     </div>
