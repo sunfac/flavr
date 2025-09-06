@@ -919,6 +919,18 @@ Return a JSON object with this structure:
       } else {
         // Generate new recipe with AI (premium users or no cache found)
         console.log('🤖 Generating fresh AI recipe...');
+        
+        // Check if this looks like a specific recipe title from Inspire Me
+        const isSpecificRecipeTitle = userPrompt.includes('-Inspired') || 
+                                    userPrompt.includes(' with ') ||
+                                    userPrompt.match(/^[A-Z].*\w+.*\w+/); // Capitalized multi-word titles
+        
+        console.log('🎯 Recipe title specificity check:', {
+          prompt: userPrompt,
+          isSpecific: isSpecificRecipeTitle,
+          willForceTitle: isSpecificRecipeTitle
+        });
+        
         const result = await ChefAssistGPT5.generateFullRecipe({
           userIntent: userPrompt,
           servings,
@@ -931,7 +943,8 @@ Return a JSON object with this structure:
         cuisinePreference: req.body.cuisinePreference,
         seeds,
         clientId,
-        userId: req.session?.userId // Added for smart profiling
+        userId: req.session?.userId, // Added for smart profiling
+        forcedTitle: isSpecificRecipeTitle ? userPrompt : undefined // Force title consistency
       });
 
         // GPT-5 returns the recipe directly, not wrapped

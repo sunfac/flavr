@@ -250,6 +250,7 @@ export class ChefAssistGPT5 {
     seeds: SeedPacks;
     clientId?: string;
     userId?: number; // Keep for analytics/logging but not used for smart profiling
+    forcedTitle?: string; // Force specific title instead of generating new one
   }): Promise<any> {
     
     // Check cache first for performance
@@ -434,6 +435,12 @@ export class ChefAssistGPT5 {
       }
       
       console.log("Recipe parsed successfully:", recipe.title);
+      
+      // Override title if forced title is provided (for Inspire Me consistency)
+      if (data.forcedTitle) {
+        console.log(`🎯 Overriding recipe title: "${recipe.title}" → "${data.forcedTitle}"`);
+        recipe.title = data.forcedTitle;
+      }
       
       // Record generation for variety tracking
       if (inputAnalysis.vaguePromptSignature && data.clientId) {
