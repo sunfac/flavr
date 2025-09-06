@@ -284,6 +284,28 @@ Focus on clear, practical instructions that home cooks can follow confidently.`;
           originalPrompt: `Weekly meal plan: ${titleData.title}`
         });
 
+        // Generate recipe image in background (don't await to avoid blocking)
+        try {
+          const { generateRecipeImageWithDallE, createRecipeImagePrompt } = await import('./imageGeneration');
+          const imagePrompt = createRecipeImagePrompt(
+            savedRecipe.title, 
+            recipe.ingredients || [], 
+            'appetizing', 
+            recipe.cuisine || titleData.cuisine
+          );
+          generateRecipeImageWithDallE(imagePrompt).then(imageUrl => {
+            if (imageUrl) {
+              // Store the image URL in the recipe
+              storage.updateRecipe(savedRecipe.id, { imageUrl }).catch(err => 
+                console.error('Failed to update recipe with image URL:', err)
+              );
+              console.log('✅ Weekly planner recipe image generated:', savedRecipe.title);
+            }
+          }).catch(err => console.error('Weekly planner image generation failed:', err));
+        } catch (imageError) {
+          console.error('Error setting up image generation for weekly recipe:', imageError);
+        }
+
         return {
           day: titleData.day,
           mealType: "dinner",
