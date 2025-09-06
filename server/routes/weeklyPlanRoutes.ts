@@ -440,6 +440,29 @@ export function registerWeeklyPlanRoutes(app: Express) {
   });
 }
 
+// Helper function to consolidate shopping list ingredients
+function consolidateShoppingList(allIngredients: string[]): string[] {
+  const ingredientMap = new Map<string, number>();
+  
+  for (const ingredient of allIngredients) {
+    const normalized = ingredient.toLowerCase().trim();
+    const existing = ingredientMap.get(normalized) || 0;
+    ingredientMap.set(normalized, existing + 1);
+  }
+  
+  // Return consolidated list with quantities
+  const consolidated: string[] = [];
+  for (const [ingredient, count] of ingredientMap.entries()) {
+    if (count > 1) {
+      consolidated.push(`${ingredient} (${count}x)`);
+    } else {
+      consolidated.push(ingredient);
+    }
+  }
+  
+  return consolidated.sort();
+}
+
 // Helper function to generate ICS calendar data
 function generateICSCalendarData(plan: any): string {
   const now = new Date().toISOString().replace(/[:-]/g, '').split('.')[0] + 'Z';

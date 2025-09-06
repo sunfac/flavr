@@ -24,6 +24,13 @@ export default function WeeklyPlanner() {
   const [showAdjustModal, setShowAdjustModal] = useState(false);
   const [currentWeekPlan, setCurrentWeekPlan] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  
+  // Two-step generation states
+  const [showTitleReview, setShowTitleReview] = useState(false);
+  const [proposedTitles, setProposedTitles] = useState<any[]>([]);
+  const [isGeneratingTitles, setIsGeneratingTitles] = useState(false);
+  const [isGeneratingRecipes, setIsGeneratingRecipes] = useState(false);
+  const [estimatedCost, setEstimatedCost] = useState<number>(0);
   const { toast } = useToast();
 
   // Close all menus
@@ -73,7 +80,8 @@ export default function WeeklyPlanner() {
     }
   }, [weeklyPlans]);
 
-  const handleGenerateWeeklyPlan = async () => {
+  // STEP 1: Generate recipe titles for review
+  const handleGenerateWeeklyTitles = async () => {
     if (!isAuthenticated) {
       setShowAuthModal(true);
       return;
@@ -88,19 +96,57 @@ export default function WeeklyPlanner() {
       return;
     }
 
-    setIsGenerating(true);
+    setIsGeneratingTitles(true);
     try {
-      const response = await apiRequest("POST", "/api/generate-weekly-plan", {
+      const mealCount = preferences.isFlavrPlus ? 7 : 2;
+      const response = await apiRequest("POST", "/api/generate-weekly-titles", {
+        mealCount
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate titles');
+      }
+      
+      const titleProposal = await response.json();
+      setProposedTitles(titleProposal.titles);
+      setEstimatedCost(titleProposal.totalEstimatedCost);
+      setShowTitleReview(true);
+      
+      toast({
+        title: "Recipe Ideas Generated!",
+        description: `${titleProposal.titles.length} recipe titles ready for review. Estimated cost: $${titleProposal.totalEstimatedCost.toFixed(2)}`,
+      });
+    } catch (error: any) {
+      console.error("Error generating titles:", error);
+      toast({
+        title: "Generation Failed",
+        description: error.message || "Failed to generate recipe ideas. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingTitles(false);
+    }
+  };
+
+  // STEP 2: Generate full recipes from approved titles
+  const handleGenerateFromTitles = async (approvedTitles: any[]) => {
+    setIsGeneratingRecipes(true);
+    try {
+      const response = await apiRequest("POST", "/api/generate-from-titles", {
+        approvedTitles,
         weekStartDate: getThisMonday().toISOString()
       });
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate plan');
+        throw new Error(errorData.error || 'Failed to generate recipes');
       }
       
       const newPlan = await response.json();
       setCurrentWeekPlan(newPlan);
+      setShowTitleReview(false);
+      setProposedTitles([]);
       refetchPlans();
       
       toast({
@@ -108,15 +154,48 @@ export default function WeeklyPlanner() {
         description: "Your personalized meal plan is ready. Review and accept or make adjustments.",
       });
     } catch (error: any) {
-      console.error("Error generating weekly plan:", error);
+      console.error("Error generating recipes:", error);
       toast({
         title: "Generation Failed",
-        description: error.message || "Failed to generate your weekly plan. Please try again.",
+        description: error.message || "Failed to generate recipes. Please try again.",
         variant: "destructive"
       });
     } finally {
-      setIsGenerating(false);
+      setIsGeneratingRecipes(false);
     }
+  };
+
+  // Regenerate single title
+  const handleRegenerateTitle = async (day: string, index: number) => {
+    try {
+      const response = await apiRequest("POST", "/api/regenerate-title", {
+        day,
+        currentTitle: proposedTitles[index]?.title
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to regenerate title');
+      }
+      
+      const { title } = await response.json();
+      const updatedTitles = [...proposedTitles];
+      updatedTitles[index] = title;
+      setProposedTitles(updatedTitles);
+      
+    } catch (error: any) {
+      console.error("Error regenerating title:", error);
+      toast({
+        title: "Regeneration Failed",
+        description: error.message || "Failed to regenerate title. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Legacy function for backwards compatibility (now triggers title generation)
+  const handleGenerateWeeklyPlan = async () => {
+    await handleGenerateWeeklyTitles();
   };
 
   const handleAcceptPlan = async () => {
@@ -346,8 +425,116 @@ export default function WeeklyPlanner() {
             <p className="text-slate-300">Your personalized cooking schedule</p>
           </div>
 
-          {/* Current Week Plan */}
-          {currentWeekPlan ? (
+          {/* Title Review Step */}
+          {showTitleReview ? (
+            <div className="space-y-6">
+              <Card className="bg-slate-800/50 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white text-xl">
+                    Review Your Weekly Recipe Ideas
+                  </CardTitle>
+                  <p className="text-slate-300">
+                    Review and customize your recipe selections before generating the full meal plan.
+                    Estimated cost for full recipes: <span className="text-orange-400 font-semibold">${estimatedCost.toFixed(2)}</span>
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {proposedTitles.map((titleData, index) => (
+                      <div 
+                        key={titleData.day}
+                        className="bg-slate-700/50 rounded-lg p-4 border border-slate-600"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="text-white font-semibold capitalize">{titleData.day}</h3>
+                          <Badge variant="outline" className="border-slate-500 text-slate-300">
+                            {titleData.cuisine}
+                          </Badge>
+                        </div>
+                        
+                        <h4 className="text-slate-200 font-medium mb-2 min-h-[3rem]">
+                          {titleData.title}
+                        </h4>
+                        
+                        <p className="text-slate-400 text-sm mb-3 min-h-[2.5rem]">
+                          {titleData.description}
+                        </p>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1 text-sm text-slate-400">
+                            <Clock className="w-3 h-3" />
+                            {titleData.estimatedTime} min
+                          </div>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRegenerateTitle(titleData.day, index)}
+                            className="border-orange-500 text-orange-400 hover:bg-orange-500/10"
+                          >
+                            <RefreshCw className="w-3 h-3 mr-1" />
+                            Change
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-3 mt-6 justify-center">
+                    <Button
+                      onClick={() => handleGenerateFromTitles(proposedTitles)}
+                      disabled={isGeneratingRecipes}
+                      className="bg-green-600 hover:bg-green-700 text-white px-6"
+                    >
+                      {isGeneratingRecipes ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Generating Recipes...
+                        </>
+                      ) : (
+                        <>
+                          Generate Full Recipes (${estimatedCost.toFixed(2)})
+                        </>
+                      )}
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowTitleReview(false);
+                        setProposedTitles([]);
+                      }}
+                      className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                    >
+                      Cancel
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      onClick={handleGenerateWeeklyTitles}
+                      disabled={isGeneratingTitles}
+                      className="border-orange-500 text-orange-400 hover:bg-orange-500/10"
+                    >
+                      {isGeneratingTitles ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Generate New Ideas
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : 
+          
+          /* Current Week Plan */
+          currentWeekPlan ? (
             <div className="space-y-6">
               {/* Plan Status */}
               <Card className="bg-slate-800/50 border-slate-700">
