@@ -761,30 +761,82 @@ MEAT PREFERENCE: Unless specifically vegan/vegetarian, strongly favor meat-based
       }
 
     } else if (inspirationType === 1) {
-      // Restaurant-style excellence  
-      const restaurantTypes = [
-        // Popular London Restaurants
-        "Kiln's Thai fire cooking", "Hawksmoor's premium steakhouse", "Dishoom's Bombay café culture",
-        "Zuma's contemporary Japanese", "Novikov's Asian-Italian fusion", "Bancone's fresh pasta perfection",
-        "Sexy Fish's glamorous seafood", "Rules' traditional British game", "Sabor's authentic Spanish tapas",
-        "China Tang's Cantonese classics", "The Ivy's British institution", "Coal Office's modern British",
-        "Nobu's Japanese-Peruvian fusion", "Sketch's artistic innovation", "Oma's Middle Eastern flavours",
-        "St. JOHN's nose-to-tail British", "Barrafina's Spanish counter dining", "Bao's Taiwanese street food",
-        "Hoppers' Sri Lankan street food", "Roka's robatayaki grilling", "Koya Bar's Japanese comfort",
-        "Mayfair Chippy's elevated fish & chips", "Bentley's Oyster Bar seafood", "The Ledbury's modern European",
-        
-        // International Restaurant Styles
-        "British gastropub classics", "Italian trattoria warmth", "French bistro elegance", 
-        "Spanish tapas creativity", "Thai street food authenticity", "Japanese izakaya comfort",
-        "Indian restaurant spices", "Mexican cantina flavors", "Greek taverna traditions",
-        "Lebanese meze selections", "Korean BBQ techniques", "Vietnamese pho mastery",
-        "Moroccan tagine houses", "Turkish kebab mastery", "Peruvian cevicheria freshness",
-        "Argentinian parrilla grilling", "Brazilian churrascaria cuts", "Ethiopian injera sharing",
-        "Russian caviar service", "Scandinavian hygge dining", "Austrian schnitzel houses",
-        "Portuguese seafood tavernas", "Hungarian goulash comfort", "Polish pierogi traditions",
-        "German beer hall heartiness", "Swiss fondue alpine warmth", "Belgian brasserie classics"
-      ];
-      const selectedType = restaurantTypes[Math.floor(Math.random() * restaurantTypes.length)];
+      // Restaurant-style excellence - match restaurants to appropriate cuisines
+      const restaurantCuisineMap = {
+        // British Cuisine Restaurants
+        "British": [
+          "Hawksmoor's premium steakhouse", "Rules' traditional British game", "The Ivy's British institution", 
+          "Coal Office's modern British", "St. JOHN's nose-to-tail British", "Mayfair Chippy's elevated fish & chips", 
+          "Bentley's Oyster Bar seafood", "The Ledbury's modern European", "British gastropub classics"
+        ],
+        // Italian Cuisine Restaurants  
+        "Italian": [
+          "Bancone's fresh pasta perfection", "Italian trattoria warmth", "Novikov's Asian-Italian fusion"
+        ],
+        // Japanese Cuisine Restaurants
+        "Japanese": [
+          "Zuma's contemporary Japanese", "Nobu's Japanese-Peruvian fusion", "Roka's robatayaki grilling", 
+          "Koya Bar's Japanese comfort", "Japanese izakaya comfort"
+        ],
+        // Indian/South Asian Cuisine Restaurants
+        "Indian": [
+          "Dishoom's Bombay café culture", "Hoppers' Sri Lankan street food", "Indian restaurant spices"
+        ],
+        // Thai Cuisine Restaurants
+        "Thai": [
+          "Kiln's Thai fire cooking", "Thai street food authenticity"
+        ],
+        // Spanish Cuisine Restaurants
+        "Spanish": [
+          "Sabor's authentic Spanish tapas", "Barrafina's Spanish counter dining", "Spanish tapas creativity"
+        ],
+        // Chinese Cuisine Restaurants
+        "Chinese": [
+          "China Tang's Cantonese classics", "Bao's Taiwanese street food"
+        ],
+        // French Cuisine Restaurants
+        "French": [
+          "French bistro elegance", "Sketch's artistic innovation"
+        ],
+        // Middle Eastern Cuisine Restaurants
+        "Middle Eastern": [
+          "Oma's Middle Eastern flavours", "Lebanese meze selections"
+        ],
+        // Seafood Restaurants (for various cuisines)
+        "Seafood": [
+          "Sexy Fish's glamorous seafood", "Bentley's Oyster Bar seafood"
+        ],
+        // International/Other
+        "Mexican": ["Mexican cantina flavors"],
+        "Greek": ["Greek taverna traditions"],
+        "Korean": ["Korean BBQ techniques"],
+        "Vietnamese": ["Vietnamese pho mastery"],
+        "Moroccan": ["Moroccan tagine houses"],
+        "Turkish": ["Turkish kebab mastery"],
+        "Peruvian": ["Peruvian cevicheria freshness"],
+        "Argentinian": ["Argentinian parrilla grilling"],
+        "Brazilian": ["Brazilian churrascaria cuts"],
+        "Ethiopian": ["Ethiopian injera sharing"],
+        "Portuguese": ["Portuguese seafood tavernas"],
+        "German": ["German beer hall heartiness"],
+        "Austrian": ["Austrian schnitzel houses"],
+        "Swiss": ["Swiss fondue alpine warmth"],
+        "Belgian": ["Belgian brasserie classics"]
+      };
+      
+      // Find restaurants that match the selected cuisine
+      let suitableRestaurants = (restaurantCuisineMap as any)[selectedCuisine] || [];
+      
+      // If no specific restaurants for the cuisine, use general restaurant styles
+      if (suitableRestaurants.length === 0) {
+        suitableRestaurants = [
+          `authentic ${selectedCuisine} restaurant traditions`,
+          `traditional ${selectedCuisine} cooking techniques`,
+          `professional ${selectedCuisine} kitchen methods`
+        ];
+      }
+      
+      const selectedType = suitableRestaurants[Math.floor(Math.random() * suitableRestaurants.length)];
       
       inspirationPrompt = `Create a ${selectedCuisine} recipe title inspired by ${selectedType}.
       
