@@ -9,12 +9,10 @@ import ShoppingList from "./ShoppingList";
 import ChatBot from "./ChatBot";
 import RecipeShareTools from "./RecipeShareTools";
 import VoiceControl from "./VoiceControl";
-import SommelierModal from "./SommelierModal";
 import { generateShoppingPrompt2 } from "@/prompts/shoppingPrompt2";
 import { generateFridgePrompt2 } from "@/prompts/fridgePrompt2";
 import { motion, AnimatePresence } from "framer-motion";
 import { iconMap } from "@/lib/iconMap";
-import { Wine } from "lucide-react";
 import EnhancedRecipeCard from "./recipe/EnhancedRecipeCard";
 import { useRecipeStore } from "@/stores/recipeStore";
 import { RecipeCardSkeleton } from "@/components/ui/skeleton";
@@ -48,7 +46,6 @@ export default function RecipeCard({
   const [showChatbot, setShowChatbot] = useState(false);
   const [chatbotMessage, setChatbotMessage] = useState("");
   const [showVoiceControl, setShowVoiceControl] = useState(false);
-  const [showSommelier, setShowSommelier] = useState(false);
   const { toast } = useToast();
   const recipeStore = useRecipeStore();
   const updateActiveRecipe = useRecipeStore((state) => state.updateActiveRecipe);
@@ -388,10 +385,9 @@ export default function RecipeCard({
 
       {/* Additional Legacy Features */}
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Action Buttons Section */}
-        <div className="space-y-4 mb-8">
-          {/* Shopping List Button (only for shopping mode) */}
-          {mode === "shopping" && fullRecipe.shoppingList && (
+        {/* Shopping List Button (only for shopping mode) */}
+        {mode === "shopping" && fullRecipe.shoppingList && (
+          <div className="mb-8">
             <Button 
               onClick={() => setShowShoppingList(true)}
               className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90"
@@ -399,19 +395,8 @@ export default function RecipeCard({
               <iconMap.shoppingCart className="w-4 h-4 mr-2" />
               Generate Shopping List
             </Button>
-          )}
-
-          {/* Ask the Sommelier Button */}
-          <Button
-            onClick={() => setShowSommelier(true)}
-            variant="outline"
-            className="w-full bg-slate-800/50 border-slate-600/50 text-slate-200 hover:bg-slate-700/50 transition-all duration-200"
-            data-testid="button-sommelier"
-          >
-            <Wine className="w-4 h-4 mr-2 text-purple-400" />
-            Ask the Sommelier
-          </Button>
-        </div>
+          </div>
+        )}
 
         {/* Additional Sharing Tools for Shopping Mode */}
         {mode === "shopping" && fullRecipe.id && (
@@ -488,20 +473,6 @@ export default function RecipeCard({
           onClose={() => setShowShoppingList(false)}
         />
       )}
-
-      {/* Sommelier Modal */}
-      <SommelierModal
-        isOpen={showSommelier}
-        onClose={() => setShowSommelier(false)}
-        recipe={{
-          title: actualRecipe.title,
-          cuisine: actualRecipe.cuisine,
-          ingredients: actualRecipe.ingredients || [],
-          instructions: actualRecipe.instructions || [],
-          difficulty: actualRecipe.difficulty,
-          cookTime: actualRecipe.cookTime
-        }}
-      />
     </div>
   );
 }

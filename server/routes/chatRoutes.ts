@@ -21,12 +21,89 @@ if (!process.env.OPENAI_API_KEY) {
 }
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// REMOVED: General recipe inspiration system - chat is now recipe-context only
+// Smart inspiration selection based on dish type
+function selectAppropriateInspiration(message: string, allChefs: string[], allRestaurants: string[]): string {
+  const lowerMessage = message.toLowerCase();
+  
+  // Italian dishes - prefer Italian chefs and Italian restaurants
+  if (lowerMessage.includes('pasta') || lowerMessage.includes('pizza') || lowerMessage.includes('risotto') || 
+      lowerMessage.includes('carbonara') || lowerMessage.includes('bolognese') || lowerMessage.includes('marinara') ||
+      lowerMessage.includes('parmigiana') || lowerMessage.includes('gnocchi') || lowerMessage.includes('lasagna') ||
+      lowerMessage.includes('porchetta') || lowerMessage.includes('osso buco') || lowerMessage.includes('saltimbocca') ||
+      lowerMessage.includes('bruschetta') || lowerMessage.includes('antipasti') || lowerMessage.includes('tiramisu')) {
+    const italianChefs = ['Gino D\'Acampo', 'Antonio Carluccio', 'Giorgio Locatelli'];
+    const italianRestaurants = ['Padella', 'Bancone', 'Barrafina'];
+    const useChef = Math.random() < 0.6; // Slight preference for chefs for Italian
+    return useChef 
+      ? italianChefs[Math.floor(Math.random() * italianChefs.length)]
+      : italianRestaurants[Math.floor(Math.random() * italianRestaurants.length)];
+  }
+  
+  // Indian dishes - prefer Indian-focused chefs and restaurants
+  if (lowerMessage.includes('curry') || lowerMessage.includes('dal') || lowerMessage.includes('biryani') ||
+      lowerMessage.includes('tandoori') || lowerMessage.includes('masala') || lowerMessage.includes('naan')) {
+    const indianChefs = ['Atul Kochhar', 'Cyrus Todiwala', 'Vivek Singh'];
+    const indianRestaurants = ['Dishoom', 'Gymkhana', 'Hoppers'];
+    const useChef = Math.random() < 0.4; // Preference for restaurants for Indian
+    return useChef 
+      ? indianChefs[Math.floor(Math.random() * indianChefs.length)]
+      : indianRestaurants[Math.floor(Math.random() * indianRestaurants.length)];
+  }
+  
+  // Asian dishes - prefer Asian-focused chefs and restaurants
+  if (lowerMessage.includes('stir fry') || lowerMessage.includes('noodles') || lowerMessage.includes('ramen') ||
+      lowerMessage.includes('pad thai') || lowerMessage.includes('pho') || lowerMessage.includes('dumplings') ||
+      lowerMessage.includes('sushi') || lowerMessage.includes('miso') || lowerMessage.includes('teriyaki')) {
+    const asianChefs = ['Ken Hom', 'Ching He Huang', 'David Chang'];
+    const asianRestaurants = ['Bao', 'Kiln', 'Roka', 'Smoking Goat'];
+    const useChef = Math.random() < 0.3; // Strong preference for restaurants for Asian
+    return useChef 
+      ? asianChefs[Math.floor(Math.random() * asianChefs.length)]
+      : asianRestaurants[Math.floor(Math.random() * asianRestaurants.length)];
+  }
+  
+  // British/Classic dishes - prefer British chefs and traditional restaurants
+  if (lowerMessage.includes('fish and chips') || lowerMessage.includes('roast') || lowerMessage.includes('pie') ||
+      lowerMessage.includes('bangers') || lowerMessage.includes('shepherd') || lowerMessage.includes('cottage') ||
+      lowerMessage.includes('toad in the hole') || lowerMessage.includes('bubble and squeak')) {
+    const britishChefs = ['Gordon Ramsay', 'Jamie Oliver', 'Tom Kerridge', 'Rick Stein', 'Mary Berry'];
+    const britishRestaurants = ['St. John', 'Rules', 'Simpson\'s in the Strand'];
+    const useChef = Math.random() < 0.7; // Strong preference for chefs for British
+    return useChef 
+      ? britishChefs[Math.floor(Math.random() * britishChefs.length)]
+      : britishRestaurants[Math.floor(Math.random() * britishRestaurants.length)];
+  }
+  
+  // Steakhouse/Meat dishes - prefer steakhouse restaurants
+  if (lowerMessage.includes('steak') || lowerMessage.includes('beef') || lowerMessage.includes('lamb') ||
+      lowerMessage.includes('pork') || lowerMessage.includes('bbq') || lowerMessage.includes('grill')) {
+    const meatChefs = ['Gordon Ramsay', 'Marco Pierre White', 'Tom Kerridge'];
+    const steakhouses = ['Hawksmoor', 'Temper', 'Brat'];
+    const useChef = Math.random() < 0.3; // Strong preference for steakhouses
+    return useChef 
+      ? meatChefs[Math.floor(Math.random() * meatChefs.length)]
+      : steakhouses[Math.floor(Math.random() * steakhouses.length)];
+  }
+  
+  // Baking/Desserts - prefer baking specialists
+  if (lowerMessage.includes('cake') || lowerMessage.includes('cookies') || lowerMessage.includes('bread') ||
+      lowerMessage.includes('muffin') || lowerMessage.includes('scone') || lowerMessage.includes('tart') ||
+      lowerMessage.includes('pudding') || lowerMessage.includes('bake')) {
+    const bakingChefs = ['Mary Berry', 'Paul Hollywood', 'Nadiya Hussain', 'Delia Smith'];
+    return bakingChefs[Math.floor(Math.random() * bakingChefs.length)];
+  }
+  
+  // Default: use any chef or restaurant (50/50 split)
+  const useChef = Math.random() < 0.5;
+  return useChef 
+    ? allChefs[Math.floor(Math.random() * allChefs.length)]
+    : allRestaurants[Math.floor(Math.random() * allRestaurants.length)];
+}
 
 export function registerChatRoutes(app: Express) {
   const zestService = new ZestService();
 
-  // Recipe-focused chat endpoint (requires recipe context)
+  // NEW: Optimized chat endpoint (cost-efficient)
   app.post("/api/chat/optimized", async (req, res) => {
     try {
       const { message, conversationHistory = [], currentRecipe } = req.body;
@@ -35,13 +112,39 @@ export function registerChatRoutes(app: Express) {
         return res.status(400).json({ error: "Message is required" });
       }
 
-      // CRITICAL: Require recipe context for all chat interactions
-      if (!currentRecipe || !currentRecipe.title || !currentRecipe.ingredients) {
-        return res.status(400).json({ 
-          error: "Recipe context required",
-          message: "I'm your recipe assistant! I can only help when you're working on a specific recipe. Please select a recipe to get started.",
-          requiresRecipeContext: true
-        });
+      // Check quota first (same as other endpoints)
+      try {
+        if (req.session?.userId) {
+          const user = await storage.getUserById(req.session.userId);
+          if (!user?.hasFlavrPlus && (user?.recipesThisMonth || 0) >= 3) {
+            return res.status(403).json({
+              error: "You have no free recipes remaining this month. Sign up for Flavr+ to get unlimited recipes!",
+              recipesUsed: user?.recipesThisMonth || 0,
+              recipesLimit: 3,
+              hasFlavrPlus: false
+            });
+          }
+        } else {
+          const pseudoId = req.body.pseudoUserId;
+          if (pseudoId) {
+            let pseudoUser = await storage.getPseudoUser(pseudoId);
+            if (!pseudoUser) {
+              pseudoUser = await storage.createPseudoUser({ pseudoId });
+            }
+            
+            if ((pseudoUser.recipesThisMonth || 0) >= 3) {
+              return res.status(403).json({
+                error: "You have no free recipes remaining this month. Sign up for Flavr+ to get unlimited recipes!",
+                recipesUsed: pseudoUser.recipesThisMonth || 0,
+                recipesLimit: 3,
+                hasFlavrPlus: false
+              });
+            }
+          }
+        }
+      } catch (quotaError) {
+        console.error('Error checking quota:', quotaError);
+        // Continue without quota check if quota service fails
       }
 
       const userContext = {
@@ -50,14 +153,29 @@ export function registerChatRoutes(app: Express) {
         isAuthenticated: !!req.session?.userId
       };
 
-      console.log('🍳 Recipe-focused chat request:', { 
+      // Get user preferences for Chat Mode personalization
+      let userPreferences = null;
+      if (req.session?.userId) {
+        try {
+          userPreferences = await storage.getUserPreferences(req.session.userId);
+          console.log('💭 Chat Mode user preferences loaded:', {
+            hasDietaryRestrictions: !!userPreferences?.dietaryRestrictions?.length,
+            timePreference: userPreferences?.timePreference,
+            ambitionLevel: userPreferences?.ambitionLevel,
+            skillLevel: userPreferences?.skillLevel
+          });
+        } catch (error) {
+          console.log("No user preferences found for Chat Mode");
+        }
+      }
+
+      console.log('⚡ Optimized chat request:', { 
         message: message.substring(0, 50) + '...', 
         userId: userContext.userId,
-        recipeTitle: currentRecipe.title,
-        ingredientCount: currentRecipe.ingredients?.length || 0
+        hasCurrentRecipe: !!currentRecipe
       });
 
-      // Process with recipe-focused service
+      // Process with optimized service
       const result = await OptimizedChatService.processMessage({
         message,
         conversationHistory,
@@ -65,7 +183,7 @@ export function registerChatRoutes(app: Express) {
         userContext
       });
 
-      console.log('🍳 Recipe-focused result:', {
+      console.log('⚡ Optimized chat result:', {
         intent: result.intent,
         confidence: result.confidence,
         estimatedCost: result.estimatedCost,
@@ -78,20 +196,20 @@ export function registerChatRoutes(app: Express) {
         intent: result.intent,
         confidence: result.confidence,
         suggestedActions: result.suggestedActions,
-        isRecipeFocused: true,
+        isOptimized: true,
         metadata: result.metadata
       });
 
     } catch (error) {
-      console.error('❌ Recipe-focused chat error:', error);
+      console.error('❌ Optimized chat error:', error);
       res.status(500).json({ 
-        error: "Failed to process recipe-focused chat",
+        error: "Failed to process chat message",
         details: error instanceof Error ? error.message : "Unknown error"
       });
     }
   });
 
-  // Recipe-focused Zest chat endpoint (requires recipe context)
+  // Enhanced Zest chat endpoint with user memory and intent detection
   app.post("/api/zest/chat", async (req, res) => {
     try {
       const { message, conversationHistory = [], currentRecipe } = req.body;
@@ -100,260 +218,124 @@ export function registerChatRoutes(app: Express) {
         return res.status(400).json({ error: "Message is required" });
       }
 
-      // CRITICAL: Require recipe context for all Zest chat interactions
-      if (!currentRecipe || !currentRecipe.title || !currentRecipe.ingredients) {
-        return res.status(400).json({ 
-          error: "Recipe context required",
-          message: "I'm Zest, your recipe assistant! I can only help when you're working on a specific recipe. Please select a recipe to get started.",
-          requiresRecipeContext: true
-        });
-      }
-
       // Get user context
       const userContext = {
         userId: req.session?.userId,
-        pseudoUserId: req.body.pseudoUserId,
+        pseudoUserId: req.body.pseudoUserId, // For anonymous users
         isAuthenticated: !!req.session?.userId
       };
 
-      console.log('🧠 Recipe-focused Zest chat request:', { 
-        message: message.substring(0, 50) + '...', 
+      console.log('🧠 Zest chat request:', { 
+        message: message.substring(0, 100) + '...', 
         userId: userContext.userId,
-        recipeTitle: currentRecipe.title,
-        ingredientCount: currentRecipe.ingredients?.length || 0
+        hasCurrentRecipe: !!currentRecipe,
+        currentRecipeTitle: currentRecipe?.title,
+        currentRecipeIngredients: currentRecipe?.ingredients?.length || 0
       });
 
-      // Process recipe-focused request using OptimizedChatService
-      const result = await OptimizedChatService.processMessage({
-        message,
-        conversationHistory,
-        currentRecipe,
-        userContext
-      });
-
-      console.log('🧠 Zest recipe-focused result:', {
-        intent: result.intent,
-        confidence: result.confidence,
-        estimatedCost: result.estimatedCost,
-        modelUsed: result.metadata.modelUsed,
-        processingTime: result.metadata.processingTimeMs,
-        recipeTitle: currentRecipe.title
-      });
-
-      // Save the conversation for authenticated users
-      if (userContext.userId) {
+      // Get user preferences for Zest chat personalization
+      let userPreferences = null;
+      if (req.session?.userId) {
         try {
-          await storage.createChatMessage({
-            userId: userContext.userId,
-            message: message,
-            response: result.message
+          userPreferences = await storage.getUserPreferences(req.session.userId);
+          console.log('💭 Zest chat user preferences loaded:', {
+            hasDietaryRestrictions: !!userPreferences?.dietaryRestrictions?.length,
+            timePreference: userPreferences?.timePreference,
+            ambitionLevel: userPreferences?.ambitionLevel,
+            skillLevel: userPreferences?.skillLevel
           });
         } catch (error) {
-          console.error('Error saving recipe-focused Zest chat:', error);
+          console.log("No user preferences found for Zest chat");
         }
       }
 
-      return res.json({
-        message: result.message,
-        intent: result.intent,
-        confidence: result.confidence,
-        suggestedActions: result.suggestedActions,
-        isRecipeFocused: true,
-        currentRecipeTitle: currentRecipe.title,
-        metadata: result.metadata
+      // Load user memory and preferences
+      const userMemory = await zestService.getUserMemory(userContext);
+      console.log('🔍 User memory loaded:', {
+        hasPreferences: !!userMemory.preferences,
+        conversationHistory: userMemory.recentConversations.length,
+        cookingHistory: userMemory.cookingHistory.length
       });
 
-    } catch (error) {
-      console.error('❌ Recipe-focused Zest chat error:', error);
-      res.status(500).json({ 
-        error: "Failed to process recipe-focused chat",
-        details: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
-
-  // === REMAINING ENDPOINTS (Already Recipe-Focused or Non-Chat) ===
-
-  // Recipe generation endpoint for when user confirms intent
-  app.post("/api/zest/generate-recipe", async (req, res) => {
-    try {
-      const { 
-        message, 
-        userConfirmed, 
-        suggestedRecipeTitle, 
-        isFlavorMaximized, 
-        selectedInspiration, 
-        originalMessage 
-      } = req.body;
+      // Check if this is a request for a quick recipe in chat (check this FIRST)
+      const isQuickRecipeRequest = message.toLowerCase().startsWith('quick recipe for:');
       
-      if (!userConfirmed) {
-        return res.status(400).json({ error: "User confirmation required" });
-      }
-
-      // DEPRECATED: This endpoint should no longer be used for general recipe generation
-      // All chat is now recipe-focused and doesn't generate new recipes
-      return res.status(400).json({ 
-        error: "Recipe generation disabled",
-        message: "Recipe generation has been moved to recipe-focused modes. Please use Chef Assist, Fridge Mode, or Shopping Mode to create new recipes."
-      });
-
-    } catch (error) {
-      console.error('Error in deprecated generate-recipe endpoint:', error);
-      res.status(500).json({ error: "Failed to generate recipe" });
-    }
-  });
-
-  // Original chat endpoint for streaming responses with function calling
-  app.post("/api/chat/stream", async (req, res) => {
-    try {
-      const { message, conversationHistory = [], currentRecipe, openAIContext } = req.body;
+      // Detect recipe intent - but only for new recipes if no current recipe exists
+      const intentResult = await zestService.detectRecipeIntent(message);
+      console.log('🎯 Intent detection:', intentResult);
       
-      if (!message) {
-        return res.status(400).json({ error: "Message is required" });
-      }
-
-      // CRITICAL: Require recipe context for streaming chat
-      if (!currentRecipe || !currentRecipe.title || !currentRecipe.ingredients) {
-        res.write(`data: ${JSON.stringify({ error: "Recipe context required for chat functionality" })}\n\n`);
-        res.end();
-        return;
-      }
-
-      console.log('💬 Recipe-focused chat stream request:', { 
-        message: message.substring(0, 50) + '...', 
-        recipeTitle: currentRecipe.title
-      });
-
-      // Set headers for streaming
-      res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Connection', 'keep-alive');
-      res.setHeader('Access-Control-Allow-Origin', '*');
-
-      // Enhanced system prompt for recipe-focused interactions
-      const systemPrompt = `You are Zest, Flavr's expert AI cooking assistant. You ONLY help with the current recipe being prepared: "${currentRecipe.title}".
-
-Current Recipe Context: ${JSON.stringify(currentRecipe)}
-${openAIContext ? `Original Context: ${JSON.stringify(openAIContext)}` : ''}
-
-CRITICAL RULES for Recipe-Focused Assistance:
-
-1. ONLY discuss the current recipe: ${currentRecipe.title}
-2. ONLY use updateRecipe function when user EXPLICITLY requests changes:
-   ✓ "Make it spicier" → Update with added chili/spices
-   ✓ "Add more garlic" → Update ingredients and steps
-   ✓ "Make it vegetarian" → Replace meat ingredients
-   ✓ "Double the recipe" → Update all quantities
-   
-3. DO NOT update recipe for questions:
-   ✗ "What wine pairs with this?" → Just give suggestions about THIS recipe
-   ✗ "Can I prep this ahead?" → Give advice about THIS recipe only
-   ✗ "Tell me about this dish" → Share knowledge about THIS specific dish
-   ✗ "How do I dice an onion?" → Provide technique tips for THIS recipe
-
-4. When you DO update:
-   - Include ALL ingredients (complete list)
-   - Include ALL instructions (every step)
-   - Update title if the change is significant
-   - Maintain exact formatting
-
-5. Always respond conversationally first, explaining what you're changing and why.
-6. All responses must be specific to this recipe: ${currentRecipe.title}
-
-Be warm, encouraging, and knowledgeable about cooking THIS specific dish!`;
-      const messages = [
-        { role: "system" as const, content: systemPrompt },
-        ...conversationHistory.map((msg: any) => ({
-          role: msg.role || (msg.sender === 'user' ? 'user' : 'assistant'),
-          content: msg.content || msg.text
-        })),
-        { role: "user" as const, content: message }
-      ];
-
-      // Function definition for recipe updates
-      const functions = [{
-        name: "updateRecipe",
-        description: "Update the current recipe with modifications",
-        parameters: {
-          type: "object",
-          properties: {
-            title: { type: "string", description: "Updated recipe title if significantly changed" },
-            ingredients: { type: "array", items: { type: "string" }, description: "Complete list of ALL ingredients" },
-            instructions: { type: "array", items: { type: "string" }, description: "Complete list of ALL instructions" },
-            cookTime: { type: "number", description: "Updated cooking time in minutes" },
-            servings: { type: "number", description: "Updated number of servings" }
-          },
-          required: ["ingredients", "instructions"]
-        }
-      }];
-
-      const stream = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages,
-        temperature: 0.7,
-        max_tokens: 1500,
-        stream: true,
-        functions,
-        function_call: "auto"
-      });
-
-      let fullResponse = '';
-      let functionCall = null;
-      let functionArgs = '';
-
-      for await (const chunk of stream) {
-        const delta = chunk.choices[0]?.delta;
+      if (isQuickRecipeRequest) {
+        console.log('🔍 Quick recipe request detected, generating condensed recipe');
         
-        if (delta?.content) {
-          fullResponse += delta.content;
-          res.write(`data: ${JSON.stringify({ content: delta.content })}\n\n`);
-        }
+        const recipeTitle = message.replace(/^quick recipe for:\s*/i, '').trim();
         
-        if (delta?.function_call) {
-          if (delta.function_call.name) {
-            functionCall = delta.function_call.name;
-          }
-          if (delta.function_call.arguments) {
-            functionArgs += delta.function_call.arguments;
+        // Build context for quick recipe generation
+        const contextPrompt = zestService.buildZestContext(userMemory, currentRecipe);
+        
+        const quickRecipeResponse = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            { 
+              role: "system", 
+              content: `${contextPrompt}
+
+QUICK RECIPE MODE: Generate a condensed, easy-to-follow recipe directly in the chat. Keep it concise but complete.
+
+Format:
+📝 **Recipe Title**
+
+🥘 **Ingredients:** (bullet points, 4-8 items max)
+• Main ingredient with quantity
+• Key flavor enhancers
+
+👨‍🍳 **Quick Method:** (2-4 simple steps)
+1. Prep step with timing
+2. Cooking step with technique
+3. Finishing step
+
+⏱️ **Time:** Total cooking time | **Serves:** Number of people
+
+💡 **Pro Tip:** One key technique or flavor enhancement
+
+Be warm and encouraging like Zest, but keep it concise for easy chat reading.` 
+            },
+            { role: "user", content: `Give me a quick recipe for: ${recipeTitle}` }
+          ],
+          max_tokens: 500,
+          temperature: 0.7
+        });
+
+        const quickRecipe = quickRecipeResponse.choices[0].message.content;
+        
+        // Save the conversation
+        if (userContext.userId) {
+          try {
+            await storage.createChatMessage({
+              userId: userContext.userId,
+              message: message,
+              response: quickRecipe || 'No response generated'
+            });
+          } catch (error) {
+            console.error('Error saving quick recipe chat:', error);
           }
         }
+
+        return res.json({
+          message: quickRecipe,
+          isRecipeIntent: false,
+          isQuickRecipe: true,
+          userMemory: {
+            hasPreferences: !!userMemory.preferences,
+            topicsRemembered: [recipeTitle]
+          }
+        });
       }
 
-      // Handle function call if present
-      if (functionCall === 'updateRecipe' && functionArgs) {
-        try {
-          const updatedRecipe = JSON.parse(functionArgs);
-          res.write(`data: ${JSON.stringify({ functionCall: 'updateRecipe', recipeUpdate: updatedRecipe })}\n\n`);
-        } catch (error) {
-          console.error('Error parsing function arguments:', error);
-        }
-      }
-
-      res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
-      res.end();
-
-      // Log the successful interaction
-      await logSimpleGPTInteraction({
-        endpoint: 'chat-stream-recipe-focused',
-        prompt: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
-        response: fullResponse,
-        model: 'gpt-4o',
-        duration: 0,
-        inputTokens: 0,
-        outputTokens: 0,
-        cost: 0,
-        success: true,
-        userId: req.session?.userId?.toString() || undefined
-      });
-
-    } catch (error) {
-      console.error("Recipe-focused chat stream error:", error);
-      res.write(`data: ${JSON.stringify({ error: "Failed to process recipe-focused chat message" })}\n\n`);
-      res.end();
-    }
-  });
-
-  // === REMAINING CHAT ENDPOINTS (RECIPE-FOCUSED ONLY) === 
+      // Check if user is confirming they want an alternative suggestion
+      const messageClean = message.toLowerCase().trim().replace(/[.!?]+$/, ''); // Remove trailing punctuation
+      const isYesResponse = ['yes', 'y', 'yeah', 'yep', 'sure', 'ok', 'okay'].includes(messageClean);
+      
+      const isAlternativeConfirmation = isYesResponse && 
         conversationHistory.length > 0 && 
         (conversationHistory[conversationHistory.length - 1]?.response?.includes('Would you like me to suggest another') ||
          conversationHistory[conversationHistory.length - 1]?.response?.includes('different idea') ||
@@ -1426,39 +1408,20 @@ Be warm, encouraging, and knowledgeable about cooking!`;
         return res.status(400).json({ error: "Message is required" });
       }
 
-      // CRITICAL: Require recipe context for all chat interactions
-      if (!recipeData || !recipeData.title || !recipeData.ingredients) {
-        return res.status(400).json({ 
-          error: "Recipe context required",
-          message: "I'm Zest, your recipe assistant! I can only help when you're working on a specific recipe. Please select a recipe to get started.",
-          requiresRecipeContext: true
-        });
-      }
-
-      console.log('💬 Recipe-focused chat request:', { 
-        message: message.substring(0, 50) + '...', 
-        recipeTitle: recipeData.title
-      });
+      console.log('💬 Chat request:', { message: message.substring(0, 100) + '...' });
 
       const messages = [
         {
           role: "system" as const,
-          content: `You are Zest, Flavr's expert AI cooking assistant. You ONLY help with the current recipe being prepared: "${recipeData.title}".
+          content: `You are Zest, Flavr's friendly AI cooking assistant. You help users with recipe questions, cooking tips, and culinary guidance.
 
-Current Recipe Context: ${JSON.stringify(recipeData)}
+Current recipe context: ${recipeData ? JSON.stringify(recipeData) : 'No active recipe'}
 
-CRITICAL RULES:
-1. ONLY discuss this specific recipe: ${recipeData.title}
-2. All advice must be specific to this recipe
-3. Focus on modifications, techniques, and improvements for THIS dish
-4. Do not suggest other recipes or general cooking advice
-5. Be helpful, encouraging, and knowledgeable about THIS specific recipe
-
-Guidelines for THIS recipe:
-- Provide specific, actionable advice for modifying THIS recipe
-- When suggesting changes, be specific about quantities and techniques  
-- Keep responses focused on improving THIS particular dish
-- All responses must reference the current recipe context`
+Guidelines:
+- Be helpful, encouraging, and knowledgeable about cooking
+- If asked about modifying recipes, provide specific, actionable advice
+- Keep responses concise but informative
+- Focus on practical cooking guidance`
         },
         ...conversationHistory.map((msg: any) => ({
           role: msg.type === 'user' ? 'user' : 'assistant',
@@ -1526,17 +1489,7 @@ Guidelines for THIS recipe:
         return res.status(400).json({ error: "Messages array is required" });
       }
 
-      // CRITICAL: Require recipe context for streaming chat
-      if (!recipeData || !recipeData.title || !recipeData.ingredients) {
-        res.write(`data: ${JSON.stringify({ error: "Recipe context required for chat functionality" })}\n\n`);
-        res.end();
-        return;
-      }
-
-      console.log('🔄 Recipe-focused stream request:', { 
-        messageCount: messages.length, 
-        recipeTitle: recipeData.title
-      });
+      console.log('🔄 OpenAI stream request with', messages.length, 'messages');
 
       // Set headers for streaming
       res.setHeader('Content-Type', 'text/event-stream');
@@ -1546,22 +1499,15 @@ Guidelines for THIS recipe:
 
       const systemMessage = {
         role: "system" as const,
-        content: `You are Zest, Flavr's expert AI cooking assistant. You ONLY help with the current recipe being prepared: "${recipeData.title}".
+        content: `You are Zest, Flavr's expert AI cooking assistant. You help users with recipe modifications, cooking questions, and culinary guidance.
 
-Current Recipe Context: ${JSON.stringify(recipeData)}
+${recipeData ? `Current recipe context: ${JSON.stringify(recipeData)}` : ''}
 
-CRITICAL RULES:
-1. ONLY discuss this specific recipe: ${recipeData.title}
-2. All advice must be specific to this recipe
-3. Focus on modifications, techniques, and improvements for THIS dish
-4. Do not suggest other recipes or general cooking advice
-5. Provide specific, actionable cooking advice for THIS recipe
-
-Guidelines for THIS recipe:
+Guidelines:
+- Provide specific, actionable cooking advice
 - When modifying recipes, give exact measurements and instructions
-- Be encouraging and knowledgeable about THIS specific dish
-- Focus on practical results for improving THIS particular recipe
-- All responses must reference the current recipe context`
+- Be encouraging and knowledgeable
+- Focus on practical results`
       };
 
       const chatMessages = [systemMessage, ...messages];

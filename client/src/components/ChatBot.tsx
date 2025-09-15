@@ -149,150 +149,77 @@ export default function ChatBot({
      location.includes('/fridge') ? 'fridge' : 
      location.includes('/chef-assist') ? 'chef' : undefined);
 
-  // Intelligent contextual suggestions based on recipe analysis
-  const [intelligentSuggestions, setIntelligentSuggestions] = useState<Array<{
-    text: string;
-    icon: any;
-    updatesRecipe: boolean;
-    priority: number;
-    reasoning?: string;
-  }>>([]);
-
-  // Fallback suggestions when no recipe context is available
-  const fallbackSuggestions = [
-    { text: "What should I cook for dinner?", icon: iconMap.clock, updatesRecipe: false, priority: 1 },
-    { text: "I need quick meal ideas", icon: iconMap.timer, updatesRecipe: false, priority: 1 },
-    { text: "Help me cook something healthy", icon: iconMap.heart, updatesRecipe: false, priority: 1 },
-    { text: "What's good for beginners?", icon: iconMap.smile, updatesRecipe: false, priority: 1 }
+  // Recipe modification suggestions (when a recipe exists)
+  const recipeModificationChips = [
+    { text: "Make this for 6 people", icon: iconMap.users, updatesRecipe: true },
+    { text: "Make it vegan", icon: iconMap.heart, updatesRecipe: true },
+    { text: "Add more spice", icon: iconMap.flame, updatesRecipe: true },
+    { text: "Make it gluten-free", icon: iconMap.shield, updatesRecipe: true },
+    { text: "Add a side dish", icon: iconMap.utensilsCrossed, updatesRecipe: false },
+    { text: "Make it healthier", icon: iconMap.target, updatesRecipe: true },
+    { text: "Double the recipe", icon: iconMap.plus, updatesRecipe: true },
+    { text: "Make it dairy-free", icon: iconMap.droplets, updatesRecipe: true },
+    { text: "Suggest wine pairing", icon: iconMap.wine, updatesRecipe: false },
+    { text: "How can I prep ahead?", icon: iconMap.timer, updatesRecipe: false },
+    { text: "Make it easier to cook", icon: iconMap.chefHat, updatesRecipe: true },
+    { text: "Add more vegetables", icon: iconMap.leaf, updatesRecipe: true },
+    { text: "Make it low-carb", icon: iconMap.zap, updatesRecipe: true },
+    { text: "Turn into meal prep", icon: iconMap.calendar, updatesRecipe: true },
+    { text: "Make it kid-friendly", icon: iconMap.smile, updatesRecipe: true },
+    { text: "Add protein options", icon: iconMap.beef, updatesRecipe: true },
+    { text: "Make it spicier", icon: iconMap.sparkles, updatesRecipe: true },
+    { text: "Suggest leftovers ideas", icon: iconMap.refrigerator, updatesRecipe: false }
   ];
 
-  // Intelligent recipe analysis and suggestion generation
-  const analyzeRecipeAndGenerateSuggestions = async (recipe: Recipe) => {
-    try {
-      const suggestions = [];
-      
-      // Analyze ingredients for dietary modifications
-      const ingredients = recipe.ingredients || [];
-      const instructions = recipe.instructions || [];
-      const hasAnimalProducts = ingredients.some(ing => 
-        ing.toLowerCase().includes('meat') || ing.toLowerCase().includes('chicken') || 
-        ing.toLowerCase().includes('beef') || ing.toLowerCase().includes('pork') ||
-        ing.toLowerCase().includes('dairy') || ing.toLowerCase().includes('cheese') ||
-        ing.toLowerCase().includes('milk') || ing.toLowerCase().includes('butter')
-      );
-      
-      const hasGluten = ingredients.some(ing => 
-        ing.toLowerCase().includes('flour') || ing.toLowerCase().includes('bread') ||
-        ing.toLowerCase().includes('pasta') || ing.toLowerCase().includes('wheat')
-      );
-      
-      const cookTime = recipe.cookTime || 30;
-      const servings = recipe.servings || 4;
-      
-      // Generate contextual suggestions based on recipe analysis
-      if (hasAnimalProducts) {
-        suggestions.push({
-          text: "Make this plant-based",
-          icon: iconMap.leaf,
-          updatesRecipe: true,
-          priority: 3,
-          reasoning: "I can substitute the animal products with plant-based alternatives"
-        });
-      }
-      
-      if (hasGluten) {
-        suggestions.push({
-          text: "Convert to gluten-free",
-          icon: iconMap.shield,
-          updatesRecipe: true,
-          priority: 3,
-          reasoning: "I can modify this to be gluten-free using alternative flours"
-        });
-      }
-      
-      if (cookTime > 45) {
-        suggestions.push({
-          text: "Speed this up for weeknights",
-          icon: iconMap.timer,
-          updatesRecipe: true,
-          priority: 4,
-          reasoning: "This takes a while - let me show you shortcuts"
-        });
-      }
-      
-      if (servings === 4) {
-        suggestions.push({
-          text: "Scale for meal prep",
-          icon: iconMap.calendar,
-          updatesRecipe: true,
-          priority: 2,
-          reasoning: "Perfect for making extra portions for the week"
-        });
-      }
-      
-      // Check cooking complexity
-      const isComplex = instructions.length > 8 || instructions.some(step => 
-        step.toLowerCase().includes('marinate') || step.toLowerCase().includes('rest') ||
-        step.toLowerCase().includes('chill') || step.toLowerCase().includes('overnight')
-      );
-      
-      if (isComplex) {
-        suggestions.push({
-          text: "Simplify the technique",
-          icon: iconMap.chefHat,
-          updatesRecipe: true,
-          priority: 3,
-          reasoning: "I can break this down into easier steps"
-        });
-      }
-      
-      // Always include these contextual chef suggestions
-      suggestions.push(
-        {
-          text: `Perfect wine pairing for ${recipe.title?.toLowerCase()}`,
-          icon: iconMap.wine,
-          updatesRecipe: false,
-          priority: 1,
-          reasoning: `Let me suggest wines that complement ${recipe.cuisine || 'this'} cuisine`
-        },
-        {
-          text: "Prep-ahead strategy",
-          icon: iconMap.clock,
-          updatesRecipe: false,
-          priority: 2,
-          reasoning: "I'll show you what you can prepare in advance"
-        },
-        {
-          text: "Professional chef tips",
-          icon: iconMap.sparkles,
-          updatesRecipe: false,
-          priority: 1,
-          reasoning: "Want to know the secrets that make this dish restaurant-quality?"
-        }
-      );
-      
-      // Sort by priority and return top suggestions
-      return suggestions.sort((a, b) => b.priority - a.priority).slice(0, 6);
-      
-    } catch (error) {
-      console.error('Error analyzing recipe:', error);
-      return fallbackSuggestions;
-    }
-  };
+  // General cooking help suggestions (when no recipe exists)
+  const generalCookingChips = [
+    { text: "Show me dinner recipe options", icon: iconMap.clock, updatesRecipe: false },
+    { text: "What can I make with pasta?", icon: iconMap.utensilsCrossed, updatesRecipe: false },
+    { text: "Give me breakfast recipe ideas", icon: iconMap.coffee, updatesRecipe: false },
+    { text: "Easy recipes for beginners", icon: iconMap.smile, updatesRecipe: false },
+    { text: "What's good for meal prep?", icon: iconMap.calendar, updatesRecipe: false },
+    { text: "I have chicken, what to make?", icon: iconMap.beef, updatesRecipe: false },
+    { text: "Comfort food recipes", icon: iconMap.heart, updatesRecipe: false },
+    { text: "Quick 30-minute meals", icon: iconMap.timer, updatesRecipe: false },
+    { text: "Vegetarian dinner ideas", icon: iconMap.leaf, updatesRecipe: false },
+    { text: "One-pot meal suggestions", icon: iconMap.chef, updatesRecipe: false },
+    { text: "Best dessert to impress?", icon: iconMap.sparkles, updatesRecipe: false },
+    { text: "Cooking techniques to learn", icon: iconMap.chefHat, updatesRecipe: false },
+    { text: "Seasonal ingredient ideas", icon: iconMap.calendar, updatesRecipe: false },
+    { text: "Budget-friendly recipes", icon: iconMap.dollarSign, updatesRecipe: false },
+    { text: "Kid-friendly meal ideas", icon: iconMap.users, updatesRecipe: false },
+    { text: "Date night cooking ideas", icon: iconMap.wine, updatesRecipe: false }
+  ];
+
+  // Determine which suggestion set to use
+  const hasCurrentRecipe = currentRecipe || (recipeStore.meta.title && recipeStore.ingredients.length > 0);
+  const allSuggestionChips = hasCurrentRecipe ? recipeModificationChips : generalCookingChips;
+
+  // Rotating chips state - show 4 at a time (2x2 grid), rotate every 8 seconds with fade
+  const [chipRotationIndex, setChipRotationIndex] = useState(0);
+  const [isRotating, setIsRotating] = useState(false);
+  const chipsToShow = 4;
   
-  // Update suggestions when recipe changes
   useEffect(() => {
-    const currentRecipeContext = getCurrentRecipeContext();
-    if (currentRecipeContext.hasRecipe) {
-      analyzeRecipeAndGenerateSuggestions(currentRecipeContext.recipe)
-        .then(suggestions => setIntelligentSuggestions(suggestions));
-    } else {
-      setIntelligentSuggestions(fallbackSuggestions);
-    }
-  }, [currentRecipe, recipeStore.meta.title, recipeStore.ingredients.length]);
+    const interval = setInterval(() => {
+      setIsRotating(true);
+      
+      // After fade out, change the chips
+      setTimeout(() => {
+        setChipRotationIndex(prev => {
+          const nextIndex = prev + chipsToShow;
+          // Reset to 0 when we've shown all chips
+          return nextIndex >= allSuggestionChips.length ? 0 : nextIndex;
+        });
+        setIsRotating(false);
+      }, 200); // 200ms fade out duration
+    }, 8000);
+    
+    return () => clearInterval(interval);
+  }, [allSuggestionChips.length]);
   
-  // Display current suggestions (no rotation, always show most relevant)
-  const suggestionChips = intelligentSuggestions.slice(0, 4);
+  // Get current 4 chips to display
+  const suggestionChips = allSuggestionChips.slice(chipRotationIndex, chipRotationIndex + chipsToShow);
 
   // Get chat history
   const { data: historyData } = useQuery({
@@ -761,68 +688,21 @@ export default function ChatBot({
     }
   });
 
-  // Initialize with intelligent recipe assessment when we have a recipe
+  // Initialize with Zest's welcome message when we have a recipe
   useEffect(() => {
-    if (!hasInitialized && actualIsOpen) {
-      const currentRecipeContext = getCurrentRecipeContext();
-      if (currentRecipeContext.hasRecipe) {
-        // Generate intelligent assessment of the current recipe
-        const generateWelcomeAssessment = async () => {
-          const recipe = currentRecipeContext.recipe;
-          const suggestions = await analyzeRecipeAndGenerateSuggestions(recipe);
-          
-          // Create contextual welcome message based on recipe analysis
-          let welcomeText = `Perfect! ${recipe.title} is a great choice. `;
-          
-          // Add specific insights based on the recipe
-          if (recipe.cookTime && recipe.cookTime > 60) {
-            welcomeText += "I see this is a longer cook - perfect for weekend cooking. ";
-          } else if (recipe.cookTime && recipe.cookTime < 30) {
-            welcomeText += "Great choice for a quick meal! ";
-          }
-          
-          // Add proactive suggestions based on analysis
-          if (suggestions.length > 0) {
-            const topSuggestion = suggestions[0];
-            if (topSuggestion.priority > 2) {
-              welcomeText += `Quick question: interested in making this ${topSuggestion.text.toLowerCase()}? `;
-            }
-          }
-          
-          // Add cuisine-specific insights
-          if (recipe.cuisine) {
-            welcomeText += `I love ${recipe.cuisine} cuisine - there are some great techniques we can use here. `;
-          }
-          
-          welcomeText += "I'm here to help you nail every step. What would you like to know?";
-          
-          const welcomeMessage: ChatMessage = {
-            id: Date.now(),
-            message: "",
-            response: welcomeText,
-            isUser: false,
-            text: welcomeText,
-            timestamp: new Date(),
-          };
-          setLocalMessages([welcomeMessage]);
-        };
-        
-        generateWelcomeAssessment();
-      } else {
-        // Generic welcome for when no recipe is present
-        const welcomeMessage: ChatMessage = {
-          id: Date.now(),
-          message: "",
-          response: "Hey there! I'm your personal chef assistant. What would you like to cook today? I can help you find recipes, modify existing ones, or answer any cooking questions you have.",
-          isUser: false,
-          text: "Hey there! I'm your personal chef assistant. What would you like to cook today? I can help you find recipes, modify existing ones, or answer any cooking questions you have.",
-          timestamp: new Date(),
-        };
-        setLocalMessages([welcomeMessage]);
-      }
+    if (!hasInitialized && actualIsOpen && currentRecipe) {
+      const welcomeMessage: ChatMessage = {
+        id: Date.now(),
+        message: "",
+        response: "Boom — you picked a flavour bomb. Want to swap something, spice it up, or make it your own? I've got ideas. Just ask.",
+        isUser: false,
+        text: "Boom — you picked a flavour bomb. Want to swap something, spice it up, or make it your own? I've got ideas. Just ask.",
+        timestamp: new Date(),
+      };
+      setLocalMessages([welcomeMessage]);
       setHasInitialized(true);
     }
-  }, [actualIsOpen, hasInitialized, currentRecipe, recipeStore.meta.title]);
+  }, [actualIsOpen, hasInitialized, currentRecipe]);
 
   // Auto-scroll to latest message with debouncing
   useEffect(() => {
@@ -946,22 +826,18 @@ export default function ChatBot({
     setLocalMessages(prev => [...prev, userMessage]);
     setShowSuggestions(false);
 
-    // Enhanced context-aware message processing
-    const currentRecipeContext = getCurrentRecipeContext();
-    const enhancedMessage = enhanceMessageWithContext(textToSend, currentRecipeContext);
-
-    // Use optimized chat by default for cost efficiency with enhanced context
+    // Use optimized chat by default for cost efficiency
     if (useOptimized) {
       optimizedChatMutation.mutate({ 
-        message: enhancedMessage,
-        currentRecipe: currentRecipeContext.hasRecipe ? currentRecipeContext.recipe : null,
+        message: textToSend,
+        currentRecipe,
         mode: detectedMode
       });
     } else {
       // Fallback to original chat for complex cases
       sendMessageMutation.mutate({ 
-        message: enhancedMessage,
-        currentRecipe: currentRecipeContext.hasRecipe ? currentRecipeContext.recipe : null,
+        message: textToSend,
+        currentRecipe,
         mode: detectedMode
       });
     }
@@ -969,42 +845,6 @@ export default function ChatBot({
     if (!messageText) {
       setMessage("");
     }
-  };
-
-  // Enhanced message processing with recipe context
-  const enhanceMessageWithContext = (message: string, recipeContext: any) => {
-    if (!recipeContext.hasRecipe) {
-      return `As my personal chef, ${message}`;
-    }
-
-    const recipe = recipeContext.recipe;
-    let contextualMessage = `I'm cooking ${recipe.title}`;
-    
-    // Add relevant recipe context to the message
-    if (recipe.cuisine) {
-      contextualMessage += ` (${recipe.cuisine} cuisine)`;
-    }
-    
-    if (recipe.cookTime) {
-      contextualMessage += `, cook time: ${recipe.cookTime} minutes`;
-    }
-    
-    if (recipe.difficulty) {
-      contextualMessage += `, difficulty: ${recipe.difficulty}`;
-    }
-    
-    contextualMessage += `. ${message}`;
-    
-    // Add intelligent context based on message type
-    if (message.toLowerCase().includes('substitute') || message.toLowerCase().includes('replace')) {
-      contextualMessage += ` Please provide substitutions that work specifically with this ${recipe.cuisine || ''} dish.`;
-    } else if (message.toLowerCase().includes('technique') || message.toLowerCase().includes('how to')) {
-      contextualMessage += ` Focus on techniques that are relevant to this specific recipe.`;
-    } else if (message.toLowerCase().includes('time') || message.toLowerCase().includes('quick')) {
-      contextualMessage += ` Consider the current cook time and complexity of this recipe.`;
-    }
-    
-    return contextualMessage;
   };
 
   const handleSuggestionClick = (suggestion: string) => () => {

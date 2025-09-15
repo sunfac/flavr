@@ -31,6 +31,7 @@ import RedirectComponent from "@/components/RedirectComponent";
 import DigitalCookbook from "@/pages/DigitalCookbook";
 import BudgetPlanner from "@/pages/BudgetPlanner";
 import ChefAssist from "@/pages/ChefAssist";
+import ChatMode from "@/pages/ChatMode";
 import Recipe from "@/pages/Recipe";
 import RecipeSelection from "@/pages/RecipeSelection";
 import LoadingPage from "@/pages/LoadingPage";
@@ -51,6 +52,7 @@ function Router() {
       {/* Core Feature Routes */}
       <Route path="/chef-assist" component={ChefAssist} />
       <Route path="/shopping" component={ShoppingMode} />
+      <Route path="/chat" component={ChatMode} />
       <Route path="/weekly-planner" component={WeeklyPlanner} />
       <Route path="/cookbook" component={DigitalCookbook} />
       

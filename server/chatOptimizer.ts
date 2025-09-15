@@ -13,13 +13,12 @@ interface ChatContext {
 }
 
 interface ChatIntentResult {
-  intent: 'recipe_modification' | 'recipe_question' | 'ingredient_substitution' | 'cooking_technique';
+  intent: 'recipe_request' | 'recipe_modification' | 'conversational' | 'quick_recipe';
   confidence: number;
   specificity: 'crystal_clear' | 'moderately_clear' | 'somewhat_vague' | 'very_vague';
   modelRecommendation: 'gpt-4o-mini' | 'gpt-4o';
   estimatedCost: number;
   reasoning?: string;
-  requiresRecipeContext: boolean;
 }
 
 interface ConversationMemory {
@@ -34,24 +33,11 @@ export class ChatOptimizer {
   private static readonly MAX_MEMORY_TOKENS = 500;
   private static readonly MAX_MEMORY_ITEMS = 8;
 
-  // Recipe-focused intent classification - ONLY works with recipe context
+  // Fast intent classification using GPT-4o-mini (similar to Chef Assist approach)
   static async classifyIntent(
     message: string, 
     context: ChatContext
   ): Promise<ChatIntentResult> {
-    
-    // CRITICAL: Require recipe context for all chat interactions
-    if (!context.currentRecipe) {
-      return {
-        intent: 'recipe_modification',
-        confidence: 0,
-        specificity: 'very_vague',
-        modelRecommendation: 'gpt-4o-mini',
-        estimatedCost: 0,
-        requiresRecipeContext: true,
-        reasoning: 'No recipe context - chat disabled'
-      };
-    }
     
     // Quick pattern matching for obvious cases (no AI cost)
     const quickResult = this.quickPatternMatch(message, context);
@@ -64,7 +50,7 @@ export class ChatOptimizer {
         messages: [
           {
             role: "system",
-            content: `You are a recipe-focused chat intent classifier. The user is ALWAYS working on a specific recipe and all interactions must be recipe-contextual.
+            content: `You are a chat intent classifier. Analyze the user's message and classify intent with specificity level.
 
 CRITICAL JSON REQUIREMENTS:
 - Return ONLY valid JSON, no text before or after
@@ -72,19 +58,24 @@ CRITICAL JSON REQUIREMENTS:
 - No trailing commas
 - Keep string values concise to avoid truncation
 
-RECIPE-FOCUSED INTENT TYPES (context required):
-1. "recipe_modification" - User wants to modify current recipe (ingredients, quantities, steps)
-2. "recipe_question" - Questions about the current recipe (timing, techniques, why certain steps)
-3. "ingredient_substitution" - Replace/swap ingredients in current recipe
-4. "cooking_technique" - Questions about techniques specific to current recipe
+INTENT TYPES:
+1. "recipe_request" - User wants a new recipe (no current recipe exists or wants something new)
+2. "recipe_modification" - User wants to modify existing recipe
+3. "conversational" - Cooking questions, techniques, advice (no recipe generation needed) 
+4. "quick_recipe" - User explicitly wants a quick/condensed recipe in chat
 
 SPECIFICITY LEVELS:
-- "crystal_clear": Specific modification/question about current recipe
-- "moderately_clear": Some details but needs clarification about current recipe
-- "somewhat_vague": General question about current recipe
-- "very_vague": Unclear question about current recipe
+- "crystal_clear": Specific dish, ingredients, or method (e.g., "spicy chicken curry", "chocolate chip cookies")
+- "moderately_clear": Some specifics but missing details (e.g., "pasta with vegetables", "something with salmon")
+- "somewhat_vague": General category (e.g., "dinner", "dessert", "healthy meal")
+- "very_vague": Unclear request (e.g., "what should I cook?", "I'm hungry")
 
-CURRENT RECIPE: ${context.currentRecipe.title} - ALL responses must be specific to this dish
+SPECIAL PATTERNS FOR RECIPE REQUESTS:
+- "Dinner suggestion" = recipe_request (user wants recipe options)
+- "Recipe suggestion" = recipe_request (user wants recipe options)
+- "[meal] suggestion" = recipe_request (user wants recipe options)
+
+CONTEXT: ${context.currentRecipe ? 'User has current recipe: ' + context.currentRecipe.title : 'No current recipe'}
 
 Respond with JSON (keep all strings under 50 characters): {
   "intent": "type",
@@ -110,148 +101,136 @@ Respond with JSON (keep all strings under 50 characters): {
       const estimatedCost = this.estimateCost(result.intent, modelRecommendation);
 
       return {
-        intent: result.intent || 'recipe_modification',
+        intent: result.intent || 'conversational',
         confidence: result.confidence || 0.5,
         specificity: result.specificity || 'somewhat_vague',
         modelRecommendation,
         estimatedCost,
-        requiresRecipeContext: true,
         reasoning: result.reasoning
       };
 
     } catch (error) {
-      console.error('Recipe-focused intent classification error:', error);
-      // Fallback to recipe modification (safest default)
+      console.error('Intent classification error:', error);
+      // Fallback to safe defaults
       return {
-        intent: 'recipe_modification',
+        intent: 'conversational',
         confidence: 0.3,
         specificity: 'somewhat_vague',
-        modelRecommendation: 'gpt-4o-mini',
-        estimatedCost: 0.005,
-        requiresRecipeContext: true
+        modelRecommendation: 'gpt-4o',
+        estimatedCost: 0.015
       };
     }
   }
 
-  // Recipe-focused pattern matching (no AI cost)
+  // Quick pattern matching for obvious cases (no AI cost)
   private static quickPatternMatch(
     message: string, 
     context: ChatContext
   ): ChatIntentResult | null {
     
-    // MUST have recipe context
-    if (!context.currentRecipe) {
-      return {
-        intent: 'recipe_modification',
-        confidence: 0,
-        specificity: 'very_vague',
-        modelRecommendation: 'gpt-4o-mini',
-        estimatedCost: 0,
-        requiresRecipeContext: true
-      };
-    }
-    
     const lower = message.toLowerCase().trim();
     
-    // Recipe modification patterns (requires current recipe)
-    if (lower.includes('make it') || 
-        lower.includes('change') ||
-        lower.includes('substitute') ||
-        lower.includes('replace') ||
-        lower.includes('add') ||
-        lower.includes('remove') ||
-        lower.includes('more') ||
-        lower.includes('less') ||
-        lower.includes('instead of') ||
-        lower.includes('without')) {
+    // Quick recipe request pattern
+    if (lower.startsWith('quick recipe for:')) {
       return {
-        intent: 'recipe_modification',
-        confidence: 0.95,
-        specificity: 'moderately_clear',
-        modelRecommendation: 'gpt-4o-mini',
-        estimatedCost: 0.002,
-        requiresRecipeContext: true
-      };
-    }
-
-    // Ingredient substitution patterns
-    if (lower.includes('substitute') ||
-        lower.includes('replace') ||
-        lower.includes('swap') ||
-        lower.includes('instead of') ||
-        lower.includes('alternative to') ||
-        lower.includes('without')) {
-      return {
-        intent: 'ingredient_substitution',
-        confidence: 0.95,
+        intent: 'quick_recipe',
+        confidence: 1.0,
         specificity: 'crystal_clear',
         modelRecommendation: 'gpt-4o-mini',
-        estimatedCost: 0.001,
-        requiresRecipeContext: true
+        estimatedCost: 0.0003
       };
     }
 
-    // Recipe-specific question patterns
+    // Recipe modification patterns (when current recipe exists)
+    if (context.currentRecipe && (
+      lower.includes('make it') || 
+      lower.includes('change') ||
+      lower.includes('substitute') ||
+      lower.includes('add') ||
+      lower.includes('remove') ||
+      lower.includes('more') ||
+      lower.includes('less')
+    )) {
+      return {
+        intent: 'recipe_modification',
+        confidence: 0.9,
+        specificity: 'moderately_clear',
+        modelRecommendation: 'gpt-4o-mini',
+        estimatedCost: 0.002
+      };
+    }
+
+    // Recipe suggestion patterns (should generate recipe options)
+    if (lower.includes('show me') && lower.includes('recipe') ||
+        lower.includes('give me') && lower.includes('recipe') ||
+        lower === 'dinner suggestion' ||
+        lower === 'recipe suggestion' ||
+        lower.includes('what should i cook') ||
+        lower.includes('what can i make')) {
+      return {
+        intent: 'recipe_request',
+        confidence: 0.9,
+        specificity: 'somewhat_vague',
+        modelRecommendation: 'gpt-4o-mini',
+        estimatedCost: 0.003
+      };
+    }
+
+    // Clear conversational patterns
     if (lower.includes('how do i') ||
         lower.includes('what is') ||
         lower.includes('how to') ||
         lower.includes('why') ||
         lower.includes('when') ||
-        lower.includes('how long') ||
-        lower.includes('what temperature')) {
+        lower.includes('temperature') ||
+        lower.includes('technique')) {
       return {
-        intent: 'recipe_question',
+        intent: 'conversational',
         confidence: 0.9,
         specificity: 'crystal_clear',
         modelRecommendation: 'gpt-4o-mini',
-        estimatedCost: 0.001,
-        requiresRecipeContext: true
-      };
-    }
-
-    // Cooking technique patterns (specific to current recipe)
-    if (lower.includes('technique') ||
-        lower.includes('method') ||
-        lower.includes('cook') ||
-        lower.includes('prepare') ||
-        lower.includes('mixture') ||
-        lower.includes('consistency')) {
-      return {
-        intent: 'cooking_technique',
-        confidence: 0.85,
-        specificity: 'moderately_clear',
-        modelRecommendation: 'gpt-4o-mini',
-        estimatedCost: 0.001,
-        requiresRecipeContext: true
+        estimatedCost: 0.001
       };
     }
 
     return null; // Need AI classification
   }
 
-  // Select optimal model for recipe-focused interactions
+  // Select optimal model based on intent and specificity
   private static selectOptimalModel(
     intent: string, 
     specificity: string
   ): 'gpt-4o-mini' | 'gpt-4o' {
     
-    // Use GPT-4o-mini for all recipe-focused interactions (faster, cheaper)
-    // All interactions are focused on current recipe, so complexity is manageable
-    return 'gpt-4o-mini';
+    // Use GPT-4o-mini for most cases (faster, cheaper)
+    if (intent === 'conversational') return 'gpt-4o-mini';
+    if (intent === 'quick_recipe') return 'gpt-4o-mini';
+    if (intent === 'recipe_modification') return 'gpt-4o-mini';
+    
+    // Use GPT-4o for complex recipe requests
+    if (intent === 'recipe_request' && specificity === 'very_vague') return 'gpt-4o';
+    
+    return 'gpt-4o-mini'; // Default to cheaper model
   }
 
-  // Estimate cost for recipe-focused interactions
+  // Estimate cost based on intent and model
   private static estimateCost(intent: string, model: string): number {
     const costs = {
       'gpt-4o-mini': {
+        conversational: 0.001,
+        quick_recipe: 0.0003,
         recipe_modification: 0.002,
-        recipe_question: 0.001,
-        ingredient_substitution: 0.001,
-        cooking_technique: 0.001
+        recipe_request: 0.003
+      },
+      'gpt-4o': {
+        conversational: 0.005,
+        quick_recipe: 0.008,
+        recipe_modification: 0.008,
+        recipe_request: 0.015
       }
     };
 
-    return costs[model as keyof typeof costs]?.[intent as keyof typeof costs['gpt-4o-mini']] || 0.002;
+    return costs[model as keyof typeof costs]?.[intent as keyof typeof costs['gpt-4o-mini']] || 0.01;
   }
 
   // Smart context compression - keep conversation relevant but token-efficient
