@@ -246,15 +246,17 @@ export class ChefAssistGPT5 {
     }
   }
   
-  // === TITLE GENERATION (Updated to use AIProvider) ===
+  // === TITLE GENERATION (Updated to use AIProvider weekly title system) ===
   static async generateInspireTitle(data: {
     seeds: SeedPacks;
     userIntent: string;
     clientId?: string;
     userId?: number;
+    cuisinePreference?: string;
+    avoid?: string[];
   }): Promise<{ title: string; description?: string; reasoning?: string[] }> {
     
-    console.log("🔄 ChefAssistGPT5.generateInspireTitle (via AIProvider)");
+    console.log("🔄 ChefAssistGPT5.generateInspireTitle (via AIProvider Weekly Title System)");
     
     try {
       // Get variety guidance
@@ -263,46 +265,63 @@ export class ChefAssistGPT5 {
         ? `Avoid these overused words/phrases: ${avoidWords.join(', ')}`
         : "";
       
-      // Use AIProvider chat system for title generation
-      const chatMessage = `Generate an inspiring recipe title for: ${data.userIntent}
+      // Create mock weekly planner preferences for single title generation
+      const mockPreferences = {
+        householdSize: { adults: 2, kids: 0 },
+        cookingFrequency: "weekly",
+        timeComfort: { 
+          weeknight: 45,
+          weekend: 90
+        },
+        ambitionLevel: "balanced",
+        dietaryNeeds: data.avoid || [],
+        cuisineWeighting: data.cuisinePreference ? { [data.cuisinePreference]: 0.8 } : { "International": 0.6 },
+        cuisinePreferences: data.cuisinePreference ? [data.cuisinePreference] : ["International"],
+        budgetPerServing: "standard",
+        onboardingCompleted: true,
+        onboardingCompletedAt: new Date(),
+        userId: data.userId || 0,
+        id: 0
+      };
       
-${varietyNote ? `VARIETY GUIDANCE: ${varietyNote}` : ''}
-
-Requirements:
-- Single creative recipe title that sounds appetizing
-- Should be specific and evocative
-- Avoid generic words like "perfect", "ultimate", "heavenly"
-- Make it sound like something from a quality cookbook
-- Keep it concise but descriptive
-
-Respond with just the title, nothing else.`;
-
-      const chatResponse = await AIService.chat({
-        message: chatMessage,
-        variant: "technical_advisor"
+      // Use AIProvider weekly title generation system for single title
+      const weeklyResponse = await AIService.generateWeeklyTitles({
+        preferences: mockPreferences,
+        totalMeals: 1,
+        avoidSimilarTo: varietyNote,
+        variant: "balanced_planning"
       }, {
         userId: data.userId,
         traceId: `inspire-${Date.now()}`,
-        maxTokens: 100
+        maxTokens: 400
       });
       
-      const title = chatResponse.message.trim();
+      // Extract the first (and only) meal title
+      const meal = weeklyResponse.plannedMeals[0];
+      const title = meal?.recipeTitle || "Delicious Home Cooking";
+      const description = meal?.description || "An inspired recipe suggestion";
       
       // Track title words for variety
       if (data.clientId) {
         trackTitleWords(data.clientId, title);
       }
       
-      console.log(`✅ Title generated via AIProvider: ${title}`);
+      console.log(`✅ Title generated via AIProvider Weekly System: "${title}"`);
+      console.log(`   Description: ${description}`);
       
       return {
         title,
-        description: `An inspired recipe suggestion`,
-        reasoning: [`Generated using AIProvider chat system`, `Variety tracking applied`]
+        description,
+        reasoning: [
+          `Generated using AIProvider weekly title system`, 
+          `Cuisine: ${meal?.cuisine || 'International'}`,
+          `Cook time: ${meal?.cookTime || 45} minutes`,
+          varietyNote ? `Variety tracking applied` : `Fresh suggestion without repetition concerns`
+        ]
       };
       
     } catch (error) {
-      console.error("❌ Title generation failed, using fallback:", error);
+      console.error("❌ Weekly title generation failed, using fallback:", error);
       
       // Fallback title generation
       const fallbackTitles = [

@@ -4,7 +4,7 @@
 
 import { AIService } from './aiProviderInit';
 import { smartProfilingService, type RecipeGenerationContext } from './services/smartProfilingService';
-import { generateVarietyNotes } from './varietyTracker'; // Assuming this exists
+// import { generateVarietyNotes } from './varietyTracker'; // Module doesn't exist - removed
 import type { WeeklyPlanPreferences, PlannedMeal } from '@shared/aiSchemas';
 
 // Keep original interfaces for backward compatibility
@@ -95,7 +95,7 @@ export class WeeklyPlannerService {
               const existingCuisines = preferences.cuisinePreferences || [];
               enhancedPreferences = {
                 ...preferences,
-                cuisinePreferences: [...new Set([...suggestedCuisines, ...existingCuisines])]
+                cuisinePreferences: Array.from(new Set([...suggestedCuisines, ...existingCuisines]))
               };
             }
             
@@ -124,7 +124,10 @@ export class WeeklyPlannerService {
       }, {
         userId,
         traceId: `weekly-titles-${Date.now()}`,
-        maxTokens: 2000
+        maxTokens: 2000,
+        stream: false,
+        timeoutMs: 30000,
+        retries: 2
       });
       
       // Transform AIProvider response to match original format
@@ -224,7 +227,10 @@ export class WeeklyPlannerService {
           }, {
             userId,
             traceId: `weekly-recipe-${index}-${Date.now()}`,
-            maxTokens: 3000
+            maxTokens: 3000,
+            stream: false,
+            timeoutMs: 45000,
+            retries: 2
           });
           
           // Transform to PlannedMeal format
