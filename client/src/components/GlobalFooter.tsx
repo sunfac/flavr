@@ -51,7 +51,7 @@ export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
     },
     {
       id: "chat",
-      label: "Chat Mode",
+      label: "Capture",
       icon: iconMap.messageCircle,
       path: "/chat",
     },

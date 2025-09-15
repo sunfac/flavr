@@ -7,7 +7,6 @@ import { PageLayout } from "@/components/PageLayout";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import QuotaCounter from "@/components/QuotaCounter";
-import FloatingChatButton from "@/components/FloatingChatButton";
 
 interface ModeCard {
   title: string;
@@ -21,6 +20,14 @@ interface ModeCard {
 }
 
 const modes: ModeCard[] = [
+  {
+    title: "Discover",
+    description: "Tell me what you want to cook, I'll create the perfect recipe just for you",
+    icon: <ChefHat className="w-12 h-12" />,
+    color: "text-orange-500 dark:text-orange-400",
+    route: "/chef-assist",
+    gradient: "from-orange-500/10 to-orange-600/10 dark:from-orange-500/20 dark:to-orange-600/20"
+  },
   {
     title: "Plan",
     description: "Plan your week with AI-generated meal plans and smart shopping lists",
@@ -71,15 +78,6 @@ export default function ModeSelection() {
           </div>
         </motion.div>
 
-        {/* Talk to Private Chef Button - Fixed above mode cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="flex justify-center mb-8 md:mb-12"
-        >
-          <FloatingChatButton variant="fixed" />
-        </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 md:mb-12 max-w-7xl mx-auto">
           {modes.map((mode, index) => (
