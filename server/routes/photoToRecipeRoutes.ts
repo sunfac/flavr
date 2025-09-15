@@ -150,7 +150,7 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
       // Wait for all main photo processing and collect results
       const mainPhotoResults = await Promise.allSettled(mainPhotoPromises);
       mainPhotoResults.forEach((result, index) => {
-        if (result.status === 'fulfilled' && result.value.success) {
+        if (result.status === 'fulfilled' && result.value.success && result.value.text) {
           mainRecipeTexts.push(result.value.text);
         } else if (result.status === 'fulfilled' && !result.value.success) {
           failedFiles.push(result.value.filename);
@@ -449,8 +449,8 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
       }
       
       // Initialize global cache if needed
-      if (!global.recipeImageCache) {
-        global.recipeImageCache = new Map();
+      if (!(global as any).recipeImageCache) {
+        (global as any).recipeImageCache = new Map();
       }
       
       // Create a tempId for image polling
@@ -468,25 +468,25 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
           quality: "standard",
         });
 
-        if (imageResponse.data[0]?.url) {
+        if (imageResponse.data?.[0]?.url) {
           const imageUrl = imageResponse.data[0].url;
           recipe.imageUrl = imageUrl;
           
           // Update cache with image
-          global.recipeImageCache.set(tempId, {
+          (global as any).recipeImageCache.set(tempId, {
             recipe,
             imageUrl
           });
           console.log(`🎨 Recipe image generated and cached for tempId: ${tempId}`);
         }
       } catch (imageError) {
-        console.warn('⚠️ Image generation failed:', imageError.message);
+        console.warn('⚠️ Image generation failed:', imageError instanceof Error ? imageError.message : String(imageError));
         console.log('📸 Continuing without image generation...');
       }
       
       // Ensure cache is set if no image was generated
-      if (!global.recipeImageCache.has(tempId)) {
-        global.recipeImageCache.set(tempId, {
+      if (!(global as any).recipeImageCache.has(tempId)) {
+        (global as any).recipeImageCache.set(tempId, {
           recipe,
           imageUrl: null
         });
@@ -586,7 +586,6 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
         ingredients: ingredientStrings,
         instructions: instructionStrings,
         tips: tips ? JSON.stringify(tips) : '[]',
-        nutritionalHighlights: nutritionalHighlights ? JSON.stringify(nutritionalHighlights) : '[]',
         imageUrl: null, // No image for photo-extracted recipes initially
         isShared: false,
         shareId: null,

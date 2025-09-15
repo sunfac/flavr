@@ -116,7 +116,7 @@ export function registerChatRoutes(app: Express) {
       try {
         if (req.session?.userId) {
           const user = await storage.getUserById(req.session.userId);
-          if (!user?.hasFlavrPlus && (user?.recipesThisMonth || 0) >= 3) {
+          if (user && !user.hasFlavrPlus && (user.recipesThisMonth || 0) >= 3) {
             return res.status(403).json({
               error: "You have no free recipes remaining this month. Sign up for Flavr+ to get unlimited recipes!",
               recipesUsed: user.recipesThisMonth || 0,
@@ -240,6 +240,22 @@ export function registerChatRoutes(app: Express) {
         conversationHistory: userMemory.recentConversations.length,
         cookingHistory: userMemory.cookingHistory.length
       });
+
+      // Get user preferences for Zest chat personalization
+      let userPreferences = null;
+      if (req.session?.userId) {
+        try {
+          userPreferences = await storage.getUserPreferences(req.session.userId);
+          console.log('💭 Zest user preferences loaded:', {
+            hasDietaryRestrictions: !!userPreferences?.dietaryRestrictions?.length,
+            timePreference: userPreferences?.timePreference,
+            ambitionLevel: userPreferences?.ambitionLevel,
+            skillLevel: userPreferences?.skillLevel
+          });
+        } catch (error) {
+          console.log("No user preferences found for Zest Mode");
+        }
+      }
 
       // Check if this is a request for a quick recipe in chat (check this FIRST)
       const isQuickRecipeRequest = message.toLowerCase().startsWith('quick recipe for:');
@@ -693,7 +709,7 @@ Respond with ONLY the enhanced title.`
         }
         
         // Use user preference cuisine if none detected in message
-        if (!cuisinePreference && userPreferences?.preferredCuisines?.length > 0) {
+        if (!cuisinePreference && userPreferences?.preferredCuisines && userPreferences.preferredCuisines.length > 0) {
           cuisinePreference = userPreferences.preferredCuisines[0]; // Use first preferred cuisine
           console.log('💭 Using user preferred cuisine:', cuisinePreference);
         }
@@ -1596,7 +1612,7 @@ Guidelines:
       try {
         if (req.session?.userId) {
           const user = await storage.getUserById(req.session.userId);
-          if (!user?.hasFlavrPlus && (user?.recipesThisMonth || 0) >= 3) {
+          if (user && !user.hasFlavrPlus && (user.recipesThisMonth || 0) >= 3) {
             return res.status(403).json({
               error: "You have no free recipes remaining this month. Sign up for Flavr+ to get unlimited recipes!",
               recipesUsed: user.recipesThisMonth || 0,

@@ -94,7 +94,7 @@ export default function DigitalCookbook() {
     } catch {
       ingredientArray = Array.isArray(recipe.ingredients) 
         ? recipe.ingredients 
-        : [recipe.ingredients?.toString() || ''];
+        : [(recipe.ingredients as any)?.toString() || ''];
     }
     
     try {
@@ -104,7 +104,7 @@ export default function DigitalCookbook() {
     } catch {
       instructionArray = Array.isArray(recipe.instructions) 
         ? recipe.instructions 
-        : [recipe.instructions?.toString() || ''];
+        : [(recipe.instructions as any)?.toString() || ''];
     }
     
     replaceRecipe({

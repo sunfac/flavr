@@ -202,17 +202,21 @@ export class ChefAssistGPT5 {
     this.recipeCache.set(key, recipe);
   }
 
-  // Enhanced JSON cleaning utility for GPT-4o-mini responses
+  // Simplified JSON cleaning utility - only safe, basic repairs
   static cleanAndValidateJSON(content: string): string {
-    // First, clean basic formatting issues
-    let cleaned = content
-      .replace(/[\x00-\x1F\x7F-\x9F]/g, ' ')  // Remove control characters
-      .replace(/\n/g, ' ')                     // Remove newlines
-      .replace(/\t/g, ' ')                     // Remove tabs
+    console.log("Original AI response length:", content.length);
+    console.log("Original AI response preview:", content.substring(0, 200) + "...");
+    
+    // Remove code fences if present
+    let cleaned = content.replace(/```(?:json)?\s*|\s*```/g, '').trim();
+
+    // Normalize basic whitespace issues (but preserve structure)
+    cleaned = cleaned
+      .replace(/[\x00-\x1F\x7F-\x9F]/g, ' ')  // Remove control characters only
       .replace(/\s+/g, ' ')                    // Normalize whitespace
       .trim();
 
-    // Find the JSON object boundaries more reliably
+    // Find JSON boundaries - extract content between first '{' and last '}'
     const firstBrace = cleaned.indexOf('{');
     const lastBrace = cleaned.lastIndexOf('}');
     
@@ -220,42 +224,28 @@ export class ChefAssistGPT5 {
       cleaned = cleaned.substring(firstBrace, lastBrace + 1);
     }
 
-    // ENHANCED: Fix unescaped quotes within string values (main cause of position-based errors)
-    // This addresses the "Expected ',' or '}' after property value" error
-    cleaned = cleaned
-      // Fix nested quotes in string values - replace internal quotes with escaped versions
-      .replace(/:\s*"([^"]*)"([^"]+)"([^"]*?)"/g, ': "$1\\"$2\\"$3"')
-      // Fix single nested quotes (most common pattern)
-      .replace(/:\s*"([^"]*)"([^",}]+)"/g, ': "$1\\"$2\\"')
-      // Fix quotes around individual words within strings
-      .replace(/"([^"]*)\s"(\w+)"\s([^"]*)"/g, '"$1 \\"$2\\" $3"')
-      // Remove problematic standalone quotes within strings  
-      .replace(/:\s*"([^"]*?)"\s*([^",}]*?)"/g, ': "$1 $2"')
-      // Fix common cooking terminology that causes issues
-      .replace(/"\s*golden\s*"/g, '\\"golden\\"')
-      .replace(/"\s*tender\s*"/g, '\\"tender\\"')
-      .replace(/"\s*crispy\s*"/g, '\\"crispy\\"')
-      .replace(/"\s*al dente\s*"/g, '\\"al dente\\"');
-
-    // Fix common GPT-4o-mini JSON issues
+    // SAFE repairs only - do not alter content within string values
     cleaned = cleaned
       .replace(/,\s*}/g, '}')                    // Remove trailing commas before }
       .replace(/,\s*]/g, ']')                    // Remove trailing commas before ]
-      .replace(/:\s*"[^"]*$/, ': ""')            // Fix unterminated strings at end
-      .replace(/"[^"]*$/, '""')                  // Fix incomplete strings at end
-      .replace(/,\s*$/, '')                      // Remove trailing comma at end
-      .replace(/([}\]]),?\s*$/, '$1');           // Ensure proper ending
+      .replace(/,\s*$/, '');                     // Remove trailing comma at end
 
-    // ENHANCED: Additional safety measures for complex recipe structures
-    cleaned = cleaned
-      // Fix missing commas between array elements
-      .replace(/"\s*\n\s*"/g, '", "')
-      .replace(/"(\s*){(\s*)"/, '", {')
-      // Fix object/array boundaries
-      .replace(/}(\s*){/g, '}, {')
-      .replace(/](\s*)\[/g, '], [')
-      // Ensure proper string termination
-      .replace(/([^\\])"([^",}\]]+)$/g, '$1\\"$2\\"');
+    // Balance braces and brackets if needed
+    const openBraces = (cleaned.match(/\{/g) || []).length;
+    const closeBraces = (cleaned.match(/\}/g) || []).length;
+    const openBrackets = (cleaned.match(/\[/g) || []).length;
+    const closeBrackets = (cleaned.match(/\]/g) || []).length;
+    
+    // Add missing closing braces/brackets
+    for (let i = 0; i < openBraces - closeBraces; i++) {
+      cleaned += '}';
+    }
+    for (let i = 0; i < openBrackets - closeBrackets; i++) {
+      cleaned += ']';
+    }
+
+    console.log("Cleaned JSON length:", cleaned.length);
+    console.log("Cleaned JSON preview:", cleaned.substring(0, 200) + "...");
 
     return cleaned;
   }
@@ -394,41 +384,21 @@ export class ChefAssistGPT5 {
       try {
         recipe = JSON.parse(content);
       } catch (parseError) {
-        console.error("JSON parse error, attempting advanced repair:", parseError);
+        console.error("JSON parse error:", parseError instanceof Error ? parseError.message : String(parseError));
+        console.log("Failed JSON content preview:", content.substring(0, 300) + "...");
         
-        // Advanced JSON repair - fix common GPT-4o-mini issues
-        console.log("Attempting advanced JSON repair...");
+        // Simplified advanced repair - only safe operations
+        console.log("Attempting minimal JSON repair...");
         
-        // ENHANCED: Apply the same quote-fixing patterns from cleanAndValidateJSON
-        content = content
-          // Fix nested quotes in string values - main cause of position-based parsing errors
-          .replace(/:\s*"([^"]*)"([^"]+)"([^"]*?)"/g, ': "$1\\"$2\\"$3"')
-          .replace(/:\s*"([^"]*)"([^",}]+)"/g, ': "$1\\"$2\\"')
-          .replace(/"([^"]*)\s"(\w+)"\s([^"]*)"/g, '"$1 \\"$2\\" $3"')
-          .replace(/:\s*"([^"]*?)"\s*([^",}]*?)"/g, ': "$1 $2"')
-          // Fix common cooking terms that cause quote issues
-          .replace(/"\s*golden\s*"/g, '\\"golden\\"')
-          .replace(/"\s*tender\s*"/g, '\\"tender\\"')
-          .replace(/"\s*crispy\s*"/g, '\\"crispy\\"')
-          .replace(/"\s*al dente\s*"/g, '\\"al dente\\"');
-        
-        // Fix unterminated strings first (most common issue)
-        content = content.replace(/"[^"]*$/g, '""');  // Fix strings that don't end with quote
-        content = content.replace(/:\s*"[^"]*$/g, ': ""'); // Fix values that start with quote but don't end
-        
-        // Fix array and object structure issues
+        // Only fix obvious structural issues - no content manipulation
         content = content
           .replace(/,\s*}/g, '}')                    // Remove trailing commas before }
           .replace(/,\s*]/g, ']')                    // Remove trailing commas before ]
-          .replace(/([^"]),(\s*[}\]])/g, '$1$2')     // Fix comma spacing issues
-          .replace(/}\s*{/g, '},{')                  // Fix missing commas between objects
-          .replace(/]\s*\[/g, '],[')                 // Fix missing commas between arrays
-          .replace(/:\s*,/g, ': "",')                // Fix missing values
-          .replace(/,\s*,/g, ',')                    // Remove duplicate commas
           .replace(/,\s*$/, '')                      // Remove trailing comma at end
-          .replace(/([}\]]),?\s*$/, '$1');           // Ensure proper ending
+          .replace(/}\s*{/g, '},{')                  // Fix missing commas between objects
+          .replace(/]\s*\[/g, '],[');                // Fix missing commas between arrays
         
-        // Ensure the JSON is properly closed
+        // Balance braces and brackets only
         const openBraces = (content.match(/\{/g) || []).length;
         const closeBraces = (content.match(/\}/g) || []).length;
         const openBrackets = (content.match(/\[/g) || []).length;
@@ -444,8 +414,10 @@ export class ChefAssistGPT5 {
           
         try {
           recipe = JSON.parse(content);
+          console.log("Minimal repair succeeded!");
         } catch (secondError) {
-          console.error("Advanced repair failed, trying fallback:", secondError);
+          console.error("Minimal repair failed:", secondError instanceof Error ? secondError.message : String(secondError));
+          console.log("Final failed content sample:", content.substring(0, 500));
           
           // Final fallback: Create a minimal valid recipe structure based on user intent
           console.log("Creating fallback recipe structure based on user request:", data.userIntent);
