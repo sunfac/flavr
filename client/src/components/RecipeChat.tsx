@@ -180,7 +180,7 @@ export default function RecipeChat({
         content: msg.isUser ? msg.message : msg.response
       }));
 
-      const response = await fetch("/api/chat/optimized", {
+      const response = await fetch("/api/zest/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -189,11 +189,7 @@ export default function RecipeChat({
           message: data.message,
           conversationHistory,
           currentRecipe: getCurrentRecipeContext().recipe,
-          userContext: {
-            userId: undefined, // Will be handled by session
-            pseudoUserId: localStorage.getItem('pseudoUserId') || `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            isAuthenticated: false
-          }
+          pseudoUserId: localStorage.getItem('pseudoUserId') || `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
         }),
       });
 

@@ -143,35 +143,19 @@ export default function Recipe() {
 
       {/* Floating Chat Button - Fixed above mobile nav */}
       {!showChat && (
-        <div
-          className="fixed right-4"
-          style={{
-            position: 'fixed',
-            bottom: '80px', // Above mobile navigation
-            right: '16px',
-            zIndex: 50,
-            pointerEvents: 'auto'
+        <Button
+          onClick={() => {
+            console.log('🔥 Chat button clicked! Current showChat:', showChat);
+            setShowChat(!showChat);
           }}
+          className="fixed bottom-20 right-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg w-12 h-12 rounded-full p-0 z-50"
+          style={{
+            zIndex: 100
+          }}
+          data-testid="button-open-chat"
         >
-          <div>
-            <Button
-              onClick={() => {
-                console.log('🔥 Chat button clicked! Current showChat:', showChat);
-                setShowChat(!showChat);
-              }}
-              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg w-12 h-12 rounded-full p-0 relative group"
-            >
-              <MessageCircle className="w-5 h-5" />
-              
-              {/* Tooltip */}
-              <div className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                <div className="bg-slate-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                  Chat with Zest
-                </div>
-              </div>
-            </Button>
-          </div>
-        </div>
+          <MessageCircle className="w-5 h-5" />
+        </Button>
       )}
     </>
   );
