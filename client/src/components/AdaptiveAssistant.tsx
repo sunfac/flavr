@@ -224,7 +224,7 @@ export default function AdaptiveAssistant({
   // Optimized chat mutation
   const optimizedChatMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch('/api/optimized-chat', {
+      const response = await fetch('/api/chat/optimized', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
