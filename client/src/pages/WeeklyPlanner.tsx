@@ -930,18 +930,6 @@ export default function WeeklyPlanner() {
                       <CardTitle className="text-white text-xl">
                         Week of {formatDate(currentWeekPlan.weekStartDate)}
                       </CardTitle>
-                      <Badge 
-                        variant={currentWeekPlan.planStatus === 'accepted' ? 'default' : 'secondary'}
-                        className={
-                          currentWeekPlan.planStatus === 'accepted' 
-                            ? 'bg-green-600 text-white'
-                            : currentWeekPlan.planStatus === 'pending'
-                            ? 'bg-orange-600 text-white'  
-                            : 'bg-slate-600 text-white'
-                        }
-                      >
-                        {currentWeekPlan.planStatus}
-                      </Badge>
                     </div>
                   </div>
                   
