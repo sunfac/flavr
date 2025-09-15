@@ -13,7 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Clock, Users, ShoppingCart, Download, RefreshCw, Settings, ImageIcon, ChefHat, TrendingUp, PieChart, Share2, BarChart3 } from "lucide-react";
+import { Calendar, Clock, Users, ShoppingCart, Download, RefreshCw, Settings, ImageIcon, ChefHat, TrendingUp, PieChart, Share2, BarChart3, Copy, CheckCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // Analytics interfaces
 interface SavingsMetrics {
@@ -60,6 +61,8 @@ export default function WeeklyPlanner() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showAdjustModal, setShowAdjustModal] = useState(false);
+  const [showShoppingListModal, setShowShoppingListModal] = useState(false);
+  const [currentShoppingList, setCurrentShoppingList] = useState<string[]>([]);
   const [currentWeekPlan, setCurrentWeekPlan] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   
@@ -425,26 +428,12 @@ export default function WeeklyPlanner() {
           return;
         }
 
-        // Create a formatted shopping list display
-        const listText = shoppingList.map((item: string, index: number) => 
-          `${index + 1}. ${item}`
-        ).join('\n');
+        // Open the shopping list modal with the data
+        setCurrentShoppingList(shoppingList);
+        setShowShoppingListModal(true);
         
-        // Copy to clipboard and show success
-        navigator.clipboard.writeText(listText).then(() => {
-          toast({
-            title: "Shopping List Copied!",
-            description: `${shoppingList.length} ingredients copied to clipboard. Check your planned recipes for the full list.`,
-          });
-        }).catch(() => {
-          toast({
-            title: "Shopping List Ready",
-            description: `${shoppingList.length} ingredients ready. Check your browser console for the full list.`,
-          });
-          console.log("🛒 SHOPPING LIST:", listText);
-        });
-        
-        console.log("Shopping list:", shoppingData);
+      } else {
+        throw new Error('Failed to fetch shopping list');
       }
     } catch (error) {
       console.error("Error getting shopping list:", error);
@@ -454,6 +443,89 @@ export default function WeeklyPlanner() {
         variant: "destructive"
       });
     }
+  };
+
+  // Copy shopping list to clipboard
+  const handleCopyShoppingList = async () => {
+    if (currentShoppingList.length === 0) return;
+    
+    const listText = currentShoppingList.map((item: string, index: number) => 
+      `${index + 1}. ${item}`
+    ).join('\n');
+    
+    try {
+      await navigator.clipboard.writeText(listText);
+      toast({
+        title: "Shopping List Copied!",
+        description: `${currentShoppingList.length} ingredients copied to clipboard.`,
+      });
+    } catch (error) {
+      console.log("🛒 SHOPPING LIST:", listText);
+      toast({
+        title: "Shopping List Ready",
+        description: "Check the browser console for your shopping list.",
+      });
+    }
+  };
+
+  // Shopping List Modal Component
+  const ShoppingListModal = () => {
+    if (!currentShoppingList || currentShoppingList.length === 0) return null;
+    
+    return (
+      <Dialog open={showShoppingListModal} onOpenChange={setShowShoppingListModal}>
+        <DialogContent className="max-w-md w-full mx-4 bg-slate-800 border-slate-700 text-white max-h-[80vh] overflow-y-auto">
+          <DialogHeader className="border-b border-slate-700 pb-4">
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <ShoppingCart className="w-5 h-5 text-orange-400" />
+              Shopping List
+            </DialogTitle>
+            <p className="text-slate-300 text-sm">
+              {currentShoppingList.length} items • Week of {currentWeekPlan ? formatDate(currentWeekPlan.weekStartDate) : ''}
+            </p>
+          </DialogHeader>
+          
+          <div className="space-y-3 py-4">
+            <div className="max-h-[400px] overflow-y-auto space-y-2 pr-2">
+              {currentShoppingList.map((item, index) => (
+                <div 
+                  key={index} 
+                  className="flex items-start gap-3 p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700/70 transition-colors"
+                  data-testid={`text-ingredient-${index}`}
+                >
+                  <div className="flex-shrink-0 w-6 h-6 bg-orange-500/20 rounded-full flex items-center justify-center text-orange-400 text-sm font-semibold mt-0.5">
+                    {index + 1}
+                  </div>
+                  <div className="flex-1 text-slate-200 leading-relaxed">
+                    {item}
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="flex gap-3 pt-4 border-t border-slate-700">
+              <Button
+                onClick={handleCopyShoppingList}
+                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+                data-testid="button-copy-shopping-list"
+              >
+                <Copy className="w-4 h-4 mr-2" />
+                Copy to Clipboard
+              </Button>
+              <Button
+                onClick={() => setShowShoppingListModal(false)}
+                variant="outline"
+                className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                data-testid="button-close-shopping-list"
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Done
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
   };
 
   const getThisMonday = () => {
@@ -1174,6 +1246,7 @@ export default function WeeklyPlanner() {
       <GlobalNavigation isOpen={showNavigation} onClose={closeAllMenus} />
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} onSuccess={() => setShowAuthModal(false)} />
       <FlavrPlusUpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+      <ShoppingListModal />
     </div>
   );
 }
