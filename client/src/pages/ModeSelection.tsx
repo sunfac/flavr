@@ -22,16 +22,16 @@ interface ModeCard {
 
 const modes: ModeCard[] = [
   {
-    title: "Chef Assist",
-    description: "Tell me what you want to cook, I'll create the perfect recipe just for you",
+    title: "Discover",
+    description: "Find chef-inspired dishes perfectly matched to your taste profile and mood",
     icon: <ChefHat className="w-12 h-12" />,
     color: "text-orange-500 dark:text-orange-400",
     route: "/chef-assist",
     gradient: "from-orange-500/10 to-orange-600/10 dark:from-orange-500/20 dark:to-orange-600/20"
   },
   {
-    title: "Weekly Planner",
-    description: "Plan your week with AI-generated meal plans and smart shopping lists",
+    title: "Plan",
+    description: "Generate weekly meal plans with smart shopping lists tailored to your preferences",
     icon: <CalendarDays className="w-12 h-12" />,
     color: "text-purple-500 dark:text-purple-400",
     route: "/weekly-planner",
@@ -39,8 +39,8 @@ const modes: ModeCard[] = [
     isPremium: true
   },
   {
-    title: "Photo to Recipe",
-    description: "Transform cookbook photos into interactive digital recipes with AI",
+    title: "Capture",
+    description: "Transform cookbook photos and ingredient lists into interactive digital recipes",
     icon: <Camera className="w-12 h-12" />,
     color: "text-blue-500 dark:text-blue-400",
     route: "/photo-to-recipe",
@@ -69,10 +69,10 @@ export default function ModeSelection() {
           className="text-center mb-8 md:mb-16 pt-12 md:pt-16"
         >
           <h1 className="text-3xl md:text-5xl font-bold mb-3 md:mb-4 bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
-            What's Cooking?
+            Your Culinary Journey
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-4 md:mb-6">
-            Your AI culinary companion for personalized recipes and meal planning
+            Discover amazing dishes, plan your meals, and capture recipes that match your taste
           </p>
           <div className="flex justify-center">
             <QuotaCounter showUpgradeHint={true} />
@@ -120,9 +120,9 @@ export default function ModeSelection() {
                     "p-2 sm:p-3 md:p-4 rounded-full bg-background/80 backdrop-blur-sm inline-flex mx-auto mb-2 sm:mb-3 md:mb-4 border-2 border-current/20", 
                     mode.color
                   )}>
-                    <ChefHat className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Chef Assist" ? "" : "hidden")} />
-                    <Camera className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Photo to Recipe" ? "" : "hidden")} />
-                    <CalendarDays className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Weekly Planner" ? "" : "hidden")} />
+                    <ChefHat className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Discover" ? "" : "hidden")} />
+                    <Camera className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Capture" ? "" : "hidden")} />
+                    <CalendarDays className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Plan" ? "" : "hidden")} />
                   </div>
                   <div className="flex items-center justify-center gap-2 mb-2 sm:mb-3">
                     <CardTitle className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold">{mode.title}</CardTitle>

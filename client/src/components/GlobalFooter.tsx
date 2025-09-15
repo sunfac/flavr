@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 
 interface GlobalFooterProps {
-  currentMode?: "chef-assist" | "cookbook" | "chat" | "weekly-planner";
+  currentMode?: "discover" | "plan" | "capture" | "cookbook";
 }
 
 export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
@@ -44,28 +44,28 @@ export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
 
   const modes = [
     {
-      id: "chef-assist",
-      label: "Chef Assist",
+      id: "discover",
+      label: "Discover",
       icon: iconMap.chefHat,
       path: "/chef-assist",
     },
     {
-      id: "chat",
-      label: "Chat Mode",
-      icon: iconMap.messageCircle,
-      path: "/chat",
+      id: "plan",
+      label: "Plan",
+      icon: iconMap.calendar,
+      path: "/weekly-planner",
+    },
+    {
+      id: "capture",
+      label: "Capture",
+      icon: iconMap.camera,
+      path: "/photo-to-recipe",
     },
     {
       id: "cookbook",
-      label: "My Cookbook", 
+      label: "Cookbook", 
       icon: iconMap.bookOpen,
       path: "/cookbook",
-    },
-    {
-      id: "weekly-planner",
-      label: "Planner",
-      icon: iconMap.calendar,
-      path: "/weekly-planner",
     },
   ];
 
