@@ -2,6 +2,8 @@ import { OpenAI } from "openai";
 import { UserInputAnalyzer, UserInputAnalysis } from './userInputAnalyzer';
 import { AdaptivePromptBuilder, AdaptivePromptResult } from './adaptivePromptBuilder';
 import { smartProfilingService, type RecipeGenerationContext } from './services/smartProfilingService';
+import { AIService } from './aiProvider';
+import type { RecipeInput, RecipeLLM } from '@shared/aiSchemas';
 
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY 
@@ -319,42 +321,103 @@ export class ChefAssistGPT5 {
     const userMessage = promptResult.userMessage;
 
     try {
-      console.log(`Calling ${promptResult.modelRecommendation} for full recipe with max_completion_tokens: ${promptResult.maxTokens}`);
+      console.log(`🍳 [ChefAssistGPT5] Generating recipe via AIProvider with ${promptResult.modelRecommendation}, tokens: ${promptResult.maxTokens}`);
       const startTime = Date.now();
       
-      const completionPromise = openai.chat.completions.create({
-        model: promptResult.modelRecommendation,
-        messages: [
-          { role: "system", content: systemMessage },
-          { role: "user", content: userMessage }
-        ],
-        max_tokens: promptResult.maxTokens,
-        response_format: { type: "json_object" }
-      });
-      
-      let completion: any;
+      // Map current parameters to AIProvider RecipeInput format
+      const recipeInput: RecipeInput = {
+        request: data.userIntent,
+        preferences: {
+          difficulty: promptResult.speedExpected === "fast" ? "Easy" : "Medium",
+          cuisine: data.cuisinePreference,
+          servings: data.servings,
+          timeConstraint: data.timeBudget,
+          dietaryRestrictions: data.dietaryNeeds || [],
+          equipment: data.equipment || []
+        },
+        quizData: {
+          systemMessage,
+          userMessage,
+          stylePacks: adjustedPacks,
+          seeds: data.seeds,
+          mustUse: data.mustUse,
+          avoid: data.avoid,
+          budgetNote: data.budgetNote
+        },
+        mode: "chef_assist",
+        model: promptResult.modelRecommendation as any, // Type assertion for model compatibility
+        variant: "michelin_quality"
+      };
+
+      // Call AIProvider with timeout handling
+      let aiProviderResponse: RecipeLLM;
       try {
-        completion = await Promise.race([
-          completionPromise, 
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout after 35s')), 35000))
+        const aiProviderPromise = AIService.generateRecipe(recipeInput, {
+          maxTokens: promptResult.maxTokens,
+          timeoutMs: 35000,
+          userId: data.clientId ? parseInt(data.clientId, 10) : undefined,
+          traceId: `chef-assist-${Date.now()}`
+        });
+        
+        aiProviderResponse = await Promise.race([
+          aiProviderPromise,
+          new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error('Timeout after 35s')), 35000)
+          )
         ]);
       } catch (timeoutError) {
-        console.log("First attempt timed out, retrying with fallback model...");
+        console.log("🔄 [ChefAssistGPT5] First attempt timed out, retrying with fallback model...");
         
-        completion = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
-          messages: [
-            { role: "system", content: systemMessage },
-            { role: "user", content: userMessage }
-          ],
-          max_tokens: 4096,
-          response_format: { type: "json_object" }
+        // Fallback with gpt-4o-mini
+        const fallbackInput: RecipeInput = {
+          ...recipeInput,
+          model: "gpt-4o-mini"
+        };
+        
+        aiProviderResponse = await AIService.generateRecipe(fallbackInput, {
+          maxTokens: 4096,
+          timeoutMs: 30000,
+          userId: data.clientId ? parseInt(data.clientId, 10) : undefined,
+          traceId: `chef-assist-fallback-${Date.now()}`
         });
       }
       
-      console.log(`Recipe response received in ${Date.now() - startTime}ms`);
+      console.log(`🍳 Recipe response received in ${Date.now() - startTime}ms`);
 
-      let content = completion.choices[0]?.message?.content;
+      // Convert AIProvider structured response back to JSON format for existing code compatibility
+      const recipeJson = {
+        title: data.forcedTitle || aiProviderResponse.title,
+        description: aiProviderResponse.description || "",
+        cuisine: aiProviderResponse.cuisine || data.cuisinePreference || "British",
+        difficulty: aiProviderResponse.difficulty,
+        cookTime: aiProviderResponse.cookTime,
+        servings: aiProviderResponse.servings,
+        ingredients: Array.isArray(aiProviderResponse.ingredients) 
+          ? aiProviderResponse.ingredients.map(ing => typeof ing === 'string' ? ing : ing.text)
+          : [],
+        instructions: Array.isArray(aiProviderResponse.instructions)
+          ? aiProviderResponse.instructions.map((instr, index) => 
+              typeof instr === 'string' 
+                ? { step: index + 1, instruction: instr }
+                : { step: instr.step || index + 1, instruction: instr.instruction, timing: instr.timing }
+            )
+          : [],
+        tips: aiProviderResponse.tips,
+        variations: aiProviderResponse.variations || [],
+        equipment: aiProviderResponse.equipment || data.equipment || [],
+        tags: aiProviderResponse.tags || [],
+        dietary: aiProviderResponse.dietary || data.dietaryNeeds || [],
+        metadata: {
+          provider: aiProviderResponse.metadata.provider,
+          model: aiProviderResponse.metadata.model,
+          processingTimeMs: Date.now() - startTime,
+          estimatedCost: aiProviderResponse.metadata.estimatedCostUsd
+        }
+      };
+
+      // Convert back to JSON string for existing parsing logic
+      let content = JSON.stringify(recipeJson);
+      
       if (!content) {
         throw new Error("Empty response from AI model");
       }
@@ -930,24 +993,35 @@ CREATE A RECIPE TITLE THAT:
 JSON OUTPUT: {"title": "Your Creative Recipe Title"}`;
 
     try {
-      console.log(`Calling ${inspirationAnalysis.promptStrategy.modelRecommendation} for inspire title generation`);
+      console.log(`🎯 [ChefAssistGPT5] Generating inspire title via AIProvider with ${inspirationAnalysis.promptStrategy.modelRecommendation}`);
       
-      const result = await openai.chat.completions.create({
-        model: inspirationAnalysis.promptStrategy.modelRecommendation,
-        messages: [
-          { role: "system", content: systemMessage },
-          { role: "user", content: userMessage }
-        ],
-        max_tokens: 150,
-        response_format: { type: "json_object" }
+      // Use AIService.chat for title generation since it's a creative conversational task
+      const chatInput = {
+        message: userMessage,
+        context: {
+          mode: "inspire_title",
+          userPreferences: {
+            cuisine: data.cuisinePreference,
+            clientId: data.clientId
+          }
+        },
+        model: inspirationAnalysis.promptStrategy.modelRecommendation as any
+      };
+
+      const aiProviderResponse = await AIService.chat(chatInput, {
+        maxTokens: 150,
+        userId: data.clientId ? parseInt(data.clientId, 10) : undefined,
+        traceId: `inspire-title-${Date.now()}`,
+        timeoutMs: 20000
       });
 
-      const content = result.choices[0]?.message?.content;
+      // The chat response contains the JSON content in the message field
+      const content = aiProviderResponse.message;
       if (!content) {
-        throw new Error("No content received from OpenAI");
+        throw new Error("No content received from AI model");
       }
 
-      console.log("Raw inspire response:", content);
+      console.log("🎯 Raw inspire response via AIProvider:", content);
       const parsedResult = JSON.parse(content);
       const generatedTitle = parsedResult.title || "Delicious Home-Cooked Recipe";
       

@@ -53,11 +53,11 @@ export class WeeklyPlannerService {
       preferences.householdSize.adults,
       preferences.householdSize.kids,
       preferences.cookingFrequency,
-      preferences.timeComfort,
+      JSON.stringify(preferences.timeComfort || {}),
       preferences.ambitionLevel,
       JSON.stringify(preferences.cuisineWeighting || {}),
       JSON.stringify(preferences.dietaryNeeds || []),
-      preferences.budgetPerServing || "standard",
+      String(preferences.budgetPerServing || "standard"),
       mealCount
     ];
     return keyParts.join('|');
@@ -139,7 +139,7 @@ export class WeeklyPlannerService {
               return cuisine.charAt(0).toUpperCase() + cuisine.slice(1);
             });
             // Merge with existing preferences, giving weight to user profile
-            cuisines = [...new Set([...suggestedCuisines, ...cuisines])];
+            cuisines = Array.from(new Set([...suggestedCuisines, ...cuisines]));
           }
           
           smartProfileLog = `Profile applied (${smartEnhancement.confidenceLevel} confidence, ${smartEnhancement.diversityBoost}% diversity): ${smartEnhancement.reasoning.slice(0, 2).join(', ')}`;
@@ -189,7 +189,7 @@ CRITICAL DIVERSITY REQUIREMENTS:
 
 HOUSEHOLD SPECS:
 - Consider household: ${preferences.householdSize.adults} adults, ${preferences.householdSize.kids} kids
-- Time preference: ${preferences.timeComfort.weeknight} minutes weeknights, ${preferences.timeComfort.weekend} minutes weekends
+- Time preference: ${preferences.timeComfort?.weeknight || 45} minutes weeknights, ${preferences.timeComfort?.weekend || 60} minutes weekends
 - Ambition level: ${preferences.ambitionLevel}
 - Budget per serving: ${preferences.budgetPerServing ? `£${(preferences.budgetPerServing / 100).toFixed(2)}` : 'flexible'}
 ${preferences.dietaryNeeds ? `- Dietary needs: ${Array.isArray(preferences.dietaryNeeds) ? preferences.dietaryNeeds.join(', ') : preferences.dietaryNeeds}` : ''}
@@ -264,7 +264,7 @@ ${avoidSimilarTo ? `\n\nIMPORTANT: ${avoidSimilarTo}` : ''}${varietyNotes}`;
         day: selectedDays[index],
         title: title.title || `${selectedDays[index]} Dinner`,
         cuisine: title.cuisine || "International",
-        estimatedTime: title.estimatedTime || parseInt(preferences.timeComfort) || 45,
+        estimatedTime: title.estimatedTime || preferences.timeComfort?.weeknight || 45,
         description: title.description || "Delicious homemade dinner"
       }));
 
@@ -278,7 +278,8 @@ ${avoidSimilarTo ? `\n\nIMPORTANT: ${avoidSimilarTo}` : ''}${varietyNotes}`;
       });
 
       return {
-        titles: generatedTitles
+        titles: generatedTitles,
+        totalEstimatedCost: 0 // Cost tracking not implemented yet
       };
 
     } catch (error) {
@@ -289,12 +290,13 @@ ${avoidSimilarTo ? `\n\nIMPORTANT: ${avoidSimilarTo}` : ''}${varietyNotes}`;
         day,
         title: `${day} Family Dinner`,
         cuisine: cuisines.length > 0 ? cuisines[index % cuisines.length] : "International",
-        estimatedTime: parseInt(preferences.timeComfort) || 45,
+        estimatedTime: preferences.timeComfort?.weeknight || 45,
         description: "A delicious family-friendly meal"
       }));
 
       return {
-        titles: fallbackTitles
+        titles: fallbackTitles,
+        totalEstimatedCost: 0 // Cost tracking not implemented yet
       };
     }
   }
@@ -486,10 +488,9 @@ Focus on clear, practical instructions with professional techniques that home co
         cookingFrequency: preferences.cookingFrequency,
         timeComfort: preferences.timeComfort,
         cuisineWeighting: preferences.cuisineWeighting || {},
-        cuisinePreferences: preferences.cuisinePreferences || [],
         ambitionLevel: preferences.ambitionLevel,
         dietaryNeeds: preferences.dietaryNeeds || [],
-        budgetPerServing: preferences.budgetPerServing
+        budgetPerServing: preferences.budgetPerServing ?? undefined
       },
       consolidatedShoppingList: []
     };
@@ -552,7 +553,7 @@ Focus on clear, practical instructions with professional techniques that home co
             clonedMeals.push({
               ...cachedMeal,
               recipeId: clonedRecipe.id,
-              servings: clonedRecipe.servings
+              servings: clonedRecipe.servings || preferences.householdSize.adults + preferences.householdSize.kids
             });
           }
         } catch (error) {
@@ -572,7 +573,7 @@ Focus on clear, practical instructions with professional techniques that home co
     const cuisines = Object.keys(preferences.cuisineWeighting || {});
     const baseData = {
       servings: preferences.householdSize.adults + preferences.householdSize.kids,
-      timeBudget: preferences.timeComfort === "15" ? 15 : preferences.timeComfort === "30" ? 30 : preferences.timeComfort === "45" ? 45 : 60,
+      timeBudget: preferences.timeComfort?.weeknight || 45,
       dietaryNeeds: preferences.dietaryNeeds || [],
       budgetNote: preferences.budgetPerServing ? `${preferences.budgetPerServing} per serving` : "Quality-focused",
       equipment: ["Standard kitchen"],

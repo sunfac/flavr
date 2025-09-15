@@ -6,6 +6,7 @@ import { storage } from "../storage";
 import { convertToUKIngredients } from "../ukIngredientMappings";
 import { ImageStorage } from "../imageStorage";
 import OpenAI from "openai";
+import { AIService } from "../aiProviderInit";
 
 // Configure multer for photo uploads
 const upload = multer({
@@ -96,8 +97,9 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
           const imageBytes = fs.readFileSync(file.path);
           const base64Image = imageBytes.toString("base64");
           
+          // Use direct OpenAI for image analysis - fallback until AIProvider supports images
           const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini", // using gpt-4o-mini for cost efficiency
+            model: "gpt-4o-mini",
             messages: [
               {
                 role: "user",
@@ -105,15 +107,15 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
                   {
                     type: "text",
                     text: `Extract ALL text from this cookbook page image. Focus on:
-                    - Recipe title
-                    - Ingredient lists with measurements
-                    - Cooking instructions/method steps
-                    - Serving information
-                    - Cooking times
-                    - Any notes or tips
-                    - Page references (e.g., "see page 45")
-                    
-                    Please transcribe the text exactly as written, maintaining the structure and format. If this appears to be a recipe page, extract every detail you can see, including any sub-recipe sections or references to other pages.`
+- Recipe title
+- Ingredient lists with measurements
+- Cooking instructions/method steps
+- Serving information
+- Cooking times
+- Any notes or tips
+- Page references (e.g., "see page 45")
+
+Please transcribe the text exactly as written, maintaining the structure and format. If this appears to be a recipe page, extract every detail you can see, including any sub-recipe sections or references to other pages.`
                   },
                   {
                     type: "image_url",
@@ -126,6 +128,7 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
             ],
             max_tokens: 1000
           });
+          console.log(`🔄 Photo text extraction - Vision API call completed for ${file.filename}`);
 
           const extractedText = response.choices[0]?.message?.content || '';
           if (extractedText.trim()) {
@@ -151,7 +154,9 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
       const mainPhotoResults = await Promise.allSettled(mainPhotoPromises);
       mainPhotoResults.forEach((result, index) => {
         if (result.status === 'fulfilled' && result.value.success) {
-          mainRecipeTexts.push(result.value.text);
+          if (result.value.text) {
+            mainRecipeTexts.push(result.value.text);
+          }
         } else if (result.status === 'fulfilled' && !result.value.success) {
           failedFiles.push(result.value.filename);
         } else if (result.status === 'rejected') {
@@ -169,8 +174,9 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
           const imageBytes = fs.readFileSync(subRecipe.file.path);
           const base64Image = imageBytes.toString("base64");
           
+          // Use direct OpenAI for sub-recipe image analysis - fallback until AIProvider supports images
           const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini", // using gpt-4o-mini for cost efficiency
+            model: "gpt-4o-mini",
             messages: [
               {
                 role: "user",
@@ -178,13 +184,13 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
                   {
                     type: "text",
                     text: `Extract ALL text from this cookbook page image for the recipe: "${subRecipe.name}". Focus on:
-                    - Recipe title (should contain "${subRecipe.name}")
-                    - Complete ingredient list
-                    - Cooking method/instructions
-                    - Prep time and cooking time if shown
-                    - Any notes or tips
-                    
-                    This is a sub-recipe/side dish that will be referenced by a main recipe. Please extract every detail you can see.`
+- Recipe title (should contain "${subRecipe.name}")
+- Complete ingredient list
+- Cooking method/instructions
+- Prep time and cooking time if shown
+- Any notes or tips
+
+This is a sub-recipe/side dish that will be referenced by a main recipe. Please extract every detail you can see.`
                   },
                   {
                     type: "image_url",
@@ -197,6 +203,7 @@ export function registerPhotoToRecipeRoutes(app: Express): void {
             ],
             max_tokens: 1000
           });
+          console.log(`🔄 Sub-recipe text extraction - Vision API call completed for ${subRecipe.name}`);
 
           const extractedText = response.choices[0]?.message?.content || '';
           if (extractedText.trim()) {
@@ -382,21 +389,33 @@ Return ONLY a valid JSON object with this exact structure:
 
 CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing commas.`;
 
-      const recipeResponse = await openai.chat.completions.create({
-        model: "gpt-4o", // using gpt-4o for cost efficiency as requested
-        messages: [
-          {
-            role: "user",
-            content: recipePrompt
+      // Use AIService for recipe structuring - convert extracted text to structured recipe
+      const recipeResponse = await AIService.chat(
+        {
+          message: recipePrompt,
+          context: {
+            mode: "recipe_extraction",
+            userPreferences: {
+              responseFormat: "json",
+              style: "flavr"
+            }
           }
-        ],
-        temperature: 0.3, // Lower temperature for more consistent JSON
-        max_tokens: 2000
-      });
+        },
+        {
+          temperature: 0.3,
+          maxTokens: 2000,
+          timeoutMs: 30000,
+          stream: false,
+          retries: 1,
+          userId: req.session?.userId,
+          traceId: `photo-recipe-structure-${Date.now()}`
+        }
+      );
+      console.log(`🔄 Recipe structuring via AIProvider completed`);
 
-      const recipeContent = recipeResponse.choices[0]?.message?.content;
+      const recipeContent = recipeResponse.message;
       if (!recipeContent) {
-        throw new Error('No recipe content received from OpenAI');
+        throw new Error('No recipe content received from AI service');
       }
 
       // Parse the recipe JSON
@@ -457,8 +476,8 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
       const tempId = `photo-extracted-${Date.now()}`;
       recipe.tempId = tempId;
       
-      // Generate recipe image using DALL-E 3
-      console.log('🎨 Generating recipe image...');
+      // Generate recipe image using direct DALL-E - fallback until AIProvider supports images
+      console.log('🎨 Generating recipe image via DALL-E...');
       try {
         const imageResponse = await openai.images.generate({
           model: "dall-e-3",
@@ -468,28 +487,28 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
           quality: "standard",
         });
 
-        if (imageResponse.data[0]?.url) {
+        if (imageResponse.data?.[0]?.url) {
           const imageUrl = imageResponse.data[0].url;
           recipe.imageUrl = imageUrl;
           
           // Update cache with image
-          global.recipeImageCache.set(tempId, {
+          global.recipeImageCache.set(tempId, JSON.stringify({
             recipe,
             imageUrl
-          });
+          }));
           console.log(`🎨 Recipe image generated and cached for tempId: ${tempId}`);
         }
-      } catch (imageError) {
+      } catch (imageError: any) {
         console.warn('⚠️ Image generation failed:', imageError.message);
         console.log('📸 Continuing without image generation...');
       }
       
       // Ensure cache is set if no image was generated
       if (!global.recipeImageCache.has(tempId)) {
-        global.recipeImageCache.set(tempId, {
+        global.recipeImageCache.set(tempId, JSON.stringify({
           recipe,
           imageUrl: null
-        });
+        }));
         console.log(`📋 Cached recipe data without image for tempId: ${tempId}`);
       }
 
@@ -553,7 +572,7 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      const { title, description, cuisine, difficulty, prepTime, cookTime, servings, ingredients, instructions, tips, nutritionalHighlights } = req.body;
+      const { title, description, cuisine, difficulty, prepTime, cookTime, servings, ingredients, instructions, tips } = req.body;
 
       if (!title || !ingredients || !instructions) {
         return res.status(400).json({ error: 'Missing required recipe fields' });
@@ -586,7 +605,6 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
         ingredients: ingredientStrings,
         instructions: instructionStrings,
         tips: tips ? JSON.stringify(tips) : '[]',
-        nutritionalHighlights: nutritionalHighlights ? JSON.stringify(nutritionalHighlights) : '[]',
         imageUrl: null, // No image for photo-extracted recipes initially
         isShared: false,
         shareId: null,
