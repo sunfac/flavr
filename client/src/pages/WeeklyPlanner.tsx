@@ -53,6 +53,8 @@ import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
 import WeeklyPlannerOnboarding from "@/components/WeeklyPlannerOnboarding";
+import RecipeCard from "@/components/RecipeCard";
+import { ArrowLeft } from "lucide-react";
 
 export default function WeeklyPlanner() {
   const [showNavigation, setShowNavigation] = useState(false);
@@ -75,6 +77,9 @@ export default function WeeklyPlanner() {
   const [isGeneratingTitles, setIsGeneratingTitles] = useState(false);
   const [isGeneratingRecipes, setIsGeneratingRecipes] = useState(false);
   const [editingPreferences, setEditingPreferences] = useState<any>(null);
+  // Recipe viewing state
+  const [viewingRecipe, setViewingRecipe] = useState<any>(null);
+  const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
   // Removed estimatedCost state - users shouldn't see internal costs
   const { toast } = useToast();
 
@@ -368,9 +373,32 @@ export default function WeeklyPlanner() {
     }
   };
 
-  const handleViewRecipe = (recipeId: number) => {
-    // Navigate to recipe view page
-    window.open(`/recipe/${recipeId}`, '_blank');
+  const handleViewRecipe = async (recipeId: number) => {
+    setIsLoadingRecipe(true);
+    try {
+      const response = await apiRequest("GET", `/api/recipe/${recipeId}`);
+      if (!response.ok) {
+        throw new Error('Failed to load recipe');
+      }
+      const recipeData = await response.json();
+      setViewingRecipe(recipeData.recipe);
+      // Scroll to top when showing recipe
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error: any) {
+      console.error('Error loading recipe:', error);
+      toast({
+        title: "Failed to Load Recipe",
+        description: error.message || "Could not load recipe details. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoadingRecipe(false);
+    }
+  };
+
+  const handleBackFromRecipe = () => {
+    setViewingRecipe(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleAdjustPlan = () => {
@@ -637,12 +665,43 @@ export default function WeeklyPlanner() {
       <main className="pt-20 pb-24">
         <div className="max-w-6xl mx-auto px-4 py-8">
           
-          {/* Header */}
-          <div className="text-center mb-8">
-            <Calendar className="w-12 h-12 text-orange-400 mx-auto mb-4" />
-            <h1 className="text-3xl font-bold text-white mb-2">Weekly Meal Planner</h1>
-            <p className="text-slate-300">Your personalized cooking schedule</p>
-          </div>
+          {/* Recipe View - Show when viewing a specific recipe */}
+          {viewingRecipe ? (
+            <div className="space-y-4">
+              <Button
+                variant="outline"
+                onClick={handleBackFromRecipe}
+                className="border-slate-600 text-slate-300 hover:bg-slate-700 mb-4"
+                disabled={isLoadingRecipe}
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Weekly Plan
+              </Button>
+              
+              {isLoadingRecipe ? (
+                <div className="flex items-center justify-center min-h-[400px]">
+                  <div className="text-center">
+                    <div className="animate-spin w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full mb-4 mx-auto"></div>
+                    <h3 className="text-lg font-medium text-foreground mb-2">Loading recipe...</h3>
+                    <p className="text-muted-foreground">Please wait while we prepare your recipe.</p>
+                  </div>
+                </div>
+              ) : (
+                <RecipeCard
+                  recipe={viewingRecipe}
+                  isFullView={true}
+                  onBack={handleBackFromRecipe}
+                />
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Header */}
+              <div className="text-center mb-8">
+                <Calendar className="w-12 h-12 text-orange-400 mx-auto mb-4" />
+                <h1 className="text-3xl font-bold text-white mb-2">Weekly Meal Planner</h1>
+                <p className="text-slate-300">Your personalized cooking schedule</p>
+              </div>
 
           {/* Analytics Dashboard - Only for Flavr+ members */}
           {isAuthenticated && (user as any)?.user?.hasFlavrPlus && (
@@ -1239,6 +1298,8 @@ export default function WeeklyPlanner() {
               </Button>
             </div>
           )}
+            </>
+          )}
         </div>
       </main>
 
@@ -1258,7 +1319,7 @@ function RecipeCardWithImage({ meal, onClick }: { meal: any; onClick: () => void
 
   // Fetch recipe details to get image
   const { data: recipe } = useQuery({
-    queryKey: ["/api/recipe", meal.recipeId],
+    queryKey: [`/api/recipe/${meal.recipeId}`],
     enabled: !!meal.recipeId,
     retry: false,
   });
