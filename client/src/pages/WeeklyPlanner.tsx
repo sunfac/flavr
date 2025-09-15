@@ -13,8 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Clock, Users, ShoppingCart, Download, RefreshCw, Settings, ImageIcon, ChefHat, TrendingUp, PieChart, Share2, BarChart3, Copy, CheckCircle } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Calendar, Clock, Users, ShoppingCart, Download, RefreshCw, Settings, ImageIcon, ChefHat, TrendingUp, PieChart, Share2, BarChart3 } from "lucide-react";
 
 // Analytics interfaces
 interface SavingsMetrics {
@@ -53,8 +52,6 @@ import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
 import WeeklyPlannerOnboarding from "@/components/WeeklyPlannerOnboarding";
-import RecipeCard from "@/components/RecipeCard";
-import { ArrowLeft } from "lucide-react";
 
 export default function WeeklyPlanner() {
   const [showNavigation, setShowNavigation] = useState(false);
@@ -63,8 +60,6 @@ export default function WeeklyPlanner() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showAdjustModal, setShowAdjustModal] = useState(false);
-  const [showShoppingListModal, setShowShoppingListModal] = useState(false);
-  const [currentShoppingList, setCurrentShoppingList] = useState<string[]>([]);
   const [currentWeekPlan, setCurrentWeekPlan] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   
@@ -77,9 +72,6 @@ export default function WeeklyPlanner() {
   const [isGeneratingTitles, setIsGeneratingTitles] = useState(false);
   const [isGeneratingRecipes, setIsGeneratingRecipes] = useState(false);
   const [editingPreferences, setEditingPreferences] = useState<any>(null);
-  // Recipe viewing state
-  const [viewingRecipe, setViewingRecipe] = useState<any>(null);
-  const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
   // Removed estimatedCost state - users shouldn't see internal costs
   const { toast } = useToast();
 
@@ -373,32 +365,9 @@ export default function WeeklyPlanner() {
     }
   };
 
-  const handleViewRecipe = async (recipeId: number) => {
-    setIsLoadingRecipe(true);
-    try {
-      const response = await apiRequest("GET", `/api/recipe/${recipeId}`);
-      if (!response.ok) {
-        throw new Error('Failed to load recipe');
-      }
-      const recipeData = await response.json();
-      setViewingRecipe(recipeData.recipe);
-      // Scroll to top when showing recipe
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (error: any) {
-      console.error('Error loading recipe:', error);
-      toast({
-        title: "Failed to Load Recipe",
-        description: error.message || "Could not load recipe details. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoadingRecipe(false);
-    }
-  };
-
-  const handleBackFromRecipe = () => {
-    setViewingRecipe(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleViewRecipe = (recipeId: number) => {
+    // Navigate to recipe view page
+    window.open(`/recipe/${recipeId}`, '_blank');
   };
 
   const handleAdjustPlan = () => {
@@ -456,12 +425,26 @@ export default function WeeklyPlanner() {
           return;
         }
 
-        // Open the shopping list modal with the data
-        setCurrentShoppingList(shoppingList);
-        setShowShoppingListModal(true);
+        // Create a formatted shopping list display
+        const listText = shoppingList.map((item: string, index: number) => 
+          `${index + 1}. ${item}`
+        ).join('\n');
         
-      } else {
-        throw new Error('Failed to fetch shopping list');
+        // Copy to clipboard and show success
+        navigator.clipboard.writeText(listText).then(() => {
+          toast({
+            title: "Shopping List Copied!",
+            description: `${shoppingList.length} ingredients copied to clipboard. Check your planned recipes for the full list.`,
+          });
+        }).catch(() => {
+          toast({
+            title: "Shopping List Ready",
+            description: `${shoppingList.length} ingredients ready. Check your browser console for the full list.`,
+          });
+          console.log("🛒 SHOPPING LIST:", listText);
+        });
+        
+        console.log("Shopping list:", shoppingData);
       }
     } catch (error) {
       console.error("Error getting shopping list:", error);
@@ -471,89 +454,6 @@ export default function WeeklyPlanner() {
         variant: "destructive"
       });
     }
-  };
-
-  // Copy shopping list to clipboard
-  const handleCopyShoppingList = async () => {
-    if (currentShoppingList.length === 0) return;
-    
-    const listText = currentShoppingList.map((item: string, index: number) => 
-      `${index + 1}. ${item}`
-    ).join('\n');
-    
-    try {
-      await navigator.clipboard.writeText(listText);
-      toast({
-        title: "Shopping List Copied!",
-        description: `${currentShoppingList.length} ingredients copied to clipboard.`,
-      });
-    } catch (error) {
-      console.log("🛒 SHOPPING LIST:", listText);
-      toast({
-        title: "Shopping List Ready",
-        description: "Check the browser console for your shopping list.",
-      });
-    }
-  };
-
-  // Shopping List Modal Component
-  const ShoppingListModal = () => {
-    if (!currentShoppingList || currentShoppingList.length === 0) return null;
-    
-    return (
-      <Dialog open={showShoppingListModal} onOpenChange={setShowShoppingListModal}>
-        <DialogContent className="max-w-md w-full mx-4 bg-slate-800 border-slate-700 text-white max-h-[80vh] overflow-y-auto">
-          <DialogHeader className="border-b border-slate-700 pb-4">
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <ShoppingCart className="w-5 h-5 text-orange-400" />
-              Shopping List
-            </DialogTitle>
-            <p className="text-slate-300 text-sm">
-              {currentShoppingList.length} items • Week of {currentWeekPlan ? formatDate(currentWeekPlan.weekStartDate) : ''}
-            </p>
-          </DialogHeader>
-          
-          <div className="space-y-3 py-4">
-            <div className="max-h-[400px] overflow-y-auto space-y-2 pr-2">
-              {currentShoppingList.map((item, index) => (
-                <div 
-                  key={index} 
-                  className="flex items-start gap-3 p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700/70 transition-colors"
-                  data-testid={`text-ingredient-${index}`}
-                >
-                  <div className="flex-shrink-0 w-6 h-6 bg-orange-500/20 rounded-full flex items-center justify-center text-orange-400 text-sm font-semibold mt-0.5">
-                    {index + 1}
-                  </div>
-                  <div className="flex-1 text-slate-200 leading-relaxed">
-                    {item}
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="flex gap-3 pt-4 border-t border-slate-700">
-              <Button
-                onClick={handleCopyShoppingList}
-                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
-                data-testid="button-copy-shopping-list"
-              >
-                <Copy className="w-4 h-4 mr-2" />
-                Copy to Clipboard
-              </Button>
-              <Button
-                onClick={() => setShowShoppingListModal(false)}
-                variant="outline"
-                className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                data-testid="button-close-shopping-list"
-              >
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Done
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
   };
 
   const getThisMonday = () => {
@@ -576,7 +476,7 @@ export default function WeeklyPlanner() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-        <GlobalHeader onMenuClick={() => openMenu('navigation')} />
+        <GlobalHeader onMenuClick={(menu) => openMenu(menu)} />
         
         <main className="pt-20 pb-24">
           <div className="max-w-4xl mx-auto px-4 py-16 text-center">
@@ -596,7 +496,7 @@ export default function WeeklyPlanner() {
           </div>
         </main>
 
-        <GlobalFooter currentMode="plan" />
+        <GlobalFooter currentMode="weekly-planner" />
         <GlobalNavigation 
           isOpen={showNavigation}
           onClose={closeAllMenus}
@@ -604,7 +504,6 @@ export default function WeeklyPlanner() {
         <AuthModal 
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
-          onSuccess={() => setShowAuthModal(false)}
         />
       </div>
     );
@@ -613,7 +512,7 @@ export default function WeeklyPlanner() {
   if (preferencesLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-        <GlobalHeader onMenuClick={() => openMenu('navigation')} />
+        <GlobalHeader onMenuClick={(menu) => openMenu(menu)} />
         <main className="pt-20 pb-24">
           <div className="max-w-4xl mx-auto px-4 py-16 text-center">
             <div className="animate-spin w-8 h-8 border-4 border-orange-400 border-t-transparent rounded-full mx-auto mb-4" />
@@ -624,10 +523,10 @@ export default function WeeklyPlanner() {
     );
   }
 
-  if (!preferences || (preferences as any)?.onboardingRequired) {
+  if (!preferences || preferences?.onboardingRequired) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-        <GlobalHeader onMenuClick={() => openMenu('navigation')} />
+        <GlobalHeader onMenuClick={(menu) => openMenu(menu)} />
         
         <main className="pt-20 pb-24">
           <div className="max-w-4xl mx-auto px-4 py-16">
@@ -652,7 +551,7 @@ export default function WeeklyPlanner() {
           </div>
         </main>
 
-        <GlobalFooter currentMode="plan" />
+        <GlobalFooter currentMode="weekly-planner" />
         <GlobalNavigation isOpen={showNavigation} onClose={closeAllMenus} />
       </div>
     );
@@ -660,48 +559,17 @@ export default function WeeklyPlanner() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-      <GlobalHeader onMenuClick={() => openMenu('navigation')} />
+      <GlobalHeader onMenuClick={(menu) => openMenu(menu)} />
       
       <main className="pt-20 pb-24">
         <div className="max-w-6xl mx-auto px-4 py-8">
           
-          {/* Recipe View - Show when viewing a specific recipe */}
-          {viewingRecipe ? (
-            <div className="space-y-4">
-              <Button
-                variant="outline"
-                onClick={handleBackFromRecipe}
-                className="border-slate-600 text-slate-300 hover:bg-slate-700 mb-4"
-                disabled={isLoadingRecipe}
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Weekly Plan
-              </Button>
-              
-              {isLoadingRecipe ? (
-                <div className="flex items-center justify-center min-h-[400px]">
-                  <div className="text-center">
-                    <div className="animate-spin w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full mb-4 mx-auto"></div>
-                    <h3 className="text-lg font-medium text-foreground mb-2">Loading recipe...</h3>
-                    <p className="text-muted-foreground">Please wait while we prepare your recipe.</p>
-                  </div>
-                </div>
-              ) : (
-                <RecipeCard
-                  recipe={viewingRecipe}
-                  isFullView={true}
-                  onBack={handleBackFromRecipe}
-                />
-              )}
-            </div>
-          ) : (
-            <>
-              {/* Header */}
-              <div className="text-center mb-8">
-                <Calendar className="w-12 h-12 text-orange-400 mx-auto mb-4" />
-                <h1 className="text-3xl font-bold text-white mb-2">Weekly Meal Planner</h1>
-                <p className="text-slate-300">Your personalized cooking schedule</p>
-              </div>
+          {/* Header */}
+          <div className="text-center mb-8">
+            <Calendar className="w-12 h-12 text-orange-400 mx-auto mb-4" />
+            <h1 className="text-3xl font-bold text-white mb-2">Weekly Meal Planner</h1>
+            <p className="text-slate-300">Your personalized cooking schedule</p>
+          </div>
 
           {/* Analytics Dashboard - Only for Flavr+ members */}
           {isAuthenticated && (user as any)?.user?.hasFlavrPlus && (
@@ -736,8 +604,8 @@ export default function WeeklyPlanner() {
                         ></div>
                       </div>
                       <p className="text-xs text-slate-400">
-                        {(savingsData?.efficiencyScore || 0) > 0 
-                          ? `You're ${savingsData?.efficiencyScore}% more efficient than average!`
+                        {savingsData?.efficiencyScore > 0 
+                          ? `You're ${savingsData.efficiencyScore}% more efficient than average!`
                           : "Start cooking to see your savings!"
                         }
                       </p>
@@ -755,9 +623,9 @@ export default function WeeklyPlanner() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {(tasteData?.cuisinePreferences?.length || 0) > 0 ? (
+                      {tasteData?.cuisinePreferences?.length > 0 ? (
                         <>
-                          {tasteData?.cuisinePreferences?.slice(0, 3).map((cuisine: any, index: number) => (
+                          {tasteData.cuisinePreferences.slice(0, 3).map((cuisine: any, index: number) => (
                             <div key={cuisine.cuisine} className="flex justify-between items-center">
                               <span className="text-slate-300 text-sm capitalize">{cuisine.cuisine}</span>
                               <span className="text-purple-400 font-semibold">{cuisine.percentage}%</span>
@@ -776,8 +644,8 @@ export default function WeeklyPlanner() {
                           size="sm"
                           className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10 text-xs"
                           onClick={() => {
-                            if ((tasteData?.cuisinePreferences?.length || 0) > 0) {
-                              const shareText = `My Flavr cooking style: ${tasteData?.cuisinePreferences?.slice(0, 3).map((c: any) => `${c.cuisine} ${c.percentage}%`).join(', ')}`;
+                            if (tasteData?.cuisinePreferences?.length > 0) {
+                              const shareText = `My Flavr cooking style: ${tasteData.cuisinePreferences.slice(0, 3).map((c: any) => `${c.cuisine} ${c.percentage}%`).join(', ')}`;
                               navigator.clipboard.writeText(shareText);
                               toast({
                                 title: "Taste Portrait Copied!",
@@ -930,6 +798,18 @@ export default function WeeklyPlanner() {
                       <CardTitle className="text-white text-xl">
                         Week of {formatDate(currentWeekPlan.weekStartDate)}
                       </CardTitle>
+                      <Badge 
+                        variant={currentWeekPlan.planStatus === 'accepted' ? 'default' : 'secondary'}
+                        className={
+                          currentWeekPlan.planStatus === 'accepted' 
+                            ? 'bg-green-600 text-white'
+                            : currentWeekPlan.planStatus === 'pending'
+                            ? 'bg-orange-600 text-white'  
+                            : 'bg-slate-600 text-white'
+                        }
+                      >
+                        {currentWeekPlan.planStatus}
+                      </Badge>
                     </div>
                   </div>
                   
@@ -943,7 +823,7 @@ export default function WeeklyPlanner() {
                         onClick={handleExportPlan}
                       >
                         <Download className="w-4 h-4 mr-2" />
-                        Add to Calendar
+                        Export
                       </Button>
                       <Button
                         variant="outline"
@@ -1286,16 +1166,13 @@ export default function WeeklyPlanner() {
               </Button>
             </div>
           )}
-            </>
-          )}
         </div>
       </main>
 
-      <GlobalFooter currentMode="plan" />
+      <GlobalFooter />
       <GlobalNavigation isOpen={showNavigation} onClose={closeAllMenus} />
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} onSuccess={() => setShowAuthModal(false)} />
       <FlavrPlusUpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
-      <ShoppingListModal />
     </div>
   );
 }
@@ -1307,14 +1184,14 @@ function RecipeCardWithImage({ meal, onClick }: { meal: any; onClick: () => void
 
   // Fetch recipe details to get image
   const { data: recipe } = useQuery({
-    queryKey: [`/api/recipe/${meal.recipeId}`],
+    queryKey: ["/api/recipes", meal.recipeId],
     enabled: !!meal.recipeId,
     retry: false,
   });
 
   useEffect(() => {
     if (recipe) {
-      const imageUrl = (recipe as any)?.imageUrl || (recipe as any)?.image;
+      const imageUrl = recipe.imageUrl || recipe.image;
       if (imageUrl) {
         setRecipeImage(imageUrl);
         setImageLoading(false);

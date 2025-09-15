@@ -22,29 +22,29 @@ interface ModeCard {
 
 const modes: ModeCard[] = [
   {
-    title: "Discover",
-    description: "Find chef-inspired dishes perfectly matched to your taste profile and mood",
+    title: "Chef Assist",
+    description: "Tell me what you want to cook, I'll create the perfect recipe just for you",
     icon: <ChefHat className="w-12 h-12" />,
-    color: "text-primary",
+    color: "text-orange-500 dark:text-orange-400",
     route: "/chef-assist",
-    gradient: "from-primary/10 to-primary/20"
+    gradient: "from-orange-500/10 to-orange-600/10 dark:from-orange-500/20 dark:to-orange-600/20"
   },
   {
-    title: "Plan",
-    description: "Generate weekly meal plans with smart shopping lists tailored to your preferences",
+    title: "Weekly Planner",
+    description: "Plan your week with AI-generated meal plans and smart shopping lists",
     icon: <CalendarDays className="w-12 h-12" />,
-    color: "text-secondary",
+    color: "text-purple-500 dark:text-purple-400",
     route: "/weekly-planner",
-    gradient: "from-secondary/10 to-secondary/20",
+    gradient: "from-purple-500/10 to-purple-600/10 dark:from-purple-500/20 dark:to-purple-600/20",
     isPremium: true
   },
   {
-    title: "Capture",
-    description: "Transform cookbook photos and ingredient lists into interactive digital recipes",
+    title: "Photo to Recipe",
+    description: "Transform cookbook photos into interactive digital recipes with AI",
     icon: <Camera className="w-12 h-12" />,
-    color: "text-accent",
+    color: "text-blue-500 dark:text-blue-400",
     route: "/photo-to-recipe",
-    gradient: "from-accent/10 to-accent/20",
+    gradient: "from-blue-500/10 to-blue-600/10 dark:from-blue-500/20 dark:to-blue-600/20",
     isPremium: true
   }
 ];
@@ -68,11 +68,11 @@ export default function ModeSelection() {
           transition={{ duration: 0.5 }}
           className="text-center mb-8 md:mb-16 pt-12 md:pt-16"
         >
-          <h1 className="text-3xl md:text-5xl font-bold mb-3 md:mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Your Private Chef
+          <h1 className="text-3xl md:text-5xl font-bold mb-3 md:mb-4 bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+            What's Cooking?
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-4 md:mb-6">
-            Premium culinary experiences, perfectly tailored to your taste
+            Your AI culinary companion for personalized recipes and meal planning
           </p>
           <div className="flex justify-center">
             <QuotaCounter showUpgradeHint={true} />
@@ -103,7 +103,7 @@ export default function ModeSelection() {
                   mode.isComingSoon 
                     ? "cursor-not-allowed hover:shadow-lg hover:scale-[1.02] opacity-90" 
                     : "cursor-pointer hover:shadow-xl hover:scale-105",
-                  "bg-card/80 border-border backdrop-blur-sm"
+                  "dark:bg-gray-800/50 dark:border-gray-700"
                 )}
                 onClick={() => handleModeSelect(mode)}
               >
@@ -120,9 +120,9 @@ export default function ModeSelection() {
                     "p-2 sm:p-3 md:p-4 rounded-full bg-background/80 backdrop-blur-sm inline-flex mx-auto mb-2 sm:mb-3 md:mb-4 border-2 border-current/20", 
                     mode.color
                   )}>
-                    <ChefHat className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Discover" ? "" : "hidden")} />
-                    <Camera className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Capture" ? "" : "hidden")} />
-                    <CalendarDays className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Plan" ? "" : "hidden")} />
+                    <ChefHat className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Chef Assist" ? "" : "hidden")} />
+                    <Camera className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Photo to Recipe" ? "" : "hidden")} />
+                    <CalendarDays className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Weekly Planner" ? "" : "hidden")} />
                   </div>
                   <div className="flex items-center justify-center gap-2 mb-2 sm:mb-3">
                     <CardTitle className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold">{mode.title}</CardTitle>
@@ -152,9 +152,10 @@ export default function ModeSelection() {
                       mode.isComingSoon 
                         ? "cursor-not-allowed bg-gray-400 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-600 text-white" 
                         : "group-hover:translate-y-[-2px] shadow-lg hover:shadow-xl",
-                      !mode.isComingSoon && mode.title === "Discover" ? "bg-primary hover:bg-primary/90" : "",
-                      !mode.isComingSoon && mode.title === "Plan" ? "bg-secondary hover:bg-secondary/90" : "",
-                      !mode.isComingSoon && mode.title === "Capture" ? "bg-accent hover:bg-accent/90 text-accent-foreground" : ""
+                      !mode.isComingSoon && mode.color === "text-green-500 dark:text-green-400" ? "bg-green-600 hover:bg-green-700" : "",
+                      !mode.isComingSoon && mode.color === "text-orange-500 dark:text-orange-400" ? "bg-orange-600 hover:bg-orange-700" : "",
+                      !mode.isComingSoon && mode.color === "text-blue-500 dark:text-blue-400" ? "bg-blue-600 hover:bg-blue-700" : "",
+                      !mode.isComingSoon && mode.color === "text-purple-500 dark:text-purple-400" ? "bg-purple-600 hover:bg-purple-700" : ""
                     )}
                     size="default"
                     disabled={mode.isComingSoon}

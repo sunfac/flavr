@@ -8,7 +8,10 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import LandingPage from "@/pages/LandingPage";
 import LoginPage from "@/pages/LoginPage";
 import ModeSelection from "@/pages/ModeSelection";
+import ShoppingMode from "@/pages/ShoppingMode";
 import ChefAssistMode from "@/pages/ChefAssistMode";
+import FlavrRituals from "@/pages/FlavrRituals";
+import FlavrRitualsPhase2 from "@/pages/FlavrRitualsPhase2";
 import FlavrPlus from "@/pages/FlavrPlus";
 import SettingsPage from "@/pages/SettingsPage";
 import Subscribe from "@/pages/Subscribe";
@@ -25,6 +28,11 @@ import NotFound from "@/pages/not-found";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 
 import DigitalCookbook from "@/pages/DigitalCookbook";
+import BudgetPlanner from "@/pages/BudgetPlanner";
+import ChefAssist from "@/pages/ChefAssist";
+import ChatMode from "@/pages/ChatMode";
+import Recipe from "@/pages/Recipe";
+import RecipeSelection from "@/pages/RecipeSelection";
 import LoadingPage from "@/pages/LoadingPage";
 import PublicRecipeView from "./pages/PublicRecipeView";
 import TempRecipe from "@/pages/TempRecipe";
@@ -38,7 +46,13 @@ function Router() {
       <Route path="/" component={LandingPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/app" component={ModeSelection} />
-      <Route path="/chef-assist" component={ChefAssistMode} />
+      <Route path="/app/shopping" component={ShoppingMode} />
+      <Route path="/app/chef" component={ChefAssistMode} />
+      <Route path="/shopping" component={ShoppingMode} />
+      <Route path="/chef" component={ChefAssistMode} />
+      <Route path="/rituals" component={FlavrRituals} />
+      <Route path="/flavr-rituals" component={FlavrRituals} />
+      <Route path="/flavr-rituals/phase2" component={FlavrRitualsPhase2} />
       <Route path="/flavr-plus" component={FlavrPlus} />
       <Route path="/my-recipes" component={MyRecipes} />
       <Route path="/recipe/:id" component={RecipeView} />
@@ -54,6 +68,11 @@ function Router() {
       <Route path="/diagnostic" component={DiagnosticPage} />
 
       <Route path="/cookbook" component={DigitalCookbook} />
+      <Route path="/budget-planner" component={BudgetPlanner} />
+      <Route path="/chef-assist" component={ChefAssist} />
+      <Route path="/chat" component={ChatMode} />
+      <Route path="/recipe" component={Recipe} />
+      <Route path="/recipe-selection" component={RecipeSelection} />
       <Route path="/share/:shareId" component={PublicRecipeView} />
       <Route path="/temp-recipe" component={TempRecipe} />
       <Route path="/weekly-planner" component={WeeklyPlanner} />

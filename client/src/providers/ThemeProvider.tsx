@@ -19,8 +19,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (stored === 'light' || stored === 'dark') {
       return stored;
     }
-    // Default to light theme for modern, premium feel
-    return 'light';
+    // Default to dark theme to match current design
+    return 'dark';
   });
 
   useEffect(() => {
