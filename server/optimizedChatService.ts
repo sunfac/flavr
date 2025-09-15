@@ -2,8 +2,6 @@ import { OpenAI } from "openai";
 import { ChatOptimizer } from "./chatOptimizer";
 import { storage } from "./storage";
 import { trackTitleWords, generateVarietyNotes } from './sharedVarietyTracker';
-import { AIService } from './aiProvider';
-import type { ChatInput, ChatResponse } from '@shared/aiSchemas';
 
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY 
@@ -192,31 +190,17 @@ CONTEXT: ${compressedContext}
 
 Be conversational and practical. Keep responses focused and useful without being overly wordy, but include technique insights that show culinary expertise.`;
 
-    // Use AIService.chat for conversational queries
-    const chatInput: ChatInput = {
-      message: request.message,
-      conversationHistory: request.conversationHistory?.map(msg => ({
-        role: msg.role as any,
-        content: msg.content
-      })),
-      context: {
-        mode: "conversational",
-        userPreferences: {
-          userId: request.userContext.userId,
-          pseudoUserId: request.userContext.pseudoUserId
-        }
-      },
-      model: intentResult.modelRecommendation as any
-    };
-
-    const aiResponse = await AIService.chat(chatInput, {
-      maxTokens: 300,
-      temperature: 0.7,
-      userId: request.userContext.userId,
-      traceId: `chat-conversational-${Date.now()}`
+    const response = await openai.chat.completions.create({
+      model: intentResult.modelRecommendation,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: request.message }
+      ],
+      max_tokens: 300,
+      temperature: 0.7
     });
 
-    return aiResponse.message || "I'd be happy to help with your cooking question!";
+    return response.choices[0]?.message?.content || "I'd be happy to help with your cooking question!";
   }
 
   // Handle quick recipe requests (condensed recipes in chat)
@@ -233,35 +217,22 @@ Be conversational and practical. Keep responses focused and useful without being
     // Add variety notes to the prompt
     const varietyNotes = generateVarietyNotes(clientId, 'chat-mode');
     
-    // Use AIService.chat for quick recipe requests
-    const quickRecipeChatInput: ChatInput = {
-      message: `${varietyNotes}
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini", // Always use mini for quick recipes
+      messages: [
+        { 
+          role: "system", 
+          content: `You are Zest, channeling established chef voices to create condensed, chat-friendly recipes. Sound like:
 
-${request.message}
+BRITISH CHEFS: Rick Stein, Jamie Oliver, Tom Kerridge, Mary Berry, Delia Smith, Marcus Wareing, Gordon Ramsay, Nigella Lawson, Michel Roux Jr, Angela Hartnett, Jason Atherton, Clare Smyth
 
-Create a condensed, chat-friendly recipe that sounds authentic and practical.`,
-      conversationHistory: request.conversationHistory?.map(msg => ({
-        role: msg.role as any,
-        content: msg.content
-      })),
-      context: {
-        mode: "quick_recipe",
-        userPreferences: {
-          userId: request.userContext.userId,
-          variety: varietyNotes
-        }
-      },
-      model: "gpt-4o-mini" // Always use mini for quick recipes
-    };
+LONDON RESTAURANT MASTERS: Ollie Dabbous, José Pizarro, Aktar Islam, Anna Hansen, Rohit Ghai, Francesco Mazzei, Adam Handling
 
-    const quickRecipeResponse = await AIService.chat(quickRecipeChatInput, {
-      maxTokens: 400,
-      temperature: 0.8,
-      userId: request.userContext.userId,
-      traceId: `chat-quick-recipe-${Date.now()}`
-    });
+INTERNATIONAL LEGENDS: Yotam Ottolenghi, José Andrés, Julia Child, Thomas Keller, Massimo Bottura, David Chang, Ferran Adrià, Alain Ducasse
 
-    console.log("🔄 OptimizedChat quick recipe generated via AIProvider");
+Be direct, practical, confident.
+
+AUTHENTICITY REQUIREMENTS:
 - Use British English and metric measurements
 - Include one professional technique or tip
 - Explain timing and technique briefly but expertly
@@ -281,7 +252,13 @@ Format:
 
 Be concise but complete. Use friendly, encouraging chef's tone with technique confidence.${varietyNotes}`
         },
-    const responseContent = quickRecipeResponse.message || "Here's a quick recipe idea for you!";
+        { role: "user", content: `Quick recipe for: ${recipeTitle}` }
+      ],
+      max_tokens: 400,
+      temperature: 0.7
+    });
+
+    const responseContent = response.choices[0]?.message?.content || "Here's a quick recipe idea for you!";
     
     // Track the recipe title for variety (extract from response)
     const titleMatch = responseContent.match(/🍽️\s*\*\*(.+?)\*\*/);
@@ -377,32 +354,25 @@ Be concise but complete. Use friendly, encouraging chef's tone with technique co
       return "I'd love to help modify a recipe, but I don't see one loaded. Could you generate a recipe first?";
     }
 
-    // Use AIService.chat for recipe modifications
-    const modificationChatInput: ChatInput = {
-      message: request.message,
-      currentRecipe: request.currentRecipe,
-      conversationHistory: request.conversationHistory?.map(msg => ({
-        role: msg.role as any,
-        content: msg.content
-      })),
-      context: {
-        mode: "recipe_modification",
-        userPreferences: {
-          currentRecipeTitle: request.currentRecipe.title,
-          userId: request.userContext.userId
-        }
-      },
-      model: "gpt-4o-mini"
-    };
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini", // Use mini for modifications
+      messages: [
+        {
+          role: "system",
+          content: `You are Zest helping modify a recipe. Current recipe: "${request.currentRecipe.title}"
 
-    const modificationResponse = await AIService.chat(modificationChatInput, {
-      maxTokens: 250,
-      temperature: 0.7,
-      userId: request.userContext.userId,
-      traceId: `chat-modification-${Date.now()}`
+Provide clear, specific modification advice. Be concise and practical.`
+        },
+        {
+          role: "user",
+          content: request.message
+        }
+      ],
+      max_tokens: 250,
+      temperature: 0.7
     });
 
-    return modificationResponse.message || "I can help you modify that recipe!";
+    return response.choices[0]?.message?.content || "I can help you modify that recipe!";
   }
 
   // Fallback handler

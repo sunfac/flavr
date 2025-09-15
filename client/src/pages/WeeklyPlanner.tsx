@@ -14,8 +14,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar, Clock, Users, ShoppingCart, Download, RefreshCw, Settings, ImageIcon, ChefHat, TrendingUp, PieChart, Share2, BarChart3 } from "lucide-react";
-import { StepProgress, CompactStepProgress } from "@/components/ui/step-progress";
-import { ProgressiveLoading } from "@/components/ui/progressive-loading";
 
 // Analytics interfaces
 interface SavingsMetrics {
@@ -55,25 +53,6 @@ import AuthModal from "@/components/AuthModal";
 import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
 import WeeklyPlannerOnboarding from "@/components/WeeklyPlannerOnboarding";
 
-// Define the weekly planner steps
-const WEEKLY_PLANNER_STEPS = [
-  {
-    id: "preferences",
-    title: "Setup",
-    description: "Review preferences & meal count"
-  },
-  {
-    id: "titles",
-    title: "Plan",
-    description: "Generate & review meal ideas"
-  },
-  {
-    id: "recipes",
-    title: "Create",
-    description: "Generate full weekly plan"
-  }
-];
-
 export default function WeeklyPlanner() {
   const [showNavigation, setShowNavigation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -83,10 +62,6 @@ export default function WeeklyPlanner() {
   const [showAdjustModal, setShowAdjustModal] = useState(false);
   const [currentWeekPlan, setCurrentWeekPlan] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  
-  // Multi-step progress tracking
-  const [currentPlannerStep, setCurrentPlannerStep] = useState<number>(1);
-  const [completedPlannerSteps, setCompletedPlannerSteps] = useState<number[]>([]);
   
   // Three-step generation states
   const [showPreferencesReview, setShowPreferencesReview] = useState(false);
@@ -126,9 +101,6 @@ export default function WeeklyPlanner() {
     if (menuType === 'settings') setShowSettings(true);
     if (menuType === 'userMenu') setShowUserMenu(true);
   };
-
-  // Specific menu handlers for GlobalHeader
-  const handleMenuClick = () => openMenu('navigation');
 
   // Get user's weekly planning preferences
   const { data: preferences, isLoading: preferencesLoading, refetch: refetchPreferences } = useQuery({
@@ -184,10 +156,7 @@ export default function WeeklyPlanner() {
       return;
     }
 
-    // Update progress tracking
-    setCurrentPlannerStep(2);
     setIsGeneratingTitles(true);
-    
     try {
       const response = await apiRequest("POST", "/api/generate-weekly-titles", {
         mealCount: selectedMealCount
@@ -200,8 +169,6 @@ export default function WeeklyPlanner() {
       
       const titleProposal = await response.json();
       setProposedTitles(titleProposal.titles);
-      // Mark step 1 as completed
-      setCompletedPlannerSteps(prev => [...prev, 1]);
       // Cost removed from UI
       setShowTitleReview(true);
       setShowMealCountSelection(false); // Ensure we stay on title review
@@ -224,10 +191,7 @@ export default function WeeklyPlanner() {
 
   // STEP 2: Generate full recipes from approved titles
   const handleGenerateFromTitles = async (approvedTitles: any[]) => {
-    // Update progress tracking
-    setCurrentPlannerStep(3);
     setIsGeneratingRecipes(true);
-    
     try {
       const response = await apiRequest("POST", "/api/generate-from-titles", {
         approvedTitles,
@@ -243,10 +207,6 @@ export default function WeeklyPlanner() {
       setCurrentWeekPlan(newPlan);
       setShowTitleReview(false);
       setProposedTitles([]);
-      
-      // Mark all steps as completed
-      setCompletedPlannerSteps([1, 2, 3]);
-      
       refetchPlans();
       
       toast({
@@ -516,7 +476,7 @@ export default function WeeklyPlanner() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-        <GlobalHeader onMenuClick={handleMenuClick} />
+        <GlobalHeader onMenuClick={(menu) => openMenu(menu)} />
         
         <main className="pt-20 pb-24">
           <div className="max-w-4xl mx-auto px-4 py-16 text-center">
@@ -544,7 +504,6 @@ export default function WeeklyPlanner() {
         <AuthModal 
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
-          onSuccess={() => setShowAuthModal(false)}
         />
       </div>
     );
@@ -553,7 +512,7 @@ export default function WeeklyPlanner() {
   if (preferencesLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-        <GlobalHeader onMenuClick={handleMenuClick} />
+        <GlobalHeader onMenuClick={(menu) => openMenu(menu)} />
         <main className="pt-20 pb-24">
           <div className="max-w-4xl mx-auto px-4 py-16 text-center">
             <div className="animate-spin w-8 h-8 border-4 border-orange-400 border-t-transparent rounded-full mx-auto mb-4" />
@@ -564,10 +523,10 @@ export default function WeeklyPlanner() {
     );
   }
 
-  if (!preferences || (preferences as any)?.onboardingRequired) {
+  if (!preferences || preferences?.onboardingRequired) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-        <GlobalHeader onMenuClick={handleMenuClick} />
+        <GlobalHeader onMenuClick={(menu) => openMenu(menu)} />
         
         <main className="pt-20 pb-24">
           <div className="max-w-4xl mx-auto px-4 py-16">
@@ -600,7 +559,7 @@ export default function WeeklyPlanner() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-      <GlobalHeader onMenuClick={handleMenuClick} />
+      <GlobalHeader onMenuClick={(menu) => openMenu(menu)} />
       
       <main className="pt-20 pb-24">
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -645,7 +604,7 @@ export default function WeeklyPlanner() {
                         ></div>
                       </div>
                       <p className="text-xs text-slate-400">
-                        {savingsData && savingsData.efficiencyScore > 0 
+                        {savingsData?.efficiencyScore > 0 
                           ? `You're ${savingsData.efficiencyScore}% more efficient than average!`
                           : "Start cooking to see your savings!"
                         }
@@ -664,9 +623,9 @@ export default function WeeklyPlanner() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {tasteData?.cuisinePreferences && tasteData.cuisinePreferences.length > 0 ? (
+                      {tasteData?.cuisinePreferences?.length > 0 ? (
                         <>
-                          {tasteData?.cuisinePreferences?.slice(0, 3).map((cuisine: any, index: number) => (
+                          {tasteData.cuisinePreferences.slice(0, 3).map((cuisine: any, index: number) => (
                             <div key={cuisine.cuisine} className="flex justify-between items-center">
                               <span className="text-slate-300 text-sm capitalize">{cuisine.cuisine}</span>
                               <span className="text-purple-400 font-semibold">{cuisine.percentage}%</span>
@@ -685,7 +644,7 @@ export default function WeeklyPlanner() {
                           size="sm"
                           className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10 text-xs"
                           onClick={() => {
-                            if (tasteData?.cuisinePreferences?.length && tasteData.cuisinePreferences.length > 0) {
+                            if (tasteData?.cuisinePreferences?.length > 0) {
                               const shareText = `My Flavr cooking style: ${tasteData.cuisinePreferences.slice(0, 3).map((c: any) => `${c.cuisine} ${c.percentage}%`).join(', ')}`;
                               navigator.clipboard.writeText(shareText);
                               toast({
@@ -723,26 +682,6 @@ export default function WeeklyPlanner() {
           {/* Title Review Step */}
           {showTitleReview ? (
             <div className="space-y-6">
-              {/* Step Progress Indicator */}
-              <div className="hidden md:block">
-                <StepProgress 
-                  steps={WEEKLY_PLANNER_STEPS}
-                  currentStep={currentPlannerStep}
-                  completedSteps={completedPlannerSteps}
-                  isLoading={isGeneratingRecipes}
-                  loadingStep={isGeneratingRecipes ? 3 : undefined}
-                />
-              </div>
-              
-              {/* Mobile compact progress */}
-              <div className="md:hidden">
-                <CompactStepProgress 
-                  steps={WEEKLY_PLANNER_STEPS}
-                  currentStep={currentPlannerStep}
-                  completedSteps={completedPlannerSteps}
-                />
-              </div>
-
               <Card className="bg-slate-800/50 border-slate-700">
                 <CardHeader>
                   <CardTitle className="text-white text-xl">
@@ -1133,27 +1072,7 @@ export default function WeeklyPlanner() {
             </div>
           ) : showMealCountSelection ? (
             /* Meal Count Selection */
-            <div className="max-w-2xl mx-auto space-y-6">
-              {/* Step Progress Indicator */}
-              <div className="hidden md:block">
-                <StepProgress 
-                  steps={WEEKLY_PLANNER_STEPS}
-                  currentStep={currentPlannerStep}
-                  completedSteps={completedPlannerSteps}
-                  isLoading={isGeneratingTitles}
-                  loadingStep={isGeneratingTitles ? 2 : undefined}
-                />
-              </div>
-              
-              {/* Mobile compact progress */}
-              <div className="md:hidden">
-                <CompactStepProgress 
-                  steps={WEEKLY_PLANNER_STEPS}
-                  currentStep={currentPlannerStep}
-                  completedSteps={completedPlannerSteps}
-                />
-              </div>
-
+            <div className="max-w-2xl mx-auto">
               <Card className="bg-slate-800/50 border-slate-700">
                 <CardHeader>
                   <CardTitle className="text-white text-xl text-center">
@@ -1272,7 +1191,7 @@ function RecipeCardWithImage({ meal, onClick }: { meal: any; onClick: () => void
 
   useEffect(() => {
     if (recipe) {
-      const imageUrl = (recipe as any)?.imageUrl || (recipe as any)?.image;
+      const imageUrl = recipe.imageUrl || recipe.image;
       if (imageUrl) {
         setRecipeImage(imageUrl);
         setImageLoading(false);

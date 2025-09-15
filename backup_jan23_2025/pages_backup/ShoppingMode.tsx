@@ -4,7 +4,7 @@ import { apiRequest } from "@/lib/queryClient";
 import SlideQuizShell from "@/components/SlideQuizShell";
 import TinderRecipeCards from "@/components/TinderRecipeCards";
 import RecipeCard from "@/components/RecipeCard";
-import LoadingPage from "./LoadingPage";
+import Loading from "@/components/Loading";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
 import GlobalNavigation from "@/components/GlobalNavigation";
@@ -12,7 +12,7 @@ import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
 import AuthModal from "@/components/AuthModal";
 import ChatBot from "@/components/ChatBot";
-import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
+import UpgradeModal from "@/components/UpgradeModal";
 import { shoppingQuestions } from "@/config/shoppingQuestions";
 import { useQuery } from "@tanstack/react-query";
 import { checkQuotaBeforeGPT } from "@/lib/quotaManager";
@@ -83,8 +83,7 @@ export default function ShoppingMode() {
     }
 
     try {
-      // Navigate to dedicated loading page instead of inline loading
-      navigate("/loading");
+      setIsLoading(true);
       
       const fetchResponse = await fetch("/api/generate-recipe-ideas", {
         method: "POST",
@@ -113,8 +112,6 @@ export default function ShoppingMode() {
       
       setRecipeIdeas(transformedRecipes);
       setCurrentStep("suggestions");
-      // Navigate back to shopping mode with results
-      navigate("/shopping");
     } catch (error) {
       console.error("Recipe generation failed:", error);
       // Fallback recipes
@@ -130,8 +127,8 @@ export default function ShoppingMode() {
       ];
       setRecipeIdeas(fallbackRecipes);
       setCurrentStep("suggestions");
-      // Navigate back even with fallback
-      navigate("/shopping");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -239,21 +236,6 @@ export default function ShoppingMode() {
         console.log("📋 Nested recipe instructions:", response.recipe.instructions);
       }
       
-      // Store generation parameters for rerolling
-      const generationParams = {
-        mode: 'shopping' as const,
-        originalInputs: {
-          selectedRecipe: {
-            title: recipe.title,
-            description: recipe.description,
-            ...(recipe.originalData || recipe)
-          },
-          quizData: quizData
-        }
-      };
-      
-      // Store recipe in both local state (for ShoppingMode display) and global store (for reroll)
-      fullRecipe.generationParams = generationParams;
       setSelectedRecipe(fullRecipe);
       setCurrentStep("recipe");
       
@@ -307,7 +289,7 @@ export default function ShoppingMode() {
           />
         </main>
 
-        <GlobalFooter currentMode="fridge2fork" />
+        <GlobalFooter currentMode="shopping" />
         
         {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
         {showSettings && <SettingsPanel onClose={closeAllMenus} />}
@@ -326,10 +308,7 @@ export default function ShoppingMode() {
   }
 
   if (isLoading) {
-    return <LoadingPage 
-      title="Creating Your Perfect Recipe" 
-      subtitle="Our AI chef is preparing something delicious..."
-    />;
+    return <Loading message="Creating your perfect recipe..." showDidYouKnow />;
   }
 
   if (currentStep === "suggestions") {
@@ -351,7 +330,7 @@ export default function ShoppingMode() {
           />
         </main>
 
-        <GlobalFooter currentMode="fridge2fork" />
+        <GlobalFooter currentMode="shopping" />
         
         {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
         {showSettings && <SettingsPanel onClose={closeAllMenus} />}
@@ -366,10 +345,11 @@ export default function ShoppingMode() {
           />
         )}
         {showUpgradeModal && (
-          <FlavrPlusUpgradeModal
+          <UpgradeModal
             isOpen={showUpgradeModal}
             onClose={() => setShowUpgradeModal(false)}
             recipesUsed={usageData?.recipesUsed || 3}
+            recipesLimit={usageData?.recipesLimit || 3}
           />
         )}
       </div>
@@ -402,25 +382,22 @@ export default function ShoppingMode() {
             currentRecipe={selectedRecipe}
             currentMode="shopping"
             onRecipeUpdate={(updatedRecipe: any) => {
-              // Preserve generationParams when recipe is updated
-              if (selectedRecipe && selectedRecipe.generationParams) {
-                updatedRecipe.generationParams = selectedRecipe.generationParams;
-              }
               setSelectedRecipe(updatedRecipe);
             }}
           />
         </main>
 
-        <GlobalFooter currentMode="fridge2fork" />
+        <GlobalFooter currentMode="shopping" />
         
         {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
         {showSettings && <SettingsPanel onClose={closeAllMenus} />}
         {showUserMenu && <UserMenu onClose={closeAllMenus} />}
         {showUpgradeModal && (
-          <FlavrPlusUpgradeModal
+          <UpgradeModal
             isOpen={showUpgradeModal}
             onClose={() => setShowUpgradeModal(false)}
             recipesUsed={usageData?.recipesUsed || 3}
+            recipesLimit={usageData?.recipesLimit || 3}
           />
         )}
       </div>

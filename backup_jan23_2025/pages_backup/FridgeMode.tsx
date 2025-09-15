@@ -16,7 +16,7 @@ import { checkQuotaBeforeGPT, getRemainingRecipes, canGenerateRecipe } from "@/l
 import { apiRequest } from "@/lib/queryClient";
 import AuthModal from "@/components/AuthModal";
 import FlavrPlusGate from "@/components/FlavrPlusGate";
-import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
+import UpgradeModal from "@/components/UpgradeModal";
 import { Clock } from "lucide-react";
 
 export default function FridgeMode() {
@@ -29,7 +29,6 @@ export default function FridgeMode() {
   const [hasGeneratedSecondBatch, setHasGeneratedSecondBatch] = useState(false);
   const [showGate, setShowGate] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showNavigation, setShowNavigation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -83,27 +82,19 @@ export default function FridgeMode() {
     console.log("Transformed data:", transformedData);
     setQuizData(transformedData);
 
-    // Check usage limit before generating (unified with ShoppingMode approach)
+    // Check global quota before proceeding with GPT
     console.log("Checking quota...");
-    try {
-      const response = await apiRequest("GET", "/api/check-usage-limit");
-      const usageData = await response.json();
-      
-      // If user can't generate more recipes, show upgrade modal
-      if (!usageData.canGenerate && !usageData.hasFlavrPlus) {
-        console.log("Quota exceeded, showing upgrade modal");
-        setShowUpgradeModal(true);
-        return;
-      }
-    } catch (error) {
-      console.error("Usage check failed:", error);
-      // Allow generation if check fails
+    const allowed = await checkQuotaBeforeGPT();
+    console.log("Quota check result:", allowed);
+    if (!allowed) {
+      console.log("Quota exceeded, showing auth modal");
+      setShowAuthModal(true);
+      return;
     }
 
     console.log("Quota approved, starting API call...");
     try {
-      // Navigate to dedicated loading page
-      navigate("/loading");
+      setIsLoading(true);
       
       // Use the already transformed data with random cuisine selection
       const apiData = {
@@ -154,12 +145,10 @@ export default function FridgeMode() {
       console.log("Recipe ideas received:", response.recipes || []);
       setRecipeIdeas(response.recipes || []);
       setCurrentStep("suggestions");
-      // Navigate back to fridge mode with results
-      navigate("/fridge");
     } catch (error) {
       console.error("Failed to generate recipe ideas:", error);
-      // Navigate back even with error
-      navigate("/fridge");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -365,7 +354,7 @@ export default function FridgeMode() {
       )}
       
       {/* Consistent footer across all modes */}
-      <GlobalFooter currentMode="fridge2fork" />
+      <GlobalFooter currentMode="fridge" />
 
       {/* Navigation overlays */}
       {showNavigation && (
@@ -386,12 +375,6 @@ export default function FridgeMode() {
         onSuccess={handleAuthSuccess}
         title="Your personalized recipes are ready!"
         description="Sign up to unlock your custom AI-generated recipes based on your preferences"
-      />
-
-      <FlavrPlusUpgradeModal
-        isOpen={showUpgradeModal}
-        onClose={() => setShowUpgradeModal(false)}
-        recipesUsed={3}
       />
     </div>
   );

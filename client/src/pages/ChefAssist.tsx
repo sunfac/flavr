@@ -15,7 +15,6 @@ import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
 import DietaryToggleSection from "@/components/DietaryToggleSection";
 import { useQuery } from "@tanstack/react-query";
 import { detectDietaryConflicts } from "@/utils/dietaryConflictDetection";
-import { ProgressiveLoading, QuickLoadingButton } from "@/components/ui/progressive-loading";
 
 // Use the original chef assist examples
 const chefExamples = [
@@ -351,18 +350,17 @@ export default function ChefAssist() {
                   className="min-h-[120px] md:min-h-[150px] text-base md:text-lg bg-slate-800/50 border-slate-600 text-white focus:border-orange-400 rounded-xl placeholder:text-slate-500"
                 />
 
-                {/* Inspire Me button with progressive loading */}
+                {/* Inspire Me button matching original style */}
                 <div className="flex justify-center">
-                  <QuickLoadingButton
-                    isLoading={isProcessing}
-                    loadingText="Finding inspiration..."
+                  <Button
                     onClick={handleInspireMe}
                     variant="outline"
+                    disabled={isProcessing}
                     className="text-sm md:text-base border-orange-400 text-orange-400 hover:bg-orange-400/10"
                   >
                     <Sparkles className="w-4 h-4 mr-2" />
                     Inspire Me
-                  </QuickLoadingButton>
+                  </Button>
                 </div>
 
                 {/* Dietary and Nutritional Toggles */}

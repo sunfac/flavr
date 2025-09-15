@@ -147,7 +147,7 @@ export default function ChatBot({
   const detectedMode = currentMode || 
     (location.includes('/shopping') ? 'shopping' : 
      location.includes('/fridge') ? 'fridge' : 
-     location.includes('/chef-assist') ? 'chef' : undefined);
+     location.includes('/chef') ? 'chef' : undefined);
 
   // Recipe modification suggestions (when a recipe exists)
   const recipeModificationChips = [

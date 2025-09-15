@@ -9,7 +9,7 @@ import { logGPTInteraction, logSimpleGPTInteraction } from "../developerLogger";
 import { processFridgeImage } from "../vision";
 import { getCreativeGuidanceBlock } from "../shoppingPromptBlocks";
 import { MichelinChefAI } from "../openaiService";
-import { ChefAssistGPT5 } from "../chefAssistGPT5Updated";
+import { ChefAssistGPT5 } from "../chefAssistGPT5";
 import { 
   difficultyMap, 
   getCookTime, 

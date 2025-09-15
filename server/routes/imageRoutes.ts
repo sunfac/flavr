@@ -1,9 +1,8 @@
-import type { Express, Request, Response } from "express";
+import type { Express } from "express";
 import path from "path";
 import fs from "fs";
 import { ImageStorage } from "../imageStorage";
 import { storage } from "../storage";
-import { requireDeveloperWithRateLimit } from "./authRoutes";
 
 export function registerImageRoutes(app: Express): void {
   // Serve local images with better deployment support
@@ -46,8 +45,8 @@ export function registerImageRoutes(app: Express): void {
     }
   });
 
-  // Migration endpoint for existing images (developer access only)
-  app.post('/api/migrate-images', requireDeveloperWithRateLimit, async (req: Request, res: Response) => {
+  // Migration endpoint for existing images
+  app.post('/api/migrate-images', async (req, res) => {
     try {
       await ImageStorage.migrateExistingImages();
       res.json({ message: 'Image migration completed successfully' });
@@ -60,8 +59,8 @@ export function registerImageRoutes(app: Express): void {
     }
   });
 
-  // Check migration status (developer access only)
-  app.get('/api/migration-status', requireDeveloperWithRateLimit, async (req: Request, res: Response) => {
+  // Check migration status
+  app.get('/api/migration-status', async (req, res) => {
     try {
       const recipes = await storage.getAllRecipes();
       const expiredImages = recipes.filter(r => 

@@ -1,4 +1,4 @@
-import type { Express, Request, Response } from "express";
+import type { Express } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
@@ -6,7 +6,7 @@ import WebSocket, { WebSocketServer } from "ws";
 import { storage } from "../storage";
 import { db } from "../db";
 import { setupGoogleLiveAudioWebSocket } from "../googleLiveAudio";
-import { registerAuthRoutes, requireDeveloperWithRateLimit } from "./authRoutes";
+import { registerAuthRoutes } from "./authRoutes";
 import { registerRecipeRoutes } from "./recipeRoutes";
 import { registerChatRoutes } from "./chatRoutes";
 import { registerSubscriptionRoutes } from "./subscriptionRoutes";
@@ -20,18 +20,12 @@ import { registerSubRecipeRoutes } from "./subRecipeRoutes";
 import { registerWeeklyPlanRoutes } from "./weeklyPlanRoutes";
 import { registerAnalyticsRoutes } from "./analyticsRoutes";
 import { registerUserPreferencesRoutes } from "./userPreferencesRoutes";
-import migrationRoutes from "./migrationRoutes";
 import { initializeOAuthStrategies } from "../oauthStrategies";
 import passport from "passport";
-import { PerformanceMonitor } from "../performanceMonitor";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Add route debugging
   console.log('🔧 Registering Express routes...');
-  
-  // Setup performance monitoring middleware BEFORE routes
-  app.use(PerformanceMonitor.createMiddleware());
-  console.log('📊 Performance monitoring middleware enabled');
   
   // Setup PostgreSQL session store for persistent sessions
   const PgSession = connectPgSimple(session);
@@ -76,48 +70,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerAnalyticsRoutes(app);
   registerUserPreferencesRoutes(app);
 
-  // Migration monitoring routes (developer access only)
-  app.use("/api/migration", requireDeveloperWithRateLimit, migrationRoutes);
-  
-  // Performance monitoring routes (developer access only)
-  app.get("/api/performance/dashboard", requireDeveloperWithRateLimit, async (req, res) => {
-    try {
-      const dashboard = PerformanceMonitor.generateDashboardHTML();
-      res.set('Content-Type', 'text/html');
-      res.send(dashboard);
-    } catch (error) {
-      console.error("Failed to generate performance dashboard:", error);
-      res.status(500).json({ error: "Failed to generate performance dashboard" });
-    }
-  });
-  
-  app.get("/api/performance/metrics", requireDeveloperWithRateLimit, async (req, res) => {
-    try {
-      const metrics = PerformanceMonitor.getCurrentMetrics();
-      res.json(metrics);
-    } catch (error) {
-      console.error("Failed to get performance metrics:", error);
-      res.status(500).json({ error: "Failed to get performance metrics" });
-    }
-  });
-  
-  app.post("/api/performance/test/:endpoint", requireDeveloperWithRateLimit, async (req, res) => {
-    try {
-      const { endpoint } = req.params;
-      const { testCount = 10 } = req.body;
-      const testResults = await PerformanceMonitor.testEndpointPerformance(`/api/${endpoint}`, testCount);
-      res.json(testResults);
-    } catch (error) {
-      console.error("Failed to test endpoint performance:", error);
-      res.status(500).json({ error: "Failed to test endpoint performance" });
-    }
-  });
-
   // Additional utility routes
   
   // Developer logs endpoint (developer access only)
-  app.get("/api/developer/logs", requireDeveloperWithRateLimit, async (req: Request, res: Response) => {
+  app.get("/api/developer/logs", async (req, res) => {
     try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Check if user is developer
+      const user = await storage.getUser(req.session.userId);
+      if (user?.email !== "william@blycontracting.co.uk") {
+        return res.status(403).json({ error: "Developer access required" });
+      }
+
       const logs = await storage.getDeveloperLogs();
       res.json(logs);
     } catch (error) {
@@ -127,8 +94,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Developer all recipes endpoint (developer access only)
-  app.get("/api/developer/all-recipes", requireDeveloperWithRateLimit, async (req: Request, res: Response) => {
+  app.get("/api/developer/all-recipes", async (req, res) => {
     try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Check if user is developer
+      const user = await storage.getUser(req.session.userId);
+      if (user?.email !== "william@blycontracting.co.uk") {
+        return res.status(403).json({ error: "Developer access required" });
+      }
+
       const allRecipes = await storage.getAllRecipes();
       res.json(allRecipes);
     } catch (error) {
@@ -138,8 +115,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Developer AI costs endpoint (developer access only)
-  app.get("/api/developer/ai-costs", requireDeveloperWithRateLimit, async (req: Request, res: Response) => {
+  app.get("/api/developer/ai-costs", async (req, res) => {
     try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Check if user is developer
+      const user = await storage.getUser(req.session.userId);
+      if (user?.email !== "william@blycontracting.co.uk") {
+        return res.status(403).json({ error: "Developer access required" });
+      }
+
       const { aiCostTracker } = await import("../aiCostTracker");
       const now = new Date();
       const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;

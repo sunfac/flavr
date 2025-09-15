@@ -15,9 +15,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { iconMap } from "@/lib/iconMap";
 import EnhancedRecipeCard from "./recipe/EnhancedRecipeCard";
 import { useRecipeStore } from "@/stores/recipeStore";
-import { RecipeCardSkeleton } from "@/components/ui/skeleton";
-import { OptimisticSaveButton, OptimisticShareButton } from "@/components/ui/optimistic";
-import { RecipeImage } from "@/components/ui/progressive-image";
 
 interface RecipeCardProps {
   recipe: any;
@@ -167,7 +164,24 @@ export default function RecipeCard({
     }
   };
 
-  // Old save recipe mutation removed - now handled by OptimisticSaveButton
+  // Save recipe mutation
+  const saveRecipeMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/save-recipe", { recipe: fullRecipe }),
+    onSuccess: () => {
+      setIsSaved(true);
+      toast({
+        title: "Recipe saved!",
+        description: "Added to your recipe collection",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Save failed",
+        description: "Could not save recipe",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Handle ingredient substitution
   const handleSubstitution = (ingredient: string) => {
@@ -191,33 +205,38 @@ export default function RecipeCard({
         onClick={handleCardClick}
         style={{ minWidth: "300px", minHeight: "400px" }}
       >
-        {/* Hero Image Area with Progressive Loading */}
+        {/* Hero Image Area */}
         <motion.div 
-          whileHover={{ scale: 1.02 }}
+          className="w-full h-56 bg-gradient-to-br from-primary/30 via-secondary/20 to-accent/30 flex items-center justify-center relative overflow-hidden"
+          whileHover={{ scale: 1.05 }}
           transition={{ duration: 0.3 }}
-          className="relative"
         >
-          <RecipeImage
-            src={recipe.imageUrl || recipe.image}
-            alt={recipe.title || "Recipe"}
-            className="w-full h-56 rounded-t-xl"
-            aspectRatio="wide"
-            priority={false}
-          />
+          <motion.div
+            animate={{ 
+              rotate: [0, 5, -5, 0],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{ duration: 3, repeat: Infinity }}
+            className="text-6xl"
+          >
+            🍽️
+          </motion.div>
           
-          {/* Recipe Type Badge Overlay */}
-          <div className="absolute top-4 right-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              className="bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full"
-            >
-              <span className="text-white text-xs font-medium">
-                {recipe.cuisine || recipe.mood || "Delicious"} ✨
-              </span>
-            </motion.div>
-          </div>
+          {/* Floating elements */}
+          <motion.div
+            animate={{ y: [-10, 10, -10] }}
+            transition={{ duration: 4, repeat: Infinity }}
+            className="absolute top-4 right-4 text-2xl opacity-60"
+          >
+            ✨
+          </motion.div>
+          <motion.div
+            animate={{ y: [10, -10, 10] }}
+            transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+            className="absolute bottom-4 left-4 text-xl opacity-40"
+          >
+            👨‍🍳
+          </motion.div>
         </motion.div>
 
         {/* Content Area */}
@@ -274,7 +293,17 @@ export default function RecipeCard({
   }
 
   if (generateFullRecipeMutation.isPending) {
-    return <RecipeCardSkeleton />;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mb-4 mx-auto"></div>
+          <h3 className="text-lg font-medium text-foreground mb-2">Creating your perfect recipe...</h3>
+          <p className="text-muted-foreground">
+            Our AI chef is crafting something delicious just for you.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   if (!fullRecipe) {

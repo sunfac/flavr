@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { storage } from "../storage";
-import { WeeklyPlannerService, type ProposedRecipeTitle } from "../weeklyPlannerServiceUpdated";
+import { WeeklyPlannerService, type ProposedRecipeTitle } from "../weeklyPlannerService";
 
 export function registerWeeklyPlanRoutes(app: Express) {
   
@@ -176,27 +176,13 @@ export function registerWeeklyPlanRoutes(app: Express) {
       const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Sunday = 0, Monday = 1
       mondayDate.setDate(mondayDate.getDate() + daysToMonday);
 
-      // Generate the weekly plan titles first  
-      const titleProposal = await WeeklyPlannerService.generateWeeklyTitles(
-        preferences as any,
-        7, // mealCount
-        userId
-      );
-      
-      // Then generate full recipes
-      const plannedMeals = await WeeklyPlannerService.generateSelectiveRecipes(
-        titleProposal.titles,
-        preferences as any,
-        userId
-      );
-      
-      // Create the weekly plan
-      const weeklyPlan = await WeeklyPlannerService.createWeeklyPlan(
-        plannedMeals,
-        preferences as any,
+      // Generate the weekly plan
+      const weeklyPlan = await WeeklyPlannerService.generateWeeklyPlan({
         userId,
-        mondayDate.toISOString()
-      );
+        weekStartDate: mondayDate,
+        preferences,
+        isFlavrPlus
+      });
 
       res.json(weeklyPlan);
     } catch (error: any) {
@@ -298,7 +284,8 @@ export function registerWeeklyPlanRoutes(app: Express) {
       const { swapRecipes, newCuisineWeighting } = req.body;
       
       const updatedPlan = await WeeklyPlannerService.adjustWeeklyPlan(planId, userId, {
-        cuisineWeighting: newCuisineWeighting
+        swapRecipes,
+        newCuisineWeighting
       });
       res.json(updatedPlan);
     } catch (error: any) {
@@ -325,10 +312,10 @@ export function registerWeeklyPlanRoutes(app: Express) {
 
       // Generate titles only
       const titleProposal = await WeeklyPlannerService.generateWeeklyTitles(
-        preferences as any,
         mealCount || 7,
-        userId, // Added for smart profiling
-        undefined // avoidSimilarTo
+        preferences,
+        undefined, // avoidSimilarTo
+        userId // Added for smart profiling
       );
 
       res.json(titleProposal);
@@ -361,7 +348,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
       // Generate full recipes for approved titles
       const plannedMeals = await WeeklyPlannerService.generateSelectiveRecipes(
         approvedTitles,
-        preferences as any,
+        preferences,
         userId
       );
 
@@ -379,7 +366,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
       const allIngredients: string[] = [];
       for (const meal of plannedMeals.slice(0, mealCount)) {
         try {
-          const recipe = await storage.getRecipe(meal.recipeId!);
+          const recipe = await storage.getRecipe(meal.recipeId);
           if (recipe && recipe.ingredients) {
             allIngredients.push(...recipe.ingredients);
           }
@@ -403,10 +390,7 @@ export function registerWeeklyPlanRoutes(app: Express) {
         weekStartDate: weekStart,
         weekEndDate: weekEnd,
         planStatus: "pending" as const,
-        plannedRecipes: plannedMeals.slice(0, mealCount).map(meal => ({
-          ...meal,
-          recipeId: meal.recipeId || 0
-        })),
+        plannedRecipes: plannedMeals.slice(0, mealCount),
         consolidatedShoppingList,
         generatedAt: new Date()
       };
@@ -445,10 +429,10 @@ export function registerWeeklyPlanRoutes(app: Express) {
 
       // Generate a completely different title for this specific day
       const singleTitleProposal = await WeeklyPlannerService.generateWeeklyTitles(
-        preferences as any,
-        1,
-        userId, // Added for smart profiling
-        currentTitle ? `AVOID: Do not generate anything similar to "${currentTitle}". Create something completely different in cuisine, cooking method, or main ingredient.` : undefined
+        1, 
+        preferences,
+        currentTitle ? `AVOID: Do not generate anything similar to "${currentTitle}". Create something completely different in cuisine, cooking method, or main ingredient.` : undefined,
+        userId // Added for smart profiling
       );
       
       const newTitle = {
