@@ -22,7 +22,7 @@ interface ModeCard {
 
 const modes: ModeCard[] = [
   {
-    title: "Weekly Planner",
+    title: "Plan",
     description: "Plan your week with AI-generated meal plans and smart shopping lists",
     icon: <CalendarDays className="w-12 h-12" />,
     color: "text-purple-500 dark:text-purple-400",
@@ -31,7 +31,7 @@ const modes: ModeCard[] = [
     isPremium: true
   },
   {
-    title: "Photo to Recipe",
+    title: "Capture",
     description: "Transform cookbook photos into interactive digital recipes with AI",
     icon: <Camera className="w-12 h-12" />,
     color: "text-blue-500 dark:text-blue-400",
@@ -112,9 +112,9 @@ export default function ModeSelection() {
                     "p-2 sm:p-3 md:p-4 rounded-full bg-background/80 backdrop-blur-sm inline-flex mx-auto mb-2 sm:mb-3 md:mb-4 border-2 border-current/20", 
                     mode.color
                   )}>
-                    <ChefHat className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Chef Assist" ? "" : "hidden")} />
-                    <Camera className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Photo to Recipe" ? "" : "hidden")} />
-                    <CalendarDays className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Weekly Planner" ? "" : "hidden")} />
+                    <ChefHat className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Discover" ? "" : "hidden")} />
+                    <Camera className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Capture" ? "" : "hidden")} />
+                    <CalendarDays className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10", mode.title === "Plan" ? "" : "hidden")} />
                   </div>
                   <div className="flex items-center justify-center gap-2 mb-2 sm:mb-3">
                     <CardTitle className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold">{mode.title}</CardTitle>

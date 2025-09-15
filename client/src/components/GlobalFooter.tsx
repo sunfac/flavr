@@ -45,7 +45,7 @@ export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
   const modes = [
     {
       id: "chef-assist",
-      label: "Chef Assist",
+      label: "Discover",
       icon: iconMap.chefHat,
       path: "/chef-assist",
     },
@@ -63,7 +63,7 @@ export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
     },
     {
       id: "weekly-planner",
-      label: "Planner",
+      label: "Plan",
       icon: iconMap.calendar,
       path: "/weekly-planner",
     },
