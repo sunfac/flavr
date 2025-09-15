@@ -11,7 +11,7 @@ import GlobalNavigation from "@/components/GlobalNavigation";
 import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
 import AuthModal from "@/components/AuthModal";
-import ChatBot from "@/components/ChatBot";
+import RecipeChat from "@/components/RecipeChat";
 import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
 import { shoppingQuestions } from "@/config/shoppingQuestions";
 import { useQuery } from "@tanstack/react-query";
@@ -54,7 +54,7 @@ export default function ShoppingMode() {
     queryKey: ["/api/me"],
     retry: false,
   });
-  const isAuthenticated = !!user?.user;
+  const isAuthenticated = !!user;
 
   const checkUsageLimit = async () => {
     try {
@@ -397,10 +397,9 @@ export default function ShoppingMode() {
             onNewSearch={handleNewSearch}
           />
           
-          {/* Floating Zest Chatbot - Always visible when recipe is shown */}
-          <ChatBot 
+          {/* Recipe Chat - Always visible when recipe is shown */}
+          <RecipeChat 
             currentRecipe={selectedRecipe}
-            currentMode="shopping"
             onRecipeUpdate={(updatedRecipe: any) => {
               // Preserve generationParams when recipe is updated
               if (selectedRecipe && selectedRecipe.generationParams) {

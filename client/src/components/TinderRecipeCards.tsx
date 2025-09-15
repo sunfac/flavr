@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { iconMap } from "@/lib/iconMap";
 import { motion, AnimatePresence } from "framer-motion";
+import FloatingChatButton from "@/components/FloatingChatButton";
 
 interface RecipeIdea {
   title: string;
@@ -147,14 +148,29 @@ export default function TinderRecipeCards({
                     {/* Spacer */}
                     <div className="flex-1"></div>
 
-                    {/* Action Button */}
-                    <Button
-                      onClick={() => onSelectRecipe(currentRecipe)}
-                      className={`w-full h-12 font-semibold rounded-xl transition-all duration-300 bg-gradient-to-r ${themeColors[theme]} hover:scale-105 shadow-lg hover:shadow-orange-500/25 text-white`}
-                    >
-                      <iconMap.heart className="w-4 h-4 mr-2" />
-                      Use This Recipe
-                    </Button>
+                    {/* Action Buttons */}
+                    <div className="space-y-3">
+                      <Button
+                        onClick={() => onSelectRecipe(currentRecipe)}
+                        className={`w-full h-12 font-semibold rounded-xl transition-all duration-300 bg-gradient-to-r ${themeColors[theme]} hover:scale-105 shadow-lg hover:shadow-orange-500/25 text-white`}
+                      >
+                        <iconMap.heart className="w-4 h-4 mr-2" />
+                        Use This Recipe
+                      </Button>
+                      
+                      {/* Embedded Chat Button for Recipe Exploration */}
+                      <FloatingChatButton
+                        variant="fixed"
+                        currentRecipe={{
+                          title: currentRecipe.title,
+                          description: currentRecipe.description,
+                          cuisine: theme,
+                          mode: theme
+                        }}
+                        currentMode={theme}
+                        className="w-full"
+                      />
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>

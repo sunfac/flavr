@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { iconMap } from "@/lib/iconMap";
 import { motion, AnimatePresence } from "framer-motion";
-import ChatBot from "@/components/ChatBot";
+import RecipeChat from "@/components/RecipeChat";
 
 interface FloatingChatButtonProps {
   className?: string;
@@ -118,11 +118,10 @@ export default function FloatingChatButton({ className = "", variant = "floating
                     </Button>
                   </div>
 
-                  <ChatBot
+                  <RecipeChat
                     isOpen={isChatOpen}
                     onClose={handleCloseChat}
                     currentRecipe={currentRecipe}
-                    currentMode={currentMode as "shopping" | "fridge" | "chef" | undefined}
                     onRecipeUpdate={onRecipeUpdate}
                   />
                 </motion.div>
@@ -258,11 +257,10 @@ export default function FloatingChatButton({ className = "", variant = "floating
                   </Button>
                 </div>
 
-                <ChatBot
+                <RecipeChat
                   isOpen={isChatOpen}
                   onClose={handleCloseChat}
                   currentRecipe={currentRecipe}
-                  currentMode={currentMode as "shopping" | "fridge" | "chef" | undefined}
                   onRecipeUpdate={onRecipeUpdate}
                 />
               </motion.div>

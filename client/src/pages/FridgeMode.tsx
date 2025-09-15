@@ -10,7 +10,7 @@ import SlideQuizShell from "@/components/SlideQuizShell";
 import { fridgeQuestions } from "@/config/fridgeQuestions";
 import RecipeCard from "@/components/RecipeCard";
 import TinderRecipeCards from "@/components/TinderRecipeCards";
-import ChatBot from "@/components/ChatBot";
+import RecipeChat from "@/components/RecipeChat";
 import Loading from "@/components/Loading";
 import { checkQuotaBeforeGPT, getRemainingRecipes, canGenerateRecipe } from "@/lib/quotaManager";
 import { apiRequest } from "@/lib/queryClient";
@@ -55,7 +55,7 @@ export default function FridgeMode() {
   });
 
   // Allow users to try the quiz without authentication
-  const isAuthenticated = user?.user;
+  const isAuthenticated = !!user;
 
   const handleQuizComplete = async (data: any) => {
     console.log("Quiz completed with data:", data);
@@ -165,7 +165,7 @@ export default function FridgeMode() {
 
   const handleRecipeSelect = async (recipe: any) => {
     // Use the same developer mode bypass logic as in quota check
-    const currentUser = user?.user;
+    const currentUser = user;
     if (currentUser && !canGenerateRecipe(currentUser)) {
       setShowGate(true);
       return;
@@ -353,11 +353,10 @@ export default function FridgeMode() {
         )}
       </main>
 
-      {/* Only show ChatBot when not in quiz mode */}
+      {/* Only show RecipeChat when not in quiz mode */}
       {currentStep !== "quiz" && (
-        <ChatBot 
+        <RecipeChat 
           currentRecipe={selectedRecipe}
-          currentMode="fridge"
           onRecipeUpdate={(updatedRecipe: any) => {
             setSelectedRecipe(updatedRecipe);
           }}

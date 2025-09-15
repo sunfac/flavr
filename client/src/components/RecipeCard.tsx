@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import ShoppingList from "./ShoppingList";
-import ChatBot from "./ChatBot";
+import RecipeChat from "./RecipeChat";
 import RecipeShareTools from "./RecipeShareTools";
 import VoiceControl from "./VoiceControl";
 import { generateShoppingPrompt2 } from "@/prompts/shoppingPrompt2";
@@ -40,8 +40,7 @@ export default function RecipeCard({
   const [fullRecipe, setFullRecipe] = useState<any>(isFullView ? recipe : null);
   const [showShoppingList, setShowShoppingList] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const [showChatbot, setShowChatbot] = useState(false);
-  const [chatbotMessage, setChatbotMessage] = useState("");
+  // Chat functionality is now handled by parent pages using RecipeChat or FloatingChatButton
   const [showVoiceControl, setShowVoiceControl] = useState(false);
   const { toast } = useToast();
   const recipeStore = useRecipeStore();
@@ -183,10 +182,10 @@ export default function RecipeCard({
     },
   });
 
-  // Handle ingredient substitution
+  // Handle ingredient substitution - now handled by parent RecipeChat component
   const handleSubstitution = (ingredient: string) => {
-    setChatbotMessage(`Suggest a substitution for ${ingredient}`);
-    setShowChatbot(true);
+    // This functionality is now handled by the parent RecipeChat component
+    console.log(`Substitution requested for: ${ingredient}`);
   };
 
   if (!isFullView) {
@@ -409,6 +408,7 @@ export default function RecipeCard({
         recipe={enhancedRecipe}
         onBack={onBack}
         onShare={handleShare}
+        onRecipeUpdate={handleRecipeUpdate}
         key={`recipe-${enhancedRecipe.id}-${Date.now()}`} // Force re-render when recipe updates
       />
 

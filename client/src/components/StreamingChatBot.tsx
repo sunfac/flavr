@@ -14,7 +14,7 @@ interface Message {
   timestamp: Date;
   isStreaming?: boolean;
   suggestedActions?: Array<{
-    type: 'quick_recipe' | 'full_recipe' | 'continue_chat';
+    type: 'quick_recipe' | 'full_recipe' | 'continue_chat' | 'view_recipe';
     label: string;
     data?: any;
   }>;

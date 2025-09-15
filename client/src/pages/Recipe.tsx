@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { PageLayout } from "@/components/PageLayout";
 import { EnhancedRecipeCard } from "@/components/recipe/EnhancedRecipeCard";
-import ChatBot from "@/components/ChatBot";
+import RecipeChat from "@/components/RecipeChat";
 
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
@@ -128,12 +128,12 @@ export default function Recipe() {
           {/* Chat Panel Container */}
           <div className="relative ml-auto h-full">
             <div className="w-screen sm:w-[400px] h-full bg-slate-900 shadow-2xl flex flex-col">
-              <ChatBot 
+              <RecipeChat 
                 isOpen={showChat}
                 onClose={() => setShowChat(false)}
                 currentRecipe={activeRecipe as any}
                 onRecipeUpdate={(updatedRecipe) => {
-                  console.log('Recipe updated from ChatBot:', updatedRecipe);
+                  console.log('Recipe updated from RecipeChat:', updatedRecipe);
                 }}
               />
             </div>
