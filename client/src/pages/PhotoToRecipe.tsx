@@ -10,7 +10,11 @@ import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { EnhancedRecipeCard } from "@/components/recipe/EnhancedRecipeCard";
 import { useRecipeStore } from "@/stores/recipeStore";
-import { ModePageLayout } from "@/components/ModePageLayout";
+import GlobalHeader from "@/components/GlobalHeader";
+import GlobalFooter from "@/components/GlobalFooter";
+import GlobalNavigation from "@/components/GlobalNavigation";
+import SettingsPanel from "@/components/SettingsPanel";
+import UserMenu from "@/components/UserMenu";
 
 interface PhotoUpload {
   file: File;
@@ -59,6 +63,33 @@ export default function PhotoToRecipe() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [newSubRecipeName, setNewSubRecipeName] = useState('');
+
+  // Menu state management
+  const [showNavigation, setShowNavigation] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Menu functions
+  const closeAllMenus = () => {
+    setShowNavigation(false);
+    setShowSettings(false);
+    setShowUserMenu(false);
+  };
+
+  const openMenu = (menu: 'navigation' | 'settings' | 'user') => {
+    closeAllMenus();
+    switch (menu) {
+      case 'navigation':
+        setShowNavigation(true);
+        break;
+      case 'settings':
+        setShowSettings(true);
+        break;
+      case 'user':
+        setShowUserMenu(true);
+        break;
+    }
+  };
 
   // Sub-recipe slot management functions
   const addSubRecipeSlot = (name: string) => {
@@ -286,78 +317,100 @@ export default function PhotoToRecipe() {
   // Show loading state
   if (isLoading) {
     return (
-      <ModePageLayout 
-        title="Photo to Recipe" 
-        currentMode="capture"
-        className="flex items-center justify-center p-4"
-      >
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
-      </ModePageLayout>
+      </div>
     );
   }
 
   // Redirect if not authenticated or no Flavr+
   if (!isAuthenticated) {
     return (
-      <ModePageLayout 
-        title="Photo to Recipe" 
-        currentMode="capture"
-        className="flex items-center justify-center p-4"
-      >
-        <Card className="w-full max-w-md">
-          <CardContent className="text-center p-6">
-            <h2 className="text-xl font-semibold mb-4">Authentication Required</h2>
-            <p className="text-gray-600 mb-4">Please log in to access photo-to-recipe conversion.</p>
-            <Button onClick={() => setLocation('/')}>Go to Login</Button>
-          </CardContent>
-        </Card>
-      </ModePageLayout>
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
+        <GlobalHeader 
+          onMenuClick={() => openMenu('navigation')}
+          onSettingsClick={() => openMenu('settings')}
+          onAuthRequired={() => setLocation("/")}
+        />
+        
+        <main className="pt-20 pb-24 flex items-center justify-center p-4">
+          <Card className="w-full max-w-md bg-slate-800 border-slate-700">
+            <CardContent className="text-center p-6">
+              <h2 className="text-xl font-semibold mb-4 text-white">Authentication Required</h2>
+              <p className="text-gray-300 mb-4">Please log in to access photo-to-recipe conversion.</p>
+              <Button onClick={() => setLocation('/')} className="bg-orange-500 hover:bg-orange-600">Go to Login</Button>
+            </CardContent>
+          </Card>
+        </main>
+
+        <GlobalFooter currentMode="capture" />
+        
+        {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => setLocation("/")} />}
+        {showSettings && <SettingsPanel onClose={closeAllMenus} />}
+        {showUserMenu && <UserMenu onClose={closeAllMenus} />}
+      </div>
     );
   }
 
   if (!hasFlavrPlus) {
     return (
-      <ModePageLayout 
-        title="Photo to Recipe" 
-        currentMode="capture"
-        className="flex items-center justify-center p-4"
-      >
-        <Card className="w-full max-w-md">
-          <CardContent className="text-center p-6">
-            <Crown className="w-12 h-12 text-orange-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-4">Flavr+ Required</h2>
-            <p className="text-gray-600 mb-4">
-              Photo-to-recipe conversion is a premium feature. Upgrade to Flavr+ to photograph your cookbook recipes and convert them to digital format.
-            </p>
-            <Button onClick={() => setLocation('/subscribe')} className="bg-orange-500 hover:bg-orange-600">
-              Upgrade to Flavr+
-            </Button>
-          </CardContent>
-        </Card>
-      </ModePageLayout>
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
+        <GlobalHeader 
+          onMenuClick={() => openMenu('navigation')}
+          onSettingsClick={() => openMenu('settings')}
+          onAuthRequired={() => setLocation("/")}
+        />
+        
+        <main className="pt-20 pb-24 flex items-center justify-center p-4">
+          <Card className="w-full max-w-md bg-slate-800 border-slate-700">
+            <CardContent className="text-center p-6">
+              <Crown className="w-12 h-12 text-orange-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold mb-4 text-white">Flavr+ Required</h2>
+              <p className="text-gray-300 mb-4">
+                Photo-to-recipe conversion is a premium feature. Upgrade to Flavr+ to photograph your cookbook recipes and convert them to digital format.
+              </p>
+              <Button onClick={() => setLocation('/subscribe')} className="bg-orange-500 hover:bg-orange-600">
+                Upgrade to Flavr+
+              </Button>
+            </CardContent>
+          </Card>
+        </main>
+
+        <GlobalFooter currentMode="capture" />
+        
+        {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => setLocation("/")} />}
+        {showSettings && <SettingsPanel onClose={closeAllMenus} />}
+        {showUserMenu && <UserMenu onClose={closeAllMenus} />}
+      </div>
     );
   }
 
   return (
-    <ModePageLayout 
-      title="Photo to Recipe" 
-      currentMode="capture"
-      className="p-4"
-    >
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-4 md:mb-6">
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
+      <GlobalHeader 
+        onMenuClick={() => openMenu('navigation')}
+        onSettingsClick={() => openMenu('settings')}
+        onAuthRequired={() => setLocation("/")}
+      />
+      
+      <main className="pt-20 pb-24 p-4">
+        {/* Page Title and Description */}
+        <div className="max-w-4xl mx-auto mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Photo to Recipe</h1>
           <p className="text-sm md:text-base text-gray-300 leading-relaxed">
             Photograph your favorite cookbook recipes (up to 3 pages) and convert them to editable digital format
           </p>
         </div>
+        
+        <div className="max-w-4xl mx-auto">
 
         {!extractedRecipe ? (
           <div className="space-y-6">
             {/* Main Recipe Photos */}
-            <Card>
+            <Card className="bg-slate-800 border-slate-700">
               <CardHeader>
-                <CardTitle>Main Recipe Photos</CardTitle>
-                <p className="text-sm text-gray-600">
+                <CardTitle className="text-white">Main Recipe Photos</CardTitle>
+                <p className="text-sm text-gray-300">
                   Upload photos of your main recipe pages (ingredients, instructions, etc.).
                 </p>
               </CardHeader>
@@ -460,10 +513,10 @@ export default function PhotoToRecipe() {
             </Card>
 
             {/* Sub-Recipe Photos Section */}
-            <Card>
+            <Card className="bg-slate-800 border-slate-700">
               <CardHeader>
-                <CardTitle>Sub-Recipe Photos (Optional)</CardTitle>
-                <p className="text-sm text-gray-600">
+                <CardTitle className="text-white">Sub-Recipe Photos (Optional)</CardTitle>
+                <p className="text-sm text-gray-300">
                   If your recipe references sub-recipes like "chilli drizzle" or "tamarind chutney", add them here for complete extraction.
                 </p>
               </CardHeader>
@@ -498,9 +551,9 @@ export default function PhotoToRecipe() {
 
                   {/* Sub-Recipe Slots */}
                   {subRecipeSlots.map((slot) => (
-                    <div key={slot.id} className="border rounded-lg p-4 space-y-3">
+                    <div key={slot.id} className="border border-slate-600 rounded-lg p-4 space-y-3 bg-slate-700">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-medium text-sm">{slot.name}</h4>
+                        <h4 className="font-medium text-sm text-white">{slot.name}</h4>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -557,7 +610,7 @@ export default function PhotoToRecipe() {
           /* Enhanced Recipe Card Display */
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-white">Your Extracted Recipe</h1>
+              <h2 className="text-xl md:text-2xl font-bold text-white">Your Extracted Recipe</h2>
               <div className="flex gap-3">
                 <Button
                   onClick={() => {
@@ -567,6 +620,7 @@ export default function PhotoToRecipe() {
                   }}
                   variant="outline"
                   size="sm"
+                  className="border-slate-600 text-white hover:bg-slate-700"
                 >
                   Start Over
                 </Button>
@@ -615,9 +669,9 @@ export default function PhotoToRecipe() {
         ) : (
           /* Basic Extracted Recipe Display for editing */
           <div className="space-y-6">
-            <Card>
+            <Card className="bg-slate-800 border-slate-700">
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+                <CardTitle className="flex items-center justify-between text-white">
                   Extracted Recipe: {extractedRecipe.title}
                   <div className="flex gap-2">
                     <Button
@@ -627,6 +681,7 @@ export default function PhotoToRecipe() {
                       }}
                       variant="outline"
                       size="sm"
+                      className="border-slate-600 text-white hover:bg-slate-700"
                     >
                       Start Over
                     </Button>
@@ -652,43 +707,43 @@ export default function PhotoToRecipe() {
                   {/* Recipe Details */}
                   <div className="space-y-4">
                     <div>
-                      <h3 className="font-semibold mb-2">Description</h3>
-                      <p className="text-gray-600">{extractedRecipe.description}</p>
+                      <h3 className="font-semibold mb-2 text-white">Description</h3>
+                      <p className="text-gray-300">{extractedRecipe.description}</p>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <h4 className="font-medium">Cuisine</h4>
-                        <p className="text-gray-600">{extractedRecipe.cuisine}</p>
+                        <h4 className="font-medium text-white">Cuisine</h4>
+                        <p className="text-gray-300">{extractedRecipe.cuisine}</p>
                       </div>
                       <div>
-                        <h4 className="font-medium">Difficulty</h4>
-                        <p className="text-gray-600">{extractedRecipe.difficulty}</p>
+                        <h4 className="font-medium text-white">Difficulty</h4>
+                        <p className="text-gray-300">{extractedRecipe.difficulty}</p>
                       </div>
                       <div>
-                        <h4 className="font-medium">Prep Time</h4>
-                        <p className="text-gray-600">{extractedRecipe.prepTime} min</p>
+                        <h4 className="font-medium text-white">Prep Time</h4>
+                        <p className="text-gray-300">{extractedRecipe.prepTime} min</p>
                       </div>
                       <div>
-                        <h4 className="font-medium">Cook Time</h4>
-                        <p className="text-gray-600">{extractedRecipe.cookTime} min</p>
+                        <h4 className="font-medium text-white">Cook Time</h4>
+                        <p className="text-gray-300">{extractedRecipe.cookTime} min</p>
                       </div>
                     </div>
 
                     <div>
-                      <h4 className="font-medium mb-2">Servings</h4>
-                      <p className="text-gray-600">{extractedRecipe.servings} servings</p>
+                      <h4 className="font-medium mb-2 text-white">Servings</h4>
+                      <p className="text-gray-300">{extractedRecipe.servings} servings</p>
                     </div>
                   </div>
 
                   {/* Ingredients */}
                   <div>
-                    <h3 className="font-semibold mb-3">Ingredients</h3>
+                    <h3 className="font-semibold mb-3 text-white">Ingredients</h3>
                     <ul className="space-y-2">
                       {extractedRecipe.ingredients.map((ingredient, index) => (
                         <li key={index} className="flex justify-between">
-                          <span>{ingredient.name}</span>
-                          <span className="text-gray-600">{ingredient.amount}</span>
+                          <span className="text-gray-300">{ingredient.name}</span>
+                          <span className="text-gray-400">{ingredient.amount}</span>
                         </li>
                       ))}
                     </ul>
@@ -697,14 +752,14 @@ export default function PhotoToRecipe() {
 
                 {/* Instructions */}
                 <div className="mt-6">
-                  <h3 className="font-semibold mb-3">Instructions</h3>
+                  <h3 className="font-semibold mb-3 text-white">Instructions</h3>
                   <ol className="space-y-3">
                     {extractedRecipe.instructions.map((instruction) => (
                       <li key={instruction.step} className="flex gap-3">
                         <span className="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-medium flex-shrink-0">
                           {instruction.step}
                         </span>
-                        <span>{instruction.instruction}</span>
+                        <span className="text-gray-300">{instruction.instruction}</span>
                       </li>
                     ))}
                   </ol>
@@ -713,10 +768,10 @@ export default function PhotoToRecipe() {
                 {/* Tips */}
                 {extractedRecipe.tips.length > 0 && (
                   <div className="mt-6">
-                    <h3 className="font-semibold mb-3">Tips</h3>
+                    <h3 className="font-semibold mb-3 text-white">Tips</h3>
                     <ul className="space-y-2">
                       {extractedRecipe.tips.map((tip, index) => (
-                        <li key={index} className="text-gray-600">• {tip}</li>
+                        <li key={index} className="text-gray-300">• {tip}</li>
                       ))}
                     </ul>
                   </div>
@@ -725,7 +780,14 @@ export default function PhotoToRecipe() {
             </Card>
           </div>
         )}
-      </div>
-    </ModePageLayout>
+        </div>
+      </main>
+
+      <GlobalFooter currentMode="capture" />
+      
+      {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => setLocation("/")} />}
+      {showSettings && <SettingsPanel onClose={closeAllMenus} />}
+      {showUserMenu && <UserMenu onClose={closeAllMenus} />}
+    </div>
   );
 }
