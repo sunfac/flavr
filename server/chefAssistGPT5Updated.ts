@@ -141,7 +141,6 @@ export class ChefAssistGPT5 {
     seeds?: SeedPacks;
     clientId?: string;
     userId?: number;
-    forcedTitle?: string;
   }): Promise<any> {
     
     console.log("🔄 ChefAssistGPT5.generateFullRecipe (via AIProvider)");
@@ -162,10 +161,7 @@ export class ChefAssistGPT5 {
       }, {
         userId: data.userId,
         traceId: `chef-${Date.now()}`,
-        maxTokens: 4000,
-        stream: false,
-        timeoutMs: 120000,
-        retries: 2
+        maxTokens: 4000
       });
       
       // Transform AIProvider response to match original ChefAssistGPT5 format
@@ -188,7 +184,7 @@ export class ChefAssistGPT5 {
         instructions: Array.isArray(recipeResponse.instructions)
           ? recipeResponse.instructions.map(inst => {
               if (typeof inst === 'string') return inst;
-              return inst.instruction || (inst as any).description || 'Follow cooking method';
+              return inst.instruction || inst.description || 'Follow cooking method';
             })
           : ["Follow standard cooking method"],
         
@@ -250,121 +246,78 @@ export class ChefAssistGPT5 {
     }
   }
   
-  // === TITLE GENERATION (Optimized for minimal token usage) ===
+  // === TITLE GENERATION (Updated to use AIProvider) ===
   static async generateInspireTitle(data: {
     seeds: SeedPacks;
     userIntent: string;
     clientId?: string;
     userId?: number;
-    cuisinePreference?: string;
-    avoid?: string[];
   }): Promise<{ title: string; description?: string; reasoning?: string[] }> {
     
-    console.log("🔄 ChefAssistGPT5.generateInspireTitle (Token-Optimized)");
+    console.log("🔄 ChefAssistGPT5.generateInspireTitle (via AIProvider)");
     
     try {
-      // Get variety guidance for better titles
+      // Get variety guidance
       const avoidWords = getAvoidWords(data.clientId || 'anonymous');
-      const varietyConstraints = avoidWords.length > 0 
-        ? `AVOID: ${avoidWords.slice(0, 5).join(', ')}`
+      const varietyNote = avoidWords.length > 0 
+        ? `Avoid these overused words/phrases: ${avoidWords.join(', ')}`
         : "";
       
-      // Chef persona selection for authentic titles
-      const chefPersonas = [
-        "Rick Stein", "Jamie Oliver", "Tom Kerridge", "James Martin", "Mary Berry",
-        "Delia Smith", "Marcus Wareing", "Gordon Ramsay", "Nigella Lawson", 
-        "Yotam Ottolenghi", "José Andrés", "Julia Child", "Thomas Keller"
-      ];
+      // Use AIProvider chat system for title generation
+      const chatMessage = `Generate an inspiring recipe title for: ${data.userIntent}
       
-      // Select chef based on seeds for consistency
-      const selectedChef = chefPersonas[data.seeds.randomSeed % chefPersonas.length];
-      
-      // Cuisine contexts for authenticity
-      const cuisineHint = data.cuisinePreference ? ` (${data.cuisinePreference} style)` : "";
-      
-      // Ultra-direct system message - NO conversational elements
-      const systemMessage = `Generate ONLY a recipe title in JSON format: {"title": "Recipe Name"}
+${varietyNote ? `VARIETY GUIDANCE: ${varietyNote}` : ''}
 
-You are channeling ${selectedChef}. Create an authentic recipe title that sounds exactly like it would appear in their cookbook.
+Requirements:
+- Single creative recipe title that sounds appetizing
+- Should be specific and evocative
+- Avoid generic words like "perfect", "ultimate", "heavenly"
+- Make it sound like something from a quality cookbook
+- Keep it concise but descriptive
 
-CHEF STYLES:
-- Rick Stein: Mediterranean seafood expertise ("Rick Stein's Cornish Crab with Saffron Aioli")
-- Jamie Oliver: Bold approachable flavors ("Jamie's 15-Minute Harissa Chicken")
-- Nigella Lawson: Indulgent comfort ("Nigella's Chocolate Guinness Cake")
-- Tom Kerridge: British pub elevated ("Tom Kerridge's Sticky Beef Short Ribs")
-- Mary Berry: Classic British baking ("Mary Berry's Classic Victoria Sponge")
-- Marcus Wareing: Fine dining precision ("Marcus Wareing's Pan-Seared Scallops with Pea Purée")
-
-${varietyConstraints ? `AVOID WORDS: ${varietyConstraints}` : ''}
-
-REQUIREMENTS:
-- Generate ONE recipe title only matching ${selectedChef}'s authentic style${cuisineHint}
-- Use appropriate ingredients and techniques for this chef
-- NO conversational text, explanations, or questions
-- ONLY JSON format: {"title": "Chef's Recipe Name"}
-
-Based on request: ${data.userIntent || "surprise me with something delicious"}`;
+Respond with just the title, nothing else.`;
 
       const chatResponse = await AIService.chat({
-        message: systemMessage,
+        message: chatMessage,
         variant: "technical_advisor"
       }, {
         userId: data.userId,
         traceId: `inspire-${Date.now()}`,
-        maxTokens: 40,  // Dramatically reduced from 100 to 40
-        stream: false,
-        timeoutMs: 10000,
-        retries: 2
+        maxTokens: 100
       });
       
-      // Parse JSON response (expect {"title": "..."})
-      let title = "";
-      try {
-        const jsonResponse = JSON.parse(chatResponse.message.trim());
-        title = jsonResponse.title || chatResponse.message.trim();
-      } catch (parseError) {
-        // Fallback: try to extract title from any response
-        title = chatResponse.message.trim().replace(/"/g, '').replace(/^title:?\s*/i, '');
-        console.log("⚠️ JSON parse failed, extracted title:", title);
-      }
-      
-      // Ensure title is reasonable length
-      if (title.length > 80) {
-        title = title.substring(0, 77) + "...";
-      }
+      const title = chatResponse.message.trim();
       
       // Track title words for variety
-      if (data.clientId && title) {
+      if (data.clientId) {
         trackTitleWords(data.clientId, title);
       }
       
-      console.log(`✅ Title generated (${selectedChef} style): ${title}`);
+      console.log(`✅ Title generated via AIProvider: ${title}`);
       
       return {
         title,
-        description: `Inspired by ${selectedChef}${cuisineHint}`,
-        reasoning: [`Generated using ${selectedChef} persona`, `Token-optimized generation`, `Variety tracking applied`]
+        description: `An inspired recipe suggestion`,
+        reasoning: [`Generated using AIProvider chat system`, `Variety tracking applied`]
       };
       
     } catch (error) {
       console.error("❌ Title generation failed, using fallback:", error);
       
-      // Enhanced fallback with chef personas
+      // Fallback title generation
       const fallbackTitles = [
-        "Rustic Country Kitchen Feast",
-        "Mediterranean-Style Comfort Bowl", 
-        "Simple Seasonal Weeknight Dinner",
-        "Classic British Pub Favorite",
-        "Fresh Garden-to-Table Creation",
-        "Hearty Family-Style Platter",
-        "Artisan Home-Cooked Special"
+        "Rustic Family Dinner",
+        "Comforting Home-Style Meal", 
+        "Simple Weeknight Favorite",
+        "Classic Comfort Food",
+        "Hearty Traditional Dish"
       ];
       
       const title = fallbackTitles[Math.floor(Math.random() * fallbackTitles.length)];
       
       return {
         title,
-        description: "Fallback title (AI generation failed)",
+        description: "Fallback title when AI generation fails",
         reasoning: ["Fallback due to AI service error"]
       };
     }

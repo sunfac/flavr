@@ -82,7 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/migration", requireDeveloperWithRateLimit, migrationRoutes);
   
   // Performance monitoring routes (developer access only)
-  app.get("/api/performance/dashboard", requireDeveloperWithRateLimit, async (req: Request, res: Response) => {
+  app.get("/api/performance/dashboard", requireDeveloperWithRateLimit, async (req, res) => {
     try {
       const dashboard = PerformanceMonitor.generateDashboardHTML();
       res.set('Content-Type', 'text/html');
@@ -93,7 +93,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/performance/metrics", requireDeveloperWithRateLimit, async (req: Request, res: Response) => {
+  app.get("/api/performance/metrics", requireDeveloperWithRateLimit, async (req, res) => {
     try {
       const metrics = PerformanceMonitor.getCurrentMetrics();
       res.json(metrics);
@@ -103,7 +103,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/performance/test/:endpoint", requireDeveloperWithRateLimit, async (req: Request, res: Response) => {
+  app.post("/api/performance/test/:endpoint", requireDeveloperWithRateLimit, async (req, res) => {
     try {
       const { endpoint } = req.params;
       const { testCount = 10 } = req.body;
