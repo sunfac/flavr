@@ -476,7 +476,7 @@ export default function WeeklyPlanner() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-        <GlobalHeader onMenuClick={(menu) => openMenu(menu)} />
+        <GlobalHeader onMenuClick={() => openMenu('navigation')} />
         
         <main className="pt-20 pb-24">
           <div className="max-w-4xl mx-auto px-4 py-16 text-center">
@@ -496,7 +496,7 @@ export default function WeeklyPlanner() {
           </div>
         </main>
 
-        <GlobalFooter currentMode="weekly-planner" />
+        <GlobalFooter currentMode="plan" />
         <GlobalNavigation 
           isOpen={showNavigation}
           onClose={closeAllMenus}
@@ -504,6 +504,7 @@ export default function WeeklyPlanner() {
         <AuthModal 
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
+          onSuccess={() => setShowAuthModal(false)}
         />
       </div>
     );
@@ -512,7 +513,7 @@ export default function WeeklyPlanner() {
   if (preferencesLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-        <GlobalHeader onMenuClick={(menu) => openMenu(menu)} />
+        <GlobalHeader onMenuClick={() => openMenu('navigation')} />
         <main className="pt-20 pb-24">
           <div className="max-w-4xl mx-auto px-4 py-16 text-center">
             <div className="animate-spin w-8 h-8 border-4 border-orange-400 border-t-transparent rounded-full mx-auto mb-4" />
@@ -523,10 +524,10 @@ export default function WeeklyPlanner() {
     );
   }
 
-  if (!preferences || preferences?.onboardingRequired) {
+  if (!preferences || (preferences as any)?.onboardingRequired) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-        <GlobalHeader onMenuClick={(menu) => openMenu(menu)} />
+        <GlobalHeader onMenuClick={() => openMenu('navigation')} />
         
         <main className="pt-20 pb-24">
           <div className="max-w-4xl mx-auto px-4 py-16">
@@ -551,7 +552,7 @@ export default function WeeklyPlanner() {
           </div>
         </main>
 
-        <GlobalFooter currentMode="weekly-planner" />
+        <GlobalFooter currentMode="plan" />
         <GlobalNavigation isOpen={showNavigation} onClose={closeAllMenus} />
       </div>
     );
@@ -559,7 +560,7 @@ export default function WeeklyPlanner() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-      <GlobalHeader onMenuClick={(menu) => openMenu(menu)} />
+      <GlobalHeader onMenuClick={() => openMenu('navigation')} />
       
       <main className="pt-20 pb-24">
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -604,8 +605,8 @@ export default function WeeklyPlanner() {
                         ></div>
                       </div>
                       <p className="text-xs text-slate-400">
-                        {savingsData?.efficiencyScore > 0 
-                          ? `You're ${savingsData.efficiencyScore}% more efficient than average!`
+                        {(savingsData?.efficiencyScore || 0) > 0 
+                          ? `You're ${savingsData?.efficiencyScore}% more efficient than average!`
                           : "Start cooking to see your savings!"
                         }
                       </p>
@@ -623,9 +624,9 @@ export default function WeeklyPlanner() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {tasteData?.cuisinePreferences?.length > 0 ? (
+                      {(tasteData?.cuisinePreferences?.length || 0) > 0 ? (
                         <>
-                          {tasteData.cuisinePreferences.slice(0, 3).map((cuisine: any, index: number) => (
+                          {tasteData?.cuisinePreferences?.slice(0, 3).map((cuisine: any, index: number) => (
                             <div key={cuisine.cuisine} className="flex justify-between items-center">
                               <span className="text-slate-300 text-sm capitalize">{cuisine.cuisine}</span>
                               <span className="text-purple-400 font-semibold">{cuisine.percentage}%</span>
@@ -644,8 +645,8 @@ export default function WeeklyPlanner() {
                           size="sm"
                           className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10 text-xs"
                           onClick={() => {
-                            if (tasteData?.cuisinePreferences?.length > 0) {
-                              const shareText = `My Flavr cooking style: ${tasteData.cuisinePreferences.slice(0, 3).map((c: any) => `${c.cuisine} ${c.percentage}%`).join(', ')}`;
+                            if ((tasteData?.cuisinePreferences?.length || 0) > 0) {
+                              const shareText = `My Flavr cooking style: ${tasteData?.cuisinePreferences?.slice(0, 3).map((c: any) => `${c.cuisine} ${c.percentage}%`).join(', ')}`;
                               navigator.clipboard.writeText(shareText);
                               toast({
                                 title: "Taste Portrait Copied!",
@@ -1169,7 +1170,7 @@ export default function WeeklyPlanner() {
         </div>
       </main>
 
-      <GlobalFooter />
+      <GlobalFooter currentMode="plan" />
       <GlobalNavigation isOpen={showNavigation} onClose={closeAllMenus} />
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} onSuccess={() => setShowAuthModal(false)} />
       <FlavrPlusUpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
@@ -1184,14 +1185,14 @@ function RecipeCardWithImage({ meal, onClick }: { meal: any; onClick: () => void
 
   // Fetch recipe details to get image
   const { data: recipe } = useQuery({
-    queryKey: ["/api/recipes", meal.recipeId],
+    queryKey: ["/api/recipe", meal.recipeId],
     enabled: !!meal.recipeId,
     retry: false,
   });
 
   useEffect(() => {
     if (recipe) {
-      const imageUrl = recipe.imageUrl || recipe.image;
+      const imageUrl = (recipe as any)?.imageUrl || (recipe as any)?.image;
       if (imageUrl) {
         setRecipeImage(imageUrl);
         setImageLoading(false);
