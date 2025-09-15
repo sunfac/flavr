@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { iconMap } from "@/lib/iconMap";
 import { motion, AnimatePresence } from "framer-motion";
-import ChatBot from "@/components/ChatBot";
+import AdaptiveAssistant from "@/components/AdaptiveAssistant";
 
 interface FloatingChatButtonProps {
   className?: string;
@@ -118,12 +118,14 @@ export default function FloatingChatButton({ className = "", variant = "floating
                     </Button>
                   </div>
 
-                  <ChatBot
+                  <AdaptiveAssistant
                     isOpen={isChatOpen}
                     onClose={handleCloseChat}
                     currentRecipe={currentRecipe}
-                    currentMode={currentMode as "shopping" | "fridge" | "chef" | undefined}
+                    currentMode={currentMode as "discover" | "plan" | "capture" | "cookbook"}
                     onRecipeUpdate={onRecipeUpdate}
+                    enableVoice={true}
+                    enableLiveAudio={false}
                   />
                 </motion.div>
               </>
@@ -258,12 +260,14 @@ export default function FloatingChatButton({ className = "", variant = "floating
                   </Button>
                 </div>
 
-                <ChatBot
+                <AdaptiveAssistant
                   isOpen={isChatOpen}
                   onClose={handleCloseChat}
                   currentRecipe={currentRecipe}
-                  currentMode={currentMode as "shopping" | "fridge" | "chef" | undefined}
+                  currentMode={currentMode as "discover" | "plan" | "capture" | "cookbook"}
                   onRecipeUpdate={onRecipeUpdate}
+                  enableVoice={true}
+                  enableLiveAudio={false}
                 />
               </motion.div>
             </>

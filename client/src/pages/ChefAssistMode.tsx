@@ -8,7 +8,7 @@ import SettingsPanel from "@/components/SettingsPanel";
 import UserMenu from "@/components/UserMenu";
 import SlideQuizShell from "@/components/SlideQuizShell";
 import RecipeCard from "@/components/RecipeCard";
-import ChatBot from "@/components/ChatBot";
+import FloatingChatButton from "@/components/FloatingChatButton";
 import Loading from "@/components/Loading";
 import { checkQuotaBeforeGPT, getRemainingRecipes } from "@/lib/quotaManager";
 import { apiRequest } from "@/lib/queryClient";
@@ -53,7 +53,7 @@ export default function ChefAssistMode() {
   }
 
   // Allow users to try the quiz without authentication
-  const isAuthenticated = user?.user;
+  const isAuthenticated = !!(user as any)?.user;
 
   const handleQuizComplete = async (data: any) => {
     // Transform quiz data for server-side processing
@@ -181,10 +181,10 @@ export default function ChefAssistMode() {
               onNewSearch={handleBackToQuiz}
             />
             
-            {/* Floating Zest Chatbot - Always visible when recipe is shown */}
-            <ChatBot 
+            {/* Floating Assistant - Always visible when recipe is shown */}
+            <FloatingChatButton 
               currentRecipe={generatedRecipe}
-              currentMode="chef"
+              currentMode="discover"
               onRecipeUpdate={(updatedRecipe: any) => {
                 setGeneratedRecipe(updatedRecipe);
               }}
@@ -193,7 +193,7 @@ export default function ChefAssistMode() {
         )}
       </main>
 
-      <GlobalFooter currentMode="chef-assist" />
+      <GlobalFooter currentMode="discover" />
 
       {showNavigation && (
         <GlobalNavigation 
@@ -224,12 +224,6 @@ export default function ChefAssistMode() {
         />
       )}
 
-      {generatedRecipe && (
-        <ChatBot
-          currentRecipe={generatedRecipe}
-          currentMode="chef"
-        />
-      )}
     </div>
   );
 }
