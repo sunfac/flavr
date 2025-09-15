@@ -70,11 +70,11 @@ export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
   ];
 
   return (
-    <footer className={`global-footer fixed bottom-0 left-0 right-0 z-40 bg-slate-900/90 backdrop-blur-xl border-t border-slate-700 transition-transform duration-300 ease-in-out ${
+    <footer className={`global-footer fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-xl border-t border-border transition-transform duration-300 ease-in-out ${
       isKeyboardVisible ? 'transform translate-y-full' : 'transform translate-y-0'
     }`}>
       <div className="px-4 py-3">
-        <div className="flex justify-around items-center max-w-md mx-auto">
+        <div className="flex justify-around items-center max-w-lg mx-auto gap-2">
           {modes.map((mode) => {
             const Icon = mode.icon;
             const isActive = currentMode === mode.id;
@@ -85,14 +85,14 @@ export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate(mode.path)}
-                className={`flex flex-col items-center space-y-1 h-auto py-2 px-3 ${
+                className={`flex flex-col items-center gap-1 h-auto py-3 px-4 min-w-[70px] ${
                   isActive 
-                    ? 'text-orange-400 bg-orange-500/10' 
-                    : 'text-slate-400 hover:text-white hover:bg-white/10'
+                    ? 'text-primary bg-primary/10' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 }`}
               >
                 <Icon className="w-5 h-5" />
-                <span className="text-xs font-medium">{mode.label}</span>
+                <span className="text-xs font-medium whitespace-nowrap">{mode.label}</span>
               </Button>
             );
           })}
