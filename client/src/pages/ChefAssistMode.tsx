@@ -15,6 +15,12 @@ import { apiRequest } from "@/lib/queryClient";
 import AuthModal from "@/components/AuthModal";
 import { chefQuestions } from "@/config/chefQuestions";
 import { iconMap } from "@/lib/iconMap";
+import { User } from "@/lib/api";
+
+// Type for the /api/me response
+interface UserResponse {
+  user?: User;
+}
 
 export default function ChefAssistMode() {
   const [, navigate] = useLocation();
@@ -43,7 +49,7 @@ export default function ChefAssistMode() {
   };
 
   // Check if user is logged in
-  const { data: user, isLoading: userLoading } = useQuery({
+  const { data: user, isLoading: userLoading } = useQuery<UserResponse>({
     queryKey: ["/api/me"],
     retry: false,
   });
@@ -53,7 +59,7 @@ export default function ChefAssistMode() {
   }
 
   // Allow users to try the quiz without authentication
-  const isAuthenticated = user?.user;
+  const isAuthenticated = !!user?.user;
 
   const handleQuizComplete = async (data: any) => {
     // Transform quiz data for server-side processing
@@ -106,7 +112,7 @@ export default function ChefAssistMode() {
         setGeneratedRecipe(response.recipe || response);
         setCurrentStep("recipe");
         // Navigate back to chef assist mode with results
-        navigate("/chef");
+        navigate("/chef-assist");
       } else {
         throw new Error("No recipe data received");
       }
@@ -114,7 +120,7 @@ export default function ChefAssistMode() {
       console.error("Failed to generate recipe:", error);
       setCurrentStep("recipe");
       // Navigate back even with error
-      navigate("/chef");
+      navigate("/chef-assist");
     }
   };
 

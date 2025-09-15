@@ -26,6 +26,7 @@ import PhotoToRecipe from "@/pages/PhotoToRecipe";
 import DiagnosticPage from "@/pages/DiagnosticPage";
 import NotFound from "@/pages/not-found";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import RedirectComponent from "@/components/RedirectComponent";
 
 import DigitalCookbook from "@/pages/DigitalCookbook";
 import BudgetPlanner from "@/pages/BudgetPlanner";
@@ -43,40 +44,56 @@ import { ThemeProvider } from "@/providers/ThemeProvider";
 function Router() {
   return (
     <Switch>
+      {/* Primary Routes */}
       <Route path="/" component={LandingPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/app" component={ModeSelection} />
-      <Route path="/app/shopping" component={ShoppingMode} />
-      <Route path="/app/chef" component={ChefAssistMode} />
+      
+      {/* Core Feature Routes */}
+      <Route path="/chef-assist" component={ChefAssist} />
       <Route path="/shopping" component={ShoppingMode} />
-      <Route path="/chef" component={ChefAssistMode} />
-      <Route path="/rituals" component={FlavrRituals} />
+      <Route path="/chat" component={ChatMode} />
+      <Route path="/weekly-planner" component={WeeklyPlanner} />
+      <Route path="/cookbook" component={DigitalCookbook} />
+      
+      {/* Legacy Route Redirects - Preserve backward compatibility */}
+      <Route path="/app/chef" component={() => <RedirectComponent to="/chef-assist" />} />
+      <Route path="/chef" component={() => <RedirectComponent to="/chef-assist" />} />
+      <Route path="/app/shopping" component={() => <RedirectComponent to="/shopping" />} />
+      <Route path="/rituals" component={() => <RedirectComponent to="/flavr-rituals" />} />
+      
+      {/* Secondary Feature Routes */}
       <Route path="/flavr-rituals" component={FlavrRituals} />
       <Route path="/flavr-rituals/phase2" component={FlavrRitualsPhase2} />
       <Route path="/flavr-plus" component={FlavrPlus} />
+      <Route path="/photo-to-recipe" component={PhotoToRecipe} />
+      <Route path="/budget-planner" component={BudgetPlanner} />
+      
+      {/* User Account & Settings */}
       <Route path="/my-recipes" component={MyRecipes} />
-      <Route path="/recipe/:id" component={RecipeView} />
-      <Route path="/recipe-test" component={RecipeCardTest} />
       <Route path="/settings" component={SettingsPage} />
       <Route path="/subscribe" component={Subscribe} />
       <Route path="/welcome-preferences" component={WelcomePreferences} />
-      <Route path="/developer-logs" component={DeveloperLogs} />
-      <Route path="/developer-recipes" component={DeveloperRecipes} />
-      <Route path="/image-migration" component={ImageMigration} />
-      <Route path="/ai-costs" component={AICostsDashboard} />
-      <Route path="/photo-to-recipe" component={PhotoToRecipe} />
-      <Route path="/diagnostic" component={DiagnosticPage} />
-
-      <Route path="/cookbook" component={DigitalCookbook} />
-      <Route path="/budget-planner" component={BudgetPlanner} />
-      <Route path="/chef-assist" component={ChefAssist} />
-      <Route path="/chat" component={ChatMode} />
+      
+      {/* Recipe & Content Routes */}
+      <Route path="/recipe/:id" component={RecipeView} />
       <Route path="/recipe" component={Recipe} />
       <Route path="/recipe-selection" component={RecipeSelection} />
       <Route path="/share/:shareId" component={PublicRecipeView} />
       <Route path="/temp-recipe" component={TempRecipe} />
-      <Route path="/weekly-planner" component={WeeklyPlanner} />
+      
+      {/* Testing & Development Routes */}
+      <Route path="/recipe-test" component={RecipeCardTest} />
+      <Route path="/developer-logs" component={DeveloperLogs} />
+      <Route path="/developer-recipes" component={DeveloperRecipes} />
+      <Route path="/image-migration" component={ImageMigration} />
+      <Route path="/ai-costs" component={AICostsDashboard} />
+      <Route path="/diagnostic" component={DiagnosticPage} />
+      
+      {/* Utility Routes */}
       <Route path="/loading" component={() => <LoadingPage title="Loading..." subtitle="Please wait while we prepare your experience" />} />
+      
+      {/* 404 Fallback */}
       <Route component={NotFound} />
     </Switch>
   );
