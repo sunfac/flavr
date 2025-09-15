@@ -171,7 +171,7 @@ export default function RecipeChat({
     }
   }, [localMessages]);
 
-  // Enhanced Zest chat with recipe modification support
+  // Enhanced Zest chat with optimized streaming support
   const sendMessageMutation = useMutation({
     mutationFn: async (data: { message: string }) => {
       // Build conversation history from local messages
@@ -180,7 +180,7 @@ export default function RecipeChat({
         content: msg.isUser ? msg.message : msg.response
       }));
 
-      const response = await fetch("/api/zest/chat", {
+      const response = await fetch("/api/chat/optimized", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -189,7 +189,11 @@ export default function RecipeChat({
           message: data.message,
           conversationHistory,
           currentRecipe: getCurrentRecipeContext().recipe,
-          openAIContext: getCurrentRecipeContext()
+          userContext: {
+            userId: undefined, // Will be handled by session
+            pseudoUserId: localStorage.getItem('pseudoUserId') || `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            isAuthenticated: false
+          }
         }),
       });
 
@@ -200,51 +204,25 @@ export default function RecipeChat({
       return await response.json();
     },
     onSuccess: async (result, variables) => {
-      // Handle recipe modification with live streaming updates
-      if (result.isRecipeModification && result.modifiedRecipe) {
-        console.log('🔄 Applying recipe modification:', result.modifiedRecipe.title);
-        
-        // Update the recipe store directly with the modified recipe
-        recipeActions.updateActiveRecipe(result.modifiedRecipe);
-        
-        // Also update parent component if callback exists
-        if (onRecipeUpdate) {
-          onRecipeUpdate(result.modifiedRecipe);
-        }
-        
-        // Show success message
-        const modificationMessage: ChatMessage = {
-          id: Date.now(),
-          message: variables.message,
-          response: `✅ Recipe updated! ${result.modifiedRecipe.modifications || 'Changes applied successfully.'}`,
-          isUser: false,
-          text: `✅ Recipe updated! ${result.modifiedRecipe.modifications || 'Changes applied successfully.'}`,
-          timestamp: new Date(),
-        };
-
-        setLocalMessages(prev => [...prev, modificationMessage]);
-        setMessage("");
-        
-        toast({
-          title: "Recipe Updated",
-          description: result.modifiedRecipe.modifications || "Your recipe has been modified successfully!",
-        });
-        
-        return;
-      }
-
-      // Create regular chat response message
+      console.log('⚡ Optimized Zest chat result:', result);
+      
+      // Create chat response message with optimized result
       const chatMessage: ChatMessage = {
         id: Date.now(),
         message: variables.message,
-        response: result.response || result.message,
+        response: result.message,
         isUser: false,
-        text: result.response || result.message,
+        text: result.message,
         timestamp: new Date(),
       };
 
       setLocalMessages(prev => [...prev, chatMessage]);
       setMessage("");
+      
+      // Show performance feedback for development
+      if (result.metadata?.processingTimeMs) {
+        console.log(`🚀 Zest responded in ${result.metadata.processingTimeMs}ms using ${result.metadata.modelUsed}`);
+      }
     },
     onError: (error) => {
       console.error('Recipe chat error:', error);
@@ -305,7 +283,7 @@ export default function RecipeChat({
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center space-x-2">
           <MessageCircle className="h-5 w-5 text-orange-500" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">Recipe Assistant</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white">Zest</h3>
         </div>
         {onClose && (
           <Button 
@@ -389,7 +367,7 @@ export default function RecipeChat({
           <Input
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Ask me about this recipe..."
+            placeholder="Ask Zest about this recipe..."
             className="flex-1"
             disabled={sendMessageMutation.isPending}
             data-testid="input-chat-message"

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Share2, BookOpen, Heart, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Share2, BookOpen, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useScaledIngredients } from '@/hooks/useScaledIngredients';
@@ -9,7 +9,6 @@ import { apiRequest } from '@/lib/queryClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import RecipeShareTools from '@/components/RecipeShareTools';
 import NutritionalAnalysis from '@/components/NutritionalAnalysis';
-import FloatingChatButton from '@/components/FloatingChatButton';
 
 // Extract duration from instruction text
 function extractDuration(instruction: string): number | undefined {
@@ -741,26 +740,6 @@ function EnhancedRecipeCard({
         onBack={() => setSubRecipeModal(prev => ({ ...prev, isOpen: false }))}
       />
 
-      {/* Embedded Chat Button - positioned within the recipe card */}
-      <div className="relative z-50">
-        <FloatingChatButton
-          variant="floating"
-          currentRecipe={{
-            id: recipe.id,
-            title: activeTitle,
-            description: recipe.description,
-            ingredients: activeIngredients,
-            instructions: activeInstructions,
-            servings: activeServings,
-            cookTime: activeCookTime,
-            difficulty: activeDifficulty,
-            cuisine: recipe.cuisine,
-            image: activeImage
-          }}
-          currentMode="recipe"
-          onRecipeUpdate={onRecipeUpdate}
-        />
-      </div>
 
     </div>
   );

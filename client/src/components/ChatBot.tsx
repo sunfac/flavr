@@ -289,8 +289,8 @@ export default function ChatBot({
         content: msg.isUser ? msg.message : msg.response
       }));
 
-      // Use enhanced Zest endpoint
-      const response = await fetch("/api/zest/chat", {
+      // Use optimized Zest endpoint for faster responses  
+      const response = await fetch("/api/chat/optimized", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -299,7 +299,11 @@ export default function ChatBot({
           message: data.message,
           conversationHistory, // Use local messages for continuity
           currentRecipe: getCurrentRecipeContext().recipe,
-          openAIContext: getCurrentRecipeContext()
+          userContext: {
+            userId: (userData as any)?.user?.id,
+            pseudoUserId: localStorage.getItem('pseudoUserId') || `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            isAuthenticated: !!(userData as any)?.user
+          }
         }),
       });
 

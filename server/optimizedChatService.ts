@@ -39,6 +39,7 @@ interface OptimizedChatResponse {
     modelUsed: string;
     processingTimeMs: number;
     tokenCount: number;
+    estimatedCost: number;
   };
 }
 
