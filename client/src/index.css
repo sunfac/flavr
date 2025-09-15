@@ -30,29 +30,29 @@ body {
 }
 
 :root {
-  /* Light Theme (Default) */
-  --background: 0 0% 100%; /* #FFFFFF - Pure white */
-  --foreground: 222 47% 11%; /* #0F172A - Rich dark slate text */
-  --muted: 210 40% 96%; /* #F1F5F9 - Light gray surface */
-  --muted-foreground: 215 16% 47%; /* #64748B - Medium gray text */
-  --popover: 0 0% 100%; /* #FFFFFF - White popover */
-  --popover-foreground: 222 47% 11%;
-  --card: 0 0% 100%; /* #FFFFFF - White card */
-  --card-foreground: 222 47% 11%;
-  --border: 214 32% 91%; /* #E2E8F0 - Light border */
-  --input: 214 32% 91%; /* #E2E8F0 - Light input */
-  --primary: 20 91% 56%; /* #F97316 - Vibrant orange */
+  /* Light Theme (Default) - Premium Culinary */
+  --background: 60 9% 98%; /* #FEFCFB - Warm off-white */
+  --foreground: 20 14% 4%; /* #0A0706 - Rich warm charcoal */
+  --muted: 43 13% 95%; /* #F5F3F0 - Soft warm beige */
+  --muted-foreground: 25 5% 45%; /* #726B66 - Warm gray text */
+  --popover: 60 9% 98%; /* #FEFCFB - Warm off-white popover */
+  --popover-foreground: 20 14% 4%;
+  --card: 60 9% 98%; /* #FEFCFB - Warm off-white card */
+  --card-foreground: 20 14% 4%;
+  --border: 20 6% 90%; /* #E8E5E1 - Warm light border */
+  --input: 43 13% 95%; /* #F5F3F0 - Warm input background */
+  --primary: 24 95% 53%; /* #E4622A - Warm saffron/terracotta */
   --primary-foreground: 0 0% 100%;
-  --secondary: 142 76% 36%; /* #059669 - Fresh green */
+  --secondary: 25 5% 45%; /* #726B66 - Warm charcoal */
   --secondary-foreground: 0 0% 100%;
-  --accent: 262 83% 58%; /* #8B5CF6 - Modern purple */
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 62% 54%; /* #EF4444 - Clean red */
+  --accent: 43 74% 66%; /* #D4AF37 - Golden accent */
+  --accent-foreground: 20 14% 4%;
+  --destructive: 0 84% 60%; /* #F87171 - Warm red */
   --destructive-foreground: 0 0% 100%;
-  --success: 142 76% 36%; /* #059669 - Success green */
-  --warning: 38 92% 50%; /* #F59E0B - Warning amber */
-  --ring: 20 91% 56%; /* Match primary */
-  --radius: 0.75rem; /* Tighter radius for modern feel */
+  --success: 142 71% 45%; /* #10B981 - Success green */
+  --warning: 43 96% 56%; /* #F59E0B - Warning amber */
+  --ring: 24 95% 53%; /* Match primary saffron */
+  --radius: 0.75rem; /* Soft rounded corners */
   
   /* Modular Typography Scale */
   --step--1: clamp(0.825rem, 0.80rem + 0.20vw, 0.90rem);
@@ -61,18 +61,18 @@ body {
   --step-2: clamp(1.56rem, 1.50rem + 0.45vw, 1.75rem);
   --step-3: clamp(1.95rem, 1.90rem + 0.55vw, 2.15rem);
   
-  /* Modern Premium Gradients */
-  --gradient-primary: linear-gradient(135deg, #F97316 0%, #FB923C 100%);
-  --gradient-secondary: linear-gradient(135deg, #059669 0%, #10B981 100%);
-  --gradient-accent: linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%);
-  --gradient-hero: linear-gradient(135deg, #F97316 0%, #8B5CF6 50%, #059669 100%);
-  --gradient-card: linear-gradient(145deg, rgba(30,41,59,0.95) 0%, rgba(30,41,59,0.8) 100%);
-  --gradient-surface: linear-gradient(145deg, rgba(30,41,59,0.6) 0%, rgba(15,23,42,0.8) 100%);
+  /* Premium Culinary Gradients */
+  --gradient-primary: linear-gradient(135deg, #E4622A 0%, #D2691E 100%);
+  --gradient-secondary: linear-gradient(135deg, #726B66 0%, #8D8680 100%);
+  --gradient-accent: linear-gradient(135deg, #D4AF37 0%, #DAA520 100%);
+  --gradient-hero: linear-gradient(135deg, #E4622A 0%, #D4AF37 50%, #726B66 100%);
+  --gradient-card: linear-gradient(145deg, rgba(254,252,251,0.95) 0%, rgba(245,243,240,0.8) 100%);
+  --gradient-surface: linear-gradient(145deg, rgba(245,243,240,0.6) 0%, rgba(232,229,225,0.8) 100%);
   
-  /* Modern Glass Morphism */
-  --glass-bg: rgba(30, 41, 59, 0.4);
-  --glass-border: rgba(148, 163, 184, 0.2);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  /* Premium Glass Morphism */
+  --glass-bg: rgba(254, 252, 251, 0.8);
+  --glass-border: rgba(228, 98, 42, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(228, 98, 42, 0.1);
   
   /* Premium Shadow System */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);

@@ -25,26 +25,26 @@ const modes: ModeCard[] = [
     title: "Discover",
     description: "Find chef-inspired dishes perfectly matched to your taste profile and mood",
     icon: <ChefHat className="w-12 h-12" />,
-    color: "text-orange-500 dark:text-orange-400",
+    color: "text-primary",
     route: "/chef-assist",
-    gradient: "from-orange-500/10 to-orange-600/10 dark:from-orange-500/20 dark:to-orange-600/20"
+    gradient: "from-primary/10 to-primary/20"
   },
   {
     title: "Plan",
     description: "Generate weekly meal plans with smart shopping lists tailored to your preferences",
     icon: <CalendarDays className="w-12 h-12" />,
-    color: "text-purple-500 dark:text-purple-400",
+    color: "text-secondary",
     route: "/weekly-planner",
-    gradient: "from-purple-500/10 to-purple-600/10 dark:from-purple-500/20 dark:to-purple-600/20",
+    gradient: "from-secondary/10 to-secondary/20",
     isPremium: true
   },
   {
     title: "Capture",
     description: "Transform cookbook photos and ingredient lists into interactive digital recipes",
     icon: <Camera className="w-12 h-12" />,
-    color: "text-blue-500 dark:text-blue-400",
+    color: "text-accent",
     route: "/photo-to-recipe",
-    gradient: "from-blue-500/10 to-blue-600/10 dark:from-blue-500/20 dark:to-blue-600/20",
+    gradient: "from-accent/10 to-accent/20",
     isPremium: true
   }
 ];
@@ -68,11 +68,11 @@ export default function ModeSelection() {
           transition={{ duration: 0.5 }}
           className="text-center mb-8 md:mb-16 pt-12 md:pt-16"
         >
-          <h1 className="text-3xl md:text-5xl font-bold mb-3 md:mb-4 bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
-            Your Culinary Journey
+          <h1 className="text-3xl md:text-5xl font-bold mb-3 md:mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Your Private Chef
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-4 md:mb-6">
-            Discover amazing dishes, plan your meals, and capture recipes that match your taste
+            Premium culinary experiences, perfectly tailored to your taste
           </p>
           <div className="flex justify-center">
             <QuotaCounter showUpgradeHint={true} />
@@ -103,7 +103,7 @@ export default function ModeSelection() {
                   mode.isComingSoon 
                     ? "cursor-not-allowed hover:shadow-lg hover:scale-[1.02] opacity-90" 
                     : "cursor-pointer hover:shadow-xl hover:scale-105",
-                  "dark:bg-gray-800/50 dark:border-gray-700"
+                  "bg-card/80 border-border backdrop-blur-sm"
                 )}
                 onClick={() => handleModeSelect(mode)}
               >
@@ -152,10 +152,9 @@ export default function ModeSelection() {
                       mode.isComingSoon 
                         ? "cursor-not-allowed bg-gray-400 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-600 text-white" 
                         : "group-hover:translate-y-[-2px] shadow-lg hover:shadow-xl",
-                      !mode.isComingSoon && mode.color === "text-green-500 dark:text-green-400" ? "bg-green-600 hover:bg-green-700" : "",
-                      !mode.isComingSoon && mode.color === "text-orange-500 dark:text-orange-400" ? "bg-orange-600 hover:bg-orange-700" : "",
-                      !mode.isComingSoon && mode.color === "text-blue-500 dark:text-blue-400" ? "bg-blue-600 hover:bg-blue-700" : "",
-                      !mode.isComingSoon && mode.color === "text-purple-500 dark:text-purple-400" ? "bg-purple-600 hover:bg-purple-700" : ""
+                      !mode.isComingSoon && mode.title === "Discover" ? "bg-primary hover:bg-primary/90" : "",
+                      !mode.isComingSoon && mode.title === "Plan" ? "bg-secondary hover:bg-secondary/90" : "",
+                      !mode.isComingSoon && mode.title === "Capture" ? "bg-accent hover:bg-accent/90 text-accent-foreground" : ""
                     )}
                     size="default"
                     disabled={mode.isComingSoon}
