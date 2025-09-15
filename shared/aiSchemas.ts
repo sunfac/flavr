@@ -300,6 +300,43 @@ export type ChatMessage = z.infer<typeof ChatMessage>;
 export type SuggestedAction = z.infer<typeof SuggestedAction>;
 export type ClarificationOption = z.infer<typeof ClarificationOption>;
 
+// === ENHANCED VALIDATION FOR GPT-4O MINI MIGRATION ===
+
+// Quality validation for recipe responses
+export const RecipeQualityValidation = z.object({
+  hasTitle: z.boolean(),
+  hasInstructions: z.boolean(),
+  hasIngredients: z.boolean(),
+  instructionCount: z.number().min(3), // At least 3 steps
+  ingredientCount: z.number().min(2),  // At least 2 ingredients
+  hasCookTime: z.boolean(),
+  hasServings: z.boolean(),
+  structuralScore: z.number().min(0).max(100), // Overall structure quality
+  contentQuality: z.enum(["excellent", "good", "acceptable", "poor"])
+});
+
+// Enhanced recipe validation with quality checks
+export const RecipeLLMWithValidation = RecipeLLM.extend({
+  qualityMetrics: RecipeQualityValidation.optional(),
+  validationPassed: z.boolean().default(true),
+  fallbackReason: z.string().optional(),
+  modelUsed: AIModel // Track which model generated this
+});
+
+// Validation thresholds for different models
+export const QUALITY_THRESHOLDS = {
+  "gpt-4o": {
+    minStructuralScore: 85,
+    minContentQuality: "good",
+    requiredFields: ["title", "ingredients", "instructions", "cookTime", "servings"]
+  },
+  "gpt-4o-mini": {
+    minStructuralScore: 80, // Slightly lower threshold for mini
+    minContentQuality: "acceptable",
+    requiredFields: ["title", "ingredients", "instructions", "cookTime"]
+  }
+} as const;
+
 // === VALIDATION HELPERS ===
 export function validateAIResponse<T>(
   schema: z.ZodSchema<T>,
@@ -327,6 +364,124 @@ export function validateAIResponse<T>(
     }
     return { success: false, error: 'Unknown validation error' };
   }
+}
+
+// Enhanced validation with quality assessment for recipe responses
+export function validateRecipeResponse(
+  data: unknown,
+  model: AIModel,
+  fallbackToGPT4o: boolean = true
+): {
+  success: boolean;
+  data?: any;
+  qualityMetrics?: any;
+  error?: string;
+  shouldFallback?: boolean;
+  fallbackReason?: string;
+} {
+  try {
+    // First, basic schema validation
+    const basicValidation = validateAIResponse(RecipeLLM, data);
+    if (!basicValidation.success) {
+      return {
+        success: false,
+        error: basicValidation.error,
+        shouldFallback: fallbackToGPT4o,
+        fallbackReason: "Schema validation failed"
+      };
+    }
+
+    const recipe = basicValidation.data;
+    
+    // Quality assessment
+    const qualityMetrics = assessRecipeQuality(recipe);
+    const threshold = QUALITY_THRESHOLDS[model] || QUALITY_THRESHOLDS["gpt-4o-mini"];
+    
+    // Check if recipe meets quality standards
+    const meetsQuality = 
+      qualityMetrics.structuralScore >= threshold.minStructuralScore &&
+      isQualityAcceptable(qualityMetrics.contentQuality, threshold.minContentQuality);
+    
+    if (!meetsQuality && model === "gpt-4o-mini" && fallbackToGPT4o) {
+      return {
+        success: false,
+        qualityMetrics,
+        shouldFallback: true,
+        fallbackReason: `Quality below threshold: ${qualityMetrics.structuralScore}/${threshold.minStructuralScore}, ${qualityMetrics.contentQuality}/${threshold.minContentQuality}`
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        ...recipe,
+        qualityMetrics,
+        validationPassed: meetsQuality,
+        modelUsed: model
+      }
+    };
+    
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown validation error",
+      shouldFallback: fallbackToGPT4o,
+      fallbackReason: "Exception during validation"
+    };
+  }
+}
+
+// Assess recipe quality based on structure and content
+function assessRecipeQuality(recipe: any): any {
+  const hasTitle = Boolean(recipe.title && recipe.title.trim().length > 0);
+  const hasInstructions = Boolean(recipe.instructions && Array.isArray(recipe.instructions) && recipe.instructions.length > 0);
+  const hasIngredients = Boolean(recipe.ingredients && Array.isArray(recipe.ingredients) && recipe.ingredients.length > 0);
+  const hasCookTime = Boolean(recipe.cookTime && typeof recipe.cookTime === 'number' && recipe.cookTime > 0);
+  const hasServings = Boolean(recipe.servings && typeof recipe.servings === 'number' && recipe.servings > 0);
+  
+  const instructionCount = hasInstructions ? recipe.instructions.length : 0;
+  const ingredientCount = hasIngredients ? recipe.ingredients.length : 0;
+  
+  // Calculate structural score (0-100)
+  let structuralScore = 0;
+  if (hasTitle) structuralScore += 20;
+  if (hasInstructions) structuralScore += 25;
+  if (hasIngredients) structuralScore += 25;
+  if (hasCookTime) structuralScore += 15;
+  if (hasServings) structuralScore += 15;
+  
+  // Bonus points for detailed content
+  if (instructionCount >= 5) structuralScore += 5;
+  if (ingredientCount >= 5) structuralScore += 5;
+  if (recipe.description) structuralScore += 3;
+  if (recipe.tips) structuralScore += 2;
+  
+  // Determine content quality
+  let contentQuality: "excellent" | "good" | "acceptable" | "poor" = "poor";
+  if (structuralScore >= 90) contentQuality = "excellent";
+  else if (structuralScore >= 80) contentQuality = "good";
+  else if (structuralScore >= 70) contentQuality = "acceptable";
+  
+  return {
+    hasTitle,
+    hasInstructions,
+    hasIngredients,
+    hasCookTime,
+    hasServings,
+    instructionCount,
+    ingredientCount,
+    structuralScore: Math.min(100, structuralScore),
+    contentQuality
+  };
+}
+
+// Helper to compare quality levels
+function isQualityAcceptable(
+  actual: "excellent" | "good" | "acceptable" | "poor",
+  required: "excellent" | "good" | "acceptable" | "poor"
+): boolean {
+  const levels = { "poor": 0, "acceptable": 1, "good": 2, "excellent": 3 };
+  return levels[actual] >= levels[required];
 }
 
 // === FALLBACK DATA TEMPLATES ===

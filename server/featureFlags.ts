@@ -142,9 +142,9 @@ const DEFAULT_FLAGS: AIProviderFlags = {
     userWhitelist: []
   },
   'canary.gpt4oMini.recipe': {
-    enabled: false,
-    percentage: 0,
-    userWhitelist: []
+    enabled: true,
+    percentage: 10,
+    userWhitelist: [] // Start with 10% rollout for recipes
   },
   'emergency.fallback.enabled': {
     enabled: true,

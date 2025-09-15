@@ -11,7 +11,9 @@ import type {
   FallbackResponse,
   AIResponseMetadata
 } from "@shared/aiSchemas";
+import { validateRecipeResponse } from "@shared/aiSchemas";
 import { FeatureFlagService } from "./featureFlags";
+import { MigrationMonitoringService, createMigrationMetric } from "./migrationMonitoring";
 import { 
   compileChatPrompt, 
   compileRecipePrompt, 
@@ -333,13 +335,14 @@ export class AIService {
     }
   }
   
-  // Recipe generation
+  // Recipe generation with validation-based fallback
   static async generateRecipe(
     input: RecipeInput,
     options: AIRequestOptions = {}
   ): Promise<RecipeLLM> {
     const traceId = options.traceId || uuidv4();
     const startTime = Date.now();
+    let attemptsLog: Array<{ model: AIModel; success: boolean; reason?: string; qualityScore?: number }> = [];
     
     try {
       const provider = AIProviderFactory.getProvider('recipe', {
@@ -347,7 +350,7 @@ export class AIService {
         userTier: options.userTier
       });
       
-      const model = input.model || FeatureFlagService.getModelForOperation('recipe', {
+      const primaryModel = input.model || FeatureFlagService.getModelForOperation('recipe', {
         userId: options.userId,
         userTier: options.userTier
       }) as AIModel;
@@ -364,38 +367,170 @@ export class AIService {
         dietaryRestrictions: input.preferences?.dietaryRestrictions,
         userPreferences: input.preferences,
         variant: input.variant,
-        model: shouldOptimize ? model : undefined,
+        model: shouldOptimize ? primaryModel : undefined,
         maxTokens: options.maxTokens
       });
       
-      console.log(`👨‍🍳 AI Recipe: ${provider.name}/${model} | Tokens: ${compiledPrompt.estimatedTokens} | Trace: ${traceId}`);
+      console.log(`👨‍🍳 AI Recipe: ${provider.name}/${primaryModel} | Tokens: ${compiledPrompt.estimatedTokens} | Trace: ${traceId}`);
       
-      const circuitBreaker = AIProviderFactory['circuitBreakers'].get(provider.name);
-      const response = await circuitBreaker?.execute(async () => {
-        return provider.generateRecipe({
-          ...input,
-          model
-        }, {
-          ...options,
-          traceId
+      // === PRIMARY MODEL ATTEMPT ===
+      try {
+        const circuitBreaker = AIProviderFactory['circuitBreakers'].get(provider.name);
+        const primaryResponse = await circuitBreaker?.execute(async () => {
+          return provider.generateRecipe({
+            ...input,
+            model: primaryModel
+          }, {
+            ...options,
+            traceId
+          });
+        }) || await provider.generateRecipe({ ...input, model: primaryModel }, { ...options, traceId });
+        
+        // Validate response quality
+        const validation = validateRecipeResponse(
+          primaryResponse, 
+          primaryModel,
+          primaryModel === "gpt-4o-mini" // Only fallback if using mini
+        );
+        
+        attemptsLog.push({
+          model: primaryModel,
+          success: validation.success,
+          reason: validation.fallbackReason,
+          qualityScore: validation.qualityMetrics?.structuralScore
         });
-      }) || await provider.generateRecipe({ ...input, model }, { ...options, traceId });
-      
-      await this.trackOperation('recipe', {
-        provider: provider.name,
-        model,
-        traceId,
-        startTime,
-        response,
-        userId: options.userId,
-        estimatedTokens: compiledPrompt.estimatedTokens,
-        optimizations: compiledPrompt.optimizations
-      });
-      
-      return response;
+        
+        if (validation.success) {
+          console.log(`✅ Recipe validation passed: ${primaryModel} (Score: ${validation.qualityMetrics?.structuralScore}/100)`);
+          
+          await this.trackOperation('recipe', {
+            provider: provider.name,
+            model: primaryModel,
+            traceId,
+            startTime,
+            response: validation.data,
+            userId: options.userId,
+            estimatedTokens: compiledPrompt.estimatedTokens,
+            optimizations: compiledPrompt.optimizations,
+            metadata: {
+              attemptsLog,
+              validationPassed: true,
+              fallbackUsed: false
+            }
+          });
+          
+          return validation.data;
+        }
+        
+        // === VALIDATION FAILED - TRY FALLBACK ===
+        if (validation.shouldFallback && primaryModel === "gpt-4o-mini") {
+          console.warn(`⚠️ Recipe validation failed for ${primaryModel}, falling back to GPT-4o: ${validation.fallbackReason}`);
+          
+          try {
+            const fallbackResponse = await circuitBreaker?.execute(async () => {
+              return provider.generateRecipe({
+                ...input,
+                model: "gpt-4o"
+              }, {
+                ...options,
+                traceId: `${traceId}_fallback`
+              });
+            }) || await provider.generateRecipe({ ...input, model: "gpt-4o" }, { ...options, traceId: `${traceId}_fallback` });
+            
+            const fallbackValidation = validateRecipeResponse(fallbackResponse, "gpt-4o", false);
+            
+            attemptsLog.push({
+              model: "gpt-4o",
+              success: fallbackValidation.success,
+              reason: fallbackValidation.fallbackReason,
+              qualityScore: fallbackValidation.qualityMetrics?.structuralScore
+            });
+            
+            if (fallbackValidation.success) {
+              console.log(`✅ Fallback recipe validation passed: GPT-4o (Score: ${fallbackValidation.qualityMetrics?.structuralScore}/100)`);
+              
+              await this.trackOperation('recipe', {
+                provider: provider.name,
+                model: "gpt-4o",
+                traceId,
+                startTime,
+                response: fallbackValidation.data,
+                userId: options.userId,
+                estimatedTokens: compiledPrompt.estimatedTokens,
+                optimizations: compiledPrompt.optimizations,
+                metadata: {
+                  attemptsLog,
+                  validationPassed: true,
+                  fallbackUsed: true,
+                  originalModel: primaryModel,
+                  fallbackReason: validation.fallbackReason
+                }
+              });
+              
+              // Mark response with fallback metadata
+              return {
+                ...fallbackValidation.data,
+                metadata: {
+                  ...fallbackValidation.data.metadata,
+                  fallbackUsed: true,
+                  originalModel: primaryModel,
+                  fallbackReason: validation.fallbackReason
+                }
+              };
+            }
+            
+            console.error(`❌ Fallback validation also failed for GPT-4o: ${fallbackValidation.error}`);
+          } catch (fallbackError) {
+            console.error(`❌ Fallback generation failed:`, fallbackError);
+            attemptsLog.push({
+              model: "gpt-4o",
+              success: false,
+              reason: `Generation error: ${fallbackError instanceof Error ? fallbackError.message : 'Unknown'}`
+            });
+          }
+        }
+        
+        // If we get here, use the primary response even if validation failed
+        console.warn(`⚠️ Using primary response despite validation failure: ${validation.error}`);
+        
+        await this.trackOperation('recipe', {
+          provider: provider.name,
+          model: primaryModel,
+          traceId,
+          startTime,
+          response: validation.data || primaryResponse,
+          userId: options.userId,
+          estimatedTokens: compiledPrompt.estimatedTokens,
+          optimizations: compiledPrompt.optimizations,
+          metadata: {
+            attemptsLog,
+            validationPassed: false,
+            fallbackUsed: false,
+            validationError: validation.error
+          }
+        });
+        
+        return validation.data || primaryResponse;
+        
+      } catch (primaryError) {
+        console.error(`❌ Primary model (${primaryModel}) generation failed:`, primaryError);
+        attemptsLog.push({
+          model: primaryModel,
+          success: false,
+          reason: `Generation error: ${primaryError instanceof Error ? primaryError.message : 'Unknown'}`
+        });
+        
+        // Emergency fallback to emergency response
+        if (FeatureFlagService.getValue('emergency.fallback.enabled')) {
+          console.warn(`🆘 Using emergency fallback response`);
+          return this.createFallbackRecipeResponse(input.request, traceId, Date.now() - startTime, primaryError);
+        }
+        
+        throw primaryError;
+      }
       
     } catch (error) {
-      console.error(`❌ AI Recipe error (${traceId}):`, error);
+      console.error(`❌ AI Recipe generation failed completely (${traceId}):`, error);
       
       if (FeatureFlagService.getValue('emergency.fallback.enabled')) {
         return this.createFallbackRecipeResponse(input.request, traceId, Date.now() - startTime, error);
@@ -514,11 +649,28 @@ export class AIService {
       userId?: number;
       estimatedTokens?: number;
       optimizations?: string[];
+      metadata?: {
+        attemptsLog?: Array<{ model: AIModel; success: boolean; reason?: string; qualityScore?: number }>;
+        validationPassed?: boolean;
+        fallbackUsed?: boolean;
+        originalModel?: AIModel;
+        fallbackReason?: string;
+        validationError?: string;
+      };
     }
   ): Promise<void> {
     const duration = Date.now() - details.startTime;
     
     try {
+      // Enhanced tracking for GPT-4o mini migration
+      const migrationMetadata = {
+        ...details.metadata,
+        migrationActive: details.model === "gpt-4o-mini" || details.metadata?.originalModel === "gpt-4o-mini",
+        costOptimizationUsed: details.model === "gpt-4o-mini",
+        qualityScore: details.metadata?.attemptsLog?.find(a => a.model === details.model)?.qualityScore,
+        totalAttempts: details.metadata?.attemptsLog?.length || 1
+      };
+
       await aiCostTracker.trackCost({
         userId: details.userId,
         sessionId: details.traceId,
@@ -530,13 +682,53 @@ export class AIService {
         requestData: {
           estimatedTokens: details.estimatedTokens,
           optimizations: details.optimizations,
-          traceId: details.traceId
+          traceId: details.traceId,
+          migrationMetadata
         },
         responseData: {
           processingTimeMs: duration,
-          fallbackUsed: details.response.metadata?.fallbackUsed || false
+          fallbackUsed: details.response.metadata?.fallbackUsed || details.metadata?.fallbackUsed || false,
+          validationPassed: details.metadata?.validationPassed,
+          qualityScore: migrationMetadata.qualityScore
         }
       });
+
+      // Log migration-specific metrics for monitoring
+      if (migrationMetadata.migrationActive) {
+        console.log(`📊 MIGRATION METRICS [${details.traceId}]:`, {
+          operation,
+          primaryModel: details.metadata?.originalModel || details.model,
+          finalModel: details.model,
+          fallbackUsed: details.metadata?.fallbackUsed || false,
+          validationPassed: details.metadata?.validationPassed,
+          qualityScore: migrationMetadata.qualityScore,
+          duration: `${duration}ms`,
+          attempts: details.metadata?.attemptsLog?.map(a => 
+            `${a.model}:${a.success ? '✅' : '❌'}${a.qualityScore ? `(${a.qualityScore})` : ''}`
+          )?.join(' -> ') || `${details.model}:✅`
+        });
+
+        // Track migration metrics for analytics
+        if (operation === 'recipe' || operation === 'chat') {
+          const migrationMetric = createMigrationMetric({
+            userId: details.userId,
+            operation: operation as 'chat' | 'recipe',
+            primaryModel: details.metadata?.originalModel || details.model,
+            finalModel: details.model,
+            fallbackUsed: details.metadata?.fallbackUsed || false,
+            validationPassed: details.metadata?.validationPassed || true,
+            qualityMetrics: details.metadata?.attemptsLog?.find(a => a.model === details.model),
+            processingTimeMs: duration,
+            tokenCount: (details.response.metadata?.inputTokens || 0) + (details.response.metadata?.outputTokens || 0),
+            estimatedCostUsd: details.response.metadata?.estimatedCostUsd,
+            fallbackReason: details.metadata?.fallbackReason,
+            attemptsCount: migrationMetadata.totalAttempts
+          });
+          
+          MigrationMonitoringService.trackMigrationMetric(migrationMetric);
+        }
+      }
+      
     } catch (error) {
       console.error('Error tracking AI operation cost:', error);
     }

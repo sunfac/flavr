@@ -20,6 +20,7 @@ import { registerSubRecipeRoutes } from "./subRecipeRoutes";
 import { registerWeeklyPlanRoutes } from "./weeklyPlanRoutes";
 import { registerAnalyticsRoutes } from "./analyticsRoutes";
 import { registerUserPreferencesRoutes } from "./userPreferencesRoutes";
+import migrationRoutes from "./migrationRoutes";
 import { initializeOAuthStrategies } from "../oauthStrategies";
 import passport from "passport";
 
@@ -69,6 +70,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerWeeklyPlanRoutes(app);
   registerAnalyticsRoutes(app);
   registerUserPreferencesRoutes(app);
+
+  // Migration monitoring routes (developer access only)
+  app.use("/api/migration", requireDeveloperWithRateLimit, migrationRoutes);
 
   // Additional utility routes
   
