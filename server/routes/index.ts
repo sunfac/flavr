@@ -23,10 +23,15 @@ import { registerUserPreferencesRoutes } from "./userPreferencesRoutes";
 import migrationRoutes from "./migrationRoutes";
 import { initializeOAuthStrategies } from "../oauthStrategies";
 import passport from "passport";
+import { PerformanceMonitor } from "../performanceMonitor";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Add route debugging
   console.log('🔧 Registering Express routes...');
+  
+  // Setup performance monitoring middleware BEFORE routes
+  app.use(PerformanceMonitor.createMiddleware());
+  console.log('📊 Performance monitoring middleware enabled');
   
   // Setup PostgreSQL session store for persistent sessions
   const PgSession = connectPgSimple(session);
@@ -73,6 +78,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Migration monitoring routes (developer access only)
   app.use("/api/migration", requireDeveloperWithRateLimit, migrationRoutes);
+  
+  // Performance monitoring routes (developer access only)
+  app.get("/api/performance/dashboard", requireDeveloperWithRateLimit, async (req, res) => {
+    try {
+      const dashboard = PerformanceMonitor.generateDashboardHTML();
+      res.set('Content-Type', 'text/html');
+      res.send(dashboard);
+    } catch (error) {
+      console.error("Failed to generate performance dashboard:", error);
+      res.status(500).json({ error: "Failed to generate performance dashboard" });
+    }
+  });
+  
+  app.get("/api/performance/metrics", requireDeveloperWithRateLimit, async (req, res) => {
+    try {
+      const metrics = PerformanceMonitor.getCurrentMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error("Failed to get performance metrics:", error);
+      res.status(500).json({ error: "Failed to get performance metrics" });
+    }
+  });
+  
+  app.post("/api/performance/test/:endpoint", requireDeveloperWithRateLimit, async (req, res) => {
+    try {
+      const { endpoint } = req.params;
+      const { testCount = 10 } = req.body;
+      const testResults = await PerformanceMonitor.testEndpointPerformance(`/api/${endpoint}`, testCount);
+      res.json(testResults);
+    } catch (error) {
+      console.error("Failed to test endpoint performance:", error);
+      res.status(500).json({ error: "Failed to test endpoint performance" });
+    }
+  });
 
   // Additional utility routes
   

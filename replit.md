@@ -19,12 +19,13 @@ Preferred communication style: Simple, everyday language.
 
 ### Backend
 - **Runtime**: Node.js with TypeScript
-- **Framework**: Express.js
-- **Database**: PostgreSQL with Drizzle ORM
-- **Authentication**: Session-based authentication (express-session), Google OAuth
-- **AI Integration**: MichelinChefAI system using GPT-4o for reliable recipe generation (switched from GPT-5 reasoning model); Google Gemini for conversational AI. Enhanced Inspire Me system with authentic cuisine-specific dishes including detailed flavor-boosting elements, proper timing, and cultural authenticity markers. Comprehensive authenticity validation against 15+ established chefs. **Cross-mode consistency implementation**: Unified chef persona system across Weekly Planner, Chat Mode, Chef Assist, and Inspire Me with shared variety tracking to prevent repetition.
-- **Image Generation**: Replicate API (Stable Diffusion), DALL-E 3 for recipe images.
-- **Payment Processing**: Stripe for subscription management.
+- **Framework**: Express.js with comprehensive performance monitoring
+- **Database**: PostgreSQL with Drizzle ORM, optimized for sub-500ms response times
+- **Authentication**: Session-based authentication (express-session), Google OAuth, RBAC for developer endpoints
+- **AI Integration**: Advanced AI Provider system with intelligent routing and fallback. MichelinChefAI using GPT-4o for reliable recipe generation; GPT-4o-mini for cost optimization via migration monitoring. Google Gemini for conversational AI. Enhanced Inspire Me system with authentic cuisine-specific dishes including detailed flavor-boosting elements, proper timing, and cultural authenticity markers. Comprehensive authenticity validation against 15+ established chefs. **Cross-mode consistency implementation**: Unified chef persona system across Weekly Planner, Chat Mode, Chef Assist, and Inspire Me with shared variety tracking to prevent repetition.
+- **Performance Architecture**: Real-time performance monitoring with SLO compliance tracking (p50 < 1.5s, p95 < 3.0s). Circuit breakers and automatic migration system between AI models. Cost optimization with GPT-4o-mini canary deployment at 10% traffic.
+- **Image Generation**: Replicate API (Stable Diffusion), DALL-E 3 for recipe images with local storage optimization.
+- **Payment Processing**: Stripe for subscription management with development/production mode detection.
 - **Core Logic**: Advanced MichelinChefAI prompting system with cookbook-quality recipes matching established chef voices (Rick Stein, Jamie Oliver, Tom Kerridge, Mary Berry, Delia Smith, Marcus Wareing, Georgina Hayden, Jose Pizarro, Dishoom, etc.); sophisticated flavor maximization; UK English ingredient terminology mappings; Enhanced Inspire Me with authentic dishes (Thai Laab, Greek Yuvetsi, French Coq au Vin, etc.) including proper timing and technique details; Comprehensive authenticity validation system blocking pretentious language, strange fusion combinations, and molecular gastronomy; AI-powered step timing; server-side image storage and serving.
 
 ### Core Cooking Modes
@@ -46,15 +47,17 @@ Preferred communication style: Simple, everyday language.
 - **Subscription Management**: Stripe integration for payments, webhooks for events, tier enforcement.
 - **Image Storage System**: Local storage in `server/public/recipe-images/`, served via `/api/images/serve/`, with migration utility.
 - **Behavioral Profiling**: `interaction_logs` database table for user behavior tracking and B2B insights.
-- **Security**: Bcrypt for password hashing; server-side quota enforcement; OAuth2 service account authentication.
-- **Code Structure**: Modular server routes (`authRoutes.ts`, `recipeRoutes.ts`, etc.); shared types for client/server.
+- **Security**: Bcrypt for password hashing; server-side quota enforcement; OAuth2 service account authentication; RBAC for developer endpoints with rate limiting (100 requests/15min).
+- **Performance Optimization**: Real-time monitoring middleware tracking all endpoint response times against SLO targets. Automatic slow request alerting for P95 violations. Circuit breaker pattern for AI providers. Cost optimization through GPT-4o-mini migration at 10% canary traffic.
+- **Code Structure**: Modular server routes (`authRoutes.ts`, `recipeRoutes.ts`, etc.); shared types for client/server; comprehensive performance monitoring in `performanceMonitor.ts`.
 
 ## External Dependencies
 
 ### AI Services
-- **OpenAI**: MichelinChefAI system using GPT-5 standard model (not reasoning variant) for cookbook-quality recipe generation (no chef-science jargon). DALL-E 3 for recipe images. User input priority with intent classification (exact_named_dish, constrained_brief, broad_theme). Performance targets: 12-30s typical, ≤45s complex recipes, 1-3s for Inspire Me titles with varied structure.
+- **OpenAI**: Advanced AI Provider system using GPT-4o for recipe generation and GPT-4o-mini for cost optimization. MichelinChefAI system for cookbook-quality recipes. DALL-E 3 for recipe images. Migration monitoring with automatic fallback and circuit breakers. **Current Performance**: Chef Assist inspire ~2.9s (target optimization: < 2s), other endpoints < 500ms.
 - **Google Gemini**: Conversational AI (primary chatbot), Google Vision API for ingredient detection (Photo-to-Recipe).
 - **Replicate**: Stable Diffusion for food image generation.
+- **Performance Monitoring**: Real-time AI cost tracking, migration metrics with quality scoring, automatic canary percentage adjustment based on performance thresholds.
 
 ### Payment & Analytics
 - **Stripe**: Subscription billing, payment processing (Stripe Elements), webhook handling.
