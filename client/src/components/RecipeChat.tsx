@@ -3,7 +3,6 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { iconMap } from "@/lib/iconMap";
 import { useRecipeStore, recipeActions, Step } from "@/stores/recipeStore";
@@ -44,12 +43,6 @@ export default function RecipeChat({
   isOpen = true,
   onClose
 }: RecipeChatProps) {
-  // Check authentication status
-  const { data: userData } = useQuery({
-    queryKey: ["/api/me"],
-    retry: false,
-  });
-  const isAuthenticated = !!(userData as any)?.user;
 
   const [message, setMessage] = useState("");
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
@@ -90,20 +83,41 @@ export default function RecipeChat({
   // Generate unique key for current recipe to persist chat per recipe
   const getRecipeKey = () => {
     if (!recipe || !recipe.title) return 'no-recipe';
-    return `recipe-chat-${recipe.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`;
+    // Use recipe ID if available for better stability, fallback to title slug
+    const identifier = recipe.id 
+      ? `id-${recipe.id}` 
+      : `title-${recipe.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`;
+    return `recipe-chat-${identifier}`;
   };
   
   // Save chat history to localStorage per recipe
   const saveChatHistory = (messages: ChatMessage[]) => {
-    const recipeKey = getRecipeKey();
-    localStorage.setItem(`chat-history-${recipeKey}`, JSON.stringify(messages));
+    try {
+      const recipeKey = getRecipeKey();
+      localStorage.setItem(`chat-history-${recipeKey}`, JSON.stringify(messages));
+    } catch (error) {
+      console.warn('Failed to save chat history:', error);
+    }
   };
   
   // Load chat history from localStorage for current recipe
   const loadChatHistory = (): ChatMessage[] => {
-    const recipeKey = getRecipeKey();
-    const saved = localStorage.getItem(`chat-history-${recipeKey}`);
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const recipeKey = getRecipeKey();
+      const saved = localStorage.getItem(`chat-history-${recipeKey}`);
+      if (!saved) return [];
+      
+      // Parse and fix timestamp deserialization bug
+      const parsedMessages = JSON.parse(saved);
+      return parsedMessages.map((msg: any) => ({
+        ...msg,
+        // Convert string timestamps back to Date objects
+        timestamp: typeof msg.timestamp === 'string' ? new Date(msg.timestamp) : msg.timestamp
+      }));
+    } catch (error) {
+      console.warn('Failed to load chat history:', error);
+      return [];
+    }
   };
 
   // Recipe modification suggestions
@@ -330,7 +344,7 @@ export default function RecipeChat({
                   {msg.isUser ? msg.message : msg.response}
                 </p>
                 <p className="text-xs opacity-70 mt-1">
-                  {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
             </div>

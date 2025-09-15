@@ -22,14 +22,6 @@ interface ModeCard {
 
 const modes: ModeCard[] = [
   {
-    title: "Chef Assist",
-    description: "Tell me what you want to cook, I'll create the perfect recipe just for you",
-    icon: <ChefHat className="w-12 h-12" />,
-    color: "text-orange-500 dark:text-orange-400",
-    route: "/chef-assist",
-    gradient: "from-orange-500/10 to-orange-600/10 dark:from-orange-500/20 dark:to-orange-600/20"
-  },
-  {
     title: "Weekly Planner",
     description: "Plan your week with AI-generated meal plans and smart shopping lists",
     icon: <CalendarDays className="w-12 h-12" />,
