@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { storage } from "../storage";
 import { insertInteractionLogSchema } from "@shared/schema";
+import { requireDeveloperWithRateLimit, validateQueryLimit } from "./authRoutes";
 
 export function registerInteractionRoutes(app: Express) {
   // Create interaction log
@@ -44,8 +45,8 @@ export function registerInteractionRoutes(app: Express) {
     }
   });
 
-  // Get interaction logs with optional filtering
-  app.get("/api/interactions", async (req: Request, res: Response) => {
+  // Get interaction logs with optional filtering (developer access only)
+  app.get("/api/interactions", requireDeveloperWithRateLimit, validateQueryLimit, async (req: Request, res: Response) => {
     try {
       const { userId, sessionId, limit = '100' } = req.query;
       const limitNumber = parseInt(limit as string, 10);
@@ -69,8 +70,8 @@ export function registerInteractionRoutes(app: Express) {
     }
   });
 
-  // Get interaction analytics summary
-  app.get("/api/interactions/analytics", async (req: Request, res: Response) => {
+  // Get interaction analytics summary (developer access only)
+  app.get("/api/interactions/analytics", requireDeveloperWithRateLimit, async (req: Request, res: Response) => {
     try {
       const allInteractions = await storage.getInteractionLogs(1000);
       

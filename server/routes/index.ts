@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
@@ -6,7 +6,7 @@ import WebSocket, { WebSocketServer } from "ws";
 import { storage } from "../storage";
 import { db } from "../db";
 import { setupGoogleLiveAudioWebSocket } from "../googleLiveAudio";
-import { registerAuthRoutes } from "./authRoutes";
+import { registerAuthRoutes, requireDeveloperWithRateLimit } from "./authRoutes";
 import { registerRecipeRoutes } from "./recipeRoutes";
 import { registerChatRoutes } from "./chatRoutes";
 import { registerSubscriptionRoutes } from "./subscriptionRoutes";
@@ -73,18 +73,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Additional utility routes
   
   // Developer logs endpoint (developer access only)
-  app.get("/api/developer/logs", async (req, res) => {
+  app.get("/api/developer/logs", requireDeveloperWithRateLimit, async (req: Request, res: Response) => {
     try {
-      if (!req.session?.userId) {
-        return res.status(401).json({ error: "Authentication required" });
-      }
-
-      // Check if user is developer
-      const user = await storage.getUser(req.session.userId);
-      if (user?.email !== "william@blycontracting.co.uk") {
-        return res.status(403).json({ error: "Developer access required" });
-      }
-
       const logs = await storage.getDeveloperLogs();
       res.json(logs);
     } catch (error) {
@@ -94,18 +84,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Developer all recipes endpoint (developer access only)
-  app.get("/api/developer/all-recipes", async (req, res) => {
+  app.get("/api/developer/all-recipes", requireDeveloperWithRateLimit, async (req: Request, res: Response) => {
     try {
-      if (!req.session?.userId) {
-        return res.status(401).json({ error: "Authentication required" });
-      }
-
-      // Check if user is developer
-      const user = await storage.getUser(req.session.userId);
-      if (user?.email !== "william@blycontracting.co.uk") {
-        return res.status(403).json({ error: "Developer access required" });
-      }
-
       const allRecipes = await storage.getAllRecipes();
       res.json(allRecipes);
     } catch (error) {
@@ -115,18 +95,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Developer AI costs endpoint (developer access only)
-  app.get("/api/developer/ai-costs", async (req, res) => {
+  app.get("/api/developer/ai-costs", requireDeveloperWithRateLimit, async (req: Request, res: Response) => {
     try {
-      if (!req.session?.userId) {
-        return res.status(401).json({ error: "Authentication required" });
-      }
-
-      // Check if user is developer
-      const user = await storage.getUser(req.session.userId);
-      if (user?.email !== "william@blycontracting.co.uk") {
-        return res.status(403).json({ error: "Developer access required" });
-      }
-
       const { aiCostTracker } = await import("../aiCostTracker");
       const now = new Date();
       const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;

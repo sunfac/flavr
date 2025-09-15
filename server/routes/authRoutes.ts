@@ -4,6 +4,43 @@ import bcrypt from "bcrypt";
 import passport from "passport";
 // OAuth strategies are now initialized in routes/index.ts
 
+// Simple rate limiter for developer endpoints
+const developerRateLimit = new Map<string, { count: number; resetTime: number }>();
+
+// Rate limiting configuration for developer endpoints
+const DEVELOPER_RATE_LIMIT = {
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  maxRequests: 100 // 100 requests per 15 minutes for developer
+};
+
+// Developer rate limiting middleware
+const rateLimitDeveloper = (req: any, res: any, next: any) => {
+  const key = `dev-${req.session.userId}`;
+  const now = Date.now();
+  const userLimit = developerRateLimit.get(key);
+
+  if (!userLimit || now > userLimit.resetTime) {
+    // Reset or create new limit window
+    developerRateLimit.set(key, {
+      count: 1,
+      resetTime: now + DEVELOPER_RATE_LIMIT.windowMs
+    });
+    next();
+  } else if (userLimit.count >= DEVELOPER_RATE_LIMIT.maxRequests) {
+    // Rate limit exceeded
+    console.log(`🚫 Developer rate limit exceeded for user ${req.session.userId}`);
+    res.status(429).json({
+      message: "Rate limit exceeded",
+      error: "Too many developer API requests. Please try again later.",
+      retryAfter: Math.ceil((userLimit.resetTime - now) / 1000)
+    });
+  } else {
+    // Increment count
+    userLimit.count++;
+    next();
+  }
+};
+
 // Session type extension
 declare module 'express-session' {
   interface SessionData {
@@ -17,6 +54,71 @@ export const requireAuth = (req: any, res: any, next: any) => {
   if (!req.session?.userId) {
     console.log("Authentication failed - no session userId");
     return res.status(401).json({ message: "Authentication required" });
+  }
+  next();
+};
+
+// Developer access middleware - requires authentication first
+export const requireDeveloper = async (req: any, res: any, next: any) => {
+  if (!req.session?.userId) {
+    console.log("Developer access failed - no session userId");
+    return res.status(401).json({ message: "Authentication required" });
+  }
+
+  try {
+    const user = await storage.getUser(req.session.userId);
+    if (!user) {
+      console.log("Developer access failed - user not found");
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    const isDeveloper = user.email === "william@blycontracting.co.uk";
+    if (!isDeveloper) {
+      console.log(`Developer access denied for user ${user.email} - not developer account`);
+      return res.status(403).json({ 
+        message: "Developer access required", 
+        error: "This endpoint is restricted to developer accounts only" 
+      });
+    }
+
+    console.log(`Developer access granted for ${user.email}`);
+    next();
+  } catch (error) {
+    console.error("Developer access check error:", error);
+    return res.status(500).json({ message: "Access verification failed" });
+  }
+};
+
+// Combined developer middleware with rate limiting
+export const requireDeveloperWithRateLimit = [rateLimitDeveloper, requireDeveloper];
+
+// Input validation helpers for developer endpoints
+export const validateQueryLimit = (req: any, res: any, next: any) => {
+  const { limit } = req.query;
+  if (limit) {
+    const parsedLimit = parseInt(limit as string, 10);
+    if (isNaN(parsedLimit) || parsedLimit < 1 || parsedLimit > 10000) {
+      return res.status(400).json({
+        message: "Invalid limit parameter",
+        error: "Limit must be a number between 1 and 10000"
+      });
+    }
+    req.validatedQuery = { ...req.query, limit: parsedLimit };
+  }
+  next();
+};
+
+export const validateNumericId = (req: any, res: any, next: any) => {
+  const { id } = req.params;
+  if (id) {
+    const parsedId = parseInt(id, 10);
+    if (isNaN(parsedId) || parsedId < 1) {
+      return res.status(400).json({
+        message: "Invalid ID parameter",
+        error: "ID must be a positive number"
+      });
+    }
+    req.validatedParams = { ...req.params, id: parsedId };
   }
   next();
 };
