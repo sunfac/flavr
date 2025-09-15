@@ -10,6 +10,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { EnhancedRecipeCard } from "@/components/recipe/EnhancedRecipeCard";
 import { useRecipeStore } from "@/stores/recipeStore";
+import { ModePageLayout } from "@/components/ModePageLayout";
 
 interface PhotoUpload {
   file: File;
@@ -285,16 +286,24 @@ export default function PhotoToRecipe() {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center p-4">
+      <ModePageLayout 
+        title="Photo to Recipe" 
+        currentMode="capture"
+        className="flex items-center justify-center p-4"
+      >
         <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
-      </div>
+      </ModePageLayout>
     );
   }
 
   // Redirect if not authenticated or no Flavr+
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center p-4">
+      <ModePageLayout 
+        title="Photo to Recipe" 
+        currentMode="capture"
+        className="flex items-center justify-center p-4"
+      >
         <Card className="w-full max-w-md">
           <CardContent className="text-center p-6">
             <h2 className="text-xl font-semibold mb-4">Authentication Required</h2>
@@ -302,13 +311,17 @@ export default function PhotoToRecipe() {
             <Button onClick={() => setLocation('/')}>Go to Login</Button>
           </CardContent>
         </Card>
-      </div>
+      </ModePageLayout>
     );
   }
 
   if (!hasFlavrPlus) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center p-4">
+      <ModePageLayout 
+        title="Photo to Recipe" 
+        currentMode="capture"
+        className="flex items-center justify-center p-4"
+      >
         <Card className="w-full max-w-md">
           <CardContent className="text-center p-6">
             <Crown className="w-12 h-12 text-orange-500 mx-auto mb-4" />
@@ -321,15 +334,18 @@ export default function PhotoToRecipe() {
             </Button>
           </CardContent>
         </Card>
-      </div>
+      </ModePageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 p-4">
+    <ModePageLayout 
+      title="Photo to Recipe" 
+      currentMode="capture"
+      className="p-4"
+    >
       <div className="max-w-4xl mx-auto">
         <div className="mb-4 md:mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Photo to Recipe</h1>
           <p className="text-sm md:text-base text-gray-300 leading-relaxed">
             Photograph your favorite cookbook recipes (up to 3 pages) and convert them to editable digital format
           </p>
@@ -710,6 +726,6 @@ export default function PhotoToRecipe() {
           </div>
         )}
       </div>
-    </div>
+    </ModePageLayout>
   );
 }
