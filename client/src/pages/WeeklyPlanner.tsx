@@ -955,7 +955,7 @@ export default function WeeklyPlanner() {
                         onClick={handleExportPlan}
                       >
                         <Download className="w-4 h-4 mr-2" />
-                        Export
+                        Add to Calendar
                       </Button>
                       <Button
                         variant="outline"
