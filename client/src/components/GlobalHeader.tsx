@@ -4,6 +4,13 @@ import FlavrLogo from "@assets/0EBD66C5-C52B-476B-AC48-A6F4E0E3EAE7.png";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 
+// Extract icon components for proper React usage
+const Menu = iconMap.menu;
+const Crown = iconMap.crown;
+const Settings = iconMap.settings;
+const LogIn = iconMap.login;
+const UserPlus = iconMap.userPlus;
+
 interface GlobalHeaderProps {
   onMenuClick?: () => void;
   onSettingsClick?: () => void;
@@ -55,7 +62,7 @@ export default function GlobalHeader({
             onClick={onMenuClick}
             className="text-white hover:bg-white/10 relative z-10"
           >
-            <iconMap.menu className="w-6 h-6" />
+            <Menu className="w-6 h-6" />
           </Button>
           
           {/* Flavr+ button - always visible as info page, icon only */}
@@ -65,7 +72,7 @@ export default function GlobalHeader({
             onClick={handleFlavrPlusClick}
             className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1.5 py-1 relative z-10 border border-orange-400/30 hover:border-orange-400/50"
           >
-            <iconMap.crown className="w-4 h-4" />
+            <Crown className="w-4 h-4" />
           </Button>
         </div>
 
@@ -89,7 +96,7 @@ export default function GlobalHeader({
               onClick={handleSettingsClick}
               className="text-white hover:bg-white/10 relative z-10 px-1.5 py-0.5"
             >
-              <iconMap.settings className="w-4 h-4" />
+              <Settings className="w-4 h-4" />
             </Button>
           ) : !user ? (
             // Not authenticated - mobile-first positioning with icons-only option on small screens
@@ -100,7 +107,7 @@ export default function GlobalHeader({
                 onClick={handleLoginClick}
                 className="text-white hover:text-white hover:bg-white/10 font-medium px-1 py-0.5 text-xs relative z-10 md:px-3 md:py-1.5 md:text-sm min-h-0 h-auto xs:px-1.5"
               >
-                <iconMap.login className="w-3 h-3 md:w-4 md:h-4" />
+                <LogIn className="w-3 h-3 md:w-4 md:h-4" />
                 <span className="hidden xs:inline text-xs md:text-sm ml-0.5 md:ml-1">Login</span>
               </Button>
               
@@ -110,7 +117,7 @@ export default function GlobalHeader({
                 onClick={handleSignUpClick}
                 className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-medium px-1 py-0.5 text-xs relative z-10 border border-orange-400/30 hover:border-orange-400/50 md:px-3 md:py-1.5 md:text-sm min-h-0 h-auto xs:px-1.5"
               >
-                <iconMap.userPlus className="w-3 h-3 md:w-4 md:h-4" />
+                <UserPlus className="w-3 h-3 md:w-4 md:h-4" />
                 <span className="hidden xs:inline text-xs md:text-sm ml-0.5 md:ml-1">Sign Up</span>
               </Button>
             </>
