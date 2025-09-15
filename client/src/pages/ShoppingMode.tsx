@@ -17,6 +17,12 @@ import { shoppingQuestions } from "@/config/shoppingQuestions";
 import { useQuery } from "@tanstack/react-query";
 import { checkQuotaBeforeGPT } from "@/lib/quotaManager";
 import { trackUserInteraction } from "@/lib/userFingerprint";
+import { User } from "@/lib/api";
+
+// Type for the /api/me response
+interface UserResponse {
+  user?: User;
+}
 
 export default function ShoppingMode() {
   const [, navigate] = useLocation();
@@ -50,7 +56,7 @@ export default function ShoppingMode() {
   const [usageData, setUsageData] = useState<any>(null);
 
   // Get user authentication status
-  const { data: user } = useQuery({
+  const { data: user } = useQuery<UserResponse>({
     queryKey: ["/api/me"],
     retry: false,
   });
@@ -307,7 +313,7 @@ export default function ShoppingMode() {
           />
         </main>
 
-        <GlobalFooter currentMode="fridge2fork" />
+        <GlobalFooter />
         
         {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
         {showSettings && <SettingsPanel onClose={closeAllMenus} />}
@@ -351,7 +357,7 @@ export default function ShoppingMode() {
           />
         </main>
 
-        <GlobalFooter currentMode="fridge2fork" />
+        <GlobalFooter />
         
         {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
         {showSettings && <SettingsPanel onClose={closeAllMenus} />}
@@ -411,7 +417,7 @@ export default function ShoppingMode() {
           />
         </main>
 
-        <GlobalFooter currentMode="fridge2fork" />
+        <GlobalFooter />
         
         {showNavigation && <GlobalNavigation onClose={closeAllMenus} onAuthRequired={() => navigate("/")} />}
         {showSettings && <SettingsPanel onClose={closeAllMenus} />}

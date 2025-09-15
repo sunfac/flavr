@@ -18,6 +18,12 @@ import AuthModal from "@/components/AuthModal";
 import FlavrPlusGate from "@/components/FlavrPlusGate";
 import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
 import { Clock } from "lucide-react";
+import { User } from "@/lib/api";
+
+// Type for the /api/me response
+interface UserResponse {
+  user?: User;
+}
 
 export default function FridgeMode() {
   const [, navigate] = useLocation();
@@ -48,7 +54,7 @@ export default function FridgeMode() {
   };
 
   // Check if user is logged in - allow graceful fallback for non-authenticated users
-  const { data: user, isLoading: userLoading } = useQuery({
+  const { data: user, isLoading: userLoading } = useQuery<UserResponse>({
     queryKey: ["/api/me"],
     retry: false,
     enabled: false, // Don't auto-fetch on load to prevent 401 errors
@@ -365,7 +371,7 @@ export default function FridgeMode() {
       )}
       
       {/* Consistent footer across all modes */}
-      <GlobalFooter currentMode="fridge2fork" />
+      <GlobalFooter />
 
       {/* Navigation overlays */}
       {showNavigation && (
