@@ -282,24 +282,31 @@ export class ChefAssistGPT5 {
       // Cuisine contexts for authenticity
       const cuisineHint = data.cuisinePreference ? ` (${data.cuisinePreference} style)` : "";
       
-      // Ultra-minimal system message - ONLY for titles
-      const systemMessage = `You are a recipe title generator. Output ONLY a JSON object with one field.
+      // Ultra-direct system message - NO conversational elements
+      const systemMessage = `Generate ONLY a recipe title in JSON format: {"title": "Recipe Name"}
 
-CHEF INSPIRATION: ${selectedChef}${cuisineHint}
-${varietyConstraints ? varietyConstraints : ''}
+You are channeling ${selectedChef}. Create an authentic recipe title that sounds exactly like it would appear in their cookbook.
 
-Generate exactly one creative recipe title that sounds like it's from ${selectedChef}'s cookbook. Be specific and appetizing but concise.
+CHEF STYLES:
+- Rick Stein: Mediterranean seafood expertise ("Rick Stein's Cornish Crab with Saffron Aioli")
+- Jamie Oliver: Bold approachable flavors ("Jamie's 15-Minute Harissa Chicken")
+- Nigella Lawson: Indulgent comfort ("Nigella's Chocolate Guinness Cake")
+- Tom Kerridge: British pub elevated ("Tom Kerridge's Sticky Beef Short Ribs")
+- Mary Berry: Classic British baking ("Mary Berry's Classic Victoria Sponge")
+- Marcus Wareing: Fine dining precision ("Marcus Wareing's Pan-Seared Scallops with Pea Purée")
 
-OUTPUT FORMAT (exactly this structure):
-{"title": "Your Recipe Title Here"}
+${varietyConstraints ? `AVOID WORDS: ${varietyConstraints}` : ''}
 
-Do not include any other text, explanations, or fields. Just the JSON.`;
+REQUIREMENTS:
+- Generate ONE recipe title only matching ${selectedChef}'s authentic style${cuisineHint}
+- Use appropriate ingredients and techniques for this chef
+- NO conversational text, explanations, or questions
+- ONLY JSON format: {"title": "Chef's Recipe Name"}
 
-      // Minimal user prompt
-      const userPrompt = data.userIntent || "surprise me with something delicious";
+Based on request: ${data.userIntent || "surprise me with something delicious"}`;
 
       const chatResponse = await AIService.chat({
-        message: systemMessage + "\n\nUser request: " + userPrompt,
+        message: systemMessage,
         variant: "technical_advisor"
       }, {
         userId: data.userId,
