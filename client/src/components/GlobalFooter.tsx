@@ -50,6 +50,12 @@ export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
       path: "/chef-assist",
     },
     {
+      id: "weekly-planner",
+      label: "Plan",
+      icon: iconMap.calendar,
+      path: "/weekly-planner",
+    },
+    {
       id: "capture",
       label: "Capture",
       icon: iconMap.camera,
@@ -60,12 +66,6 @@ export default function GlobalFooter({ currentMode }: GlobalFooterProps) {
       label: "My Cookbook", 
       icon: iconMap.bookOpen,
       path: "/cookbook",
-    },
-    {
-      id: "weekly-planner",
-      label: "Plan",
-      icon: iconMap.calendar,
-      path: "/weekly-planner",
     },
   ];
 
