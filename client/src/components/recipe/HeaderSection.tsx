@@ -295,7 +295,7 @@ export default function HeaderSection({
       {/* Hero Image - Mobile First Design */}
       <div className="relative w-full">
         {/* Image Container - Always Visible */}
-        <div className="relative w-full aspect-[4/3] sm:aspect-[3/2] lg:aspect-[16/9] bg-gradient-to-br from-orange-400 to-orange-600 rounded-t-xl overflow-hidden">
+        <div className="relative w-full aspect-[3/2] sm:aspect-[2/1] lg:aspect-[5/2] bg-gradient-to-br from-orange-400 to-orange-600 rounded-t-xl overflow-hidden">
           {currentImage && !recipe.imageLoading ? (
             /* Actual Image */
             <motion.img 
