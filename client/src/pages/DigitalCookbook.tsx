@@ -48,35 +48,72 @@ export default function DigitalCookbook() {
 
   // Filter recipes based on search and filter criteria
   const filteredRecipes = recipes?.filter((recipe: SavedRecipe) => {
-    const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         recipe.cuisine.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = recipe.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         recipe.cuisine?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          recipe.description?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesFilter = selectedFilter === "all" || 
-                         `mode-${recipe.mode}` === selectedFilter ||
-                         `cuisine-${recipe.cuisine.toLowerCase()}` === selectedFilter ||
-                         `difficulty-${recipe.difficulty.toLowerCase()}` === selectedFilter;
+                         `mode-${recipe.mode?.trim().toLowerCase()}` === selectedFilter ||
+                         `cuisine-${recipe.cuisine?.trim().toLowerCase()}` === selectedFilter ||
+                         `difficulty-${recipe.difficulty?.trim().toLowerCase()}` === selectedFilter;
     
     return matchesSearch && matchesFilter;
   }) || [];
+
+  // Helper function to format labels with proper capitalization
+  const formatLabel = (text: string) => {
+    if (!text) return text;
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+  };
 
   // Get unique filter options from recipes
   const getFilterOptions = () => {
     if (!recipes) return [];
     
-    const modes = Array.from(new Set(recipes.map((r: SavedRecipe) => r.mode))) as string[];
-    const cuisines = Array.from(new Set(recipes.map((r: SavedRecipe) => r.cuisine))).filter(Boolean) as string[];
-    const difficulties = Array.from(new Set(recipes.map((r: SavedRecipe) => r.difficulty))).filter(Boolean) as string[];
+    // Normalize and dedupe modes - apply trimming and case normalization, filter out shopping case-insensitively
+    const normalizedModes: string[] = Array.from(new Set(
+      recipes
+        .map((recipe: SavedRecipe) => recipe.mode?.trim().toLowerCase())
+        .filter((mode: string | undefined): mode is string => Boolean(mode) && mode !== 'shopping') // case-insensitive shopping exclusion
+    ));
     
-    // Filter out shopping mode from the modes
-    const filteredModes = modes.filter(mode => mode !== 'shopping');
+    // Apply trim().toLowerCase() for cuisine/difficulty to ensure complete normalization
+    const cuisineSet = new Set<string>();
+    const difficultySet = new Set<string>();
     
-    return [
+    recipes.forEach((r: SavedRecipe) => {
+      if (r.cuisine?.trim()) cuisineSet.add(r.cuisine.trim().toLowerCase());
+      if (r.difficulty?.trim()) difficultySet.add(r.difficulty.trim().toLowerCase());
+    });
+    
+    const cuisines = Array.from(cuisineSet);
+    const difficulties = Array.from(difficultySet);
+    
+    const filterOptions = [
       { label: "All Recipes", value: "all" },
-      ...filteredModes.map((mode, index) => ({ label: `${mode.charAt(0).toUpperCase() + mode.slice(1)} Mode`, value: `mode-${mode}` })),
-      ...cuisines.map((cuisine, index) => ({ label: cuisine, value: `cuisine-${cuisine.toLowerCase()}` })),
-      ...difficulties.map((diff, index) => ({ label: diff, value: `difficulty-${diff.toLowerCase()}` }))
+      ...normalizedModes.map((mode) => ({ 
+        label: `${formatLabel(mode)} Mode`, 
+        value: `mode-${mode}` 
+      })),
+      ...cuisines.map((cuisine) => ({ 
+        label: formatLabel(cuisine), 
+        value: `cuisine-${cuisine}` 
+      })),
+      ...difficulties.map((diff) => ({ 
+        label: formatLabel(diff), 
+        value: `difficulty-${diff}` 
+      }))
     ];
+    
+    // Final deduplication safeguard - dedupe by value to prevent duplicate keys in React
+    const seenValues = new Set<string>();
+    return filterOptions.filter(option => {
+      if (seenValues.has(option.value)) {
+        return false;
+      }
+      seenValues.add(option.value);
+      return true;
+    });
   };
 
   const handleRecipeClick = (recipe: SavedRecipe) => {
