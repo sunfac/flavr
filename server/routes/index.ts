@@ -175,6 +175,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Recipe image migration endpoints - Admin only
+  app.get("/api/admin/recipe-image-status", async (req, res) => {
+    try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Check if user is admin (developer account)
+      const user = await storage.getUser(req.session.userId);
+      if (!user || user.email !== "william@blycontracting.co.uk") {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const { checkRecipeImageStatus } = await import("../fixRecipeImages");
+      const status = await checkRecipeImageStatus();
+      res.json(status);
+    } catch (error) {
+      console.error("Failed to check recipe image status:", error);
+      res.status(500).json({ error: "Failed to check recipe image status" });
+    }
+  });
+
+  app.post("/api/admin/fix-recipe-images", async (req, res) => {
+    try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Check if user is admin (developer account)
+      const user = await storage.getUser(req.session.userId);
+      if (!user || user.email !== "william@blycontracting.co.uk") {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const { fixRecipeImages } = await import("../fixRecipeImages");
+      await fixRecipeImages();
+      res.json({ success: true, message: "Recipe image migration completed" });
+    } catch (error) {
+      console.error("Failed to fix recipe images:", error);
+      res.status(500).json({ error: "Failed to fix recipe images" });
+    }
+  });
+
   // Get single recipe endpoint
   app.get("/api/recipe/:id", async (req, res) => {
     try {
