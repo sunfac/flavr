@@ -189,26 +189,24 @@ async function incrementUsageCounter(req: any): Promise<void> {
   }
 }
 
-// Generate recipe image using DALL-E 3 and store locally (Flavr+ only)
+// Generate recipe image with different quality based on subscription
 async function generateRecipeImage(recipeTitle: string, cuisine: string, recipeId?: number, userId?: number): Promise<string | null> {
   try {
-    // Check if user has Flavr+ subscription for image generation
+    let hasFlavrPlus = false;
+    let isDeveloper = false;
+    
+    // Check subscription status
     if (userId) {
       const user = await storage.getUser(userId);
-      const isDeveloper = user?.email === "william@blycontracting.co.uk";
-      const hasFlavrPlus = user?.hasFlavrPlus || isDeveloper;
-      
-      if (!hasFlavrPlus) {
-        console.log('🚫 Image generation restricted to Flavr+ users');
-        return null; // No image for free users
-      }
-    } else {
-      // Pseudo users (not logged in) don't get images
-      console.log('🚫 Image generation requires Flavr+ subscription');
-      return null;
+      isDeveloper = user?.email === "william@blycontracting.co.uk";
+      hasFlavrPlus = user?.hasFlavrPlus || isDeveloper;
     }
     
-    console.log('🎨 Generating recipe image with DALL-E 3 (Flavr+ user)...');
+    // Use premium DALL-E 3 for Flavr+ users, basic generation for free users
+    const useHDQuality = hasFlavrPlus || isDeveloper;
+    
+    const qualityLevel = useHDQuality ? 'Premium HD' : 'Standard';
+    console.log(`🎨 Generating recipe image (${qualityLevel})...`);
     
     // Enhanced prompt to avoid whole animals unless specifically mentioned
     const shouldShowWholeAnimal = recipeTitle.toLowerCase().includes('whole') || 
@@ -220,14 +218,18 @@ async function generateRecipeImage(recipeTitle: string, cuisine: string, recipeI
       '' : 
       'Show prepared, portioned pieces (fillets, cuts, portions) rather than whole animals. Focus on the cooked, plated dish as served.';
     
-    const imagePrompt = `Photorealistic commercial food photography of ${recipeTitle}, ${cuisine} cuisine, M&S Marks & Spencer style, professional studio lighting, ultra-realistic detail, high-definition food photography, commercial quality, appetizing and luxurious presentation, clean modern aesthetic, professional food styling, photographic realism, 45-degree angle view. ${animalGuidance} Ultra-realistic, highly detailed, photographic quality with sharp focus and natural textures.`;
+    // Create different prompts based on subscription level
+    const basePrompt = `Food photography of ${recipeTitle}, ${cuisine} cuisine, appetizing presentation, clean aesthetic. ${animalGuidance}`;
+    const premiumPrompt = `Photorealistic commercial food photography of ${recipeTitle}, ${cuisine} cuisine, M&S Marks & Spencer style, professional studio lighting, ultra-realistic detail, high-definition food photography, commercial quality, appetizing and luxurious presentation, clean modern aesthetic, professional food styling, photographic realism, 45-degree angle view. ${animalGuidance} Ultra-realistic, highly detailed, photographic quality with sharp focus and natural textures.`;
+    
+    const imagePrompt = useHDQuality ? premiumPrompt : basePrompt;
     
     const response = await openai.images.generate({
       model: "dall-e-3",
       prompt: imagePrompt,
       n: 1,
-      size: "1024x1024",
-      quality: "standard",
+      size: useHDQuality ? "1024x1024" : "512x512", // Smaller size for free users
+      quality: useHDQuality ? "hd" : "standard", // HD quality for Flavr+ users
     });
 
     if (response.data && response.data[0] && response.data[0].url) {

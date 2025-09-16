@@ -227,7 +227,7 @@ async function generateRecipeWithPrompt(prompt: string, mode: string, data: Conv
     // Add metadata from conversation
     recipe.mode = mode;
     recipe.conversationalData = data;
-    recipe.id = Date.now().toString();
+    // Remove manual ID assignment - let database auto-generate
     recipe.createdAt = new Date().toISOString();
     
     return recipe;

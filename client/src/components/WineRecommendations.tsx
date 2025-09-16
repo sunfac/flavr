@@ -180,16 +180,23 @@ function WineRecommendations({ recipe, className = '' }: WineRecommendationsProp
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto"
             onClick={() => setIsOpen(false)}
+            style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh' }}
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-2xl w-full my-8 mx-auto"
+              style={{ 
+                maxHeight: 'calc(100vh - 4rem)',
+                minHeight: 'auto',
+                transform: 'translateZ(0)'
+              }}
             >
+              <div className="max-h-full overflow-y-auto">
               {/* Header */}
               <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-6 rounded-t-xl">
                 <div className="flex items-center justify-between">
@@ -266,6 +273,7 @@ function WineRecommendations({ recipe, className = '' }: WineRecommendationsProp
                     Consult your local wine shop for personalized recommendations.
                   </p>
                 </div>
+              </div>
               </div>
             </motion.div>
           </motion.div>

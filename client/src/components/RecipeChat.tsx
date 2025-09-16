@@ -346,9 +346,18 @@ export default function RecipeChat({
                 }`}
                 data-testid={msg.isUser ? "message-user" : "message-assistant"}
               >
-                <p className="text-sm whitespace-pre-wrap">
-                  {msg.isUser ? msg.message : msg.response}
-                </p>
+                <div className="text-sm whitespace-pre-wrap">
+                  {msg.isUser ? (
+                    <p>{msg.message}</p>
+                  ) : (
+                    <div dangerouslySetInnerHTML={{
+                      __html: msg.response
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                        .replace(/\n/g, '<br />')
+                    }} />
+                  )}
+                </div>
                 <p className="text-xs opacity-70 mt-1">
                   {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
@@ -359,7 +368,14 @@ export default function RecipeChat({
           {sendMessageMutation.isPending && (
             <div className="flex justify-start">
               <div className="bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-lg max-w-xs">
-                <p className="text-sm text-gray-600 dark:text-gray-300">Typing...</p>
+                <div className="flex items-center space-x-1">
+                  <span className="text-sm text-gray-600 dark:text-gray-300">Zest is thinking</span>
+                  <div className="flex space-x-1">
+                    <div className="w-1 h-1 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-1 h-1 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-1 h-1 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

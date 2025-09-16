@@ -351,7 +351,7 @@ Return ONLY valid JSON with this exact structure:
       
       // Create a basic recipe object that matches our schema
       const fallbackRecipe: Recipe = {
-        id: Date.now(), // Temporary ID - will be replaced when saved
+        // Remove manual ID assignment - let database auto-generate
         userId: 0, // System generated
         title: recipeData.title || 'Simple Recipe',
         cuisine: recipeData.cuisine || cuisine,

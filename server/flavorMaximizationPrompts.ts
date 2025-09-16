@@ -104,7 +104,10 @@ When creating specific traditional dishes, ALWAYS include their essential flavor
 - Sumac, za'atar, pomegranate molasses, tahini, preserved lemons, harissa
 
 **Indian Subcontinent:**
-- Whole spices (cumin, coriander, cardamom), garam masala, ginger-garlic paste, curry leaves
+- Whole spices (cumin seeds, coriander seeds, green cardamom pods, black cardamom, cinnamon sticks, cloves, bay leaves)
+- Garam masala components (green cardamom, black cardamom, cinnamon, cloves, black peppercorns, nutmeg, mace)
+- Fresh aromatics (ginger-garlic paste, curry leaves, fresh cilantro, mint)
+- Essential spices (turmeric powder, red chili powder, asafoetida/hing)
 
 **Latin American:**
 - Lime juice, cilantro, chillies, cumin, garlic, onions
@@ -126,7 +129,13 @@ When generating ANY traditional dish, MANDATORY inclusion of authentic ingredien
 **Pad Thai:** rice noodles, fish sauce, tamarind paste, palm sugar, dried shrimp, peanuts, bean sprouts, garlic chives, lime
 **Chinese Stir-fries:** soy sauce, rice wine, sesame oil, ginger, garlic, spring onions, plus appropriate vegetables (bean sprouts, pak choi, etc.)
 **Japanese Ramen:** dashi, miso/soy/tonkotsu base, nori, spring onions, bamboo shoots, soft-boiled egg, chashu
-**Indian Curry:** whole spices (cumin, coriander, cardamom), onions, ginger-garlic paste, tomatoes, garam masala
+**Indian Curry:** whole spices (cumin seeds, coriander seeds, green cardamom pods, cinnamon stick, cloves), onions, ginger-garlic paste, tomatoes, turmeric powder, red chili powder, garam masala
+**Biryani:** basmati rice, whole spices (green cardamom, black cardamom, cinnamon sticks, cloves, black peppercorns, star anise, bay leaves), saffron, rose water/kewra water, fried onions, mint leaves, cilantro, ginger-garlic paste, yogurt, specific biryani masala blend (not just "biryani spices")
+**Tandoori Dishes:** tandoori masala (paprika, cayenne, coriander powder, cumin powder, garam masala, ginger powder, garlic powder, fenugreek leaves), yogurt, lemon juice, ginger-garlic paste
+**Dal/Lentil Dishes:** specific lentils (chana dal, toor dal, moong dal, masoor dal), turmeric, cumin seeds, mustard seeds, asafoetida, curry leaves, dried red chilies
+**South Indian Dishes:** mustard seeds, curry leaves, urad dal, chana dal, asafoetida, dried red chilies, coconut (fresh or desiccated), tamarind paste, sambar powder components
+**Rajasthani Dishes:** dried red chilies, coriander seeds, fennel seeds, fenugreek seeds, nigella seeds (kalonji), dried mint, amchur (dry mango powder)
+**Bengali Dishes:** panch phoron (cumin seeds, fennel seeds, fenugreek seeds, nigella seeds, mustard seeds), mustard oil, poppy seeds, coconut
 **Italian Carbonara:** eggs, pecorino romano, guanciale/pancetta, black pepper (NO cream)
 **French Coq au Vin:** chicken, red wine, pearl onions, mushrooms, bacon, herbs de provence
 **Mexican Tacos:** corn tortillas, onions, cilantro, lime, salsa verde/roja
