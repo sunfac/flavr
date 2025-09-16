@@ -53,6 +53,7 @@ import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
 import WeeklyPlannerOnboarding from "@/components/WeeklyPlannerOnboarding";
+import ShoppingListModal from "@/components/ShoppingListModal";
 
 export default function WeeklyPlanner() {
   const [, navigate] = useLocation();
@@ -74,6 +75,9 @@ export default function WeeklyPlanner() {
   const [isGeneratingTitles, setIsGeneratingTitles] = useState(false);
   const [isGeneratingRecipes, setIsGeneratingRecipes] = useState(false);
   const [editingPreferences, setEditingPreferences] = useState<any>(null);
+  // Shopping list modal state
+  const [showShoppingListModal, setShowShoppingListModal] = useState(false);
+  const [shoppingListData, setShoppingListData] = useState<string[]>([]);
   // Removed estimatedCost state - users shouldn't see internal costs
   const { toast } = useToast();
 
@@ -427,26 +431,10 @@ export default function WeeklyPlanner() {
           return;
         }
 
-        // Create a formatted shopping list display
-        const listText = shoppingList.map((item: string, index: number) => 
-          `${index + 1}. ${item}`
-        ).join('\n');
+        // Store shopping list data and open modal
+        setShoppingListData(shoppingList);
+        setShowShoppingListModal(true);
         
-        // Copy to clipboard and show success
-        navigator.clipboard.writeText(listText).then(() => {
-          toast({
-            title: "Shopping List Copied!",
-            description: `${shoppingList.length} ingredients copied to clipboard. Check your planned recipes for the full list.`,
-          });
-        }).catch(() => {
-          toast({
-            title: "Shopping List Ready",
-            description: `${shoppingList.length} ingredients ready. Check your browser console for the full list.`,
-          });
-          console.log("🛒 SHOPPING LIST:", listText);
-        });
-        
-        console.log("Shopping list:", shoppingData);
       }
     } catch (error) {
       console.error("Error getting shopping list:", error);
@@ -1180,6 +1168,12 @@ export default function WeeklyPlanner() {
       <GlobalNavigation isOpen={showNavigation} onClose={closeAllMenus} />
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} onSuccess={() => setShowAuthModal(false)} />
       <FlavrPlusUpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+      <ShoppingListModal 
+        isOpen={showShoppingListModal} 
+        onClose={() => setShowShoppingListModal(false)}
+        shoppingList={shoppingListData}
+        weekStartDate={currentWeekPlan?.weekStartDate}
+      />
     </div>
   );
 }
