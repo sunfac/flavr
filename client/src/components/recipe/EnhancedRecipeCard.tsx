@@ -62,6 +62,7 @@ import ProgressBar from './ProgressBar';
 import FooterSection from './FooterSection';
 import SubRecipeModal from './SubRecipeModal';
 import { RecipeNavigation } from './RecipeNavigation';
+import WineRecommendations from '@/components/WineRecommendations';
 import { animations, layout } from '@/styles/tokens';
 
 interface Recipe {
@@ -688,6 +689,20 @@ function EnhancedRecipeCard({
             servings: activeServings
           }}
         />
+
+        {/* Wine Recommendations Section */}
+        <div className="p-6 bg-slate-800/20 border-t border-slate-700/50">
+          <WineRecommendations 
+            recipe={{
+              title: activeTitle,
+              cuisine: recipe.cuisine,
+              ingredients: formattedIngredients.map(ing => ing.text),
+              instructions: activeInstructions,
+              difficulty: activeDifficulty,
+              description: recipe.description
+            }}
+          />
+        </div>
 
         {/* Recipe Tips - Above Footer to Prevent Overlap */}
         {recipe.tips && (
