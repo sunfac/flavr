@@ -143,24 +143,35 @@ function WineRecommendations({ recipe, className = '' }: WineRecommendationsProp
 
   return (
     <div className={className}>
-      {/* Wine Recommendations Trigger Button */}
-      <Button
-        data-testid="button-wine-recommendations"
-        onClick={fetchWineRecommendations}
-        disabled={isLoading}
-        variant="outline"
-        size="sm"
-        className="flex items-center gap-2 bg-white dark:bg-gray-800 border-2 border-purple-200 dark:border-purple-800 hover:border-purple-300 dark:hover:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200"
-      >
-        {isLoading ? (
-          <LoaderCircle className="h-4 w-4 animate-spin" />
-        ) : (
-          <Wine className="h-4 w-4" />
-        )}
-        <span className="font-medium">
-          {isLoading ? 'Finding wines...' : 'Wine Pairing'}
-        </span>
-      </Button>
+      {/* Wine Recommendations Trigger Button - Enhanced Prominence */}
+      <div className="w-full">
+        <Button
+          data-testid="button-wine-recommendations"
+          onClick={fetchWineRecommendations}
+          disabled={isLoading}
+          variant="default"
+          size="lg"
+          className="w-full flex flex-col items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 dark:from-purple-500 dark:to-purple-600 dark:hover:from-purple-600 dark:hover:to-purple-700 text-white border-0 rounded-xl py-4 px-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+        >
+          {isLoading ? (
+            <>
+              <LoaderCircle className="h-6 w-6 animate-spin" />
+              <div className="text-center">
+                <div className="font-semibold text-base">Finding Perfect Wines...</div>
+                <div className="text-sm opacity-90">Analyzing flavor profiles</div>
+              </div>
+            </>
+          ) : (
+            <>
+              <Wine className="h-6 w-6 mb-1" />
+              <div className="text-center">
+                <div className="font-semibold text-base">Wine Pairings</div>
+                <div className="text-sm opacity-90">Get expert wine recommendations</div>
+              </div>
+            </>
+          )}
+        </Button>
+      </div>
 
       {/* Wine Recommendations Modal/Panel */}
       <AnimatePresence>

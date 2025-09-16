@@ -108,12 +108,24 @@ export function registerWineRoutes(app: Express) {
         throw new Error('No wine recommendation generated');
       }
 
-      // Parse the JSON response
+      // Parse the JSON response (strip markdown code blocks if present)
       let wineRecommendations: WineRecommendation[];
       try {
-        wineRecommendations = JSON.parse(responseText);
+        // Clean the response text by removing markdown code blocks
+        let cleanedJson = responseText;
+        if (responseText.includes('```')) {
+          // Remove markdown code blocks: ```json ... ``` or ``` ... ```
+          cleanedJson = responseText
+            .replace(/^```(?:json)?\s*\n?/gm, '') // Remove opening code block
+            .replace(/\n?\s*```\s*$/gm, '')      // Remove closing code block
+            .trim();
+        }
+        
+        console.log('🍷 Parsing cleaned JSON for wine recommendations:', cleanedJson);
+        wineRecommendations = JSON.parse(cleanedJson);
       } catch (parseError) {
-        console.error('Failed to parse wine recommendations JSON:', responseText);
+        console.error('❌ Failed to parse wine recommendations JSON:', responseText);
+        console.error('Parse error details:', parseError);
         throw new Error('Invalid wine recommendation format received');
       }
 

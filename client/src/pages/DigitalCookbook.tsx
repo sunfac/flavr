@@ -200,7 +200,7 @@ export default function DigitalCookbook() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-      <div className="container mx-auto px-4 py-4 md:py-8">
+      <div className="container mx-auto max-w-7xl px-4 py-4 md:py-8">
         {/* Header */}
         <div className="mb-6 md:mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -282,7 +282,7 @@ export default function DigitalCookbook() {
 
         {/* Loading State */}
         {isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-6 max-w-6xl mx-auto">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="animate-pulse">
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm h-72 md:h-80">
@@ -341,7 +341,7 @@ export default function DigitalCookbook() {
 
         {/* Recipe Grid */}
         {!isLoading && filteredRecipes.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 pb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-6 pb-8 max-w-6xl mx-auto">
             <AnimatePresence>
               {filteredRecipes.map((recipe: SavedRecipe, index: number) => (
                 <motion.div
