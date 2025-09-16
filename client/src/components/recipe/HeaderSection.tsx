@@ -374,10 +374,10 @@ export default function HeaderSection({
               onClick={handleCopyIngredients}
               size="sm"
               variant="secondary"
-              className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-3 md:py-2 text-xs relative z-20 cursor-pointer"
+              className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-200 px-1 py-0.5 sm:px-1.5 sm:py-1 md:px-2 md:py-1 text-xs relative z-20 cursor-pointer"
               style={{ pointerEvents: 'auto' }}
             >
-              <Copy className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+              <Copy className="w-3 h-3 mr-0.5" />
               <span className="text-xs font-medium">Copy</span>
             </Button>
             
