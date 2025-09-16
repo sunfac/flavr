@@ -8,12 +8,16 @@ interface GlobalHeaderProps {
   onMenuClick?: () => void;
   onSettingsClick?: () => void;
   onAuthRequired?: () => void;
+  onBackClick?: () => void;
+  backButtonText?: string;
 }
 
 export default function GlobalHeader({ 
   onMenuClick, 
   onSettingsClick,
-  onAuthRequired 
+  onAuthRequired,
+  onBackClick,
+  backButtonText = "Back"
 }: GlobalHeaderProps) {
   const [, navigate] = useLocation();
   
@@ -47,16 +51,29 @@ export default function GlobalHeader({
   return (
     <header className="absolute top-0 left-0 right-0 z-50 px-6 py-4 pointer-events-auto">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Left: Hamburger Menu and Flavr+ */}
+        {/* Left: Back Button or Hamburger Menu and Flavr+ */}
         <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost"
-            size="icon"
-            onClick={onMenuClick}
-            className="text-white hover:bg-white/10 relative z-10"
-          >
-            <iconMap.menu className="w-6 h-6" />
-          </Button>
+          {onBackClick ? (
+            <Button 
+              variant="ghost"
+              size="sm"
+              onClick={onBackClick}
+              className="text-white hover:bg-white/10 relative z-10 flex items-center gap-1.5 px-2"
+              data-testid="button-back"
+            >
+              <iconMap.arrowLeft className="w-4 h-4" />
+              <span className="text-sm">{backButtonText}</span>
+            </Button>
+          ) : (
+            <Button 
+              variant="ghost"
+              size="icon"
+              onClick={onMenuClick}
+              className="text-white hover:bg-white/10 relative z-10"
+            >
+              <iconMap.menu className="w-6 h-6" />
+            </Button>
+          )}
           
           {/* Flavr+ button - always visible as info page, icon only */}
           <Button 

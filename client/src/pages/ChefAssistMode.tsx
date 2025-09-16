@@ -142,6 +142,8 @@ export default function ChefAssistMode() {
         onMenuClick={() => openMenu('navigation')}
         onSettingsClick={() => openMenu('settings')}
         onAuthRequired={() => navigate("/")}
+        onBackClick={() => navigate("/app")}
+        backButtonText="Back to Modes"
       />
 
       {/* Recipe Remaining Banner - positioned below header with proper spacing */}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
@@ -54,6 +55,7 @@ import FlavrPlusUpgradeModal from "@/components/FlavrPlusUpgradeModal";
 import WeeklyPlannerOnboarding from "@/components/WeeklyPlannerOnboarding";
 
 export default function WeeklyPlanner() {
+  const [, navigate] = useLocation();
   const [showNavigation, setShowNavigation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -476,7 +478,11 @@ export default function WeeklyPlanner() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-        <GlobalHeader onMenuClick={(menu) => openMenu(menu)} />
+        <GlobalHeader 
+          onMenuClick={() => openMenu('navigation')}
+          onBackClick={() => navigate("/app")}
+          backButtonText="Back to Modes"
+        />
         
         <main className="pt-20 pb-24">
           <div className="max-w-4xl mx-auto px-4 py-16 text-center">
@@ -512,7 +518,11 @@ export default function WeeklyPlanner() {
   if (preferencesLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-        <GlobalHeader onMenuClick={(menu) => openMenu(menu)} />
+        <GlobalHeader 
+          onMenuClick={() => openMenu('navigation')}
+          onBackClick={() => navigate("/app")}
+          backButtonText="Back to Modes"
+        />
         <main className="pt-20 pb-24">
           <div className="max-w-4xl mx-auto px-4 py-16 text-center">
             <div className="animate-spin w-8 h-8 border-4 border-orange-400 border-t-transparent rounded-full mx-auto mb-4" />
@@ -526,7 +536,11 @@ export default function WeeklyPlanner() {
   if (!preferences || preferences?.onboardingRequired) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-        <GlobalHeader onMenuClick={(menu) => openMenu(menu)} />
+        <GlobalHeader 
+          onMenuClick={() => openMenu('navigation')}
+          onBackClick={() => navigate("/app")}
+          backButtonText="Back to Modes"
+        />
         
         <main className="pt-20 pb-24">
           <div className="max-w-4xl mx-auto px-4 py-16">
@@ -559,7 +573,11 @@ export default function WeeklyPlanner() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-      <GlobalHeader onMenuClick={(menu) => openMenu(menu)} />
+      <GlobalHeader 
+        onMenuClick={() => openMenu('navigation')}
+        onBackClick={() => window.location.href = "/app"}
+        backButtonText="Back to Modes"
+      />
       
       <main className="pt-20 pb-24">
         <div className="max-w-6xl mx-auto px-4 py-8">

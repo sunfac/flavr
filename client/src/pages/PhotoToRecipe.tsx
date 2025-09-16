@@ -331,6 +331,8 @@ export default function PhotoToRecipe() {
           onMenuClick={() => openMenu('navigation')}
           onSettingsClick={() => openMenu('settings')}
           onAuthRequired={() => setLocation("/")}
+          onBackClick={() => setLocation("/app")}
+          backButtonText="Back to Modes"
         />
         
         <main className="pt-20 pb-24 flex items-center justify-center p-4">
@@ -359,6 +361,8 @@ export default function PhotoToRecipe() {
           onMenuClick={() => openMenu('navigation')}
           onSettingsClick={() => openMenu('settings')}
           onAuthRequired={() => setLocation("/")}
+          onBackClick={() => setLocation("/app")}
+          backButtonText="Back to Modes"
         />
         
         <main className="pt-20 pb-24 flex items-center justify-center p-4">
@@ -391,6 +395,8 @@ export default function PhotoToRecipe() {
         onMenuClick={() => openMenu('navigation')}
         onSettingsClick={() => openMenu('settings')}
         onAuthRequired={() => setLocation("/")}
+        onBackClick={() => setLocation("/app")}
+        backButtonText="Back to Modes"
       />
       
       <main className="pt-20 pb-24 p-4">
