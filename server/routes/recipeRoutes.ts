@@ -769,8 +769,9 @@ Return a JSON object with this structure:
         // Apply UK conversions
         const convertedRecipe = convertRecipeToUKEnglish(flavorMaximizedRecipe);
 
-        // Start parallel image generation (don't await)
-        const tempRecipeId = Date.now();
+        // Start parallel image generation (don't await) 
+        // Use a smaller random ID to avoid PostgreSQL integer overflow
+        const tempRecipeId = Math.floor(Math.random() * 1000000) + 1;
         console.log('🎨 Starting parallel image generation for better UX...');
         
         // Start image generation in background
@@ -951,7 +952,8 @@ Return a JSON object with this structure:
         recipe = result;
       
       // Start parallel image generation (don't wait for it)
-      const tempRecipeId = Date.now();
+      // Use a smaller random ID to avoid PostgreSQL integer overflow  
+      const tempRecipeId = Math.floor(Math.random() * 1000000) + 1;
       console.log('🎨 Starting parallel image generation for faster response...');
       
       // Start image generation in background

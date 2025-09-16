@@ -430,8 +430,8 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
         }));
       }
 
-      // Add metadata
-      recipe.id = Date.now().toString();
+      // Add metadata - use a smaller random ID to avoid PostgreSQL integer overflow
+      recipe.id = (Math.floor(Math.random() * 1000000) + 1).toString();
       recipe.createdAt = new Date().toISOString();
       recipe.mode = 'photo-extraction';
 
@@ -453,8 +453,8 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
         (global as any).recipeImageCache = new Map();
       }
       
-      // Create a tempId for image polling
-      const tempId = `photo-extracted-${Date.now()}`;
+      // Create a tempId for image polling - use random number instead of timestamp
+      const tempId = `photo-extracted-${Math.floor(Math.random() * 1000000)}`;
       recipe.tempId = tempId;
       
       // Generate recipe image using DALL-E 3
