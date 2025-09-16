@@ -5,7 +5,9 @@ import { ChefHat, Sparkles, Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { PageLayout } from "@/components/PageLayout";
+import GlobalHeader from "@/components/GlobalHeader";
+import GlobalFooter from "@/components/GlobalFooter";
+import GlobalNavigation from "@/components/GlobalNavigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -78,8 +80,25 @@ export default function ChefAssist() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [selectedDietary, setSelectedDietary] = useState<string[]>([]);
   const [selectedNutritional, setSelectedNutritional] = useState<string[]>([]);
+  const [showNavigation, setShowNavigation] = useState(false);
   const { toast } = useToast();
   const { updateActiveRecipe } = useRecipeStore();
+
+  // Close all menus
+  const closeAllMenus = () => {
+    setShowNavigation(false);
+  };
+
+  // Open specific menu and close others
+  const openMenu = (menuType: 'navigation') => {
+    closeAllMenus();
+    if (menuType === 'navigation') setShowNavigation(true);
+  };
+
+  // Close all menus on component mount
+  useEffect(() => {
+    closeAllMenus();
+  }, []);
 
   // Check quota status
   const { data: quotaData } = useQuery({
@@ -325,8 +344,15 @@ export default function ChefAssist() {
   }
 
   return (
-    <PageLayout>
-      <div className="max-w-4xl mx-auto px-4 py-4 md:py-8">
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+      <GlobalHeader 
+        onMenuClick={() => openMenu('navigation')}
+        onBackClick={() => navigate("/app")}
+        backButtonText="Back to Modes"
+      />
+      
+      <main className="pt-20 pb-24">
+        <div className="max-w-4xl mx-auto px-4 py-4 md:py-8">
         {/* Original quiz-style layout */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -422,13 +448,16 @@ export default function ChefAssist() {
             </CardContent>
           </Card>
         </motion.div>
-      </div>
-      
+        </div>
+      </main>
+
+      <GlobalFooter />
+      <GlobalNavigation isOpen={showNavigation} onClose={closeAllMenus} />
       <FlavrPlusUpgradeModal
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
         recipesUsed={3}
       />
-    </PageLayout>
+    </div>
   );
 }
