@@ -1167,6 +1167,45 @@ Examples of NON-modification requests:
         );
       }
 
+      // Comprehensive analytics logging for Chat recipe generation
+      if (recipe) {
+        try {
+          const { logRecipeGeneration } = await import("../analyticsLogger");
+          await logRecipeGeneration({
+            userId: userContext.userId?.toString() || 'anonymous',
+            mode: 'chat',
+            gptVersion: isFlavorMaximized ? 'gpt-5-flavor' : 'gpt-4o',
+            recipeOutput: {
+              title: recipe.title,
+              cuisine: recipe.cuisine || 'Mixed',
+              difficulty: recipe.difficulty || 'medium',
+              servings: recipe.servings || 4,
+              cookTime: recipe.cookTime || 30,
+              ingredients: recipe.ingredients || [],
+              instructions: recipe.instructions || [],
+              tips: recipe.tips
+            },
+            intentData: {
+              mood: userMemory?.preferences?.cookingMood,
+              ambition: userMemory?.preferences?.ambitionLevel,
+              diet: userMemory?.preferences?.dietaryRestrictions || [],
+              time: userMemory?.preferences?.timePreference,
+              equipment: userMemory?.preferences?.availableEquipment || [],
+              cuisinePreference: userMemory?.preferences?.preferredCuisines?.[0]
+            },
+            userAction: {
+              chatbotUsed: true,
+              chatbotQueries: [message]
+            },
+            sessionId: req.session?.id,
+            userAgent: req.get('User-Agent'),
+            sourcePrompt2: isFlavorMaximized ? `Flavor-maximized generation: ${originalMessage}` : `Chat recipe: ${message}`
+          });
+        } catch (logError) {
+          console.error('Failed to log comprehensive Chat recipe generation:', logError);
+        }
+      }
+
       // Save recipe and increment usage counter
       let savedRecipe = null;
       if (recipe) {

@@ -160,6 +160,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Developer recipe generation logs endpoint (developer access only)
+  app.get("/api/developer/recipe-generation-logs", async (req, res) => {
+    try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Check if user is developer
+      const user = await storage.getUser(req.session.userId);
+      if (user?.email !== "william@blycontracting.co.uk") {
+        return res.status(403).json({ error: "Developer access required" });
+      }
+
+      const logs = await storage.getRecipeGenerationLogs();
+      res.json(logs);
+    } catch (error) {
+      console.error("Failed to fetch recipe generation logs:", error);
+      res.status(500).json({ error: "Failed to fetch recipe generation logs" });
+    }
+  });
+
   // Get recipes endpoint
   app.get("/api/recipes", async (req, res) => {
     try {

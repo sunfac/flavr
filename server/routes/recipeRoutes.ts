@@ -6,6 +6,7 @@ import { storage } from "../storage";
 import { requireAuth } from "./authRoutes";
 import { insertRecipeSchema } from "@shared/schema";
 import { logGPTInteraction, logSimpleGPTInteraction } from "../developerLogger";
+import { logRecipeGeneration } from "../analyticsLogger";
 import { processFridgeImage } from "../vision";
 import { getCreativeGuidanceBlock } from "../shoppingPromptBlocks";
 import { MichelinChefAI } from "../openaiService";
@@ -600,6 +601,41 @@ Return a JSON object with this structure:
         userId: req.session?.userId?.toString() || "anonymous"
       });
 
+      // Comprehensive analytics logging for first recipe generated
+      if (response.recipes && response.recipes.length > 0) {
+        const firstRecipe = response.recipes[0];
+        try {
+          await logRecipeGeneration({
+            userId: req.session?.userId?.toString() || 'anonymous',
+            mode: 'fridge',
+            gptVersion: 'gpt-5',
+            recipeOutput: {
+              title: firstRecipe.title,
+              cuisine: firstRecipe.cuisine || 'Mixed',
+              difficulty: firstRecipe.difficulty || 'easy',
+              servings: servings,
+              cookTime: cookingTime,
+              ingredients: firstRecipe.keyIngredients || ingredients,
+              instructions: firstRecipe.description ? [firstRecipe.description] : ['Recipe generated from available ingredients'],
+              tips: firstRecipe.tips
+            },
+            intentData: {
+              ingredients: ingredients,
+              time: cookingTime,
+              budget: budget?.toString(),
+              equipment: equipment,
+              diet: combinedDietaryNeeds,
+              flexibility: ingredientFlexibility
+            },
+            sessionId: req.session?.id,
+            userAgent: req.get('User-Agent'),
+            sourcePrompt2: "GPT-5 MichelinChefAI Fridge Mode generation"
+          });
+        } catch (logError) {
+          console.error('Failed to log comprehensive recipe generation:', logError);
+        }
+      }
+
       res.json({ recipes: response.recipes || [] });
 
       // Increment usage counter after successful generation
@@ -1028,6 +1064,41 @@ Return a JSON object with this structure:
         success: true,
         userId: req.session?.userId?.toString()
       }).catch(err => console.error('Background logging failed:', err));
+
+      // Comprehensive analytics logging for Chef Assist recipe
+      try {
+        await logRecipeGeneration({
+          userId: req.session?.userId?.toString() || 'anonymous',
+          mode: 'chef',
+          gptVersion: 'gpt-5',
+          recipeOutput: {
+            title: recipe.title,
+            cuisine: recipe.cuisine || 'Mixed',
+            difficulty: recipe.difficulty || 'medium',
+            servings: servings || 4,
+            cookTime: recipe.cookTime || recipe.time || 30,
+            ingredients: recipe.ingredients || [],
+            instructions: recipe.instructions || [],
+            tips: recipe.tips
+          },
+          intentData: {
+            mood: req.body.mood,
+            ambition: req.body.ambition,
+            diet: combinedDietaryNeeds,
+            time: req.body.timeBudget,
+            budget: req.body.budgetNote,
+            equipment: req.body.equipment || [],
+            cuisinePreference: req.body.cuisinePreference,
+            ingredientVariety: req.body.mustUse?.length > 0 ? 'specific' : 'flexible',
+            reusabilityPreference: req.body.avoid?.length > 0 ? 'restrictive' : 'open'
+          },
+          sessionId: req.session?.id,
+          userAgent: req.get('User-Agent'),
+          sourcePrompt2: `GPT-5 Chef Assist: ${userPrompt}`
+        });
+      } catch (logError) {
+        console.error('Failed to log comprehensive Chef Assist recipe generation:', logError);
+      }
     } catch (error: any) {
       console.error('Chef assist generation error:', error);
       
