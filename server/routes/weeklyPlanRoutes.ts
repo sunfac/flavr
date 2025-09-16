@@ -389,7 +389,8 @@ export function registerWeeklyPlanRoutes(app: Express) {
         userId,
         weekStartDate: weekStart,
         weekEndDate: weekEnd,
-        planStatus: "pending" as const,
+        planStatus: "accepted" as const,
+        acceptedAt: new Date(),
         plannedRecipes: plannedMeals.slice(0, mealCount),
         consolidatedShoppingList,
         generatedAt: new Date()

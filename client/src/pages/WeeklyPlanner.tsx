@@ -62,7 +62,6 @@ export default function WeeklyPlanner() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [showAdjustModal, setShowAdjustModal] = useState(false);
   const [currentWeekPlan, setCurrentWeekPlan] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   
@@ -217,7 +216,7 @@ export default function WeeklyPlanner() {
       
       toast({
         title: "Weekly Plan Generated!",
-        description: "Your personalized meal plan is ready. Review and accept or make adjustments.",
+        description: "Your personalized meal plan has been automatically saved and is ready to use.",
       });
     } catch (error: any) {
       console.error("Error generating recipes:", error);
@@ -325,60 +324,13 @@ export default function WeeklyPlanner() {
     });
   };
 
-  const handleAcceptPlan = async () => {
-    if (!currentWeekPlan) return;
 
-    try {
-      const response = await apiRequest("POST", `/api/weekly-plans/${currentWeekPlan.id}/accept`);
-      const updatedPlan = await response.json();
-      setCurrentWeekPlan(updatedPlan);
-      
-      toast({
-        title: "Plan Accepted!",
-        description: "Your weekly meal plan is now active. Happy cooking!",
-      });
-    } catch (error) {
-      console.error("Error accepting plan:", error);
-      toast({
-        title: "Failed to Accept",
-        description: "Could not accept the plan. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleSkipPlan = async (reason: string) => {
-    if (!currentWeekPlan) return;
-
-    try {
-      const response = await apiRequest("POST", `/api/weekly-plans/${currentWeekPlan.id}/skip`, {
-        reason
-      });
-      const updatedPlan = await response.json();
-      setCurrentWeekPlan(updatedPlan);
-      
-      toast({
-        title: "Plan Skipped",
-        description: "We'll generate a fresh plan for you next week.",
-      });
-    } catch (error) {
-      console.error("Error skipping plan:", error);
-      toast({
-        title: "Failed to Skip",
-        description: "Could not skip the plan. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
 
   const handleViewRecipe = (recipeId: number) => {
     // Navigate to recipe view page
     window.open(`/recipe/${recipeId}`, '_blank');
   };
 
-  const handleAdjustPlan = () => {
-    setShowAdjustModal(true);
-  };
 
   const handleExportPlan = async () => {
     if (!currentWeekPlan) return;
@@ -866,31 +818,16 @@ export default function WeeklyPlanner() {
                     ))}
                   </div>
 
-                  {/* Action Buttons */}
-                  {currentWeekPlan.planStatus === 'pending' && (
-                    <div className="flex flex-wrap gap-3 mt-6 justify-center">
-                      <Button
-                        onClick={handleAcceptPlan}
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                      >
-                        Accept Plan
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleAdjustPlan()}
-                        className="border-orange-500 text-orange-400 hover:bg-orange-500/10"
-                      >
-                        Adjust
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleSkipPlan("Not this week")}
-                        className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                      >
-                        Skip Week
-                      </Button>
+                  {/* Plan Status */}
+                  <div className="mt-6 text-center">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 rounded-lg border border-green-500/30">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <span className="text-green-400 font-medium">Plan Finalized & Ready</span>
                     </div>
-                  )}
+                    <p className="text-slate-400 text-sm mt-2">
+                      Your weekly meal plan has been automatically saved and is ready to use.
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </div>

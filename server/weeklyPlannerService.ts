@@ -139,7 +139,7 @@ export class WeeklyPlannerService {
               return cuisine.charAt(0).toUpperCase() + cuisine.slice(1);
             });
             // Merge with existing preferences, giving weight to user profile
-            cuisines = [...new Set([...suggestedCuisines, ...cuisines])];
+            cuisines = Array.from(new Set([...suggestedCuisines, ...cuisines]));
           }
           
           smartProfileLog = `Profile applied (${smartEnhancement.confidenceLevel} confidence, ${smartEnhancement.diversityBoost}% diversity): ${smartEnhancement.reasoning.slice(0, 2).join(', ')}`;
@@ -264,7 +264,7 @@ ${avoidSimilarTo ? `\n\nIMPORTANT: ${avoidSimilarTo}` : ''}${varietyNotes}`;
         day: selectedDays[index],
         title: title.title || `${selectedDays[index]} Dinner`,
         cuisine: title.cuisine || "International",
-        estimatedTime: title.estimatedTime || parseInt(preferences.timeComfort) || 45,
+        estimatedTime: title.estimatedTime || preferences.timeComfort?.weeknight || 45,
         description: title.description || "Delicious homemade dinner"
       }));
 
@@ -278,7 +278,8 @@ ${avoidSimilarTo ? `\n\nIMPORTANT: ${avoidSimilarTo}` : ''}${varietyNotes}`;
       });
 
       return {
-        titles: generatedTitles
+        titles: generatedTitles,
+        totalEstimatedCost: 0
       };
 
     } catch (error) {
@@ -289,12 +290,13 @@ ${avoidSimilarTo ? `\n\nIMPORTANT: ${avoidSimilarTo}` : ''}${varietyNotes}`;
         day,
         title: `${day} Family Dinner`,
         cuisine: cuisines.length > 0 ? cuisines[index % cuisines.length] : "International",
-        estimatedTime: parseInt(preferences.timeComfort) || 45,
+        estimatedTime: preferences.timeComfort?.weeknight || 45,
         description: "A delicious family-friendly meal"
       }));
 
       return {
-        titles: fallbackTitles
+        titles: fallbackTitles,
+        totalEstimatedCost: 0
       };
     }
   }
@@ -460,9 +462,9 @@ Focus on clear, practical instructions with professional techniques that home co
     
     // Check if plan already exists for this week
     const existingPlan = await storage.getCurrentWeekPlan(userId, weekStartDate);
-    if (existingPlan && existingPlan.planStatus !== 'pending') {
-      // Only return existing plan if it's been accepted/finalized
-      // Allow regeneration of pending plans
+    if (existingPlan && existingPlan.planStatus === 'accepted') {
+      // Return existing accepted plan to avoid duplicates
+      // Allow regeneration of plans that aren't yet finalized
       return existingPlan;
     }
     
@@ -474,29 +476,31 @@ Focus on clear, practical instructions with professional techniques that home co
     // Generate high-quality recipes using MichelinChefAI system
     const plannedRecipes = await this.createQualityPlannedMeals(userId, mealCount, preferences);
     
-    // Create the weekly plan
+    // Create the weekly plan (auto-accepted - no manual acceptance required)
     const weeklyPlanData: InsertWeeklyPlan = {
       userId,
       weekStartDate,
       weekEndDate,
-      planStatus: "pending",
+      planStatus: "accepted",
+      acceptedAt: new Date(),
       plannedRecipes,
       preferencesSnapshot: {
         householdSize: preferences.householdSize,
         cookingFrequency: preferences.cookingFrequency,
         timeComfort: preferences.timeComfort,
         cuisineWeighting: preferences.cuisineWeighting || {},
-        cuisinePreferences: preferences.cuisinePreferences || [],
         ambitionLevel: preferences.ambitionLevel,
         dietaryNeeds: preferences.dietaryNeeds || [],
-        budgetPerServing: preferences.budgetPerServing
+        budgetPerServing: preferences.budgetPerServing ?? undefined
       },
       consolidatedShoppingList: []
     };
     
-    // If there's an existing pending plan, update it instead of creating duplicate
-    if (existingPlan && existingPlan.planStatus === 'pending') {
+    // If there's an existing plan that's not accepted, update it instead of creating duplicate
+    if (existingPlan && existingPlan.planStatus !== 'accepted') {
       const updatedPlan = await storage.updateWeeklyPlan(existingPlan.id, {
+        planStatus: 'accepted',
+        acceptedAt: new Date(),
         plannedRecipes,
         preferencesSnapshot: weeklyPlanData.preferencesSnapshot,
         generatedAt: new Date()
@@ -552,7 +556,7 @@ Focus on clear, practical instructions with professional techniques that home co
             clonedMeals.push({
               ...cachedMeal,
               recipeId: clonedRecipe.id,
-              servings: clonedRecipe.servings
+              servings: clonedRecipe.servings || 2
             });
           }
         } catch (error) {
@@ -572,7 +576,7 @@ Focus on clear, practical instructions with professional techniques that home co
     const cuisines = Object.keys(preferences.cuisineWeighting || {});
     const baseData = {
       servings: preferences.householdSize.adults + preferences.householdSize.kids,
-      timeBudget: preferences.timeComfort === "15" ? 15 : preferences.timeComfort === "30" ? 30 : preferences.timeComfort === "45" ? 45 : 60,
+      timeBudget: preferences.timeComfort?.weeknight || 45,
       dietaryNeeds: preferences.dietaryNeeds || [],
       budgetNote: preferences.budgetPerServing ? `${preferences.budgetPerServing} per serving` : "Quality-focused",
       equipment: ["Standard kitchen"],
