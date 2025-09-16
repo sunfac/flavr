@@ -202,17 +202,49 @@ export default function RecipeChat({
     onSuccess: async (result, variables) => {
       console.log('⚡ Optimized Zest chat result:', result);
       
-      // Create chat response message with optimized result
-      const chatMessage: ChatMessage = {
-        id: Date.now(),
-        message: variables.message,
-        response: result.message,
-        isUser: false,
-        text: result.message,
-        timestamp: new Date(),
-      };
+      // CRITICAL FIX: Handle recipe modifications from chat
+      if (result.isRecipeModification && result.modifiedRecipe) {
+        console.log('🎯 Recipe modification detected in chat response!', result.modifiedRecipe);
+        
+        // Update the recipe store with the modified recipe
+        const { updateActiveRecipe } = useRecipeStore.getState();
+        updateActiveRecipe(result.modifiedRecipe);
+        
+        // Dispatch recipe-updated event to trigger UI updates
+        window.dispatchEvent(new CustomEvent('recipe-updated', { 
+          detail: { 
+            recipe: result.modifiedRecipe,
+            source: 'zest-chat'
+          } 
+        }));
+        
+        console.log('✅ Recipe store updated and event dispatched');
+        
+        // Use special success message for recipe modifications
+        const chatMessage: ChatMessage = {
+          id: Date.now(),
+          message: variables.message,
+          response: result.message + " ✨ Recipe updated successfully!",
+          isUser: false,
+          text: result.message + " ✨ Recipe updated successfully!",
+          timestamp: new Date(),
+        };
+        
+        setLocalMessages(prev => [...prev, chatMessage]);
+      } else {
+        // Regular chat response handling
+        const chatMessage: ChatMessage = {
+          id: Date.now(),
+          message: variables.message,
+          response: result.message,
+          isUser: false,
+          text: result.message,
+          timestamp: new Date(),
+        };
 
-      setLocalMessages(prev => [...prev, chatMessage]);
+        setLocalMessages(prev => [...prev, chatMessage]);
+      }
+      
       setMessage("");
       
       // Show performance feedback for development
