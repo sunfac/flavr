@@ -151,22 +151,22 @@ function WineRecommendations({ recipe, className = '' }: WineRecommendationsProp
           disabled={isLoading}
           variant="default"
           size="lg"
-          className="w-full flex flex-col items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 dark:from-purple-500 dark:to-purple-600 dark:hover:from-purple-600 dark:hover:to-purple-700 text-white border-0 rounded-xl py-4 px-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          className="w-full flex flex-col items-center gap-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 dark:from-purple-500 dark:to-purple-600 dark:hover:from-purple-600 dark:hover:to-purple-700 text-white border-0 rounded-xl py-6 px-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
         >
           {isLoading ? (
             <>
-              <LoaderCircle className="h-6 w-6 animate-spin" />
+              <LoaderCircle className="h-8 w-8 animate-spin" />
               <div className="text-center">
-                <div className="font-semibold text-base">Finding Perfect Wines...</div>
-                <div className="text-sm opacity-90">Analyzing flavor profiles</div>
+                <div className="font-semibold text-lg">Finding Perfect Wines...</div>
+                <div className="text-base opacity-90">Analyzing flavor profiles</div>
               </div>
             </>
           ) : (
             <>
-              <Wine className="h-6 w-6 mb-1" />
+              <Wine className="h-8 w-8 mb-1" />
               <div className="text-center">
-                <div className="font-semibold text-base">Wine Pairings</div>
-                <div className="text-sm opacity-90">Get expert wine recommendations</div>
+                <div className="font-semibold text-lg">Wine Pairings</div>
+                <div className="text-base opacity-90">Get expert wine recommendations</div>
               </div>
             </>
           )}
