@@ -586,13 +586,18 @@ CRITICAL: Return ONLY the JSON object, no markdown, no explanations, no trailing
         ingredients: ingredientStrings,
         instructions: instructionStrings,
         tips: tips ? JSON.stringify(tips) : '[]',
-        imageUrl: null, // No image for photo-extracted recipes initially
+        imageUrl: req.body.imageUrl || null, // Accept imageUrl from request body for potential migration
         isShared: false,
         shareId: null,
         mode: 'photo-extraction'
       });
 
       console.log('✅ Recipe saved to cookbook:', savedRecipe.id);
+
+      // Automatically migrate any external image URLs to local storage
+      if (req.body.imageUrl) {
+        await ImageStorage.autoMigrateRecipeImage(req.body.imageUrl, savedRecipe.id, storage);
+      }
 
       res.json({ 
         success: true, 

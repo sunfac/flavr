@@ -6,6 +6,7 @@ import { insertChatMessageSchema } from "@shared/schema";
 import { logGPTInteraction, logSimpleGPTInteraction } from "../developerLogger";
 import { ZestService } from "../zestService";
 import { OptimizedChatService } from "../optimizedChatService";
+import { ImageStorage } from "../imageStorage";
 
 // Session type extension
 declare module 'express-session' {
@@ -1188,6 +1189,11 @@ Examples of NON-modification requests:
               imageUrl: recipe.imageUrl, // Include the generated image URL
               originalPrompt: message
             });
+            
+            // Automatically migrate external image URLs to local storage
+            if (recipe.imageUrl && savedRecipe.id) {
+              await ImageStorage.autoMigrateRecipeImage(recipe.imageUrl, savedRecipe.id, storage);
+            }
           }
           
           // Increment usage counter

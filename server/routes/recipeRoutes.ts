@@ -804,6 +804,11 @@ Return a JSON object with this structure:
               userId: req.session.userId
             });
             
+            // Automatically migrate external image URLs to local storage
+            if (convertedRecipe.imageUrl && savedRecipe.id) {
+              await ImageStorage.autoMigrateRecipeImage(convertedRecipe.imageUrl, savedRecipe.id, storage);
+            }
+            
             // Update usage tracking
             const user = await storage.getUser(req.session.userId);
             if (user) {
@@ -1092,19 +1097,11 @@ Return a JSON object with this structure:
       const savedRecipe = await storage.createRecipe(recipeData);
       console.log('✅ Recipe saved to database with ID:', savedRecipe.id);
 
-      // If there's an external image URL (like from DALL-E), download and store it locally
-      if (recipe.imageUrl && recipe.imageUrl.startsWith('http')) {
-        console.log('📥 Processing external image URL for local storage...');
-        const localImagePath = await ImageStorage.downloadAndStoreImage(recipe.imageUrl, savedRecipe.id);
-        
-        if (localImagePath) {
-          console.log('✅ Image downloaded and stored locally:', localImagePath);
-          // Update the recipe with the local image path
-          await storage.updateRecipe(savedRecipe.id, { imageUrl: localImagePath });
-          console.log('✅ Recipe updated with local image path');
-        }
-      } else if (!recipe.imageUrl) {
-        // Generate a new image for the saved recipe
+      // Automatically migrate external image URLs to local storage
+      if (recipe.imageUrl) {
+        await ImageStorage.autoMigrateRecipeImage(recipe.imageUrl, savedRecipe.id, storage);
+      } else {
+        // Generate a new image for the saved recipe if none provided
         console.log('🎨 Generating new image for saved recipe...');
         const imageUrl = await generateRecipeImage(recipe.title, recipe.cuisine || 'international', savedRecipe.id, req.session?.userId);
         
