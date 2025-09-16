@@ -60,7 +60,7 @@ export default function ModeSelection() {
 
   return (
     <PageLayout className="py-4 md:py-12">
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -79,7 +79,7 @@ export default function ModeSelection() {
         </motion.div>
 
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 md:mb-12 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 xl:gap-16 mb-6 md:mb-12 max-w-6xl mx-auto px-4">
           {modes.map((mode, index) => (
             <motion.div
               key={mode.title}
