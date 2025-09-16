@@ -54,7 +54,7 @@ ${publicUrl}`;
   // Mutation to enable/disable sharing
   const shareToggleMutation = useMutation({
     mutationFn: async ({ recipeId, shouldShare }: { recipeId: string; shouldShare: boolean }) => {
-      const response = await apiRequest("POST", `/api/recipe/${recipeId}/share`, { isShared: shouldShare });
+      const response = await apiRequest("POST", `/api/recipes/${recipeId}/share`, { isShared: shouldShare });
       return response.json();
     },
     onSuccess: (data) => {

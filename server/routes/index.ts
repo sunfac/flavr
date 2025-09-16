@@ -239,28 +239,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get single recipe endpoint
-  app.get("/api/recipe/:id", async (req, res) => {
+  // Get single recipe endpoint with enhanced logging
+  app.get("/api/recipes/:id", async (req, res) => {
     try {
       if (!req.session?.userId) {
+        console.log(`❌ Recipe ${req.params.id}: Authentication required`);
         return res.status(401).json({ error: "Authentication required" });
       }
 
       const { id } = req.params;
-      const recipe = await storage.getRecipe(parseInt(id));
+      const recipeId = parseInt(id);
+      const userId = req.session.userId;
+      
+      console.log(`🔍 Recipe lookup: ID ${recipeId} requested by user ${userId}`);
+      
+      // Enhanced validation for recipe ID
+      if (!recipeId || isNaN(recipeId) || recipeId <= 0) {
+        console.log(`❌ Recipe ${id}: Invalid recipe ID format`);
+        return res.status(400).json({ error: "Invalid recipe ID" });
+      }
+      
+      const recipe = await storage.getRecipe(recipeId);
       
       if (!recipe) {
+        console.log(`❌ Recipe ${recipeId}: Not found in database for user ${userId}`);
         return res.status(404).json({ error: "Recipe not found" });
       }
 
       // Verify recipe belongs to the user (security check)
-      if (recipe.userId !== req.session.userId) {
+      if (recipe.userId !== userId) {
+        console.log(`❌ Recipe ${recipeId}: Access denied - recipe belongs to user ${recipe.userId}, requested by user ${userId}`);
         return res.status(403).json({ error: "Access denied" });
       }
 
+      console.log(`✅ Recipe ${recipeId}: Successfully retrieved for user ${userId} - "${recipe.title}"`);
       res.json({ recipe });
     } catch (error) {
-      console.error("Failed to fetch recipe:", error);
+      console.error(`❌ Recipe ${req.params.id}: Server error -`, error);
       res.status(500).json({ error: "Failed to fetch recipe" });
     }
   });
@@ -278,6 +293,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to delete recipe:", error);
       res.status(500).json({ error: "Failed to delete recipe" });
+    }
+  });
+
+  // Toggle recipe sharing endpoint (used by RecipeView.tsx)
+  app.post("/api/toggle-recipe-share", async (req, res) => {
+    try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const { id, isShared } = req.body;
+      const userId = req.session.userId;
+      
+      console.log(`🔄 Toggling share for recipe ${id} - isShared: ${isShared}, user: ${userId}`);
+      
+      const recipe = await storage.getRecipe(id);
+      if (!recipe || recipe.userId !== userId) {
+        return res.status(404).json({ error: "Recipe not found" });
+      }
+
+      await storage.updateRecipeSharing(id, isShared);
+      
+      console.log(`✅ Recipe ${id} sharing updated to: ${isShared}`);
+      res.json({ success: true, isShared });
+    } catch (error) {
+      console.error("Failed to toggle recipe sharing:", error);
+      res.status(500).json({ error: "Failed to update sharing settings" });
+    }
+  });
+
+  // Recipe sharing endpoint (used by other components)  
+  app.post("/api/recipes/:id/share", async (req, res) => {
+    try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const { id } = req.params;
+      const { isShared } = req.body;
+      const userId = req.session.userId;
+      
+      console.log(`🔄 Sharing recipe ${id} - isShared: ${isShared}, user: ${userId}`);
+      
+      const recipe = await storage.getRecipe(parseInt(id));
+      if (!recipe || recipe.userId !== userId) {
+        return res.status(404).json({ error: "Recipe not found" });
+      }
+
+      await storage.updateRecipeSharing(parseInt(id), isShared);
+      
+      // If sharing is enabled and no shareId exists, get the updated recipe with shareId
+      if (isShared) {
+        const updatedRecipe = await storage.getRecipe(parseInt(id));
+        const shareUrl = updatedRecipe?.shareId ? `https://getflavr.ai/share/${updatedRecipe.shareId}` : null;
+        console.log(`✅ Recipe ${id} shared with URL: ${shareUrl}`);
+        res.json({ success: true, isShared, shareUrl, shareId: updatedRecipe?.shareId });
+      } else {
+        console.log(`✅ Recipe ${id} sharing disabled`);
+        res.json({ success: true, isShared });
+      }
+    } catch (error) {
+      console.error("Failed to update recipe sharing:", error);
+      res.status(500).json({ error: "Failed to update sharing settings" });
     }
   });
 

@@ -326,9 +326,46 @@ export default function WeeklyPlanner() {
 
 
 
-  const handleViewRecipe = (recipeId: number) => {
-    // Navigate to recipe view page
-    window.open(`/recipe/${recipeId}`, '_blank');
+  const handleViewRecipe = (recipeId: number, recipeTitle?: string) => {
+    // Enhanced validation and error handling for recipe navigation
+    if (!recipeId || recipeId <= 0) {
+      toast({
+        title: "Invalid Recipe",
+        description: "This recipe link appears to be invalid. Please try regenerating your weekly plan.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    console.log(`🍽️ Weekly Planner: Navigating to recipe ${recipeId} (${recipeTitle || 'Unknown'})`);
+    
+    // Track navigation attempt for debugging
+    const navigationUrl = `/recipe/${recipeId}`;
+    
+    try {
+      // Use window.open for better user experience (opens in new tab)
+      const newTab = window.open(navigationUrl, '_blank');
+      
+      // Check if popup was blocked
+      if (!newTab) {
+        toast({
+          title: "Popup Blocked",
+          description: "Please allow popups for this site or try clicking the recipe again.",
+          variant: "destructive"
+        });
+        // Fallback to same-tab navigation
+        navigate(navigationUrl);
+      }
+    } catch (error) {
+      console.error(`❌ Failed to navigate to recipe ${recipeId}:`, error);
+      toast({
+        title: "Navigation Error",
+        description: "Unable to open recipe. Trying alternative method...",
+        variant: "destructive"
+      });
+      // Fallback to same-tab navigation
+      navigate(navigationUrl);
+    }
   };
 
 
@@ -450,6 +487,7 @@ export default function WeeklyPlanner() {
         <AuthModal 
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
+          onSuccess={() => setShowAuthModal(false)}
         />
       </div>
     );
@@ -473,7 +511,7 @@ export default function WeeklyPlanner() {
     );
   }
 
-  if (!preferences || preferences?.onboardingRequired) {
+  if (!preferences || (preferences as any)?.onboardingRequired) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
         <GlobalHeader 
@@ -562,8 +600,8 @@ export default function WeeklyPlanner() {
                         ></div>
                       </div>
                       <p className="text-xs text-slate-400">
-                        {savingsData?.efficiencyScore > 0 
-                          ? `You're ${savingsData.efficiencyScore}% more efficient than average!`
+                        {(savingsData?.efficiencyScore ?? 0) > 0 
+                          ? `You're ${savingsData?.efficiencyScore}% more efficient than average!`
                           : "Start cooking to see your savings!"
                         }
                       </p>
@@ -581,9 +619,9 @@ export default function WeeklyPlanner() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {tasteData?.cuisinePreferences?.length > 0 ? (
+                      {(tasteData?.cuisinePreferences?.length ?? 0) > 0 ? (
                         <>
-                          {tasteData.cuisinePreferences.slice(0, 3).map((cuisine: any, index: number) => (
+                          {tasteData?.cuisinePreferences?.slice(0, 3).map((cuisine: any, index: number) => (
                             <div key={cuisine.cuisine} className="flex justify-between items-center">
                               <span className="text-slate-300 text-sm capitalize">{cuisine.cuisine}</span>
                               <span className="text-purple-400 font-semibold">{cuisine.percentage}%</span>
@@ -602,8 +640,8 @@ export default function WeeklyPlanner() {
                           size="sm"
                           className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10 text-xs"
                           onClick={() => {
-                            if (tasteData?.cuisinePreferences?.length > 0) {
-                              const shareText = `My Flavr cooking style: ${tasteData.cuisinePreferences.slice(0, 3).map((c: any) => `${c.cuisine} ${c.percentage}%`).join(', ')}`;
+                            if ((tasteData?.cuisinePreferences?.length ?? 0) > 0) {
+                              const shareText = `My Flavr cooking style: ${tasteData?.cuisinePreferences?.slice(0, 3).map((c: any) => `${c.cuisine} ${c.percentage}%`).join(', ')}`;
                               navigator.clipboard.writeText(shareText);
                               toast({
                                 title: "Taste Portrait Copied!",
@@ -813,7 +851,7 @@ export default function WeeklyPlanner() {
                       <RecipeCardWithImage 
                         key={`${meal.day}-${meal.mealType}`}
                         meal={meal}
-                        onClick={() => handleViewRecipe(meal.recipeId)}
+                        onClick={() => handleViewRecipe(meal.recipeId, meal.recipeTitle)}
                       />
                     ))}
                   </div>
@@ -1129,7 +1167,7 @@ function RecipeCardWithImage({ meal, onClick }: { meal: any; onClick: () => void
 
   useEffect(() => {
     if (recipe) {
-      const imageUrl = recipe.imageUrl || recipe.image;
+      const imageUrl = (recipe as any).imageUrl || (recipe as any).image;
       if (imageUrl) {
         setRecipeImage(imageUrl);
         setImageLoading(false);

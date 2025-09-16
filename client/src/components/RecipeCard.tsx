@@ -361,7 +361,7 @@ export default function RecipeCard({
     try {
       // First ensure recipe is saved and shared
       if (fullRecipe.id) {
-        await apiRequest("POST", `/api/recipe/${fullRecipe.id}/share`, { 
+        await apiRequest("POST", `/api/recipes/${fullRecipe.id}/share`, { 
           isShared: true 
         });
       }

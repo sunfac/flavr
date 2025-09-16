@@ -26,6 +26,7 @@ import GlobalHeader from "@/components/GlobalHeader";
 import GlobalNavigation from "@/components/GlobalNavigation";
 import SettingsPanel from "@/components/SettingsPanel";
 import GlobalFooter from "@/components/GlobalFooter";
+import UserMenu from "@/components/UserMenu";
 
 interface Recipe {
   id: number;
@@ -74,13 +75,13 @@ export default function MyRecipes() {
   // Fetch recipe history
   const { data: recipesData, isLoading: recipesLoading } = useQuery({
     queryKey: ["/api/recipes/history"],
-    enabled: !!user?.user,
+    enabled: !!(user as any)?.user,
   });
 
   // Share toggle mutation
   const shareToggleMutation = useMutation({
     mutationFn: ({ recipeId, isShared }: { recipeId: number; isShared: boolean }) =>
-      apiRequest("POST", `/api/recipe/${recipeId}/share`, { isShared }),
+      apiRequest("POST", `/api/recipes/${recipeId}/share`, { isShared }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/recipes/history"] });
       toast({
@@ -161,12 +162,12 @@ export default function MyRecipes() {
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (!userLoading && !user?.user) {
+    if (!userLoading && !(user as any)?.user) {
       navigate("/");
     }
   }, [user, userLoading, navigate]);
 
-  if (userLoading || !user?.user) {
+  if (userLoading || !(user as any)?.user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
@@ -174,7 +175,7 @@ export default function MyRecipes() {
     );
   }
 
-  const recipes = recipesData?.recipes || [];
+  const recipes = (recipesData as any)?.recipes || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black relative overflow-hidden">
