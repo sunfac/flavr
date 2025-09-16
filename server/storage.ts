@@ -1,6 +1,6 @@
 import { users, recipes, chatMessages, developerLogs, pseudoUsers, interactionLogs, weeklyPlans, weeklyPlanPreferences, userPreferences, type User, type InsertUser, type Recipe, type InsertRecipe, type ChatMessage, type InsertChatMessage, type DeveloperLog, type InsertDeveloperLog, type PseudoUser, type InsertPseudoUser, recipeGenerationLogs, type RecipeGenerationLog, type InsertRecipeGenerationLog, type InteractionLog, type InsertInteractionLog, type WeeklyPlan, type InsertWeeklyPlan, type WeeklyPlanPreferences, type InsertWeeklyPlanPreferences, type UserPreferences, type InsertUserPreferences } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, or, and } from "drizzle-orm";
+import { eq, desc, or, and, sql } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
@@ -513,10 +513,18 @@ export class DatabaseStorage implements IStorage {
 
   async executeRawQuery(query: string, params?: any[]): Promise<{ rows: any[] }> {
     try {
-      const result = await db.execute({
-        sql: query,
-        args: params || []
-      });
+      // Build the query with parameters manually for compatibility
+      let finalQuery = query;
+      if (params && params.length > 0) {
+        // Replace $1, $2, etc. with actual parameter values
+        params.forEach((param, index) => {
+          const placeholder = `$${index + 1}`;
+          const value = typeof param === 'string' ? `'${param.replace(/'/g, "''")}'` : String(param);
+          finalQuery = finalQuery.replace(new RegExp(`\\${placeholder}\\b`, 'g'), value);
+        });
+      }
+      
+      const result = await db.execute(sql.raw(finalQuery));
       return { rows: result.rows || [] };
     } catch (error) {
       console.error('❌ Raw query execution failed:', error);

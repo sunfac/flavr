@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { aiCosts, type InsertAiCost } from "@shared/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, inArray } from "drizzle-orm";
 
 interface TokenUsage {
   inputTokens?: number;
@@ -268,13 +268,16 @@ export class AiCostTracker {
       const userEmails = new Map<number, string>();
       if (userCosts.length > 0) {
         const { users } = await import("@shared/schema");
-        const userDetails = await db
-          .select({ id: users.id, email: users.email })
-          .from(users)
-          .where(sql`${users.id} IN (${userCosts.map(u => u.userId).join(',')})`);
-        
-        for (const user of userDetails) {
-          userEmails.set(user.id, user.email);
+        const userIds = userCosts.map(u => u.userId!).filter(id => id !== null);
+        if (userIds.length > 0) {
+          const userDetails = await db
+            .select({ id: users.id, email: users.email })
+            .from(users)
+            .where(inArray(users.id, userIds));
+          
+          for (const user of userDetails) {
+            userEmails.set(user.id, user.email);
+          }
         }
       }
 
