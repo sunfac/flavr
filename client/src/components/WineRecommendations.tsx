@@ -180,35 +180,42 @@ function WineRecommendations({ recipe, className = '' }: WineRecommendationsProp
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto"
+            className="fixed inset-0 bg-black/50 z-50 flex items-start sm:items-center justify-center overflow-y-auto"
             onClick={() => setIsOpen(false)}
-            style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh' }}
+            style={{ 
+              position: 'fixed', 
+              top: 0, 
+              left: 0, 
+              width: '100vw', 
+              height: '100vh',
+              WebkitOverflowScrolling: 'touch'
+            }}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-2xl w-full my-8 mx-auto"
+              className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-sm sm:max-w-lg lg:max-w-2xl mx-4 sm:mx-6 lg:mx-8 my-4 sm:my-8"
               style={{ 
-                maxHeight: 'calc(100vh - 4rem)',
+                maxHeight: 'calc(100vh - 2rem)',
                 minHeight: 'auto',
                 transform: 'translateZ(0)'
               }}
             >
-              <div className="max-h-full overflow-y-auto">
+              <div className="h-full flex flex-col overflow-hidden">
               {/* Header */}
-              <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-6 rounded-t-xl">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-                      <Wine className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-4 sm:p-6 rounded-t-xl">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex-shrink-0">
+                      <Wine className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 dark:text-purple-400" />
                     </div>
-                    <div>
-                      <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white leading-tight">
                         Wine Pairing Recommendations
                       </h2>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 leading-tight">
                         For {recipe.title}
                       </p>
                     </div>
@@ -218,60 +225,62 @@ function WineRecommendations({ recipe, className = '' }: WineRecommendationsProp
                     variant="ghost"
                     size="sm"
                     onClick={() => setIsOpen(false)}
-                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 flex-shrink-0 p-2 h-auto w-auto min-w-[44px] min-h-[44px] flex items-center justify-center"
                   >
-                    <X className="h-5 w-5" />
+                    <X className="h-5 w-5 sm:h-6 sm:w-6" />
                   </Button>
                 </div>
               </div>
 
               {/* Wine Recommendations Content */}
-              <div className="p-6 space-y-4">
-                {recommendations.map((wine, index) => (
-                  <Card
-                    key={index}
-                    data-testid={`wine-recommendation-${index}`}
-                    className="p-5 border-2 border-gray-100 dark:border-gray-800 hover:border-purple-200 dark:hover:border-purple-800 transition-colors duration-200"
-                  >
-                    <div className="space-y-3">
-                      {/* Wine Name and Type */}
-                      <div className="flex items-start justify-between gap-3">
-                        <h3 className="font-semibold text-lg text-gray-900 dark:text-white leading-tight">
-                          {wine.name}
-                        </h3>
-                        <div className="flex gap-2 flex-shrink-0">
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getWineTypeColor(wine.type)}`}>
-                            {wine.type}
-                          </span>
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriceRangeColor(wine.priceRange)}`}>
-                            {wine.priceRange}
-                          </span>
+              <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+                <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+                  {recommendations.map((wine, index) => (
+                    <Card
+                      key={index}
+                      data-testid={`wine-recommendation-${index}`}
+                      className="p-4 sm:p-5 border-2 border-gray-100 dark:border-gray-800 hover:border-purple-200 dark:hover:border-purple-800 transition-colors duration-200"
+                    >
+                      <div className="space-y-3">
+                        {/* Wine Name and Type */}
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3">
+                          <h3 className="font-semibold text-base sm:text-lg text-gray-900 dark:text-white leading-tight flex-1">
+                            {wine.name}
+                          </h3>
+                          <div className="flex gap-1.5 sm:gap-2 flex-wrap sm:flex-shrink-0">
+                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${getWineTypeColor(wine.type)}`}>
+                              {wine.type}
+                            </span>
+                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriceRangeColor(wine.priceRange)}`}>
+                              {wine.priceRange}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Wine Description */}
+                        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                          {wine.description}
+                        </p>
+
+                        {/* Pairing Reason */}
+                        <div className="bg-purple-50 dark:bg-purple-900/10 p-3 rounded-lg border border-purple-100 dark:border-purple-900/20">
+                          <p className="text-sm text-purple-700 dark:text-purple-300 leading-relaxed">
+                            <span className="font-medium">Perfect pairing: </span>
+                            {wine.pairing_reason}
+                          </p>
                         </div>
                       </div>
+                    </Card>
+                  ))}
 
-                      {/* Wine Description */}
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {wine.description}
-                      </p>
-
-                      {/* Pairing Reason */}
-                      <div className="bg-purple-50 dark:bg-purple-900/10 p-3 rounded-lg border border-purple-100 dark:border-purple-900/20">
-                        <p className="text-sm text-purple-700 dark:text-purple-300">
-                          <span className="font-medium">Perfect pairing: </span>
-                          {wine.pairing_reason}
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-
-                {/* Footer Note */}
-                <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Wine recommendations are AI-generated suggestions. Personal taste may vary.
-                    <br />
-                    Consult your local wine shop for personalized recommendations.
-                  </p>
+                  {/* Footer Note */}
+                  <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700 pb-2">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed px-2">
+                      Wine recommendations are AI-generated suggestions. Personal taste may vary.
+                      <br className="hidden sm:block" />
+                      <span className="block sm:inline"> Consult your local wine shop for personalized recommendations.</span>
+                    </p>
+                  </div>
                 </div>
               </div>
               </div>
