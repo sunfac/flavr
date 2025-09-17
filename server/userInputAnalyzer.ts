@@ -14,6 +14,7 @@ export enum InputSpecificity {
 
 export interface UserInputAnalysis {
   specificity: InputSpecificity;
+  needsTitleGeneration: boolean; // Whether input is too vague to be a proper recipe title
   extractedElements: {
     // Core cooking elements
     namedDish?: string;           // "Carbonara", "Beef Wellington"
@@ -49,6 +50,14 @@ export interface UserInputAnalysis {
   
   // Anti-repetition data
   vaguePromptSignature?: string; // For tracking similar vague requests
+  
+  // Title generation context for vague inputs
+  titleGenerationContext?: {
+    ambitionLevel: 'simple' | 'impressive' | 'sophisticated';
+    primaryContext: string;      // Main context extracted from vague input
+    suggestedCuisine?: string;   // Cuisine suggestion based on context
+    suggestedTechnique?: string; // Cooking technique suggestion
+  };
 }
 
 export class UserInputAnalyzer {
@@ -93,6 +102,100 @@ export class UserInputAnalyzer {
   }
   
   /**
+   * Detect if input needs title generation (too vague to be a proper recipe title)
+   */
+  private static needsTitleGeneration(input: string, extractedElements?: any): boolean {
+    const normalizedInput = input.toLowerCase().trim();
+    
+    // Vague prompt patterns that need title generation
+    const vaguePatterns = [
+      /^(something|anything)\s*(tasty|good|nice|delicious|amazing|impressive)/, // "something impressive"
+      /^(a|an)\s*(good|great|amazing|impressive|delicious|perfect)\s*dish/, // "an amazing dish"
+      /^(a|an)\s*(quick|easy|simple|healthy)\s*(meal|dinner|lunch)/, // "a quick meal"
+      /(impress|wow|amaze).*?(guests?|friends?|family|dinner party)/, // "impress guests"
+      /(perfect|ideal)\s*for\s*(dinner party|date night|weekend|tonight)/, // "perfect for dinner party"
+      /^(comfort food|date night|dinner party|weekend cooking)$/, // Context-only inputs
+      /^(what should i|what can i|help me)\s*(cook|make)/, // "what should I cook"
+      /^(i want|i need|looking for)\s*(something|a dish)/, // "I want something"
+      /(weeknight|weekend|tonight)\s*(dinner|meal)/, // "weeknight dinner"
+      /^(healthy|quick|easy|simple)\s*(and\s*)?(tasty|delicious)/, // "healthy and tasty"
+    ];
+    
+    // Check if input matches vague patterns
+    const isVague = vaguePatterns.some(pattern => pattern.test(normalizedInput));
+    
+    // Also check if it lacks specific dish identifiers
+    const hasSpecificDish = !!(extractedElements?.namedDish || extractedElements?.chefReference);
+    const hasSpecificIngredient = normalizedInput.match(/\b(chicken|beef|salmon|pasta|rice)\b/) && 
+                                 normalizedInput.match(/\b(with|and|recipe|dish)\b/);
+    
+    // Needs title generation if it's vague OR lacks specific identifiers
+    return isVague || (!hasSpecificDish && !hasSpecificIngredient && normalizedInput.length > 15);
+  }
+  
+  /**
+   * Extract title generation context from vague inputs
+   */
+  private static extractTitleGenerationContext(input: string, extractedElements: any): any {
+    const normalizedInput = input.toLowerCase();
+    
+    // Determine ambition level from context
+    let ambitionLevel: 'simple' | 'impressive' | 'sophisticated' = 'simple';
+    let primaryContext = 'general';
+    
+    if (normalizedInput.includes('dinner party') || normalizedInput.includes('impress') || 
+        normalizedInput.includes('guests') || normalizedInput.includes('wow') || 
+        normalizedInput.includes('special occasion')) {
+      ambitionLevel = 'sophisticated';
+      primaryContext = 'dinner party';
+    } else if (normalizedInput.includes('date night') || normalizedInput.includes('romantic') ||
+               normalizedInput.includes('anniversary') || normalizedInput.includes('celebration')) {
+      ambitionLevel = 'impressive';
+      primaryContext = 'date night';
+    } else if (normalizedInput.includes('weeknight') || normalizedInput.includes('quick') ||
+               normalizedInput.includes('easy') || normalizedInput.includes('simple')) {
+      ambitionLevel = 'simple';
+      primaryContext = 'weeknight';
+    } else if (normalizedInput.includes('weekend') || normalizedInput.includes('leisure')) {
+      ambitionLevel = 'impressive';
+      primaryContext = 'weekend';
+    } else if (normalizedInput.includes('comfort') || normalizedInput.includes('cozy')) {
+      ambitionLevel = 'simple';
+      primaryContext = 'comfort';
+    } else if (normalizedInput.includes('healthy') || normalizedInput.includes('light')) {
+      ambitionLevel = 'simple';
+      primaryContext = 'healthy';
+    }
+    
+    // Suggest cuisine based on context
+    let suggestedCuisine;
+    if (extractedElements.cuisine?.length) {
+      suggestedCuisine = extractedElements.cuisine[0];
+    } else if (ambitionLevel === 'sophisticated') {
+      suggestedCuisine = 'French'; // Sophisticated default
+    } else if (primaryContext === 'comfort') {
+      suggestedCuisine = 'British'; // Comfort default
+    }
+    
+    // Suggest technique based on ambition
+    let suggestedTechnique;
+    if (ambitionLevel === 'sophisticated') {
+      suggestedTechnique = 'roasting'; // Complex techniques
+    } else if (ambitionLevel === 'impressive') {
+      suggestedTechnique = 'pan-searing'; // Impressive but manageable
+    } else {
+      suggestedTechnique = 'one-pan'; // Simple approaches
+    }
+    
+    return {
+      ambitionLevel,
+      primaryContext,
+      suggestedCuisine,
+      suggestedTechnique
+    };
+  }
+  
+  /**
    * Quick pattern matching for obvious cases (saves AI calls)
    */
   private static quickSpecificityCheck(input: string): UserInputAnalysis | null {
@@ -107,7 +210,9 @@ export class UserInputAnalyzer {
     
     for (const pattern of crystalClearPatterns) {
       if (pattern.test(input)) {
-        return this.createCrystalClearAnalysis(input);
+        const analysis = this.createCrystalClearAnalysis(input);
+        analysis.needsTitleGeneration = false; // Crystal clear inputs don't need title generation
+        return analysis;
       }
     }
     
@@ -121,7 +226,9 @@ export class UserInputAnalyzer {
     
     for (const pattern of veryVaguePatterns) {
       if (pattern.test(input)) {
-        return this.createVeryVagueAnalysis(input);
+        const analysis = this.createVeryVagueAnalysis(input);
+        analysis.needsTitleGeneration = true; // Very vague inputs always need title generation
+        return analysis;
       }
     }
     
@@ -223,6 +330,15 @@ Focus on extracting actual mentions and clear implications only.`;
     if (aiResult.flavorProfile?.length) promptFocus.push('flavor_development');
     if (aiResult.occasion?.length) promptFocus.push('context_matching');
     
+    // Check if this input needs title generation
+    const needsTitleGeneration = this.needsTitleGeneration(originalInput, aiResult);
+    
+    // Extract title generation context for vague inputs
+    let titleGenerationContext;
+    if (needsTitleGeneration) {
+      titleGenerationContext = this.extractTitleGenerationContext(originalInput, aiResult);
+    }
+    
     // Generate vague prompt signature if needed
     let vaguePromptSignature: string | undefined;
     if (specificity === InputSpecificity.VERY_VAGUE) {
@@ -231,6 +347,7 @@ Focus on extracting actual mentions and clear implications only.`;
     
     return {
       specificity: specificity as InputSpecificity,
+      needsTitleGeneration,
       extractedElements: {
         namedDish: aiResult.namedDish,
         chefReference: aiResult.chefReference,
@@ -249,7 +366,8 @@ Focus on extracting actual mentions and clear implications only.`;
         promptFocus,
         creativityLevel
       },
-      vaguePromptSignature
+      vaguePromptSignature,
+      titleGenerationContext
     };
   }
   
@@ -360,6 +478,7 @@ Focus on extracting actual mentions and clear implications only.`;
     
     return {
       specificity: InputSpecificity.CRYSTAL_CLEAR,
+      needsTitleGeneration: false, // Crystal clear inputs don't need title generation
       extractedElements,
       promptStrategy: {
         tokenBudget: 2000,
@@ -371,41 +490,54 @@ Focus on extracting actual mentions and clear implications only.`;
   }
   
   private static createVeryVagueAnalysis(input: string): UserInputAnalysis {
+    const titleContext = this.extractTitleGenerationContext(input, {});
+    
     return {
       specificity: InputSpecificity.VERY_VAGUE,
+      needsTitleGeneration: true, // Very vague inputs always need title generation
       extractedElements: {},
       promptStrategy: {
         tokenBudget: 3000,
-        modelRecommendation: 'gpt-4o',
+        modelRecommendation: 'gpt-4o-mini', // Cost optimization
         promptFocus: ['creative_freedom', 'flavor_maximization'],
         creativityLevel: 'high'
       },
-      vaguePromptSignature: this.generateVagueSignature(input, {})
+      vaguePromptSignature: this.generateVagueSignature(input, {}),
+      titleGenerationContext: titleContext
     };
   }
   
   private static createModerateAnalysis(input: string): UserInputAnalysis {
+    const needsTitle = this.needsTitleGeneration(input, {});
+    
     return {
       specificity: InputSpecificity.MODERATELY_CLEAR,
+      needsTitleGeneration: needsTitle,
       extractedElements: {},
       promptStrategy: {
         tokenBudget: 2000,
         modelRecommendation: 'gpt-4o-mini',
         promptFocus: ['balanced_approach'],
         creativityLevel: 'medium'
-      }
+      },
+      titleGenerationContext: needsTitle ? this.extractTitleGenerationContext(input, {}) : undefined
     };
   }
   
   private static createDefaultAnalysis(): UserInputAnalysis {
     return {
       specificity: InputSpecificity.SOMEWHAT_VAGUE,
+      needsTitleGeneration: true, // Default to needing title generation for vague inputs
       extractedElements: {},
       promptStrategy: {
         tokenBudget: 2000,
         modelRecommendation: 'gpt-4o-mini',
         promptFocus: ['creative_guidance'],
         creativityLevel: 'medium'
+      },
+      titleGenerationContext: {
+        ambitionLevel: 'simple',
+        primaryContext: 'general'
       }
     };
   }

@@ -301,6 +301,17 @@ export class ChefAssistGPT5 {
     
     console.log(`Input specificity: ${inputAnalysis.specificity}, Model: ${inputAnalysis.promptStrategy.modelRecommendation}`);
     
+    // NEW: Handle title generation for vague inputs
+    if (inputAnalysis.needsTitleGeneration) {
+      console.log(`🎯 TITLE GENERATION MODE: Input "${data.userIntent}" is too vague for a proper recipe title`);
+      if (inputAnalysis.titleGenerationContext) {
+        const { ambitionLevel, primaryContext, suggestedCuisine } = inputAnalysis.titleGenerationContext;
+        console.log(`📋 Title Context: ${primaryContext} (${ambitionLevel} level)${suggestedCuisine ? `, ${suggestedCuisine} cuisine suggested` : ''}`);
+      }
+    } else {
+      console.log(`✅ SPECIFIC INPUT: Using "${data.userIntent}" as provided - no title generation needed`);
+    }
+    
     // Get variety guidance for vague prompts
     const varietyGuidance = UserInputAnalyzer.getVarietyGuidance(inputAnalysis, data.clientId);
     
@@ -503,24 +514,42 @@ export class ChefAssistGPT5 {
       
       console.log("Recipe parsed successfully:", recipe.title);
       
+      // Enhanced title handling: Check if we generated a proper title for vague input
+      if (inputAnalysis.needsTitleGeneration && recipe.title) {
+        console.log(`✨ TITLE GENERATED: Original vague input "${data.userIntent}" → Recipe title: "${recipe.title}"`);
+        
+        // Track title word usage for variety
+        if (data.clientId) {
+          trackTitleWords(data.clientId, recipe.title);
+        }
+      }
+      
       // Override title if forced title is provided (for Inspire Me consistency)
       if (data.forcedTitle) {
         console.log(`🎯 Overriding recipe title: "${recipe.title}" → "${data.forcedTitle}"`);
         recipe.title = data.forcedTitle;
       }
       
-      // Record generation for variety tracking
-      if (inputAnalysis.vaguePromptSignature && data.clientId) {
-        UserInputAnalyzer.recordGeneration(
-          inputAnalysis, 
-          data.clientId, 
-          recipe.cuisine || 'British',
-          recipe.method?.[0]?.instruction?.toLowerCase()?.includes('roast') ? 'roasting' :
-          recipe.method?.[0]?.instruction?.toLowerCase()?.includes('fry') ? 'frying' :
-          recipe.method?.[0]?.instruction?.toLowerCase()?.includes('braise') ? 'braising' :
-          recipe.method?.[0]?.instruction?.toLowerCase()?.includes('grill') ? 'grilling' :
-          'general'
-        );
+      // Enhanced generation tracking for title generation and variety
+      if (data.clientId) {
+        // Record variety tracking for vague prompts
+        if (inputAnalysis.vaguePromptSignature) {
+          UserInputAnalyzer.recordGeneration(
+            inputAnalysis, 
+            data.clientId, 
+            recipe.cuisine || 'British',
+            recipe.method?.[0]?.instruction?.toLowerCase()?.includes('roast') ? 'roasting' :
+            recipe.method?.[0]?.instruction?.toLowerCase()?.includes('fry') ? 'frying' :
+            recipe.method?.[0]?.instruction?.toLowerCase()?.includes('braise') ? 'braising' :
+            recipe.method?.[0]?.instruction?.toLowerCase()?.includes('grill') ? 'grilling' :
+            'general'
+          );
+        }
+        
+        // Additional logging for successful title generation
+        if (inputAnalysis.needsTitleGeneration && recipe.title) {
+          console.log(`📊 Title Generation Success: Context "${inputAnalysis.titleGenerationContext?.primaryContext || 'general'}" → "${recipe.title}"`);
+        }
       }
       
       // Cache the generated recipe for performance

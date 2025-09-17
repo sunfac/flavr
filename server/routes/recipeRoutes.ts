@@ -964,32 +964,25 @@ Return a JSON object with this structure:
         // Generate new recipe with AI (premium users or no cache found)
         console.log('🤖 Generating fresh AI recipe...');
         
-        // Check if this looks like a specific recipe title from Inspire Me
-        const isSpecificRecipeTitle = userPrompt.includes('-Inspired') || 
-                                    userPrompt.includes(' with ') ||
-                                    userPrompt.match(/^[A-Z].*\w+.*\w+/); // Capitalized multi-word titles
-        
-        console.log('🎯 Recipe title specificity check:', {
-          prompt: userPrompt,
-          isSpecific: isSpecificRecipeTitle,
-          willForceTitle: isSpecificRecipeTitle
-        });
+        // Enhanced Chef Assist with intelligent title generation
+        // The UserInputAnalyzer and AdaptivePromptBuilder now handle title generation automatically
+        console.log('🎆 Using enhanced Chef Assist with intelligent title generation for:', userPrompt);
         
         const result = await ChefAssistGPT5.generateFullRecipe({
           userIntent: userPrompt,
           servings,
           timeBudget: req.body.timeBudget,
           dietaryNeeds: combinedDietaryNeeds,
-        mustUse: req.body.mustUse || [],
-        avoid: req.body.avoid || [],
-        equipment: req.body.equipment || [],
-        budgetNote: req.body.budgetNote,
-        cuisinePreference: req.body.cuisinePreference,
-        seeds,
-        clientId,
-        userId: req.session?.userId, // Added for smart profiling
-        forcedTitle: isSpecificRecipeTitle ? userPrompt : undefined // Force title consistency
-      });
+          mustUse: req.body.mustUse || [],
+          avoid: req.body.avoid || [],
+          equipment: req.body.equipment || [],
+          budgetNote: req.body.budgetNote,
+          cuisinePreference: req.body.cuisinePreference,
+          seeds,
+          clientId,
+          userId: req.session?.userId
+          // Note: Removed forcedTitle - let the enhanced system handle title generation intelligently
+        });
 
         // GPT-5 returns the recipe directly, not wrapped
         recipe = result;

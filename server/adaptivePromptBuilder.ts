@@ -38,7 +38,13 @@ export class AdaptivePromptBuilder {
     const { specificity, extractedElements, promptStrategy } = analysis;
     
     // Build system message based on specificity
-    const systemMessage = this.buildSystemMessage(specificity, extractedElements, promptStrategy.promptFocus);
+    const systemMessage = this.buildSystemMessage(
+      specificity, 
+      extractedElements, 
+      promptStrategy.promptFocus,
+      analysis.needsTitleGeneration,
+      analysis.titleGenerationContext
+    );
     
     // Build user message with smart targeting
     const userMessage = this.buildUserMessage(
@@ -72,7 +78,9 @@ export class AdaptivePromptBuilder {
   private static buildSystemMessage(
     specificity: InputSpecificity,
     extractedElements: UserInputAnalysis['extractedElements'],
-    promptFocus: string[]
+    promptFocus: string[],
+    needsTitleGeneration = false,
+    titleGenerationContext?: any
   ): string {
     
     const baseCore = `You are "Zest," a cookbook-quality recipe expert. Create authentic, flavorful recipes that maximize taste and approachability for home cooks.
@@ -117,6 +125,32 @@ RECIPE STANDARDS:
       specificGuidance.push(`CREATIVE EXPLORATION: Use your full culinary creativity to create an exciting, delicious recipe. Focus on unexpected but harmonious flavor combinations and impressive presentation.`);
     }
     
+    // Add title generation guidance for vague inputs
+    if (needsTitleGeneration && titleGenerationContext) {
+      const { ambitionLevel, primaryContext, suggestedCuisine, suggestedTechnique } = titleGenerationContext;
+      
+      let titleGuidance = `TITLE GENERATION: Create a compelling, restaurant-quality recipe title that matches the context. `;
+      
+      if (ambitionLevel === 'sophisticated') {
+        titleGuidance += `This is for ${primaryContext} - create an impressive, sophisticated dish with chef-inspired flair. Use elevated language and techniques that will truly impress guests.`;
+      } else if (ambitionLevel === 'impressive') {
+        titleGuidance += `This is for ${primaryContext} - create an attractive, well-executed dish that's impressive but achievable. Balance sophistication with approachability.`;
+      } else {
+        titleGuidance += `This is for ${primaryContext} - create a delicious, approachable dish that delivers comfort and satisfaction.`;
+      }
+      
+      if (suggestedCuisine) {
+        titleGuidance += ` Consider ${suggestedCuisine} cuisine influences.`;
+      }
+      if (suggestedTechnique) {
+        titleGuidance += ` Emphasize ${suggestedTechnique} cooking methods.`;
+      }
+      
+      titleGuidance += ` The title should be specific, appealing, and capture the essence of the dish (e.g., "Pan-Seared Duck Breast with Cherry Port Sauce" rather than "Amazing Duck Recipe").`;
+      
+      specificGuidance.push(titleGuidance);
+    }
+    
     // Speed optimization for crystal clear inputs
     if (specificity === InputSpecificity.CRYSTAL_CLEAR) {
       specificGuidance.push(`EFFICIENCY MODE: Generate directly and confidently. The user knows exactly what they want - deliver it with precision and authentic execution.`);
@@ -143,16 +177,38 @@ RECIPE STANDARDS:
     // Start with core user request
     let message = `Generate a complete recipe JSON that maximizes flavor and home cook confidence.\n\nUSER REQUEST: "${recipeData.userIntent}"`;
     
-    // CRITICAL: Preserve the original user intent as the title for Inspire Me recipes
-    // This ensures chef inspirations and specific titles are maintained
-    const shouldPreserveTitle = extractedElements.chefReference || 
+    // ENHANCED TITLE LOGIC: Handle both specific titles and vague inputs needing generation
+    const shouldPreserveTitle = (extractedElements.chefReference || 
                                extractedElements.namedDish ||
                                recipeData.userIntent.includes('-inspired') ||
-                               recipeData.userIntent.includes('-style');
+                               recipeData.userIntent.includes('-style')) && 
+                               !analysis.needsTitleGeneration;
     
     if (shouldPreserveTitle) {
       message += `\n\nIMPORTANT: Use this EXACT title for the recipe: "${recipeData.userIntent}"`;
       message += `\nDo not modify or shorten this title - it contains specific inspiration context that must be preserved.`;
+    } else if (analysis.needsTitleGeneration && analysis.titleGenerationContext) {
+      // For vague inputs, provide context for generating a proper title
+      const { ambitionLevel, primaryContext, suggestedCuisine } = analysis.titleGenerationContext;
+      
+      message += `\n\nTITLE GENERATION CONTEXT:`;
+      message += `\n- Original user intent: "${recipeData.userIntent}" (too vague for a recipe title)`;
+      message += `\n- Context: ${primaryContext} (${ambitionLevel} ambition level)`;
+      if (suggestedCuisine) {
+        message += `\n- Suggested cuisine influence: ${suggestedCuisine}`;
+      }
+      message += `\n- Generate a specific, appealing recipe title that captures the dish and matches the ${ambitionLevel} ambition level`;
+      
+      // Add context-specific guidance
+      if (primaryContext === 'dinner party') {
+        message += `\n- This is for entertaining guests - create something impressive and memorable`;
+      } else if (primaryContext === 'date night') {
+        message += `\n- This is for a romantic occasion - create something elegant and special`;
+      } else if (primaryContext === 'weeknight') {
+        message += `\n- This is for busy weeknight cooking - keep it approachable but delicious`;
+      } else if (primaryContext === 'comfort') {
+        message += `\n- This is comfort food - focus on satisfying, heartwarming flavors`;
+      }
     }
     
     // Add extracted context for better targeting
@@ -238,10 +294,25 @@ RECIPE STANDARDS:
       message += `\n- Create an exciting, memorable recipe that builds cooking confidence`;
       message += `\n- Focus on maximum flavor and satisfying results`;
       message += `\n- Surprise and delight with professional techniques made approachable`;
+      
+      // Add context-specific success criteria for vague inputs
+      if (analysis.titleGenerationContext) {
+        const { ambitionLevel, primaryContext } = analysis.titleGenerationContext;
+        if (ambitionLevel === 'sophisticated') {
+          message += `\n- Deliver restaurant-quality complexity suitable for ${primaryContext}`;
+        } else if (ambitionLevel === 'impressive') {
+          message += `\n- Create an impressive but achievable dish perfect for ${primaryContext}`;
+        }
+      }
     } else {
       message += `\n- Balance the user's specific requests with creative excellence`;
       message += `\n- Maximize flavor through proper technique and seasoning`;
       message += `\n- Ensure reliable, delicious results for home cooks`;
+    }
+    
+    // Add title generation reminder for vague inputs
+    if (analysis.needsTitleGeneration) {
+      message += `\n\nTITLE REMINDER: Generate a specific, compelling recipe title that matches the context and ambition level. Do NOT use the original vague user input as the title.`;
     }
     
     // Critical: Add JSON size constraint to prevent parsing errors at position 3630+
