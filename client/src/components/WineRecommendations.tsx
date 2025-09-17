@@ -163,10 +163,10 @@ function WineRecommendations({ recipe, className = '' }: WineRecommendationsProp
             </>
           ) : (
             <>
-              <Wine className="h-8 w-8 mb-1" />
-              <div className="text-center">
-                <div className="font-semibold text-lg">Wine Pairings</div>
-                <div className="text-base opacity-90">Get expert wine recommendations</div>
+              <Wine className="h-8 w-8 mb-2" />
+              <div className="text-center space-y-1">
+                <div className="font-semibold text-lg leading-tight">Wine Pairings</div>
+                <div className="text-base opacity-90 leading-tight">Get expert wine recommendations</div>
               </div>
             </>
           )}
